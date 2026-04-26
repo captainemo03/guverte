@@ -1326,10 +1326,27 @@ const KONTRAT_DEFS={
 // ===== OYUN DEĞİŞKENLERİ =====
 let pn="Stajyer", sn="M/V Ege Meltem";
 let selYear=2018, selType="kuru", selKontrat=0;
-let stats={cesaret:50,bilgi:30,sayginlik:40,dinclik:80};
+let stats={cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
 let scenes=[], currentIdx=0, choicesMade=[];
 let contractDays=0, contractTotal=6;
 let sceneQueue=[], usedScenes=new Set();
+const DIFFICULTY={
+  positiveGainMult:0.72,
+  negativeLossMult:1.18,
+  highStatThreshold:70,
+  extremeStatThreshold:85,
+  highStatGainMult:0.55,
+  extremeStatGainMult:0.5,
+  passiveFatigue:2,
+  periodicStressEvery:5,
+  periodicStressLoss:1,
+};
+const SYSTEM_STATE={
+  consecutiveMistakes:0,
+  totalMistakes:0,
+  hiddenFailures:{bridge:0,deck:0,engine:0,compliance:0},
+  triggeredChains:new Set(),
+};
 const tagL={cesur:"Cesur",akilli:"Akıllı",itaatkar:"İtaatkar",korkak:"Korkak",sosyal:"Sosyal",kritik:"KRİTİK"};
 
 // ===== GİRİŞ EKRANI =====
@@ -1382,24 +1399,124 @@ function updateSugs(){
 // ===== STAT YÖNETİMİ =====
 function clamp(v){return Math.min(100,Math.max(0,Math.round(v)));}
 
+function tuneDelta(key,current,delta){
+  if(delta===0) return 0;
+  if(delta>0){
+    let mult=DIFFICULTY.positiveGainMult;
+    if(current>=DIFFICULTY.highStatThreshold) mult*=DIFFICULTY.highStatGainMult;
+    if(current>=DIFFICULTY.extremeStatThreshold) mult*=DIFFICULTY.extremeStatGainMult;
+    if(key==='dinclik') mult*=0.8;
+    return Math.max(1,Math.round(delta*mult));
+  }
+  let mult=DIFFICULTY.negativeLossMult;
+  if(key==='dinclik') mult+=0.07;
+  return Math.min(-1,Math.round(delta*mult));
+}
+
+function addEffectDelta(effect,key,delta){
+  if(!delta) return;
+  effect[key]=(effect[key]||0)+delta;
+}
+
+function getSceneDomain(sc){
+  const blob=`${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.who||''}`.toLowerCase();
+  if(/engine|makine|carkci|bas2|yagci/.test(blob)) return 'engine';
+  if(/solas|marpol|stcw|loadline|bunker|bunkers|afs|atina|montreux|charter|isps|gmdss|compliance/.test(blob)) return 'compliance';
+  if(/bridge|radar|compass|bogaz|tss|köprü|kopru|vhf|night/.test(blob)) return 'bridge';
+  return 'deck';
+}
+
+function evaluateDecisionPressure(sc,c2){
+  const extra={};
+  const notes=[];
+  const tag=c2.tag||'akilli';
+  const domain=getSceneDomain(sc);
+  const isMistake=tag==='korkak';
+
+  if(isMistake){
+    SYSTEM_STATE.consecutiveMistakes++;
+    SYSTEM_STATE.totalMistakes++;
+    SYSTEM_STATE.hiddenFailures[domain]=(SYSTEM_STATE.hiddenFailures[domain]||0)+1;
+  }else{
+    if(tag==='akilli'||tag==='kritik') SYSTEM_STATE.consecutiveMistakes=0;
+    if(tag==='cesur') SYSTEM_STATE.consecutiveMistakes=Math.max(0,SYSTEM_STATE.consecutiveMistakes-1);
+    SYSTEM_STATE.hiddenFailures[domain]=Math.max(0,(SYSTEM_STATE.hiddenFailures[domain]||0)-(tag==='kritik'?2:1));
+  }
+
+  if(SYSTEM_STATE.consecutiveMistakes>=2){
+    addEffectDelta(extra,'sayginlik',-2);
+    notes.push('Ayni tip hatalar ekipte guven asindirdi.');
+  }
+  if(SYSTEM_STATE.consecutiveMistakes>=3){
+    addEffectDelta(extra,'dinclik',-3);
+    addEffectDelta(extra,'bilgi',-1);
+    notes.push('Ust uste hatalar baski ve dalginlik yaratti.');
+  }
+
+  const hiddenLevel=SYSTEM_STATE.hiddenFailures[domain]||0;
+  const warnKey=`${domain}-warn`;
+  const breakKey=`${domain}-break`;
+  if(hiddenLevel>=3&&!SYSTEM_STATE.triggeredChains.has(warnKey)){
+    SYSTEM_STATE.triggeredChains.add(warnKey);
+    addEffectDelta(extra,'sayginlik',-2);
+    notes.push('Gorunmeyen kucuk hatalar birikmeye basladi.');
+  }
+  if(hiddenLevel>=5&&!SYSTEM_STATE.triggeredChains.has(breakKey)){
+    SYSTEM_STATE.triggeredChains.add(breakKey);
+    addEffectDelta(extra,'bilgi',-2);
+    addEffectDelta(extra,'dinclik',-4);
+    notes.push('Gizli basarisizlik zinciri patladi; ekip seni daha yakin izliyor.');
+  }
+
+  if(stats.cesaret>=78&&tag==='cesur'){
+    addEffectDelta(extra,'dinclik',-4);
+    addEffectDelta(extra,'sayginlik',-2);
+    notes.push('Yuksek cesaret kontrolsuz riske kaydi.');
+  }
+  if(stats.sayginlik>=78&&(tag==='sosyal'||tag==='itaatkar')){
+    addEffectDelta(extra,'dinclik',-3);
+    notes.push('Herkese yetismeye calismak seni yipratiyor.');
+  }
+  if(stats.bilgi>=82&&(tag==='akilli'||tag==='kritik')){
+    addEffectDelta(extra,'cesaret',-2);
+    addEffectDelta(extra,'sayginlik',-1);
+    notes.push('Asiri analiz karar hizini dusurdu.');
+  }
+
+  return {extra,notes};
+}
+
 function applyEffect(e){
   const old={...stats};
   Object.keys(e).forEach(k=>{
-    if(k==='yorgunluk') stats.dinclik=clamp(stats.dinclik-e[k]); // yorgunluk artarsa dinçlik azalır
-    else if(k==='dinclik') stats.dinclik=clamp(stats.dinclik+e[k]);
-    else if(stats[k]!==undefined) stats[k]=clamp(stats[k]+e[k]);
+    if(k==='yorgunluk'){
+      const tuned=tuneDelta('dinclik',stats.dinclik,-e[k]); // yorgunluk artarsa dinclik azalir
+      stats.dinclik=clamp(stats.dinclik+tuned);
+    }
+    else if(k==='dinclik'){
+      const tuned=tuneDelta('dinclik',stats.dinclik,e[k]);
+      stats.dinclik=clamp(stats.dinclik+tuned);
+    }
+    else if(stats[k]!==undefined){
+      const tuned=tuneDelta(k,stats[k],e[k]);
+      stats[k]=clamp(stats[k]+tuned);
+    }
   });
+  stats.dinclik=clamp(stats.dinclik-DIFFICULTY.passiveFatigue);
+  if(choicesMade.length>0&&choicesMade.length%DIFFICULTY.periodicStressEvery===0){
+    stats.sayginlik=clamp(stats.sayginlik-DIFFICULTY.periodicStressLoss);
+  }
   updateStats(old);
-  // Tehlike bölgesi bildirimi
+  // Tehlike bolgesi bildirimi
   const dangerChecks = [
     {val:stats.cesaret, name:'Cesaret', prev:old.cesaret},
     {val:stats.bilgi,   name:'Bilgi',   prev:old.bilgi},
-    {val:stats.sayginlik,name:'Saygınlık',prev:old.sayginlik},
-    {val:stats.dinclik, name:'Dinçlik', prev:old.dinclik},
+    {val:stats.sayginlik,name:'Sayginlik',prev:old.sayginlik},
+    {val:stats.dinclik, name:'Dinclik', prev:old.dinclik},
   ];
   dangerChecks.forEach(d=>{
     if(d.val<=20 && d.prev>20){
-      setTimeout(()=>showNotif('⚠️','TEHLİKE!', d.name+' kritik seviyede — '+d.val+' kaldı!'), 300);
+      setTimeout(()=>showNotif('!','TEHLIKE!', d.name+' kritik seviyede - '+d.val+' kaldi!'), 300);
     }
   });
   return checkCrisis();
@@ -1550,15 +1667,22 @@ function renderScene(idx){
     b.onclick=()=>{
       sfxClick();
       ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
-      choicesMade.push({tag:c2.tag});
+      const pressure=evaluateDecisionPressure(sc,c2);
+      const resolvedEffect={...(c2.effect||{})};
+      Object.entries(pressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
+      choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
       applyCrewEffect(sc.who, c2.tag);
-      const crisis=applyEffect(c2.effect);
+      const crisis=applyEffect(resolvedEffect);
 
-      const pos=Object.entries(c2.effect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
-      const neg=Object.entries(c2.effect).filter(([k,v])=>v<0&&k!=='yorgunluk').map(([k,v])=>v+' '+k).join(' ');
+      const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
+      const neg=Object.entries(resolvedEffect).filter(([k,v])=>v<0&&k!=='yorgunluk').map(([k,v])=>v+' '+k).join(' ');
       const parts=[];if(pos)parts.push(pos);if(neg)parts.push(neg);
-      const icon=c2.tag==='kritik'?'🚨':c2.tag==='cesur'?'💪':c2.tag==='akilli'?'🧠':'📊';
-      if(parts.length)showNotif(icon,'Stat değişimi',parts.join(' | '));
+      const icon=c2.tag==='kritik'?'!':c2.tag==='cesur'?'^':c2.tag==='akilli'?'i':'~';
+      if(parts.length)showNotif(icon,'Stat degisimi',parts.join(' | '));
+      if(pressure.notes.length){
+        setTimeout(()=>showNotif('!','Baski Artiyor',pressure.notes[0]),900);
+        addJournalEntry('[BASKI] '+pressure.notes.join(' '), sc.day, sc.time);
+      }
 
       addJournalEntry(c2.text, sc.day, sc.time);
       const nextFn=()=>{
@@ -1656,8 +1780,12 @@ function beginGame(){
   sceneQueue=buildSceneQueue(pool, contractTotal);
   currentIdx=0;
 
-  stats={cesaret:50,bilgi:30,sayginlik:40,dinclik:80};
+  stats={cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
   choicesMade=[];
+  SYSTEM_STATE.consecutiveMistakes=0;
+  SYSTEM_STATE.totalMistakes=0;
+  SYSTEM_STATE.hiddenFailures={bridge:0,deck:0,engine:0,compliance:0};
+  SYSTEM_STATE.triggeredChains.clear();
   seenColregHints.clear();
   journalEntries=[];
   photos=[];
