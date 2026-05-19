@@ -7491,6 +7491,7 @@ function buildPortChartSvg(port){
   const profile = getPortChartProfile(port);
   const region = profile.region;
   const hay = `${port.name} ${region}`.toLowerCase();
+  const detailLevel = portChartZoom >= 3.4 ? 'high' : portChartZoom >= 1.8 ? 'mid' : 'low';
   const coastLeft = port.x < 110;
   const southFacing = port.y > 170;
   const harborColor = visitedPorts.has(port.name) ? '#d4a017' : '#6fa8dc';
@@ -7729,6 +7730,38 @@ function buildPortChartSvg(port){
       <path d="M${coastLeft ? 84 : 356} ${channelY+60} l18 -8 l-8 18 z" fill="#5dbf8a" opacity=".8"/>
       <text x="${coastLeft ? 64 : 330}" y="${channelY+82}" fill="#8fd8ab" font-size="7" font-family="monospace">LEE SIDE</text>`
     : '';
+  const buoyDetailOverlay = coastLeft
+    ? `
+      <circle cx="${channelEndX+24}" cy="${channelY-18}" r="3.2" fill="#44d26f"/><text x="${channelEndX+30}" y="${channelY-20}" fill="#8fd8ab" font-size="6.3" font-family="monospace">G1</text>
+      <circle cx="${channelEndX+48}" cy="${channelY+18}" r="3.2" fill="#d24c4c"/><text x="${channelEndX+54}" y="${channelY+20}" fill="#ffb0b0" font-size="6.3" font-family="monospace">R2</text>
+      <circle cx="${channelEndX+74}" cy="${channelY-24}" r="3.2" fill="#44d26f"/><text x="${channelEndX+80}" y="${channelY-26}" fill="#8fd8ab" font-size="6.3" font-family="monospace">G3</text>
+      <circle cx="${channelEndX+98}" cy="${channelY+24}" r="3.2" fill="#d24c4c"/><text x="${channelEndX+104}" y="${channelY+26}" fill="#ffb0b0" font-size="6.3" font-family="monospace">R4</text>`
+    : `
+      <circle cx="${channelEndX-24}" cy="${channelY-18}" r="3.2" fill="#44d26f"/><text x="${channelEndX-44}" y="${channelY-20}" fill="#8fd8ab" font-size="6.3" font-family="monospace">G1</text>
+      <circle cx="${channelEndX-48}" cy="${channelY+18}" r="3.2" fill="#d24c4c"/><text x="${channelEndX-68}" y="${channelY+20}" fill="#ffb0b0" font-size="6.3" font-family="monospace">R2</text>
+      <circle cx="${channelEndX-74}" cy="${channelY-24}" r="3.2" fill="#44d26f"/><text x="${channelEndX-94}" y="${channelY-26}" fill="#8fd8ab" font-size="6.3" font-family="monospace">G3</text>
+      <circle cx="${channelEndX-98}" cy="${channelY+24}" r="3.2" fill="#d24c4c"/><text x="${channelEndX-118}" y="${channelY+26}" fill="#ffb0b0" font-size="6.3" font-family="monospace">R4</text>`;
+  const microNoteOverlay = `
+    <text x="${coastLeft ? 126 : 250}" y="${channelY-82}" fill="#7ea0bd" font-size="6.1" font-family="monospace">UKC WATCH</text>
+    <text x="${coastLeft ? 238 : 128}" y="${channelY+98}" fill="#7ea0bd" font-size="6.1" font-family="monospace">ECHO / RADAR CHECK</text>
+    <text x="${coastLeft ? 308 : 70}" y="${channelY+48}" fill="#7ea0bd" font-size="6.1" font-family="monospace">LEADING LINE IN USE</text>`;
+  const visibleOuterContours = detailLevel !== 'low' ? outerContours : '';
+  const visibleExtendedSoundings = detailLevel === 'high' ? extendedSoundings : '';
+  const visibleDredgedOverlay = detailLevel !== 'low' ? dredgedOverlay : '';
+  const visibleCableOverlay = detailLevel === 'high' ? cableOverlay : '';
+  const visibleReportingOverlay = detailLevel !== 'low' ? reportingOverlay : '';
+  const visibleTidalOverlay = detailLevel !== 'low' ? tidalOverlay : '';
+  const visibleShoalOverlay = detailLevel === 'high' ? shoalOverlay : '';
+  const visibleLeadingLineOverlay = detailLevel !== 'low' ? leadingLineOverlay : '';
+  const visiblePilotGroundOverlay = detailLevel !== 'low' ? pilotGroundOverlay : '';
+  const visibleNoAnchoringOverlay = detailLevel === 'high' ? noAnchoringOverlay : '';
+  const visibleTrafficArrowOverlay = detailLevel === 'high' ? trafficArrowOverlay : '';
+  const visibleSectorLightOverlay = detailLevel === 'high' ? sectorLightOverlay : '';
+  const visibleSpecialOverlay = detailLevel !== 'low' ? specialOverlay : '';
+  const visibleOverviewInset = detailLevel !== 'low' ? overviewInset : '';
+  const visibleSpecialInset = detailLevel === 'high' ? specialInset : '';
+  const visibleBuoyDetailOverlay = detailLevel === 'high' ? buoyDetailOverlay : '';
+  const visibleMicroNoteOverlay = detailLevel === 'high' ? microNoteOverlay : '';
   return `
   <defs>
     <linearGradient id="portSea" x1="0" y1="0" x2="0" y2="1">
@@ -7748,13 +7781,13 @@ function buildPortChartSvg(port){
   <path d="${coastLeft ? 'M84 210 L112 218 L108 234 L76 232 Z' : 'M356 210 L328 218 L332 234 L364 232 Z'}" fill="#0d2337" opacity=".72"/>
   ${islandLabels}
   ${contourOverlay}
-  ${outerContours}
+  ${visibleOuterContours}
   <path d="M${channelStartX} ${channelY} Q${(channelStartX+channelEndX)/2} ${channelY-18} ${channelEndX} ${channelY}" fill="none" stroke="#4f8fc7" stroke-width="2.2" stroke-dasharray="7,5" opacity=".9"/>
   <path d="M${channelStartX} ${channelY-14} Q${(channelStartX+channelEndX)/2} ${channelY-32} ${channelEndX} ${channelY-14}" fill="none" stroke="#1d5d95" stroke-width="1" stroke-dasharray="4,4" opacity=".45"/>
   <path d="M${channelStartX} ${channelY+14} Q${(channelStartX+channelEndX)/2} ${channelY-4} ${channelEndX} ${channelY+14}" fill="none" stroke="#1d5d95" stroke-width="1" stroke-dasharray="4,4" opacity=".45"/>
   <path d="M${coastLeft ? 170 : 270} ${channelY-44} L${berthX} ${channelY-20} L${berthX} ${channelY+36} L${coastLeft ? 176 : 264} ${channelY+18} Z" fill="#17324c" opacity=".72"/>
-  ${dredgedOverlay}
-  ${cableOverlay}
+  ${visibleDredgedOverlay}
+  ${visibleCableOverlay}
   <path d="M${berthX} ${channelY-26} V${channelY+42}" stroke="#cfd8e4" stroke-width="4"/>
   <path d="M${berthX + (coastLeft?-24:24)} ${channelY-18} V${channelY+32}" stroke="#7ea0bd" stroke-width="1" opacity=".7"/>
   <path d="M${berthX + (coastLeft?-36:36)} ${channelY-10} V${channelY+24}" stroke="#7ea0bd" stroke-width="1" opacity=".55"/>
@@ -7813,19 +7846,25 @@ function buildPortChartSvg(port){
   <text x="96" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonA}</text>
   <text x="264" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonB}</text>
   ${soundingText}
-  ${extendedSoundings}
+  ${visibleExtendedSoundings}
   <rect x="${scaleBarX}" y="236" width="108" height="10" rx="3" fill="#081929" stroke="#385f86" stroke-width="1"/>
   <path d="M${scaleBarX+8} 241 H${scaleBarX+28} M${scaleBarX+28} 241 H${scaleBarX+48} M${scaleBarX+48} 241 H${scaleBarX+68} M${scaleBarX+68} 241 H${scaleBarX+88}" stroke="#cfd8e4" stroke-width="3"/>
   <text x="${scaleBarX+4}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
   <text x="${scaleBarX+40}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">1</text>
   <text x="${scaleBarX+80}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">2 NM</text>
-  ${pilotGroundOverlay}
-  ${noAnchoringOverlay}
-  ${trafficArrowOverlay}
-  ${sectorLightOverlay}
-  ${specialOverlay}
-  ${overviewInset}
-  ${specialInset}
+  ${visiblePilotGroundOverlay}
+  ${visibleReportingOverlay}
+  ${visibleTidalOverlay}
+  ${visibleShoalOverlay}
+  ${visibleLeadingLineOverlay}
+  ${visibleNoAnchoringOverlay}
+  ${visibleTrafficArrowOverlay}
+  ${visibleSectorLightOverlay}
+  ${visibleSpecialOverlay}
+  ${visibleOverviewInset}
+  ${visibleSpecialInset}
+  ${visibleBuoyDetailOverlay}
+  ${visibleMicroNoteOverlay}
   `;
 }
 
