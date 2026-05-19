@@ -7185,7 +7185,7 @@ function selectPortChart(name){
   renderMap();
 }
 function adjustPortChartZoom(delta){
-  portChartZoom = Math.max(1, Math.min(4.5, +(portChartZoom + delta).toFixed(2)));
+  portChartZoom = Math.max(1, Math.min(6, +(portChartZoom + delta).toFixed(2)));
   if(mapView === 'library') renderMapLibrary();
 }
 
@@ -7859,13 +7859,37 @@ function renderMapLibrary(){
   }
   const profile = getPortChartProfile(active);
   const region = profile.region;
-  chartTitle.textContent = `${active.name} · Liman Haritasi`;
+  chartTitle.textContent = `${active.name} · ${active.kind==='port'?'Liman Haritasi':'Transit Haritasi'}`;
   chartSvg.innerHTML = buildPortChartSvg(active);
   initPortChartInteractions(chartSvg);
   chartSvg.onclick = (ev)=>handlePortChartTaskClick(chartSvg, ev, active);
   chartSvg.setAttribute('viewBox', getPortChartViewBox());
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
-  chartMeta.innerHTML = `DOSYA: ${active.name.replace(/ /g,'_').toUpperCase()}.chart<br>YAYIN: ${profile.publication}<br>CHART NO: ${profile.chartNo} · ${profile.edition}<br>TIP: LIMAN YAKLASMA PLANI<br>BOLGE: ${region}<br>OLCEK: ${profile.scale}<br>YAKLASMA: ${profile.approach}<br>MAKS DRAFT: ${profile.maxDraft}<br>BERTH: ${profile.berth}<br>DATUM: ${profile.soundDatum}<br>MAG VAR: ${profile.magVar}<br>GELGIT/AKINTI: ${profile.tides}<br>DURUM: ${visitedPorts.has(active.name)?'UGRANAN LIMAN':'ARSIV HARITASI'}<br>NOT: ${profile.notes}`;
+  chartMeta.innerHTML = `
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Dosya / Yayin</div>
+      <div class="chart-meta-value">DOSYA: ${active.name.replace(/ /g,'_').toUpperCase()}.chart<br>YAYIN: ${profile.publication}<br>CHART NO: ${profile.chartNo} · ${profile.edition}</div>
+    </div>
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Olcek / Bolge</div>
+      <div class="chart-meta-value">TIP: ${active.kind==='port'?'LIMAN YAKLASMA PLANI':'TRANSIT / GECIT CHARTI'}<br>BOLGE: ${region}<br>OLCEK: ${profile.scale}</div>
+    </div>
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Yaklasma</div>
+      <div class="chart-meta-value">YAKLASMA: ${profile.approach}<br>PILOT / REPORT: ${profile.pilot}<br>TEHLIKE ODAK: ${profile.hazard}</div>
+    </div>
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Draft / Datum</div>
+      <div class="chart-meta-value">MAKS DRAFT: ${profile.maxDraft}<br>DATUM: ${profile.soundDatum}<br>MAG VAR: ${profile.magVar}</div>
+    </div>
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Operasyon</div>
+      <div class="chart-meta-value">BERTH / LANE: ${profile.berth}<br>GELGIT / AKINTI: ${profile.tides}<br>DURUM: ${visitedPorts.has(active.name)?'UGRANAN CHART':'ARSIV CHARTI'}</div>
+    </div>
+    <div class="chart-meta-card">
+      <div class="chart-meta-label">Chart Notu</div>
+      <div class="chart-meta-value">${profile.notes}</div>
+    </div>`;
   updateMapTaskBox(active);
 }
 
