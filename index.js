@@ -8935,6 +8935,7 @@ const GLOSSARY_TERMS = [
   {term:"Zincirlik", meaning:"Demir zincirinin toplandigi bolme.", example:"Zincirlik temiz ve neta tutulmazsa sorun cikar."},
   {term:"After Peak Tank", meaning:"Geminin kic tarafinda bulunan, trim ve denge amaciyla kullanilabilen tank.", example:"After peak tank seviyesine bakmadan kica trim yorumu eksik kalir."},
   {term:"Fore Peak Tank", meaning:"Geminin bas tarafinda bulunan, trim ve denge icin kullanilan tank.", example:"Fore peak tank doluluk orani bas draftini hizla etkileyebilir."},
+  {term:"After Peak Tank", meaning:"Geminin kic tarafinda bulunan, trim ve denge icin kullanilan tank.", example:"After peak tank seviyesi kica trimli durumu belirginlestirebilir."},
   {term:"Ballast Voyage", meaning:"Geminin ticari yuk olmadan veya az yukle ballast durumunda yaptigi sefer.", example:"Ballast voyage sirasinda pervane ve draft davranisi farkli hissedilir."},
   {term:"Bending Moment Limit", meaning:"Geminin boyuna mukavemet sinirlarini asmayacak sekilde izin verilen en buyuk bending moment degeri.", example:"Loading computer bending moment limit asimina izin vermedi."},
   {term:"Shear Force Limit", meaning:"Kesme kuvveti acisindan gemi yapisini korumak icin asilmamasi gereken sinir.", example:"Yanlis loading sequence shear force limit alarmi dogurabilir."},
@@ -8950,6 +8951,15 @@ const GLOSSARY_TERMS = [
   {term:"Displacement", meaning:"Geminin yuzdurdugu su agirligina esit toplam gemi agirligi.", example:"Displacement artinca draft da buna bagli olarak buyur."},
   {term:"Dog Clutch", meaning:"Iki donebilen parcayi dogrudan birbirine kilitleyerek tork aktarimi saglayan mekanik kavrama tipi.", example:"Dog clutch tam gecmezse ekipman zorlanarak ses yapabilir."},
   {term:"Double Bottom Tank", meaning:"Cift dip yapisi icinde bulunan ballast veya yakit tanki.", example:"Double bottom tank soundingleri her zaman dikkatle okunur."},
+  {term:"Frame", meaning:"Geminin govdesine enine tasiyicilik veren posta elemani.", example:"Survey sirasinda belirli frame bolgeleri yakindan incelendi."},
+  {term:"Longitudinal", meaning:"Gemide boyuna uzanan tasiyici eleman veya boyuna yon referansi.", example:"Longitudinal gucler bending moment hesabinda onemlidir."},
+  {term:"Transverse Bulkhead", meaning:"Gemiyi enine bolmelere ayiran sizdirmaz veya yapisal perde.", example:"Transverse bulkhead butunlugu su alma senaryosunda kritik hale gelir."},
+  {term:"Inner Bottom", meaning:"Double bottom yapisinin ust tabani; tank top'u olusturan ic yuzey.", example:"Inner bottom ustunde yuk limitleri goz ardi edilmez."},
+  {term:"Tank Top", meaning:"Ambar tabani gibi gorunen, aslinda cift dip ustunu olusturan yuzey.", example:"Tank top noktalarina agir yuk verirken limitler tekrar kontrol edildi."},
+  {term:"Side Shell", meaning:"Geminin dis borda kaplamasini olusturan yan govde yapisi.", example:"Side shell kalinlik olcumleri kuru havuzda yapildi."},
+  {term:"Collision Bulkhead", meaning:"Pruva tarafinda suyun gemi icine yayilmasini sinirlamak icin yapilan sizdirmaz perde.", example:"Collision bulkhead onundeki alan depolama icin kullanilmadi."},
+  {term:"Cofferdam", meaning:"Iki tank veya mahal arasinda birakilan bos emniyet bolmesi.", example:"Cofferdam kontrolu gaz ve kacak ihtimalini erken gosterebilir."},
+  {term:"Tween Deck", meaning:"Ana ambar icinde ara yuk seviyesi veya ara guverte duzeni.", example:"Tween deck yerlesimi yuk planini tamamen degistirebilir."},
   {term:"Escape Trunk", meaning:"Acil durumda kapali mahalden cikisa imkan veren kacis bacasi veya gecidi.", example:"Escape trunk yolu malzeme ile asla kapatilmaz."},
   {term:"Fire Patrol", meaning:"Yangin riski bulunan zamanlarda mahal kontrolu icin yapilan devriye.", example:"Hot work sonrasinda fire patrol suresi uzatildi."},
   {term:"Foam Applicator", meaning:"Kopuk sistemini dogru noktaya uygulamak icin kullanilan lans veya uygulayici parca.", example:"Foam applicator olmadan galley yanginina dogru mudahale zorlasir."},
@@ -9815,6 +9825,50 @@ function buildShipPartsDiagram(){
         <text x="212" y="34" fill="#dceaf4" font-size="11" font-family="monospace">HATCH OPENING / USTTEN AMBAR</text>
       </svg>
       <div class="shipsection-note">Bu kesitte ambarin ortada, yapisal postalarin dis cidara tasiyici destek verdigi, cift dip tanklarin altta ve omurganin en altta referans ekseni oldugu gorulur. Yani yuk, tank ve govde tasiyiciligi birbirinden ayri degil; ayni yapinin parcasi olarak dusunulur.</div>
+    </div>
+    <div class="shipsection-card">
+      <div class="shipsection-head">Boyuna Kesit / Geminin Icerden Akisi</div>
+      <svg class="shipsection-svg" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" aria-label="Geminin boyuna kesiti">
+        <defs>
+          <linearGradient id="longBg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#14344f"/>
+            <stop offset="100%" stop-color="#071725"/>
+          </linearGradient>
+        </defs>
+        <rect width="520" height="250" rx="10" fill="url(#longBg)"/>
+        <path d="M34 76 H404 L424 66 H486 L470 96 L470 164 Q470 184 446 196 H78 Q44 196 34 160 Z" fill="#808890" stroke="#4f5961" stroke-width="2"/>
+        <path d="M54 96 H432 V174 H82 Q60 174 54 154 Z" fill="#12273a" stroke="#627381" stroke-width="1.6"/>
+        <path d="M54 154 H432" stroke="#6e808f" stroke-width="1.2"/>
+        <path d="M96 96 V174 M150 96 V174 M208 96 V174 M266 96 V174 M324 96 V174 M382 96 V174" stroke="#687884" stroke-width="1.1" opacity=".55"/>
+        <path d="M72 174 H420 L406 194 H86 Z" fill="#415a6d" opacity=".92"/>
+        <rect x="62" y="120" width="54" height="34" rx="4" fill="#274158" stroke="#7ea0bd" stroke-width="1.2"/>
+        <rect x="118" y="104" width="90" height="50" rx="4" fill="#203a52" stroke="#7ea0bd" stroke-width="1.2"/>
+        <rect x="210" y="104" width="78" height="50" rx="4" fill="#203a52" stroke="#7ea0bd" stroke-width="1.2"/>
+        <rect x="290" y="104" width="78" height="50" rx="4" fill="#203a52" stroke="#7ea0bd" stroke-width="1.2"/>
+        <rect x="370" y="110" width="50" height="44" rx="4" fill="#274158" stroke="#7ea0bd" stroke-width="1.2"/>
+        <rect x="84" y="54" width="42" height="42" fill="#bfc7cf" stroke="#6d7780" stroke-width="1.2"/>
+        <rect x="94" y="48" width="26" height="10" fill="#d7dee5" stroke="#7b848c" stroke-width="1"/>
+        <rect x="104" y="60" width="4" height="32" fill="#4a5f72"/>
+        <path d="M106 60 h18 M106 72 h14" stroke="#4a5f72" stroke-width="2"/>
+        <rect x="96" y="174" width="70" height="14" rx="3" fill="#34556e" stroke="#89a7be" stroke-width="1.1"/>
+        <rect x="178" y="174" width="70" height="14" rx="3" fill="#34556e" stroke="#89a7be" stroke-width="1.1"/>
+        <rect x="260" y="174" width="70" height="14" rx="3" fill="#34556e" stroke="#89a7be" stroke-width="1.1"/>
+        <rect x="342" y="174" width="70" height="14" rx="3" fill="#34556e" stroke="#89a7be" stroke-width="1.1"/>
+        <text x="72" y="114" fill="#f4d172" font-size="11" font-family="monospace">FORE PEAK</text>
+        <text x="132" y="132" fill="#dceaf4" font-size="12" font-family="monospace">HOLD 1</text>
+        <text x="224" y="132" fill="#dceaf4" font-size="12" font-family="monospace">HOLD 2</text>
+        <text x="304" y="132" fill="#dceaf4" font-size="12" font-family="monospace">HOLD 3</text>
+        <text x="380" y="132" fill="#f4d172" font-size="11" font-family="monospace">ENGINE RM</text>
+        <text x="88" y="44" fill="#8fd8ab" font-size="11" font-family="monospace">BRIDGE / ACCOM</text>
+        <text x="386" y="86" fill="#f4d172" font-size="11" font-family="monospace">AFTER PEAK</text>
+        <path d="M98 172 V198" stroke="#f4d172" stroke-width="1.8"/>
+        <text x="80" y="212" fill="#f4d172" font-size="11" font-family="monospace">DB TANK</text>
+        <path d="M206 100 V78" stroke="#9cc8ef" stroke-width="1.6"/>
+        <text x="172" y="72" fill="#9cc8ef" font-size="11" font-family="monospace">HATCH OPENING</text>
+        <path d="M392 110 V84" stroke="#8fd8ab" stroke-width="1.6"/>
+        <text x="354" y="78" fill="#8fd8ab" font-size="11" font-family="monospace">SHAFT / ENGINE ZONE</text>
+      </svg>
+      <div class="shipsection-note">Boyuna kesitte pruvaldan kica giderken fore peak, ambarlar, ust yapi, makine dairesi ve after peak iliskisi daha net okunur. Bu bakis acisi, trim, yuk dagilimi, ballast plani ve makine mahallinin gemi icindeki yerini zihinde oturtmak icin cok kullanislidir.</div>
     </div>
   </div>`;
 }
