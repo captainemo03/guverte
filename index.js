@@ -3501,6 +3501,96 @@ choices:[
 {text:"Hava sertse rastgele daha cok su almak yeter sanirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Ballast planinin havayla ciddi ilgisi olmadigini dusunurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
 
+{id:"s361",gfx:"bridge",alert:false,day:"Gun 10",time:"05:45",loc:"Pilot Station - Master/Pilot Exchange",sub:"Yanasma zincirinin ilk ciddi halkasi",who:"suvari",
+text:`Pilot bordaya cikmadan once kopruustunde kisa ama cok kritik bir hazirlik basliyor. Pilot card acik, mevcut draft, UKC, yanaacagin berth ve tug plani tekrar masaya yatiriliyor.
+
+Suvari sana donuyor.
+"Pilot gelince sadece hos geldiniz demek yetmez. Geminin ne oldugunu, ne bekledigini, ne istemedigini net vereceksin. Sonra da onun anlattigini capraz teyit edeceksin."
+
+VHF acik, rota son kisimda, herkes senden toparli bir bilgi akisi bekliyor.`,
+choices:[
+{text:"Draft, speed, tug plan ve berth detaylarini kisa ve net ozetlerim",tag:"akilli",effect:{bilgi:17,sayginlik:13}},
+{text:"Pilot ne sorarsa ona cevap vermeyi yeterli gorurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:5}},
+{text:"Detaylara girmeden sadece yanaacagimizi soyler gecerim",tag:"zayif",effect:{bilgi:-10,sayginlik:-11}}]},
+
+{id:"s362",gfx:"harbor",alert:false,day:"Gun 10",time:"06:20",loc:"Tug Made Fast - Bas Omuzluk",sub:"Plan artik kagittan cikti",who:"z1",
+text:`Romorkor hattini aldi. Yanasma plani artik sadece pilot kartindaki bir cizim degil; gercek kuvvetler gemiye baglanmis durumda.
+
+1. zabit sakin ama sert bir sesle hatirlatiyor:
+"Tug made fast demek isin bittigi an degil. Hangi romorkor nerede, hangi yonde cekiyor, komutlar ne kadar acik gidiyor, hepsini takip edeceksin."
+
+Disarida halat gergin, kopruustunde komutlar daha kisa ve daha dikkatli.`,
+choices:[
+{text:"Tug position, line status ve verilen komutlari capraz teyit ederim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+{text:"Sadece romorkor baglandi bilgisini yeterli sayarim",tag:"orta",effect:{bilgi:5,sayginlik:4}},
+{text:"Romorkor baglandiysa gerisini pilot bilir diye dusunurum",tag:"zayif",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s363",gfx:"harbor",alert:false,day:"Gun 10",time:"06:50",loc:"Berth Final Approach",sub:"Mesafe kuculdukce bilgi daha kritik hale gelir",who:"suvari",
+text:`Rihtim artik iyice buyumus durumda. Mesafeler hizla kisaliyor; spring hazirligi, engine order, tug etkisi ve ruzgar baskisi ayni anda hissediliyor.
+
+Suvari senden gevezelik degil, faydali akis istiyor:
+"Distance, speed over ground, tug response ve mooring readiness. Bos laf yok. Ise yarayan bilgi var."
+
+Bu anlarda kopruustu sessiz ama cok yogun bir yer oluyor.`,
+choices:[
+{text:"Kisa araliklarla net distance ve readiness raporu veririm",tag:"akilli",effect:{bilgi:18,sayginlik:13}},
+{text:"Sadece soruldugunda bilgi veririm",tag:"itaatkar",effect:{bilgi:6,sayginlik:5}},
+{text:"Herkes zaten goruyor diye raporu gevsetirim",tag:"zayif",effect:{bilgi:-10,sayginlik:-12}}]},
+
+{id:"s364",gfx:"harbor",alert:false,day:"Gun 10",time:"07:15",loc:"Berth - All Fast Sonrasi",sub:"Baglanmak bitis degil, yeni duzenin baslangici",who:"lostromo",
+text:`Son halat da emniyete alindi. "All fast" dendi ama guvertede is yeni sekil degistirdi: halat gerilimleri izlenecek, gangway emniyeti saglanacak, cargo watch ve terminal ile ilk temas kurulacak.
+
+Lostromo sana bakip kisaca konusuyor:
+"Baglandik diye rehavet olmaz. Ilk yarim saat iyi tutulursa kalan gun rahatlar."
+
+Yani liman zincirinin bu halkasi da dikkat istiyor.`,
+choices:[
+{text:"Mooring tension, gangway, terminal ve watch hazirligini sirayla kontrol ederim",tag:"olgun",effect:{bilgi:16,sayginlik:12,dinclik:2}},
+{text:"All fast sonrasi biraz gevseyip sonra bakarim",tag:"orta",effect:{bilgi:5,sayginlik:4,dinclik:1}},
+{text:"Baglandiktan sonra isin buyuk kismi bitti diye dusunurum",tag:"zayif",effect:{bilgi:-9,sayginlik:-10}}]},
+
+...(stype==='kont' ? [{
+id:"s365",gfx:"cargo",alert:false,day:"Gun 10",time:"09:10",loc:"Konteyner Terminali - Bay Plani Baskisi",sub:"Slot, sequence ve lashing ayni anda dusunulmeli",who:"z2",
+text:`Terminal planner yeni bir liste gonderdi. Birkac konteynerin bay/row/tier yeri son anda degisiyor. Ama guvertedeki lashing dengesi ve discharge sequence de buna bagli.
+
+2. zabit sana plan ekranini gosteriyor:
+"Terminal hiz ister, ama biz geminin mantigini koruruz. Yanlis stack, yanlis sequence ve ustte gereksiz agirlik sonra bize doner."
+
+Bir yandan operasyon baskisi, bir yandan plan disiplini var.`,
+choices:[
+{text:"Bay plan, discharge sequence ve on-deck weight dengesini birlikte kontrol ederim",tag:"akilli",effect:{bilgi:17,sayginlik:12}},
+{text:"Terminalin son gonderdigini fazla sorgulamadan uygularim",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+{text:"Sadece hizlansin diye ustteki stack dengesini ikinci plana atarim",tag:"zayif",effect:{bilgi:-11,sayginlik:-10}}]
+}] : []),
+
+...(stype==='tanker' ? [{
+id:"s366",gfx:"cargo",alert:false,day:"Gun 10",time:"08:40",loc:"Tanker Terminali - Manifold ve Line-Up",sub:"Yuk operasyonu detayla guvenli olur",who:"z1",
+text:`Terminalle ilk toplantidan sonra manifold sahasi hazirlaniyor. Drip tray, scupper plug, hose baglantilari, line-up, vapour return ve ESD mantigi yeniden teyit ediliyor.
+
+1. zabit sana ciddi bir tonda hatirlatiyor:
+"Tankerde hiz degil dogruluk once gelir. Yanlis line-up ya da eksik emniyet geri donusu kotu olan hatadir."
+
+CCR ile saha arasinda temiz bir bilgi akisi kurulmasi gerekiyor.`,
+choices:[
+{text:"Manifold, line-up, scupper plug, drip tray ve ESD hazirligini tek tek teyit ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Saha hazirdir diye dusunup sadece yuzeysel bakarim",tag:"orta",effect:{bilgi:5,sayginlik:4}},
+{text:"Baglantilar kurulduysa detay kontrolunu gereksiz gorurum",tag:"zayif",effect:{bilgi:-12,sayginlik:-11}}]
+}] : []),
+
+...(stype==='bulk' ? [{
+id:"s367",gfx:"cargo",alert:false,day:"Gun 10",time:"10:00",loc:"Bulk Operasyonu - Loading Sequence",sub:"Trim, dagilim ve yuk selameti ayni tabloda bulusur",who:"z2",
+text:`Yukleyici hizli bir sequence istiyor ama ambar dagilimi, trim ve gemi icindeki gerilim limitleri buna birebir bagli. Bir ambar fazla dolarsa sonra tum duzen bozulabilir.
+
+2. zabit plana bakip acik konusuyor:
+"Bulk operasyonda sadece tonaja bakilmaz. Hangi ambar, hangi sirayla, ne kadar ve nasil dolduruluyor; asil mesele o."
+
+Senden sadece evet demen degil, mantikli bir dagilim dusunmen bekleniyor.`,
+choices:[
+{text:"Loading sequence'i trim, shear force ve dagilimla birlikte degerlendiririm",tag:"akilli",effect:{bilgi:17,sayginlik:12}},
+{text:"Yukleyicinin temposuna uyup dagilimi ikinci planda tutarim",tag:"orta",effect:{bilgi:6,sayginlik:4}},
+{text:"Hangi ambar dolarsa dolsun yeter ki hizli bitsin diye bakarim",tag:"zayif",effect:{bilgi:-11,sayginlik:-10}}]
+}] : []),
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
