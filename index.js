@@ -9777,6 +9777,45 @@ function buildShipPartsDiagram(){
       <div class="shipparts-detail-head">Kopruustu</div>
       <div class="shipparts-detail-body">Geminin sevk ve idaresinin yapildigi mahaldir. Radar, ECDIS, pusulalar, VHF/GMDSS ekipmanlari ve vardiya zabitinin ana kontrol noktasi burada bulunur.</div>
     </div>
+    <div class="shipsection-card">
+      <div class="shipsection-head">Enine Kesit / Ic Yapinin Iliskisi</div>
+      <svg class="shipsection-svg" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" aria-label="Geminin enine kesiti">
+        <defs>
+          <linearGradient id="sectionBg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#14344f"/>
+            <stop offset="100%" stop-color="#071725"/>
+          </linearGradient>
+        </defs>
+        <rect width="520" height="250" rx="10" fill="url(#sectionBg)"/>
+        <path d="M84 42 H436 L458 62 V176 L422 212 H98 L62 176 V62 Z" fill="#7f878f" stroke="#4f5961" stroke-width="2"/>
+        <path d="M110 60 H410 L430 78 V164 L402 190 H118 L90 164 V78 Z" fill="#12273a" stroke="#627381" stroke-width="1.6"/>
+        <path d="M118 164 H402 L384 188 H136 Z" fill="#425a6d" opacity=".9"/>
+        <path d="M260 60 V188" stroke="#95a7b7" stroke-width="1.4" stroke-dasharray="5,4" opacity=".55"/>
+        <path d="M150 78 V186 M186 72 V188 M222 68 V188 M298 68 V188 M334 72 V188 M370 78 V186" stroke="#687884" stroke-width="1.2" opacity=".55"/>
+        <path d="M124 124 H396" stroke="#6b7c89" stroke-width="1.1" opacity=".45" stroke-dasharray="4,4"/>
+        <rect x="176" y="72" width="168" height="86" rx="6" fill="#203a52" stroke="#7ea0bd" stroke-width="1.5"/>
+        <text x="260" y="120" text-anchor="middle" fill="#dceaf4" font-size="16" font-family="monospace">AMBAR / CARGO HOLD</text>
+        <rect x="138" y="172" width="104" height="16" rx="4" fill="#34556e" stroke="#89a7be" stroke-width="1.2"/>
+        <rect x="278" y="172" width="104" height="16" rx="4" fill="#34556e" stroke="#89a7be" stroke-width="1.2"/>
+        <text x="190" y="184" text-anchor="middle" fill="#dceaf4" font-size="10" font-family="monospace">DOUBLE BOTTOM TANK</text>
+        <text x="330" y="184" text-anchor="middle" fill="#dceaf4" font-size="10" font-family="monospace">DOUBLE BOTTOM TANK</text>
+        <path d="M122 62 H398" stroke="#d6dee5" stroke-width="2"/>
+        <text x="400" y="56" fill="#f4d172" font-size="11" font-family="monospace">ANA GUVERT E</text>
+        <path d="M260 188 L260 214" stroke="#f4d172" stroke-width="2"/>
+        <text x="270" y="222" fill="#f4d172" font-size="11" font-family="monospace">OMURGA</text>
+        <path d="M150 72 L120 50" stroke="#8fd8ab" stroke-width="1.8"/>
+        <text x="34" y="48" fill="#8fd8ab" font-size="11" font-family="monospace">POSTA / FRAME</text>
+        <path d="M110 176 L78 188" stroke="#8fd8ab" stroke-width="1.8"/>
+        <text x="18" y="198" fill="#8fd8ab" font-size="11" font-family="monospace">YAN TANK / WING TANK</text>
+        <path d="M344 172 L422 152" stroke="#9cc8ef" stroke-width="1.8"/>
+        <text x="426" y="150" fill="#9cc8ef" font-size="11" font-family="monospace">CIFT DIP / DB TANK</text>
+        <path d="M338 88 L428 78" stroke="#d4a017" stroke-width="1.8"/>
+        <text x="430" y="76" fill="#d4a017" font-size="11" font-family="monospace">HATCH COAMING</text>
+        <path d="M260 72 L260 42" stroke="#dceaf4" stroke-width="1.8"/>
+        <text x="212" y="34" fill="#dceaf4" font-size="11" font-family="monospace">HATCH OPENING / USTTEN AMBAR</text>
+      </svg>
+      <div class="shipsection-note">Bu kesitte ambarin ortada, yapisal postalarin dis cidara tasiyici destek verdigi, cift dip tanklarin altta ve omurganin en altta referans ekseni oldugu gorulur. Yani yuk, tank ve govde tasiyiciligi birbirinden ayri degil; ayni yapinin parcasi olarak dusunulur.</div>
+    </div>
   </div>`;
 }
 
