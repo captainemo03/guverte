@@ -5,17 +5,27 @@
   if(!cv)return;
   const cx=cv.getContext('2d');
   let W,H,t=0;
+  const getBackdropProfile=()=>window.__bgBackdropProfile||'opensea';
   function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
   function draw(){
     cx.clearRect(0,0,W,H);
+    const profile=getBackdropProfile();
+    const isHarbor=profile==='harbor';
+    const isStorm=profile==='storm';
+    const isNight=profile==='night';
+    const isOpenSea=profile==='opensea';
     // Sky
     const sky=cx.createLinearGradient(0,0,0,H*.65);
-    sky.addColorStop(0,'#020810');sky.addColorStop(.6,'#04111f');sky.addColorStop(1,'#071828');
+    sky.addColorStop(0,isStorm?'#02060d':'#020810');
+    sky.addColorStop(.6,isStorm?'#07111d':'#04111f');
+    sky.addColorStop(1,isHarbor?'#0a1d2d':'#071828');
     cx.fillStyle=sky;cx.fillRect(0,0,W,H*.65);
     // Stars
     const stars=[[.16,.14,1],[.3,.07,1.2],[.44,.17,1],[.62,.05,1],[.76,.12,1],[.86,.21,.8],[.1,.25,1],[.92,.07,1.1],[.24,.1,.9],[.56,.16,1.3],[.68,.08,1],[.38,.22,.8]];
     stars.forEach(([rx,ry,r])=>{
-      const a=Math.sin(t*.012+rx*10)*.4+.6;
+      const base = isStorm ? 0.06 : isHarbor ? 0.35 : 0.6;
+      const swing = isStorm ? 0.08 : isNight ? 0.45 : 0.28;
+      const a=Math.sin(t*.012+rx*10)*swing+base;
       cx.fillStyle=`rgba(200,220,255,${a})`;
       cx.beginPath();cx.arc(rx*W,ry*H*.65,r,0,Math.PI*2);cx.fill();
     });
@@ -38,11 +48,15 @@
       cx.fill();
       cx.restore();
     };
-    drawCloudBand((W*0.18 + cloudDrift*0.4)%(W+240)-120,H*0.12,56,12,0.05);
-    drawCloudBand((W*0.46 + cloudDrift*0.26)%(W+320)-160,H*0.18,78,16,0.045);
-    drawCloudBand((W*0.72 + cloudDrift*0.18)%(W+260)-130,H*0.09,46,10,0.04);
+    drawCloudBand((W*0.18 + cloudDrift*0.4)%(W+240)-120,H*0.12,56,12,isStorm?0.12:0.05);
+    drawCloudBand((W*0.46 + cloudDrift*0.26)%(W+320)-160,H*0.18,78,16,isStorm?0.14:0.045);
+    drawCloudBand((W*0.72 + cloudDrift*0.18)%(W+260)-130,H*0.09,46,10,isStorm?0.1:0.04);
+    if(isStorm){
+      drawCloudBand((W*0.32 + cloudDrift*0.14)%(W+380)-190,H*0.22,118,26,0.18);
+      drawCloudBand((W*0.74 + cloudDrift*0.1)%(W+420)-210,H*0.28,132,30,0.16);
+    }
     // Occasional shooting star
-    if((t%540)>470 && (t%540)<485){
+    if(!isStorm && !isHarbor && (t%540)>470 && (t%540)<485){
       const sx=W*0.66, sy=H*0.12;
       const prog=((t%540)-470)/15;
       cx.strokeStyle=`rgba(230,240,255,${0.18+prog*0.35})`;
@@ -54,11 +68,12 @@
     }
     // Sea
     const sea=cx.createLinearGradient(0,H*.62,0,H);
-    sea.addColorStop(0,'#071828');sea.addColorStop(1,'#030c18');
+    sea.addColorStop(0,isStorm?'#08131f':isHarbor?'#0a1d31':'#071828');
+    sea.addColorStop(1,isStorm?'#06111b':'#030c18');
     cx.fillStyle=sea;cx.fillRect(0,H*.62,W,H);
     // Waves
     [[0,'rgba(13,48,96,.75)'],[1,'rgba(10,36,72,.6)'],[2,'rgba(8,28,56,.5)']].forEach(([i,col])=>{
-      const phase=t*.009-i*.6,amp=(7+i*4)*(H/600),yb=H*(.64+i*.07);
+      const phase=t*.009-i*.6,amp=(isStorm?12:7 + i*4)*(H/600)*(isStorm?1.35:(isHarbor?0.8:1)),yb=H*(.64+i*.07);
       cx.beginPath();cx.moveTo(0,yb);
       for(let x=0;x<=W;x+=5)cx.lineTo(x,yb+Math.sin(x*.014+phase)*amp);
       cx.lineTo(W,H);cx.lineTo(0,H);cx.closePath();
@@ -240,22 +255,36 @@
       cx.stroke();
       cx.restore();
     };
-    drawShip({x:W*0.1, y:H*0.735 + shipBob*0.1, scale:0.42, type:'chemical', hull:'#0a1523', shadow:'#07111d', deck:'#1d3958', light:`rgba(111,168,220,${0.42+Math.sin(t*0.028)*0.12})`});
-    drawShip({x:W*0.16, y:H*0.71 + shipBob*0.16, scale:0.64, type:'tanker', hull:'#0a1523', shadow:'#07111d', deck:'#193957', light:`rgba(111,168,220,${0.55+Math.sin(t*0.03)*0.15})`});
-    drawShip({x:W*0.37, y:H*0.748 + shipBob*0.14, scale:0.5, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.4+Math.cos(t*0.02)*0.1})`});
-    drawShip({x:W*0.47, y:H*0.718 + shipBob*0.11, scale:0.54, type:'bulk', hull:'#091422', shadow:'#06111b', deck:'#36506a', light:`rgba(185,205,224,${0.34+Math.sin(t*0.02)*0.1})`});
-    drawShip({x:W*0.58, y:H*0.775 + shipBob*0.2, scale:0.96, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.5+Math.cos(t*0.025)*0.18})`});
-    drawShip({x:W*0.72, y:H*0.725 + shipBob*0.12, scale:0.46, type:'feeder', hull:'#0a1624', shadow:'#07121e', deck:'#1a4163', light:`rgba(154,194,228,${0.38+Math.sin(t*0.022)*0.12})`});
-    drawShip({x:W*0.8, y:H*0.695 + shipBob*0.14, scale:0.56, type:'lng', hull:'#0a1624', shadow:'#07121e', deck:'#183d62', light:`rgba(201,112,112,${0.45+Math.sin(t*0.04)*0.18})`});
-    drawShip({x:W*0.88, y:H*0.742 + shipBob*0.1, scale:0.43, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.32+Math.cos(t*0.018)*0.08})`});
-    drawShip({x:W*0.24, y:H*0.782 + shipBob*0.08, scale:0.34, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.26+Math.cos(t*0.022)*0.08})`});
-    drawShip({x:W*0.31, y:H*0.694 + shipBob*0.09, scale:0.28, type:'bulk', hull:'#08121e', shadow:'#050d17', deck:'#30485e', light:`rgba(170,196,220,${0.2+Math.sin(t*0.017)*0.08})`});
-    drawShip({x:W*0.66, y:H*0.758 + shipBob*0.12, scale:0.3, type:'chemical', hull:'#09131f', shadow:'#050e18', deck:'#203b57', light:`rgba(190,210,228,${0.22+Math.cos(t*0.019)*0.08})`});
+    if(!isStorm){
+      if(isHarbor){
+        drawShip({x:W*0.12, y:H*0.745 + shipBob*0.08, scale:0.48, type:'chemical', hull:'#0a1523', shadow:'#07111d', deck:'#1d3958', light:`rgba(111,168,220,${0.34+Math.sin(t*0.028)*0.12})`});
+        drawShip({x:W*0.28, y:H*0.738 + shipBob*0.12, scale:0.74, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.42+Math.cos(t*0.025)*0.18})`});
+        drawShip({x:W*0.51, y:H*0.748 + shipBob*0.08, scale:0.52, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.32+Math.cos(t*0.02)*0.1})`});
+        drawShip({x:W*0.77, y:H*0.734 + shipBob*0.08, scale:0.58, type:'tanker', hull:'#0a1523', shadow:'#07111d', deck:'#193957', light:`rgba(111,168,220,${0.38+Math.sin(t*0.03)*0.15})`});
+      }else{
+        drawShip({x:W*0.1, y:H*0.735 + shipBob*0.1, scale:0.42, type:'chemical', hull:'#0a1523', shadow:'#07111d', deck:'#1d3958', light:`rgba(111,168,220,${0.42+Math.sin(t*0.028)*0.12})`});
+        drawShip({x:W*0.16, y:H*0.71 + shipBob*0.16, scale:0.64, type:'tanker', hull:'#0a1523', shadow:'#07111d', deck:'#193957', light:`rgba(111,168,220,${0.55+Math.sin(t*0.03)*0.15})`});
+        drawShip({x:W*0.37, y:H*0.748 + shipBob*0.14, scale:0.5, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.4+Math.cos(t*0.02)*0.1})`});
+        drawShip({x:W*0.47, y:H*0.718 + shipBob*0.11, scale:0.54, type:'bulk', hull:'#091422', shadow:'#06111b', deck:'#36506a', light:`rgba(185,205,224,${0.34+Math.sin(t*0.02)*0.1})`});
+        drawShip({x:W*0.58, y:H*0.775 + shipBob*0.2, scale:0.96, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.5+Math.cos(t*0.025)*0.18})`});
+        drawShip({x:W*0.72, y:H*0.725 + shipBob*0.12, scale:0.46, type:'feeder', hull:'#0a1624', shadow:'#07121e', deck:'#1a4163', light:`rgba(154,194,228,${0.38+Math.sin(t*0.022)*0.12})`});
+        drawShip({x:W*0.8, y:H*0.695 + shipBob*0.14, scale:0.56, type:'lng', hull:'#0a1624', shadow:'#07121e', deck:'#183d62', light:`rgba(201,112,112,${0.45+Math.sin(t*0.04)*0.18})`});
+        drawShip({x:W*0.88, y:H*0.742 + shipBob*0.1, scale:0.43, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.32+Math.cos(t*0.018)*0.08})`});
+        drawShip({x:W*0.24, y:H*0.782 + shipBob*0.08, scale:0.34, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.26+Math.cos(t*0.022)*0.08})`});
+        drawShip({x:W*0.31, y:H*0.694 + shipBob*0.09, scale:0.28, type:'bulk', hull:'#08121e', shadow:'#050d17', deck:'#30485e', light:`rgba(170,196,220,${0.2+Math.sin(t*0.017)*0.08})`});
+        drawShip({x:W*0.66, y:H*0.758 + shipBob*0.12, scale:0.3, type:'chemical', hull:'#09131f', shadow:'#050e18', deck:'#203b57', light:`rgba(190,210,228,${0.22+Math.cos(t*0.019)*0.08})`});
+      }
+    }
     drawIsland(W*0.22, H*0.628, 1.05, true);
     drawIsland(W*0.52, H*0.61, 0.8, false);
     drawIsland(W*0.84, H*0.64, 0.92, true);
-    drawTerminalSilhouette(W*0.14,H*0.64,0.74,3);
-    drawTerminalSilhouette(W*0.68,H*0.605,0.62,4);
+    if(isHarbor){
+      drawTerminalSilhouette(W*0.14,H*0.64,0.88,4);
+      drawTerminalSilhouette(W*0.68,H*0.605,0.76,5);
+    }else if(!isStorm){
+      drawTerminalSilhouette(W*0.14,H*0.64,0.74,3);
+      drawTerminalSilhouette(W*0.68,H*0.605,0.62,4);
+    }
     // Buoys
     const drawBuoy = (x,y,body,topLight) => {
       const bob = Math.sin(t*0.03 + x*0.01)*3;
@@ -270,11 +299,13 @@
       cx.fillStyle = 'rgba(180,210,230,0.1)';
       cx.fillRect(x-1, y+bob+7, 2, 10);
     };
-    drawBuoy(W*0.3, H*0.8, '#c93030', `rgba(255,160,160,${0.5+Math.sin(t*0.05)*0.25})`);
-    drawBuoy(W*0.74, H*0.84, '#d4a017', `rgba(255,230,140,${0.5+Math.cos(t*0.045)*0.22})`);
-    drawBuoy(W*0.58, H*0.825, '#1e7d46', `rgba(170,255,190,${0.38+Math.cos(t*0.038)*0.18})`);
+    if(!isStorm){
+      drawBuoy(W*0.3, H*0.8, '#c93030', `rgba(255,160,160,${0.5+Math.sin(t*0.05)*0.25})`);
+      drawBuoy(W*0.74, H*0.84, '#d4a017', `rgba(255,230,140,${0.5+Math.cos(t*0.045)*0.22})`);
+      drawBuoy(W*0.58, H*0.825, '#1e7d46', `rgba(170,255,190,${0.38+Math.cos(t*0.038)*0.18})`);
+    }
     // Lighthouse silhouettes and beams
-    const beamA = 0.12 + (Math.sin(t*0.018)+1)*0.08;
+    const beamA = isHarbor ? 0.2 + (Math.sin(t*0.018)+1)*0.1 : 0.12 + (Math.sin(t*0.018)+1)*0.08;
     cx.fillStyle = '#09111c';
     cx.fillRect(W*0.06, H*0.55, 10, H*0.11);
     cx.fillRect(W*0.055, H*0.52, 20, 6);
@@ -298,14 +329,33 @@
     // Far harbor glow on horizon
     const glow=cx.createLinearGradient(0,H*0.6,0,H*0.72);
     glow.addColorStop(0,'rgba(255,190,110,0)');
-    glow.addColorStop(.55,'rgba(255,190,110,0.04)');
+    glow.addColorStop(.55,`rgba(255,190,110,${isHarbor?0.08:0.04})`);
     glow.addColorStop(1,'rgba(255,190,110,0)');
-    cx.fillStyle=glow;
-    cx.fillRect(W*0.08,H*0.59,W*0.2,H*0.08);
-    cx.fillRect(W*0.6,H*0.57,W*0.16,H*0.07);
+    if(isHarbor || isNight){
+      cx.fillStyle=glow;
+      cx.fillRect(W*0.08,H*0.59,W*0.2,H*0.08);
+      cx.fillRect(W*0.6,H*0.57,W*0.16,H*0.07);
+    }
+    if(isStorm){
+      const flash=((t%220)>202 && (t%220)<208) || ((t%370)>338 && (t%370)<343);
+      if(flash){
+        cx.fillStyle='rgba(220,235,255,0.12)';
+        cx.fillRect(0,0,W,H);
+        cx.strokeStyle='rgba(220,235,255,0.42)';
+        cx.lineWidth=2;
+        cx.beginPath();
+        cx.moveTo(W*0.72,H*0.06);
+        cx.lineTo(W*0.7,H*0.15);
+        cx.lineTo(W*0.74,H*0.15);
+        cx.lineTo(W*0.68,H*0.28);
+        cx.stroke();
+      }
+    }
     // Moon reflection
-    cx.fillStyle='rgba(180,200,220,.05)';
-    cx.fillRect(W*.78,H*.62,W*.08,H*.38);
+    if(!isStorm){
+      cx.fillStyle=`rgba(180,200,220,${isHarbor?0.035:0.05})`;
+      cx.fillRect(W*.78,H*.62,W*.08,H*.38);
+    }
     t++;requestAnimationFrame(draw);
   }
   window.addEventListener('resize',resize);
@@ -6738,6 +6788,15 @@ function maybePrioritizeRecoveryScene(){
 }
 
 // ===== SAHNE RENDER =====
+function getSceneBackdropProfile(sc){
+  if(!sc) return 'opensea';
+  const hay = `${sc.gfx||''} ${sc.loc||''} ${sc.sub||''}`.toLowerCase();
+  if(/storm|firtina|squall|beaufort|swell/.test(hay)) return 'storm';
+  if(/harbor|liman|terminal|rihtim|rıhtım|berth|gangway|pilot station|ambarlı|rotterdam|singapur|panama|samsun|trabzon/.test(hay)) return 'harbor';
+  if(/night|gece|00:|01:|02:|03:|04:/.test(hay)) return 'night';
+  return 'opensea';
+}
+
 function renderScene(idx){
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
@@ -6774,6 +6833,7 @@ function renderScene(idx){
   else ab.style.display='none';
 
   const svg=document.getElementById('gfx-svg');
+  window.__bgBackdropProfile = getSceneBackdropProfile(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
 
   playSceneAudio(sc);
