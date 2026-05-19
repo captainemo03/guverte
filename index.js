@@ -3591,6 +3591,40 @@ choices:[
 {text:"Hangi ambar dolarsa dolsun yeter ki hizli bitsin diye bakarim",tag:"zayif",effect:{bilgi:-11,sayginlik:-10}}]
 }] : []),
 
+{id:"s368",gfx:"bridge",alert:false,day:"Gun 12",time:"10:40",loc:"Koprustu - Williamson ve Anderson",sub:"Hangi geri donus manevrasi ne zaman dusunulur?",who:"z2",
+text:`2. zabit manevra kitabini acip iki cizgi gosterdi.
+
+"Her geri donus ayni degil. MOB yeni olduysa bir manevra, kisi geride kaybolduysa baska manevra dusunursun. Williamson, Anderson, Scharnow isimleri bu yuzden var."
+
+Sana sordu: Anderson turn ile Williamson turn arasindaki pratik farki nasil kurarsin?`,
+choices:[
+{text:"Anderson'in daha hizli ilk reaksiyon, Williamson'in ise eski iz hattina daha kontrollu donus dusuncesi oldugunu soylerim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Ikisi de ayni seydir, sadece isimleri farklidir derim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"MOB olunca manevra turunun cok fark etmedigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s369",gfx:"sea",alert:false,day:"Gun 12",time:"11:15",loc:"Acik Deniz - Zig-Zag Testi",sub:"Dumen cevabi ve overshoot neden izlenir?",who:"suvari",
+text:`Suvari elindeki kagida kisa bir zikzak cizdi.
+
+"Zig-zag testi oyuncak test degil. Geminin dumen komutuna ne kadar gec ya da ne kadar asarak cevap verdigini anlatir. Bu bilgi bogazda, dar kanalda ve pilotajda zihninin bir kosesinde durur."
+
+Sana gore zabit neden bu testi ciddiye alir?`,
+choices:[
+{text:"Cunku geminin yon tutma ve dumen cevabi hakkinda gercek karakter bilgisini verir derim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+{text:"Sadece klas veya evrak icin yapilan formalite gibi gorurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Geminin duz gitmesi yetiyorsa test sonucunu onemsiz sayarim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s370",gfx:"harbor",alert:false,day:"Gun 12",time:"17:10",loc:"Yanasma Oncesi - Berthing Plan",sub:"Ruzgar, akinti, tug ve thruster birlikte okunur",who:"suvari",
+text:`Pilot gelmeden once son yanaşma brifingi yapiliyor. Harita ustunde berth cizili, notlarda ruzgar ve akinti var.
+
+Suvari parmagiyla plana vurdu:
+"Berthing, dumen ve makine komutu ezberi degil. Ruzgar nereden, akinti ne yonde, tug ne zaman basacak, varsa bow thruster sana ne kadar yardim edecek; hepsini ayni anda dusunursun."
+
+En saglam ilk refleks hangisi?`,
+choices:[
+{text:"Berthing planini ruzgar, akinti, tug, thruster ve spring hazirligi ile birlikte degerlendiririm",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Pilot vardir diye ayrintili dusunmeyi ikinci plana atarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Yanaşmada en onemli sey sadece son dumen komutu diye dusunurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -8300,6 +8334,7 @@ const STUDENT_NOTES = [
   {head:"ANA KURALLAR", body:"Sormadan varsayma.<br>Gormeden dogru kabul etme.<br>Hata gordugunde saklama, amire bildir.<br>PPE'siz ise baslama.<br>Snap-back zone'a girme.<br>Kapali mahalde permitsiz girme.<br>Stop komutu duyuldugunda herkes durur.<br>Near-miss de raporlanir.", tip:"Denizcilikte disiplin tekrar degil, hayatta kalma bicimidir."},
   {head:"OLCU BIRIMLERI - DENIZCILIK", body:"<b>1 deniz mili (NM)</b> = 1852 metre<br><b>1 knot (kt)</b> = saatte 1 deniz mili = 1.852 km/saat<br><b>1 kablo (cable)</b> = 0.1 deniz mili = 185.2 metre<br><b>1 kulac (fathom)</b> = 6 feet = 1.8288 metre<br><b>1 feet (ft)</b> = 0.3048 metre<br><b>1 inch</b> = 2.54 cm<br><b>1 metre</b> = 100 cm<br><b>1 santimetre</b> = 10 mm<br><b>1 ton</b> = 1000 kg<br><b>1 long ton</b> = 1016 kg yaklasik<br><b>1 short ton</b> = 907 kg yaklasik<br><b>DWT</b> = Deadweight tonnage; geminin tasiyabilecegi toplam agirlik kapasitesi<br><b>GT</b> = Gross Tonnage; hacim esasli tonaj olcusudur, agirlik degildir<br><b>TEU</b> = 20 feet'lik bir konteyner birimi<br><b>20 ft</b> = 6.096 metre<br><b>40 ft</b> = 12.192 metre<br><b>m3</b> = hacim birimi; tank, ambar ve stowage hesaplarinda kullanilir<br><b>t/m3</b> veya <b>kg/m3</b> = yogunluk birimi; draft survey, ballast ve yakit hesaplarinda gorulur<br><b>ppm</b> = millionda bir; OWS, su kalitesi ve gaz olcumlerinde gorulur<br><b>%LEL</b> = patlayici alt limit yuzdesi; gaz olcumlerinde kullanilir<br><b>bar</b> = basinÃ§ birimi; 1 bar yaklasik 100 kPa'dir<br><b>kW</b> = guc birimi; makine ve jeneratorde kullanilir<br><b>RPM</b> = dakikadaki devir sayisi; ana makine ve pompada gorulur<br><br><b>Pratik not:</b> Seyirde mesafe deniz miliyle, hiz knot ile, draft metre veya feet ile, yuk agirligi ton ile okunur.", tip:"Ayni soruda metre, feet, ton ve deniz mili bir araya gelebilir; birim karisinca hesap da karar da bozulur."},
   {head:"COLREG OZETI", body:"<b>Rule 5</b> proper look-out: goz, kulak, radar/AIS ve tum mevcut imkanlarla takip yapilir.<br><b>Rule 6</b> safe speed: gorus, trafik, draft, manevra ve sensor sinirlariyla birlikte degerlendirilir.<br><b>Rule 7</b> risk of collision: suphe varsa risk var kabul edilir; sabit kerteriz ve dusen CPA ciddiye alinir.<br><b>Rule 8</b> action to avoid collision: manevra erken, belirgin ve iyi denizcilige uygun olur.<br><b>Rule 9</b> dar kanal: sancak sinirina yakin seyredilir, gecis gereksiz engellenmez.<br><b>Rule 10</b> traffic separation scheme: serit disiplini korunur, akisi bozacak gecislerden kacinilir.<br><b>Rule 13</b> overtaking: yetisen gemi yol verir.<br><b>Rule 14</b> head-on: iki gemi de sancaga duser.<br><b>Rule 15</b> crossing: sancaginda gemi goruyorsan give-way sensin.<br><b>Rule 18</b> sorumluluk hiyerarsisi: NUC, RAM, CBD, fishing, sailing ve power-driven iliskisi birlikte okunur.<br><b>Rule 19</b> restricted visibility: safe speed, radar yorumu ve fog signal disiplini artar.", tip:"COLREG ezber listesi degil; durumu dogru okuyup erken davranma sanatidir."},
+  {head:"GEMI MANEVRA TURLERI", body:"<b>Turning circle</b> geminin sabit dumen acisi altindaki donus karakterini gosterir; advance, transfer ve tactical diameter burada okunur.<br><b>Crash stop</b> ileri yoldaki geminin tam geri komutla ne kadar mesafede durdugunu anlamaya yarar.<br><b>Williamson turn</b>, <b>Anderson turn</b> ve <b>Scharnow turn</b> ozellikle MOB ve geri donus mantiginda anlatilan temel manevralardir.<br><b>Zig-zag test</b> geminin dumen komutuna cevabini ve overshoot acilarini degerlendirir.<br><b>Berthing</b> manevrasi ise dumen, makine, ruzgar, akinti, varsa thruster ve tug etkisinin birlikte okunmasidir.<br><br>"+buildManeuverGallery(), tip:"Manevra, komut ezberi degil; geminin karakterini ve ortam kuvvetlerini birlikte okumaktir."},
   {head:"ECDIS / HARITA", body:"Route check, safety contour, safety depth, no-go area, isolated danger ve alarm ayarlari seyirden once gozden gecirilir.<br><b>Safety contour</b> ile <b>safety depth</b> ayni sey degildir; biri ekranda hangi derinligin tehlike gibi cizilecegini, digeri sayisal emniyet dusuncesini guclendirir.<br><b>Route monitor</b> sirasinda XTD, wheel-over point, turn radius, waypoint radius ve cross track alarm mantigi zabit tarafindan bilinmelidir.<br>GPS bilgisi radar, gorusel mevki ve diger sensorlerle capraz kontrol edilir.<br><b>GPS quality control</b>: pozisyon kaynagi saglikli mi; DGPS/GNSS durumu, HDOP/PDOP, RAIM uyari mantigi, anten ofseti, sensor input secimi, position jump, COG/SOG tutarliligi ve secondary position source birlikte izlenir.<br><b>ENC yonetimi</b>: cell status, permit, latest update, update history, alarm acknowledgement ve overdue area mantigi takip edilir.<br><b>Chart correction</b> dusuncesi kagit haritada NtM, correction number, tracing ve correction record ile; ECDIS'te ise ENC update ve permit kontrolu ile devam eder.<br><b>Route planning</b> sadece cizgi cekmek degil; UKC, reporting point, pilot station, no anchoring area, TSS, weather route ve alternatif liman dusuncesini birlikte okumaktir.<br>Rota degisikligi varsa passage plan, kagit harita, ECDIS route ve logbook ayni mantikla guncellenir.<br><br>"+buildEcdisPanelGuide(), tip:"ECDIS yardimcidir; kagit harita dusuncesi, sensor capraz kontrolu ve iyi vardiya muhakemesiyle birlikte guclenir."},
   {head:"RADAR / ARPA / AIS", body:"<b>Radar</b> ham hedefi, relative movement'i, coast line'i, squall'i ve yakin trafik davranisini gosteren asli gozdur.<br><b>Temel radar ayarlari</b>: range, gain, sea clutter, rain clutter, tuning, trails, head-up / north-up / course-up secimi ve uygun pulse length mantigi bilinmelidir.<br><b>Display mode mantigi</b>:<br><b>North-Up (N-Up)</b> kagit harita ve ECDIS zihniyle en uyumlu moddur; genel durum resmi, TSS yorumu, chart capraz kontrolu ve egitim icin cok rahattir.<br><b>Course-Up (C-Up)</b> aktif rota hattini yukariya aldigi icin planlanan seyir dogrultusunda on tarafi okumayi kolaylastirir; passage monitoring ve route check mantiginda sik tercih edilir.<br><b>Head-Up (H-Up)</b> geminin mevcut basini yukarida gosterir; anlik manevra hissi, yakin trafik resmi ve gozle gorulen tabloyla hizli eslestirme icin faydali olabilir ama her donuste ekran da doner, bu da uzun yorumda yorucu olabilir.<br><b>Kisa pratik</b>: genel seyir ve chart dusuncesinde N-Up, rota takibinde C-Up, yakin manevra ve anlik sezgide H-Up daha cok ise yarar.<br><b>EBL / VRM</b> ile kerteriz ve mesafe olculur; guard zone, PI line ve parallel indexing emniyetli seyirde cok faydalidir.<br><b>ARPA</b> raw echo ustune yorum getirir: acquire, track quality, vector, CPA, TCPA, trial maneuver, lost target, target swap ve data age birlikte dusunulur.<br>ARPA verisi ne kadar guzel gorunurse gorunsun, ham echo ve gorsel teyit terk edilmez.<br><b>AIS</b> hedefin ismi, MMSI, callsign, COG, SOG, heading, ROT, destination, draught ve navigation status gibi faydali bilgi verir; ama bu bilgi geminin kendi sensor kalitesi kadar dogrudur.<br><b>AIS sinirlari</b>: gecikme, yanlis static data, yanlis GPS kaynagi, anten ofseti, spoofing, manual giris hatasi ve bazi hedeflerin AIS kapali olmasi ihtimali vardir.<br><b>Pratik vardiya mantigi</b>: radar ham hedefi gosterir, ARPA trendi okutur, AIS kimlik ve ek bilgi saglar; karar ise bunlarin hepsinin ustune zabitin muhakemesiyle verilir.<br><br>"+buildSensorCompareTable()+buildRadarPanelGuide(), tip:"Radar gozdur, ARPA yorum yardimcisidir, AIS ise kimlik ve trafik bilgisidir; hicbiri tek basina yeterli degildir."},
   {head:"FENER VE SAMANDIRA", body:"IALA lateral markalarda renk, tepe isareti ve isik karakteri birlikte okunur.<br>Fl, Oc, Iso, Q, VQ, LFl ve sektor renkleri fenerleri ayirt etmeyi saglar.<br>Cardinal marklarda kuzey-dogu-guney-bati tepe isaretleri ve siyah-sari renk dizilimi ezberlenmelidir.<br><br>"+buildBuoyGallery()+buildLightCharacterTable()+buildSectorLightDemo()+buildShipLightsGallery(), tip:"Renk kadar sekli ve ust isaretini de oku."},
@@ -9550,6 +9585,37 @@ function buildFrontGallery(){
     {name:'Ridge', type:'ridge', desc:'Yuksek basinç sirti; genelde daha duzenli ve nispeten sakin hava penceresi saglar.'}
   ];
   return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Front Turleri</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${frontSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
+}
+
+function maneuverSvg(type){
+  const body = {
+    turning:`<circle cx="160" cy="76" r="34" fill="none" stroke="#d4a017" stroke-width="2.4" stroke-dasharray="6,5"/><path d="M160 42 l8 -12 l8 12" fill="none" stroke="#d4a017" stroke-width="2.4"/><path d="M78 92 C112 72,132 58,160 42" fill="none" stroke="#8fd8ab" stroke-width="3"/><path d="M160 110 C188 126,214 130,254 116" fill="none" stroke="#9cc8ef" stroke-width="2.4" stroke-dasharray="6,4"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">TURNING CIRCLE</text>`,
+    crash:`<path d="M52 76 H184" stroke="#8fd8ab" stroke-width="3"/><path d="M184 76 C220 76,238 88,240 108 C242 128,224 142,188 146" fill="none" stroke="#d24c4c" stroke-width="3"/><path d="M188 146 H112" stroke="#d24c4c" stroke-width="2.4" stroke-dasharray="6,4"/><path d="M178 66 l14 10 l-14 10" fill="#8fd8ab"/><path d="M198 136 l-14 10 l14 10" fill="#d24c4c"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">CRASH STOP</text>`,
+    williamson:`<path d="M56 70 H156" stroke="#8fd8ab" stroke-width="3"/><path d="M156 70 C188 70,214 92,214 120 C214 150,188 170,154 170 C118 170,96 146,96 124" fill="none" stroke="#d4a017" stroke-width="3"/><path d="M96 124 C96 102,112 88,132 88" fill="none" stroke="#9cc8ef" stroke-width="2.4" stroke-dasharray="5,4"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">WILLIAMSON TURN</text>`,
+    scharnow:`<path d="M54 78 H170" stroke="#8fd8ab" stroke-width="3"/><path d="M170 78 C220 78,244 120,220 154 C194 190,132 188,112 152" fill="none" stroke="#d4a017" stroke-width="3"/><path d="M112 152 C102 130,110 114,126 104" fill="none" stroke="#9cc8ef" stroke-width="2.4" stroke-dasharray="5,4"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">SCHARNOW TURN</text>`,
+    anderson:`<path d="M54 74 H150" stroke="#8fd8ab" stroke-width="3"/><path d="M150 74 C192 74,220 100,220 132 C220 160,196 178,170 178" fill="none" stroke="#d24c4c" stroke-width="3"/><path d="M170 178 H132" stroke="#d24c4c" stroke-width="2.4" stroke-dasharray="5,4"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">ANDERSON TURN</text>`,
+    zigzag:`<path d="M48 124 L104 92 L158 124 L214 92 L272 124" fill="none" stroke="#8fd8ab" stroke-width="3"/><path d="M104 92 l-4 -14 M158 124 l4 14 M214 92 l-4 -14" stroke="#d4a017" stroke-width="2"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">ZIG-ZAG TEST</text>`,
+    berthing:`<rect x="212" y="46" width="22" height="112" fill="#cfd8e4" opacity=".92"/><path d="M70 100 H182" stroke="#8fd8ab" stroke-width="3"/><path d="M182 100 C198 100,206 96,212 88" fill="none" stroke="#8fd8ab" stroke-width="3"/><circle cx="116" cy="86" r="8" fill="#d4a017"/><circle cx="146" cy="116" r="8" fill="#d4a017"/><text x="18" y="26" fill="#f4d172" font-size="12" font-family="Share Tech Mono, monospace">BERTHING / TUG ASSIST</text>`
+  }[type] || '';
+  return `<svg class="maneuver-svg" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" aria-label="${type} manevrasi">
+    <defs><linearGradient id="manBg_${type}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#163a5a"/><stop offset="100%" stop-color="#081828"/></linearGradient></defs>
+    <rect width="320" height="180" rx="8" fill="url(#manBg_${type})"/>
+    <path d="M0 138 Q70 130 140 138 T280 138 T320 138 V180 H0 Z" fill="#0b2238"/>
+    ${body}
+  </svg>`;
+}
+
+function buildManeuverGallery(){
+  const items = [
+    {name:'Turning Circle', type:'turning', desc:'Geminin sabit dumen acisi altinda nasil dondugunu; advance, transfer ve tactical diameter karakterini anlamak icin kullanilir.'},
+    {name:'Crash Stop', type:'crash', desc:'Ileri yoldaki geminin tam geri komutla ne kadar mesafede durdugunu anlamaya yarar. Stopping distance burada okunur.'},
+    {name:'Williamson Turn', type:'williamson', desc:'Ozellikle MOB durumunda eski iz hattina kontrollu donus icin bilinen klasik manevralardandir.'},
+    {name:'Scharnow Turn', type:'scharnow', desc:'MOB geride kaldiginda daha genis ama mantikli geri donus sekli olarak anlatilir.'},
+    {name:'Anderson Turn', type:'anderson', desc:'Hizli reaksiyon ister; yakin MOB durumunda daha seri donus dusuncesi verir.'},
+    {name:'Zig-Zag Test', type:'zigzag', desc:'Geminin dumen komutuna cevabini, overshoot acilarini ve yon tutma davranisini degerlendirmek icin yapilir.'},
+    {name:'Berthing / Tug Assist', type:'berthing', desc:'Rıhtıma yanaşmada dumen, makine, ruzgar, akinti, varsa thruster ve romorkor etkisinin birlikte okunmasi gerekir.'}
+  ];
+  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Gemi Manevra Turleri</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${maneuverSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
 }
 
 function buildShipPartsDiagram(){
