@@ -25,6 +25,33 @@
     mg.addColorStop(0,'rgba(200,215,230,.9)');mg.addColorStop(1,'transparent');
     cx.fillStyle=mg;cx.beginPath();cx.arc(mx,my,mr,0,Math.PI*2);cx.fill();
     cx.fillStyle='#030b18';cx.beginPath();cx.arc(mx+mr*.4,my-mr*.2,mr*.85,0,Math.PI*2);cx.fill();
+    // Thin high cloud bands
+    const cloudDrift=t*.18;
+    const drawCloudBand=(x,y,w,h,a)=>{
+      cx.save();
+      cx.translate(x,y);
+      cx.fillStyle=`rgba(150,175,205,${a})`;
+      cx.beginPath();
+      cx.ellipse(0,0,w,h,0,0,Math.PI*2);
+      cx.ellipse(w*.28,-h*.18,w*.46,h*.72,0,0,Math.PI*2);
+      cx.ellipse(-w*.24,h*.05,w*.42,h*.66,0,0,Math.PI*2);
+      cx.fill();
+      cx.restore();
+    };
+    drawCloudBand((W*0.18 + cloudDrift*0.4)%(W+240)-120,H*0.12,56,12,0.05);
+    drawCloudBand((W*0.46 + cloudDrift*0.26)%(W+320)-160,H*0.18,78,16,0.045);
+    drawCloudBand((W*0.72 + cloudDrift*0.18)%(W+260)-130,H*0.09,46,10,0.04);
+    // Occasional shooting star
+    if((t%540)>470 && (t%540)<485){
+      const sx=W*0.66, sy=H*0.12;
+      const prog=((t%540)-470)/15;
+      cx.strokeStyle=`rgba(230,240,255,${0.18+prog*0.35})`;
+      cx.lineWidth=1.5;
+      cx.beginPath();
+      cx.moveTo(sx+prog*40,sy+prog*16);
+      cx.lineTo(sx-24+prog*40,sy-8+prog*16);
+      cx.stroke();
+    }
     // Sea
     const sea=cx.createLinearGradient(0,H*.62,0,H);
     sea.addColorStop(0,'#071828');sea.addColorStop(1,'#030c18');
@@ -68,6 +95,30 @@
         cx.fillStyle = '#09111c';
         cx.fillRect(7,-11,2,11);
       }
+      cx.restore();
+    };
+    const drawTerminalSilhouette = (x,y,scale=1,cranes=3) => {
+      cx.save();
+      cx.translate(x,y);
+      cx.scale(scale,scale);
+      cx.fillStyle='rgba(10,20,32,.9)';
+      cx.fillRect(-34,6,88,8);
+      cx.fillRect(-10,-6,14,12);
+      for(let i=0;i<cranes;i++){
+        const cx0=-20+i*24;
+        cx.fillRect(cx0,-18,3,24);
+        cx.beginPath();
+        cx.moveTo(cx0+1,-18);
+        cx.lineTo(cx0+14,-30);
+        cx.lineTo(cx0+17,-30);
+        cx.lineTo(cx0+4,-18);
+        cx.closePath();
+        cx.fill();
+        cx.fillRect(cx0+11,-30,2,10);
+      }
+      cx.fillStyle=`rgba(255,220,150,${0.16+Math.sin(t*0.03+x*0.002)*0.08})`;
+      cx.fillRect(-6,-2,3,3);
+      cx.fillRect(24,-2,3,3);
       cx.restore();
     };
     // Distant ships
@@ -198,9 +249,13 @@
     drawShip({x:W*0.8, y:H*0.695 + shipBob*0.14, scale:0.56, type:'lng', hull:'#0a1624', shadow:'#07121e', deck:'#183d62', light:`rgba(201,112,112,${0.45+Math.sin(t*0.04)*0.18})`});
     drawShip({x:W*0.88, y:H*0.742 + shipBob*0.1, scale:0.43, type:'roro', hull:'#091523', shadow:'#06101b', deck:'#214968', light:`rgba(167,210,236,${0.32+Math.cos(t*0.018)*0.08})`});
     drawShip({x:W*0.24, y:H*0.782 + shipBob*0.08, scale:0.34, type:'kont', hull:'#091321', shadow:'#06101b', deck:'#173553', light:`rgba(212,160,23,${0.26+Math.cos(t*0.022)*0.08})`});
+    drawShip({x:W*0.31, y:H*0.694 + shipBob*0.09, scale:0.28, type:'bulk', hull:'#08121e', shadow:'#050d17', deck:'#30485e', light:`rgba(170,196,220,${0.2+Math.sin(t*0.017)*0.08})`});
+    drawShip({x:W*0.66, y:H*0.758 + shipBob*0.12, scale:0.3, type:'chemical', hull:'#09131f', shadow:'#050e18', deck:'#203b57', light:`rgba(190,210,228,${0.22+Math.cos(t*0.019)*0.08})`});
     drawIsland(W*0.22, H*0.628, 1.05, true);
     drawIsland(W*0.52, H*0.61, 0.8, false);
     drawIsland(W*0.84, H*0.64, 0.92, true);
+    drawTerminalSilhouette(W*0.14,H*0.64,0.74,3);
+    drawTerminalSilhouette(W*0.68,H*0.605,0.62,4);
     // Buoys
     const drawBuoy = (x,y,body,topLight) => {
       const bob = Math.sin(t*0.03 + x*0.01)*3;
@@ -217,6 +272,7 @@
     };
     drawBuoy(W*0.3, H*0.8, '#c93030', `rgba(255,160,160,${0.5+Math.sin(t*0.05)*0.25})`);
     drawBuoy(W*0.74, H*0.84, '#d4a017', `rgba(255,230,140,${0.5+Math.cos(t*0.045)*0.22})`);
+    drawBuoy(W*0.58, H*0.825, '#1e7d46', `rgba(170,255,190,${0.38+Math.cos(t*0.038)*0.18})`);
     // Lighthouse silhouettes and beams
     const beamA = 0.12 + (Math.sin(t*0.018)+1)*0.08;
     cx.fillStyle = '#09111c';
@@ -239,6 +295,14 @@
     cx.lineTo(W*0.765, H*0.565);
     cx.closePath();
     cx.fill();
+    // Far harbor glow on horizon
+    const glow=cx.createLinearGradient(0,H*0.6,0,H*0.72);
+    glow.addColorStop(0,'rgba(255,190,110,0)');
+    glow.addColorStop(.55,'rgba(255,190,110,0.04)');
+    glow.addColorStop(1,'rgba(255,190,110,0)');
+    cx.fillStyle=glow;
+    cx.fillRect(W*0.08,H*0.59,W*0.2,H*0.08);
+    cx.fillRect(W*0.6,H*0.57,W*0.16,H*0.07);
     // Moon reflection
     cx.fillStyle='rgba(180,200,220,.05)';
     cx.fillRect(W*.78,H*.62,W*.08,H*.38);
