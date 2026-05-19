@@ -3647,6 +3647,139 @@ choices:[
 {text:"Kisa makine darbelerinin sadece hiz artirip azalttigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Dusuk suratte bu kadar ince his farkinin cok onemli olmadigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
 
+{id:"s373",gfx:"bridge",alert:false,day:"Gun 13",time:"23:55",loc:"Koprustu - Vardiya Teslimi",sub:"Trafigi, havayi, arizayi ve waypoint'i eksik alma",who:"z2",
+text:`0000-0400 vardiyasini devralacaksin. 2. zabit sana kisa kisa konusuyor:
+
+"Sancak onde trafik var. Hava biraz bozuluyor. Bir teknik not da var. Bir alarm gecici bypass'ta. Ayrica yaklasan waypoint var."
+
+Ama bunlari tek tek cekip almazsan birazdan hepsi senin sorunun olur.
+
+Teslim alan zabit gibi hangi basliklari yazili hale getirirsin?`,
+choices:[
+{text:"Trafik, hava/gorus, ariza, alarm bypass ve yaklasan waypoint'i sistemli toplarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Ana fikri alip detaylari vardiya icinde gorurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Teslim veren anlattikca yeterli sayar, net soru sormam",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s374",gfx:"harbor",alert:false,day:"Gun 14",time:"05:30",loc:"Bas Ustu - Mooring Station",sub:"Head line, spring ve breast gorevlerini karistirma",who:"lostromo",
+text:`Lostromo sana bos bir mooring tahtasi uzatti.
+
+"Halat ismi bilmek yetmez. Hangisi nereye calisir, hangisi gemiyi rihtima ceker, hangisi boyuna kacmayi tutar; kafa orada net olacak."
+
+Tipik yanasma mantigini ve halat gorevlerini birlikte yerlestirmeni istedi.`,
+choices:[
+{text:"Spring, breast, head ve stern line gorevlerini tipik sirayla birlikte dogru yerlestiririm",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Temel mantigi kurarim ama sirayi biraz karistirabilirim",tag:"akilli",effect:{bilgi:9,sayginlik:7}},
+{text:"Halat isimleri benzer diye gorev yerlerini ayirt etmeyi ikincil gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s375",gfx:"cargo",alert:false,day:"Gun 14",time:"08:00",loc:"Main Deck - Toolbox Talk",sub:"Is baslamadan risk, stop noktasi ve ekip duzeni netlesmeli",who:"z1",
+text:`Yuk operasyonu oncesi ekip toplandi. 1. zabit kisa kesti:
+
+"Toolbox talk imza toplama degil. Ne is yapilacak, en buyuk risk ne, stop komutu ne, PPE ne, kim kimi duyacak? Bunlar bos gecilirse kaza bir anda buyur."
+
+Sana kisa kaydi tamamlatmak istiyor.`,
+choices:[
+{text:"Is tanimi, riskler ve kontrol tedbirlerini net yazarim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Genel bir emniyet konusmasi yazip gecerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Toolbox talk'i formalite gorur, ayrintiya girmem",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s376",gfx:"fire",alert:false,day:"Gun 14",time:"10:20",loc:"Workshop - Hot Work Permit",sub:"Izolasyon, fire watch ve alan hazirligi",who:"z3",
+text:`Workshop tarafinda kaynak isi acilacak. 3. zabit permit dosyasini onune koydu.
+
+"Hot work'te imza degil, alan gercekten hazir mi ona bakilir. Yanici malzeme, fire line, extinguisher, fire watch, izolasyon..."
+
+Bir eksik kalirsa kivilcim kaza olur.`,
+choices:[
+{text:"Mahal, izolasyon ve fire watch hazirligini permitte netlestiririm",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Kaynak ekibi tecrubeli diye permitte detayi kisa gecerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Hot work izni icin imzanin yettigi dusuncesine kayarim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+
+{id:"s377",gfx:"bridge",alert:true,day:"Gun 14",time:"13:00",loc:"Bos Tank Ustu - Enclosed Space Entry",sub:"Gaz olcumu ve rescue hazirligi bos gecilmez",who:"suvari",
+text:`Bos tank girisi oncesi permit acildi. Suvari bu kez sesi biraz daha sert:
+
+"Kapali mahal kahramanlik kaldirmaz. O2, LEL, H2S; disarida attendant; rescue set standby. Bunlardan biri yoksa giris yok."
+
+Senden permit omurgasini doldurman istendi.`,
+choices:[
+{text:"Gaz testleri, attendant ve rescue hazirligini birlikte kayda gecerim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+{text:"Gaz olcumu varsa diger basliklari daha ikinci planda tutarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Mahale girip hizli bakmanin permitten daha onemli oldugunu sanirim",tag:"korkak",effect:{bilgi:-13,sayginlik:-12}}]},
+
+{id:"s378",gfx:"gmdss_panel",alert:false,day:"Gun 14",time:"17:15",loc:"Koprustu - Radio Log",sub:"Saat, istasyon ve mesaj ozeti temiz olmali",who:"z3",
+text:`VHF uzerinden gelen trafik uyarisi ve sahil istasyonu mesaji kayda gececek.
+
+3. zabit kalemi sana uzatti:
+"Radio log duzensizse sonra kim, neyi, ne zaman duydu belli olmaz. Saat, istasyon, frekans, mesaj ozeti."
+
+Kisa ama duzgun bir kayit istiyor.`,
+choices:[
+{text:"Saat, istasyon/callsign ve mesaj ozetini net kaydederim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Mesajin ne oldugunu yazar, diger basliklari kisa keserim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Zaten herkes duydu diye log kaydini ikincil gorurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s379",gfx:"bridge",alert:false,day:"Gun 15",time:"09:25",loc:"Ballast Control - Exchange Record",sub:"Balast degisimi kaydi usulen degil izlenebilir olmali",who:"z2",
+text:`Acil olmayan ama ciddi bir disiplin isi. Ballast exchange tamamlandi, sira kayitta.
+
+2. zabit dedi ki:
+"Yer, zaman, yontem, hangi tanklar... Bunlar sonradan tahmin edilmez. Record book duzgun degilse islem sanki hic olmamis gibi sorun olur."
+
+Kaydi sen tamamlayacaksin.`,
+choices:[
+{text:"Mevki, yontem ve tank/islem bilgisini duzgun yazarim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Genel bir exchange notu dusup ayrintiyi fazla uzatmam",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Ballast exchange yapildiysa kaydin ayrintisinin cok da onemli olmadigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+...(stype==='kont' ? [{
+id:"s380",gfx:"cargo",alert:false,day:"Gun 15",time:"11:10",loc:"Konteyner Sahasi - Reefer ve Lashing",sub:"Bay/row/tier kadar sogutma ve baglama disiplini de kritik",who:"z2",
+text:`Terminal plancisi reefer listesini uzatti. Bir yandan da ust kat lash kontrolleri bekliyor.
+
+"Konteynerde sadece bos slot doldurmak yetmez," dedi 2. zabit. "Reefer plug, setpoint alarmi, lashing bridge, stack weight, discharge sequence... hepsi ayni oyunun parcasi."
+
+Sence ilk profesyonel refleks hangisi?`,
+choices:[
+{text:"Reefer durumu, lashing ve bay/row/tier planini birlikte capraz kontrol ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Slot plani oturduysa reefer ve lashingi sonraya birakirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Konteynerde terminal ne dediyse onu yapmak yeterlidir diye dusunurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]
+}] : []),
+
+...(stype==='tanker' ? [{
+id:"s381",gfx:"cargo",alert:true,day:"Gun 15",time:"11:40",loc:"Tanker Terminali - Inert Gas ve ESD",sub:"Line-up kadar gaz emniyeti de ayni zincirin parcasi",who:"z1",
+text:`Yuk oncesi son kontrolde 1. zabit sesini alcak ama sert tuttu:
+
+"Manifold hazir diye operasyon hazir sayilmaz. Inert gas basinci, PV hattı, ESD loop, CCR-saha haberlesmesi, vapour return..."
+
+Senden "tamam hazir" demeden once neye bakacagini duymak istiyor.`,
+choices:[
+{text:"IGS, ESD, line-up, vapour return ve saha/CCR teyidini birlikte isterim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+{text:"Line-up tamamlandiysa digerlerini rutin kabul ederim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Tanker operasyonunda asil isin hortum baglandiktan sonra basladigini dusunurum",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]
+}] : []),
+
+...(stype==='bulk' ? [{
+id:"s382",gfx:"cargo",alert:false,day:"Gun 15",time:"12:05",loc:"Bulk Terminali - Hold Cleanliness ve Draft",sub:"Yuk uygunlugu sadece tonaj tablosu degil",who:"z2",
+text:`Surveyor hold icine bakacak. Bir yandan da loading order draft/trim tablosuyla karsinda.
+
+2. zabit not dusuyor:
+"Bulk'ta temiz olmayan hold claim dogurur. Yanlis loading order ise trim, shear ve drafti bozar. Ikisini ayri ayri degil bir arada dusun."
+
+Ilk dogru hareket hangisi?`,
+choices:[
+{text:"Hold cleanliness, loading order, draft ve trim etkisini birlikte kontrol ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Yuk bir an once baslasin diye temizlik detayini surveyore birakirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Bulk yukte asilin tonaj oldugunu, hold durumunun ikincil kaldigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]
+}] : []),
+
+{id:"s383",gfx:"cargo",alert:true,day:"Gun 16",time:"14:20",loc:"Agir Yuk Operasyonu - Project Cargo",sub:"Lifting plan, COG ve sling angle ayni zincirdedir",who:"lostromo",
+text:`Terminalde bu kez standart yuk yok; proje parcasi geliyor. Agir, yuksek ve merkezi hassas.
+
+Lostromo bir bakista anladi:
+"Bu tip yukte sadece tonaja bakarsan gec kalirsin. Lifting plan, center of gravity, sling angle, spreader, tag line, exclusion zone..."
+
+Senden hangi bakis acisini kurman beklenir?`,
+choices:[
+{text:"Lifting plan, COG, sling angle ve exclusion zone'u birlikte okurum",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+{text:"Kren kapasitesi yetiyorsa detaylarin saha icinde cozulur diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Agir yukte asilin sadece tonaj oldugunu sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -6375,6 +6508,30 @@ function evaluateDecisionPressure(sc,c2){
   return {extra,notes};
 }
 
+function evaluateEnvironmentPressure(sc,c2){
+  const extra={};
+  const notes=[];
+  const tag=c2.tag||'akilli';
+  const blob=`${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const heavyWeather = currentWeather >= 5 || /storm|firtina|swell|rough|crosswind|squall|fog|restricted visibility|dar kanal|akinti|current|bank effect/.test(blob);
+  if(!heavyWeather) return {extra,notes};
+
+  if(tag==='korkak'){
+    addEffectDelta(extra,'sayginlik',-3);
+    addEffectDelta(extra,'bilgi',-2);
+    addEffectDelta(extra,'dinclik',-2);
+    notes.push('Agir hava/deniz sartinda zayif karar daha hizli buyudu.');
+  }else if(tag==='itaatkar'){
+    addEffectDelta(extra,'dinclik',-1);
+    notes.push('Zor sartta ortalama karar bile daha fazla efor istedi.');
+  }else if(tag==='akilli'||tag==='kritik'){
+    addEffectDelta(extra,'sayginlik',1);
+    if(/fog|restricted visibility|swell|current|crosswind/.test(blob)) addEffectDelta(extra,'bilgi',1);
+    notes.push('Zor sartta dogru muhakeme ekipte daha cok guven yaratti.');
+  }
+  return {extra,notes};
+}
+
 function applyEffect(e,opts={}){
   const old={...stats};
   Object.keys(e).forEach(k=>{
@@ -6496,7 +6653,9 @@ function handleSceneChoice(sc, c2, ch){
   }
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
+  const envPressure = evaluateEnvironmentPressure(sc,c2);
   Object.entries(pressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
+  Object.entries(envPressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
   if(c2.routePlanKey&&ECDIS_ROUTE_PLANS[c2.routePlanKey]){
     activeEcdisPlanKey=c2.routePlanKey;
     addJournalEntry(`[SEYIR PLANI] ${ECDIS_ROUTE_PLANS[c2.routePlanKey].label} ECDIS uzerinde aktif edildi.`, sc.day, sc.time);
@@ -6518,6 +6677,10 @@ function handleSceneChoice(sc, c2, ch){
   if(pressure.notes.length){
     setTimeout(()=>showNotif('!','Baski Artiyor',pressure.notes[0]),900);
     addJournalEntry('[BASKI] '+pressure.notes.join(' '), sc.day, sc.time);
+  }
+  if(envPressure.notes.length){
+    setTimeout(()=>showNotif('~','Deniz Sarti',envPressure.notes[0]),700);
+    addJournalEntry('[CENVRE BASKISI] '+envPressure.notes.join(' '), sc.day, sc.time);
   }
 
   addJournalEntry(c2.text, sc.day, sc.time);
@@ -6582,6 +6745,17 @@ function renderCalcPanel(sc, ch){
 }
 
 const DOCUMENT_FORM_CONFIGS = {
+  s373:{
+    title:'Vardiya Teslim Alma Notu',
+    hint:'Teslim alan zabit gibi dusun. Trafik, hava, ariza, alarm bypass ve yaklasan waypoint bilgisini bos gecme.',
+    fields:[
+      {id:'traffic', label:'Trafik durumu', placeholder:'Orn: sancak onde crossing tanker / CPA 1.2', keywords:['trafik','cpa','crossing','head-on','tanker','hedef']},
+      {id:'weather', label:'Hava / gorus', placeholder:'Orn: Bft 5, swell sancak basa, gorus dusuyor', keywords:['bft','swell','gorus','fog','ruzgar','hava']},
+      {id:'fault', label:'Ariza / teknik not', placeholder:'Orn: no.2 radar standby / steering pump note', keywords:['ariza','radar','gyro','pump','alarm','steering']},
+      {id:'bypass', label:'Alarm bypass / dikkat noktasi', placeholder:'Orn: bilge alarm bypass gecici kontrol altinda', keywords:['bypass','alarm','bilge','gecici','silenced']},
+      {id:'waypoint', label:'Yaklasan waypoint / rapor', placeholder:'Orn: 18 dk sonra WP / pilot station report', keywords:['waypoint','wp','pilot','report','xtd','wheel-over']}
+    ]
+  },
   s194:{
     title:'Pilot Card Mini Formu',
     hint:'Bosluklari kisaca doldur. Burada kusursuz evrak dili degil, dogru operatif bilgi bekleniyor.',
@@ -6653,6 +6827,51 @@ const DOCUMENT_FORM_CONFIGS = {
       {id:'potential', label:'Potansiyel sonuc', placeholder:'Orn: personnel injury / cargo damage', keywords:['injury','yaralan','damage','hasar','risk']},
       {id:'action', label:'Duzeltici faaliyet', placeholder:'Orn: stop job / re-brief / inspect gear', keywords:['stop','brief','inspect','kontrol','duzeltici','ppe']}
     ]
+  },
+  s375:{
+    title:'Toolbox Talk Ozeti',
+    hint:'Is baslamadan once risk, ekipman ve stop noktalarini netlestir.',
+    fields:[
+      {id:'job', label:'Is tanimi', placeholder:'Orn: manifold hose connection / hatch work', keywords:['manifold','hose','hatch','lifting','work','job']},
+      {id:'risks', label:'Temel riskler', placeholder:'Orn: pinch point / gas / suspended load', keywords:['risk','gas','load','pinch','fall','slip']},
+      {id:'controls', label:'Kontroller', placeholder:'Orn: PPE / comms / stop signal / permit', keywords:['ppe','permit','signal','comms','isolate','watch']}
+    ]
+  },
+  s376:{
+    title:'Hot Work Permit',
+    hint:'Alev/kivilcim olan iste izolasyon, gaz emniyeti ve fire watch bos bir imza degildir.',
+    fields:[
+      {id:'location', label:'Mahal', placeholder:'Orn: bosun store shell plate / engine workshop', keywords:['mahal','workshop','deck','store','plate','engine']},
+      {id:'isolation', label:'Izolasyon / hazirlik', placeholder:'Orn: area cleared, fire line ready, combustibles removed', keywords:['isol','removed','fire line','clear','combustible']},
+      {id:'watch', label:'Yangin nobeti', placeholder:'Orn: fire watch assigned with extinguisher', keywords:['watch','extinguisher','fire','standby','hose']}
+    ]
+  },
+  s377:{
+    title:'Enclosed Space Entry Permit',
+    hint:'Kapali mahal girişi kagit ustu cesaret degil; gaz, attendant ve rescue hazirligi ister.',
+    fields:[
+      {id:'tests', label:'Gaz olcumleri', placeholder:'Orn: O2 20.9 / LEL 0 / H2S 0', keywords:['o2','lel','h2s','gas','20.9','0']},
+      {id:'attendant', label:'Disarida kim var?', placeholder:'Orn: attendant on station with comms', keywords:['attendant','outside','comms','watch']},
+      {id:'rescue', label:'Rescue hazirligi', placeholder:'Orn: rescue set / tripod / SCBA standby', keywords:['rescue','scba','tripod','standby','set']}
+    ]
+  },
+  s378:{
+    title:'Radio Log Girisi',
+    hint:'Saat, istasyon, frekans ve mesaj ozeti temiz olmali.',
+    fields:[
+      {id:'time', label:'UTC / gemi saati', placeholder:'Orn: 0942 UTC', keywords:['utc','09','10',':']},
+      {id:'station', label:'Istasyon / callsign', placeholder:'Orn: Istanbul VTS / TBGH', keywords:['vts','mrcc','coast','call','istanbul','station']},
+      {id:'summary', label:'Mesaj ozeti', placeholder:'Orn: traffic advisory / pilot boarding delay', keywords:['traffic','advisory','pilot','delay','warning','message']}
+    ]
+  },
+  s379:{
+    title:'Ballast Exchange Record',
+    hint:'Yer, zaman ve yontem kaydi MARPOL/BWM disiplininin omurgasidir.',
+    fields:[
+      {id:'position', label:'Mevki', placeholder:'Orn: Lat/Lon ya da open sea area', keywords:['lat','lon','open sea','position','mevki']},
+      {id:'method', label:'Yontem', placeholder:'Orn: sequential / flow-through', keywords:['sequential','flow','through','method']},
+      {id:'volume', label:'Kaydedilen islem', placeholder:'Orn: tank list / percentage / completed time', keywords:['tank','percent','time','completed','volume']}
+    ]
   }
 };
 
@@ -6676,6 +6895,27 @@ const STOWAGE_PLAN_CONFIGS = {
       'H2: orta bolge, alt istif icin guvenli',
       'H3: orta-kic bolge, list duzeltmede faydali',
       'H4: kic tarafa yakin, asiri yukleme trim riski yaratir'
+    ]
+  }
+};
+
+const MOORING_PLAN_CONFIGS = {
+  s374:{
+    title:'Mooring Line Yerlesimi',
+    hint:'Halatlari tipik yanasma sirasi ve uygun gorevleriyle eslestir. Ruzgar/akinti bunu degistirebilir ama temel mantik sabittir.',
+    lines:[
+      {id:'forespring', label:'Fore Spring'},
+      {id:'headline', label:'Head Line'},
+      {id:'sternline', label:'Stern Line'},
+      {id:'aftspring', label:'Aft Spring'},
+      {id:'breast', label:'Breast Line'}
+    ],
+    targets:[
+      {id:'bow', label:'Bas dogrultusu / bow bollard'},
+      {id:'stern', label:'Kic dogrultusu / stern bollard'},
+      {id:'fwdspring', label:'Bas omuzluktan kica calisan spring hatti'},
+      {id:'aftspring', label:'Kictan basa calisan spring hatti'},
+      {id:'side', label:'Rihtima dik breast hatti'}
     ]
   }
 };
@@ -6724,6 +6964,31 @@ function getDocumentOutcomeChoice(sc, values){
   });
   if(score >= Math.max(2, cfg.fields.length-1)) return sc.choices.find(c=>c.tag==='kritik') || sc.choices[0];
   if(score >= 1) return sc.choices.find(c=>c.tag==='itaatkar' || c.tag==='akilli') || sc.choices[1] || sc.choices[0];
+  return sc.choices.find(c=>c.tag==='korkak') || sc.choices[sc.choices.length-1] || sc.choices[0];
+}
+
+function getMooringOutcomeChoice(sc, values){
+  const expected = {
+    forespring:'fwdspring',
+    headline:'bow',
+    sternline:'stern',
+    aftspring:'aftspring',
+    breast:'side'
+  };
+  const orderExpected = ['forespring','headline','sternline','aftspring','breast'];
+  let score = 0;
+  let orderScore = 0;
+  Object.entries(expected).forEach(([line,target])=>{
+    if(values[line]?.target === target) score += 2;
+  });
+  orderExpected.forEach((line, idx)=>{
+    const ord = Number(values[line]?.order || 0);
+    if(ord === idx+1) orderScore += 1;
+    else if(Math.abs(ord - (idx+1)) === 1) orderScore += 0.5;
+  });
+  score += orderScore;
+  if(score >= 12) return sc.choices.find(c=>c.tag==='kritik') || sc.choices[0];
+  if(score >= 8) return sc.choices.find(c=>c.tag==='akilli' || c.tag==='itaatkar') || sc.choices[1] || sc.choices[0];
   return sc.choices.find(c=>c.tag==='korkak') || sc.choices[sc.choices.length-1] || sc.choices[0];
 }
 
@@ -6829,6 +7094,63 @@ function renderStowagePanel(sc, ch){
         : 'Bu yerlesim sancak yatikligi veya boyuna dengeyi gereksiz zorlayabilir.';
     submit.disabled = true;
     panel.querySelectorAll('.stowage-select').forEach(el=>el.disabled = true);
+    setTimeout(()=>handleSceneChoice(sc, picked, ch), 850);
+  };
+  return true;
+}
+
+function renderMooringPanel(sc, ch){
+  const panel = document.getElementById('calc-panel');
+  if(!panel) return false;
+  const cfg = MOORING_PLAN_CONFIGS[sc?.id];
+  if(!cfg) return false;
+  panel.className='calc-panel show';
+  panel.innerHTML = `<div class="stowage-box mooring-box">
+    <div class="stowage-title">${cfg.title}</div>
+    <div class="stowage-hint">${cfg.hint}</div>
+    <div class="mooring-headline">Her halat icin gorev yeri ve tipik sirayi sec.</div>
+    <div class="stowage-grid mooring-grid">
+      ${cfg.lines.map(line=>`<div class="stowage-row mooring-row">
+        <div class="stowage-unit"><span>${line.label}</span><b>Line</b></div>
+        <select class="stowage-select" data-mooring="${line.id}-target">
+          ${cfg.targets.map(t=>`<option value="${t.id}">${t.label}</option>`).join('')}
+        </select>
+        <select class="stowage-select" data-mooring="${line.id}-order">
+          <option value="1">1. verilen</option>
+          <option value="2">2. verilen</option>
+          <option value="3">3. verilen</option>
+          <option value="4">4. verilen</option>
+          <option value="5">5. verilen</option>
+        </select>
+      </div>`).join('')}
+    </div>
+    <div class="stowage-actions">
+      <span class="stowage-meta">Spring boyuna kacmayi tutar, breast gemiyi rihtima ceker, head/stern line basi ve kici kontrol eder.</span>
+      <button id="mooring-submit" class="doc-submit">Mooring Planini Degerlendir</button>
+    </div>
+    <div id="mooring-feedback" class="doc-feedback"></div>
+  </div>`;
+  const submit = document.getElementById('mooring-submit');
+  const feedback = document.getElementById('mooring-feedback');
+  submit.onclick = ()=>{
+    const values = {};
+    cfg.lines.forEach(line=>{
+      values[line.id] = {
+        target: panel.querySelector(`[data-mooring="${line.id}-target"]`)?.value,
+        order: panel.querySelector(`[data-mooring="${line.id}-order"]`)?.value
+      };
+    });
+    const picked = getMooringOutcomeChoice(sc, values);
+    const strong = picked && picked.tag === 'kritik';
+    const mid = picked && (picked.tag === 'akilli' || picked.tag === 'itaatkar');
+    feedback.className = `doc-feedback ${strong ? '' : (mid ? 'warn' : 'bad')}`.trim();
+    feedback.textContent = strong
+      ? 'Halat gorevleri ve tipik sira birlikte oturdu. Lostromo plana guvenir.'
+      : mid
+        ? 'Temel mantik var ama spring ve breast gorevini daha net okumalisin.'
+        : 'Bu yerlesim yanasmada gereksiz kargaşa ve kontrol kaybi yaratabilir.';
+    submit.disabled = true;
+    panel.querySelectorAll('[data-mooring]').forEach(el=>el.disabled = true);
     setTimeout(()=>handleSceneChoice(sc, picked, ch), 850);
   };
   return true;
@@ -6990,13 +7312,14 @@ function renderScene(idx){
   renderCalcPanel(sc, ch);
   const hasDocPanel = renderDocumentPanel(sc, ch);
   const hasStowagePanel = renderStowagePanel(sc, ch);
+  const hasMooringPanel = renderMooringPanel(sc, ch);
   getSceneRenderChoices(sc).forEach(c2=>{
     const b=document.createElement('button');b.className='cbtn';
     b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+tagL[c2.tag||'akilli']+'</span>'+c2.text;
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
-  if(sc.calc || hasDocPanel || hasStowagePanel){
+  if(sc.calc || hasDocPanel || hasStowagePanel || hasMooringPanel){
     ch.style.display='none';
   }else{
     ch.style.display='';
