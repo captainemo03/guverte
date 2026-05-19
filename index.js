@@ -9870,6 +9870,57 @@ function buildShipPartsDiagram(){
       </svg>
       <div class="shipsection-note">Boyuna kesitte pruvaldan kica giderken fore peak, ambarlar, ust yapi, makine dairesi ve after peak iliskisi daha net okunur. Bu bakis acisi, trim, yuk dagilimi, ballast plani ve makine mahallinin gemi icindeki yerini zihinde oturtmak icin cok kullanislidir.</div>
     </div>
+    <div class="shipsection-card">
+      <div class="shipsection-head">Tank Plani / Ballast ve Hacim Yerlesimi</div>
+      <svg class="shipsection-svg" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg" aria-label="Geminin tank plani">
+        <defs>
+          <linearGradient id="tankBg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#14344f"/>
+            <stop offset="100%" stop-color="#071725"/>
+          </linearGradient>
+        </defs>
+        <rect width="520" height="260" rx="10" fill="url(#tankBg)"/>
+        <path d="M34 82 H404 L424 70 H486 L470 104 V188 Q470 206 442 214 H82 Q46 214 34 180 Z" fill="#102537" stroke="#5b6b78" stroke-width="2"/>
+        <path d="M56 106 H432 V188 H86 Q62 188 56 170 Z" fill="#1a344b" stroke="#708393" stroke-width="1.4"/>
+        <rect x="62" y="130" width="58" height="38" rx="4" fill="#31516b" stroke="#8ba7bd" stroke-width="1.2"/>
+        <text x="91" y="152" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">FORE PEAK</text>
+        <rect x="120" y="118" width="64" height="52" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="184" y="118" width="64" height="52" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="248" y="118" width="64" height="52" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="312" y="118" width="64" height="52" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="376" y="130" width="50" height="38" rx="4" fill="#31516b" stroke="#8ba7bd" stroke-width="1.2"/>
+        <text x="401" y="152" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">AFT PEAK</text>
+        <rect x="120" y="176" width="64" height="18" rx="3" fill="#46657c" stroke="#9ab6cb" stroke-width="1"/>
+        <rect x="184" y="176" width="64" height="18" rx="3" fill="#46657c" stroke="#9ab6cb" stroke-width="1"/>
+        <rect x="248" y="176" width="64" height="18" rx="3" fill="#46657c" stroke="#9ab6cb" stroke-width="1"/>
+        <rect x="312" y="176" width="64" height="18" rx="3" fill="#46657c" stroke="#9ab6cb" stroke-width="1"/>
+        <text x="152" y="188" text-anchor="middle" fill="#e8f1f7" font-size="9.5" font-family="monospace">DB TANK</text>
+        <text x="216" y="188" text-anchor="middle" fill="#e8f1f7" font-size="9.5" font-family="monospace">DB TANK</text>
+        <text x="280" y="188" text-anchor="middle" fill="#e8f1f7" font-size="9.5" font-family="monospace">DB TANK</text>
+        <text x="344" y="188" text-anchor="middle" fill="#e8f1f7" font-size="9.5" font-family="monospace">DB TANK</text>
+        <rect x="106" y="112" width="14" height="72" rx="3" fill="#5b7c95" stroke="#a4bfd1" stroke-width="1"/>
+        <rect x="376" y="112" width="14" height="72" rx="3" fill="#5b7c95" stroke="#a4bfd1" stroke-width="1"/>
+        <text x="82" y="108" fill="#8fd8ab" font-size="11" font-family="monospace">WING TANK</text>
+        <text x="354" y="108" fill="#8fd8ab" font-size="11" font-family="monospace">WING TANK</text>
+        <rect x="226" y="92" width="60" height="20" rx="4" fill="#3b5c76" stroke="#a0bbcd" stroke-width="1.1"/>
+        <text x="256" y="105" text-anchor="middle" fill="#f4d172" font-size="10.5" font-family="monospace">DEEP TANK</text>
+        <text x="152" y="148" text-anchor="middle" fill="#dceaf4" font-size="10.5" font-family="monospace">HOLD / TANK BAY</text>
+        <text x="216" y="148" text-anchor="middle" fill="#dceaf4" font-size="10.5" font-family="monospace">HOLD / TANK BAY</text>
+        <text x="280" y="148" text-anchor="middle" fill="#dceaf4" font-size="10.5" font-family="monospace">HOLD / TANK BAY</text>
+        <text x="344" y="148" text-anchor="middle" fill="#dceaf4" font-size="10.5" font-family="monospace">HOLD / TANK BAY</text>
+        <path d="M92 124 L48 102" stroke="#8fd8ab" stroke-width="1.7"/>
+        <text x="14" y="100" fill="#8fd8ab" font-size="10.5" font-family="monospace">BAS BALLAST HACMI</text>
+        <path d="M402 124 L452 102" stroke="#8fd8ab" stroke-width="1.7"/>
+        <text x="378" y="98" fill="#8fd8ab" font-size="10.5" font-family="monospace">KIC BALLAST HACMI</text>
+        <path d="M256 194 V222" stroke="#f4d172" stroke-width="1.7"/>
+        <text x="214" y="236" fill="#f4d172" font-size="10.5" font-family="monospace">CIFT DIP BOYUNCA ALT TANKLAR</text>
+        <path d="M256 92 V60" stroke="#9cc8ef" stroke-width="1.7"/>
+        <text x="208" y="54" fill="#9cc8ef" font-size="10.5" font-family="monospace">MERKEZI DEEP TANK / SERVICE TANK</text>
+        <path d="M110 146 H56" stroke="#9cc8ef" stroke-width="1.4" stroke-dasharray="4,3"/>
+        <path d="M390 146 H450" stroke="#9cc8ef" stroke-width="1.4" stroke-dasharray="4,3"/>
+      </svg>
+      <div class="shipsection-note">Tank plani, geminin sadece yuk degil ayni zamanda sivi hacim mantigiyla da yasadigini gosterir. Fore peak ve after peak trim ayarinda, wing tank ve double bottom tanklar denge ve ballast planinda, deep tank ise gemi tipine gore ballast, yakit veya servis hacmi olarak onem kazanabilir.</div>
+    </div>
   </div>`;
 }
 
