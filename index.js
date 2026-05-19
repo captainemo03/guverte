@@ -7189,6 +7189,12 @@ function adjustPortChartZoom(delta){
   if(mapView === 'library') renderMapLibrary();
 }
 
+function getPortChartDetailLabel(){
+  return portChartZoom >= 3.4 ? 'Close Detail'
+    : portChartZoom >= 1.8 ? 'Approach Detail'
+    : 'Overview';
+}
+
 function getPortChartTaskGeometry(port){
   const region = getMapRegionByPosition(port);
   const hay = `${port.name} ${region}`.toLowerCase();
@@ -7874,6 +7880,7 @@ function renderMapLibrary(){
   const chartTitle = document.getElementById('port-chart-title');
   const chartMeta = document.getElementById('port-chart-meta');
   const chartZoomLabel = document.getElementById('port-chart-zoom-label');
+  const chartDetailLabel = document.getElementById('port-chart-detail-label');
   if(!files || !chartSvg || !chartTitle || !chartMeta) return;
   ensureTaskPort(getCurrentMapTask());
   const active = ensureSelectedPortChart();
@@ -7904,6 +7911,7 @@ function renderMapLibrary(){
   chartSvg.onclick = (ev)=>handlePortChartTaskClick(chartSvg, ev, active);
   chartSvg.setAttribute('viewBox', getPortChartViewBox());
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
+  if(chartDetailLabel) chartDetailLabel.textContent = getPortChartDetailLabel();
   chartMeta.innerHTML = `
     <div class="chart-meta-card">
       <div class="chart-meta-label">Dosya / Yayin</div>
@@ -8751,7 +8759,28 @@ const GLOSSARY_TERMS = [
   {term:"Trim by Stern", meaning:"Geminin kic draftinin bas draftinden fazla oldugu durum.", example:"Trim by stern bazen pervane performansina yardim eder ama asirisi sorun cikarir."},
   {term:"Trim by Head", meaning:"Geminin bas draftinin kic draftinden fazla oldugu durum.", example:"Trim by head fazla olursa manevra ve gorus etkilenebilir."},
   {term:"Ventilation Log", meaning:"Ambar veya kapali mahal havalandirmasina dair zaman ve karar kaydi.", example:"Dew point takibinde ventilation log duzgun tutuldu."},
-  {term:"Void Space", meaning:"Depolama veya servis amaci olmadan yapisal ayrim icin birakilan bos kapali hacim.", example:"Void space girisi enclosed space prosedurune tabidir."}
+  {term:"Void Space", meaning:"Depolama veya servis amaci olmadan yapisal ayrim icin birakilan bos kapali hacim.", example:"Void space girisi enclosed space prosedurune tabidir."},
+  {term:"Sweep Width", meaning:"Radar taramasinin ekran uzerinde donerek bilgi topladigi alan ve genel tarama kapsami mantigi.", example:"Sweep width dusuk gorusun icinde radar resmini yorumlarken akilda tutulur."},
+  {term:"Sea Clutter", meaning:"Deniz yuzeyinden gelen istenmeyen echo karmasasi.", example:"Sea clutter fazla olunca kucuk hedefler dipte kaybolabilir."},
+  {term:"Rain Clutter", meaning:"Yagis hucrelerinden donen echo karmasasi.", example:"Rain clutter ayari yanlis olursa yagmur icinde hedef secmek zorlasir."},
+  {term:"Gain", meaning:"Radar alici hassasiyet ayari.", example:"Gain fazla acilinca ekran kar gibi dolar."},
+  {term:"Tuning", meaning:"Radar alicisinin en temiz echo icin ayarlanmasi.", example:"Tuning bozuksa hedefler sanki zayifmis gibi gorunur."},
+  {term:"Safety Contour", meaning:"ECDIS'te emniyetli su ile riskli suyu ayiran secili derinlik konturu.", example:"Safety contour yanlis secilirse ekran seni oldugundan rahat gosterebilir."},
+  {term:"Safety Depth", meaning:"ECDIS'te dikkat edilmesi gereken kritik derinlik siniri.", example:"Safety depth alarm mantigi route check'te mutlaka kontrol edilir."},
+  {term:"Vector", meaning:"Radar/ARPA ekraninda hedefin gidis yonu ve hizina dair gosterim cizgisi.", example:"Uzun vector bazen resmi netlestirir, bazen kalabalastirir."},
+  {term:"Trail", meaning:"Hedefin onceki hareket izini gosteren radar izi.", example:"Trail acinca crossing trafigin niyeti daha hizli okunabilir."},
+  {term:"Rate of Turn Indicator", meaning:"Geminin dakikadaki donus hizini gosteren ROT gostergesi.", example:"Dar gecitte ROT artisini erken gormek wheel-over icin faydalidir."},
+  {term:"Conning Position", meaning:"Gemiyi anlik olarak idare etmek icin kullanilan aktif sevk ve kumanda noktasi.", example:"Pilot geldiginde conning position uzerindeki bilgi akisi netlesir."},
+  {term:"Master-Pilot Exchange", meaning:"Kaptan ile pilot arasinda gemi karakteri ve gecis planinin karsilikli paylasildigi brifing.", example:"Master-pilot exchange zayif gecerse son yaklasma stresi buyur."},
+  {term:"Under Keel Clearance Alarm", meaning:"ECDIS veya ilgili sistemlerde omurga alti su payi kritik seviyeye yaklastiginda verilen uyari.", example:"UKC alarmi gelince sadece sesi susturup gecilmez."},
+  {term:"Bank Effect", meaning:"Dar kanal veya nehirde geminin kiyidan hidrodinamik olarak etkilenmesi.", example:"Bank effect yuzunden gemi bir yana cekiliyormus gibi hissedilebilir."},
+  {term:"Interaction", meaning:"Iki gemi birbirine yakin gectiginde olusan hidrodinamik etkilesim.", example:"Interaction ozellikle dar su ve dusuk mesafede tehlikeli olabilir."},
+  {term:"Heaving Line", meaning:"Kiyiya ya da diger tekneye once atilan ince haberci halat; el incesi.", example:"Kalinin oncesinde heaving line atilmazsa palamar alma baslayamaz."},
+  {term:"Messenger Line", meaning:"Daha kalin halat ya da donanimi cektirmek icin once gonderilen ince hat.", example:"Messenger line dogru gecmezse sonraki halat da takilir."},
+  {term:"Chafing Gear", meaning:"Halatin surtunerek asinacagi yere konan koruyucu malzeme.", example:"Spring uzerinde chafing gear yoksa uzun beklemede sorun cikar."},
+  {term:"Snap-Back Zone", meaning:"Gergin halat koparsa geri savrulup oldurucu etki yaratabilecek alan.", example:"Snap-back zone icinde gereksiz personel tutulmaz."},
+  {term:"Fidley", meaning:"Makine havalandirmasi ve erisim cikisi iceren ust yapi bolumu.", example:"Fidley civarinda sicak hava ve gurultu daha belirgin hissedilir."},
+  {term:"Monkey Island", meaning:"Kopruustunun en ust acik platformu.", example:"Monkey island uzerinde pusula ve acik gorus avantaj saglar."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
