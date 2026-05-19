@@ -9921,6 +9921,56 @@ function buildShipPartsDiagram(){
       </svg>
       <div class="shipsection-note">Tank plani, geminin sadece yuk degil ayni zamanda sivi hacim mantigiyla da yasadigini gosterir. Fore peak ve after peak trim ayarinda, wing tank ve double bottom tanklar denge ve ballast planinda, deep tank ise gemi tipine gore ballast, yakit veya servis hacmi olarak onem kazanabilir.</div>
     </div>
+    <div class="shipsection-card">
+      <div class="shipsection-head">Makine Tank Plani / Yakit ve Kirli Hacim Akisi</div>
+      <svg class="shipsection-svg" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg" aria-label="Makine tank plani">
+        <defs>
+          <linearGradient id="machTankBg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#14344f"/>
+            <stop offset="100%" stop-color="#071725"/>
+          </linearGradient>
+        </defs>
+        <rect width="520" height="260" rx="10" fill="url(#machTankBg)"/>
+        <rect x="28" y="30" width="464" height="200" rx="10" fill="#102537" stroke="#5b6b78" stroke-width="2"/>
+        <rect x="54" y="72" width="86" height="44" rx="4" fill="#3b5c76" stroke="#a0bbcd" stroke-width="1.2"/>
+        <rect x="164" y="72" width="86" height="44" rx="4" fill="#3b5c76" stroke="#a0bbcd" stroke-width="1.2"/>
+        <rect x="276" y="72" width="86" height="44" rx="4" fill="#31516b" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="388" y="72" width="86" height="44" rx="4" fill="#31516b" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="108" y="144" width="96" height="42" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="220" y="144" width="96" height="42" rx="4" fill="#23435d" stroke="#8ba7bd" stroke-width="1.2"/>
+        <rect x="332" y="144" width="96" height="42" rx="4" fill="#563c36" stroke="#d0a18b" stroke-width="1.2"/>
+        <rect x="54" y="144" width="40" height="42" rx="4" fill="#2f4558" stroke="#8aa5ba" stroke-width="1.1"/>
+        <rect x="438" y="144" width="36" height="42" rx="4" fill="#2f4558" stroke="#8aa5ba" stroke-width="1.1"/>
+        <text x="97" y="98" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">HFO STORAGE</text>
+        <text x="207" y="98" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">MDO STORAGE</text>
+        <text x="319" y="98" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">SETTLING TANK</text>
+        <text x="431" y="98" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">SERVICE TANK</text>
+        <text x="156" y="168" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">LO TANK</text>
+        <text x="268" y="168" text-anchor="middle" fill="#dceaf4" font-size="11" font-family="monospace">FW / JCW TK</text>
+        <text x="380" y="168" text-anchor="middle" fill="#f4d172" font-size="11" font-family="monospace">SLUDGE TK</text>
+        <text x="74" y="168" text-anchor="middle" fill="#8fd8ab" font-size="10" font-family="monospace">BILGE WELL</text>
+        <text x="456" y="168" text-anchor="middle" fill="#8fd8ab" font-size="10" font-family="monospace">OVFL</text>
+        <path d="M140 94 H164" stroke="#9cc8ef" stroke-width="2"/>
+        <path d="M250 94 H276" stroke="#9cc8ef" stroke-width="2"/>
+        <path d="M362 94 H388" stroke="#9cc8ef" stroke-width="2"/>
+        <path d="M431 116 V144" stroke="#9cc8ef" stroke-width="2"/>
+        <path d="M380 116 V144" stroke="#d4a017" stroke-width="2" stroke-dasharray="5,4"/>
+        <path d="M94 166 H108" stroke="#8fd8ab" stroke-width="2"/>
+        <path d="M316 166 H332" stroke="#d4a017" stroke-width="2"/>
+        <path d="M428 166 H438" stroke="#8fd8ab" stroke-width="2"/>
+        <path d="M431 186 V210" stroke="#8aa5ba" stroke-width="1.6"/>
+        <path d="M74 186 V210" stroke="#8aa5ba" stroke-width="1.6"/>
+        <path d="M74 210 H431" stroke="#5e7387" stroke-width="1.2" stroke-dasharray="5,4" opacity=".55"/>
+        <text x="180" y="220" fill="#8aa5ba" font-size="10.5" font-family="monospace">DRAIN / TRANSFER / RETURN LOGIC</text>
+        <path d="M320 64 V42" stroke="#f4d172" stroke-width="1.8"/>
+        <text x="278" y="36" fill="#f4d172" font-size="10.5" font-family="monospace">PURIFIER FEED ZONE</text>
+        <path d="M431 64 V40" stroke="#8fd8ab" stroke-width="1.8"/>
+        <text x="396" y="34" fill="#8fd8ab" font-size="10.5" font-family="monospace">DAY TANK / ENGINE SUPPLY</text>
+        <path d="M380 186 V204" stroke="#d0a18b" stroke-width="1.8"/>
+        <text x="334" y="216" fill="#d0a18b" font-size="10.5" font-family="monospace">DIRTY OIL / WASTE COLLECTION</text>
+      </svg>
+      <div class="shipsection-note">Bu mini makine plani, yakitin depodan settling ve service tank mantigina nasil yaklastigini, kirli yag ve sludge tarafinin neden ayri tutuldugunu, bilge ve overflow hacimlerinin neden hassas oldugunu zihinde toplar. Gercek gemide sistem bundan daha karmasiktir ama iskelet mantik boyledir.</div>
+    </div>
   </div>`;
 }
 
