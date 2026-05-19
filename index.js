@@ -4039,13 +4039,65 @@ Ilk bakisin nereye dagilir?`,
   {text:"Sadece cizili rota hattina bakmanin yeterli oldugunu sanirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
   {text:"Harita karmasik diye yorumlamayi birakirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
 ];
+const POST2000_EQUIPMENT_SCENES=[
+  {id:"s356",gfx:"ecdis_panel",alert:true,day:"Gun 14",time:"07:20",loc:"Koprustu - ENC Status",sub:"ENC permit suresi dolmak uzere",who:"z2",
+  text:`ECDIS'in kozesinde sari bir uyari yandi. Bir cell'in permit suresi dolmak uzereydi.
+
+"Harita ekrani acik diye her sey guncel sanilmaz." dedi 2. Zabiti. "Permit, update tarihi ve overdue area birlikte okunur. Yolun ustunde kopuk bir chart istemeyiz."
+
+Ilk refleksin ne olur?`,
+  choices:[
+  {text:"Affected area'yi, permit durumunu ve update history'yi kontrol edip hemen raporlarim",tag:"kritik",effect:{bilgi:18,sayginlik:13,cesaret:2}},
+  {text:"Voyage bitene kadar bekleyip sonra bakariz derim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Rota cizgisi gorunuyorsa permitin cok da onemli olmadigini dusunurum",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+  {id:"s357",gfx:"ais_panel",alert:true,day:"Gun 14",time:"08:05",loc:"Koprustu - AIS / Radar Cross-Check",sub:"AIS spoofing ya da veri uyusmazligi supheleri",who:"suvari",
+  text:`AIS listesinde hedef vardi ama radar echo'su yerinde oturmuyordu.
+
+Suvari sakin bir sesle konustu: "AIS kimlik yardimcisidir; goz degil. Bazen veri kayar, bazen gec gelir, bazen de supheli gorunur. Hedefi cihaz degil zabit teyit eder."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"AIS bilgisini radar, visual ve seyir durumu ile capraz kontrol ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"AIS etiketi varsa hedefi dogrulanmis sayarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Bir cihaz uyusmuyorsa hepsini birden kapatmak isterim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s358",gfx:"bridge",alert:true,day:"Gun 14",time:"09:10",loc:"Koprustu - Sensor Source",sub:"GPS / gyro / log verileri birbirini tutmuyor",who:"z2",
+  text:`Sensor status satirinda kucuk ama ciddi bir uyumsuzluk vardi. COG, heading ve speed trendi ayni hikayeyi anlatmiyordu.
+
+"Modern kopruustu rahat degil; daha fazla capraz kontrol ister." dedi 2. Zabiti. "Source mismatch gorursen once hangi sensorun koptugunu degil, hangi bilginin bozuldugunu anlarsin."
+
+En dogru adim hangisi?`,
+  choices:[
+  {text:"Source panelini, gyro repeater'i, log'u ve radar trendini birlikte karsilastiririm",tag:"kritik",effect:{bilgi:18,sayginlik:12}},
+  {text:"Ana ekranda tek bir sayi dogru gorunuyorsa kalanini onemsiz sayarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Alarm susarsa sorunun bittigini varsayarim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+  {id:"s359",gfx:"radar",alert:true,day:"Gun 14",time:"09:45",loc:"Koprustu - Radar Overlay",sub:"Radar overlay chart ustune tam oturmuyor",who:"z3",
+  text:`Radar overlay ECDIS ustunde hafif kayik gorunuyordu. Kiyi cizgisiyle echo tam ust uste gelmiyordu.
+
+3. Zabiti omzunu silkti: "Overlay guzeldir ama kutsal degil. Gyro, position source, timing farki ya da chart source bunu kaydirabilir. Goz boyanmayacak."
+
+Ilk yorumun ne olur?`,
+  choices:[
+  {text:"Overlay'e kor baglanmam; gyro, position source ve chart datum tarafini kontrol ederim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+  {text:"Overlay aciksa otomatikman dogrudur diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Bir kayma gordugum anda radar ya da ECDIS'ten birini tamamen yok sayarim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s360",gfx:"ecdis_panel",alert:false,day:"Gun 14",time:"10:25",loc:"Koprustu - Backup Positioning",sub:"Ikinci mevki kaynagi ile teyit",who:"suvari",
+  text:`Suvari sordu: "Ana GNSS'e guveniyorsun; peki ikinci kaynak ne diyor?"
+
+ECDIS'te primary ve secondary position source satirlari acikti. Radar range, visual mark ve ikinci GNSS ayni masada bekliyordu.
+
+Modern seyirde en saglam dusunce nedir?`,
+  choices:[
+  {text:"Primary source'u secondary source ve bagimsiz cross-check ile desteklerim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+  {text:"Ana sensor calisiyorsa ikinci kaynaga gerek olmadigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Yedek source kullanmanin sadece denetim icin oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]}
+];
 function getExtraRouteScenesForYear(yr){
   return yr<2000 ? PRE2000_ROUTE_SCENES : EXTRA_ROUTE_SCENES;
 }
 function getExtraEquipmentScenesForYear(yr){
   return yr<2000
     ? EXTRA_EQUIPMENT_SCENES.filter(sc=>sc.id!=='s236').concat(PRE2000_EQUIPMENT_SCENES)
-    : EXTRA_EQUIPMENT_SCENES;
+    : EXTRA_EQUIPMENT_SCENES.concat(POST2000_EQUIPMENT_SCENES);
 }
 const DOCUMENT_CHAIN_SCENE_IDS = new Set(['s309','s310','s311','s312','s313','s314']);
 const EXTRA_EQUIPMENT_SCENES=[
@@ -7038,6 +7090,12 @@ const ROUTE_PORTS = [
   {name:"Kiel Kanali", x:46, y:8, visited:false, kind:"waterway"},
   {name:"Korint Kanali", x:118, y:154, visited:false, kind:"waterway"},
   {name:"St. Lawrence", x:46, y:56, visited:false, kind:"waterway"},
+  {name:"İstanbul Bogazi", x:178, y:84, visited:false, kind:"waterway"},
+  {name:"Çanakkale Bogazi", x:132, y:98, visited:false, kind:"waterway"},
+  {name:"Otranto Bogazi", x:112, y:112, visited:false, kind:"waterway"},
+  {name:"Mans Denizi", x:28, y:24, visited:false, kind:"waterway"},
+  {name:"Skagerrak", x:58, y:4, visited:false, kind:"waterway"},
+  {name:"Kattegat", x:54, y:10, visited:false, kind:"waterway"},
   {name:"Hurmuz Bogazi", x:342, y:206, visited:false, kind:"waterway"},
   {name:"Babulmendep", x:282, y:218, visited:false, kind:"waterway"},
   {name:"Malakka Bogazi", x:344, y:162, visited:false, kind:"waterway"},
@@ -7051,6 +7109,8 @@ const ROUTE_PORTS = [
   {name:"Kore Bogazi", x:404, y:84, visited:false, kind:"waterway"},
   {name:"Torres Bogazi", x:396, y:210, visited:false, kind:"waterway"},
   {name:"Macellan Bogazi", x:34, y:252, visited:false, kind:"waterway"},
+  {name:"Drake Gecidi", x:24, y:258, visited:false, kind:"waterway"},
+  {name:"Cape Horn", x:30, y:256, visited:false, kind:"waterway"},
   {name:"Bering Bogazi", x:430, y:12, visited:false, kind:"waterway"},
   {name:"Mississippi Nehri", x:36, y:128, visited:false, kind:"waterway"},
   {name:"Amazon Nehri", x:48, y:214, visited:false, kind:"waterway"},
@@ -7070,6 +7130,7 @@ const ROUTE_PORTS = [
   {name:"Biskay Korfezi", x:10, y:70, visited:false, kind:"waterway"},
   {name:"Aslan Korfezi", x:34, y:96, visited:false, kind:"waterway"},
   {name:"Umman Korfezi", x:352, y:198, visited:false, kind:"waterway"},
+  {name:"Mozambik Kanali", x:166, y:228, visited:false, kind:"waterway"},
 ];
 
 let shipPosition = {x:85, y:130};
@@ -7148,7 +7209,7 @@ function getCurrentMapTask(){
 
 function ensureTaskPort(task){
   if(!task?.preferredPort) return;
-  const active = ROUTE_PORTS.find(p=>p.name===selectedPortChart && p.kind==='port');
+  const active = ROUTE_PORTS.find(p=>p.name===selectedPortChart);
   if(!active) return;
   const geo = getPortChartTaskGeometry(active);
   if(task.id === 'tss' && !/traffic|canal/.test(geo.profile.template)) selectedPortChart = task.preferredPort;
@@ -7178,7 +7239,15 @@ function updateMapTaskBox(port){
   const status = document.getElementById('port-chart-taskstatus');
   const btn = document.getElementById('port-task-next');
   if(!title || !desc || !status) return;
-  const effectivePort = ROUTE_PORTS.find(p=>p.name===selectedPortChart && p.kind==='port') || port;
+  const effectivePort = ROUTE_PORTS.find(p=>p.name===selectedPortChart) || port;
+  if(effectivePort?.kind !== 'port'){
+    title.textContent = `${effectivePort?.name || 'Chart'} · Stratejik Gecit`;
+    desc.textContent = 'Bu chart liman plani degil, transit / stratejik gecit inceleme chartidir. Gorev kutusu liman chartlarinda aktif calisir; burada enlem-boylam, derinlik, reporting point ve traffic flow okumaya odaklan.';
+    status.className = 'warn';
+    status.textContent = 'Inceleme modundasin. Gorev yapmak istersen bir liman charti sec.';
+    if(btn) btn.textContent = activeMapTaskIndex === MAP_TASKS.length-1 ? 'Basa Don' : 'Sonraki';
+    return;
+  }
   title.textContent = `${task.title} · ${effectivePort?.name || ''}`;
   desc.textContent = task.desc + (task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${effectivePort.name} charti uzerindesin.` : '');
   status.className = '';
@@ -7189,6 +7258,14 @@ function updateMapTaskBox(port){
 function handlePortChartTaskClick(svg, ev, port){
   const task = getCurrentMapTask();
   if(!task || !port) return;
+  if(port.kind !== 'port'){
+    const status = document.getElementById('port-chart-taskstatus');
+    if(status){
+      status.className = 'warn';
+      status.textContent = 'Bu chart transit inceleme icin acik. Gorev kutusu liman chartlarinda aktif calisir.';
+    }
+    return;
+  }
   if(portChartDidPan){
     portChartDidPan = false;
     return;
@@ -7304,12 +7381,15 @@ function getMapRegionByPosition(pos){
 
 function getPortChartEntries(){
   return ROUTE_PORTS
-    .filter(p=>p.kind==='port')
+    .filter(p=>['port','waterway'].includes(p.kind))
     .slice()
     .sort((a,b)=>{
       const av = visitedPorts.has(a.name) ? 0 : 1;
       const bv = visitedPorts.has(b.name) ? 0 : 1;
       if(av !== bv) return av - bv;
+      const ak = a.kind==='port' ? 0 : 1;
+      const bk = b.kind==='port' ? 0 : 1;
+      if(ak !== bk) return ak - bk;
       return a.name.localeCompare(b.name,'tr');
     });
 }
@@ -7326,6 +7406,11 @@ function ensureSelectedPortChart(){
 
 function getPortChartHint(name, region){
   const hay = `${name} ${region}`.toLowerCase();
+  if(/istanbul bogazi|çanakkale bogazi|canakkale bogazi/.test(hay)) return 'Dar bogaz, akinti, yogun yerel trafik ve reporting disiplini birlikte okunur.';
+  if(/cebelitarık|cebelitarik|mans denizi|dover bogazi|skagerrak|kattegat/.test(hay)) return 'Karsilasma trafigi, separation lane, akinti ve gorus disiplinini birlikte dusun.';
+  if(/hurmuz bogazi|babulmendep|malakka bogazi|sunda bogazi|lombok bogazi/.test(hay)) return 'Stratejik trafik, reporting, guvenlik seviyesi ve dar gecit disiplinini birlikte oku.';
+  if(/mozambik kanali|drake gecidi|cape horn|macellan bogazi|bering bogazi/.test(hay)) return 'Agir hava, swell, akinti ve konservatif seyir dusuncesi one cikar.';
+  if(/panama kanali|kiel kanali|korint kanali|st\. lawrence/.test(hay)) return 'Transit chart, pilotaj, lock/kanal kurallari ve hiz kisitlari burada birlikte okunur.';
   if(/ambarlı|tekirdag|derince|gemlik|al[aı]ğa/.test(hay)) return 'Konteyner, sanayi iskeleleri, pilotaj ve Marmara trafik disiplini birlikte okunur.';
   if(/samsun|trabzon/.test(hay)) return 'Karadeniz hava degisimi, mendirek girisi ve swell etkisi birlikte dusunulur.';
   if(/iskenderun|mersin/.test(hay)) return 'Akdeniz yaklasmasi, terminal yogunlugu ve rüzgar altı etkileri one cikar.';
@@ -7344,22 +7429,23 @@ function getPortChartProfile(port){
   const latBase = (8 + (260-port.y)*0.18);
   const lonBase = (-14 + port.x*0.9);
   const isTurkishPort = /izmir|istanbul|çanakkale|canakkale|ambarlı|ambarli|aliağa|aliaga|iskenderun|gemlik|samsun|trabzon|tekirdag|derince|mersin/.test(hay);
+  const isWaterway = port.kind === 'waterway';
   const profile = {
     region,
-    maxDraft: port.y > 185 ? '14.5m' : port.y < 40 ? '12.8m' : '13.6m',
-    berth: /rotterdam|anvers|hamburg|panama|new orleans|santos|singapur|yokohama|sanghay/.test(hay) ? 'Terminal 3' : 'Berth 2',
-    pilot: /rotterdam|anvers|hamburg|panama|new orleans|santos|trieste/.test(hay) ? 'River / Pilot boarding' : 'Pilot Station',
-    hazard: /mersin|haifa|port said|suveys|cidde|dubai|abu dhabi|doha/.test(hay) ? 'Traffic lane / reporting' : 'Shallow patch',
-    approach: /rotterdam|anvers|hamburg|panama|new orleans|santos/.test(hay) ? 'Nehir / kanal yaklasmasi' : 'Acik denizden liman yaklasmasi',
+    maxDraft: isWaterway ? (port.y > 185 ? '16.8m' : '15.2m') : (port.y > 185 ? '14.5m' : port.y < 40 ? '12.8m' : '13.6m'),
+    berth: isWaterway ? 'Transit Lane' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|singapur|yokohama|sanghay/.test(hay) ? 'Terminal 3' : 'Berth 2'),
+    pilot: isWaterway ? 'Reporting / Pilot Exchange' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|trieste/.test(hay) ? 'River / Pilot boarding' : 'Pilot Station'),
+    hazard: isWaterway ? 'Transit traffic / current line' : (/mersin|haifa|port said|suveys|cidde|dubai|abu dhabi|doha/.test(hay) ? 'Traffic lane / reporting' : 'Shallow patch'),
+    approach: isWaterway ? 'Stratejik gecit / transit chart' : (/rotterdam|anvers|hamburg|panama|new orleans|santos/.test(hay) ? 'Nehir / kanal yaklasmasi' : 'Acik denizden liman yaklasmasi'),
     notes: getPortChartHint(port.name, region),
     depthA: port.y > 185 ? '16.2' : '14.8',
     depthB: port.y < 70 ? '11.4' : '12.9',
     tides: /rotterdam|anvers|hamburg|dover|marsilya|singapur/.test(hay) ? 'Gelgit / akinti etkisi var' : 'Akinti / ruzgar one cikiyor',
     chartNo:`BA ${1000 + Math.round(port.x*3 + port.y)}`,
-    publication:`Admiralty Harbour Chart`,
+    publication:isWaterway ? `Admiralty Transit Chart` : `Admiralty Harbour Chart`,
     edition:`Ed. ${2026 - (Math.round(port.x+port.y)%4)}`,
     soundDatum:'Chart Datum',
-    scale: port.x > 340 || port.x < 30 ? '1:75 000' : '1:50 000',
+    scale: isWaterway ? '1:90 000' : (port.x > 340 || port.x < 30 ? '1:75 000' : '1:50 000'),
     magVar: `${(2.1 + ((port.x+port.y)%7)*0.3).toFixed(1)}°E`,
     latA:`${Math.abs(latBase).toFixed(1)}°${latBase>=0?'N':'S'}`,
     latB:`${Math.abs(latBase-0.4).toFixed(1)}°${latBase>=0?'N':'S'}`,
@@ -7368,18 +7454,22 @@ function getPortChartProfile(port){
     template:'default'
   };
   if(isTurkishPort) profile.publication = 'Turkiye Liman Yaklasma Haritasi';
+  if(isWaterway) profile.publication = /panama kanali|kiel kanali|korint kanali|st\. lawrence|suveys/.test(hay) ? 'Canal / Transit Chart' : 'Strait / Transit Chart';
   if(/ambarlı|ambarli|tekirdag|derince|gemlik/.test(hay)) profile.template = 'terminal';
   else if(/samsun|trabzon/.test(hay)) profile.template = 'blacksea';
   if(/panama/.test(hay)) profile.template = 'river';
   else if(/ras tanura/.test(hay)) profile.template = 'oil';
   else if(/rotterdam/.test(hay)) profile.template = 'canal';
   else if(/singapur/.test(hay)) profile.template = 'traffic';
+  else if(/suveys|panama kanali|kiel kanali|korint kanali|st\. lawrence/.test(hay)) profile.template = 'canal';
+  else if(/istanbul bogazi|çanakkale bogazi|canakkale bogazi|cebelitarık|cebelitarik|mans denizi|h[uü]rmuz bogazi|babulmendep|malakka bogazi|sunda bogazi|lombok bogazi|dover bogazi|kerch bogazi|tayvan bogazi|tsugaru bogazi|kore bogazi|torres bogazi|macellan bogazi|bering bogazi|otranto bogazi|skagerrak|kattegat|drake gecidi|cape horn|mozambik kanali/.test(hay)) profile.template = 'strait';
   if(profile.template==='river') profile.scale = '1:40 000';
   if(profile.template==='oil') profile.scale = '1:35 000';
   if(profile.template==='canal') profile.scale = '1:45 000';
   if(profile.template==='traffic') profile.scale = '1:60 000';
   if(profile.template==='terminal') profile.scale = '1:25 000';
   if(profile.template==='blacksea') profile.scale = '1:32 000';
+  if(profile.template==='strait') profile.scale = '1:85 000';
   if(/singapur|yokohama|sanghay|rotterdam|anvers|hamburg/.test(hay)) profile.hazard = 'TSS / yogun trafik';
   if(/dubai|abu dhabi|doha|basra/.test(hay)) profile.hazard = 'Draft / sicak hava / traffic lane';
   if(/marsilya|napoli|pire|valensiya|malta|barselona|cenova/.test(hay)) profile.hazard = 'Breakwater / ferry traffic';
@@ -7388,6 +7478,12 @@ function getPortChartProfile(port){
   if(/ambarlı|ambarli|tekirdag|derince|gemlik/.test(hay)) profile.hazard = 'Pilot / terminal traffic / berth swing';
   if(/samsun|trabzon/.test(hay)) profile.hazard = 'Breakwater / swell / crosswind';
   if(/iskenderun|aliağa|aliaga/.test(hay)) profile.hazard = 'Industrial jetty / tug traffic';
+  if(/istanbul bogazi|çanakkale bogazi|canakkale bogazi/.test(hay)) profile.hazard = 'Counter current / local traffic / reporting';
+  if(/cebelitarık|cebelitarik|mans denizi|dover bogazi|malakka bogazi|skagerrak|kattegat/.test(hay)) profile.hazard = 'Traffic lane / crossing traffic / visibility';
+  if(/hurmuz bogazi|babulmendep|sunda bogazi|lombok bogazi/.test(hay)) profile.hazard = 'Security / reporting / narrow transit';
+  if(/macellan bogazi|drake gecidi|cape horn|mozambik kanali|bering bogazi/.test(hay)) profile.hazard = 'Heavy weather / current / conservative speed';
+  if(/istanbul bogazi|çanakkale bogazi|canakkale bogazi|malakka bogazi|dover bogazi|hurmuz bogazi|babulmendep|cebelitarık|cebelitarik|sunda bogazi|lombok bogazi|otranto bogazi/.test(hay)) profile.approach = 'Dar gecit / transit monitoring';
+  if(/skagerrak|kattegat|drake gecidi|cape horn|mozambik kanali/.test(hay)) profile.approach = 'Acik deniz gecidi / akinti ve swell takibi';
   return profile;
 }
 
