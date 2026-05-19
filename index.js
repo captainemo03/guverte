@@ -9565,16 +9565,28 @@ function buildShipPartsDiagram(){
       <path d="M52 108 L422 108 L435 102 L492 102 L482 118 L484 165 Q484 175 474 181 L70 181 Q56 181 52 170 Z" fill="url(#shipHull)" stroke="#4f4f4f" stroke-width="1.6"/>
       <path d="M52 165 L469 165 Q478 165 478 173 Q478 178 470 178 L65 178 Q55 178 52 165 Z" fill="url(#bootTop)"/>
       <path d="M52 108 L418 108" stroke="#4b4b4b" stroke-width="1.2"/>
+      <path d="M86 114 v56 M116 112 v60 M146 110 v63 M176 109 v66 M206 109 v68 M236 109 v68 M266 109 v68 M296 109 v68 M326 110 v66 M356 111 v63 M386 112 v60 M416 114 v56" stroke="#5a5a5a" stroke-width="1" opacity=".32"/>
+      <path d="M86 142 q14 12 28 0 q14 -12 28 0 q14 12 28 0 q14 -12 28 0 q14 12 28 0 q14 -12 28 0 q14 12 28 0 q14 -12 28 0 q14 12 28 0 q14 -12 28 0 q14 12 28 0" fill="none" stroke="#8d8d8d" stroke-width=".8" opacity=".18"/>
       <rect x="84" y="62" width="44" height="46" fill="#bfbfbf" stroke="#666" stroke-width="1.2"/>
       <rect x="92" y="56" width="34" height="8" fill="#d9d9d9" stroke="#777" stroke-width="1"/>
       <rect x="92" y="70" width="28" height="10" fill="#d0d0d0"/>
       <rect x="86" y="82" width="36" height="6" fill="#8ca8bf"/>
+      <path d="M142 108 V34" stroke="#4a5f72" stroke-width="3"/>
+      <path d="M142 52 h22 M142 68 h16" stroke="#4a5f72" stroke-width="2"/>
+      <path d="M142 34 l-5 -8 h10 z" fill="#d4a017"/>
       <rect x="198" y="108" width="150" height="7" fill="#7f7f7f"/>
       <rect x="196" y="104" width="154" height="4" fill="#5f5f5f" opacity=".85"/>
+      <rect x="200" y="92" width="30" height="12" rx="1.5" fill="#7d8790" stroke="#5d6770" stroke-width="1"/>
+      <rect x="238" y="92" width="30" height="12" rx="1.5" fill="#7d8790" stroke="#5d6770" stroke-width="1"/>
+      <rect x="276" y="92" width="30" height="12" rx="1.5" fill="#7d8790" stroke="#5d6770" stroke-width="1"/>
+      <rect x="314" y="92" width="30" height="12" rx="1.5" fill="#7d8790" stroke="#5d6770" stroke-width="1"/>
       <path d="M172 121 h190" stroke="#d5dde4" stroke-width="1" stroke-dasharray="4,3" opacity=".55"/>
       <path d="M118 98 h18" stroke="#dceaf4" stroke-width="2"/>
       <path d="M118 102 h18" stroke="#dceaf4" stroke-width="2"/>
       <path d="M128 98 v10" stroke="#dceaf4" stroke-width="1.2"/>
+      <path d="M128 88 q8 -20 18 -20" stroke="#dceaf4" stroke-width="2" fill="none"/>
+      <path d="M128 92 q12 -26 28 -26" stroke="#dceaf4" stroke-width="2" fill="none"/>
+      <path d="M146 68 h16 l6 6 h-16 z" fill="#d8e2ea" stroke="#7b8790" stroke-width="1"/>
       <rect x="66" y="150" width="10" height="18" rx="1.5" fill="#d6dfe6"/>
       <path d="M72 168 l-16 16" stroke="#d6dfe6" stroke-width="2"/>
       <path d="M60 180 h14" stroke="#d6dfe6" stroke-width="1.1"/>
@@ -9717,6 +9729,18 @@ function buildShipPartsDiagram(){
         <circle cx="72" cy="126" r="10" fill="rgba(138,176,200,.18)" stroke="#8ab0c8" stroke-width="1.5"/>
         <text x="67" y="130" fill="#dceaf4" font-size="9" font-family="monospace">26</text>
       </g>
+      <g class="shipparts-hotspot" data-part="frames" tabindex="0">
+        <circle cx="248" cy="154" r="10" fill="rgba(138,176,200,.18)" stroke="#8ab0c8" stroke-width="1.5"/>
+        <text x="243" y="158" fill="#dceaf4" font-size="9" font-family="monospace">27</text>
+      </g>
+      <g class="shipparts-hotspot" data-part="mainmast" tabindex="0">
+        <circle cx="164" cy="44" r="10" fill="rgba(212,160,23,.18)" stroke="#d4a017" stroke-width="1.5"/>
+        <text x="159" y="48" fill="#f4e7b4" font-size="9" font-family="monospace">28</text>
+      </g>
+      <g class="shipparts-hotspot" data-part="davit" tabindex="0">
+        <circle cx="160" cy="76" r="10" fill="rgba(212,160,23,.18)" stroke="#d4a017" stroke-width="1.5"/>
+        <text x="155" y="80" fill="#f4e7b4" font-size="9" font-family="monospace">29</text>
+      </g>
     </svg>
     <div class="shipparts-legend">
       <button class="shipparts-chip" type="button" data-part="bas">1 Pruva / Bas</button>
@@ -9745,6 +9769,9 @@ function buildShipPartsDiagram(){
       <button class="shipparts-chip" type="button" data-part="coaming">24 Hatch Coaming</button>
       <button class="shipparts-chip" type="button" data-part="thruster">25 Bow Thruster</button>
       <button class="shipparts-chip" type="button" data-part="freeingport">26 Freeing Port</button>
+      <button class="shipparts-chip" type="button" data-part="frames">27 Postalar / Frameler</button>
+      <button class="shipparts-chip" type="button" data-part="mainmast">28 Grandi Diregi</button>
+      <button class="shipparts-chip" type="button" data-part="davit">29 Matafora / Davit</button>
     </div>
     <div class="shipparts-detail" data-active-ship-part="bridge">
       <div class="shipparts-detail-head">Kopruustu</div>
@@ -9857,6 +9884,18 @@ const SHIP_PARTS_INFO = {
   freeingport:{
     head:'Freeing Port',
     body:'Guverteye gelen suyun hizla denize bosalmasi icin bulwark uzerinde birakilan tahliye acikligidir. Tikaliysa guvertede su birikir, agirlik ve kayma riski buyur.'
+  },
+  frames:{
+    head:'Postalar / Frameler',
+    body:'Postalar gemi govdesinin enine tasiyici iskeletidir. Kaplama bu iskelet uzerine oturur; darbe, yuk dagilimi ve govde formunun korunmasinda temel rol oynarlar. Ahsap teknelerde posta, celik gemilerde frame/rib mantigi diye de dusunebilirsin.'
+  },
+  mainmast:{
+    head:'Grandi Diregi',
+    body:'Ticari gemilerde masthead light, radar scanner, antenler, seyir isaretleri ve bazen yuk ekipman baglantilari bu dik yapida toplanir. Eski literaturde grandi diregi en belirgin ana direk mantigiyla anilir.'
+  },
+  davit:{
+    head:'Matafora / Davit',
+    body:'Can filikasi ya da rescue boat sistemini kontrollu sekilde denize indirmeye yarayan kol ve mesnet sistemidir. Fall, sheave, brake, limit switch, release gear ve launching proseduru birlikte dusunulur; sadece kol degil tum launching appliance zinciridir.'
   }
 };
 
