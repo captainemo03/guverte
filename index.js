@@ -3826,6 +3826,51 @@ choices:[
 {text:"Yonu soylemenin yeterli oldugunu, geri kalan yorumun ikincil oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Ruzgar isimleriyle deniz davranisi arasinda ciddi bag olmadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
 
+{id:"s388",gfx:"cargo",alert:false,day:"Gun 17",time:"15:05",loc:"Cargo Office - Ilk Ifade",sub:"Near-miss sonrasi ifadeni duzgun kur",who:"z1",
+text:`Yuk operasyonundaki near-miss buyumedi ama konu kapanmadi. 1. zabit dosyayi onune koydu:
+
+"Simdi kahramanlik ya da bahane istemiyorum. Kim, ne zaman, nerede, ne oldu?"
+
+Sahadaki olay artik resmi ifade istiyor.`,
+choices:[
+{text:"Mahal, zaman, kisiler ve olay akisina dayali net ifade veririm",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Genel bir ozet verip detaylari cok acmam",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Kimin yaptigini ustten gecip sorumlulugu dagitmaya calisirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s389",gfx:"bridge",alert:false,day:"Gun 17",time:"15:40",loc:"Toplanti Masasi - Root Cause",sub:"Kok nedeni secmek suclu secmek degildir",who:"suvari",
+text:`Suvari dosyaya bakip kalemi masaya koydu:
+
+"Kok neden demek gunah kecisi bulmak degil. Iletisim mi koptu, plan mi zayifti, ekipman mi sorunluydu, baski mi vardi?"
+
+Bu kez senden dusunerek sebep zinciri kurmani istiyor.`,
+choices:[
+{text:"Birincil kok neden ve katki yapan unsurlari ayirarak kurarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Tek bir sebep yazar, zinciri fazla acmam",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Kok nedeni kisi hatasi diye kestirip gecmeyi yeterli sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+
+{id:"s390",gfx:"cargo",alert:false,day:"Gun 17",time:"16:05",loc:"Cargo Office - Corrective Action",sub:"Bir daha olmasin diye ne degisecek?",who:"z1",
+text:`1. zabit dosyanin son kismini gosterdi:
+
+"Ayni olay yarin tekrar oluyorsa bugun yazdigin rapor cop oldu demektir. Duzeltici faaliyet gercek olacak."
+
+Senden kağıda gercekten is gorecek bir takip plani istiyor.`,
+choices:[
+{text:"Egitim, kontrol, ekipman ve sorumluyu netlestiren corrective action yazarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Genel bir dikkatli olalim notu dusmeyi yeterli gorurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Bir kez oldu bitti diye takip faaliyetini gereksiz bulurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s391",gfx:"bridge",alert:false,day:"Gun 17",time:"16:40",loc:"Acenta / Office Mail",sub:"Ofise giden rapor duygusal degil izlenebilir olur",who:"z1",
+text:`Sirketten follow-up maili geldi. Olayin ozeti, etkisi ve takip maddeleri isteniyor.
+
+1. zabit sakin bir sesle dedi ki:
+"Ofise yazarken drama degil; ne oldu, ne etkisi oldu, ne yaptik, ne takip edecegiz. Hepsi izlenebilir olacak."
+
+Kisa ama profesyonel bir ofis notu hazirliyorsun.`,
+choices:[
+{text:"Olay ozeti, etki ve takip maddelerini net raporlarim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Mesaji kisa tutup etki ve takip kısmını yuzeysel birakirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Ofisin boyle ayrintiya girmesine gerek olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -6338,6 +6383,7 @@ const tagL={cesur:"Cesur",akilli:"Akıllı",itaatkar:"İtaatkar",korkak:"Korkak"
 let mood=58;
 let delayedConsequences=[];
 let playerFlags={securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
+let careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function adjustMood(delta,reason=''){
@@ -6412,6 +6458,9 @@ function scheduleAdvancedConsequences(sc,c2){
   if(id==='s129'&&tag==='korkak'){
     playerFlags.nearMiss++;
     queueDelayedConsequence({sayginlik:-8,bilgi:-5},'Near-Miss Report','Olay resmi rapora donustu; detay vermen beklendi.',1,-2);
+  }
+  if((id==='s124'||id==='s124b'||id==='s129') && tag!=='kritik'){
+    careerMemory.investigations++;
   }
 }
 
@@ -6918,6 +6967,42 @@ const DOCUMENT_FORM_CONFIGS = {
       {id:'method', label:'Yontem', placeholder:'Orn: sequential / flow-through', keywords:['sequential','flow','through','method']},
       {id:'volume', label:'Kaydedilen islem', placeholder:'Orn: tank list / percentage / completed time', keywords:['tank','percent','time','completed','volume']}
     ]
+  },
+  s388:{
+    title:'Ilk Ifade / Near-Miss Statement',
+    hint:'Kim, ne zaman, nerede, ne oldu. Bahane degil olay akisi yazilir.',
+    fields:[
+      {id:'where', label:'Mahal / zaman', placeholder:'Orn: no.2 hatch coaming / 14:20 LT', keywords:['hatch','deck','hold','14','lt','mahal','time']},
+      {id:'what', label:'Ne oldu?', placeholder:'Orn: suspended load swung after slack sling', keywords:['load','swing','sling','halat','stop','near']},
+      {id:'who', label:'Kimler vardi?', placeholder:'Orn: crane op / bosun / AB on station', keywords:['bosun','ab','op','watch','crew']}
+    ]
+  },
+  s389:{
+    title:'Root Cause Secimi',
+    hint:'Kok neden genelde tek kelime degil; planlama, iletisim, ekipman ve gozetim bir arada dusunulur.',
+    fields:[
+      {id:'primary', label:'Birincil kok neden', placeholder:'Orn: poor communication / bad rigging plan', keywords:['communication','rigging','plan','brief','inspection']},
+      {id:'secondary', label:'Katki yapan unsur', placeholder:'Orn: time pressure / blind spot / weather', keywords:['pressure','weather','blind','fatigue','rush']},
+      {id:'evidence', label:'Dayanak', placeholder:'Orn: witness statement / gear check / permit', keywords:['witness','gear','permit','statement','check']}
+    ]
+  },
+  s390:{
+    title:'Corrective Action',
+    hint:'Bir daha olmasin diye ne degisecek? Egitim, ekipman, kontrol, prosedur...',
+    fields:[
+      {id:'action', label:'Ana faaliyet', placeholder:'Orn: revise lift plan and toolbox talk', keywords:['revise','toolbox','lift plan','inspect','replace','brief']},
+      {id:'owner', label:'Kim takip edecek?', placeholder:'Orn: chief officer / bosun / company', keywords:['chief','bosun','company','master','officer']},
+      {id:'verify', label:'Nasil dogrulanacak?', placeholder:'Orn: next operation audit / signed check', keywords:['audit','check','verify','next','drill']}
+    ]
+  },
+  s391:{
+    title:'Office Report / Follow-Up',
+    hint:'Sahadaki olay ofise giderken duygu degil izlenebilir bilgi tasir.',
+    fields:[
+      {id:'summary', label:'Kisa ozet', placeholder:'Orn: no injury, operation stopped, gear quarantined', keywords:['injury','stopped','gear','quarantine','safe']},
+      {id:'impact', label:'Etkisi', placeholder:'Orn: 45 min delay / no damage', keywords:['delay','damage','impact','safe']},
+      {id:'followup', label:'Takip', placeholder:'Orn: photos attached / corrective action pending', keywords:['photo','attached','corrective','pending','report']}
+    ]
   }
 };
 
@@ -6963,6 +7048,42 @@ const MOORING_PLAN_CONFIGS = {
       {id:'aftspring', label:'Kictan basa calisan spring hatti'},
       {id:'side', label:'Rihtima dik breast hatti'}
     ]
+  }
+};
+
+const EMERGENCY_PANEL_CONFIGS = {
+  s237:{
+    title:'MOB Ilk Dakika',
+    hint:'Sirayi kur: bagir, isaret et, goz temasi, alarm/rapor. Sonra ekipman mantigi.',
+    steps:[
+      {id:'step1', label:'1. ilk hareket', options:['MOB diye bagir','Can simidi ara','Durbunu al']},
+      {id:'step2', label:'2. ikinci hareket', options:['Tarafi isaret et / goz temasi koru','Kamaraya kos','Logbook ac']},
+      {id:'step3', label:'3. ucuncu hareket', options:['Alarm / zabite net rapor ver','Sessizce bekle','Sadece VHF’ye saril']},
+      {id:'gear', label:'Destek ekipmani', options:['Can simidi + smoke/light','Yangin baltasi','Paint bucket']}
+    ],
+    expected:{step1:'MOB diye bagir',step2:'Tarafi isaret et / goz temasi koru',step3:'Alarm / zabite net rapor ver',gear:'Can simidi + smoke/light'}
+  },
+  s238:{
+    title:'Fire Alarm Ilk Refleks',
+    hint:'Mahal teyidi, alarm zinciri, muster ve kontrol dusuncesi ayni anda kurulur.',
+    steps:[
+      {id:'step1', label:'1. ilk cevap', options:['Alarmi ciddiye al / mahali teyit et','Bir sure bekle','Tek basina kos']},
+      {id:'step2', label:'2. ikinci cevap', options:['Zabite / ekibe rapor ver','Kimseye soyleme','Yangini uzaktan tahmin et']},
+      {id:'step3', label:'3. ucuncu cevap', options:['Muster / area control / ekipman hazirligi','Kapilari acik birak','Telefon ara dur']},
+      {id:'gear', label:'Ilk uygun ekipman', options:['Report + uygun extinguisher/PPE','Can sali kilidi','Pilot ladder']}
+    ],
+    expected:{step1:'Alarmi ciddiye al / mahali teyit et',step2:'Zabite / ekibe rapor ver',step3:'Muster / area control / ekipman hazirligi',gear:'Report + uygun extinguisher/PPE'}
+  },
+  s82:{
+    title:'Abandon Ship Zinciri',
+    hint:'Panik degil sirali terk dusuncesi: muster, sayim, lifejacket, boat/raft readiness.',
+    steps:[
+      {id:'step1', label:'1. ilk adim', options:['Muster yerine git','Kamaraya saklan','Isi bitir sonra bak']},
+      {id:'step2', label:'2. ikinci adim', options:['Can yelek / immersion suit kontrolu','Foto cek','Kahve al']},
+      {id:'step3', label:'3. ucuncu adim', options:['Sayim ve komut zinciri','Tek basina filikaya atla','Herkes dagilsin']},
+      {id:'gear', label:'Hazirlik mantigi', options:['Boat/raft ready + calm accountability','Makine logu yaz','Rope ladder only']}
+    ],
+    expected:{step1:'Muster yerine git',step2:'Can yelek / immersion suit kontrolu',step3:'Sayim ve komut zinciri',gear:'Boat/raft ready + calm accountability'}
   }
 };
 
@@ -7202,6 +7323,57 @@ function renderMooringPanel(sc, ch){
   return true;
 }
 
+function getEmergencyOutcomeChoice(sc, values){
+  const cfg = EMERGENCY_PANEL_CONFIGS[sc?.id];
+  if(!cfg) return sc?.choices?.[0];
+  let score = 0;
+  Object.entries(cfg.expected).forEach(([k,v])=>{
+    if(values[k] === v) score += 2;
+  });
+  if(score >= 7) return sc.choices.find(c=>c.tag==='kritik') || sc.choices[0];
+  if(score >= 4) return sc.choices.find(c=>c.tag==='akilli' || c.tag==='itaatkar') || sc.choices[1] || sc.choices[0];
+  return sc.choices.find(c=>c.tag==='korkak') || sc.choices[sc.choices.length-1] || sc.choices[0];
+}
+
+function renderEmergencyPanel(sc, ch){
+  const panel = document.getElementById('calc-panel');
+  if(!panel) return false;
+  const cfg = EMERGENCY_PANEL_CONFIGS[sc?.id];
+  if(!cfg) return false;
+  panel.className='calc-panel show';
+  panel.innerHTML = `<div class="stowage-box mooring-box">
+    <div class="stowage-title">${cfg.title}</div>
+    <div class="stowage-hint">${cfg.hint}</div>
+    <div class="doc-grid">
+      ${cfg.steps.map(step=>`<label class="doc-field"><span class="doc-label">${step.label}</span><select class="stowage-select" data-emergency="${step.id}">${step.options.map(opt=>`<option value="${opt}">${opt}</option>`).join('')}</select></label>`).join('')}
+    </div>
+    <div class="stowage-actions">
+      <span class="stowage-meta">Acil durumda ilk dakikada sira bozulursa geri kalan her sey zorlasir.</span>
+      <button id="emergency-submit" class="doc-submit">Acil Zinciri Degerlendir</button>
+    </div>
+    <div id="emergency-feedback" class="doc-feedback"></div>
+  </div>`;
+  const submit = document.getElementById('emergency-submit');
+  const feedback = document.getElementById('emergency-feedback');
+  submit.onclick = ()=>{
+    const values = {};
+    panel.querySelectorAll('[data-emergency]').forEach(el=>{ values[el.dataset.emergency] = el.value; });
+    const picked = getEmergencyOutcomeChoice(sc, values);
+    const strong = picked && picked.tag==='kritik';
+    const mid = picked && (picked.tag==='akilli' || picked.tag==='itaatkar');
+    feedback.className = `doc-feedback ${strong ? '' : (mid ? 'warn' : 'bad')}`.trim();
+    feedback.textContent = strong
+      ? 'Acil durum sirasi oturdu; prosedur kafanda temiz.'
+      : mid
+        ? 'Temel refleks var ama adim sirani daha temiz kurman gerekir.'
+        : 'Sirayi bozdugunda acil durum panige kayar; bunu yeniden dusunmek gerekir.';
+    submit.disabled = true;
+    panel.querySelectorAll('[data-emergency]').forEach(el=>el.disabled = true);
+    setTimeout(()=>handleSceneChoice(sc, picked, ch), 850);
+  };
+  return true;
+}
+
 // ===== RASTGELE SENARYO SIRASI =====
 function buildSceneQueue(pool, totalDays, yr=selYear){
   const extraRouteScenes = getExtraRouteScenesForYear(yr);
@@ -7359,13 +7531,14 @@ function renderScene(idx){
   const hasDocPanel = renderDocumentPanel(sc, ch);
   const hasStowagePanel = renderStowagePanel(sc, ch);
   const hasMooringPanel = renderMooringPanel(sc, ch);
+  const hasEmergencyPanel = renderEmergencyPanel(sc, ch);
   getSceneRenderChoices(sc).forEach(c2=>{
     const b=document.createElement('button');b.className='cbtn';
     b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+tagL[c2.tag||'akilli']+'</span>'+c2.text;
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
-  if(sc.calc || hasDocPanel || hasStowagePanel || hasMooringPanel){
+  if(sc.calc || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
     ch.style.display='none';
   }else{
     ch.style.display='';
@@ -7432,6 +7605,17 @@ function showEnd(){
   if(playerFlags.securityBreach>0) verdict+=` Security breach riski ${playerFlags.securityBreach} kez buyudu.`;
   if(playerFlags.nearMiss>0) verdict+=` Yuk elleclemede ${playerFlags.nearMiss} near-miss kaydi olustu.`;
   if(playerFlags.sextantGood>0) verdict+=` Sextant disiplininde de kendini gosterdi.`;
+  if(careerMemory.investigations>0) verdict+=` ${careerMemory.investigations} olay resmi soruşturma/ifadeye donustu.`;
+  const bestCrew = Object.entries(crewTrust).sort((a,b)=>b[1]-a[1])[0];
+  if(bestCrew && CREW_DEFS[bestCrew[0]]) verdict+=` <br><strong>En guclu bag:</strong> ${CREW_DEFS[bestCrew[0]].name} (${bestCrew[1]}/100).`;
+  const memoryMoments = [
+    careerMemory.firstPilot?'ilk pilot':'',
+    careerMemory.firstStorm?'ilk firtina':'',
+    careerMemory.firstAllFast?'ilk all fast':'',
+    careerMemory.firstNearMiss?'ilk near-miss':'',
+    careerMemory.firstPraise?'ilk tebrik':''
+  ].filter(Boolean);
+  if(memoryMoments.length) verdict+=` <br><strong>Hatira Cizgisi:</strong> ${memoryMoments.join(', ')}.`;
   verdict+=` <br><strong>Ruh Hali:</strong> ${mood}/100 - ${moodLabel}.`;
   document.getElementById('ende').textContent=emoji;
   document.getElementById('endt').textContent=title;
@@ -7481,6 +7665,7 @@ function beginGame(){
   journalEntries=[];
   photos=[];
   seenPhotoMoments.clear();
+  careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
   shipPosition={x:selectedStartPort.x,y:selectedStartPort.y};
@@ -7516,21 +7701,27 @@ document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==
 // ===== MÜRETTEBAT İLİŞKİ SİSTEMİ =====
 const CREW_DEFS = {
   lostromo: {name:"Lostromo", icon:"🪢", title:"Güverte Ustası", trust:50,
+    style:"Seni sever ama once eline, gozune ve pratikligine bakar.",
     secrets:["Denizde 22 yıl. İlk gemisi İzmir'den İskenderiye hattıydı.","Oğlu da denizcilik okulu okuyor — bilmiyor bunu.","Ellerindeki yara izi bir halat kazasından: 1998, Kızıldeniz."],
     tips:["Güverte kontrol listesini hiç atlamama","Halat bağlama tekniklerini sormaya devam et","Sabah turuna zamanında çık"]},
   suvari: {name:"Kaptan Serra", icon:"🎖️", title:"Süvari", trust:40,
+    style:"Guvenir ama sert davranir; ozellikle durustluk ve muhakemeye bakar.",
     secrets:["Emekliliğine 3 yıl kaldı. Bilmiyor bunu henüz.","Her seferin başında gemisine 5 dakika yalnız bakıyor.","İki dil biliyor — ama İngilizce konuşmayı sevmiyor."],
     tips:["Zor sorulara dürüst cevap ver","Köprüde konuşmak için izin iste","Sorduğunda görüşünü söyle"]},
   z1: {name:"1. Zabit Ece", icon:"🧭", title:"Güverte Ops.", trust:45,
+    style:"Seni belge ve duzen uzerinden test eder; sessiz ama keskindir.",
     secrets:["Hukuk okumak istiyordu. Ailesi denizci çıkardı onu.","Her sabah 04:45'te kalkar — kimse bilmez.","Raporlarda her virgülü kontrol eder."],
     tips:["Belgeleri eksiksiz tut","Hata yaptıysan hemen bildir","Görev devrine zamanında hazır ol"]},
   z2: {name:"2. Zabit Derya", icon:"🗺️", title:"Seyir Subayı", trust:40,
+    style:"Merakini sever; sorana kapisi acilir ama bos ozguvene tahammulu yoktur.",
     secrets:["Yıldızları tanıyor — eski usul sextant hâlâ masasında.","Mühendislik fonu var, seyire geçiş hikayesi ilginç.","Gece nöbetinde caz müziği dinliyor — sessizce."],
     tips:["ECDIS notlarını düzenli tut","Radar olaylarını logla","Nöbet devrine eksiksiz brifinle"]},
   z3: {name:"3. Zabit Selin", icon:"🚒", title:"Emniyet Subayı", trust:45,
+    style:"Seni korur ama emniyet zaafina cok sert kesilir.",
     secrets:["Her tatbikat öncesi 10 dakika hazırlık yapıyor — görmeden.","SOLAS kitabını ezberden biliyor.","İlk gemisinde gerçek yangın yaşadı."],
     tips:["Muster listeni ezberle","Tatbikatlara ciddi katıl","Emniyet raporlarını atlatma"]},
   carkci: {name:"Baş Mühendis Nermin", icon:"⚙️", title:"Çarkçıbaşı", trust:35,
+    style:"Kolay guvenmez; teknik merak gorurse seni sahiplenir.",
     secrets:["Bu gemide 11 yıldır — şirketi tanıdığından beter tanıyor.","Makine dairesini kapalı gözle dolaşabilir.","İki çocuğunun fotoğrafı kontrol panelinde."],
     tips:["Makine dairesine meraklı in","Teknik soruları çekinmeden sor","Arıza loglarını takip et"]},
   bas2: {name:"2. Mühendis Aylin", icon:"🔧", title:"Makine 2. Amiri", trust:40,
@@ -7632,6 +7823,7 @@ function renderCrewCards(){
       <div><div class="crew-name">${def.name}</div><div class="crew-title-small">${def.title}</div></div>
       <span style="margin-left:auto;font-size:11px;font-family:'Share Tech Mono',monospace;color:${color};">${trust}</span>
     </div>
+    <div class="crew-title-small" style="margin-bottom:6px;color:var(--text2);line-height:1.45;">${def.style||''}</div>
     <div class="crew-trust-bar"><div class="crew-trust-fill" style="width:${trust}%;background:${color};"></div></div>
     <div class="crew-trust-lbl"><span>${trust>=70?'Güveniyor':trust>=50?'Tanışıyor':'Mesafeli'}</span><span>🔓 ${unlocked}/3</span></div>
     ${unlocked>0?`<div class="crew-unlocked">💬 "${def.secrets[unlocked-1]?.substring(0,50)}..."</div>`:''}`;
@@ -7648,7 +7840,14 @@ function toggleCrew(){
 function applyCrewEffect(who, tag){
   const key = getCrewKeyFromWho(who);
   if(!key) return;
-  const delta = tag==='sosyal'?5:tag==='akilli'?3:tag==='cesur'?2:tag==='korkak'?-5:tag==='itaatkar'?2:-2;
+  let delta = tag==='sosyal'?5:tag==='akilli'?3:tag==='cesur'?2:tag==='korkak'?-5:tag==='itaatkar'?2:-2;
+  if(key==='suvari' && (tag==='kritik' || tag==='akilli')) delta += 2;
+  if(key==='suvari' && tag==='korkak') delta -= 2;
+  if(key==='z1' && (tag==='kritik' || tag==='itaatkar')) delta += 1;
+  if(key==='z2' && (tag==='akilli' || tag==='kritik')) delta += 2;
+  if(key==='z3' && tag==='korkak') delta -= 2;
+  if(key==='lostromo' && tag==='cesur') delta += 1;
+  if(key==='carkci' && (tag==='akilli' || tag==='kritik')) delta += 1;
   updateCrewTrust(key, delta);
 }
 
@@ -11011,6 +11210,26 @@ function onSceneRender(sc){
   else if(sc.id==='s01') tryAddMomentPhoto('scene-s01', 'Ilk Adim', 'Iskeleye ilk kez ayak basiyorum...', 'harbor');
   else if(sc.id==='FINAL') tryAddMomentPhoto('scene-final', 'Son Gun', 'Bu yolculugun son sahnesi.', 'bridge');
   else maybeAddOceanPhoto(sc);
+  if(!careerMemory.firstPilot && (sc.id==='s134' || sc.id==='s361')){
+    careerMemory.firstPilot = true;
+    tryAddMomentPhoto('career-first-pilot','Ilk Pilot','Ilk ciddi pilot brifingini yasadim. Kopru bir anda daha resmi geldi.','bridge');
+  }
+  if(!careerMemory.firstStorm && (/storm/.test(sc.gfx||'') || sc.id==='kriz04' || sc.id==='kriz05b' || sc.id==='s258')){
+    careerMemory.firstStorm = true;
+    tryAddMomentPhoto('career-first-storm','Ilk Firtina','Ilk sert hava gecisinde geminin gercekten yasadigini hissettim.','storm');
+  }
+  if(!careerMemory.firstAllFast && (sc.id==='s364' || /all fast/i.test(`${sc.loc||''} ${sc.sub||''}`))){
+    careerMemory.firstAllFast = true;
+    tryAddMomentPhoto('career-first-allfast','Ilk All Fast','Halatlar oturdu, gemi rihtima nefes alarak yaslandi.','harbor');
+  }
+  if(!careerMemory.firstNearMiss && (sc.id==='s124' || sc.id==='s124b' || sc.id==='s129')){
+    careerMemory.firstNearMiss = true;
+    tryAddMomentPhoto('career-first-nearmiss','Ilk Near-Miss','Buyumeden duran bir olay bile insanin icine oturuyor.','cargo');
+  }
+  if(!careerMemory.firstPraise && (sc.id==='s371' || sc.id==='s373' || sc.id==='s384')){
+    careerMemory.firstPraise = true;
+    tryAddMomentPhoto('career-first-praise','Ilk Tebrik','Bir ustun gozunde ilk kez gercekten bir seylerin oturdugunu hissettim.','bridge');
+  }
   const hint = COLREG_HINTS[sc.id];
   if(hint && !seenColregHints.has(sc.id)){
     seenColregHints.add(sc.id);
