@@ -3871,6 +3871,28 @@ choices:[
 {text:"Mesaji kisa tutup etki ve takip kısmını yuzeysel birakirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Ofisin boyle ayrintiya girmesine gerek olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
 
+{id:"s397",gfx:"cargo",alert:false,day:"Gun 17",time:"17:15",loc:"Safety Office - Follow-Up Review",sub:"Corrective action yazildiysa nasil dogrulanacak?",who:"z1",
+text:`1. zabit dosyayi kapatmak yerine tekrar acti.
+
+"Duzeltici faaliyet yazmak kolay. Ama sorumlusu, hedef tarihi ve nasil dogrulanacagi net degilse bu rapor sadece raf doldurur."
+
+Bu noktada nasil bir profesyonellik gosterirsin?`,
+choices:[
+{text:"Sorumlu kisi, hedef tarih ve dogrulama yontemini birlikte yazarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Faaliyet yazilmis olmasini buyuk oranda yeterli gorurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Takip dogrulamasinin gereksiz formalite oldugunu dusunurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s398",gfx:"cargo",alert:false,day:"Gun 17",time:"18:00",loc:"Toolbox Corner - Lessons Learned",sub:"Near-miss sonrasi ekip ne ogrenecek?",who:"lostromo",
+text:`Lostromo ekibi kisa bir cemberde topladi.
+
+"Suclu aramak kolay. Ama herkes ayni hataya tekrar dusuyorsa rapor hic yazilmamis demektir. Ekibin aklinda ne kalacagini da kuracaksin."
+
+Senden beklenen refleks nedir?`,
+choices:[
+{text:"Toolbox talk'ta olayi tarafsiz ozetler, stop noktasi ve yeni kontrol adimini net aktaririm",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+{text:"Ekip zaten gordu diyerek ozet gecerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Bu kadar kisa olay icin ekip brifingine gerek olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
 {id:"s392",gfx:"harbor",alert:false,day:"Gun 18",time:"09:10",loc:"Boat Deck - Can Sali Kontrolu",sub:"Can sali kutusu sadece kutu degildir",who:"z3",
 text:`3. zabit boat deck'te can sali kutusunun onunde durdu.
 
@@ -7128,6 +7150,87 @@ const DOCUMENT_FORM_CONFIGS = {
       {id:'impact', label:'Etkisi', placeholder:'Orn: 45 min delay / no damage', keywords:['delay','damage','impact','safe']},
       {id:'followup', label:'Takip', placeholder:'Orn: photos attached / corrective action pending', keywords:['photo','attached','corrective','pending','report']}
     ]
+  },
+  s397:{
+    title:'Corrective Action Follow-Up',
+    hint:'Faaliyet kapaniyorsa sorumlusu, hedef tarihi ve dogrulama izi olmali.',
+    fields:[
+      {id:'owner', label:'Sorumlu', placeholder:'Orn: chief officer / bosun / terminal rep', keywords:['chief','bosun','terminal','owner','officer']},
+      {id:'target', label:'Hedef tarih', placeholder:'Orn: before next cargo operation', keywords:['next','before','date','target','operation']},
+      {id:'verify', label:'Dogrulama yontemi', placeholder:'Orn: signed check / audit / toolbox observation', keywords:['audit','check','signed','verify','toolbox','observation']}
+    ]
+  },
+  s398:{
+    title:'Lessons Learned / Toolbox Follow-Up',
+    hint:'Ekip neyi farkli yapacak? Bir sonraki operasyona tasinan net ders lazim.',
+    fields:[
+      {id:'lesson', label:'Ana ders', placeholder:'Orn: stop signal before load swing zone entry', keywords:['stop','signal','zone','entry','load','lesson']},
+      {id:'brief', label:'Ekibe nasil aktarirsin?', placeholder:'Orn: short toolbox before next lift', keywords:['toolbox','next','brief','lift','crew']},
+      {id:'control', label:'Yeni kontrol adimi', placeholder:'Orn: sling check and exclusion zone reconfirmed', keywords:['sling','zone','check','reconfirm','control']}
+    ]
+  },
+  s365:{
+    title:'Konteyner Bay / Row / Tier Karari',
+    hint:'Slot degisikligi sadece yer degisikligi degil; sequence, lashing ve reefer takibini etkiler.',
+    fields:[
+      {id:'slot', label:'Kritik slot bilgisi', placeholder:'Orn: Bay 18 Row 06 Tier 82', keywords:['bay','row','tier','18','06','82']},
+      {id:'sequence', label:'Neyi capraz kontrol edersin?', placeholder:'Orn: discharge order / lashing bridge / stack weight', keywords:['discharge','lashing','stack','weight','order']},
+      {id:'risk', label:'Asil risk', placeholder:'Orn: wrong sequence or high stack imbalance', keywords:['sequence','imbalance','stack','reefer','twistlock']}
+    ]
+  },
+  s366:{
+    title:'Tanker Manifold / Line-Up Hazirligi',
+    hint:'Line-up kagit uzerinde degil; saha, CCR ve emniyet zinciriyle dogrulanir.',
+    fields:[
+      {id:'area', label:'Saha hazirligi', placeholder:'Orn: drip tray / scupper plug / hose support ready', keywords:['drip','scupper','hose','support','ready']},
+      {id:'lineup', label:'Line-up teyidi', placeholder:'Orn: manifold to cargo tank via crossover checked', keywords:['line-up','manifold','tank','crossover','valve']},
+      {id:'safety', label:'Emniyet noktasi', placeholder:'Orn: ESD tested / vapour return confirmed', keywords:['esd','vapour','return','tested','ig']}
+    ]
+  },
+  s367:{
+    title:'Bulk Loading Sequence',
+    hint:'Ilk ambar, dagilim ve trim dusuncesi yapisal sinirlerle birlikte okunur.',
+    fields:[
+      {id:'firsthold', label:'Ilk odak', placeholder:'Orn: start center holds to control bending', keywords:['center','hold','bending','start','trim']},
+      {id:'structure', label:'Yapisal kontrol', placeholder:'Orn: shear force / bending moment watch', keywords:['shear','bending','moment','force']},
+      {id:'risk', label:'Operasyon riski', placeholder:'Orn: uneven loading and excessive stern trim', keywords:['uneven','trim','stern','draft','list']}
+    ]
+  },
+  s380:{
+    title:'Reefer / Lashing / Bay Plan',
+    hint:'Konteynerde sogutma, elektrik ve lashing ayni tabloda dusunulur.',
+    fields:[
+      {id:'reefer', label:'Reefer kontrolu', placeholder:'Orn: setpoint / power / alarm status', keywords:['setpoint','power','alarm','reefer']},
+      {id:'stow', label:'Plan bilgisi', placeholder:'Orn: bay row tier and stack weight checked', keywords:['bay','row','tier','stack','weight']},
+      {id:'lashing', label:'Baglama noktasi', placeholder:'Orn: twistlock and rod tension verified', keywords:['twistlock','rod','tension','lashing']}
+    ]
+  },
+  s381:{
+    title:'Inert Gas / ESD / Vapour Return',
+    hint:'Tanker operasyonunda tek eksik halka butun zinciri bozar.',
+    fields:[
+      {id:'ig', label:'IG / atmosfer', placeholder:'Orn: IG pressure stable, oxygen under limit', keywords:['ig','pressure','oxygen','limit']},
+      {id:'esd', label:'ESD / stop mantigi', placeholder:'Orn: ESD link tested with terminal', keywords:['esd','terminal','tested','stop']},
+      {id:'return', label:'Hat teyidi', placeholder:'Orn: vapour return and manifold lineup confirmed', keywords:['vapour','return','manifold','line-up','confirmed']}
+    ]
+  },
+  s382:{
+    title:'Bulk Hold Cleanliness / Draft / Trim',
+    hint:'Yuk uygunlugu sadece temiz ambar degil; draft ve dagilimle birlikte okunur.',
+    fields:[
+      {id:'clean', label:'Ambar uygunlugu', placeholder:'Orn: dry / odor free / previous cargo residues nil', keywords:['dry','odor','residue','clean']},
+      {id:'draft', label:'Draft / trim odagi', placeholder:'Orn: monitor mean draft and trim by stern', keywords:['draft','trim','stern','mean']},
+      {id:'loading', label:'Yukleme disiplini', placeholder:'Orn: sequence agreed with terminal and surveyor', keywords:['sequence','terminal','surveyor','agreed']}
+    ]
+  },
+  s383:{
+    title:'Project Cargo / Lifting Plan',
+    hint:'Agir yukte COG, sling angle ve exclusion zone ayni zincirdedir.',
+    fields:[
+      {id:'cog', label:'COG / agirlik merkezi', placeholder:'Orn: COG marked and verified', keywords:['cog','center','gravity','marked','verified']},
+      {id:'rigging', label:'Rigging detayi', placeholder:'Orn: sling angle and SWL checked', keywords:['sling','angle','swl','rigging']},
+      {id:'zone', label:'Saha emniyeti', placeholder:'Orn: exclusion zone and stop signal agreed', keywords:['zone','stop','signal','exclusion','agreed']}
+    ]
   }
 };
 
@@ -7827,26 +7930,32 @@ document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==
 const CREW_DEFS = {
   lostromo: {name:"Lostromo", icon:"🪢", title:"Güverte Ustası", trust:50,
     style:"Seni sever ama once eline, gozune ve pratikligine bakar.",
+    prefs:{kritik:3,akilli:1,cesur:1,sosyal:1,korkak:-3,itaatkar:0},
     secrets:["Denizde 22 yıl. İlk gemisi İzmir'den İskenderiye hattıydı.","Oğlu da denizcilik okulu okuyor — bilmiyor bunu.","Ellerindeki yara izi bir halat kazasından: 1998, Kızıldeniz."],
     tips:["Güverte kontrol listesini hiç atlamama","Halat bağlama tekniklerini sormaya devam et","Sabah turuna zamanında çık"]},
   suvari: {name:"Kaptan Serra", icon:"🎖️", title:"Süvari", trust:40,
     style:"Guvenir ama sert davranir; ozellikle durustluk ve muhakemeye bakar.",
+    prefs:{kritik:3,akilli:2,itaatkar:0,sosyal:-1,cesur:0,korkak:-4},
     secrets:["Emekliliğine 3 yıl kaldı. Bilmiyor bunu henüz.","Her seferin başında gemisine 5 dakika yalnız bakıyor.","İki dil biliyor — ama İngilizce konuşmayı sevmiyor."],
     tips:["Zor sorulara dürüst cevap ver","Köprüde konuşmak için izin iste","Sorduğunda görüşünü söyle"]},
   z1: {name:"1. Zabit Ece", icon:"🧭", title:"Güverte Ops.", trust:45,
     style:"Seni belge ve duzen uzerinden test eder; sessiz ama keskindir.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:-1,cesur:0,korkak:-3},
     secrets:["Hukuk okumak istiyordu. Ailesi denizci çıkardı onu.","Her sabah 04:45'te kalkar — kimse bilmez.","Raporlarda her virgülü kontrol eder."],
     tips:["Belgeleri eksiksiz tut","Hata yaptıysan hemen bildir","Görev devrine zamanında hazır ol"]},
   z2: {name:"2. Zabit Derya", icon:"🗺️", title:"Seyir Subayı", trust:40,
     style:"Merakini sever; sorana kapisi acilir ama bos ozguvene tahammulu yoktur.",
+    prefs:{kritik:2,akilli:3,itaatkar:0,sosyal:1,cesur:0,korkak:-3},
     secrets:["Yıldızları tanıyor — eski usul sextant hâlâ masasında.","Mühendislik fonu var, seyire geçiş hikayesi ilginç.","Gece nöbetinde caz müziği dinliyor — sessizce."],
     tips:["ECDIS notlarını düzenli tut","Radar olaylarını logla","Nöbet devrine eksiksiz brifinle"]},
   z3: {name:"3. Zabit Selin", icon:"🚒", title:"Emniyet Subayı", trust:45,
     style:"Seni korur ama emniyet zaafina cok sert kesilir.",
+    prefs:{kritik:3,akilli:1,itaatkar:0,sosyal:0,cesur:0,korkak:-4},
     secrets:["Her tatbikat öncesi 10 dakika hazırlık yapıyor — görmeden.","SOLAS kitabını ezberden biliyor.","İlk gemisinde gerçek yangın yaşadı."],
     tips:["Muster listeni ezberle","Tatbikatlara ciddi katıl","Emniyet raporlarını atlatma"]},
   carkci: {name:"Baş Mühendis Nermin", icon:"⚙️", title:"Çarkçıbaşı", trust:35,
     style:"Kolay guvenmez; teknik merak gorurse seni sahiplenir.",
+    prefs:{kritik:2,akilli:3,itaatkar:0,sosyal:-1,cesur:0,korkak:-3},
     secrets:["Bu gemide 11 yıldır — şirketi tanıdığından beter tanıyor.","Makine dairesini kapalı gözle dolaşabilir.","İki çocuğunun fotoğrafı kontrol panelinde."],
     tips:["Makine dairesine meraklı in","Teknik soruları çekinmeden sor","Arıza loglarını takip et"]},
   bas2: {name:"2. Mühendis Aylin", icon:"🔧", title:"Makine 2. Amiri", trust:40,
@@ -7940,7 +8049,7 @@ function renderCrewCards(){
     const trust = crewTrust[key] || def.trust;
     const unlocked = crewUnlocked[key] || 0;
     const color = trust>=70?'#5dbf8a':trust>=50?'#d4a017':'#c97070';
-    const label = trust>=70?'Güvenir':'GÜVEN'+trust>=50?'Tanışıyor':'Mesafeli';
+    const relation = trust>=75?'Guveniyor ama gozunu uzerinde tutuyor':trust>=55?'Seni tartiyor':trust>=40?'Mesafeyi koruyor':'Henuz kolay acilmiyor';
     const div = document.createElement('div');
     div.className = 'crew-card';
     div.innerHTML = `<div class="crew-card-top">
@@ -7949,6 +8058,7 @@ function renderCrewCards(){
       <span style="margin-left:auto;font-size:11px;font-family:'Share Tech Mono',monospace;color:${color};">${trust}</span>
     </div>
     <div class="crew-title-small" style="margin-bottom:6px;color:var(--text2);line-height:1.45;">${def.style||''}</div>
+    <div class="crew-title-small" style="margin-bottom:6px;color:${color};line-height:1.35;">${relation}</div>
     <div class="crew-trust-bar"><div class="crew-trust-fill" style="width:${trust}%;background:${color};"></div></div>
     <div class="crew-trust-lbl"><span>${trust>=70?'Güveniyor':trust>=50?'Tanışıyor':'Mesafeli'}</span><span>🔓 ${unlocked}/3</span></div>
     ${unlocked>0?`<div class="crew-unlocked">💬 "${def.secrets[unlocked-1]?.substring(0,50)}..."</div>`:''}`;
@@ -7966,6 +8076,8 @@ function applyCrewEffect(who, tag){
   const key = getCrewKeyFromWho(who);
   if(!key) return;
   let delta = tag==='sosyal'?5:tag==='akilli'?3:tag==='cesur'?2:tag==='korkak'?-5:tag==='itaatkar'?2:-2;
+  const pref = CREW_DEFS[key]?.prefs?.[tag];
+  if(typeof pref === 'number') delta += pref;
   if(key==='suvari' && (tag==='kritik' || tag==='akilli')) delta += 2;
   if(key==='suvari' && tag==='korkak') delta -= 2;
   if(key==='z1' && (tag==='kritik' || tag==='itaatkar')) delta += 1;
@@ -11472,6 +11584,11 @@ function onSceneRender(sc){
     careerMemory.firstPraise = true;
     tryAddMomentPhoto('career-first-praise','Ilk Tebrik','Bir ustun gozunde ilk kez gercekten bir seylerin oturdugunu hissettim.','bridge');
   }
+  if(sc.id==='s365') tryAddMomentPhoto('ops-container-bayplan','Konteyner Plani','Bay / row / tier baskisinin sadece sayi degil, denge ve sequence isi oldugunu ilk kez net gordum.','cargo');
+  if(sc.id==='s366' || sc.id==='s381') tryAddMomentPhoto('ops-tanker-manifold','Manifold Hatti','Terminal tarafinda line-up ve ESD teyidi bende ilk kez gercek operasyon hissi yaratti.','cargo');
+  if(sc.id==='s367' || sc.id==='s382') tryAddMomentPhoto('ops-bulk-loading','Bulk Yuk Akisi','Trim, draft ve loading order ayni anda kafamda oturmaya basladi.','cargo');
+  if(sc.id==='s383') tryAddMomentPhoto('ops-project-cargo','Agir Yuk Gunu','COG, sling angle ve exclusion zone bir anda kagittan cikti, sahaya indi.','cargo');
+  if(sc.id==='s391' || sc.id==='s397' || sc.id==='s398') tryAddMomentPhoto('career-incident-followup','Soruşturma Dosyasi','Near-miss raporunun kapanmasi degil, takibi ve dersi asil agir kismiymis.','bridge');
   const hint = COLREG_HINTS[sc.id];
   if(hint && !seenColregHints.has(sc.id)){
     seenColregHints.add(sc.id);
