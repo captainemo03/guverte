@@ -6322,6 +6322,8 @@ function getFireTrainingOverlay(sc){
     s396:`<g opacity=".98">
       <rect x="40" y="24" width="146" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
       <text x="50" y="36" fill="#ffd1d1" font-size="6.5" font-family="monospace">FIRE CLASS DECISION BOARD</text>
+      <rect x="244" y="24" width="170" height="88" rx="6" fill="rgba(3,17,28,.55)" stroke="#7fc3ff" stroke-width=".8"/>
+      <image href="assets/fire-classes-overview.png" x="246" y="26" width="166" height="84" preserveAspectRatio="xMidYMid slice"/>
       <rect x="52" y="52" width="70" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#7fc3ff" stroke-width=".8"/>
       <text x="60" y="64" fill="#cfeaff" font-size="6.2" font-family="monospace">A / B / C / D / F</text>
       <rect x="52" y="78" width="98" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
@@ -6351,6 +6353,8 @@ function getLsaTrainingOverlay(sc){
     s394:`<g opacity=".98">
       <rect x="42" y="24" width="124" height="18" rx="4" fill="rgba(3,17,28,.78)" stroke="#7fc3ff" stroke-width=".8"/>
       <text x="52" y="36" fill="#cfeaff" font-size="6.5" font-family="monospace">ENCLOSED / FREE-FALL</text>
+      <rect x="236" y="20" width="180" height="92" rx="6" fill="rgba(3,17,28,.55)" stroke="#7fc3ff" stroke-width=".8"/>
+      <image href="assets/lsa-overview.png" x="238" y="22" width="176" height="88" preserveAspectRatio="xMidYMid slice"/>
       <rect x="54" y="84" width="88" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
       <text x="64" y="98" fill="#fff4bf" font-size="6.3" font-family="monospace">LIFEBOAT TYPES</text>
       <rect x="160" y="84" width="92" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#5dbf8a" stroke-width=".8"/>
@@ -10151,7 +10155,7 @@ function buildLsaGallery(){
     {name:'Rescue Boat', type:'rescue', desc:'Terk araci degil; recovery, MOB ve hizli kurtarma gorevleri icin kullanilir.'},
     {name:'LSA Inventory', type:'inventory', desc:'Su, ration, pyro, first aid, sea anchor ve survival kit eksiksiz olmadan ekipman hazir sayilmaz.'}
   ];
-  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Can Sali / Filika Tipleri ve Icindekiler</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${lsaSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
+  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Can Sali / Filika Tipleri ve Icindekiler</div><img class="notes-photo" src="assets/lsa-overview.png" alt="Can sali ve filika tipleri"/><div class="cloud-grid">${items.map(item=>`<div class="cloud-card"><div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
 }
 
 function fireClassSvg(type){
@@ -10185,7 +10189,7 @@ function buildFireClassGallery(){
     {name:'Class F', type:'f', desc:'Galley yag yangini: wet chemical ya da fire blanket; suyla buyutulmez.'},
     {name:'Electrical', type:'elec', desc:'Pratikte once enerji kestirilir; suya kosmadan uygun CO2 veya DCP dusunulur.'}
   ];
-  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Yangin Siniflari / Uygun Sondurucu</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${fireClassSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
+  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Yangin Siniflari / Uygun Sondurucu</div><img class="notes-photo" src="assets/fire-classes-overview.png" alt="Yangin siniflari ve uygun sonduruculer"/><div class="cloud-grid">${items.map(item=>`<div class="cloud-card"><div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
 }
 
 function buildSensorCompareTable(){

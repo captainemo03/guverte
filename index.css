@@ -397,6 +397,7 @@ input[type=text]::placeholder{color:var(--text3);}
 .cloud-desc{font-size:11px;line-height:1.5;color:var(--text2);}
 .meteo-gallery-card{margin-top:10px;border:1px solid var(--border2);border-radius:8px;background:rgba(6,16,28,0.72);padding:10px;}
 .meteo-gallery-head{font-size:11px;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:8px;}
+.notes-photo{width:100%;height:auto;display:block;margin:0 0 10px 0;border-radius:8px;border:1px solid rgba(74,112,152,.28);background:#091b2d;object-fit:cover;}
 .meteo-svg{width:100%;height:auto;display:block;margin:0 0 8px 0;border-radius:6px;border:1px solid rgba(74,112,152,.25);background:linear-gradient(180deg, rgba(13,34,56,.92), rgba(7,20,34,.98));}
 .maneuver-svg{width:100%;height:auto;display:block;margin:0 0 8px 0;border-radius:6px;border:1px solid rgba(74,112,152,.25);background:linear-gradient(180deg, rgba(13,34,56,.92), rgba(7,20,34,.98));}
 .shiplight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;}
