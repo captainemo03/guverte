@@ -3871,6 +3871,50 @@ choices:[
 {text:"Mesaji kisa tutup etki ve takip kısmını yuzeysel birakirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Ofisin boyle ayrintiya girmesine gerek olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
 
+{id:"s392",gfx:"harbor",alert:false,day:"Gun 18",time:"09:10",loc:"Boat Deck - Can Sali Kontrolu",sub:"Can sali kutusu sadece kutu degildir",who:"z3",
+text:`3. zabit boat deck'te can sali kutusunun onunde durdu.
+
+"Servis tarihi, hydrostatic release, painter ve lash durumu... Bunlar kagit ustunde tik atilacak seyler degil. Terk aninda sali acilmiyorsa her sey gec kalir."
+
+Sana bakip sordu: Bir can sali kontrolunde ilk profesyonel bakis acin ne olur?`,
+choices:[
+{text:"Servis tarihi, hydrostatic release, painter baglantisi ve genel lash durumunu birlikte kontrol ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Kutunun saglam gorunmesi yeterli diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Can salinin acil durumda nasil olsa otomatik acilacagini varsayarim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s393",gfx:"harbor",alert:false,day:"Gun 18",time:"10:05",loc:"Filika Icinde - Inventory Kontrolu",sub:"Filikanin icinde ne oldugunu bilmeden filika hazir denmez",who:"z3",
+text:`Bu kez seni filikanin icine aldi. Raflar, dry ration kutulari, su paketleri, pyrotechnics, first aid ve diger malzemeler tek tek duruyordu.
+
+"Filika var demek yetmez. Icindeki inventory eksikse kapasite kagitta kalir."
+
+Senden hangi dusunceyi kurman beklenir?`,
+choices:[
+{text:"Su, ration, pyrotechnics, first aid, sea anchor, compass ve temel survival inventory'yi birlikte teyit ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Motor ve oturma yeri varsa filikanin genel olarak hazir oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Filika icindeki malzeme listesinin detayini cok kritik gormem",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s394",gfx:"harbor",alert:false,day:"Gun 18",time:"11:15",loc:"Boat Deck - Filika Tipleri",sub:"Enclosed, free-fall, rescue boat farki",who:"suvari",
+text:`Suvari uzaktan filikayi gosterdi.
+
+"Her filika ayni degil. Enclosed, free-fall, rescue boat... Gemi tipine gore roller degisir. Bazen terk icin, bazen kurtarma icin, bazen hizli recovery icin dusunursun."
+
+Sana gore en temel profesyonel ayrim hangisi?`,
+choices:[
+{text:"Tam kapali filika, free-fall ve rescue boat'un gorev ve kullanim farkini ayiririm",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Hepsini genel olarak can kurtarma araci diye ayni sinifta dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Filika tiplerinin pratikte ciddi fark yaratmadigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s395",gfx:"harbor",alert:true,day:"Gun 18",time:"12:20",loc:"Abandon Ship Hazirligi",sub:"Can sali mi, filika mi, komut zinciri mi?",who:"suvari",
+text:`Tatbikat alarmi calmadi ama suvari bilerek seni koseye sikistirdi:
+
+"Diyelim abandon ship karari geldi. Hangi aracin hangi role daha uygun oldugunu, komut zincirini ve sayimi bilmeden panik baslar."
+
+Bu kez senden sadece isim degil, duzen duymak istiyor.`,
+choices:[
+{text:"Muster, sayim, can yelegi, uygun filika/can sali ve komut zincirini birlikte dusunurum",tag:"kritik",effect:{bilgi:19,sayginlik:14,cesaret:3}},
+{text:"Once hangi araca kosacagima bakar, digerlerini sonra dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Abandon ship'te en hizli kosanin daha guvende oldugunu sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11,cesaret:-4}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -8935,6 +8979,7 @@ const STUDENT_NOTES = [
   {head:"PSC / ISPS / SOLAS / STCW", body:"PSC denetiminde evrak, emniyet ekipmani, drill kayitlari, GMDSS testleri ve gemi kondisyonu birlikte incelenir.<br>ISPS tarafinda gangway kontrolu, ziyaretci kaydi ve security level takibi esastir.<br>SOLAS can emniyeti, STCW yeterlilik ve vardiya standartlarini kurar.", tip:"Denetime her gun hazir olunur."},
   {head:"LSA / FILIKA / MATAFORA BAKIMI", body:"Can salinda servis tarihi, hydrostatic release unit (HRU), painter, lash ve konteyner kondisyonu kontrol edilir.<br>Can filikasinda inventory, drain plug, battery, engine readiness, communication set, water/ration ve release gear gozden gecirilir.<br>Can yeleklerinde light, whistle, tape, buddy line ve genel kondisyon; immersion suitte size, zipper ve sizdirmazlik mantigi okunur.<br>Matafora ve launching appliance tarafinda fall, sheave, brake, grease noktasi, limit switch ve hareket testi birlikte dusunulur.<br>Pyrotechnics, line-throwing appliance, EPIRB, SART ve handheld VHF tarih/kayit/ready durumu unutulmaz.", tip:"Acil durum ekipmani en cok lazim oldugu gun surpriz cikarmamali."},
   {head:"TATBIKATLAR / DRILL MANTIGI", body:"<b>Fire drill</b>: alarm, muster, mahal teyidi, boundary cooling, fire party, communication ve sayim zinciri kurulur.<br><b>Abandon ship drill</b>: muster list, can yelekleri, kisi sayimi, filika/can sali hazirligi ve komut zinciri uygulanir.<br><b>MOB drill</b>: bagir, tarafi isaretle, goz temasini kaybetme, alarm ve manevra zincirini baslat.<br><b>Rescue boat drill</b>: hook, painter, PPE, engine readiness ve recovery plani birlikte kontrol edilir.<br><b>Oil spill drill</b>: kaynak izolasyonu, scupper kapama, spill kit, absorbent ve raporlama birlikte gider.<br><b>Emergency steering drill</b>: kopru komutu, yerel tekrar, dumen aci teyidi ve haberlesme temiz olmali.<br><b>Enclosed space rescue drill</b>: permit, gas reading, attendant, rescue set ve standby ekip hazir tutulur.", tip:"Tatbikat ezber degil; gercek olay gelmeden koordinasyonu kas hafizasina indirme isidir."},
+  {head:"CAN SALI / FILIKA / LSA", body:"<b>Can sali (liferaft)</b> genelde paketli halde saklanir, otomatik sisme mantigiyla kullanilir ve abandon ship zincirinin temel parcalarindandir.<br><b>Can sali turleri</b>: throw-over, davit launched, reversible can sali gibi tipler gorulebilir; gemi tipine ve kapasiteye gore degisir.<br><b>Filika turleri</b>: acik filika, kismen kapali, tam kapali / enclosed lifeboat, serbest dusmeli (free-fall) ve rescue boat dusuncesi ayrilir.<br><b>Filikanin temel ozellikleri</b>: motor, yakit, sevk duzeni, release gear, painter, plug, battery/light, spray korumasi ve kisi kapasitesi.<br><b>Can salinda tipik bulunanlar</b>: su, ration, sea sickness tablet, el feneri, pyrotechnics, sponge, repair kit, thermal aid, first aid, sea anchor, paddle, bailing scoop, knife, whistle, fishing kit, drinking vessel ve talimat kartlari.<br><b>Filikada tipik bulunanlar</b>: su-ration, pyrotechnics, first aid, compass, canopied koruma, signal mirror, searchlight/light, tool kit, engine start ekipmani, bilge pompa/bailer, sea anchor, thermal protection ve muster list mantigi.<br><b>Kontrol mantigi</b>: servis tarihi, hydrostatic release, painter, lash, drain plug, battery/light, hook/release, yakit, inventory ve launching arrangement birlikte bakilir.", tip:"Can kurtarma ekipmani sadece kutu degil; terk aninda hayatta kalma zinciridir."},
   {head:"YANGIN EKIPMANI NASIL KULLANILIR", body:"<b>Hydrant / hose / nozzle</b>: once uygun hydrant secilir, hortum serilir, nozzle ayari verilir, su hattina kademeli basinilir; ekip asla kontrolsuz su yemez.<br><b>Portable extinguisher</b>: pimi cek, tabana yonel, sweep hareketiyle kullan; ruzgar ve kacis yolu dusunulmeden girilmez.<br><b>CO2</b>: canli mahal veya enerjili panelde prosedursuz acilmaz; mahal izolasyonu ve personel sayimi hayati onemdedir.<br><b>Foam</b>: yanici sivilarda yuzeyi orterek oksijeni keser; kopugu dagitacak sert jet kullanilmaz.<br><b>Dry Powder</b>: hizli knock-down saglar ama gorusu bozar; elektrik ve gaz risklerinde senaryoya gore kullanilir.<br><b>Wet Chemical / Fire Blanket</b>: mutfak yag yanginlarinda ilk akla gelen medyalardandir; suyla tepki buyutulmez.<br><b>SCBA</b>: basinc, maske sizdirmazligi, demand valve, harness, alarm ve buddy check tamamlanmadan entry baslamaz.", tip:"Yanginda hiz onemlidir ama dogru medya ve dogru prosedur daha onemlidir."},
   {head:"ILK YARDIMDA ILK ADIMLAR", body:"<b>1. Sahayi emniyete al</b>: once kendini ve ortamı koru; elektrik, duman, gaz, dusme riski varsa kontrolsuz yaklasma.<br><b>2. Bilinc kontrolu</b>: sesli ve hafif dokunsal uyariyla tepki var mi bak.<br><b>3. Solunum ve hava yolu</b>: hava yolunu ac, normal solunum var mi degerlendir.<br><b>4. Yardim cagir</b>: amire, bridge'e veya medical support zincirine net bilgi ver.<br><b>5. Kanama kontrolu</b>: dogrudan basiyla durdurmaya calis; buyuk kanamada zaman kaybetme.<br><b>6. Yanikta</b>: uygun sogutma yap, yag/kimyasal/elektrik ayrimini dusun, rastgele krem-surme hatasina dusme.<br><b>7. Dumandan etkilenmede</b>: temiz hava, bilinç-solunum takibi ve ileri yardim zinciri onceliklidir.<br><b>8. Supheli kirik / dusme</b>: gereksiz oynatma; omurga veya boyun riski varsa sabitleyerek bekle.<br><b>9. Kayit</b>: saat, belirti ve yapilan ilk mudahale not edilir; gemide bilgi kaybolmasin.", tip:"Ilk yardim kahramanlik degil; sirayi bozmadan hayat fonksiyonlarini koruma isidir."},
   {head:"DEMIR ZINCIRI / KILIT MARKALARI", body:"Bir kilit / shackle genelde <b>15 fathom</b> yani yaklasik <b>27.5 metre</b> kabul edilir.<br>Zincir marking sisteminde joining shackle cevresindeki boyali baklalar ve tel sargilari hangi kilidin suda oldugunu hizlica anlamak icin kullanilir.<br>Gemiden gemiye renk ve tel duzeni degisebilir; esas olan geminin kendi <b>chain marking plan</b>ini bilmektir.<br>Pruva ustunde rapor verirken 'birinci kilit suya girdi', 'ucuncu kilit suya girdi' gibi net ve yuksek sesli ifade kullanilir.<br>Kaloma verirken sadece sayi degil; zincirin hizi, fren durumu ve davranisi da izlenir.", tip:"Ezber renk degil, gemide uygulanan marking sistemi esastir."},
