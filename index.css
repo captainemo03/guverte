@@ -142,6 +142,9 @@ input[type=text]::placeholder{color:var(--text3);}
 .doc-box{background:rgba(7,19,36,0.88);border:1px solid var(--border);border-radius:10px;padding:10px 11px;box-shadow:0 6px 18px rgba(0,0,0,.18);}
 .doc-title{font-size:11px;font-weight:600;color:var(--gold);margin-bottom:6px;}
 .doc-hint{font-size:10px;color:var(--text3);line-height:1.6;margin-bottom:8px;}
+.doc-visual{margin:0 0 10px 0;border:1px solid rgba(111,146,178,0.22);border-radius:10px;background:rgba(8,22,40,0.72);padding:8px;}
+.doc-visual svg{width:100%;height:auto;display:block;border-radius:8px;background:linear-gradient(180deg, rgba(13,34,56,.92), rgba(7,20,34,.98));}
+.doc-visual-caption{margin-top:6px;font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;line-height:1.5;}
 .doc-grid{display:grid;gap:8px;}
 .doc-field{display:flex;flex-direction:column;gap:4px;}
 .doc-label{font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace;}

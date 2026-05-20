@@ -7387,6 +7387,67 @@ function getMooringOutcomeChoice(sc, values){
   return sc.choices.find(c=>c.tag==='korkak') || sc.choices[sc.choices.length-1] || sc.choices[0];
 }
 
+function getOperationDocVisual(sc){
+  switch(sc?.id){
+    case 's365':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Bay row tier semasi">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="22" y="20" fill="#f4d172" font-size="10" font-family="monospace">BAY / ROW / TIER</text>
+        <g transform="translate(28 34)">
+          <rect x="0" y="12" width="210" height="58" rx="8" fill="#122a43" stroke="#35597c"/>
+          <line x1="70" y1="12" x2="70" y2="70" stroke="#4a7098"/><line x1="140" y1="12" x2="140" y2="70" stroke="#4a7098"/>
+          <line x1="0" y1="31" x2="210" y2="31" stroke="#4a7098"/><line x1="0" y1="50" x2="210" y2="50" stroke="#4a7098"/>
+          <rect x="72" y="14" width="66" height="16" fill="#d97357"/><rect x="72" y="33" width="66" height="16" fill="#5d8fd6"/><rect x="72" y="52" width="66" height="16" fill="#f4d172"/>
+          <text x="98" y="9" fill="#cfeaff" font-size="8" font-family="monospace">ROW 06</text>
+          <text x="2" y="86" fill="#cfeaff" font-size="8" font-family="monospace">BAY 18</text>
+          <text x="224" y="22" fill="#81f7b8" font-size="8" font-family="monospace">TIER 82</text>
+          <text x="224" y="40" fill="#fff4bf" font-size="8" font-family="monospace">REEFER POWER</text>
+          <text x="224" y="58" fill="#ffb0b0" font-size="8" font-family="monospace">LASH / STACK WT</text>
+        </g></svg><div class="doc-visual-caption">Slot degisikligi sequence, reefer ve lashing zincirini birlikte etkiler.</div></div>`;
+    case 's366':
+    case 's381':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Manifold line up semasi">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="20" y="20" fill="#f4d172" font-size="10" font-family="monospace">MANIFOLD / LINE-UP / ESD</text>
+        <rect x="24" y="44" width="58" height="34" rx="6" fill="#12324d" stroke="#4a7098"/>
+        <text x="35" y="64" fill="#cfeaff" font-size="8" font-family="monospace">SHORE</text>
+        <path d="M82 61 H154" stroke="#7fc3ff" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="118" cy="61" r="7" fill="#ffd45a"/><text x="112" y="64" fill="#14263d" font-size="7" font-family="monospace">V</text>
+        <rect x="154" y="44" width="70" height="34" rx="6" fill="#173650" stroke="#7fc3ff"/>
+        <text x="166" y="64" fill="#cfeaff" font-size="8" font-family="monospace">MANIFOLD</text>
+        <path d="M224 61 H294" stroke="#81f7b8" stroke-width="5" stroke-linecap="round"/>
+        <rect x="252" y="38" width="42" height="18" rx="4" fill="#3f1313" stroke="#c97070"/>
+        <text x="260" y="50" fill="#ffd1d1" font-size="7" font-family="monospace">ESD</text>
+        <text x="208" y="92" fill="#fff4bf" font-size="8" font-family="monospace">DRIP TRAY / SCUPPER / VAPOUR RETURN</text>
+      </svg><div class="doc-visual-caption">Saha hazirligi, valf dizilimi ve terminal teyidi ayni anda okunur.</div></div>`;
+    case 's367':
+    case 's382':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Bulk loading semasi">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="22" y="20" fill="#f4d172" font-size="10" font-family="monospace">LOADING SEQUENCE / TRIM</text>
+        <path d="M24 78 L62 42 H254 L290 78 L286 92 H28 Z" fill="#18324e" stroke="#4a7098"/>
+        <line x1="110" y1="42" x2="110" y2="90" stroke="#4a7098"/><line x1="182" y1="42" x2="182" y2="90" stroke="#4a7098"/>
+        <rect x="26" y="80" width="82" height="10" fill="#7fc3ff" opacity=".5"/><rect x="110" y="72" width="72" height="18" fill="#81f7b8" opacity=".55"/><rect x="184" y="80" width="102" height="10" fill="#ffd45a" opacity=".5"/>
+        <text x="40" y="104" fill="#cfeaff" font-size="8" font-family="monospace">H1</text><text x="142" y="104" fill="#cfeaff" font-size="8" font-family="monospace">H2</text><text x="238" y="104" fill="#cfeaff" font-size="8" font-family="monospace">H3</text>
+        <text x="210" y="36" fill="#ffb0b0" font-size="8" font-family="monospace">SHEAR / BM WATCH</text>
+      </svg><div class="doc-visual-caption">Ilk ambar secimi trimi ve yapisal limitleri birlikte etkiler.</div></div>`;
+    case 's383':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Project cargo lifting plan">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">LIFTING PLAN / COG / SLING ANGLE</text>
+        <rect x="112" y="62" width="92" height="28" rx="4" fill="#d97357" stroke="#8f432f"/>
+        <circle cx="158" cy="76" r="5" fill="#ffd45a"/><text x="149" y="57" fill="#fff4bf" font-size="8" font-family="monospace">COG</text>
+        <path d="M100 26 L144 62 M220 26 L172 62" stroke="#7fc3ff" stroke-width="4" stroke-linecap="round"/>
+        <path d="M160 18 V62" stroke="#dceaf4" stroke-width="3" stroke-dasharray="4,3"/>
+        <path d="M40 96 H280" stroke="#c97070" stroke-width="3" stroke-dasharray="6,4"/>
+        <text x="42" y="110" fill="#ffb0b0" font-size="8" font-family="monospace">EXCLUSION ZONE</text>
+        <text x="224" y="42" fill="#81f7b8" font-size="8" font-family="monospace">SWL / ANGLE</text>
+      </svg><div class="doc-visual-caption">Agir yukte merkez, baglama acisi ve saha emniyeti ayni planin parcasi olur.</div></div>`;
+    default:
+      return '';
+  }
+}
+
 function renderDocumentPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
   if(!panel) return false;
@@ -7396,6 +7457,7 @@ function renderDocumentPanel(sc, ch){
   panel.innerHTML = `<div class="doc-box">
     <div class="doc-title">${cfg.title}</div>
     <div class="doc-hint">${cfg.hint}</div>
+    ${getOperationDocVisual(sc)}
     <div class="doc-grid">
       ${cfg.fields.map(f=>`<label class="doc-field"><span class="doc-label">${f.label}</span><input class="doc-input ${f.mono?'mono':''}" data-doc-field="${f.id}" type="text" placeholder="${f.placeholder}"></label>`).join('')}
     </div>
