@@ -3780,6 +3780,52 @@ choices:[
 {text:"Kren kapasitesi yetiyorsa detaylarin saha icinde cozulur diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Agir yukte asilin sadece tonaj oldugunu sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
 
+{id:"s384",gfx:"meteo_panel",alert:false,day:"Gun 16",time:"18:25",loc:"Kopruustu - Aksam Ustu Ufku",sub:"Kaptan buluta baktiriyor",who:"suvari",
+text:`Suvari seni bridge wing'e cikardi. Ufukta kat kat, ince ve tuy gibi acilan bir bulut serisi vardi.
+
+Kaptan gozunu kisip sordu:
+"Anlat bakalim stajyer... Bu hangi bulut? Sadece adini degil, denizciye ne anlatir onu da soyle."
+
+Senden ezber degil, gozleme dayali cevap bekliyor.`,
+choices:[
+{text:"Cirrus oldugunu, yaklasan front ya da hava degisiminin habercisi olabilecegini soylerim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Yuksek ve ince oldugunu gorup genel bir bulut cevabi veririm",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Bulut tiplerinin vardiyada pek fark yaratmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s385",gfx:"meteo_panel",alert:false,day:"Gun 16",time:"18:50",loc:"Kopruustu - Guzel Hava Ama Dikey Gelisim",sub:"CB'yi zamaninda tanimak",who:"suvari",
+text:`Bu kez ufukta yukselen, basi yayilmis iri bir bulut gosterdı.
+
+"Bunu gordugunde kartpostallik bulut diye gecersen bir gun squall'i yersin," dedi kaptan.
+"Ne bu? Ve niye onemli?"
+
+Sesinden sorunun sadece isim sorusu olmadigi belliydi.`,
+choices:[
+{text:"Cumulonimbus der, saganak, yildirim, ani ruzgar ve gorus bozulmasi riski tasidigini eklerim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Buyuk bir cumulus oldugunu soyler ama etkisini net baglamam",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Yagis varsa yagis vardir deyip ayrintiyi gereksiz bulurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
+{id:"s386",gfx:"bridge",alert:false,day:"Gun 17",time:"06:40",loc:"Acik Guverte - Sabah Ruzgari",sub:"Lodos mu, poyraz mi, karayel mi?",who:"suvari",
+text:`Sabah erken. Ruzgar yuzune yanik ama yumusak vuruyor. Kaptan sancak omuzluga yaslanip sordu:
+
+"Pruvaya gore degil, cografi dusun. Bu esen ne ruzgari? Lodos mu, poyraz mi, karayel mi? Nereden geldigini anlarsan havayi da anlarsin."
+
+Senden sadece yon degil, denizci dusuncesi duymak istiyor.`,
+choices:[
+{text:"Ruzgar yonunu derece ve cografi adla birlikte okur, ornegin SW ise lodos derim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+{text:"Sadece iskele/sancak tarafindan geldigini soylerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Geleneksel ruzgar adlarini gereksiz eski bilgi gibi gorurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+
+{id:"s387",gfx:"bridge",alert:false,day:"Gun 17",time:"07:05",loc:"Monkey Island - Ruzgar ve Deniz Okumasi",sub:"Kible, kesisleme ve denizin davranisi",who:"suvari",
+text:`Kaptan seni monkey island'a kadar cikardi. Asagida deniz uzun ve duzensiz akiyordu.
+
+"Tamam," dedi. "Diyelim ruzgar guneyden, yani kible. Peki bu sana sadece isim mi soyler? Yoksa sicaklik, nem, deniz karakteri, yakin hava degisimi hakkinda da bir sey soyler mi?"
+
+Bu kez soru biraz daha usta isi geldi.`,
+choices:[
+{text:"Ruzgar adinin yonle birlikte hava karakteri, nem ve deniz davranisi hakkinda ipucu verdigini soylerim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+{text:"Yonu soylemenin yeterli oldugunu, geri kalan yorumun ikincil oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Ruzgar isimleriyle deniz davranisi arasinda ciddi bag olmadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
