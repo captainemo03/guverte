@@ -3915,6 +3915,17 @@ choices:[
 {text:"Once hangi araca kosacagima bakar, digerlerini sonra dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Abandon ship'te en hizli kosanin daha guvende oldugunu sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11,cesaret:-4}}]},
 
+{id:"s396",gfx:"fire",alert:false,day:"Gun 18",time:"14:35",loc:"Fire Control Station",sub:"Yangin siniflari ve uygun medya secimi",who:"z3",
+text:`3. zabit bu kez seni yangin siniflari panosunun onune aldi.
+
+"Ezber istemiyorum. Hangi yangina neden o medya gittigini kur. Class A, B, C, D, F... Bir de pratikte elektrik paneli ile galley yagini ayni kefeye koyma."
+
+Senden nasil bir dusunce beklenir?`,
+choices:[
+{text:"Sinifi ayirir; katida su/foam, sivida foam veya uygun DCP, gazda izolasyon ve DCP, mutfak yaginda wet chemical / blanket mantigi kurarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+{text:"Birkaç temel ayrimi bilsem yeter diyerek siniflari yuzeysel gecerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+{text:"Yangin siniflarinin pratikte cok fark yaratmadigini dusunurum",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -6250,6 +6261,24 @@ function getCommsDeviceOverlay(sc){
 function getFireTrainingOverlay(sc){
   if(!sc) return '';
   const map = {
+    s251:`<g opacity=".98">
+      <rect x="44" y="24" width="134" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
+      <text x="54" y="36" fill="#ffd1d1" font-size="6.5" font-family="monospace">CLASS A / B / C / D / F</text>
+      <rect x="52" y="54" width="68" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="60" y="66" fill="#cfeaff" font-size="6.2" font-family="monospace">A = WATER / FOAM</text>
+      <rect x="52" y="78" width="76" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="60" y="90" fill="#fff4bf" font-size="6.2" font-family="monospace">B = FOAM / DCP</text>
+      <rect x="52" y="102" width="74" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#81f7b8" stroke-width=".8"/>
+      <text x="60" y="114" fill="#b8ffe0" font-size="6.2" font-family="monospace">F = WET CHEM</text>
+    </g>`,
+    s252:`<g opacity=".98">
+      <rect x="46" y="28" width="126" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
+      <text x="56" y="40" fill="#ffd1d1" font-size="6.5" font-family="monospace">GALLEY OIL != ELEC PANEL</text>
+      <rect x="50" y="82" width="110" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="60" y="96" fill="#fff4bf" font-size="6.2" font-family="monospace">GALLEY = WET CHEM / BLANKET</text>
+      <rect x="186" y="82" width="110" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="198" y="96" fill="#cfeaff" font-size="6.2" font-family="monospace">ELEC = ISOLATE / CO2</text>
+    </g>`,
     s283:`<g opacity=".98">
       <rect x="54" y="24" width="146" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
       <text x="64" y="36" fill="#ffd1d1" font-size="6.5" font-family="monospace">DISTRESS -> POSITION -> NATURE</text>
@@ -6289,6 +6318,53 @@ function getFireTrainingOverlay(sc){
       <text x="72" y="87" fill="#fff4bf" font-size="6.5" font-family="monospace">CO2 / DCP</text>
       <rect x="54" y="102" width="112" height="20" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
       <text x="64" y="115" fill="#ffd1d1" font-size="6.5" font-family="monospace">WET CHEMICAL / GALLEY</text>
+    </g>`,
+    s396:`<g opacity=".98">
+      <rect x="40" y="24" width="146" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
+      <text x="50" y="36" fill="#ffd1d1" font-size="6.5" font-family="monospace">FIRE CLASS DECISION BOARD</text>
+      <rect x="52" y="52" width="70" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="60" y="64" fill="#cfeaff" font-size="6.2" font-family="monospace">A / B / C / D / F</text>
+      <rect x="52" y="78" width="98" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="60" y="90" fill="#fff4bf" font-size="6.2" font-family="monospace">MATCH MEDIA TO FIRE</text>
+      <rect x="52" y="104" width="118" height="18" rx="4" fill="rgba(3,17,28,.75)" stroke="#81f7b8" stroke-width=".8"/>
+      <text x="60" y="116" fill="#b8ffe0" font-size="6.2" font-family="monospace">WRONG MEDIA = BIGGER RISK</text>
+    </g>`
+  };
+  return map[sc.id] || '';
+}
+
+function getLsaTrainingOverlay(sc){
+  if(!sc) return '';
+  const map = {
+    s392:`<g opacity=".98">
+      <rect x="42" y="24" width="146" height="18" rx="4" fill="rgba(3,17,28,.78)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="52" y="36" fill="#cfeaff" font-size="6.5" font-family="monospace">RAFT / SERVICE / HRU / PAINTER</text>
+      <rect x="52" y="86" width="110" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="64" y="100" fill="#fff4bf" font-size="6.3" font-family="monospace">LASH / DATE / HRU</text>
+    </g>`,
+    s393:`<g opacity=".98">
+      <rect x="42" y="24" width="150" height="18" rx="4" fill="rgba(3,17,28,.78)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="52" y="36" fill="#cfeaff" font-size="6.5" font-family="monospace">WATER / RATION / PYRO / FIRST AID</text>
+      <rect x="284" y="84" width="118" height="24" rx="4" fill="rgba(3,17,28,.75)" stroke="#5dbf8a" stroke-width=".8"/>
+      <text x="294" y="98" fill="#81f7b8" font-size="6.3" font-family="monospace">SEA ANCHOR / COMPASS</text>
+    </g>`,
+    s394:`<g opacity=".98">
+      <rect x="42" y="24" width="124" height="18" rx="4" fill="rgba(3,17,28,.78)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="52" y="36" fill="#cfeaff" font-size="6.5" font-family="monospace">ENCLOSED / FREE-FALL</text>
+      <rect x="54" y="84" width="88" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="64" y="98" fill="#fff4bf" font-size="6.3" font-family="monospace">LIFEBOAT TYPES</text>
+      <rect x="160" y="84" width="92" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#5dbf8a" stroke-width=".8"/>
+      <text x="172" y="98" fill="#81f7b8" font-size="6.3" font-family="monospace">RESCUE BOAT</text>
+    </g>`,
+    s395:`<g opacity=".98">
+      <rect x="40" y="24" width="150" height="18" rx="4" fill="rgba(58,11,11,.72)" stroke="#c97070" stroke-width=".8"/>
+      <text x="50" y="36" fill="#ffd1d1" font-size="6.5" font-family="monospace">MUSTER / COUNT / BOAT OR RAFT</text>
+      <rect x="54" y="84" width="90" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#7fc3ff" stroke-width=".8"/>
+      <text x="66" y="98" fill="#cfeaff" font-size="6.3" font-family="monospace">LIFEJACKET</text>
+      <rect x="160" y="84" width="102" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#ffd45a" stroke-width=".8"/>
+      <text x="172" y="98" fill="#fff4bf" font-size="6.3" font-family="monospace">COMMAND CHAIN</text>
+      <rect x="278" y="84" width="110" height="22" rx="4" fill="rgba(3,17,28,.75)" stroke="#5dbf8a" stroke-width=".8"/>
+      <text x="290" y="98" fill="#81f7b8" font-size="6.3" font-family="monospace">BOAT / RAFT READY</text>
     </g>`
   };
   return map[sc.id] || '';
@@ -6404,6 +6480,7 @@ function getSceneOverlay(gfx,sc){
   extra += getCommsDeviceOverlay(sc);
   extra += getFireTrainingOverlay(sc);
   extra += getDrillTrainingOverlay(sc);
+  extra += getLsaTrainingOverlay(sc);
   if((gfx==='compass'||gfx==='bridge') && sc && (sc.ecdisPlanKey || sc.sub?.toLowerCase().includes('ecdis') || sc.sub?.toLowerCase().includes('seyir plani') || sc.loc?.toLowerCase().includes('ecdis'))){
     extra += getEcdisRouteOverlay(sc);
   }
@@ -8979,8 +9056,8 @@ const STUDENT_NOTES = [
   {head:"PSC / ISPS / SOLAS / STCW", body:"PSC denetiminde evrak, emniyet ekipmani, drill kayitlari, GMDSS testleri ve gemi kondisyonu birlikte incelenir.<br>ISPS tarafinda gangway kontrolu, ziyaretci kaydi ve security level takibi esastir.<br>SOLAS can emniyeti, STCW yeterlilik ve vardiya standartlarini kurar.", tip:"Denetime her gun hazir olunur."},
   {head:"LSA / FILIKA / MATAFORA BAKIMI", body:"Can salinda servis tarihi, hydrostatic release unit (HRU), painter, lash ve konteyner kondisyonu kontrol edilir.<br>Can filikasinda inventory, drain plug, battery, engine readiness, communication set, water/ration ve release gear gozden gecirilir.<br>Can yeleklerinde light, whistle, tape, buddy line ve genel kondisyon; immersion suitte size, zipper ve sizdirmazlik mantigi okunur.<br>Matafora ve launching appliance tarafinda fall, sheave, brake, grease noktasi, limit switch ve hareket testi birlikte dusunulur.<br>Pyrotechnics, line-throwing appliance, EPIRB, SART ve handheld VHF tarih/kayit/ready durumu unutulmaz.", tip:"Acil durum ekipmani en cok lazim oldugu gun surpriz cikarmamali."},
   {head:"TATBIKATLAR / DRILL MANTIGI", body:"<b>Fire drill</b>: alarm, muster, mahal teyidi, boundary cooling, fire party, communication ve sayim zinciri kurulur.<br><b>Abandon ship drill</b>: muster list, can yelekleri, kisi sayimi, filika/can sali hazirligi ve komut zinciri uygulanir.<br><b>MOB drill</b>: bagir, tarafi isaretle, goz temasini kaybetme, alarm ve manevra zincirini baslat.<br><b>Rescue boat drill</b>: hook, painter, PPE, engine readiness ve recovery plani birlikte kontrol edilir.<br><b>Oil spill drill</b>: kaynak izolasyonu, scupper kapama, spill kit, absorbent ve raporlama birlikte gider.<br><b>Emergency steering drill</b>: kopru komutu, yerel tekrar, dumen aci teyidi ve haberlesme temiz olmali.<br><b>Enclosed space rescue drill</b>: permit, gas reading, attendant, rescue set ve standby ekip hazir tutulur.", tip:"Tatbikat ezber degil; gercek olay gelmeden koordinasyonu kas hafizasina indirme isidir."},
-  {head:"CAN SALI / FILIKA / LSA", body:"<b>Can sali (liferaft)</b> genelde paketli halde saklanir, otomatik sisme mantigiyla kullanilir ve abandon ship zincirinin temel parcalarindandir.<br><b>Can sali turleri</b>: throw-over, davit launched, reversible can sali gibi tipler gorulebilir; gemi tipine ve kapasiteye gore degisir.<br><b>Filika turleri</b>: acik filika, kismen kapali, tam kapali / enclosed lifeboat, serbest dusmeli (free-fall) ve rescue boat dusuncesi ayrilir.<br><b>Filikanin temel ozellikleri</b>: motor, yakit, sevk duzeni, release gear, painter, plug, battery/light, spray korumasi ve kisi kapasitesi.<br><b>Can salinda tipik bulunanlar</b>: su, ration, sea sickness tablet, el feneri, pyrotechnics, sponge, repair kit, thermal aid, first aid, sea anchor, paddle, bailing scoop, knife, whistle, fishing kit, drinking vessel ve talimat kartlari.<br><b>Filikada tipik bulunanlar</b>: su-ration, pyrotechnics, first aid, compass, canopied koruma, signal mirror, searchlight/light, tool kit, engine start ekipmani, bilge pompa/bailer, sea anchor, thermal protection ve muster list mantigi.<br><b>Kontrol mantigi</b>: servis tarihi, hydrostatic release, painter, lash, drain plug, battery/light, hook/release, yakit, inventory ve launching arrangement birlikte bakilir.", tip:"Can kurtarma ekipmani sadece kutu degil; terk aninda hayatta kalma zinciridir."},
-  {head:"YANGIN EKIPMANI NASIL KULLANILIR", body:"<b>Hydrant / hose / nozzle</b>: once uygun hydrant secilir, hortum serilir, nozzle ayari verilir, su hattina kademeli basinilir; ekip asla kontrolsuz su yemez.<br><b>Portable extinguisher</b>: pimi cek, tabana yonel, sweep hareketiyle kullan; ruzgar ve kacis yolu dusunulmeden girilmez.<br><b>CO2</b>: canli mahal veya enerjili panelde prosedursuz acilmaz; mahal izolasyonu ve personel sayimi hayati onemdedir.<br><b>Foam</b>: yanici sivilarda yuzeyi orterek oksijeni keser; kopugu dagitacak sert jet kullanilmaz.<br><b>Dry Powder</b>: hizli knock-down saglar ama gorusu bozar; elektrik ve gaz risklerinde senaryoya gore kullanilir.<br><b>Wet Chemical / Fire Blanket</b>: mutfak yag yanginlarinda ilk akla gelen medyalardandir; suyla tepki buyutulmez.<br><b>SCBA</b>: basinc, maske sizdirmazligi, demand valve, harness, alarm ve buddy check tamamlanmadan entry baslamaz.", tip:"Yanginda hiz onemlidir ama dogru medya ve dogru prosedur daha onemlidir."},
+  {head:"CAN SALI / FILIKA / LSA", body:"<b>Can sali (liferaft)</b> genelde paketli halde saklanir, otomatik sisme mantigiyla kullanilir ve abandon ship zincirinin temel parcalarindandir.<br><b>Can sali turleri</b>: throw-over, davit launched, reversible can sali gibi tipler gorulebilir; gemi tipine ve kapasiteye gore degisir.<br><b>Filika turleri</b>: acik filika, kismen kapali, tam kapali / enclosed lifeboat, serbest dusmeli (free-fall) ve rescue boat dusuncesi ayrilir.<br><b>Filikanin temel ozellikleri</b>: motor, yakit, sevk duzeni, release gear, painter, plug, battery/light, spray korumasi ve kisi kapasitesi.<br><b>Can salinda tipik bulunanlar</b>: su, ration, sea sickness tablet, el feneri, pyrotechnics, sponge, repair kit, thermal aid, first aid, sea anchor, paddle, bailing scoop, knife, whistle, fishing kit, drinking vessel ve talimat kartlari.<br><b>Filikada tipik bulunanlar</b>: su-ration, pyrotechnics, first aid, compass, canopied koruma, signal mirror, searchlight/light, tool kit, engine start ekipmani, bilge pompa/bailer, sea anchor, thermal protection ve muster list mantigi.<br><b>Kontrol mantigi</b>: servis tarihi, hydrostatic release, painter, lash, drain plug, battery/light, hook/release, yakit, inventory ve launching arrangement birlikte bakilir.<br><br>"+buildLsaGallery(), tip:"Can kurtarma ekipmani sadece kutu degil; terk aninda hayatta kalma zinciridir."},
+  {head:"YANGIN EKIPMANI NASIL KULLANILIR", body:"<b>Hydrant / hose / nozzle</b>: once uygun hydrant secilir, hortum serilir, nozzle ayari verilir, su hattina kademeli basinilir; ekip asla kontrolsuz su yemez.<br><b>Portable extinguisher</b>: pimi cek, tabana yonel, sweep hareketiyle kullan; ruzgar ve kacis yolu dusunulmeden girilmez.<br><b>CO2</b>: canli mahal veya enerjili panelde prosedursuz acilmaz; mahal izolasyonu ve personel sayimi hayati onemdedir.<br><b>Foam</b>: yanici sivilarda yuzeyi orterek oksijeni keser; kopugu dagitacak sert jet kullanilmaz.<br><b>Dry Powder</b>: hizli knock-down saglar ama gorusu bozar; elektrik ve gaz risklerinde senaryoya gore kullanilir.<br><b>Wet Chemical / Fire Blanket</b>: mutfak yag yanginlarinda ilk akla gelen medyalardandir; suyla tepki buyutulmez.<br><b>SCBA</b>: basinc, maske sizdirmazligi, demand valve, harness, alarm ve buddy check tamamlanmadan entry baslamaz.<br><br><b>Yangin siniflari</b>:<br><b>Class A</b> katilar -> su / foam mantigi.<br><b>Class B</b> yanici sivilar -> foam, uygun kuru kimyevi toz, senaryoya gore CO2.<br><b>Class C</b> gazlar -> once kaynak izolasyonu, sonra uygun DCP mantigi.<br><b>Class D</b> metaller -> ozel metal tozu gerekir.<br><b>Class F</b> mutfak yagi -> wet chemical veya fire blanket; suyla buyutulmez.<br><b>Elektrik paneli</b> pratikte once enerji kestirme ve uygun CO2 / DCP mantigi ister.<br><br>"+buildFireClassGallery(), tip:"Yanginda hiz onemlidir ama dogru medya ve dogru prosedur daha onemlidir."},
   {head:"ILK YARDIMDA ILK ADIMLAR", body:"<b>1. Sahayi emniyete al</b>: once kendini ve ortamı koru; elektrik, duman, gaz, dusme riski varsa kontrolsuz yaklasma.<br><b>2. Bilinc kontrolu</b>: sesli ve hafif dokunsal uyariyla tepki var mi bak.<br><b>3. Solunum ve hava yolu</b>: hava yolunu ac, normal solunum var mi degerlendir.<br><b>4. Yardim cagir</b>: amire, bridge'e veya medical support zincirine net bilgi ver.<br><b>5. Kanama kontrolu</b>: dogrudan basiyla durdurmaya calis; buyuk kanamada zaman kaybetme.<br><b>6. Yanikta</b>: uygun sogutma yap, yag/kimyasal/elektrik ayrimini dusun, rastgele krem-surme hatasina dusme.<br><b>7. Dumandan etkilenmede</b>: temiz hava, bilinç-solunum takibi ve ileri yardim zinciri onceliklidir.<br><b>8. Supheli kirik / dusme</b>: gereksiz oynatma; omurga veya boyun riski varsa sabitleyerek bekle.<br><b>9. Kayit</b>: saat, belirti ve yapilan ilk mudahale not edilir; gemide bilgi kaybolmasin.", tip:"Ilk yardim kahramanlik degil; sirayi bozmadan hayat fonksiyonlarini koruma isidir."},
   {head:"DEMIR ZINCIRI / KILIT MARKALARI", body:"Bir kilit / shackle genelde <b>15 fathom</b> yani yaklasik <b>27.5 metre</b> kabul edilir.<br>Zincir marking sisteminde joining shackle cevresindeki boyali baklalar ve tel sargilari hangi kilidin suda oldugunu hizlica anlamak icin kullanilir.<br>Gemiden gemiye renk ve tel duzeni degisebilir; esas olan geminin kendi <b>chain marking plan</b>ini bilmektir.<br>Pruva ustunde rapor verirken 'birinci kilit suya girdi', 'ucuncu kilit suya girdi' gibi net ve yuksek sesli ifade kullanilir.<br>Kaloma verirken sadece sayi degil; zincirin hizi, fren durumu ve davranisi da izlenir.", tip:"Ezber renk degil, gemide uygulanan marking sistemi esastir."},
   {head:"ACIL HABERLESME", body:"MAYDAY distress, PAN-PAN urgency, SECURITE emniyet yayini icindir.<br>Mesajda gemi adi, callsign, pozisyon, tehlikenin cinsi, yardim ihtiyaci ve kisi sayisi acik verilir.<br>GMDSS, EPIRB, SART, NAVTEX, DSC, handheld VHF ve emergency battery kayitlari bilinir.", tip:"Netlik hiz kadar onemlidir."},
@@ -10041,6 +10118,74 @@ function buildShipLightsGallery(){
     {name:'CBD', type:'cbd', desc:'Constrained by Draught; genelde kirmizi-beyaz-kirmizi ile draft kisiti vurgulanir, bolgeye ve COLREG yorumuna gore degerlendirilir.'}
   ];
   return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Gemi Isiklari / Isik Dizilimleri</div><div class="shiplight-grid">${items.map(item=>`<div class="cloud-card">${shipLightSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
+}
+
+function lsaSvg(type){
+  const drawings = {
+    raft:`<path d="M26 90 q34 -16 68 0 q10 5 0 10 q-34 16 -68 0 q-10 -5 0 -10z" fill="#f4d172" stroke="#9b6b14" stroke-width="1.5"/><rect x="34" y="42" width="52" height="28" rx="12" fill="rgba(244,209,114,.18)" stroke="#f4d172" stroke-width="2"/><path d="M42 70 v18 M78 70 v18" stroke="#d9e6f2" stroke-width="2"/><circle cx="92" cy="44" r="7" fill="#ffd45a"/><path d="M88 44 h8 M92 40 v8" stroke="#7a5312" stroke-width="1.4"/>`,
+    davit_raft:`<rect x="32" y="90" width="70" height="12" rx="6" fill="#f4d172" stroke="#9b6b14" stroke-width="1.4"/><path d="M90 26 q20 0 20 18 v18" fill="none" stroke="#cfd9e5" stroke-width="4"/><path d="M90 44 q-8 18 -28 34" fill="none" stroke="#8ab0c8" stroke-width="2.2" stroke-dasharray="4,3"/><rect x="48" y="40" width="42" height="20" rx="8" fill="rgba(244,209,114,.18)" stroke="#f4d172" stroke-width="1.8"/>`,
+    enclosed:`<path d="M18 92 h82 q12 0 16 -8 l10 -22 q4 -10 -8 -10 h-18 l-8 -14 h-34 q-10 0 -18 8 l-16 16 q-10 10 -6 20 z" fill="#d97357" stroke="#7a2c21" stroke-width="1.6"/><rect x="60" y="48" width="26" height="10" rx="3" fill="#dceaf4"/><circle cx="48" cy="92" r="5" fill="#152a41"/><circle cx="88" cy="92" r="5" fill="#152a41"/>`,
+    freefall:`<path d="M20 88 h78 q14 0 20 -10 l10 -22 q5 -11 -8 -11 h-20 l-6 -10 h-30 q-10 0 -18 8 l-20 20 q-10 10 -6 25 z" fill="#cf5a46" stroke="#77261c" stroke-width="1.5"/><path d="M106 24 l10 20" stroke="#ffd45a" stroke-width="3.5" stroke-linecap="round"/><path d="M96 22 h22" stroke="#dceaf4" stroke-width="3" stroke-linecap="round"/><path d="M84 88 q16 12 30 4" fill="none" stroke="#ffd45a" stroke-width="2"/>`,
+    rescue:`<path d="M18 88 q18 -22 42 -22 h16 q22 0 34 20 q6 10 -8 10 h-74 q-18 0 -10 -8z" fill="#ff8a3d" stroke="#8a4410" stroke-width="1.5"/><rect x="52" y="46" width="28" height="16" rx="5" fill="#dceaf4"/><circle cx="42" cy="90" r="5" fill="#152a41"/><circle cx="88" cy="90" r="5" fill="#152a41"/><path d="M88 36 l16 10" stroke="#cfd9e5" stroke-width="4" stroke-linecap="round"/>`,
+    inventory:`<rect x="22" y="34" width="76" height="56" rx="8" fill="rgba(13,34,56,.9)" stroke="#7fc3ff" stroke-width="1.6"/><rect x="30" y="44" width="20" height="14" rx="3" fill="#79b8ff"/><rect x="54" y="44" width="14" height="14" rx="3" fill="#f4d172"/><rect x="72" y="44" width="18" height="14" rx="3" fill="#ff7676"/><rect x="30" y="64" width="16" height="18" rx="3" fill="#5dd0a5"/><rect x="50" y="64" width="18" height="18" rx="3" fill="#dceaf4"/><rect x="72" y="64" width="18" height="18" rx="3" fill="#ffd45a"/><text x="60" y="28" text-anchor="middle" fill="#d7e3ec" font-size="9" font-family="monospace">KIT / RATION / PYRO</text>`
+  }[type] || '';
+  return `<svg class="cloud-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="${type} lsa karti">
+    <defs>
+      <linearGradient id="lsaBg_${type}" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#173650"/>
+        <stop offset="100%" stop-color="#081828"/>
+      </linearGradient>
+    </defs>
+    <rect width="120" height="120" rx="8" fill="url(#lsaBg_${type})"/>
+    <path d="M0 96 Q30 90 60 96 T120 96 V120 H0 Z" fill="#0b2b47"/>
+    ${drawings}
+  </svg>`;
+}
+
+function buildLsaGallery(){
+  const items = [
+    {name:'Liferaft Canister', type:'raft', desc:'Paketli can sali; servis tarihi, HRU, painter ve lash durumu birlikte kontrol edilir.'},
+    {name:'Davit Launched Raft', type:'davit_raft', desc:'Ozellikle yolcu veya buyuk gemilerde kontrollu indirme mantigi icin kullanilir.'},
+    {name:'Enclosed Lifeboat', type:'enclosed', desc:'Tam kapali filika; ruzgar, spray ve sert havada koruma avantaji saglar.'},
+    {name:'Free-Fall Lifeboat', type:'freefall', desc:'Ozellikle tanker ve ozel gemilerde hizli terk mantigi icin serbest dusmeli tip gorulur.'},
+    {name:'Rescue Boat', type:'rescue', desc:'Terk araci degil; recovery, MOB ve hizli kurtarma gorevleri icin kullanilir.'},
+    {name:'LSA Inventory', type:'inventory', desc:'Su, ration, pyro, first aid, sea anchor ve survival kit eksiksiz olmadan ekipman hazir sayilmaz.'}
+  ];
+  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Can Sali / Filika Tipleri ve Icindekiler</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${lsaSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
+}
+
+function fireClassSvg(type){
+  const drawings = {
+    a:`<path d="M60 30 q10 10 6 22 q10 6 10 20 q0 18 -16 18 q-16 0 -16 -16 q0 -11 8 -18 q-4 -12 8 -26z" fill="#ff944d"/><path d="M60 52 q7 7 4 14 q6 4 6 12 q0 10 -10 10 q-10 0 -10 -10 q0 -7 5 -11 q-3 -8 5 -15z" fill="#ffd45a"/><rect x="20" y="92" width="80" height="8" rx="4" fill="#8a5a2b"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">WATER / FOAM</text>`,
+    b:`<path d="M24 86 q12 -12 28 -10 q16 2 24 -4 q10 -8 24 -2 q10 4 8 14 q-2 12 -20 14 q-18 2 -38 2 q-26 0 -34 -6 q-8 -6 8 -8z" fill="#ff7a59"/><path d="M42 58 q6 8 2 16 q8 4 8 14 q0 10 -10 10 q-10 0 -10 -10 q0 -8 6 -12 q-3 -8 4 -18z" fill="#ffb04d"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">FOAM / DCP / CO2</text>`,
+    c:`<path d="M24 92 h72" stroke="#8ab0c8" stroke-width="2" stroke-dasharray="5,3"/><circle cx="40" cy="92" r="6" fill="#7fc3ff"/><circle cx="76" cy="92" r="6" fill="#7fc3ff"/><path d="M60 34 q10 10 6 22 q10 6 10 20 q0 18 -16 18 q-16 0 -16 -16 q0 -11 8 -18 q-4 -12 8 -26z" fill="#ff944d"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">ISOLATE / DCP</text>`,
+    d:`<circle cx="44" cy="82" r="12" fill="#c6ccd3"/><circle cx="64" cy="70" r="10" fill="#9fa8b3"/><circle cx="78" cy="84" r="11" fill="#b7c0c8"/><path d="M60 36 q10 10 6 22 q10 6 10 20 q0 18 -16 18 q-16 0 -16 -16 q0 -11 8 -18 q-4 -12 8 -26z" fill="#ff944d"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">SPECIAL POWDER</text>`,
+    f:`<path d="M28 88 q10 -8 22 -6 q12 2 18 -4 q10 -10 22 -2 q8 6 4 12 q-6 8 -20 10 q-14 2 -30 2 q-18 0 -22 -4 q-6 -6 6 -8z" fill="#f4d172"/><path d="M60 34 q10 10 6 22 q10 6 10 20 q0 18 -16 18 q-16 0 -16 -16 q0 -11 8 -18 q-4 -12 8 -26z" fill="#ff944d"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">WET CHEM / BLANKET</text>`,
+    elec:`<rect x="44" y="42" width="32" height="38" rx="4" fill="#23384f" stroke="#8ab0c8" stroke-width="1.4"/><path d="M60 46 l-8 14 h8 l-6 14 l14 -18 h-8 l8 -10 z" fill="#ffd45a"/><text x="60" y="108" text-anchor="middle" fill="#dceaf4" font-size="9" font-family="monospace">POWER OFF / CO2</text>`
+  }[type] || '';
+  return `<svg class="cloud-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="${type} yangin sinifi karti">
+    <defs>
+      <linearGradient id="fireBg_${type}" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#3f1313"/>
+        <stop offset="100%" stop-color="#12090a"/>
+      </linearGradient>
+    </defs>
+    <rect width="120" height="120" rx="8" fill="url(#fireBg_${type})"/>
+    <circle cx="92" cy="26" r="9" fill="rgba(255,185,88,.15)"/>
+    ${drawings}
+  </svg>`;
+}
+
+function buildFireClassGallery(){
+  const items = [
+    {name:'Class A', type:'a', desc:'Katilar: tahta, kagit, kumas. Genelde su veya uygun foam dusunulur.'},
+    {name:'Class B', type:'b', desc:'Yanici sivilar: fuel, oil, solvent. Foam, uygun DCP veya senaryoya gore CO2 mantigi dusunulur.'},
+    {name:'Class C', type:'c', desc:'Yanici gazlar: once kaynak izole edilir; uygun DCP mantigi one cikar.'},
+    {name:'Class D', type:'d', desc:'Metal yanginlari: ozel metal tozu gerekir; standart medya tehlikeli olabilir.'},
+    {name:'Class F', type:'f', desc:'Galley yag yangini: wet chemical ya da fire blanket; suyla buyutulmez.'},
+    {name:'Electrical', type:'elec', desc:'Pratikte once enerji kestirilir; suya kosmadan uygun CO2 veya DCP dusunulur.'}
+  ];
+  return `<div class="meteo-gallery-card"><div class="meteo-gallery-head">Yangin Siniflari / Uygun Sondurucu</div><div class="cloud-grid">${items.map(item=>`<div class="cloud-card">${fireClassSvg(item.type)}<div class="cloud-name">${item.name}</div><div class="cloud-desc">${item.desc}</div></div>`).join('')}</div></div>`;
 }
 
 function buildSensorCompareTable(){
