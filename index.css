@@ -103,6 +103,7 @@ input[type=text]::placeholder{color:var(--text3);}
 /* === SAHNE === */
 #scene-area{border-bottom:1px solid var(--border2);position:relative;}
 #scene-area.scene-fade-once{animation:sceneFade .34s ease;}
+#scene-area::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
 #scene-graphic{width:100%;background:var(--navy);min-height:145px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-origin:50% 50%;}
 #gfx-svg{position:absolute;inset:0;width:100%;height:100%;}
 #scene-sub{font-size:10px;color:var(--text3);font-style:italic;font-family:'Crimson Pro',serif;text-align:center;padding:4px 14px 6px;background:rgba(7,19,36,0.9);}
@@ -273,6 +274,15 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-motion-alert #scene-area{animation:alertShake .45s ease;}
 .story-live #spkrow{animation:speakerNod .34s ease;}
 .story-live #text{animation:textReveal .45s ease;}
+.oneshot-mob-flash::after{background:rgba(255,64,64,0.2);animation:mobFlash .55s ease;}
+.oneshot-rope-snap #scene-graphic{animation:ropeSnapShock .45s ease;}
+.oneshot-fire-pulse #scene-graphic{animation:firePanelPulse .7s ease;}
+.oneshot-sensor-glow #gfx-svg{animation:sensorGlow .9s ease;}
+.oneshot-sensor-glow #scene-graphic{box-shadow:inset 0 0 0 1px rgba(78,160,255,0.18), 0 0 26px rgba(46,107,191,0.16);}
+@keyframes mobFlash{0%{opacity:0;}18%{opacity:1;}42%{opacity:.18;}100%{opacity:0;}}
+@keyframes ropeSnapShock{0%{transform:translateX(0) translateY(0) scale(1);}18%{transform:translateX(-6px) rotate(-.6deg) scale(1.02);}36%{transform:translateX(7px) rotate(.7deg) scale(1.026);}62%{transform:translateX(-4px) rotate(-.35deg) scale(1.016);}100%{transform:translateX(0) rotate(0) scale(1);}}
+@keyframes firePanelPulse{0%{box-shadow:inset 0 0 0 0 rgba(255,80,80,0), 0 0 0 rgba(255,80,80,0);}22%{box-shadow:inset 0 0 0 999px rgba(120,18,18,0.14), 0 0 22px rgba(255,72,72,0.22);}52%{box-shadow:inset 0 0 0 999px rgba(120,18,18,0.06), 0 0 10px rgba(255,72,72,0.1);}100%{box-shadow:inset 0 0 0 0 rgba(255,80,80,0), 0 0 0 rgba(255,80,80,0);}}
+@keyframes sensorGlow{0%{filter:none;}28%{filter:drop-shadow(0 0 8px rgba(64,166,255,0.55)) brightness(1.12);}58%{filter:drop-shadow(0 0 14px rgba(64,255,196,0.35)) brightness(1.06);}100%{filter:none;}}
 
 @media(max-width:400px){
   .stgrid{gap:4px;}

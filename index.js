@@ -7883,6 +7883,41 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   }
 }
 
+function getOneShotSceneFx(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(sc?.id === 's124b' || /sling kopuyor|halat\/sling kopuyor|rope|snap-back/.test(blob)) return 'oneshot-rope-snap';
+  if(sc?.id === 's237' || /mob|man overboard/.test(blob)) return 'oneshot-mob-flash';
+  if(sc?.id === 's238' || sc?.id === 's251' || sc?.id === 's252' || /fire alarm|yangin|fire locker|galley girisi/.test(blob)) return 'oneshot-fire-pulse';
+  if(/radar|ecdis_panel|ais_panel|radar konsolu|ecdis|enc update|route check|arpa/.test(blob)) return 'oneshot-sensor-glow';
+  return '';
+}
+
+function triggerOneShotSceneFx(sc){
+  const sceneArea = document.getElementById('scene-area');
+  const sceneGraphic = document.getElementById('scene-graphic');
+  const gfxSvg = document.getElementById('gfx-svg');
+  const fx = getOneShotSceneFx(sc);
+  if(sceneArea){
+    sceneArea.classList.remove('oneshot-mob-flash','oneshot-rope-snap','oneshot-fire-pulse','oneshot-sensor-glow');
+    void sceneArea.offsetWidth;
+  }
+  if(sceneGraphic){
+    sceneGraphic.classList.remove('oneshot-rope-snap','oneshot-fire-pulse','oneshot-sensor-glow');
+  }
+  if(gfxSvg){
+    gfxSvg.classList.remove('oneshot-sensor-glow');
+  }
+  if(!fx) return;
+  if(sceneArea) sceneArea.classList.add(fx);
+  if(sceneGraphic && /rope-snap|fire-pulse|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
+  if(gfxSvg && fx === 'oneshot-sensor-glow') gfxSvg.classList.add(fx);
+  setTimeout(()=>{
+    if(sceneArea) sceneArea.classList.remove(fx);
+    if(sceneGraphic) sceneGraphic.classList.remove(fx);
+    if(gfxSvg) gfxSvg.classList.remove(fx);
+  }, 950);
+}
+
 function renderScene(idx){
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
@@ -7925,6 +7960,7 @@ function renderScene(idx){
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
   onSceneRender(sc);
+  triggerOneShotSceneFx(sc);
 
   const ch=document.getElementById('choices');ch.innerHTML='';
   renderCalcPanel(sc, ch);
