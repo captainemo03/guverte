@@ -3323,6 +3323,28 @@ choices:[
 {text:"Etrafi izleyip sonra toplu sekilde ise donerim",tag:"itaatkar",effect:{dinclik:10,bilgi:2}},
 {text:"Oturmaya utanip hemen kalkarim",tag:"korkak",effect:{dinclik:-3,cesaret:1}}]},
 
+{id:"s187k",gfx:"galley",alert:false,day:"Gun 11",time:"03:35",loc:"Yemekhane - Sessiz Gece",sub:"Enerji icecegiyle ayakta kalmak",who:"asci",
+text:`Dincligin iyice dibe vurmus. Asci seni gece yarisi dolabi kapatirken gordu.
+
+"Kahve yetmiyorsa bunu ic ama kafana guvenip abartma," dedi. Tezgahta soguk bir enerji icecegi duruyor.
+
+Bu noktada nasil davranirsin?`,
+choices:[
+{text:"Yavas icip ustune su ekler, bunu gecici toparlanma olarak gorurum",tag:"akilli",effect:{dinclik:16,bilgi:-1}},
+{text:"Kutuyu bir dikişte bitirip kendimi zorlarsam iyi olur sanirim",tag:"itaatkar",effect:{dinclik:7,cesaret:2,sayginlik:-2}},
+{text:"Hicbir sey almadan duz duvara dayanir gibi vardiyaya donerim",tag:"korkak",effect:{dinclik:-5,bilgi:-2}}]},
+
+{id:"s187l",gfx:"bridge",alert:false,day:"Gun 12",time:"04:10",loc:"Koprustu - Son Saatler",sub:"Son saate enerji icecegiyle girmek",who:"z2",
+text:`Gecenin sonu uzamis gibi. Gozlerin batiyor. 2. zabit dolaptan kucuk bir kutu cikardi.
+
+"Bu seni kurtarmaz; sadece biraz zaman kazandirir. Sonra su, nefes ve dikkat gerekir."
+
+Hangi yolu secersin?`,
+choices:[
+{text:"Kucuk yudumlarla icip radar ve goz takibini daha disiplinli yaparim",tag:"kritik",effect:{dinclik:17,bilgi:2}},
+{text:"Icigi icince tum yorgunlugun bitecegini sanip kendimi gereksiz kasarim",tag:"itaatkar",effect:{dinclik:8,cesaret:2,sayginlik:-3}},
+{text:"Ihtiyacim yok der ama icten ice dagilmaya devam ederim",tag:"korkak",effect:{dinclik:-4,bilgi:-2}}]},
+
 {id:"s188",gfx:"harbor",alert:false,day:"Gun 9",time:"06:25",loc:"Iskele Bordi - Draft Marklari",sub:"Draft okuma disiplini",who:"z1",
 text:`1. Zabit seni bordaya aldi. Su sakin ama markalar gozu aldatiyor.
 
@@ -6747,6 +6769,23 @@ function evaluateDecisionPressure(sc,c2){
     notes.push('Asiri analiz karar hizini dusurdu.');
   }
 
+  const riskBlob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const highStakes = !!sc?.alert || /permit|line-up|manifold|mooring|pilot|radar|ecdis|fog|fire|yangin|enclosed space|lifting|sling|tss|draft|trim|cargo watch|near-miss|root cause|corrective|abandon ship|mob/.test(riskBlob);
+  if(highStakes && tag==='itaatkar'){
+    addEffectDelta(extra,'bilgi',-2);
+    addEffectDelta(extra,'sayginlik',-2);
+    notes.push('Idare eder karar yuksek riskli sahnede zayif kaldi.');
+  }
+  if(highStakes && tag==='sosyal'){
+    addEffectDelta(extra,'dinclik',-2);
+    addEffectDelta(extra,'bilgi',-1);
+    notes.push('Ortam guzel ama teknik karar yine teknik karar istiyordu.');
+  }
+  if(highStakes && tag==='cesur'){
+    addEffectDelta(extra,'sayginlik',-1);
+    notes.push('Cesaret tek basina planin yerini tutmadi.');
+  }
+
   return {extra,notes};
 }
 
@@ -7668,6 +7707,7 @@ function renderEmergencyPanel(sc, ch){
 function buildSceneQueue(pool, totalDays, yr=selYear){
   const extraRouteScenes = getExtraRouteScenesForYear(yr);
   const extraEquipmentScenes = getExtraEquipmentScenesForYear(yr);
+  const delayedInputSceneIds = new Set(Object.keys(DOCUMENT_FORM_CONFIGS));
   // Zorunlu sahneler: s01 (başlangıç), FINAL (son)
   const mandatory_start = pool.filter(s=>s.id==='s01');
   const final = pool.filter(s=>s.id==='FINAL');
@@ -7715,20 +7755,55 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
     }
   }
 
-  // Sıralamayı oluştur: başlangıç + (karışık regular + kriz) + final
-  const middle=[...selectedRegular,...selectedCrisis].sort(()=>Math.random()-0.5);
+  if(!selectedRegular.some(s=>LOW_ENERGY_RECOVERY_SCENE_IDS.has(s.id))){
+    const lowEnergyPick = shuffledRegular.find(s=>LOW_ENERGY_RECOVERY_SCENE_IDS.has(s.id) && !selectedRegular.some(x=>x.id===s.id));
+    if(lowEnergyPick){
+      selectedRegular = [
+        ...selectedRegular.slice(0, Math.max(0, selectedRegular.length-1)),
+        lowEnergyPick,
+        ...selectedRegular.slice(Math.max(0, selectedRegular.length-1))
+      ];
+    }
+  }
+
+  // Yazı yazmalı belge/form sahneleri oyunun başına çok yük bindirmesin.
+  const regularInputScenes = selectedRegular.filter(s=>delayedInputSceneIds.has(s.id));
+  const regularCoreScenes = selectedRegular.filter(s=>!delayedInputSceneIds.has(s.id));
+
+  // Sıralamayı oluştur: başlangıç + önce daha akışkan sahneler + sonra belge/form sahneleri + kriz + final
+  const coreMiddle=[...regularCoreScenes,...selectedCrisis].sort(()=>Math.random()-0.5);
+  const lateInputScenes=[...regularInputScenes].sort(()=>Math.random()-0.5);
+  const splitPoint = Math.max(6, Math.floor(coreMiddle.length*0.55));
+  const middle=[...coreMiddle.slice(0,splitPoint), ...lateInputScenes, ...coreMiddle.slice(splitPoint)];
 
   return [...mandatory_start, ...middle, ...documentChain, ...extraRouteScenes, ...extraEquipmentScenes, ...final];
 }
 
-const RECOVERY_SCENE_IDS = new Set(['s146','s147','s148','s149','s150','s183','s184','s185','s186','s187','s187b','s187c','s187d','s187e','s187f','s187g','s187h','s187i','s187j']);
+const RECOVERY_SCENE_IDS = new Set(['s146','s147','s148','s149','s150','s183','s184','s185','s186','s187','s187b','s187c','s187d','s187e','s187f','s187g','s187h','s187i','s187j','s187k','s187l']);
 const HARBOR_RECOVERY_SCENE_IDS = new Set(['s147','s150','s186','s187c','s187e','s187h','s187j']);
+const LOW_ENERGY_RECOVERY_SCENE_IDS = new Set(['s187k','s187l']);
 
 function maybePrioritizeRecoveryScene(){
   if(currentIdx >= sceneQueue.length-1) return;
   if(stats.dinclik > 62) return;
   const nextScene = sceneQueue[currentIdx];
   if(nextScene && RECOVERY_SCENE_IDS.has(nextScene.id)) return;
+
+  if(stats.dinclik <= 10){
+    let lowIdx = -1;
+    for(let i=currentIdx+1; i<sceneQueue.length-1; i++){
+      const sc = sceneQueue[i];
+      if(sc && LOW_ENERGY_RECOVERY_SCENE_IDS.has(sc.id)){
+        lowIdx = i;
+        break;
+      }
+    }
+    if(lowIdx > currentIdx){
+      const [energyScene] = sceneQueue.splice(lowIdx,1);
+      sceneQueue.splice(currentIdx,0,energyScene);
+      return;
+    }
+  }
 
   const prevScene = currentIdx > 0 ? sceneQueue[currentIdx-1] : null;
   const prevBlob = `${prevScene?.id||''} ${prevScene?.gfx||''} ${prevScene?.loc||''} ${prevScene?.sub||''}`.toLowerCase();
