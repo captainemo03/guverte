@@ -7892,11 +7892,13 @@ function getOneShotSceneFx(sc){
   return '';
 }
 
-function triggerOneShotSceneFx(sc){
+let oneShotFxTimers = [];
+function clearOneShotSceneFx(){
   const sceneArea = document.getElementById('scene-area');
   const sceneGraphic = document.getElementById('scene-graphic');
   const gfxSvg = document.getElementById('gfx-svg');
-  const fx = getOneShotSceneFx(sc);
+  oneShotFxTimers.forEach(t=>clearTimeout(t));
+  oneShotFxTimers = [];
   if(sceneArea){
     sceneArea.classList.remove('oneshot-mob-flash','oneshot-rope-snap','oneshot-fire-pulse','oneshot-sensor-glow');
     void sceneArea.offsetWidth;
@@ -7907,15 +7909,59 @@ function triggerOneShotSceneFx(sc){
   if(gfxSvg){
     gfxSvg.classList.remove('oneshot-sensor-glow');
   }
+}
+
+function applyOneShotSceneFx(fx, hold=950){
+  const sceneArea = document.getElementById('scene-area');
+  const sceneGraphic = document.getElementById('scene-graphic');
+  const gfxSvg = document.getElementById('gfx-svg');
   if(!fx) return;
+  clearOneShotSceneFx();
   if(sceneArea) sceneArea.classList.add(fx);
   if(sceneGraphic && /rope-snap|fire-pulse|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
   if(gfxSvg && fx === 'oneshot-sensor-glow') gfxSvg.classList.add(fx);
-  setTimeout(()=>{
+  const cleaner = setTimeout(()=>{
     if(sceneArea) sceneArea.classList.remove(fx);
     if(sceneGraphic) sceneGraphic.classList.remove(fx);
     if(gfxSvg) gfxSvg.classList.remove(fx);
-  }, 950);
+  }, hold);
+  oneShotFxTimers.push(cleaner);
+}
+
+function triggerOneShotSceneFx(sc){
+  applyOneShotSceneFx(getOneShotSceneFx(sc));
+}
+
+function scheduleSyncedSceneFx(sc){
+  const fx = getOneShotSceneFx(sc);
+  if(!fx){
+    clearOneShotSceneFx();
+    return;
+  }
+  const pulse = (delay, hold=950) => {
+    const timer = setTimeout(()=>applyOneShotSceneFx(fx, hold), delay);
+    oneShotFxTimers.push(timer);
+  };
+  clearOneShotSceneFx();
+  if(fx === 'oneshot-rope-snap'){
+    pulse(85, 520);
+    pulse(245, 340);
+    return;
+  }
+  if(fx === 'oneshot-fire-pulse'){
+    pulse(90, 620);
+    pulse(430, 520);
+    return;
+  }
+  if(fx === 'oneshot-sensor-glow'){
+    pulse(65, 880);
+    return;
+  }
+  if(fx === 'oneshot-mob-flash'){
+    pulse(55, 560);
+    return;
+  }
+  pulse(0, 950);
 }
 
 function renderScene(idx){
@@ -7960,7 +8006,7 @@ function renderScene(idx){
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
   onSceneRender(sc);
-  triggerOneShotSceneFx(sc);
+  scheduleSyncedSceneFx(sc);
 
   const ch=document.getElementById('choices');ch.innerHTML='';
   renderCalcPanel(sc, ch);
@@ -11922,6 +11968,13 @@ function sfxRadarBip(){
   playTone(1200, 'sine', 0.12, 0.25);
 }
 
+function sfxMetalSnap(){
+  playTone(310, 'square', 0.055, 0.13);
+  playTone(620, 'triangle', 0.08, 0.11, 0.018);
+  playTone(1420, 'square', 0.035, 0.08, 0.052);
+  playNoise(0.16, 0.045, 0.03);
+}
+
 // Dalga/fırtına ambians
 function sfxStormAmbiance(){
   stopAllMusic();
@@ -12241,17 +12294,33 @@ function playHomesickAmbiance(sc){
 function playSceneAudio(sc){
   const gfx = sc.gfx || '';
   const alert = sc.alert || false;
+  const sceneBlob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   sfxSceneTransition(gfx);
   
   if(alert){
-    if(gfx === 'pirate') { setTimeout(sfxPirateAmbiance, 300); sfxAlarm(); }
+    if(sc?.id === 's124b' || /sling kopuyor|halat\/sling kopuyor|snap-back/.test(sceneBlob)){
+      stopAllMusic();
+      setTimeout(sfxMetalSnap, 70);
+      setTimeout(()=>playTone(190,'sawtooth',0.12,0.08), 120);
+      setTimeout(sfxAlarm, 220);
+    }
+    else if(gfx === 'pirate') { setTimeout(sfxPirateAmbiance, 300); sfxAlarm(); }
     else if(gfx === 'bogaz') { sfxBogazAmbiance(); setTimeout(()=>playTone(440,'square',0.1,0.3),500); }
     else if(gfx === 'engine_fault') { sfxEngineAlarm(); }
     else { sfxAlarm(); }
   } else {
     if(gfx === 'storm') sfxStormAmbiance();
-    else if(gfx==='fire') { stopAllMusic(); sfxAlarm(); }
-    else if(gfx === 'radar') { stopAllMusic(); sfxRadarBip(); sfxPanelWake(); }
+    else if(gfx==='fire') {
+      stopAllMusic();
+      sfxAlarm();
+      setTimeout(()=>playTone(760, 'square', 0.08, 0.08), 260);
+    }
+    else if(gfx === 'radar') {
+      stopAllMusic();
+      sfxRadarBip();
+      setTimeout(sfxPanelWake, 55);
+      setTimeout(sfxRadarBip, 280);
+    }
     else if(gfx === 'engine') { stopAllMusic(); sfxShipEngine(); }
     else if(gfx==='harbor') { sfxHarbor(); sfxOceanAmbiance(); }
     else if(gfx==='sea'||gfx==='night'||gfx==='sunrise'||gfx==='port_arrival') { sfxShipEngine(); sfxOceanAmbiance(); }
@@ -12262,6 +12331,7 @@ function playSceneAudio(sc){
     else if(/ecdis_panel|ais_panel|gyro_panel|magnetic_panel|echo_panel|speedlog_panel|autopilot_panel|bnwas_panel|gmdss_panel/.test(gfx)) {
       stopAllMusic();
       sfxPanelWake();
+      if(/ecdis_panel|ais_panel/.test(gfx)) setTimeout(()=>playTone(1120, 'sine', 0.04, 0.028), 65);
     }
     else { stopAllMusic(); }
   }
