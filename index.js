@@ -7888,6 +7888,9 @@ function getOneShotSceneFx(sc){
   if(sc?.id === 's124b' || /sling kopuyor|halat\/sling kopuyor|rope|snap-back/.test(blob)) return 'oneshot-rope-snap';
   if(sc?.id === 's237' || /mob|man overboard/.test(blob)) return 'oneshot-mob-flash';
   if(sc?.id === 's238' || sc?.id === 's251' || sc?.id === 's252' || /fire alarm|yangin|fire locker|galley girisi/.test(blob)) return 'oneshot-fire-pulse';
+  if(sc?.gfx === 'storm' || /beaufort|firtina|storm|swell mendirek|sert hava/.test(blob)) return 'oneshot-storm-hit';
+  if(sc?.gfx === 'engine_fault' || /blackout|lo pressure|egzoz sicakligi|bilge high level|yuk paylasimi/.test(blob)) return 'oneshot-engine-hit';
+  if(sc?.id === 'kriz07' || sc?.id === 'kriz08' || sc?.id === 'kriz17' || sc?.id === 'kriz22' || /vhf|dsc alert|distress|sahil guvenlik|secu?rite|mayday|pan-pan/.test(blob)) return 'oneshot-vhf-burst';
   if(/radar|ecdis_panel|ais_panel|radar konsolu|ecdis|enc update|route check|arpa/.test(blob)) return 'oneshot-sensor-glow';
   return '';
 }
@@ -7900,11 +7903,11 @@ function clearOneShotSceneFx(){
   oneShotFxTimers.forEach(t=>clearTimeout(t));
   oneShotFxTimers = [];
   if(sceneArea){
-    sceneArea.classList.remove('oneshot-mob-flash','oneshot-rope-snap','oneshot-fire-pulse','oneshot-sensor-glow');
+    sceneArea.classList.remove('oneshot-mob-flash','oneshot-rope-snap','oneshot-fire-pulse','oneshot-storm-hit','oneshot-engine-hit','oneshot-vhf-burst','oneshot-sensor-glow');
     void sceneArea.offsetWidth;
   }
   if(sceneGraphic){
-    sceneGraphic.classList.remove('oneshot-rope-snap','oneshot-fire-pulse','oneshot-sensor-glow');
+    sceneGraphic.classList.remove('oneshot-rope-snap','oneshot-fire-pulse','oneshot-storm-hit','oneshot-engine-hit','oneshot-vhf-burst','oneshot-sensor-glow');
   }
   if(gfxSvg){
     gfxSvg.classList.remove('oneshot-sensor-glow');
@@ -7918,7 +7921,7 @@ function applyOneShotSceneFx(fx, hold=950){
   if(!fx) return;
   clearOneShotSceneFx();
   if(sceneArea) sceneArea.classList.add(fx);
-  if(sceneGraphic && /rope-snap|fire-pulse|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
+  if(sceneGraphic && /rope-snap|fire-pulse|storm-hit|engine-hit|vhf-burst|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
   if(gfxSvg && fx === 'oneshot-sensor-glow') gfxSvg.classList.add(fx);
   const cleaner = setTimeout(()=>{
     if(sceneArea) sceneArea.classList.remove(fx);
@@ -7955,6 +7958,21 @@ function scheduleSyncedSceneFx(sc){
   }
   if(fx === 'oneshot-sensor-glow'){
     pulse(65, 880);
+    return;
+  }
+  if(fx === 'oneshot-storm-hit'){
+    pulse(120, 620);
+    pulse(680, 460);
+    return;
+  }
+  if(fx === 'oneshot-engine-hit'){
+    pulse(95, 560);
+    pulse(410, 420);
+    return;
+  }
+  if(fx === 'oneshot-vhf-burst'){
+    pulse(45, 360);
+    pulse(240, 320);
     return;
   }
   if(fx === 'oneshot-mob-flash'){
@@ -11955,6 +11973,12 @@ function sfxVHF(){
   setTimeout(()=>playTone(800, 'square', 0.08, 0.25), 200);
 }
 
+function sfxStormHit(){
+  playNoise(0.22, 0.05, 0.03);
+  playTone(92, 'sawtooth', 0.16, 0.08);
+  setTimeout(()=>playTone(134, 'triangle', 0.14, 0.055), 110);
+}
+
 // Alarm sesi (yangın/acil)
 function sfxAlarm(){
   for(let i=0;i<5;i++){
@@ -12309,7 +12333,11 @@ function playSceneAudio(sc){
     else if(gfx === 'engine_fault') { sfxEngineAlarm(); }
     else { sfxAlarm(); }
   } else {
-    if(gfx === 'storm') sfxStormAmbiance();
+    if(gfx === 'storm') {
+      sfxStormAmbiance();
+      setTimeout(sfxStormHit, 120);
+      setTimeout(sfxStormHit, 700);
+    }
     else if(gfx==='fire') {
       stopAllMusic();
       sfxAlarm();
@@ -12334,6 +12362,13 @@ function playSceneAudio(sc){
       if(/ecdis_panel|ais_panel/.test(gfx)) setTimeout(()=>playTone(1120, 'sine', 0.04, 0.028), 65);
     }
     else { stopAllMusic(); }
+  }
+  if(/vhf|dsc alert|distress|sahil guvenlik|secu?rite|mayday|pan-pan/.test(sceneBlob)){
+    setTimeout(sfxVHF, 40);
+    setTimeout(sfxVHF, 250);
+  }
+  if(gfx === 'engine_fault' && !alert){
+    setTimeout(()=>playTone(210, 'square', 0.09, 0.05), 100);
   }
 }
 
