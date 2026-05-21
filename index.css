@@ -103,6 +103,7 @@ input[type=text]::placeholder{color:var(--text3);}
 /* === SAHNE === */
 #scene-area{border-bottom:1px solid var(--border2);position:relative;}
 #scene-area.scene-fade-once{animation:sceneFade .34s ease;}
+#scene-area::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:2;mix-blend-mode:screen;}
 #scene-area::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
 #scene-graphic{width:100%;background:var(--navy);min-height:145px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-origin:50% 50%;}
 #gfx-svg{position:absolute;inset:0;width:100%;height:100%;}
@@ -232,6 +233,10 @@ input[type=text]::placeholder{color:var(--text3);}
 @keyframes speakerNod{0%{transform:translateY(4px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
 @keyframes textReveal{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
 @keyframes choiceRise{0%{opacity:0;transform:translateY(10px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes seaBreath{0%,100%{opacity:.18;transform:translateX(-8px) translateY(0);}50%{opacity:.32;transform:translateX(10px) translateY(-2px);}}
+@keyframes nightTwinkle{0%,100%{opacity:.1;transform:translateY(0);}50%{opacity:.28;transform:translateY(-3px);}}
+@keyframes harborGlow{0%,100%{opacity:.16;transform:translateX(0);}50%{opacity:.34;transform:translateX(8px);}}
+@keyframes stormMist{0%{opacity:.08;transform:translateX(-30px);}50%{opacity:.22;transform:translateX(18px);}100%{opacity:.06;transform:translateX(46px);}}
 @keyframes bridgeFloat{0%,100%{transform:translateY(0) scale(1.008);}50%{transform:translateY(-2px) scale(1.016);}}
 @keyframes engineHum{0%,100%{transform:translateX(0) translateY(0);}25%{transform:translateX(.8px) translateY(.3px);}50%{transform:translateX(-.8px) translateY(-.3px);}75%{transform:translateX(.6px) translateY(.2px);}}
 @keyframes harborDrift{0%,100%{transform:translateX(0) scale(1.01);}50%{transform:translateX(-2px) scale(1.018);}}
@@ -272,6 +277,25 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-motion-harbor #scene-graphic{animation:harborDrift 6s ease-in-out infinite;}
 .scene-motion-storm #scene-graphic{animation:stormRock 2.4s ease-in-out infinite;}
 .scene-motion-alert #scene-area{animation:alertShake .45s ease;}
+.scene-ambient-sea::before{opacity:.22;background:
+radial-gradient(circle at 20% 72%, rgba(88,165,255,.14), transparent 20%),
+radial-gradient(circle at 76% 30%, rgba(180,228,255,.08), transparent 22%),
+linear-gradient(180deg, rgba(255,255,255,.03), transparent 46%);
+animation:seaBreath 7.4s ease-in-out infinite;}
+.scene-ambient-night::before{opacity:.24;background:
+radial-gradient(circle at 18% 24%, rgba(255,255,255,.24) 0 1px, transparent 2px),
+radial-gradient(circle at 42% 18%, rgba(153,208,255,.22) 0 1px, transparent 2px),
+radial-gradient(circle at 74% 22%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+linear-gradient(180deg, rgba(88,130,196,.06), transparent 60%);
+animation:nightTwinkle 5.8s ease-in-out infinite;}
+.scene-ambient-harbor::before{opacity:.24;background:
+linear-gradient(90deg, transparent 0%, rgba(255,196,88,.08) 18%, transparent 36%, rgba(116,179,255,.08) 58%, transparent 78%),
+linear-gradient(180deg, transparent 58%, rgba(255,214,112,.08) 100%);
+animation:harborGlow 6.6s ease-in-out infinite;}
+.scene-ambient-storm::before{opacity:.2;background:
+linear-gradient(110deg, transparent 10%, rgba(212,228,255,.08) 30%, rgba(167,206,255,.12) 44%, transparent 62%),
+linear-gradient(180deg, rgba(255,255,255,.03), transparent 42%);
+animation:stormMist 2.6s linear infinite;}
 .story-live #spkrow{animation:speakerNod .34s ease;}
 .story-live #text{animation:textReveal .45s ease;}
 .oneshot-mob-flash::after{background:rgba(255,64,64,0.2);animation:mobFlash .55s ease;}

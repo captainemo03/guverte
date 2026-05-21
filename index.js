@@ -7858,15 +7858,24 @@ function getSceneMotionClass(sc){
   return '';
 }
 
+function getSceneAmbientClass(sc){
+  const profile = getSceneBackdropProfile(sc);
+  if(profile === 'storm') return 'scene-ambient-storm';
+  if(profile === 'harbor') return 'scene-ambient-harbor';
+  if(profile === 'night') return 'scene-ambient-night';
+  return 'scene-ambient-sea';
+}
+
 function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-alert','scene-fade-once');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-fade-once');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
     if(motionClass) sceneArea.classList.add(motionClass);
+    sceneArea.classList.add(getSceneAmbientClass(sc));
   }
   if(story){
     story.classList.remove('story-live');
