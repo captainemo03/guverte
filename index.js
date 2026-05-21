@@ -7848,6 +7848,41 @@ function getSceneBackdropProfile(sc){
   return 'opensea';
 }
 
+function getSceneMotionClass(sc){
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(sc?.alert || /alarm|yangin|fire|mob|abandon|blackout|pirate|near-miss|ariza|man overboard/.test(hay)) return 'scene-motion-alert';
+  if(/storm|firtina|swell|rough|crosswind|squall/.test(hay)) return 'scene-motion-storm';
+  if(/engine|makine|carkci|exhaust|lo pressure|bilge|pump|generator|blackout/.test(hay)) return 'scene-motion-engine';
+  if(/harbor|liman|berth|terminal|rihtim|pilot|tug|all fast|gangway/.test(hay)) return 'scene-motion-harbor';
+  if(/bridge|radar|ecdis|ais|chart room|kopruustu|bogaz|tss|compass/.test(hay)) return 'scene-motion-bridge';
+  return '';
+}
+
+function triggerLiveScenePresentation(sc, choicesWrap){
+  const sceneArea = document.getElementById('scene-area');
+  const story = document.getElementById('story');
+  if(sceneArea){
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-alert','scene-fade-once');
+    void sceneArea.offsetWidth;
+    sceneArea.classList.add('scene-fade-once');
+    const motionClass = getSceneMotionClass(sc);
+    if(motionClass) sceneArea.classList.add(motionClass);
+  }
+  if(story){
+    story.classList.remove('story-live');
+    void story.offsetWidth;
+    story.classList.add('story-live');
+  }
+  if(choicesWrap){
+    Array.from(choicesWrap.querySelectorAll('.cbtn')).forEach((btn, idx)=>{
+      btn.classList.remove('scene-choice-enter');
+      btn.style.animationDelay = `${Math.min(idx * 0.06, 0.24)}s`;
+      void btn.offsetWidth;
+      btn.classList.add('scene-choice-enter');
+    });
+  }
+}
+
 function renderScene(idx){
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
@@ -7908,6 +7943,8 @@ function renderScene(idx){
   }else{
     ch.style.display='';
   }
+  triggerLiveScenePresentation(sc, ch);
+  applyLanguageUI();
 }
 
 // ===== KRİZ =====
