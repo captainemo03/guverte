@@ -4016,6 +4016,67 @@ const KONTRAT_DEFS={
 // ===== OYUN DEĞİŞKENLERİ =====
 let pn="Stajyer", sn="M/V Ege Meltem";
 let selYear=2018, selType="kuru", selKontrat=0;
+const PLAYER_LOOK = {
+  skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
+  hair:['short','wavy','side','curly'],
+  hairColor:['#2b1a12','#4b2e20','#6b4a32','#1d2431']
+};
+let playerAppearance = {skin:'#d9a27c',hair:'wavy',hairColor:'#2b1a12'};
+const crewPortraits = {};
+
+function portraitStripeCount(role){
+  if(/süvari|suvari/i.test(role||'')) return 4;
+  if(/1\. zabit|baş mühendis|bas muhendis/i.test(role||'')) return 3;
+  if(/2\. zabit|2\. mühendis/i.test(role||'')) return 2;
+  if(/3\. zabit/i.test(role||'')) return 1;
+  return 0;
+}
+
+function portraitHairPath(style='short'){
+  const map = {
+    short:'M58 56c8-18 24-28 42-28s33 9 42 28l-5 9c-9-11-20-18-37-18-18 0-31 8-37 18z',
+    wavy:'M54 62c4-22 22-34 47-34 20 0 37 9 44 28l-3 11c-8-8-11-15-17-16-2 5-6 8-12 8-5 0-9-2-12-6-4 5-10 8-17 8-7 0-13-3-17-9-3 4-7 8-13 10z',
+    side:'M58 55c10-18 25-27 45-27 21 0 35 8 42 23l-9 8c-7-8-14-12-24-12-6 0-12 1-17 4-7 4-12 10-19 18z',
+    curly:'M52 64c2-18 12-31 30-35l9 3 8-3 10 4 8-2 12 7 6 14-6 10c-6-6-10-11-14-10-3 0-5 3-8 4-4 2-8 1-11-2-4 4-8 6-13 5-4-1-7-4-10-8-5 3-10 7-21 13z'
+  };
+  return map[style] || map.short;
+}
+
+function renderPortraitSvg(cfg={}, opts={}){
+  const skin = cfg.skin || '#d9a27c';
+  const hair = cfg.hair || 'wavy';
+  const hairColor = cfg.hairColor || '#2b1a12';
+  const suit = cfg.suitColor || '#1a2333';
+  const shirt = cfg.shirtColor || '#f3f2ee';
+  const tie = cfg.tieColor || '#12161d';
+  const bg = cfg.bg || 'bridge';
+  const stripes = Math.max(0, Math.min(4, cfg.stripes ?? 1));
+  const angle = opts.full ? 1 : .92;
+  const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${36+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/><rect x="${128+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/>`).join('');
+  const bridgeBg = `<rect width="200" height="200" fill="#b7c7d8"/><rect y="114" width="200" height="86" fill="#445467"/><polygon points="108,0 200,0 200,118 136,118" fill="#2e3949"/><rect x="118" y="18" width="50" height="34" rx="3" fill="#121d29"/><rect x="124" y="24" width="38" height="22" rx="2" fill="#24394d"/><rect x="18" y="34" width="126" height="78" fill="#dce8f4"/><line x1="60" y1="34" x2="44" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="98" y1="34" x2="84" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="136" y1="34" x2="124" y2="112" stroke="#8796a4" stroke-width="3"/><rect x="20" y="112" width="126" height="8" fill="#8ca1b8"/><rect x="28" y="128" width="116" height="18" rx="4" fill="#1c2936"/><rect x="36" y="132" width="34" height="10" rx="2" fill="#24394d"/><rect x="78" y="132" width="26" height="10" rx="2" fill="#17222f"/><rect x="112" y="132" width="26" height="10" rx="2" fill="#2a1e16"/>`;
+  const portraitBg = `<rect width="200" height="200" fill="#132233"/><rect y="122" width="200" height="78" fill="#0d1724"/><circle cx="160" cy="36" r="12" fill="rgba(255,255,255,.08)"/>`;
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    ${bg==='bridge' ? bridgeBg : portraitBg}
+    <g transform="translate(0 4) scale(${angle} 1)">
+      <path d="M49 186c4-28 17-47 31-57 7-5 12-13 20-13s14 8 20 13c14 10 27 29 31 57H49z" fill="${suit}"/>
+      <path d="M76 121c6 8 14 13 24 13s18-5 24-13l10 12-16 52H62l-16-52z" fill="${shirt}"/>
+      <path d="M93 128h14l6 14-13 34-13-34z" fill="${tie}"/>
+      <circle cx="100" cy="84" r="31" fill="${skin}"/>
+      <path d="M72 86c1 20 13 37 28 37 17 0 29-17 30-37 2-20-8-38-29-38-21 0-30 17-29 38z" fill="${skin}"/>
+      <path d="${portraitHairPath(hair)}" fill="${hairColor}"/>
+      <path d="M69 79c2-20 14-35 33-35 20 0 32 13 33 35-7-6-16-11-33-11-18 0-26 5-33 11z" fill="${hairColor}" opacity=".96"/>
+      <ellipse cx="88" cy="88" rx="3.4" ry="2" fill="#1d2431"/>
+      <ellipse cx="113" cy="88" rx="3.4" ry="2" fill="#1d2431"/>
+      <path d="M100 92l-3 10 6 0" stroke="#875f4f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M90 108c6 5 15 5 21 0" stroke="#9c6152" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M56 186c6-17 16-33 29-42l10 22-8 20H56z" fill="#202b3d"/>
+      <path d="M144 186c-6-17-16-33-29-42l-10 22 8 20h31z" fill="#202b3d"/>
+      ${stripeSvg}
+      <circle cx="76" cy="158" r="6" fill="#d8ad57"/><circle cx="124" cy="158" r="6" fill="#d8ad57"/>
+      <circle cx="82" cy="178" r="6" fill="#d8ad57"/><circle cx="118" cy="178" r="6" fill="#d8ad57"/>
+    </g>
+  </svg>`;
+}
 let stats={cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
 let scenes=[], currentIdx=0, choicesMade=[];
 let contractDays=0, contractTotal=6;
@@ -6658,8 +6719,57 @@ function scheduleAdvancedConsequences(sc,c2){
 }
 
 // ===== GİRİŞ EKRANI =====
+function getPlayerPortraitConfig(){
+  return {
+    skin:playerAppearance.skin,
+    hair:playerAppearance.hair,
+    hairColor:playerAppearance.hairColor,
+    suitColor:'#1b2435',
+    shirtColor:'#f2f0ea',
+    tieColor:'#13171d',
+    stripes:1,
+    bg:'bridge'
+  };
+}
+
+function renderPortraitTargets(){
+  const avatar=document.getElementById('avatar');
+  const preview=document.getElementById('creator-preview');
+  if(avatar) avatar.innerHTML = renderPortraitSvg(getPlayerPortraitConfig(),{full:false});
+  if(preview) preview.innerHTML = renderPortraitSvg(getPlayerPortraitConfig(),{full:true});
+}
+
+function renderCreatorRow(elId, values, selected, kind){
+  const row=document.getElementById(elId);
+  if(!row) return;
+  row.innerHTML='';
+  values.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='creator-chip'+(v===selected?' active':'')+(kind==='swatch'?' swatch':'');
+    if(kind==='swatch') b.innerHTML=`<span style="background:${v};"></span>`;
+    else b.textContent = ({short:'Kısa',wavy:'Dalgalı',side:'Yana',curly:'Kıvırcık'}[v]||v);
+    b.onclick=()=>{
+      if(elId==='creator-skin') playerAppearance.skin=v;
+      else if(elId==='creator-hair') playerAppearance.hair=v;
+      else if(elId==='creator-haircolor') playerAppearance.hairColor=v;
+      renderCharacterCreator();
+    };
+    row.appendChild(b);
+  });
+}
+
+function renderCharacterCreator(){
+  renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
+  renderCreatorRow('creator-hair', PLAYER_LOOK.hair, playerAppearance.hair, 'hair');
+  renderCreatorRow('creator-haircolor', PLAYER_LOOK.hairColor, playerAppearance.hairColor, 'swatch');
+  renderPortraitTargets();
+}
+
 function buildIntro(){
   refreshShipSpecs();
+  document.getElementById('yearsel').innerHTML='';
+  document.getElementById('shiptype').innerHTML='';
   // Yıl seçimi
   const ys=document.getElementById('yearsel');
   YEARS.forEach(y=>{
@@ -6683,6 +6793,7 @@ function buildIntro(){
   });
   updateKontrat();
   updateSugs();
+  renderCharacterCreator();
 }
 
 function updateKontrat(){
@@ -8043,12 +8154,16 @@ function renderScene(idx){
   document.getElementById('tbd').textContent=sc.time;
   document.getElementById('lbd').textContent=sc.loc;
   document.getElementById('scene-sub').textContent=sc.sub||'';
-  document.getElementById('spkico').textContent=c.icon;
+  const speakerKey = getCrewKeyFromWho(sc.who);
+  document.getElementById('spkico').innerHTML = speakerKey
+    ? renderPortraitSvg(crewPortraits[speakerKey] || makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{}), {full:false})
+    : renderPortraitSvg({...getPlayerPortraitConfig(), stripes:0, bg:'portrait', suitColor:'#233043'}, {full:false});
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
   document.getElementById('text').textContent=typeof sc.text==='function'?sc.text(pn,sn):sc.text;
   document.getElementById('charname').textContent=pn;
   document.getElementById('charrole').textContent='GÜV. STAJYERİ · '+sc.day.toUpperCase();
+  renderPortraitTargets();
   const stObj=STYPES.find(x=>x.key===selType);
   const shipSpec=getShipSpec(selType);
   document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear;
@@ -8240,6 +8355,7 @@ function restartGame(){
   document.getElementById('endscr').style.display='none';
   document.getElementById('game').style.display='none';
   document.getElementById('intro').style.display='flex';
+  renderCharacterCreator();
 }
 
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
@@ -8316,9 +8432,24 @@ function pickRandom(list){
   return list[Math.floor(Math.random()*list.length)];
 }
 
+function makeCrewPortrait(key, def){
+  const stripeBias = portraitStripeCount(def.title);
+  return {
+    skin: pickRandom(PLAYER_LOOK.skin),
+    hair: pickRandom(PLAYER_LOOK.hair),
+    hairColor: pickRandom(PLAYER_LOOK.hairColor),
+    suitColor: /mühendis|cark/i.test(def.title) ? '#202d3a' : '#1b2435',
+    shirtColor:'#f1efe8',
+    tieColor:'#13171d',
+    stripes: stripeBias,
+    bg: /köprü|seyir|süvari|zabit/i.test(def.title) ? 'bridge' : 'portrait'
+  };
+}
+
 function randomizeCrewRoster(){
   Object.keys(CREW_NAME_POOLS).forEach(key=>{
     if(CREW_DEFS[key]) CREW_DEFS[key].name = pickRandom(CREW_NAME_POOLS[key]);
+    if(CREW_DEFS[key]) crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]);
   });
 }
 
@@ -8371,8 +8502,9 @@ function renderCrewCards(){
     const relation = trust>=75?'Guveniyor ama gozunu uzerinde tutuyor':trust>=55?'Seni tartiyor':trust>=40?'Mesafeyi koruyor':'Henuz kolay acilmiyor';
     const div = document.createElement('div');
     div.className = 'crew-card';
+    const portrait = renderPortraitSvg(crewPortraits[key] || makeCrewPortrait(key, def), {full:false});
     div.innerHTML = `<div class="crew-card-top">
-      <span class="crew-ico portrait-chip small">${def.icon}</span>
+      <span class="crew-ico portrait-chip small">${portrait}</span>
       <div><div class="crew-name">${def.name}</div><div class="crew-title-small">${def.title}</div></div>
       <span style="margin-left:auto;font-size:11px;font-family:'Share Tech Mono',monospace;color:${color};">${trust}</span>
     </div>
