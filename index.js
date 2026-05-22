@@ -6853,11 +6853,39 @@ function getPlayerPortraitConfig(){
   };
 }
 
+function getPortraitSpriteIndex(cfg={}){
+  const base = cfg.base || 'male';
+  const hair = cfg.hair || 'short';
+  const face = cfg.face || 'soft';
+  const hairColor = cfg.hairColor || '#1e1612';
+  if(base==='female'){
+    if(hair==='bob') return 7;
+    if(hair==='bun') return 1;
+    if(hair==='slick') return 3;
+    if(hair==='curly') return 5;
+    return hairColor==='#6a4b35' ? 1 : 3;
+  }
+  if(hair==='curly') return 6;
+  if(hair==='crop' || hair==='short') return 2;
+  if(hair==='quiff' || hair==='swept') return 0;
+  if(hairColor==='#6a4b35') return 4;
+  return face==='sharp' ? 2 : 0;
+}
+
+function renderPortraitSprite(cfg={}, variant='avatar'){
+  const idx = Number.isInteger(cfg.spriteIndex) ? cfg.spriteIndex : getPortraitSpriteIndex(cfg);
+  const col = idx % 4;
+  const row = Math.floor(idx / 4);
+  const x = [0,33.333,66.666,100][col] ?? 0;
+  const y = row===0 ? 0 : 100;
+  return `<span class="portrait-sprite ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('assets/crew-portraits.png?v=3');"></span>`;
+}
+
 function renderPortraitTargets(){
   const avatar=document.getElementById('avatar');
   const preview=document.getElementById('creator-preview');
-  if(avatar) avatar.innerHTML = renderPortraitSvg(getPlayerPortraitConfig(),{full:false});
-  if(preview) preview.innerHTML = renderPortraitSvg(getPlayerPortraitConfig(),{full:true});
+  if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'avatar');
+  if(preview) preview.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'preview');
 }
 
 function renderCreatorRow(elId, values, selected, kind){
@@ -8303,8 +8331,8 @@ function renderScene(idx){
   document.getElementById('scene-sub').textContent=sc.sub||'';
   const speakerKey = getCrewKeyFromWho(sc.who);
   document.getElementById('spkico').innerHTML = speakerKey
-    ? renderPortraitSvg(crewPortraits[speakerKey] || makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{}), {full:false})
-    : renderPortraitSvg({...getPlayerPortraitConfig(), stripes:0, bg:'portrait', suitColor:'#233043'}, {full:false});
+    ? renderPortraitSprite(crewPortraits[speakerKey] || makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{}), 'speaker')
+    : renderPortraitSprite(getPlayerPortraitConfig(), 'speaker');
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
   document.getElementById('text').textContent=typeof sc.text==='function'?sc.text(pn,sn):sc.text;
@@ -8597,7 +8625,10 @@ function makeCrewPortrait(key, def){
     shirtColor:'#f1efe8',
     tieColor:'#13171d',
     stripes: stripeBias,
-    bg: /köprü|seyir|süvari|zabit/i.test(def.title) ? 'bridge' : 'portrait'
+    bg: /köprü|seyir|süvari|zabit/i.test(def.title) ? 'bridge' : 'portrait',
+    spriteIndex: base==='female'
+      ? pickRandom([1,3,5,7])
+      : pickRandom([0,2,4,6])
   };
 }
 
@@ -8657,7 +8688,7 @@ function renderCrewCards(){
     const relation = trust>=75?'Guveniyor ama gozunu uzerinde tutuyor':trust>=55?'Seni tartiyor':trust>=40?'Mesafeyi koruyor':'Henuz kolay acilmiyor';
     const div = document.createElement('div');
     div.className = 'crew-card';
-    const portrait = renderPortraitSvg(crewPortraits[key] || makeCrewPortrait(key, def), {full:false});
+    const portrait = renderPortraitSprite(crewPortraits[key] || makeCrewPortrait(key, def), 'crew');
     div.innerHTML = `<div class="crew-card-top">
       <span class="crew-ico portrait-chip small">${portrait}</span>
       <div><div class="crew-name">${def.name}</div><div class="crew-title-small">${def.title}</div></div>
