@@ -4020,7 +4020,7 @@ const PLAYER_LOOK = {
   skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
   base:['male','female'],
   face:['soft','sharp'],
-  hair:['short','swept','waves','crop','parted','slick','bob'],
+  hair:['short','swept','waves','crop','parted','slick','bob','quiff','curly','bun'],
   hairColor:['#1e1612','#3a271b','#6a4b35','#202735'],
   eye:['#3f2c22','#496b8d','#577149','#697089'],
   uniform:['classic','dress','duty']
@@ -4044,7 +4044,10 @@ function portraitHairPath(style='short'){
     crop:'M57 56c8-17 23-28 43-28 18 0 31 8 39 23l-5 9c-7-3-13-7-20-8-18-4-34 1-48 13z',
     parted:'M60 58c7-18 21-28 40-28 18 0 32 8 40 24l-4 10c-5-8-14-15-18-18l-5 12c-5-4-8-9-13-9-6 0-9 5-13 10-5-6-12-9-27-1z',
     slick:'M58 60c8-20 24-31 44-31 18 0 32 7 40 23l-4 6c-13-4-26-7-41-6-15 1-26 4-39 15z',
-    bob:'M55 60c4-18 20-31 45-31 22 0 38 10 44 28l-2 9c-4-1-8 2-13 11-4 8-6 18-8 27H80c-2-9-4-19-8-27-5-9-9-12-17-17z'
+    bob:'M55 60c4-18 20-31 45-31 22 0 38 10 44 28l-2 9c-4-1-8 2-13 11-4 8-6 18-8 27H80c-2-9-4-19-8-27-5-9-9-12-17-17z',
+    quiff:'M57 60c7-20 22-31 44-31 20 0 35 8 42 24l-4 8c-8-3-13-8-18-15-5 10-11 15-19 15-7 0-13-3-19-10-9 1-17 4-26 9z',
+    curly:'M55 62c6-20 22-32 46-32 23 0 39 10 45 29l-2 9c-4-2-8-6-10-10-5 6-10 9-16 9-5 0-9-2-13-7-4 5-8 7-13 7-6 0-11-3-16-10-5 3-10 5-21 5z',
+    bun:'M57 60c6-19 22-31 45-31 22 0 37 10 43 27l-3 10c-6 0-11 4-16 12-4 8-6 16-8 24H84c-3-8-5-16-8-24-5-8-10-12-19-13z'
   };
   return map[style] || map.short;
 }
@@ -4062,52 +4065,124 @@ function renderPortraitSvg(cfg={}, opts={}){
   const bg = cfg.bg || 'bridge';
   const stripes = Math.max(0, Math.min(4, cfg.stripes ?? 1));
   const angle = opts.full ? 1 : .92;
-  const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${39+i*6}" y="167" width="4" height="24" rx="2" fill="#e1b765"/><rect x="${123+i*6}" y="167" width="4" height="24" rx="2" fill="#e1b765"/>`).join('');
-  const bridgeBg = `<rect width="200" height="200" fill="#b7c7d8"/><rect y="114" width="200" height="86" fill="#445467"/><polygon points="108,0 200,0 200,118 136,118" fill="#2e3949"/><rect x="118" y="18" width="50" height="34" rx="3" fill="#121d29"/><rect x="124" y="24" width="38" height="22" rx="2" fill="#24394d"/><rect x="18" y="34" width="126" height="78" fill="#dce8f4"/><line x1="60" y1="34" x2="44" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="98" y1="34" x2="84" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="136" y1="34" x2="124" y2="112" stroke="#8796a4" stroke-width="3"/><rect x="20" y="112" width="126" height="8" fill="#8ca1b8"/><rect x="28" y="128" width="116" height="18" rx="4" fill="#1c2936"/><rect x="36" y="132" width="34" height="10" rx="2" fill="#24394d"/><rect x="78" y="132" width="26" height="10" rx="2" fill="#17222f"/><rect x="112" y="132" width="26" height="10" rx="2" fill="#2a1e16"/>`;
-  const portraitBg = `<rect width="200" height="200" fill="#132233"/><rect y="122" width="200" height="78" fill="#0d1724"/><circle cx="160" cy="36" r="12" fill="rgba(255,255,255,.08)"/>`;
-  const jaw = base==='female'
+  const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${36+i*6}" y="168" width="4" height="24" rx="2" fill="#ddb15a"/><rect x="${130+i*6}" y="168" width="4" height="24" rx="2" fill="#ddb15a"/>`).join('');
+  const bridgeBg = `<rect width="200" height="200" fill="#c8d7e4"/><rect y="108" width="200" height="92" fill="#3e4f63"/><polygon points="104,0 200,0 200,116 134,116" fill="#2b3644"/><rect x="118" y="14" width="52" height="36" rx="3" fill="#111926"/><rect x="124" y="20" width="40" height="24" rx="2" fill="#25435a"/><rect x="16" y="30" width="130" height="80" fill="#deebf6"/><line x1="54" y1="30" x2="38" y2="110" stroke="#8694a1" stroke-width="3"/><line x1="94" y1="30" x2="80" y2="110" stroke="#8694a1" stroke-width="3"/><line x1="134" y1="30" x2="122" y2="110" stroke="#8694a1" stroke-width="3"/><rect x="18" y="110" width="128" height="8" fill="#8ba0b7"/><rect x="30" y="126" width="116" height="20" rx="4" fill="#182433"/><rect x="36" y="130" width="36" height="12" rx="2" fill="#274762"/><rect x="80" y="130" width="26" height="12" rx="2" fill="#111923"/><rect x="114" y="130" width="26" height="12" rx="2" fill="#32251b"/>`;
+  const portraitBg = `<rect width="200" height="200" fill="#0f2031"/><rect y="118" width="200" height="82" fill="#0a1320"/><circle cx="158" cy="30" r="13" fill="rgba(255,255,255,.06)"/>`;
+  const earY = base==='female' ? 86 : 87;
+  const bodyPath = base==='female'
+    ? 'M44 188c6-30 18-49 34-61 9-7 17-11 22-11 6 0 13 4 22 11 16 12 28 31 34 61H44z'
+    : 'M38 188c7-34 20-53 39-66 10-7 17-10 23-10 7 0 13 3 23 10 19 13 33 32 39 66H38z';
+  const chestGlow = base==='female'
+    ? 'M60 188c8-19 16-31 28-38 5-4 8-5 12-5 5 0 10 1 15 5 12 7 20 19 27 38H60z'
+    : 'M54 188c8-20 18-33 31-40 5-3 10-5 15-5 6 0 11 2 16 5 13 7 24 20 31 40H54z';
+  const headShape = base==='female'
     ? (face==='sharp'
-      ? `<path d="M76 84c0 23 11 41 25 41 17 0 27-18 27-41 0-21-9-36-26-36-17 0-26 14-26 36z" fill="${skin}"/>`
-      : `<path d="M74 84c0 23 12 40 27 40 17 0 28-17 28-40 0-21-10-36-28-36-18 0-27 14-27 36z" fill="${skin}"/>`)
+      ? 'M74 82c0-23 12-38 29-38 18 0 29 15 29 38 0 28-13 47-29 47S74 110 74 82z'
+      : 'M72 82c0-23 13-38 31-38 18 0 30 15 30 38 0 28-13 46-30 46-18 0-31-18-31-46z')
     : (face==='sharp'
-      ? `<path d="M74 84c0 24 10 43 26 43 18 0 29-19 29-43 0-22-10-37-28-37-18 0-27 15-27 37z" fill="${skin}"/>`
-      : `<path d="M71 84c0 24 12 42 29 42 18 0 30-18 30-42 0-22-10-37-30-37-19 0-29 15-29 37z" fill="${skin}"/>`);
-  const lapel = cfg.uniform==='dress'
-    ? `<path d="M80 122c6 11 14 16 20 16l-10 32-21-33z" fill="#f5f3ee"/><path d="M120 122c-6 11-14 16-20 16l10 32 21-33z" fill="#f5f3ee"/>`
-    : `<path d="M79 122c5 10 13 15 21 15s16-5 21-15l11 12-15 50H64l-15-50z" fill="${shirt}"/>`;
-  const buttons = cfg.uniform==='duty'
-    ? `<circle cx="100" cy="160" r="5.2" fill="#d8ad57"/><circle cx="100" cy="178" r="5.2" fill="#d8ad57"/>`
-    : `<circle cx="76" cy="158" r="6" fill="#d8ad57"/><circle cx="124" cy="158" r="6" fill="#d8ad57"/><circle cx="82" cy="178" r="6" fill="#d8ad57"/><circle cx="118" cy="178" r="6" fill="#d8ad57"/>`;
-  const hairCap = {
-    short:`<path d="M62 58c6-16 21-28 41-28 19 0 35 9 41 25l-2 9c-10-10-25-15-42-15-16 0-29 5-38 14z" fill="${hairColor}"/>`,
-    swept:`<path d="M56 62c8-22 26-33 48-33 18 0 33 7 41 22l-2 8c-9-6-18-13-30-14-16-2-31 7-47 17z" fill="${hairColor}"/>`,
-    waves:`<path d="M55 62c5-20 23-33 47-33 22 0 39 10 45 29l-3 9c-8-8-14-13-21-13-4 0-7 2-10 6-4 4-9 6-14 6-6 0-11-3-15-8-6 5-12 8-19 8-4 0-7-1-10-4z" fill="${hairColor}"/>`,
-    crop:`<path d="M60 58c8-17 22-28 42-28 18 0 31 8 39 22l-4 8c-10-5-22-8-36-7-14 1-26 5-41 15z" fill="${hairColor}"/>`,
-    parted:`<path d="M60 58c7-18 21-28 40-28 18 0 32 8 40 24l-4 10c-5-8-14-15-18-18l-5 12c-5-4-8-9-13-9-6 0-9 5-13 10-5-6-12-9-27-1z" fill="${hairColor}"/>`,
-    slick:`<path d="M58 60c8-20 24-31 44-31 18 0 32 7 40 23l-4 6c-13-4-26-7-41-6-15 1-26 4-39 15z" fill="${hairColor}"/>`,
-    bob:`<path d="M55 60c4-18 20-31 45-31 22 0 38 10 44 28l-2 9c-4-1-8 2-13 11-4 8-6 18-8 27H80c-2-9-4-19-8-27-5-9-9-12-17-17z" fill="${hairColor}"/>`
-  }[hair] || `<path d="M62 58c6-16 21-28 41-28 19 0 35 9 41 25l-2 9c-10-10-25-15-42-15-16 0-29 5-38 14z" fill="${hairColor}"/>`;
+      ? 'M72 82c0-24 12-39 30-39 19 0 31 15 31 39 0 29-13 48-31 48-18 0-30-19-30-48z'
+      : 'M69 82c0-24 14-39 33-39 20 0 32 15 32 39 0 29-13 47-32 47-20 0-33-18-33-47z');
   const neckShade = face==='sharp' ? '#b37b61' : '#be886c';
+  const hairLayers = {
+    short:{
+      back:`<path d="M73 64c7-20 23-31 44-31 20 0 35 9 40 26-10-8-22-13-38-13-19 0-34 6-46 18z" fill="${hairColor}"/>`,
+      top:`<path d="M69 68c8-20 22-31 43-31 21 0 35 8 42 24l-3 8c-11-8-24-12-40-12-16 0-29 4-42 11z" fill="${hairColor}"/>`,
+      front:`<path d="M79 63c8-6 18-9 31-9 10 0 20 2 28 8" stroke="${hairColor}" stroke-width="6" stroke-linecap="round" fill="none"/>`
+    },
+    swept:{
+      back:`<path d="M66 70c8-23 24-35 46-35 21 0 37 8 44 25-7-2-15-6-22-10-19-8-41-1-68 20z" fill="${hairColor}"/>`,
+      top:`<path d="M64 72c9-23 25-36 47-36 22 0 38 9 45 27l-4 7c-8-4-16-10-26-13-19-5-37 1-62 15z" fill="${hairColor}"/>`,
+      front:`<path d="M80 55c18-3 34 0 49 13" stroke="${hairColor}" stroke-width="7" stroke-linecap="round" fill="none"/>`
+    },
+    waves:{
+      back:`<path d="M66 72c6-23 24-37 48-37 24 0 41 11 47 31-7-7-13-11-19-11-4 0-7 2-10 6-4 5-9 7-15 7-6 0-11-3-16-8-7 6-16 10-35 12z" fill="${hairColor}"/>`,
+      top:`<path d="M66 72c7-22 24-35 47-35 22 0 39 11 45 29l-2 8c-8-7-13-13-21-13-5 0-9 2-12 6-4 5-9 8-15 8-7 0-12-3-16-8-6 5-13 8-26 5z" fill="${hairColor}"/>`,
+      front:`<path d="M78 62c6-6 13-9 20-9 8 0 13 3 19 10 6-7 12-10 20-10 6 0 12 2 18 7" stroke="${hairColor}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`
+    },
+    crop:{
+      back:`<path d="M72 66c9-20 23-31 42-31 20 0 33 8 39 24-8-3-20-6-36-6-17 0-31 4-45 13z" fill="${hairColor}"/>`,
+      top:`<path d="M69 68c8-19 22-30 42-30 18 0 32 8 39 22l-4 7c-10-5-21-7-34-7-16 0-30 3-43 8z" fill="${hairColor}"/>`,
+      front:`<path d="M84 60c9-3 18-4 27-4 11 0 20 1 28 4" stroke="${hairColor}" stroke-width="5" stroke-linecap="round" fill="none"/>`
+    },
+    parted:{
+      back:`<path d="M68 70c8-22 23-35 45-35 21 0 38 10 44 27-6-3-11-9-17-15l-10 17c-4-7-9-11-16-11-8 0-13 5-18 12-8-8-17-6-28 5z" fill="${hairColor}"/>`,
+      top:`<path d="M68 69c8-22 23-34 45-34 21 0 37 9 43 26l-4 8c-4-8-12-16-19-22l-4 16c-6-6-10-9-17-9-7 0-11 5-16 11-7-7-15-8-28 4z" fill="${hairColor}"/>`,
+      front:`<path d="M99 48l-3 18" stroke="#eadfd0" stroke-width="2.2" stroke-linecap="round"/><path d="M83 58c9-5 19-7 29-7 11 0 21 2 32 7" stroke="${hairColor}" stroke-width="5" stroke-linecap="round" fill="none"/>`
+    },
+    slick:{
+      back:`<path d="M69 71c8-24 24-37 46-37 21 0 37 8 43 23-13-3-27-4-43-2-18 2-32 7-46 16z" fill="${hairColor}"/>`,
+      top:`<path d="M68 70c8-22 24-34 45-34 19 0 35 7 42 22l-3 6c-14-4-28-5-42-3-17 2-30 5-42 9z" fill="${hairColor}"/>`,
+      front:`<path d="M80 58c16-5 30-6 45-4" stroke="${hairColor}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`
+    },
+    bob:{
+      back:`<path d="M66 71c5-22 23-36 47-36 23 0 40 11 46 31-5-1-10 4-14 13-4 8-6 18-8 25H79c-2-7-5-17-9-25-4-9-8-14-13-8z" fill="${hairColor}"/>`,
+      top:`<path d="M68 68c6-20 23-31 45-31 22 0 38 10 44 28l-2 8c-10-10-25-15-42-15-18 0-32 5-45 10z" fill="${hairColor}"/>`,
+      front:`<path d="M80 61c7-5 16-8 28-8 12 0 20 3 28 8" stroke="${hairColor}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`
+    },
+    quiff:{
+      back:`<path d="M68 71c8-22 23-35 45-35 20 0 36 8 43 24-8-2-14-6-19-14-5 11-11 16-20 16-7 0-13-3-20-9-10 2-18 6-29 18z" fill="${hairColor}"/>`,
+      top:`<path d="M67 71c8-22 24-35 46-35 20 0 35 8 43 24l-4 8c-7-2-12-6-17-13-5 9-11 14-19 14-7 0-13-3-19-10-10 2-18 5-30 12z" fill="${hairColor}"/>`,
+      front:`<path d="M84 53c8-5 16-7 24-7 12 0 21 5 29 15" stroke="${hairColor}" stroke-width="6.5" stroke-linecap="round" fill="none"/>`
+    },
+    curly:{
+      back:`<path d="M68 72c7-22 24-35 47-35 23 0 39 10 45 29-5-3-9-8-12-12-5 7-10 10-16 10-6 0-10-2-14-8-4 6-9 8-14 8-7 0-12-4-17-11-6 5-11 7-19 7z" fill="${hairColor}"/>`,
+      top:`<path d="M67 72c7-21 23-33 46-33 23 0 38 10 44 28l-2 8c-5-3-8-8-11-12-4 7-9 10-15 10-6 0-10-2-14-8-4 6-9 8-14 8-7 0-12-4-17-11-6 5-11 7-17 10z" fill="${hairColor}"/>`,
+      front:`<path d="M80 61c4-7 11-11 18-11 7 0 12 3 17 10 4-7 10-10 18-10 7 0 13 3 18 10" stroke="${hairColor}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`
+    },
+    bun:{
+      back:`<path d="M68 70c7-21 24-34 46-34 22 0 38 10 44 28-5 0-9 4-13 11-4 8-6 18-8 24H82c-3-8-5-16-8-24-4-7-8-11-14-5z" fill="${hairColor}"/><circle cx="114" cy="33" r="12" fill="${hairColor}"/>`,
+      top:`<path d="M68 69c6-19 23-31 45-31 22 0 37 10 43 27l-2 8c-11-10-25-14-42-14-18 0-31 4-44 10z" fill="${hairColor}"/>`,
+      front:`<path d="M82 61c8-5 17-7 28-7 11 0 20 2 28 7" stroke="${hairColor}" stroke-width="5.5" stroke-linecap="round" fill="none"/>`
+    }
+  };
+  const hairLayer = hairLayers[hair] || hairLayers.short;
+  const collar = base==='female'
+    ? `<path d="M83 123c5 8 11 13 17 13 6 0 12-5 17-13l7 10-16 17H92l-16-17z" fill="${shirt}"/>`
+    : `<path d="M80 122c6 9 12 14 20 14 8 0 14-5 20-14l9 11-18 18H89l-18-18z" fill="${shirt}"/>`;
+  const lapels = cfg.uniform==='dress'
+    ? `<path d="M72 123l18 24-16 37-15-55z" fill="#f6f4ef"/><path d="M128 123l-18 24 16 37 15-55z" fill="#f6f4ef"/>`
+    : `<path d="M73 123l18 23-16 38-18-56z" fill="${shirt}"/><path d="M127 123l-18 23 16 38 18-56z" fill="${shirt}"/>`;
+  const tieSvg = cfg.uniform==='duty'
+    ? `<path d="M96 132h8l5 15-9 33-9-33z" fill="${tie}"/>`
+    : `<path d="M94 129h12l6 16-12 39-12-39z" fill="${tie}"/>`;
+  const buttons = cfg.uniform==='duty'
+    ? `<circle cx="100" cy="160" r="5" fill="#d8ad57"/><circle cx="100" cy="177" r="5" fill="#d8ad57"/>`
+    : `<circle cx="78" cy="157" r="5.7" fill="#d8ad57"/><circle cx="122" cy="157" r="5.7" fill="#d8ad57"/><circle cx="83" cy="176" r="5.7" fill="#d8ad57"/><circle cx="117" cy="176" r="5.7" fill="#d8ad57"/>`;
+  const epaulettes = `<path d="M61 126h26l-5 10H57z" fill="#233349"/><path d="M113 126h26l4 10h-25z" fill="#233349"/><rect x="66" y="127" width="16" height="3" rx="1.5" fill="#e1b765"/><rect x="118" y="127" width="16" height="3" rx="1.5" fill="#e1b765"/>`;
   return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="coatGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${suit}"/>
+        <stop offset="100%" stop-color="#101926"/>
+      </linearGradient>
+      <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${skin}"/>
+        <stop offset="100%" stop-color="${neckShade}"/>
+      </linearGradient>
+    </defs>
     ${bg==='bridge' ? bridgeBg : portraitBg}
     <g transform="translate(0 4) scale(${angle} 1)">
-      <path d="${base==='female' ? 'M48 188c5-31 20-53 36-63 8-6 12-9 17-9 5 0 10 3 17 9 16 10 31 32 36 63H48z' : 'M42 188c6-34 22-56 40-67 9-6 13-9 18-9 6 0 10 3 18 9 18 11 34 33 40 67H42z'}" fill="${suit}"/>
-      <path d="${base==='female' ? 'M61 188c10-18 18-29 28-35 4-3 8-5 11-5 5 0 10 2 14 5 10 6 18 17 27 35H61z' : 'M56 188c10-19 18-31 30-38 5-3 9-5 14-5 6 0 11 2 16 5 12 7 21 19 30 38H56z'}" fill="rgba(255,255,255,.035)"/>
-      ${lapel}
-      <path d="M94 130h12l7 15-13 39-13-39z" fill="${tie}"/>
-      <path d="M90 108h20v18c0 7-4 12-10 12s-10-5-10-12z" fill="${neckShade}"/>
-      <circle cx="100" cy="83" r="31" fill="${skin}"/>
-      ${jaw}
-      ${hairCap}
-      <path d="M66 78c4-20 17-32 34-32 18 0 30 11 35 32-10-6-21-10-35-10-14 0-24 3-34 10z" fill="${hairColor}" opacity=".98"/>
-      <path d="M82 79c5-3 10-5 16-5" stroke="#3a271c" stroke-width="2" stroke-linecap="round"/><path d="M103 74c6 0 11 2 16 5" stroke="#3a271c" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="88" cy="88" rx="4.6" ry="3.2" fill="#fff"/><ellipse cx="113" cy="88" rx="4.6" ry="3.2" fill="#fff"/>
-      <circle cx="88" cy="88.4" r="2" fill="${eye}"/><circle cx="113" cy="88.4" r="2" fill="${eye}"/>
-      <circle cx="88.8" cy="87.7" r=".75" fill="#0f131a"/><circle cx="113.8" cy="87.7" r=".75" fill="#0f131a"/>
-      <path d="M100 91l-2.8 10h5.8" stroke="#8f6754" stroke-width="1.45" fill="none" stroke-linecap="round"/>
-      <path d="M90 108c5 3 15 3 20 0" stroke="#985f52" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-      <path d="${base==='female' ? 'M66 127l18 18-18 43H50c3-23 7-42 16-61z' : 'M61 126l20 20-20 42H44c4-25 8-44 17-62z'}" fill="${suit}"/>
-      <path d="${base==='female' ? 'M134 127l-18 18 18 43h16c-3-23-7-42-16-61z' : 'M139 126l-20 20 20 42h17c-4-25-8-44-17-62z'}" fill="${suit}"/>
+      <path d="${bodyPath}" fill="url(#coatGrad)"/>
+      <path d="${chestGlow}" fill="rgba(255,255,255,.05)"/>
+      <path d="${base==='female' ? 'M50 188c4-22 8-38 17-54l20 18-15 36H50z' : 'M43 188c4-24 9-41 19-58l21 19-16 39H43z'}" fill="${suit}"/>
+      <path d="${base==='female' ? 'M150 188c-4-22-8-38-17-54l-20 18 15 36h22z' : 'M157 188c-4-24-9-41-19-58l-21 19 16 39h24z'}" fill="${suit}"/>
+      ${epaulettes}
+      ${collar}
+      ${lapels}
+      ${tieSvg}
+      <path d="M89 108h22v19c0 8-4 13-11 13s-11-5-11-13z" fill="${neckShade}"/>
+      <path d="${headShape}" fill="url(#skinGrad)"/>
+      <ellipse cx="72" cy="${earY}" rx="4.7" ry="7.4" fill="${skin}"/>
+      <ellipse cx="129" cy="${earY}" rx="4.7" ry="7.4" fill="${skin}"/>
+      ${hairLayer.back}
+      <path d="M79 79c5-4 11-5 18-5" stroke="#3a271c" stroke-width="1.9" stroke-linecap="round"/><path d="M104 74c5 0 11 2 17 5" stroke="#3a271c" stroke-width="1.9" stroke-linecap="round"/>
+      <ellipse cx="88" cy="89" rx="4.8" ry="3.4" fill="#fff"/><ellipse cx="113" cy="89" rx="4.8" ry="3.4" fill="#fff"/>
+      <circle cx="88" cy="89.2" r="2.1" fill="${eye}"/><circle cx="113" cy="89.2" r="2.1" fill="${eye}"/>
+      <circle cx="88.7" cy="88.5" r=".7" fill="#101318"/><circle cx="113.7" cy="88.5" r=".7" fill="#101318"/>
+      <path d="M100 91l-2.8 10h5.6" stroke="#8f6754" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <path d="M90 108c5 4 15 4 20 0" stroke="#985f52" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      ${hairLayer.top}
+      ${hairLayer.front}
       ${stripeSvg}
       ${buttons}
     </g>
@@ -6804,6 +6879,9 @@ function renderCreatorRow(elId, values, selected, kind){
       parted:'Ayrık',
       slick:'Geri',
       bob:'Bob',
+      quiff:'Kabartı',
+      curly:'Kıvırcık',
+      bun:'Topuz',
       soft:'Yumuşak',
       sharp:'Keskin',
       classic:'Klasik',
@@ -8503,11 +8581,15 @@ function pickRandom(list){
 
 function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
+  const base = pickRandom(PLAYER_LOOK.base);
+  const hairPool = base==='female'
+    ? ['bob','bun','waves','parted','curly','slick']
+    : ['short','swept','crop','parted','slick','quiff','waves','curly'];
   return {
     skin: pickRandom(PLAYER_LOOK.skin),
-    base: pickRandom(PLAYER_LOOK.base),
+    base,
     face: pickRandom(PLAYER_LOOK.face),
-    hair: pickRandom(PLAYER_LOOK.hair),
+    hair: pickRandom(hairPool),
     hairColor: pickRandom(PLAYER_LOOK.hairColor),
     eye: pickRandom(PLAYER_LOOK.eye),
     uniform: pickRandom(PLAYER_LOOK.uniform),
