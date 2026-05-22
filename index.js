@@ -7905,15 +7905,13 @@ function getOneShotSceneFx(sc){
 }
 
 let oneShotFxTimers = [];
-function clearOneShotSceneFx(){
+function clearOneShotSceneFxClasses(doReflow=true){
   const sceneArea = document.getElementById('scene-area');
   const sceneGraphic = document.getElementById('scene-graphic');
   const gfxSvg = document.getElementById('gfx-svg');
-  oneShotFxTimers.forEach(t=>clearTimeout(t));
-  oneShotFxTimers = [];
   if(sceneArea){
     sceneArea.classList.remove('oneshot-mob-flash','oneshot-rope-snap','oneshot-fire-pulse','oneshot-storm-hit','oneshot-engine-hit','oneshot-vhf-burst','oneshot-sensor-glow');
-    void sceneArea.offsetWidth;
+    if(doReflow) void sceneArea.offsetWidth;
   }
   if(sceneGraphic){
     sceneGraphic.classList.remove('oneshot-rope-snap','oneshot-fire-pulse','oneshot-storm-hit','oneshot-engine-hit','oneshot-vhf-burst','oneshot-sensor-glow');
@@ -7923,12 +7921,19 @@ function clearOneShotSceneFx(){
   }
 }
 
-function applyOneShotSceneFx(fx, hold=950){
+function clearOneShotSceneFx(){
+  oneShotFxTimers.forEach(t=>clearTimeout(t));
+  oneShotFxTimers = [];
+  clearOneShotSceneFxClasses(true);
+}
+
+function applyOneShotSceneFx(fx, hold=950, keepSchedule=false){
   const sceneArea = document.getElementById('scene-area');
   const sceneGraphic = document.getElementById('scene-graphic');
   const gfxSvg = document.getElementById('gfx-svg');
   if(!fx) return;
-  clearOneShotSceneFx();
+  if(keepSchedule) clearOneShotSceneFxClasses(true);
+  else clearOneShotSceneFx();
   if(sceneArea) sceneArea.classList.add(fx);
   if(sceneGraphic && /rope-snap|fire-pulse|storm-hit|engine-hit|vhf-burst|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
   if(gfxSvg && fx === 'oneshot-sensor-glow') gfxSvg.classList.add(fx);
@@ -7950,8 +7955,15 @@ function scheduleSyncedSceneFx(sc){
     clearOneShotSceneFx();
     return;
   }
-  const pulse = (delay, hold=950) => {
-    const timer = setTimeout(()=>applyOneShotSceneFx(fx, hold), delay);
+  const pulse = (delay, hold=950, repeatGap=0) => {
+    const kickoff = ()=>{
+      applyOneShotSceneFx(fx, hold, repeatGap > 0);
+      if(repeatGap > 0){
+        const looper = setInterval(()=>applyOneShotSceneFx(fx, hold, true), repeatGap);
+        oneShotFxTimers.push(looper);
+      }
+    };
+    const timer = setTimeout(kickoff, delay);
     oneShotFxTimers.push(timer);
   };
   clearOneShotSceneFx();
@@ -7970,18 +7982,15 @@ function scheduleSyncedSceneFx(sc){
     return;
   }
   if(fx === 'oneshot-storm-hit'){
-    pulse(120, 620);
-    pulse(680, 460);
+    pulse(120, 620, 2200);
     return;
   }
   if(fx === 'oneshot-engine-hit'){
-    pulse(95, 560);
-    pulse(410, 420);
+    pulse(95, 560, 1650);
     return;
   }
   if(fx === 'oneshot-vhf-burst'){
-    pulse(45, 360);
-    pulse(240, 320);
+    pulse(45, 360, 1900);
     return;
   }
   if(fx === 'oneshot-mob-flash'){
@@ -11889,6 +11898,7 @@ function onSceneRender(sc){
 let audioCtx = null;
 let currentMusic = null;
 let musicGain = null;
+let sceneAudioLoopTimers = [];
 
 
 let soundEnabled = true;
@@ -11958,6 +11968,11 @@ function stopAllMusic(){
   ambianceNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
   ambianceNodes = [];
   if(musicGain) musicGain.gain.setTargetAtTime(0, getAudioCtx()?.currentTime||0, 0.3);
+}
+
+function clearSceneAudioLoops(){
+  sceneAudioLoopTimers.forEach(t=>clearTimeout(t));
+  sceneAudioLoopTimers = [];
 }
 
 function playDroneNote(freq, vol, ctx){
@@ -12328,6 +12343,7 @@ function playSceneAudio(sc){
   const gfx = sc.gfx || '';
   const alert = sc.alert || false;
   const sceneBlob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  clearSceneAudioLoops();
   sfxSceneTransition(gfx);
   
   if(alert){
@@ -12344,8 +12360,10 @@ function playSceneAudio(sc){
   } else {
     if(gfx === 'storm') {
       sfxStormAmbiance();
-      setTimeout(sfxStormHit, 120);
-      setTimeout(sfxStormHit, 700);
+      sceneAudioLoopTimers.push(setTimeout(()=>{
+        sfxStormHit();
+        sceneAudioLoopTimers.push(setInterval(sfxStormHit, 2200));
+      }, 120));
     }
     else if(gfx==='fire') {
       stopAllMusic();
@@ -12373,11 +12391,16 @@ function playSceneAudio(sc){
     else { stopAllMusic(); }
   }
   if(/vhf|dsc alert|distress|sahil guvenlik|secu?rite|mayday|pan-pan/.test(sceneBlob)){
-    setTimeout(sfxVHF, 40);
-    setTimeout(sfxVHF, 250);
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      sfxVHF();
+      sceneAudioLoopTimers.push(setInterval(sfxVHF, 1900));
+    }, 40));
   }
-  if(gfx === 'engine_fault' && !alert){
-    setTimeout(()=>playTone(210, 'square', 0.09, 0.05), 100);
+  if(gfx === 'engine_fault'){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(210, 'square', 0.09, 0.05);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(210, 'square', 0.09, 0.05), 1650));
+    }, 100));
   }
 }
 
