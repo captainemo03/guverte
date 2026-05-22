@@ -8279,6 +8279,31 @@ function getSceneAmbientClass(sc){
   return 'scene-ambient-sea';
 }
 
+function getSceneActorMode(sc){
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/storm|firtina|swell|rough|crosswind|squall/.test(hay)) return 'storm';
+  if(/bogaz|boğaz|canakkale|çanakkale|tss|dar kanal|dar gecit|vhf/.test(hay)) return 'strait';
+  if(/engine|makine|carkci|exhaust|lo pressure|bilge|pump|generator|blackout/.test(hay)) return 'engine';
+  if(/harbor|liman|berth|terminal|rihtim|pilot|tug|all fast|gangway/.test(hay)) return 'harbor';
+  if(/radar|ecdis|ais|arpa|gmdss|bnwas|gyro|compass|chart room|kopruustu/.test(hay)) return 'console';
+  return 'bridge';
+}
+
+function renderSceneActor(sc, actorCfg){
+  const actor = document.getElementById('gfx-actor');
+  if(!actor) return;
+  const cfg = actorCfg || getPlayerPortraitConfig();
+  if(!cfg){
+    actor.classList.add('empty');
+    actor.innerHTML = '';
+    actor.removeAttribute('data-mode');
+    return;
+  }
+  actor.classList.remove('empty');
+  actor.dataset.mode = getSceneActorMode(sc);
+  actor.innerHTML = renderPortraitSprite(cfg, 'actor');
+}
+
 function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
@@ -8430,9 +8455,10 @@ function renderScene(idx){
   document.getElementById('lbd').textContent=sc.loc;
   document.getElementById('scene-sub').textContent=sc.sub||'';
   const speakerKey = getCrewKeyFromWho(sc.who);
-  document.getElementById('spkico').innerHTML = speakerKey
-    ? renderPortraitSprite(crewPortraits[speakerKey] || makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{}), 'speaker')
-    : renderPortraitSprite(getPlayerPortraitConfig(), 'speaker');
+  const speakerPortraitCfg = speakerKey
+    ? (crewPortraits[speakerKey] || (crewPortraits[speakerKey] = makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{})))
+    : getPlayerPortraitConfig();
+  document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
   document.getElementById('text').textContent=typeof sc.text==='function'?sc.text(pn,sn):sc.text;
@@ -8460,6 +8486,7 @@ function renderScene(idx){
     photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
   }
+  renderSceneActor(sc, speakerPortraitCfg);
   svg.innerHTML=getSafeSceneMarkup(sc);
 
   playSceneAudio(sc);

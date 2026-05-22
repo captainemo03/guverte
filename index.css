@@ -118,8 +118,18 @@ input[type=text]::placeholder{color:var(--text3);}
 #scene-area::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:2;mix-blend-mode:screen;}
 #scene-area::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
 #scene-graphic{width:100%;background:var(--navy);min-height:145px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-origin:50% 50%;}
-#gfx-photo{position:absolute;inset:0;background-size:cover;background-position:center center;background-repeat:no-repeat;opacity:.42;filter:saturate(1.05) contrast(1.02) brightness(.9);}
-#gfx-svg{position:absolute;inset:0;width:100%;height:100%;}
+#gfx-photo{position:absolute;inset:-2%;background-size:cover;background-position:center center;background-repeat:no-repeat;opacity:.42;filter:saturate(1.05) contrast(1.02) brightness(.9);transform:scale(1.04);}
+#gfx-parallax{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.34;}
+#gfx-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;}
+#gfx-actor{position:absolute;right:-2px;bottom:0;width:150px;height:145px;display:flex;align-items:flex-end;justify-content:flex-end;z-index:3;pointer-events:none;opacity:.92;mix-blend-mode:normal;}
+#gfx-actor::after{content:"";position:absolute;right:18px;bottom:8px;width:84px;height:24px;background:radial-gradient(ellipse at center, rgba(0,0,0,.36), transparent 72%);filter:blur(7px);opacity:.42;}
+#gfx-actor.empty{opacity:0;}
+#gfx-actor[data-mode="console"]{width:118px;right:-10px;opacity:.76;}
+#gfx-actor[data-mode="harbor"]{width:146px;opacity:.94;}
+#gfx-actor[data-mode="storm"]{width:154px;opacity:.9;}
+#gfx-actor[data-mode="engine"]{width:126px;right:-6px;opacity:.82;}
+#gfx-actor[data-mode="strait"]{width:138px;opacity:.88;}
+#gfx-foreground{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:.34;}
 #scene-sub{font-size:10px;color:var(--text3);font-style:italic;font-family:'Crimson Pro',serif;text-align:center;padding:4px 14px 6px;background:rgba(7,19,36,0.9);}
 .bdg{position:absolute;background:rgba(4,17,31,.92);border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;z-index:5;}
 #dbd{top:7px;left:9px;}
@@ -293,7 +303,27 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-motion-harbor #scene-graphic{animation:harborDrift 6s ease-in-out infinite;}
 .scene-motion-storm #scene-graphic{animation:stormRock 2.4s ease-in-out infinite;}
 .scene-motion-strait #scene-graphic{animation:straitTension 3.4s ease-in-out infinite;}
+.scene-motion-engine #gfx-actor{animation:actorEngine .22s linear infinite;}
+.scene-motion-storm #gfx-actor{animation:actorStorm 2.1s ease-in-out infinite;}
+.scene-motion-harbor #gfx-actor{animation:actorHarbor 5.8s ease-in-out infinite;}
+.scene-motion-strait #gfx-actor{animation:actorStrait 3.1s ease-in-out infinite;}
+.scene-motion-bridge #gfx-actor{animation:actorSea 5.1s ease-in-out infinite;}
 .scene-motion-alert #scene-area{animation:alertShake .45s ease;}
+.scene-ambient-sea #gfx-photo{animation:photoDriftSea 12s ease-in-out infinite;}
+.scene-ambient-harbor #gfx-photo{animation:photoDriftHarbor 13s ease-in-out infinite;}
+.scene-ambient-night #gfx-photo{animation:photoDriftNight 14s ease-in-out infinite;}
+.scene-ambient-storm #gfx-photo{animation:photoDriftStorm 7.5s ease-in-out infinite;}
+.scene-ambient-strait #gfx-photo{animation:photoDriftHarbor 11.5s ease-in-out infinite;}
+.scene-ambient-sea #gfx-parallax{background:linear-gradient(180deg, rgba(255,255,255,.04), transparent 42%), linear-gradient(90deg, transparent 12%, rgba(150,214,255,.18) 44%, transparent 76%);animation:seaShineMove 6.4s ease-in-out infinite;}
+.scene-ambient-harbor #gfx-parallax{background:linear-gradient(90deg, transparent 0%, rgba(255,208,120,.18) 26%, transparent 48%, rgba(116,179,255,.12) 68%, transparent 84%);animation:harborLightSweep 5.8s ease-in-out infinite;}
+.scene-ambient-night #gfx-parallax{background:radial-gradient(circle at 14% 20%, rgba(255,255,255,.24) 0 1px, transparent 2px), radial-gradient(circle at 44% 16%, rgba(180,224,255,.18) 0 1px, transparent 2px), radial-gradient(circle at 72% 22%, rgba(255,255,255,.16) 0 1px, transparent 2px);animation:nightStarsDrift 6.2s ease-in-out infinite;}
+.scene-ambient-storm #gfx-parallax{background:repeating-linear-gradient(112deg, rgba(214,230,255,.06) 0 2px, transparent 3px 14px);animation:rainSweep .6s linear infinite;}
+.scene-ambient-strait #gfx-parallax{background:linear-gradient(90deg, transparent 0%, rgba(126,194,255,.14) 24%, transparent 44%, rgba(255,214,112,.1) 62%, transparent 82%);animation:straitFlow 2.3s linear infinite;}
+.scene-ambient-sea #gfx-foreground{background:linear-gradient(180deg, transparent 60%, rgba(126,194,255,.08) 74%, rgba(255,255,255,.04) 86%, transparent 100%);animation:seaShineMove 8.4s ease-in-out infinite;}
+.scene-ambient-harbor #gfx-foreground{background:linear-gradient(90deg, transparent 0%, rgba(255,196,88,.08) 22%, transparent 42%, rgba(108,172,255,.06) 60%, transparent 82%);animation:harborLightSweep 6.8s ease-in-out infinite;}
+.scene-ambient-night #gfx-foreground{background:radial-gradient(circle at 22% 18%, rgba(255,255,255,.08) 0 1px, transparent 2px), radial-gradient(circle at 68% 26%, rgba(179,220,255,.06) 0 1px, transparent 2px);animation:nightStarsDrift 7.4s ease-in-out infinite;opacity:.22;}
+.scene-ambient-storm #gfx-foreground{background:linear-gradient(180deg, transparent 55%, rgba(208,228,255,.18) 78%, transparent 100%);animation:sprayPulse 1.2s ease-in-out infinite;}
+.scene-ambient-strait #gfx-foreground{background:linear-gradient(180deg, transparent 60%, rgba(126,194,255,.1) 80%, transparent 100%);animation:straitFlow 2.6s linear infinite;}
 .scene-ambient-sea::before{opacity:.22;background:
 radial-gradient(circle at 20% 72%, rgba(88,165,255,.14), transparent 20%),
 radial-gradient(circle at 76% 30%, rgba(180,228,255,.08), transparent 22%),
@@ -319,6 +349,8 @@ linear-gradient(180deg, rgba(180,223,255,.04), transparent 55%);
 animation:straitFlow 2.8s linear infinite;}
 .story-live #spkrow{animation:speakerNod .34s ease;}
 .story-live #text{animation:textReveal .45s ease;}
+.story-live #gfx-actor .portrait-photo.actor,
+.story-live #gfx-actor .portrait-sprite.actor{animation:actorSettle .42s ease;}
 .oneshot-mob-flash::after{background:rgba(255,64,64,0.2);animation:mobFlash .55s ease;}
 .oneshot-rope-snap #scene-graphic{animation:ropeSnapShock .45s ease;}
 .oneshot-fire-pulse #scene-graphic{animation:firePanelPulse .7s ease;}
@@ -336,6 +368,21 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes vhfBurst{0%{opacity:0;}22%{opacity:1;}48%{opacity:.24;}100%{opacity:0;}}
 @keyframes vhfShake{0%{transform:translateX(0);}24%{transform:translateX(-4px);}50%{transform:translateX(4px);}76%{transform:translateX(-2px);}100%{transform:translateX(0);}}
 @keyframes sensorGlow{0%{filter:none;}28%{filter:drop-shadow(0 0 8px rgba(64,166,255,0.55)) brightness(1.12);}58%{filter:drop-shadow(0 0 14px rgba(64,255,196,0.35)) brightness(1.06);}100%{filter:none;}}
+@keyframes photoDriftSea{0%,100%{transform:scale(1.04) translateX(0) translateY(0);}50%{transform:scale(1.08) translateX(-8px) translateY(-2px);}}
+@keyframes photoDriftHarbor{0%,100%{transform:scale(1.05) translateX(0);}50%{transform:scale(1.09) translateX(-12px);}}
+@keyframes photoDriftNight{0%,100%{transform:scale(1.05) translateY(0);}50%{transform:scale(1.08) translateY(-4px);}}
+@keyframes photoDriftStorm{0%,100%{transform:scale(1.08) translateX(0) translateY(0) rotate(0deg);}30%{transform:scale(1.11) translateX(-7px) translateY(-2px) rotate(-.3deg);}60%{transform:scale(1.11) translateX(8px) translateY(2px) rotate(.35deg);}}
+@keyframes actorSea{0%,100%{transform:translateX(0) translateY(0);}50%{transform:translateX(-3px) translateY(-2px);}}
+@keyframes actorHarbor{0%,100%{transform:translateX(0);}50%{transform:translateX(-2px);}}
+@keyframes actorStorm{0%,100%{transform:translateX(0) rotate(0deg);}30%{transform:translateX(-4px) rotate(-.7deg);}60%{transform:translateX(5px) rotate(.8deg);}}
+@keyframes actorEngine{0%,100%{transform:translateX(0);}25%{transform:translateX(.8px);}50%{transform:translateX(-.8px);}75%{transform:translateX(.6px);}}
+@keyframes actorStrait{0%,100%{transform:translateX(0);}50%{transform:translateX(-1px) translateY(-1px);}}
+@keyframes actorSettle{0%{opacity:0;transform:translateY(9px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes rainSweep{0%{transform:translateX(0) translateY(-8px);}100%{transform:translateX(-16px) translateY(10px);}}
+@keyframes seaShineMove{0%{transform:translateX(-24px);}100%{transform:translateX(28px);}}
+@keyframes harborLightSweep{0%,100%{opacity:.18;transform:translateX(0);}50%{opacity:.34;transform:translateX(10px);}}
+@keyframes nightStarsDrift{0%,100%{opacity:.18;transform:translateY(0);}50%{opacity:.3;transform:translateY(-2px);}}
+@keyframes sprayPulse{0%,100%{opacity:.14;}50%{opacity:.28;}}
 
 @media(max-width:400px){
   #creator-wrap{grid-template-columns:1fr;}
@@ -385,6 +432,8 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-photo.speaker{width:42px;height:42px;border-radius:50%;}
 .portrait-photo.crew{width:38px;height:38px;border-radius:50%;}
 .portrait-photo.preview{width:100%;height:210px;border-radius:0;object-position:center 8%;}
+.portrait-photo.actor{width:132px;height:145px;object-fit:contain;object-position:right bottom;border-radius:0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));}
+.portrait-sprite.actor{width:132px;height:145px;background-size:420% 210%;background-position:var(--px,0%) calc(var(--py,0%) + 4%);filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));}
 .crew-name{font-size:12px;font-weight:600;color:var(--text);}
 .crew-title-small{font-size:9px;color:var(--text3);}
 .crew-trust-bar{height:3px;background:var(--border);border-radius:2px;margin-top:4px;}
