@@ -4029,7 +4029,7 @@ const PLAYER_LOOK = {
 };
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 const crewPortraits = {};
-const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu'];
+const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu','büşra','gizem','damla','sibel','gül','eda','esra','nisa','naz','sude'];
 const PLAYER_MODEL_PRESETS = {
   male: {
     0:{hair:'quiff', beard:'trim', face:'soft', hairColor:'#1e1612'},
@@ -8251,6 +8251,14 @@ function getSceneBackdropProfile(sc){
   return 'opensea';
 }
 
+const REALISTIC_BG = {
+  opensea:'assets/bg/opensea.png?v=1',
+  harbor:'assets/bg/harbor.png?v=1',
+  night:'assets/bg/night.png?v=1',
+  strait:'assets/bg/strait.png?v=1',
+  storm:'assets/bg/storm.png?v=1'
+};
+
 function getSceneMotionClass(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(sc?.alert || /alarm|yangin|fire|mob|abandon|blackout|pirate|near-miss|ariza|man overboard/.test(hay)) return 'scene-motion-alert';
@@ -8445,7 +8453,13 @@ function renderScene(idx){
   else ab.style.display='none';
 
   const svg=document.getElementById('gfx-svg');
+  const photo=document.getElementById('gfx-photo');
   window.__bgBackdropProfile = getSceneBackdropProfile(sc);
+  if(photo){
+    const profile = window.__bgBackdropProfile || 'opensea';
+    photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
+    photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
+  }
   svg.innerHTML=getSafeSceneMarkup(sc);
 
   playSceneAudio(sc);
@@ -8681,18 +8695,18 @@ const CREW_DEFS = {
 };
 
 const CREW_NAME_POOLS = {
-  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda"],
-  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora"],
-  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran"],
-  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep"],
-  carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Levent","Baş Mühendis Murat","Baş Mühendis Serkan"],
-  bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Can","2. Mühendis Onur","2. Mühendis Kıvanç"],
-  lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Yusuf","Lostromo Nejat","Lostromo Cihan"],
-  lostromo2:["Silici Ramazan","Silici Ali","Silici Furkan","Silici Tahir","Silici Kadir","Silici Serhat"],
-  yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan"],
-  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Hüseyin Usta","Aşçı Kemal Usta","Aşçı Levent Usta"],
-  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf"],
-  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem"]
+  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda","Kaptan Barış","Kaptan Pınar","Kaptan Cem","Kaptan Derya","Kaptan Büşra","Kaptan Erhan"],
+  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora","1. Zabit Deniz","1. Zabit Esra","1. Zabit Koral","1. Zabit Merve","1. Zabit Emre","1. Zabit Nisa"],
+  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran","2. Zabit Damla","2. Zabit Can","2. Zabit Sude","2. Zabit Oğuz","2. Zabit Eda","2. Zabit Yiğit"],
+  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep","3. Zabit Ceren","3. Zabit Burak","3. Zabit Naz","3. Zabit Hazar","3. Zabit Gizem","3. Zabit Ulaş"],
+  carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Ayşe","Baş Mühendis Nermin","Baş Mühendis Pınar","Baş Mühendis Serkan","Baş Mühendis Büşra","Baş Mühendis Murat","Baş Mühendis Dilek"],
+  bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Aylin","2. Mühendis Burcu","2. Mühendis Eylül","2. Mühendis Kıvanç","2. Mühendis Esra","2. Mühendis Levent","2. Mühendis Gizem"],
+  lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Sibel","Lostromo Gül","Lostromo Eda","Lostromo Yusuf","Lostromo Büşra","Lostromo Cihan","Lostromo Derya"],
+  lostromo2:["Silici Ramazan","Silici Ali","Silici Furkan","Silici Merve","Silici Cansu","Silici Gizem","Silici Tahir","Silici Damla","Silici Kadir","Silici Eda"],
+  yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan","Yağcı Barış","Yağcı Nisa","Yağcı Sarp","Yağcı Büşra"],
+  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Sevim Hanım","Aşçı Dilek Hanım","Aşçı Elif Hanım","Aşçı Hülya Hanım","Aşçı Kemal Usta","Aşçı Sude Hanım","Aşçı Murat Usta"],
+  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf","Tayfa Merve","Tayfa Koral","Tayfa Cansu","Tayfa Uğur"],
+  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa"]
 };
 
 function pickRandom(list){
@@ -8703,22 +8717,31 @@ function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
   const titleBlob = `${key} ${def.title||''}`.toLowerCase();
   const nameBlob = (def.name || '').toLowerCase();
+  const base = FEMALE_NAME_MARKERS.some(n=>nameBlob.includes(n)) ? 'female' : 'male';
   const supportPool = {
-    engine:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
-    deck:['assets/support-bosun-a.png','assets/support-bosun-b.png'],
-    cook:['assets/support-cook-a.png','assets/support-cook-b.png']
+    engine:{
+      male:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
+      female:['assets/support-female-engine-a.png','assets/support-female-engine-b.png','assets/support-female-engine-c.png']
+    },
+    deck:{
+      male:['assets/support-bosun-a.png','assets/support-bosun-b.png'],
+      female:['assets/support-female-bosun-a.png','assets/support-female-bosun-b.png']
+    },
+    cook:{
+      male:['assets/support-cook-a.png','assets/support-cook-b.png'],
+      female:['assets/support-female-cook-a.png']
+    }
   };
   let portraitAsset = '';
-  if(/carkci|muhendis|makine|yagci/.test(titleBlob)) portraitAsset = pickRandom(supportPool.engine);
-  else if(/lostromo|guverte|silici/.test(titleBlob)) portraitAsset = pickRandom(supportPool.deck);
-  else if(/asci|yemekhane|galley/.test(titleBlob)) portraitAsset = pickRandom(supportPool.cook);
+  if(/carkci|muhendis|makine|yagci/.test(titleBlob)) portraitAsset = pickRandom(supportPool.engine[base]);
+  else if(/lostromo|guverte|silici/.test(titleBlob)) portraitAsset = pickRandom(supportPool.deck[base]);
+  else if(/asci|yemekhane|galley/.test(titleBlob)) portraitAsset = pickRandom(supportPool.cook[base]);
   if(portraitAsset){
     return {
       portraitAsset,
       bg:'portrait'
     };
   }
-  const base = FEMALE_NAME_MARKERS.some(n=>nameBlob.includes(n)) ? 'female' : 'male';
   const hairPool = base==='female'
     ? ['bob','bun','waves','parted','curly','slick']
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
@@ -10048,6 +10071,32 @@ const GLOSSARY_TERMS = [
   {term:"Acik Deniz", meaning:"Ulke karasulari disindaki serbest deniz alanlari.", example:"Acik denizde seyir kurallari yine dikkat ister."},
   {term:"Acik Deniz Gemisi", meaning:"Acik denizde calisabilecek sekilde yapilmis ve donatilmis gemi.", example:"Bu tekne acik deniz gemisi klasinda degil."},
   {term:"Acik Deniz Platformu", meaning:"Deniz dibi petrol veya dogal gaz arastirmalari icin kullanilan platform.", example:"ECDIS uzerinde offshore platform tehlike gibi izlenir."},
+  {term:"Accommodation Ladder", meaning:"Gemi ile iskele arasinda personel inip binmesi icin kullanilan sabit/ayarli merdiven.", example:"Accommodation ladder acilmadan once emniyet filesi kontrol edildi."},
+  {term:"Anchor Aweigh", meaning:"Demirin dipten kesilip artik gemiyi tutmadigi an.", example:"Anchor aweigh raporu gelince rota emirleri hizlandi."},
+  {term:"Bank Cushion", meaning:"Nehir veya dar kanalda kiyiya yakin tarafta bas tarafinda olusan su yastigi etkisi.", example:"Bank cushion pruvayi orta hatta itmeye basladi."},
+  {term:"Bank Suction", meaning:"Dar su veya nehirde kiyiya yakin kic tarafta gemiyi kiyaya cekme egilimi yaratan hidrodinamik etki.", example:"Bank suction yuzunden kic driftini erken fark ettiler."},
+  {term:"Chipping Hammer", meaning:"Pas ve gevsek boya katmanlarini yuzeyden ayirmak icin kullanilan el aleti.", example:"Chipping hammer ile raspa yaparken gozluk takmak zorunluydu."},
+  {term:"Dead Slow Ahead", meaning:"Makine telgrafinda en dusuk ileri yurus komutu.", example:"Pilot son yaklasmada dead slow ahead istedi."},
+  {term:"Deep Tank", meaning:"Gemide ballast, tatli su veya ozel yuk icin kullanilabilen derin tank.", example:"Deep tank sounding tablosu tekrar kontrol edildi."},
+  {term:"Dog Clutch", meaning:"Iki doner parcayi mekanik olarak birbirine kilitleyen kavrama tipi.", example:"Dog clutch sert gecince makinaci sistemi tekrar stop etti."},
+  {term:"Escape Route", meaning:"Acil durumda mahalden guvenli sekilde cikis icin ayrilan kacak yol.", example:"Fire plan uzerinde escape route ilk bakilan yerlerden biriydi."},
+  {term:"Fairlead Roller", meaning:"Halatin surtunmesini azaltarak dogru hizada akmasini saglayan kılavuz makara.", example:"Fairlead roller sikişirsa palamar kontrolu zorlasir."},
+  {term:"Fire Damper", meaning:"Havalandirma hattinda yanginda hava akisini kesmek icin kapatilan klape.", example:"Yangin alarminda fire damper kapatma noktasi kontrol edildi."},
+  {term:"Foam Monitor", meaning:"Kopuk medyasini uzak mesafeye basabilen sabit veya hareketli yangin nozul sistemi.", example:"Foam monitor manifold tarafinda ana koruma elemaniydi."},
+  {term:"Heel", meaning:"Geminin donus, ruzgar veya yuk etkisiyle gecici olarak yatmasi.", example:"Sert donuste gelen heel tayfayi korkuttu ama normaldi."},
+  {term:"Inclinometer", meaning:"Geminin anlik yatma acisini gosteren cihaz.", example:"Kopruustundeki inclinometer 12 dereceyi gosterdi."},
+  {term:"Monkey Fist", meaning:"Heaving line ucuna agirlik kazandirmak icin atilan ozel dugum.", example:"Monkey fist palamar botuna ilk denemede ulasti."},
+  {term:"Painter", meaning:"Can sali veya can filikasini gemiye baglayan hat.", example:"Liferaft painter kopukse launch zinciri eksik sayilir."},
+  {term:"Pneumatic Line Thrower", meaning:"Mesafe boyunca ince hat gondermek icin kullanilan basinc destekli line-throwing duzeni.", example:"Tatbikatta pneumatic line thrower da kontrol edildi."},
+  {term:"Quarter", meaning:"Geminin kic omuzluk bolgesi.", example:"Hedef sancak quarter tarafinda gorunuyordu."},
+  {term:"Rudder Angle Indicator", meaning:"Dumenin anlik acisini gosteren panel veya cihaz.", example:"Pilot rudder angle indicator uzerinden teyit istedi."},
+  {term:"Scavenge Fire", meaning:"Ana makine scavange space icinde yag/kurum tutusmasi sonucu olusan yangin.", example:"Scavenge fire proseduru kitapta ayri isaretlenmisti."},
+  {term:"Searchlight", meaning:"Gecede hedef, platform, iskele veya kurtarma amacli kullanilan yuksek guclu isik.", example:"MOB durumunda searchlight hemen acildi."},
+  {term:"Shackle", meaning:"Demir zincirinde kilit/uzunluk birimi veya baglanti mapasi.", example:"Uc shackle in the water raporu verildi."},
+  {term:"Turnbuckle", meaning:"Lashing ve baglama elemanlarinda gerginlik ayari yapmaya yarayan civatali baglanti parcasi.", example:"Turnbuckle gevsekmisse yuk baglari guven vermez."},
+  {term:"Vent Head", meaning:"Tank veya mahal havalandirma hattinin ust cikis parcasi.", example:"Vent head etrafinda deniz suyu izi gorulunce conta bakildi."},
+  {term:"Weather Deck", meaning:"Dis havaya acik ust calisma guvertesi.", example:"Weather deck islaksa kaymaz taban daha da onem kazanir."},
+  {term:"Working Load Limit", meaning:"Bir ekipmanin emniyetli calisma yuk siniri; WLL.", example:"Shackle WLL degeri lifting planina islenmeden operasyon baslamadi."},
   {term:"Acik Dusmek", meaning:"Istenen yerden veya mevkiden daha uzakta kalmak.", example:"Akinti yuzunden rota hattinin disina acik dustuk."},
   {term:"Acik Gecmek", meaning:"Bir sahil, samandira veya deniz aracindan neta gecmek.", example:"Seli kayaligini acik gectik."},
   {term:"Acik Kira Anlasmasi", meaning:"Yukun cinsi ya da varis limani tam yazilmamis charter party.", example:"Acik kira anlasmasi ticari risk tasir."},
