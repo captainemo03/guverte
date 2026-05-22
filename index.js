@@ -7843,6 +7843,7 @@ function getSceneBackdropProfile(sc){
   if(!sc) return 'opensea';
   const hay = `${sc.gfx||''} ${sc.loc||''} ${sc.sub||''}`.toLowerCase();
   if(/storm|firtina|squall|beaufort|swell/.test(hay)) return 'storm';
+  if(/bogaz|boğaz|çanakkale|canakkale|istanbul boğazı|istanbul bogazi|dar gecit|tss/.test(hay)) return 'strait';
   if(/harbor|liman|terminal|rihtim|rıhtım|berth|gangway|pilot station|ambarlı|rotterdam|singapur|panama|samsun|trabzon/.test(hay)) return 'harbor';
   if(/night|gece|00:|01:|02:|03:|04:/.test(hay)) return 'night';
   return 'opensea';
@@ -7852,6 +7853,7 @@ function getSceneMotionClass(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(sc?.alert || /alarm|yangin|fire|mob|abandon|blackout|pirate|near-miss|ariza|man overboard/.test(hay)) return 'scene-motion-alert';
   if(/storm|firtina|swell|rough|crosswind|squall/.test(hay)) return 'scene-motion-storm';
+  if(/bogaz|boğaz|canakkale|çanakkale|tss|dar kanal|dar gecit|sahil guvenlik|vhf/.test(hay)) return 'scene-motion-strait';
   if(/engine|makine|carkci|exhaust|lo pressure|bilge|pump|generator|blackout/.test(hay)) return 'scene-motion-engine';
   if(/harbor|liman|berth|terminal|rihtim|pilot|tug|all fast|gangway/.test(hay)) return 'scene-motion-harbor';
   if(/bridge|radar|ecdis|ais|chart room|kopruustu|bogaz|tss|compass/.test(hay)) return 'scene-motion-bridge';
@@ -7861,6 +7863,7 @@ function getSceneMotionClass(sc){
 function getSceneAmbientClass(sc){
   const profile = getSceneBackdropProfile(sc);
   if(profile === 'storm') return 'scene-ambient-storm';
+  if(profile === 'strait') return 'scene-ambient-strait';
   if(profile === 'harbor') return 'scene-ambient-harbor';
   if(profile === 'night') return 'scene-ambient-night';
   return 'scene-ambient-sea';
@@ -7870,7 +7873,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-fade-once');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);

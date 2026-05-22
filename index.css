@@ -237,6 +237,8 @@ input[type=text]::placeholder{color:var(--text3);}
 @keyframes nightTwinkle{0%,100%{opacity:.1;transform:translateY(0);}50%{opacity:.28;transform:translateY(-3px);}}
 @keyframes harborGlow{0%,100%{opacity:.16;transform:translateX(0);}50%{opacity:.34;transform:translateX(8px);}}
 @keyframes stormMist{0%{opacity:.08;transform:translateX(-30px);}50%{opacity:.22;transform:translateX(18px);}100%{opacity:.06;transform:translateX(46px);}}
+@keyframes straitFlow{0%{opacity:.14;transform:translateX(-28px);}50%{opacity:.28;transform:translateX(12px);}100%{opacity:.12;transform:translateX(44px);}}
+@keyframes straitTension{0%,100%{transform:translateX(0) scale(1.01);}50%{transform:translateX(1.8px) scale(1.018);}}
 @keyframes bridgeFloat{0%,100%{transform:translateY(0) scale(1.008);}50%{transform:translateY(-2px) scale(1.016);}}
 @keyframes engineHum{0%,100%{transform:translateX(0) translateY(0);}25%{transform:translateX(.8px) translateY(.3px);}50%{transform:translateX(-.8px) translateY(-.3px);}75%{transform:translateX(.6px) translateY(.2px);}}
 @keyframes harborDrift{0%,100%{transform:translateX(0) scale(1.01);}50%{transform:translateX(-2px) scale(1.018);}}
@@ -276,6 +278,7 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-motion-engine #scene-graphic{animation:engineHum .22s linear infinite;}
 .scene-motion-harbor #scene-graphic{animation:harborDrift 6s ease-in-out infinite;}
 .scene-motion-storm #scene-graphic{animation:stormRock 2.4s ease-in-out infinite;}
+.scene-motion-strait #scene-graphic{animation:straitTension 3.4s ease-in-out infinite;}
 .scene-motion-alert #scene-area{animation:alertShake .45s ease;}
 .scene-ambient-sea::before{opacity:.22;background:
 radial-gradient(circle at 20% 72%, rgba(88,165,255,.14), transparent 20%),
@@ -296,6 +299,10 @@ animation:harborGlow 6.6s ease-in-out infinite;}
 linear-gradient(110deg, transparent 10%, rgba(212,228,255,.08) 30%, rgba(167,206,255,.12) 44%, transparent 62%),
 linear-gradient(180deg, rgba(255,255,255,.03), transparent 42%);
 animation:stormMist 2.6s linear infinite;}
+.scene-ambient-strait::before{opacity:.24;background:
+linear-gradient(90deg, transparent 0%, rgba(92,164,255,.1) 18%, transparent 36%, rgba(255,214,112,.08) 54%, transparent 74%),
+linear-gradient(180deg, rgba(180,223,255,.04), transparent 55%);
+animation:straitFlow 2.8s linear infinite;}
 .story-live #spkrow{animation:speakerNod .34s ease;}
 .story-live #text{animation:textReveal .45s ease;}
 .oneshot-mob-flash::after{background:rgba(255,64,64,0.2);animation:mobFlash .55s ease;}
