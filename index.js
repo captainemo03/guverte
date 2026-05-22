@@ -4057,36 +4057,45 @@ function renderPortraitSvg(cfg={}, opts={}){
   const bg = cfg.bg || 'bridge';
   const stripes = Math.max(0, Math.min(4, cfg.stripes ?? 1));
   const angle = opts.full ? 1 : .92;
-  const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${36+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/><rect x="${128+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/>`).join('');
+  const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${39+i*6}" y="167" width="4" height="24" rx="2" fill="#e1b765"/><rect x="${123+i*6}" y="167" width="4" height="24" rx="2" fill="#e1b765"/>`).join('');
   const bridgeBg = `<rect width="200" height="200" fill="#b7c7d8"/><rect y="114" width="200" height="86" fill="#445467"/><polygon points="108,0 200,0 200,118 136,118" fill="#2e3949"/><rect x="118" y="18" width="50" height="34" rx="3" fill="#121d29"/><rect x="124" y="24" width="38" height="22" rx="2" fill="#24394d"/><rect x="18" y="34" width="126" height="78" fill="#dce8f4"/><line x1="60" y1="34" x2="44" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="98" y1="34" x2="84" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="136" y1="34" x2="124" y2="112" stroke="#8796a4" stroke-width="3"/><rect x="20" y="112" width="126" height="8" fill="#8ca1b8"/><rect x="28" y="128" width="116" height="18" rx="4" fill="#1c2936"/><rect x="36" y="132" width="34" height="10" rx="2" fill="#24394d"/><rect x="78" y="132" width="26" height="10" rx="2" fill="#17222f"/><rect x="112" y="132" width="26" height="10" rx="2" fill="#2a1e16"/>`;
   const portraitBg = `<rect width="200" height="200" fill="#132233"/><rect y="122" width="200" height="78" fill="#0d1724"/><circle cx="160" cy="36" r="12" fill="rgba(255,255,255,.08)"/>`;
   const jaw = face==='sharp'
-    ? `<path d="M73 86c1 18 12 38 27 38 17 0 28-19 29-38 1-21-9-37-28-37-20 0-29 16-28 37z" fill="${skin}"/>`
-    : `<path d="M71 86c1 21 13 37 29 37 17 0 29-17 30-37 2-20-8-38-29-38-21 0-30 17-30 38z" fill="${skin}"/>`;
+    ? `<path d="M74 84c0 24 10 43 26 43 18 0 29-19 29-43 0-22-10-37-28-37-18 0-27 15-27 37z" fill="${skin}"/>`
+    : `<path d="M71 84c0 24 12 42 29 42 18 0 30-18 30-42 0-22-10-37-30-37-19 0-29 15-29 37z" fill="${skin}"/>`;
   const lapel = cfg.uniform==='dress'
-    ? `<path d="M78 121c4 8 12 13 22 13l-9 26-21-27z" fill="#f5f3ee"/><path d="M122 121c-4 8-12 13-22 13l9 26 21-27z" fill="#f5f3ee"/>`
-    : `<path d="M76 121c6 8 14 13 24 13s18-5 24-13l10 12-16 52H62l-16-52z" fill="${shirt}"/>`;
+    ? `<path d="M80 122c6 11 14 16 20 16l-10 32-21-33z" fill="#f5f3ee"/><path d="M120 122c-6 11-14 16-20 16l10 32 21-33z" fill="#f5f3ee"/>`
+    : `<path d="M79 122c5 10 13 15 21 15s16-5 21-15l11 12-15 50H64l-15-50z" fill="${shirt}"/>`;
   const buttons = cfg.uniform==='duty'
     ? `<circle cx="100" cy="160" r="5.2" fill="#d8ad57"/><circle cx="100" cy="178" r="5.2" fill="#d8ad57"/>`
     : `<circle cx="76" cy="158" r="6" fill="#d8ad57"/><circle cx="124" cy="158" r="6" fill="#d8ad57"/><circle cx="82" cy="178" r="6" fill="#d8ad57"/><circle cx="118" cy="178" r="6" fill="#d8ad57"/>`;
+  const hairCap = {
+    short:`<path d="M62 58c6-16 21-28 41-28 19 0 35 9 41 25l-2 9c-10-10-25-15-42-15-16 0-29 5-38 14z" fill="${hairColor}"/>`,
+    swept:`<path d="M56 62c8-22 26-33 48-33 18 0 33 7 41 22l-2 8c-9-6-18-13-30-14-16-2-31 7-47 17z" fill="${hairColor}"/>`,
+    waves:`<path d="M55 62c5-20 23-33 47-33 22 0 39 10 45 29l-3 9c-8-8-14-13-21-13-4 0-7 2-10 6-4 4-9 6-14 6-6 0-11-3-15-8-6 5-12 8-19 8-4 0-7-1-10-4z" fill="${hairColor}"/>`,
+    crop:`<path d="M60 58c8-17 22-28 42-28 18 0 31 8 39 22l-4 8c-10-5-22-8-36-7-14 1-26 5-41 15z" fill="${hairColor}"/>`
+  }[hair] || `<path d="M62 58c6-16 21-28 41-28 19 0 35 9 41 25l-2 9c-10-10-25-15-42-15-16 0-29 5-38 14z" fill="${hairColor}"/>`;
+  const neckShade = face==='sharp' ? '#b37b61' : '#be886c';
   return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
     ${bg==='bridge' ? bridgeBg : portraitBg}
     <g transform="translate(0 4) scale(${angle} 1)">
-      <path d="M46 186c5-30 20-51 35-61 7-4 12-10 19-10 8 0 13 6 20 10 16 10 30 31 35 61H46z" fill="${suit}"/>
+      <path d="M42 188c6-34 22-56 40-67 9-6 13-9 18-9 6 0 10 3 18 9 18 11 34 33 40 67H42z" fill="${suit}"/>
+      <path d="M56 188c10-19 18-31 30-38 5-3 9-5 14-5 6 0 11 2 16 5 12 7 21 19 30 38H56z" fill="rgba(255,255,255,.035)"/>
       ${lapel}
-      <path d="M93 128h14l6 14-13 34-13-34z" fill="${tie}"/>
-      <circle cx="100" cy="84" r="31" fill="${skin}"/>
+      <path d="M94 130h12l7 15-13 39-13-39z" fill="${tie}"/>
+      <path d="M90 108h20v18c0 7-4 12-10 12s-10-5-10-12z" fill="${neckShade}"/>
+      <circle cx="100" cy="83" r="31" fill="${skin}"/>
       ${jaw}
-      <path d="${portraitHairPath(hair)}" fill="${hairColor}"/>
-      <path d="M69 78c3-19 15-33 33-33 20 0 32 12 34 33-9-7-18-11-34-11-17 0-27 5-33 11z" fill="${hairColor}" opacity=".98"/>
-      <path d="M80 79c5-4 11-6 18-6" stroke="#35231a" stroke-width="2.1" stroke-linecap="round"/><path d="M103 73c7 0 13 2 18 6" stroke="#35231a" stroke-width="2.1" stroke-linecap="round"/>
-      <ellipse cx="88" cy="88" rx="4.3" ry="3" fill="#fff"/><ellipse cx="113" cy="88" rx="4.3" ry="3" fill="#fff"/>
-      <circle cx="88" cy="88.4" r="1.9" fill="${eye}"/><circle cx="113" cy="88.4" r="1.9" fill="${eye}"/>
-      <circle cx="88.6" cy="87.7" r=".7" fill="#0f131a"/><circle cx="113.6" cy="87.7" r=".7" fill="#0f131a"/>
-      <path d="M100 92l-3 10 6 0" stroke="#875f4f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-      <path d="M90 108c6 4 14 4 20 0" stroke="#9c6152" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-      <path d="M56 186c6-17 16-33 29-42l10 22-8 20H56z" fill="rgba(255,255,255,.03)"/>
-      <path d="M144 186c-6-17-16-33-29-42l-10 22 8 20h31z" fill="rgba(255,255,255,.025)"/>
+      ${hairCap}
+      <path d="M66 78c4-20 17-32 34-32 18 0 30 11 35 32-10-6-21-10-35-10-14 0-24 3-34 10z" fill="${hairColor}" opacity=".98"/>
+      <path d="M82 79c5-3 10-5 16-5" stroke="#3a271c" stroke-width="2" stroke-linecap="round"/><path d="M103 74c6 0 11 2 16 5" stroke="#3a271c" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="88" cy="88" rx="4.6" ry="3.2" fill="#fff"/><ellipse cx="113" cy="88" rx="4.6" ry="3.2" fill="#fff"/>
+      <circle cx="88" cy="88.4" r="2" fill="${eye}"/><circle cx="113" cy="88.4" r="2" fill="${eye}"/>
+      <circle cx="88.8" cy="87.7" r=".75" fill="#0f131a"/><circle cx="113.8" cy="87.7" r=".75" fill="#0f131a"/>
+      <path d="M100 91l-2.8 10h5.8" stroke="#8f6754" stroke-width="1.45" fill="none" stroke-linecap="round"/>
+      <path d="M90 108c5 3 15 3 20 0" stroke="#985f52" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+      <path d="M61 126l20 20-20 42H44c4-25 8-44 17-62z" fill="${suit}"/>
+      <path d="M139 126l-20 20 20 42h17c-4-25-8-44-17-62z" fill="${suit}"/>
       ${stripeSvg}
       ${buttons}
     </g>
