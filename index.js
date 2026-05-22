@@ -4018,10 +4018,13 @@ let pn="Stajyer", sn="M/V Ege Meltem";
 let selYear=2018, selType="kuru", selKontrat=0;
 const PLAYER_LOOK = {
   skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
-  hair:['short','wavy','side','curly'],
-  hairColor:['#2b1a12','#4b2e20','#6b4a32','#1d2431']
+  face:['soft','sharp'],
+  hair:['short','swept','waves','crop'],
+  hairColor:['#1e1612','#3a271b','#6a4b35','#202735'],
+  eye:['#3f2c22','#496b8d','#577149','#697089'],
+  uniform:['classic','dress','duty']
 };
-let playerAppearance = {skin:'#d9a27c',hair:'wavy',hairColor:'#2b1a12'};
+let playerAppearance = {skin:'#d9a27c',face:'soft',hair:'waves',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 const crewPortraits = {};
 
 function portraitStripeCount(role){
@@ -4034,18 +4037,20 @@ function portraitStripeCount(role){
 
 function portraitHairPath(style='short'){
   const map = {
-    short:'M58 56c8-18 24-28 42-28s33 9 42 28l-5 9c-9-11-20-18-37-18-18 0-31 8-37 18z',
-    wavy:'M54 62c4-22 22-34 47-34 20 0 37 9 44 28l-3 11c-8-8-11-15-17-16-2 5-6 8-12 8-5 0-9-2-12-6-4 5-10 8-17 8-7 0-13-3-17-9-3 4-7 8-13 10z',
-    side:'M58 55c10-18 25-27 45-27 21 0 35 8 42 23l-9 8c-7-8-14-12-24-12-6 0-12 1-17 4-7 4-12 10-19 18z',
-    curly:'M52 64c2-18 12-31 30-35l9 3 8-3 10 4 8-2 12 7 6 14-6 10c-6-6-10-11-14-10-3 0-5 3-8 4-4 2-8 1-11-2-4 4-8 6-13 5-4-1-7-4-10-8-5 3-10 7-21 13z'
+    short:'M58 55c6-15 22-26 43-26 17 0 32 7 41 22l-1 11c-10-9-23-14-40-14-18 0-31 6-40 16z',
+    swept:'M54 58c8-18 24-30 46-30 20 0 34 8 43 25l-4 8c-8-5-14-11-22-13-11-4-22-2-32 4-8 5-14 12-22 20z',
+    waves:'M53 61c4-19 21-33 46-33 21 0 39 10 45 28l-2 10c-8-8-12-14-19-14-4 0-7 2-10 6-4 4-8 6-13 6-6 0-10-3-14-8-5 4-10 7-16 8-6 1-11-1-17-3z',
+    crop:'M57 56c8-17 23-28 43-28 18 0 31 8 39 23l-5 9c-7-3-13-7-20-8-18-4-34 1-48 13z'
   };
   return map[style] || map.short;
 }
 
 function renderPortraitSvg(cfg={}, opts={}){
   const skin = cfg.skin || '#d9a27c';
-  const hair = cfg.hair || 'wavy';
-  const hairColor = cfg.hairColor || '#2b1a12';
+  const face = cfg.face || 'soft';
+  const hair = cfg.hair || 'waves';
+  const hairColor = cfg.hairColor || '#1e1612';
+  const eye = cfg.eye || '#496b8d';
   const suit = cfg.suitColor || '#1a2333';
   const shirt = cfg.shirtColor || '#f3f2ee';
   const tie = cfg.tieColor || '#12161d';
@@ -4055,25 +4060,35 @@ function renderPortraitSvg(cfg={}, opts={}){
   const stripeSvg = Array.from({length:stripes}, (_,i)=>`<rect x="${36+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/><rect x="${128+i*6}" y="166" width="4" height="28" rx="2" fill="#e1b765"/>`).join('');
   const bridgeBg = `<rect width="200" height="200" fill="#b7c7d8"/><rect y="114" width="200" height="86" fill="#445467"/><polygon points="108,0 200,0 200,118 136,118" fill="#2e3949"/><rect x="118" y="18" width="50" height="34" rx="3" fill="#121d29"/><rect x="124" y="24" width="38" height="22" rx="2" fill="#24394d"/><rect x="18" y="34" width="126" height="78" fill="#dce8f4"/><line x1="60" y1="34" x2="44" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="98" y1="34" x2="84" y2="112" stroke="#8796a4" stroke-width="3"/><line x1="136" y1="34" x2="124" y2="112" stroke="#8796a4" stroke-width="3"/><rect x="20" y="112" width="126" height="8" fill="#8ca1b8"/><rect x="28" y="128" width="116" height="18" rx="4" fill="#1c2936"/><rect x="36" y="132" width="34" height="10" rx="2" fill="#24394d"/><rect x="78" y="132" width="26" height="10" rx="2" fill="#17222f"/><rect x="112" y="132" width="26" height="10" rx="2" fill="#2a1e16"/>`;
   const portraitBg = `<rect width="200" height="200" fill="#132233"/><rect y="122" width="200" height="78" fill="#0d1724"/><circle cx="160" cy="36" r="12" fill="rgba(255,255,255,.08)"/>`;
+  const jaw = face==='sharp'
+    ? `<path d="M73 86c1 18 12 38 27 38 17 0 28-19 29-38 1-21-9-37-28-37-20 0-29 16-28 37z" fill="${skin}"/>`
+    : `<path d="M71 86c1 21 13 37 29 37 17 0 29-17 30-37 2-20-8-38-29-38-21 0-30 17-30 38z" fill="${skin}"/>`;
+  const lapel = cfg.uniform==='dress'
+    ? `<path d="M78 121c4 8 12 13 22 13l-9 26-21-27z" fill="#f5f3ee"/><path d="M122 121c-4 8-12 13-22 13l9 26 21-27z" fill="#f5f3ee"/>`
+    : `<path d="M76 121c6 8 14 13 24 13s18-5 24-13l10 12-16 52H62l-16-52z" fill="${shirt}"/>`;
+  const buttons = cfg.uniform==='duty'
+    ? `<circle cx="100" cy="160" r="5.2" fill="#d8ad57"/><circle cx="100" cy="178" r="5.2" fill="#d8ad57"/>`
+    : `<circle cx="76" cy="158" r="6" fill="#d8ad57"/><circle cx="124" cy="158" r="6" fill="#d8ad57"/><circle cx="82" cy="178" r="6" fill="#d8ad57"/><circle cx="118" cy="178" r="6" fill="#d8ad57"/>`;
   return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
     ${bg==='bridge' ? bridgeBg : portraitBg}
     <g transform="translate(0 4) scale(${angle} 1)">
-      <path d="M49 186c4-28 17-47 31-57 7-5 12-13 20-13s14 8 20 13c14 10 27 29 31 57H49z" fill="${suit}"/>
-      <path d="M76 121c6 8 14 13 24 13s18-5 24-13l10 12-16 52H62l-16-52z" fill="${shirt}"/>
+      <path d="M46 186c5-30 20-51 35-61 7-4 12-10 19-10 8 0 13 6 20 10 16 10 30 31 35 61H46z" fill="${suit}"/>
+      ${lapel}
       <path d="M93 128h14l6 14-13 34-13-34z" fill="${tie}"/>
       <circle cx="100" cy="84" r="31" fill="${skin}"/>
-      <path d="M72 86c1 20 13 37 28 37 17 0 29-17 30-37 2-20-8-38-29-38-21 0-30 17-29 38z" fill="${skin}"/>
+      ${jaw}
       <path d="${portraitHairPath(hair)}" fill="${hairColor}"/>
-      <path d="M69 79c2-20 14-35 33-35 20 0 32 13 33 35-7-6-16-11-33-11-18 0-26 5-33 11z" fill="${hairColor}" opacity=".96"/>
-      <ellipse cx="88" cy="88" rx="3.4" ry="2" fill="#1d2431"/>
-      <ellipse cx="113" cy="88" rx="3.4" ry="2" fill="#1d2431"/>
+      <path d="M69 78c3-19 15-33 33-33 20 0 32 12 34 33-9-7-18-11-34-11-17 0-27 5-33 11z" fill="${hairColor}" opacity=".98"/>
+      <path d="M80 79c5-4 11-6 18-6" stroke="#35231a" stroke-width="2.1" stroke-linecap="round"/><path d="M103 73c7 0 13 2 18 6" stroke="#35231a" stroke-width="2.1" stroke-linecap="round"/>
+      <ellipse cx="88" cy="88" rx="4.3" ry="3" fill="#fff"/><ellipse cx="113" cy="88" rx="4.3" ry="3" fill="#fff"/>
+      <circle cx="88" cy="88.4" r="1.9" fill="${eye}"/><circle cx="113" cy="88.4" r="1.9" fill="${eye}"/>
+      <circle cx="88.6" cy="87.7" r=".7" fill="#0f131a"/><circle cx="113.6" cy="87.7" r=".7" fill="#0f131a"/>
       <path d="M100 92l-3 10 6 0" stroke="#875f4f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-      <path d="M90 108c6 5 15 5 21 0" stroke="#9c6152" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-      <path d="M56 186c6-17 16-33 29-42l10 22-8 20H56z" fill="#202b3d"/>
-      <path d="M144 186c-6-17-16-33-29-42l-10 22 8 20h31z" fill="#202b3d"/>
+      <path d="M90 108c6 4 14 4 20 0" stroke="#9c6152" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M56 186c6-17 16-33 29-42l10 22-8 20H56z" fill="rgba(255,255,255,.03)"/>
+      <path d="M144 186c-6-17-16-33-29-42l-10 22 8 20h31z" fill="rgba(255,255,255,.025)"/>
       ${stripeSvg}
-      <circle cx="76" cy="158" r="6" fill="#d8ad57"/><circle cx="124" cy="158" r="6" fill="#d8ad57"/>
-      <circle cx="82" cy="178" r="6" fill="#d8ad57"/><circle cx="118" cy="178" r="6" fill="#d8ad57"/>
+      ${buttons}
     </g>
   </svg>`;
 }
@@ -6720,14 +6735,23 @@ function scheduleAdvancedConsequences(sc,c2){
 
 // ===== GİRİŞ EKRANI =====
 function getPlayerPortraitConfig(){
+  const uniformMap = {
+    classic:{suitColor:'#1b2435', shirtColor:'#f2f0ea', tieColor:'#13171d', stripes:1},
+    dress:{suitColor:'#141f2f', shirtColor:'#f6f4ef', tieColor:'#0f141b', stripes:2},
+    duty:{suitColor:'#223244', shirtColor:'#eef1f4', tieColor:'#16202b', stripes:1}
+  };
+  const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
   return {
     skin:playerAppearance.skin,
+    face:playerAppearance.face,
     hair:playerAppearance.hair,
     hairColor:playerAppearance.hairColor,
-    suitColor:'#1b2435',
-    shirtColor:'#f2f0ea',
-    tieColor:'#13171d',
-    stripes:1,
+    eye:playerAppearance.eye,
+    uniform:playerAppearance.uniform,
+    suitColor:uniform.suitColor,
+    shirtColor:uniform.shirtColor,
+    tieColor:uniform.tieColor,
+    stripes:uniform.stripes,
     bg:'bridge'
   };
 }
@@ -6746,13 +6770,26 @@ function renderCreatorRow(elId, values, selected, kind){
   values.forEach(v=>{
     const b=document.createElement('button');
     b.type='button';
-    b.className='creator-chip'+(v===selected?' active':'')+(kind==='swatch'?' swatch':'');
+    b.className='creator-chip'+(v===selected?' active':'')+(kind==='swatch'?' swatch':'')+(kind==='text'?' compact':'');
     if(kind==='swatch') b.innerHTML=`<span style="background:${v};"></span>`;
-    else b.textContent = ({short:'Kısa',wavy:'Dalgalı',side:'Yana',curly:'Kıvırcık'}[v]||v);
+    else b.textContent = ({
+      short:'Kısa',
+      swept:'Taralı',
+      waves:'Dalgalı',
+      crop:'Kesik',
+      soft:'Yumuşak',
+      sharp:'Keskin',
+      classic:'Klasik',
+      dress:'Tören',
+      duty:'Görev'
+    }[v]||v);
     b.onclick=()=>{
       if(elId==='creator-skin') playerAppearance.skin=v;
+      else if(elId==='creator-face') playerAppearance.face=v;
       else if(elId==='creator-hair') playerAppearance.hair=v;
       else if(elId==='creator-haircolor') playerAppearance.hairColor=v;
+      else if(elId==='creator-eye') playerAppearance.eye=v;
+      else if(elId==='creator-uniform') playerAppearance.uniform=v;
       renderCharacterCreator();
     };
     row.appendChild(b);
@@ -6761,8 +6798,11 @@ function renderCreatorRow(elId, values, selected, kind){
 
 function renderCharacterCreator(){
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
-  renderCreatorRow('creator-hair', PLAYER_LOOK.hair, playerAppearance.hair, 'hair');
+  renderCreatorRow('creator-face', PLAYER_LOOK.face, playerAppearance.face, 'text');
+  renderCreatorRow('creator-hair', PLAYER_LOOK.hair, playerAppearance.hair, 'text');
   renderCreatorRow('creator-haircolor', PLAYER_LOOK.hairColor, playerAppearance.hairColor, 'swatch');
+  renderCreatorRow('creator-eye', PLAYER_LOOK.eye, playerAppearance.eye, 'swatch');
+  renderCreatorRow('creator-uniform', PLAYER_LOOK.uniform, playerAppearance.uniform, 'text');
   renderPortraitTargets();
 }
 
@@ -8436,8 +8476,11 @@ function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
   return {
     skin: pickRandom(PLAYER_LOOK.skin),
+    face: pickRandom(PLAYER_LOOK.face),
     hair: pickRandom(PLAYER_LOOK.hair),
     hairColor: pickRandom(PLAYER_LOOK.hairColor),
+    eye: pickRandom(PLAYER_LOOK.eye),
+    uniform: pickRandom(PLAYER_LOOK.uniform),
     suitColor: /mühendis|cark/i.test(def.title) ? '#202d3a' : '#1b2435',
     shirtColor:'#f1efe8',
     tieColor:'#13171d',
