@@ -151,13 +151,22 @@ input[type=text]::placeholder{color:var(--text3);}
 #spktl{font-size:9px;color:var(--text3);}
 #speechstage{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;align-items:end;}
 #speechportrait{position:relative;height:156px;border:1px solid rgba(111,168,220,.22);border-radius:14px;background:linear-gradient(180deg, rgba(18,34,54,.92), rgba(8,19,32,.98));overflow:hidden;display:flex;align-items:flex-end;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 10px 26px rgba(0,0,0,.2);}
-#speechportrait::before{content:"";position:absolute;left:26px;right:26px;top:52px;height:9px;border-radius:999px;background:rgba(11,21,36,.42);opacity:0;transform-origin:center center;animation:blinkEyes 5.4s infinite;}
-#speechportrait::after{content:"";position:absolute;left:50%;margin-left:-12px;bottom:31px;width:24px;height:8px;border-radius:50%;background:rgba(24,12,12,.26);opacity:.24;filter:blur(.3px);animation:mouthTalk 1.1s ease-in-out infinite;}
+#speechportrait::before,#speechportrait::after{content:none;}
 #speechchar{position:relative;z-index:2;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding-top:6px;}
+.speech-facefx{position:absolute;inset:0;z-index:4;pointer-events:none;}
+.speech-eye{position:absolute;top:53px;width:18px;height:6px;border-radius:999px;background:rgba(11,18,28,.82);box-shadow:0 0 0 1px rgba(255,255,255,.04), 0 0 6px rgba(0,0,0,.16);transform-origin:center center;animation:eyeBlink 4.8s infinite;}
+.speech-eye-left{left:35px;}
+.speech-eye-right{right:35px;}
+.speech-mouth{position:absolute;left:50%;bottom:34px;width:26px;height:8px;margin-left:-13px;border-radius:0 0 18px 18px;border-bottom:3px solid rgba(52,18,18,.7);background:rgba(116,42,42,.18);box-shadow:0 2px 6px rgba(0,0,0,.18);animation:mouthSpeak .9s ease-in-out infinite;}
+.speech-facefx[data-base="female"] .speech-eye{top:51px;}
+.speech-facefx[data-base="female"] .speech-mouth{bottom:36px;width:24px;margin-left:-12px;}
+.speech-facefx.role-photo .speech-eye{top:54px;width:16px;background:rgba(14,20,26,.78);}
+.speech-facefx.role-photo .speech-mouth{bottom:32px;}
 #speechbubble{position:relative;min-height:132px;padding:14px 16px;border:1px solid rgba(111,168,220,.24);border-radius:18px 18px 18px 8px;background:linear-gradient(180deg, rgba(11,26,44,.97), rgba(7,19,34,.98));box-shadow:0 10px 24px rgba(0,0,0,.18);}
 #speechbubble::before{content:"";position:absolute;left:-10px;bottom:24px;width:22px;height:22px;background:linear-gradient(135deg, rgba(11,26,44,.97), rgba(7,19,34,.98));border-left:1px solid rgba(111,168,220,.24);border-bottom:1px solid rgba(111,168,220,.24);transform:rotate(45deg);}
 #speechbubble::after{content:"";position:absolute;inset:1px;border-radius:17px 17px 17px 7px;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.02), transparent 42%);}
-#text{position:relative;z-index:2;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-line;}
+#text{position:relative;z-index:2;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-line;min-height:100px;}
+#text.typing::after{content:"";display:inline-block;width:7px;height:15px;margin-left:4px;border-radius:2px;background:rgba(207,234,255,.85);vertical-align:-2px;animation:typingCursor .75s ease-in-out infinite;}
 
 /* === SEÇİMLER === */
 #choices{padding:8px 10px 10px;background:rgba(4,11,20,0.5);}
@@ -390,6 +399,9 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes actorSettle{0%{opacity:0;transform:translateY(9px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes blinkEyes{0%,46%,48%,100%{opacity:0;transform:scaleY(.08);}47%{opacity:.6;transform:scaleY(1);}47.5%{opacity:.76;transform:scaleY(1.2);}}
 @keyframes mouthTalk{0%,100%{transform:scaleX(.88) scaleY(.8);opacity:.2;}20%{transform:scaleX(1.08) scaleY(1.16);opacity:.3;}45%{transform:scaleX(.92) scaleY(.92);opacity:.18;}70%{transform:scaleX(1.14) scaleY(1.22);opacity:.32;}}
+@keyframes eyeBlink{0%,44%,46%,100%{transform:scaleY(1);opacity:.9;}45%{transform:scaleY(.08);opacity:1;}}
+@keyframes mouthSpeak{0%,100%{transform:scaleX(.86) scaleY(.8);opacity:.76;}18%{transform:scaleX(1.06) scaleY(1.18);opacity:.92;}42%{transform:scaleX(.94) scaleY(.92);opacity:.72;}68%{transform:scaleX(1.12) scaleY(1.24);opacity:.96;}}
+@keyframes typingCursor{0%,100%{opacity:1;}50%{opacity:.12;}}
 @keyframes rainSweep{0%{transform:translateX(0) translateY(-8px);}100%{transform:translateX(-16px) translateY(10px);}}
 @keyframes seaShineMove{0%{transform:translateX(-24px);}100%{transform:translateX(28px);}}
 @keyframes harborLightSweep{0%,100%{opacity:.18;transform:translateX(0);}50%{opacity:.34;transform:translateX(10px);}}

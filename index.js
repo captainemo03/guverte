@@ -6978,7 +6978,44 @@ function renderPortraitTargets(){
 
 function renderSpeechPortrait(cfg){
   const slot = document.getElementById('speechchar');
-  if(slot) slot.innerHTML = renderPortraitSprite(cfg || getPlayerPortraitConfig(), 'story');
+  if(slot){
+    const safeCfg = cfg || getPlayerPortraitConfig();
+    const base = safeCfg.base || 'male';
+    const roleClass = safeCfg.portraitAsset ? 'role-photo' : 'role-sprite';
+    slot.innerHTML = `
+      ${renderPortraitSprite(safeCfg, 'story')}
+      <div class="speech-facefx ${roleClass}" data-base="${base}">
+        <span class="speech-eye speech-eye-left"></span>
+        <span class="speech-eye speech-eye-right"></span>
+        <span class="speech-mouth"></span>
+      </div>
+    `;
+  }
+}
+
+let speechTypingTimer = null;
+function runSpeechTyping(text){
+  const el = document.getElementById('text');
+  if(!el) return;
+  if(speechTypingTimer){
+    clearInterval(speechTypingTimer);
+    speechTypingTimer = null;
+  }
+  const full = String(text || '');
+  el.textContent = '';
+  el.classList.add('typing');
+  let i = 0;
+  const stepMs = full.length > 280 ? 8 : full.length > 160 ? 12 : 16;
+  speechTypingTimer = setInterval(()=>{
+    i += Math.max(1, full[i]===' ' ? 2 : 1);
+    el.textContent = full.slice(0, i);
+    if(i >= full.length){
+      clearInterval(speechTypingTimer);
+      speechTypingTimer = null;
+      el.textContent = full;
+      el.classList.remove('typing');
+    }
+  }, stepMs);
 }
 
 function renderCreatorRow(elId, values, selected, kind){
@@ -8491,7 +8528,7 @@ function renderScene(idx){
   renderSpeechPortrait(speakerPortraitCfg);
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
-  document.getElementById('text').textContent=typeof sc.text==='function'?sc.text(pn,sn):sc.text;
+  runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   document.getElementById('charname').textContent=pn;
   document.getElementById('charrole').textContent='GÜV. STAJYERİ · '+sc.day.toUpperCase();
   renderPortraitTargets();
