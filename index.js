@@ -4030,6 +4030,30 @@ const PLAYER_LOOK = {
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 const crewPortraits = {};
 const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu','büşra','gizem','damla','sibel','gül','eda','esra','nisa','naz','sude'];
+const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
+const NAME_STOPWORDS = new Set(['kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3']);
+
+function normalizeTrAscii(v=''){
+  return String(v)
+    .toLowerCase()
+    .replace(/i̇/g,'i')
+    .replace(/ç/g,'c')
+    .replace(/ğ/g,'g')
+    .replace(/ı/g,'i')
+    .replace(/ö/g,'o')
+    .replace(/ş/g,'s')
+    .replace(/ü/g,'u');
+}
+
+function inferPortraitBase(def={}){
+  const tokens = normalizeTrAscii(def.name || '')
+    .split(/\s+/)
+    .map(t => t.replace(/[^\w.]/g,''))
+    .filter(Boolean)
+    .filter(t => !NAME_STOPWORDS.has(t));
+  const firstName = tokens[0] || '';
+  return FEMALE_NAME_LOOKUP.has(firstName) ? 'female' : 'male';
+}
 const PLAYER_MODEL_PRESETS = {
   male: {
     0:{hair:'quiff', beard:'trim', face:'soft', hairColor:'#1e1612'},
@@ -6952,6 +6976,11 @@ function renderPortraitTargets(){
   if(preview) preview.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'preview');
 }
 
+function renderSpeechPortrait(cfg){
+  const slot = document.getElementById('speechchar');
+  if(slot) slot.innerHTML = renderPortraitSprite(cfg || getPlayerPortraitConfig(), 'story');
+}
+
 function renderCreatorRow(elId, values, selected, kind){
   const row=document.getElementById(elId);
   if(!row) return;
@@ -8456,9 +8485,10 @@ function renderScene(idx){
   document.getElementById('scene-sub').textContent=sc.sub||'';
   const speakerKey = getCrewKeyFromWho(sc.who);
   const speakerPortraitCfg = speakerKey
-    ? (crewPortraits[speakerKey] || (crewPortraits[speakerKey] = makeCrewPortrait(speakerKey, CREW_DEFS[speakerKey]||{})))
+    ? getCrewPortraitForKey(speakerKey)
     : getPlayerPortraitConfig();
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
+  renderSpeechPortrait(speakerPortraitCfg);
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
   document.getElementById('text').textContent=typeof sc.text==='function'?sc.text(pn,sn):sc.text;
@@ -8486,7 +8516,11 @@ function renderScene(idx){
     photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
   }
-  renderSceneActor(sc, speakerPortraitCfg);
+  const sceneActor = document.getElementById('gfx-actor');
+  if(sceneActor){
+    sceneActor.classList.add('empty');
+    sceneActor.innerHTML = '';
+  }
   svg.innerHTML=getSafeSceneMarkup(sc);
 
   playSceneAudio(sc);
@@ -8742,9 +8776,8 @@ function pickRandom(list){
 
 function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
-  const titleBlob = `${key} ${def.title||''}`.toLowerCase();
-  const nameBlob = (def.name || '').toLowerCase();
-  const base = FEMALE_NAME_MARKERS.some(n=>nameBlob.includes(n)) ? 'female' : 'male';
+  const roleBlob = normalizeTrAscii(`${key} ${def.title||''} ${def.name||''}`);
+  const base = inferPortraitBase(def);
   const supportPool = {
     engine:{
       male:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
@@ -8760,11 +8793,13 @@ function makeCrewPortrait(key, def){
     }
   };
   let portraitAsset = '';
-  if(/carkci|muhendis|makine|yagci/.test(titleBlob)) portraitAsset = pickRandom(supportPool.engine[base]);
-  else if(/lostromo|guverte|silici/.test(titleBlob)) portraitAsset = pickRandom(supportPool.deck[base]);
-  else if(/asci|yemekhane|galley/.test(titleBlob)) portraitAsset = pickRandom(supportPool.cook[base]);
+  if(/(^| )(carkci|bas2|yagci)( |$)|muhendis|makine/.test(roleBlob)) portraitAsset = pickRandom(supportPool.engine[base]);
+  else if(/(^| )(lostromo|lostromo2|hasan|musa)( |$)|guverte|silici|tayfa/.test(roleBlob)) portraitAsset = pickRandom(supportPool.deck[base]);
+  else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) portraitAsset = pickRandom(supportPool.cook[base]);
   if(portraitAsset){
     return {
+      __roleKey:key,
+      __base:base,
       portraitAsset,
       bg:'portrait'
     };
@@ -8773,6 +8808,8 @@ function makeCrewPortrait(key, def){
     ? ['bob','bun','waves','parted','curly','slick']
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
   return {
+    __roleKey:key,
+    __base:base,
     skin: pickRandom(PLAYER_LOOK.skin),
     base,
     face: pickRandom(PLAYER_LOOK.face),
@@ -8789,6 +8826,15 @@ function makeCrewPortrait(key, def){
       ? pickRandom([1,3,5,7])
       : pickRandom([0,2,4,6])
   };
+}
+
+function getCrewPortraitForKey(key){
+  if(!CREW_DEFS[key]) return null;
+  const current = crewPortraits[key];
+  if(!current || current.__roleKey !== key){
+    crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]);
+  }
+  return crewPortraits[key];
 }
 
 function randomizeCrewRoster(){
@@ -8847,7 +8893,7 @@ function renderCrewCards(){
     const relation = trust>=75?'Guveniyor ama gozunu uzerinde tutuyor':trust>=55?'Seni tartiyor':trust>=40?'Mesafeyi koruyor':'Henuz kolay acilmiyor';
     const div = document.createElement('div');
     div.className = 'crew-card';
-    const portrait = renderPortraitSprite(crewPortraits[key] || makeCrewPortrait(key, def), 'crew');
+    const portrait = renderPortraitSprite(getCrewPortraitForKey(key) || makeCrewPortrait(key, def), 'crew');
     div.innerHTML = `<div class="crew-card-top">
       <span class="crew-ico portrait-chip small">${portrait}</span>
       <div><div class="crew-name">${def.name}</div><div class="crew-title-small">${def.title}</div></div>
