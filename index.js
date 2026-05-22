@@ -4019,14 +4019,31 @@ let selYear=2018, selType="kuru", selKontrat=0;
 const PLAYER_LOOK = {
   skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
   base:['male','female'],
+  model:['0','1','2','3'],
   face:['soft','sharp'],
   hair:['short','swept','waves','crop','parted','slick','bob','quiff','curly','bun'],
+  beard:['clean','trim','full'],
   hairColor:['#1e1612','#3a271b','#6a4b35','#202735'],
   eye:['#3f2c22','#496b8d','#577149','#697089'],
   uniform:['classic','dress','duty']
 };
-let playerAppearance = {skin:'#d9a27c',base:'male',face:'soft',hair:'waves',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
+let playerAppearance = {skin:'#d9a27c',base:'male',model:0,face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 const crewPortraits = {};
+const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu'];
+const PLAYER_MODEL_PRESETS = {
+  male: {
+    0:{hair:'quiff', beard:'trim', face:'soft', hairColor:'#1e1612'},
+    2:{hair:'crop', beard:'clean', face:'sharp', hairColor:'#202735'},
+    4:{hair:'swept', beard:'clean', face:'soft', hairColor:'#6a4b35'},
+    6:{hair:'curly', beard:'full', face:'sharp', hairColor:'#1e1612'}
+  },
+  female: {
+    1:{hair:'bun', beard:'clean', face:'soft', hairColor:'#6a4b35'},
+    3:{hair:'slick', beard:'clean', face:'sharp', hairColor:'#1e1612'},
+    5:{hair:'waves', beard:'clean', face:'soft', hairColor:'#1e1612'},
+    7:{hair:'bob', beard:'clean', face:'sharp', hairColor:'#6a4b35'}
+  }
+};
 
 function portraitStripeCount(role){
   if(/süvari|suvari/i.test(role||'')) return 4;
@@ -6840,8 +6857,10 @@ function getPlayerPortraitConfig(){
   return {
     skin:playerAppearance.skin,
     base:playerAppearance.base,
+    model:playerAppearance.model,
     face:playerAppearance.face,
     hair:playerAppearance.hair,
+    beard:playerAppearance.beard,
     hairColor:playerAppearance.hairColor,
     eye:playerAppearance.eye,
     uniform:playerAppearance.uniform,
@@ -6851,6 +6870,39 @@ function getPlayerPortraitConfig(){
     stripes:uniform.stripes,
     bg:'bridge'
   };
+}
+
+function getPlayerModelPool(base){
+  return base==='female' ? [1,3,5,7] : [0,2,4,6];
+}
+
+function syncPlayerAppearanceFromModel(){
+  const presets = PLAYER_MODEL_PRESETS[playerAppearance.base] || {};
+  const preset = presets[playerAppearance.model];
+  if(!preset) return;
+  playerAppearance.hair = preset.hair;
+  playerAppearance.beard = preset.beard;
+  playerAppearance.face = preset.face;
+  playerAppearance.hairColor = preset.hairColor;
+}
+
+function resolvePlayerModelFromTraits(){
+  if(playerAppearance.base==='female'){
+    if(playerAppearance.hair==='bob') return 7;
+    if(playerAppearance.hair==='bun') return 1;
+    if(playerAppearance.hair==='slick' || playerAppearance.face==='sharp') return 3;
+    return playerAppearance.hairColor==='#6a4b35' ? 1 : 5;
+  }
+  if(playerAppearance.beard==='full') return 6;
+  if(playerAppearance.hair==='crop' || playerAppearance.face==='sharp') return 2;
+  if(playerAppearance.hairColor==='#6a4b35') return 4;
+  return playerAppearance.beard==='trim' ? 0 : 2;
+}
+
+function setPlayerBase(base){
+  playerAppearance.base = base;
+  playerAppearance.model = getPlayerModelPool(base)[0];
+  syncPlayerAppearanceFromModel();
 }
 
 function getPortraitSpriteIndex(cfg={}){
@@ -6873,15 +6925,24 @@ function getPortraitSpriteIndex(cfg={}){
 }
 
 function renderPortraitSprite(cfg={}, variant='avatar'){
+  const skinIdx = Math.max(0, PLAYER_LOOK.skin.indexOf(cfg.skin));
+  const hairIdx = Math.max(0, PLAYER_LOOK.hairColor.indexOf(cfg.hairColor));
+  const eyeIdx = Math.max(0, PLAYER_LOOK.eye.indexOf(cfg.eye));
+  const uniformIdx = Math.max(0, PLAYER_LOOK.uniform.indexOf(cfg.uniform));
+  const brightness = [1.05,1,0.94,0.9][skinIdx] || 1;
+  const hue = [0,5,11,-6][hairIdx] || 0;
+  const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
+  const contrast = [1,1.04,1.08][uniformIdx] || 1;
+  const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
   if(cfg.portraitAsset){
-    return `<img class="portrait-photo ${variant}" src="${cfg.portraitAsset}?v=1" alt="">`;
+    return `<img class="portrait-photo ${variant}" style="${visualStyle}" src="${cfg.portraitAsset}?v=1" alt="">`;
   }
-  const idx = Number.isInteger(cfg.spriteIndex) ? cfg.spriteIndex : getPortraitSpriteIndex(cfg);
+  const idx = Number.isInteger(cfg.spriteIndex) ? cfg.spriteIndex : (Number.isInteger(cfg.model) ? cfg.model : getPortraitSpriteIndex(cfg));
   const col = idx % 4;
   const row = Math.floor(idx / 4);
   const x = [0,33.333,66.666,100][col] ?? 0;
   const y = row===0 ? 0 : 100;
-  return `<span class="portrait-sprite ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('assets/crew-portraits.png?v=3');"></span>`;
+  return `<span class="portrait-sprite ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('assets/crew-portraits.png?v=3');${visualStyle}"></span>`;
 }
 
 function renderPortraitTargets(){
@@ -6903,6 +6964,14 @@ function renderCreatorRow(elId, values, selected, kind){
     else b.textContent = ({
       male:'Erkek',
       female:'Kadın',
+      0:'Model 1',
+      1:'Model 1',
+      2:'Model 2',
+      3:'Model 2',
+      4:'Model 3',
+      5:'Model 3',
+      6:'Model 4',
+      7:'Model 4',
       short:'Kısa',
       swept:'Taralı',
       waves:'Dalgalı',
@@ -6913,6 +6982,9 @@ function renderCreatorRow(elId, values, selected, kind){
       quiff:'Kabartı',
       curly:'Kıvırcık',
       bun:'Topuz',
+      clean:'Yok',
+      trim:'Kısa',
+      full:'Tam',
       soft:'Yumuşak',
       sharp:'Keskin',
       classic:'Klasik',
@@ -6921,12 +6993,15 @@ function renderCreatorRow(elId, values, selected, kind){
     }[v]||v);
     b.onclick=()=>{
       if(elId==='creator-skin') playerAppearance.skin=v;
-      else if(elId==='creator-base') playerAppearance.base=v;
-      else if(elId==='creator-face') playerAppearance.face=v;
-      else if(elId==='creator-hair') playerAppearance.hair=v;
+      else if(elId==='creator-base') setPlayerBase(v);
+      else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
+      else if(elId==='creator-face'){ playerAppearance.face=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
+      else if(elId==='creator-hair'){ playerAppearance.hair=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
+      else if(elId==='creator-beard'){ playerAppearance.beard=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
       else if(elId==='creator-haircolor') playerAppearance.hairColor=v;
       else if(elId==='creator-eye') playerAppearance.eye=v;
       else if(elId==='creator-uniform') playerAppearance.uniform=v;
+      if(elId==='creator-haircolor' || elId==='creator-eye') playerAppearance.model = resolvePlayerModelFromTraits();
       renderCharacterCreator();
     };
     row.appendChild(b);
@@ -6934,10 +7009,24 @@ function renderCreatorRow(elId, values, selected, kind){
 }
 
 function renderCharacterCreator(){
+  const modelPool = getPlayerModelPool(playerAppearance.base).map(String);
+  const hairPool = playerAppearance.base==='female'
+    ? ['bun','slick','waves','bob']
+    : ['quiff','crop','swept','curly'];
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
+  renderCreatorRow('creator-model', modelPool, String(playerAppearance.model), 'text');
   renderCreatorRow('creator-face', PLAYER_LOOK.face, playerAppearance.face, 'text');
-  renderCreatorRow('creator-hair', PLAYER_LOOK.hair, playerAppearance.hair, 'text');
+  renderCreatorRow('creator-hair', hairPool, playerAppearance.hair, 'text');
+  const beardRow = document.getElementById('creator-beard');
+  const beardLbl = beardRow ? beardRow.previousElementSibling : null;
+  if(playerAppearance.base==='female'){
+    if(beardLbl) beardLbl.style.display = 'none';
+    if(beardRow) beardRow.innerHTML = '';
+  }else{
+    if(beardLbl) beardLbl.style.display = '';
+    renderCreatorRow('creator-beard', PLAYER_LOOK.beard, playerAppearance.beard, 'text');
+  }
   renderCreatorRow('creator-haircolor', PLAYER_LOOK.hairColor, playerAppearance.hairColor, 'swatch');
   renderCreatorRow('creator-eye', PLAYER_LOOK.eye, playerAppearance.eye, 'swatch');
   renderCreatorRow('creator-uniform', PLAYER_LOOK.uniform, playerAppearance.uniform, 'text');
@@ -8566,12 +8655,12 @@ const CREW_DEFS = {
     prefs:{kritik:3,akilli:1,itaatkar:0,sosyal:0,cesur:0,korkak:-4},
     secrets:["Her tatbikat öncesi 10 dakika hazırlık yapıyor — görmeden.","SOLAS kitabını ezberden biliyor.","İlk gemisinde gerçek yangın yaşadı."],
     tips:["Muster listeni ezberle","Tatbikatlara ciddi katıl","Emniyet raporlarını atlatma"]},
-  carkci: {name:"Baş Mühendis Nermin", icon:"⚙️", title:"Çarkçıbaşı", trust:35,
+  carkci: {name:"Baş Mühendis Hakan", icon:"⚙️", title:"Çarkçıbaşı", trust:35,
     style:"Kolay guvenmez; teknik merak gorurse seni sahiplenir.",
     prefs:{kritik:2,akilli:3,itaatkar:0,sosyal:-1,cesur:0,korkak:-3},
     secrets:["Bu gemide 11 yıldır — şirketi tanıdığından beter tanıyor.","Makine dairesini kapalı gözle dolaşabilir.","İki çocuğunun fotoğrafı kontrol panelinde."],
     tips:["Makine dairesine meraklı in","Teknik soruları çekinmeden sor","Arıza loglarını takip et"]},
-  bas2: {name:"2. Mühendis Aylin", icon:"🔧", title:"Makine 2. Amiri", trust:40,
+  bas2: {name:"2. Mühendis Emrah", icon:"🔧", title:"Makine 2. Amiri", trust:40,
     secrets:["Gece nöbetlerinde şiir yazıyor — kimse bilmiyor.","Jeneratör arızasını bir kez tek başına çözdü — 4 saatte.","İstanbul Teknik mezunu, master yarıda bıraktı."],
     tips:["Makine loglarını birlikte incele","Pompa sistemlerini öğren","Alarm gelince hemen bildir"]},
   lostromo2: {name:"Silici Ramazan", icon:"🧹", title:"Güverte Temizlik", trust:50,
@@ -8596,14 +8685,14 @@ const CREW_NAME_POOLS = {
   z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora"],
   z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran"],
   z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep"],
-  carkci:["Baş Mühendis Nermin","Baş Mühendis Hakan","Baş Mühendis Pınar","Baş Mühendis Tolga","Baş Mühendis Ayşe","Baş Mühendis Erdem"],
-  bas2:["2. Mühendis Aylin","2. Mühendis Burcu","2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Eylül","2. Mühendis Deniz"],
+  carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Levent","Baş Mühendis Murat","Baş Mühendis Serkan"],
+  bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Can","2. Mühendis Onur","2. Mühendis Kıvanç"],
   lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Yusuf","Lostromo Nejat","Lostromo Cihan"],
   lostromo2:["Silici Ramazan","Silici Ali","Silici Furkan","Silici Tahir","Silici Kadir","Silici Serhat"],
   yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan"],
-  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Sevim Hanım","Aşçı Hüseyin Usta","Aşçı Dilek Hanım"],
-  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Merve","Tayfa Gökhan"],
-  musa:["Tayfa Musa","Tayfa Emir","Tayfa Deniz","Tayfa Sarp","Tayfa Cansu","Tayfa Yiğit"]
+  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Hüseyin Usta","Aşçı Kemal Usta","Aşçı Levent Usta"],
+  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf"],
+  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem"]
 };
 
 function pickRandom(list){
@@ -8613,6 +8702,7 @@ function pickRandom(list){
 function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
   const titleBlob = `${key} ${def.title||''}`.toLowerCase();
+  const nameBlob = (def.name || '').toLowerCase();
   const supportPool = {
     engine:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
     deck:['assets/support-bosun-a.png','assets/support-bosun-b.png'],
@@ -8628,7 +8718,7 @@ function makeCrewPortrait(key, def){
       bg:'portrait'
     };
   }
-  const base = pickRandom(PLAYER_LOOK.base);
+  const base = FEMALE_NAME_MARKERS.some(n=>nameBlob.includes(n)) ? 'female' : 'male';
   const hairPool = base==='female'
     ? ['bob','bun','waves','parted','curly','slick']
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
