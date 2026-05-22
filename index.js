@@ -6873,6 +6873,9 @@ function getPortraitSpriteIndex(cfg={}){
 }
 
 function renderPortraitSprite(cfg={}, variant='avatar'){
+  if(cfg.portraitAsset){
+    return `<img class="portrait-photo ${variant}" src="${cfg.portraitAsset}?v=1" alt="">`;
+  }
   const idx = Number.isInteger(cfg.spriteIndex) ? cfg.spriteIndex : getPortraitSpriteIndex(cfg);
   const col = idx % 4;
   const row = Math.floor(idx / 4);
@@ -8609,6 +8612,22 @@ function pickRandom(list){
 
 function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
+  const titleBlob = `${key} ${def.title||''}`.toLowerCase();
+  const supportPool = {
+    engine:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
+    deck:['assets/support-bosun-a.png','assets/support-bosun-b.png'],
+    cook:['assets/support-cook-a.png','assets/support-cook-b.png']
+  };
+  let portraitAsset = '';
+  if(/carkci|muhendis|makine|yagci/.test(titleBlob)) portraitAsset = pickRandom(supportPool.engine);
+  else if(/lostromo|guverte|silici/.test(titleBlob)) portraitAsset = pickRandom(supportPool.deck);
+  else if(/asci|yemekhane|galley/.test(titleBlob)) portraitAsset = pickRandom(supportPool.cook);
+  if(portraitAsset){
+    return {
+      portraitAsset,
+      bg:'portrait'
+    };
+  }
   const base = pickRandom(PLAYER_LOOK.base);
   const hairPool = base==='female'
     ? ['bob','bun','waves','parted','curly','slick']
