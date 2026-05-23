@@ -465,6 +465,25 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-chip.small{width:38px;height:38px;flex-shrink:0;}
 .portrait-chip svg{width:100%;height:100%;display:block;}
 .portrait-sprite,.portrait-photo-sheet{display:block;background-repeat:no-repeat;background-size:400% 200%;background-position:var(--px,0%) var(--py,0%);filter:drop-shadow(0 6px 14px rgba(0,0,0,.2));}
+.portrait-composite{position:relative;display:block;overflow:hidden;}
+.portrait-composite.avatar{width:40px;height:40px;border-radius:50%;}
+.portrait-composite.speaker{width:42px;height:42px;border-radius:50%;}
+.portrait-composite.crew{width:38px;height:38px;border-radius:50%;}
+.portrait-composite.preview{width:100%;height:210px;}
+.portrait-composite.story{width:100%;height:156px;}
+.portrait-composite.actor{width:132px;height:145px;}
+.portrait-composite .body-layer{position:absolute;inset:0;}
+.portrait-face-overlay{position:absolute;left:50%;top:18%;width:29%;height:35%;transform:translateX(-50%);background-size:cover;background-position:center 24%;background-repeat:no-repeat;box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 8px 18px rgba(0,0,0,.16);filter:saturate(.92) contrast(.98);}
+.portrait-composite.base-female .portrait-face-overlay{top:19%;width:28%;height:34%;}
+.portrait-composite.face-soft .portrait-face-overlay{border-radius:48% 48% 52% 52% / 42% 42% 58% 58%;}
+.portrait-composite.face-sharp .portrait-face-overlay{border-radius:44% 44% 50% 50% / 36% 36% 64% 64%;}
+.portrait-composite.pose-angled .portrait-face-overlay{left:48.6%;}
+.portrait-composite.pose-command .portrait-face-overlay{top:17.4%;transform:translateX(-50%) scale(1.03);}
+.portrait-composite.avatar .portrait-face-overlay,
+.portrait-composite.speaker .portrait-face-overlay,
+.portrait-composite.crew .portrait-face-overlay{top:19%;width:33%;height:37%;box-shadow:none;}
+.portrait-composite.story .portrait-face-overlay{top:18%;width:31%;height:36%;}
+.portrait-composite.preview .portrait-face-overlay{top:18%;width:30%;height:36%;}
 .portrait-sprite.avatar,.portrait-photo-sheet.avatar{width:40px;height:40px;background-size:460% 220%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.speaker,.portrait-photo-sheet.speaker{width:42px;height:42px;background-size:460% 220%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.crew,.portrait-photo-sheet.crew{width:38px;height:38px;background-size:470% 225%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}

@@ -4032,6 +4032,7 @@ const PLAYER_LOOK = {
 };
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',scene:'opensea',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 let playerReferencePhoto = '';
+let playerStyledFacePhoto = '';
 let playerCameraStream = null;
 const PLAYER_PHOTO_MODELS = {
   male:{
@@ -6905,6 +6906,8 @@ function getPlayerPortraitConfig(){
     shirtColor:uniform.shirtColor,
     tieColor:uniform.tieColor,
     stripes:uniform.stripes,
+    isPlayer:true,
+    faceAsset:playerStyledFacePhoto,
     portraitSheet,
     sheetCols:4,
     sheetRows:2,
@@ -6979,6 +6982,60 @@ function getPortraitSpriteIndex(cfg={}){
   return face==='sharp' ? 2 : 0;
 }
 
+function buildFaceOverlayData(img){
+  const out = document.createElement('canvas');
+  out.width = 220;
+  out.height = 280;
+  const ox = out.getContext('2d');
+  ox.clearRect(0,0,out.width,out.height);
+  const sw = img.width * 0.48;
+  const sh = img.height * 0.62;
+  const sx = (img.width - sw) / 2;
+  const sy = img.height * 0.16;
+  ox.save();
+  ox.beginPath();
+  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.clip();
+  ox.filter = 'contrast(1.04) saturate(0.9) brightness(1.02)';
+  ox.drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+  ox.restore();
+  const data = ox.getImageData(0,0,out.width,out.height);
+  for(let i=0;i<data.data.length;i+=4){
+    if(data.data[i+3] < 4) continue;
+    data.data[i] = Math.round(data.data[i] / 24) * 24;
+    data.data[i+1] = Math.round(data.data[i+1] / 24) * 24;
+    data.data[i+2] = Math.round(data.data[i+2] / 24) * 24;
+  }
+  ox.putImageData(data,0,0);
+  ox.save();
+  ox.globalAlpha = 0.08;
+  ox.fillStyle = playerAppearance.skin;
+  ox.beginPath();
+  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.fill();
+  ox.restore();
+  ox.strokeStyle = 'rgba(120,86,62,0.24)';
+  ox.lineWidth = 2;
+  ox.beginPath();
+  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.stroke();
+  return out.toDataURL('image/png');
+}
+
+function refreshPlayerStyledFacePhoto(onDone){
+  if(!playerReferencePhoto){
+    playerStyledFacePhoto = '';
+    if(onDone) onDone();
+    return;
+  }
+  const img = new Image();
+  img.onload = () => {
+    playerStyledFacePhoto = buildFaceOverlayData(img);
+    if(onDone) onDone();
+  };
+  img.src = playerReferencePhoto;
+}
+
 function renderPortraitSprite(cfg={}, variant='avatar'){
   const skinIdx = Math.max(0, PLAYER_LOOK.skin.indexOf(cfg.skin));
   const hairIdx = Math.max(0, PLAYER_LOOK.hairColor.indexOf(cfg.hairColor));
@@ -6989,6 +7046,19 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
   const contrast = [1,1.04,1.08][uniformIdx] || 1;
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
+  if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
+    const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
+    const cols = cfg.sheetCols || 4;
+    const rows = cfg.sheetRows || 2;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
+    const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
+    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} base-${cfg.base||'male'} face-${cfg.face||'soft'} uniform-${cfg.uniform||'classic'}">
+      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>
+      <span class="portrait-face-overlay ${variant}" style="background-image:url('${cfg.faceAsset}');"></span>
+    </span>`;
+  }
   if(cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
@@ -7061,7 +7131,7 @@ async function openPlayerCamera(){
 
 function loadPlayerReferencePhoto(dataUrl){
   playerReferencePhoto = dataUrl;
-  renderPortraitTargets();
+  refreshPlayerStyledFacePhoto(renderPortraitTargets);
 }
 
 function handlePlayerPhotoInput(ev){
@@ -7164,7 +7234,7 @@ function applyPhotoAutoSuggestion(){
       else playerAppearance.model = 0;
     }
     playerAppearance.face = (skinSample.r - skinSample.b > 40) ? 'soft' : 'sharp';
-    renderCharacterCreator();
+    refreshPlayerStyledFacePhoto(renderCharacterCreator);
     showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
   };
   img.src = playerReferencePhoto;
@@ -7172,6 +7242,7 @@ function applyPhotoAutoSuggestion(){
 
 function clearPlayerReferencePhoto(){
   playerReferencePhoto = '';
+  playerStyledFacePhoto = '';
   stopPlayerCamera();
   const input = document.getElementById('player-photo-input');
   if(input) input.value = '';
