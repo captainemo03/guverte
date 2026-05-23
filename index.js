@@ -4085,6 +4085,16 @@ function inferPortraitBase(def={}){
   return FEMALE_NAME_LOOKUP.has(firstName) ? 'female' : 'male';
 }
 const PLAYER_MODEL_PRESETS = PLAYER_PHOTO_MODELS;
+const OFFICER_SHEET_POOLS = {
+  young:{
+    male:[0,2,4,6],
+    female:[1,3,5,7]
+  },
+  mid:{
+    male:[0,2,4,5,7],
+    female:[1,3,6]
+  }
+};
 
 function portraitStripeCount(role){
   if(/süvari|suvari/i.test(role||'')) return 4;
@@ -6927,9 +6937,8 @@ function getPlayerPortraitConfig(){
 }
 
 function getPlayerModelPool(base, age=playerAppearance.age){
-  if(age==='veteran') return base==='female' ? [1,3,5,7] : [0,2,4,6];
-  if(base==='female') return age==='mid' ? [5,7] : [1,3];
-  return age==='mid' ? [4,6] : [0,2];
+  if(age==='veteran') return OFFICER_SHEET_POOLS.mid[base] || OFFICER_SHEET_POOLS.mid.male;
+  return OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
 }
 
 function syncPlayerAppearanceFromModel(){
@@ -9123,9 +9132,7 @@ function makeCrewPortrait(key, def){
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
   const age = pickRandom(['young','mid']);
   const officerSheet = age==='young' ? 'assets/crew-portraits-illustrated-young.png' : 'assets/crew-portraits-illustrated-mid.png';
-  const officerIndexPool = base==='female'
-    ? (age==='young' ? [1,3] : [5,7])
-    : (age==='young' ? [0,2] : [4,6]);
+  const officerIndexPool = OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
   return {
     __roleKey:key,
     __base:base,
