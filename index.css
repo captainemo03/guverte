@@ -479,17 +479,19 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-composite.story{width:100%;height:156px;}
 .portrait-composite.actor{width:132px;height:145px;}
 .portrait-composite .body-layer{position:absolute;inset:0;}
-.portrait-face-overlay{position:absolute;left:50%;top:16.8%;width:24%;height:29%;transform:translateX(-50%);background-size:cover;background-position:center 32%;background-repeat:no-repeat;border-radius:48% 48% 54% 54% / 44% 44% 58% 58%;box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 8px 18px rgba(0,0,0,.12);filter:saturate(.94) contrast(.98);}
-.portrait-face-overlay{mask-image:radial-gradient(circle at 50% 46%, rgba(0,0,0,1) 0 58%, rgba(0,0,0,.9) 69%, rgba(0,0,0,0) 100%);-webkit-mask-image:radial-gradient(circle at 50% 46%, rgba(0,0,0,1) 0 58%, rgba(0,0,0,.9) 69%, rgba(0,0,0,0) 100%);}
-.portrait-composite.base-female .portrait-face-overlay{top:17.1%;width:23.4%;height:28.5%;}
+.portrait-face-overlay{position:absolute;left:50%;top:15.1%;width:20%;height:24%;transform:translateX(-50%);background-size:cover;background-position:center 26%;background-repeat:no-repeat;border-radius:48% 48% 54% 54% / 44% 44% 58% 58%;box-shadow:0 0 0 1px rgba(255,255,255,.04), 0 6px 14px rgba(0,0,0,.1);filter:saturate(.92) contrast(.97);}
+.portrait-face-overlay{mask-image:radial-gradient(circle at 50% 44%, rgba(0,0,0,1) 0 53%, rgba(0,0,0,.88) 66%, rgba(0,0,0,0) 100%);-webkit-mask-image:radial-gradient(circle at 50% 44%, rgba(0,0,0,1) 0 53%, rgba(0,0,0,.88) 66%, rgba(0,0,0,0) 100%);}
+.portrait-composite.base-female .portrait-face-overlay{top:15.4%;width:19.5%;height:23.5%;}
 .portrait-composite.face-soft .portrait-face-overlay{border-radius:48% 48% 52% 52% / 42% 42% 58% 58%;}
 .portrait-composite.face-sharp .portrait-face-overlay{border-radius:44% 44% 50% 50% / 36% 36% 64% 64%;}
-.portrait-composite.pose-angled .portrait-face-overlay{left:48.4%;top:16.4%;transform:translateX(-50%) scale(1.03);}
-.portrait-composite.pose-command .portrait-face-overlay{top:16.2%;left:50.8%;transform:translateX(-50%) scale(1.05);}
+.portrait-composite.pose-angled .portrait-face-overlay{left:48.2%;top:14.8%;transform:translateX(-50%) scale(1.02);}
+.portrait-composite.pose-command .portrait-face-overlay{top:14.7%;left:50.9%;transform:translateX(-50%) scale(1.04);}
 .portrait-composite.avatar .portrait-face-overlay,
 .portrait-composite.speaker .portrait-face-overlay{top:18.2%;width:30%;height:34%;box-shadow:none;}
-.portrait-composite.story .portrait-face-overlay{top:16.6%;width:25%;height:29%;}
-.portrait-composite.preview .portrait-face-overlay{top:16.8%;width:24%;height:29%;}
+.portrait-composite.story .portrait-face-overlay{top:15%;width:21%;height:24.5%;}
+.portrait-composite.preview .portrait-face-overlay{top:15.1%;width:20%;height:24%;}
+.portrait-composite.preview.pose-angled .portrait-face-overlay{left:47.8%;top:14.7%;width:20.8%;}
+.portrait-composite.preview.pose-command .portrait-face-overlay{left:51.1%;top:14.6%;width:20.6%;}
 .portrait-sprite.avatar,.portrait-photo-sheet.avatar{width:40px;height:40px;background-size:460% 220%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.speaker,.portrait-photo-sheet.speaker{width:42px;height:42px;background-size:460% 220%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.crew,.portrait-photo-sheet.crew{width:38px;height:38px;background-size:470% 225%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}

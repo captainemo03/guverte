@@ -7116,15 +7116,12 @@ function renderPortraitTargets(){
   const portraitCfg = getPlayerPortraitConfig();
   if(avatar) avatar.innerHTML = renderPortraitSprite(portraitCfg,'avatar');
   if(preview){
-    const ref = playerReferencePhoto
-      ? `<div class="creator-ref-thumb"><img src="${playerReferencePhoto}" alt="Referans foto"><div class="creator-ref-badge">Referans</div></div>`
-      : '';
-    preview.innerHTML = `<div class="creator-preview-stage scene-${portraitCfg.scene||'opensea'}">${renderPortraitSprite(portraitCfg,'preview')}${ref}</div>`;
+    preview.innerHTML = `<div class="creator-preview-stage scene-${portraitCfg.scene||'opensea'}">${renderPortraitSprite(portraitCfg,'preview')}</div>`;
   }
   const status = document.getElementById('creator-photo-status');
   if(status){
     status.textContent = playerReferencePhoto
-      ? 'Referans foto yüklendi. İstersen otomatik öner ile görünüşü buna yaklaştırabiliriz.'
+      ? 'Referans foto yüklendi ve karaktere uygulandı. Gerekirse creator seçenekleriyle ince ayar yapabilirsin.'
       : 'İstersen bir fotoğraf yükleyip karakteri ona göre başlatabiliriz.';
   }
 }
