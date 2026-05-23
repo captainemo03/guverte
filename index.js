@@ -7380,6 +7380,24 @@ function renderSpeechPortrait(cfg){
   }
 }
 
+function hideReplyBubble(){
+  const stage = document.getElementById('replystage');
+  const text = document.getElementById('replytext');
+  const name = document.getElementById('replyname');
+  if(stage) stage.classList.add('hidden');
+  if(text) text.textContent = '';
+  if(name) name.textContent = pn || 'Stajyer';
+}
+
+function showReplyBubble(text){
+  const stage = document.getElementById('replystage');
+  const body = document.getElementById('replytext');
+  const name = document.getElementById('replyname');
+  if(name) name.textContent = pn || 'Stajyer';
+  if(body) body.textContent = String(text || '');
+  if(stage) stage.classList.remove('hidden');
+}
+
 let speechTypingTimer = null;
 function runSpeechTyping(text){
   const el = document.getElementById('text');
@@ -7807,6 +7825,7 @@ function handleSceneChoice(sc, c2, ch){
   if(ch){
     ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
   }
+  showReplyBubble(c2.text);
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
   const envPressure = evaluateEnvironmentPressure(sc,c2);
@@ -7845,7 +7864,7 @@ function handleSceneChoice(sc, c2, ch){
     else if(crisis){showCrisis(crisis);}
     else{currentIdx++;renderScene(currentIdx);}
   };
-  setTimeout(nextFn, parts.length?2200:300);
+  setTimeout(nextFn, Math.max(parts.length?2200:300, 1400));
 }
 
 function renderCalcPanel(sc, ch){
@@ -8935,6 +8954,7 @@ function renderScene(idx){
   renderSpeechPortrait(speakerPortraitCfg);
   document.getElementById('spknm').textContent=c.name;
   document.getElementById('spktl').textContent=c.title;
+  hideReplyBubble();
   runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   document.getElementById('charname').textContent=pn;
   document.getElementById('charrole').textContent='GÜV. STAJYERİ · '+sc.day.toUpperCase();
