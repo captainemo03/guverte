@@ -7007,36 +7007,47 @@ function buildFaceOverlayData(img){
   out.height = 280;
   const ox = out.getContext('2d');
   ox.clearRect(0,0,out.width,out.height);
-  const sw = img.width * 0.48;
-  const sh = img.height * 0.62;
+  const sw = img.width * 0.42;
+  const sh = img.height * 0.56;
   const sx = (img.width - sw) / 2;
-  const sy = img.height * 0.16;
+  const sy = img.height * 0.12;
   ox.save();
   ox.beginPath();
-  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.ellipse(out.width/2, out.height*0.48, out.width*0.28, out.height*0.31, 0, 0, Math.PI*2);
   ox.clip();
-  ox.filter = 'contrast(1.04) saturate(0.9) brightness(1.02)';
-  ox.drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+  ox.filter = 'contrast(1.08) saturate(0.88) brightness(1.04)';
+  ox.drawImage(img, sx, sy, sw, sh, out.width*0.18, out.height*0.14, out.width*0.64, out.height*0.7);
   ox.restore();
   const data = ox.getImageData(0,0,out.width,out.height);
   for(let i=0;i<data.data.length;i+=4){
     if(data.data[i+3] < 4) continue;
-    data.data[i] = Math.round(data.data[i] / 24) * 24;
-    data.data[i+1] = Math.round(data.data[i+1] / 24) * 24;
-    data.data[i+2] = Math.round(data.data[i+2] / 24) * 24;
+    data.data[i] = Math.round(data.data[i] / 28) * 28;
+    data.data[i+1] = Math.round(data.data[i+1] / 28) * 28;
+    data.data[i+2] = Math.round(data.data[i+2] / 28) * 28;
   }
   ox.putImageData(data,0,0);
   ox.save();
-  ox.globalAlpha = 0.08;
+  ox.globalAlpha = 0.1;
   ox.fillStyle = playerAppearance.skin;
   ox.beginPath();
-  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.ellipse(out.width/2, out.height*0.48, out.width*0.28, out.height*0.31, 0, 0, Math.PI*2);
   ox.fill();
   ox.restore();
-  ox.strokeStyle = 'rgba(120,86,62,0.24)';
-  ox.lineWidth = 2;
+  ox.save();
+  ox.globalCompositeOperation = 'destination-in';
+  const fade = ox.createRadialGradient(out.width/2, out.height*0.47, out.width*0.12, out.width/2, out.height*0.47, out.width*0.34);
+  fade.addColorStop(0,'rgba(255,255,255,1)');
+  fade.addColorStop(0.78,'rgba(255,255,255,.96)');
+  fade.addColorStop(1,'rgba(255,255,255,0)');
+  ox.fillStyle = fade;
   ox.beginPath();
-  ox.ellipse(out.width/2, out.height/2, out.width*0.34, out.height*0.39, 0, 0, Math.PI*2);
+  ox.ellipse(out.width/2, out.height*0.48, out.width*0.34, out.height*0.37, 0, 0, Math.PI*2);
+  ox.fill();
+  ox.restore();
+  ox.strokeStyle = 'rgba(120,86,62,0.16)';
+  ox.lineWidth = 1.2;
+  ox.beginPath();
+  ox.ellipse(out.width/2, out.height*0.48, out.width*0.27, out.height*0.3, 0, 0, Math.PI*2);
   ox.stroke();
   return out.toDataURL('image/png');
 }
@@ -7065,6 +7076,19 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
   const contrast = [1,1.04,1.08][uniformIdx] || 1;
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
+  if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
+    const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
+    const cols = cfg.sheetCols || 4;
+    const rows = cfg.sheetRows || 2;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
+    const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
+    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} base-${cfg.base||'male'} face-${cfg.face||'soft'} uniform-${cfg.uniform||'classic'}">
+      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=5');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>
+      <span class="portrait-face-overlay ${variant} pose-${cfg.pose||'front'} base-${cfg.base||'male'}" style="background-image:url('${cfg.faceAsset}');"></span>
+    </span>`;
+  }
   if(cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
@@ -7137,7 +7161,6 @@ async function openPlayerCamera(){
 
 function loadPlayerReferencePhoto(dataUrl){
   playerReferencePhoto = dataUrl;
-  renderPortraitTargets();
   applyPhotoAutoSuggestion(true);
 }
 
@@ -7241,7 +7264,7 @@ function applyPhotoAutoSuggestion(silent=false){
       else playerAppearance.model = 0;
     }
     playerAppearance.face = (skinSample.r - skinSample.b > 40) ? 'soft' : 'sharp';
-    renderPortraitTargets();
+    refreshPlayerStyledFacePhoto(renderPortraitTargets);
     if(!silent) showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
     const status = document.getElementById('creator-photo-status');
     if(status){
