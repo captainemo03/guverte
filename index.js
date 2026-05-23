@@ -4107,6 +4107,8 @@ const CREATOR_POSE_LABELS = {
   angled:'3/4',
   command:'Komut'
 };
+const TRANSPARENT_SHEET_CACHE = {};
+const TRANSPARENT_SHEET_PENDING = new Set();
 
 function portraitStripeCount(role){
   if(/süvari|suvari/i.test(role||'')) return 4;
@@ -6948,6 +6950,76 @@ function getPlayerPortraitConfig(){
   };
 }
 
+function rerenderVisiblePortraits(){
+  try{
+    renderPortraitTargets();
+    renderCrewCards();
+    const game = document.getElementById('game');
+    if(game && game.style.display !== 'none'){
+      const sc = sceneQueue[currentIdx];
+      if(sc){
+        const speakerKey = getCrewKeyFromWho(sc.who);
+        const speakerPortraitCfg = speakerKey
+          ? getCrewPortraitForKey(speakerKey)
+          : getPlayerPortraitConfig();
+        const spk = document.getElementById('spkico');
+        if(spk) spk.innerHTML = renderPortraitSprite(speakerPortraitCfg,'speaker');
+        renderSpeechPortrait(speakerPortraitCfg);
+      }
+    }
+  }catch(err){
+    console.warn('Portrait rerender skipped:', err);
+  }
+}
+
+function buildTransparentSheet(src){
+  if(!src || TRANSPARENT_SHEET_CACHE[src] || TRANSPARENT_SHEET_PENDING.has(src)) return;
+  TRANSPARENT_SHEET_PENDING.add(src);
+  const img = new Image();
+  img.onload = () => {
+    try{
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const data = ctx.getImageData(0,0,canvas.width,canvas.height);
+      for(let i=0;i<data.data.length;i+=4){
+        const r = data.data[i];
+        const g = data.data[i+1];
+        const b = data.data[i+2];
+        const a = data.data[i+3];
+        if(a===0) continue;
+        const max = Math.max(r,g,b);
+        const min = Math.min(r,g,b);
+        const spread = max - min;
+        if(max <= 10){
+          data.data[i+3] = 0;
+        }else if(max <= 22 && spread <= 10){
+          data.data[i+3] = Math.round(a * (max / 22));
+        }
+      }
+      ctx.putImageData(data,0,0);
+      TRANSPARENT_SHEET_CACHE[src] = canvas.toDataURL('image/png');
+      TRANSPARENT_SHEET_PENDING.delete(src);
+      rerenderVisiblePortraits();
+    }catch(err){
+      TRANSPARENT_SHEET_PENDING.delete(src);
+      console.warn('Transparent sheet build failed:', src, err);
+    }
+  };
+  img.onerror = () => {
+    TRANSPARENT_SHEET_PENDING.delete(src);
+  };
+  img.src = src;
+}
+
+function getPortraitSheetUrl(src){
+  if(!src) return '';
+  buildTransparentSheet(src);
+  return TRANSPARENT_SHEET_CACHE[src] || `${src}?v=1`;
+}
+
 function getPlayerModelPool(base, age=playerAppearance.age){
   if(age==='veteran') return OFFICER_SHEET_POOLS.mid[base] || OFFICER_SHEET_POOLS.mid.male;
   return OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
@@ -7109,7 +7181,7 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
     const row = Math.floor(idx / cols);
     const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
     const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
-    return `<span class="portrait-photo-sheet ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>`;
+    return `<span class="portrait-photo-sheet ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${getPortraitSheetUrl(cfg.portraitSheet)}');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>`;
   }
   if(cfg.portraitAsset){
     return `<img class="portrait-photo ${variant}" style="${visualStyle}" src="${cfg.portraitAsset}?v=1" alt="">`;
