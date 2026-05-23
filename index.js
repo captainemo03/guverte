@@ -7137,7 +7137,8 @@ async function openPlayerCamera(){
 
 function loadPlayerReferencePhoto(dataUrl){
   playerReferencePhoto = dataUrl;
-  refreshPlayerStyledFacePhoto(renderPortraitTargets);
+  renderPortraitTargets();
+  applyPhotoAutoSuggestion(true);
 }
 
 function handlePlayerPhotoInput(ev){
@@ -7204,9 +7205,9 @@ function nearestPaletteColor(rgb, palette){
   return best;
 }
 
-function applyPhotoAutoSuggestion(){
+function applyPhotoAutoSuggestion(silent=false){
   if(!playerReferencePhoto){
-    showNotif('ℹ️','Referans Gerekli','Önce bir fotoğraf yükle ya da kameradan çek.');
+    if(!silent) showNotif('ℹ️','Referans Gerekli','Önce bir fotoğraf yükle ya da kameradan çek.');
     return;
   }
   const img = new Image();
@@ -7240,8 +7241,12 @@ function applyPhotoAutoSuggestion(){
       else playerAppearance.model = 0;
     }
     playerAppearance.face = (skinSample.r - skinSample.b > 40) ? 'soft' : 'sharp';
-    refreshPlayerStyledFacePhoto(renderCharacterCreator);
-    showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
+    renderPortraitTargets();
+    if(!silent) showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
+    const status = document.getElementById('creator-photo-status');
+    if(status){
+      status.textContent = 'Referans foto karaktere uygulandı. İstersen seçimleri üstünden ince ayar yapabilirsin.';
+    }
   };
   img.src = playerReferencePhoto;
 }
