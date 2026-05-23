@@ -4030,6 +4030,20 @@ const PLAYER_LOOK = {
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 let playerReferencePhoto = '';
 let playerCameraStream = null;
+const PLAYER_PHOTO_MODELS = {
+  male:{
+    0:{sheetIndex:0,label:'Atlas',hair:'quiff',beard:'trim',face:'sharp',hairColor:'#1e1612'},
+    2:{sheetIndex:2,label:'Kuzey',hair:'slick',beard:'clean',face:'sharp',hairColor:'#1e1612'},
+    4:{sheetIndex:4,label:'Mert',hair:'swept',beard:'clean',face:'soft',hairColor:'#6a4b35'},
+    6:{sheetIndex:6,label:'Baran',hair:'curly',beard:'full',face:'sharp',hairColor:'#1e1612'}
+  },
+  female:{
+    1:{sheetIndex:1,label:'Lina',hair:'bun',beard:'clean',face:'soft',hairColor:'#6a4b35'},
+    3:{sheetIndex:3,label:'Alya',hair:'slick',beard:'clean',face:'sharp',hairColor:'#1e1612'},
+    5:{sheetIndex:5,label:'Deniz',hair:'waves',beard:'clean',face:'soft',hairColor:'#1e1612'},
+    7:{sheetIndex:7,label:'Ece',hair:'bob',beard:'clean',face:'sharp',hairColor:'#6a4b35'}
+  }
+};
 const crewPortraits = {};
 const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu','büşra','gizem','damla','sibel','gül','eda','esra','nisa','naz','sude'];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
@@ -4056,20 +4070,7 @@ function inferPortraitBase(def={}){
   const firstName = tokens[0] || '';
   return FEMALE_NAME_LOOKUP.has(firstName) ? 'female' : 'male';
 }
-const PLAYER_MODEL_PRESETS = {
-  male: {
-    0:{hair:'quiff', beard:'trim', face:'soft', hairColor:'#1e1612'},
-    2:{hair:'crop', beard:'clean', face:'sharp', hairColor:'#202735'},
-    4:{hair:'swept', beard:'clean', face:'soft', hairColor:'#6a4b35'},
-    6:{hair:'curly', beard:'full', face:'sharp', hairColor:'#1e1612'}
-  },
-  female: {
-    1:{hair:'bun', beard:'clean', face:'soft', hairColor:'#6a4b35'},
-    3:{hair:'slick', beard:'clean', face:'sharp', hairColor:'#1e1612'},
-    5:{hair:'waves', beard:'clean', face:'soft', hairColor:'#1e1612'},
-    7:{hair:'bob', beard:'clean', face:'sharp', hairColor:'#6a4b35'}
-  }
-};
+const PLAYER_MODEL_PRESETS = PLAYER_PHOTO_MODELS;
 
 function portraitStripeCount(role){
   if(/süvari|suvari/i.test(role||'')) return 4;
@@ -6880,6 +6881,7 @@ function getPlayerPortraitConfig(){
     duty:{suitColor:'#223244', shirtColor:'#eef1f4', tieColor:'#16202b', stripes:1}
   };
   const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
+  const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[playerAppearance.model] || {};
   return {
     skin:playerAppearance.skin,
     base:playerAppearance.base,
@@ -6894,12 +6896,14 @@ function getPlayerPortraitConfig(){
     shirtColor:uniform.shirtColor,
     tieColor:uniform.tieColor,
     stripes:uniform.stripes,
+    portraitSheet:'assets/crew-portraits.png',
+    sheetIndex:modelMeta.sheetIndex,
     bg:'bridge'
   };
 }
 
 function getPlayerModelPool(base){
-  return base==='female' ? [1,3,5,7] : [0,2,4,6];
+  return Object.keys(PLAYER_PHOTO_MODELS[base] || {}).map(Number);
 }
 
 function syncPlayerAppearanceFromModel(){
@@ -6920,9 +6924,9 @@ function resolvePlayerModelFromTraits(){
     return playerAppearance.hairColor==='#6a4b35' ? 1 : 5;
   }
   if(playerAppearance.beard==='full') return 6;
-  if(playerAppearance.hair==='crop' || playerAppearance.face==='sharp') return 2;
+  if(playerAppearance.hair==='crop' || playerAppearance.hair==='slick' || playerAppearance.face==='sharp') return 2;
   if(playerAppearance.hairColor==='#6a4b35') return 4;
-  return playerAppearance.beard==='trim' ? 0 : 2;
+  return playerAppearance.beard==='trim' ? 0 : 4;
 }
 
 function setPlayerBase(base){
@@ -6960,6 +6964,14 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
   const contrast = [1,1.04,1.08][uniformIdx] || 1;
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
+  if(cfg.portraitSheet){
+    const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
+    const col = idx % 4;
+    const row = Math.floor(idx / 4);
+    const x = [0,33.333,66.666,100][col] ?? 0;
+    const y = row===0 ? 0 : 100;
+    return `<span class="portrait-photo-sheet ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');${visualStyle}"></span>`;
+  }
   if(cfg.portraitAsset){
     return `<img class="portrait-photo ${variant}" style="${visualStyle}" src="${cfg.portraitAsset}?v=1" alt="">`;
   }
@@ -7105,17 +7117,25 @@ function applyPhotoAutoSuggestion(){
     const hairSides = sampleRegion(cx,96,96,0.08,0.16,0.92,0.42);
     playerAppearance.skin = nearestPaletteColor(skinSample, PLAYER_LOOK.skin);
     playerAppearance.hairColor = nearestPaletteColor(hairTop, PLAYER_LOOK.hairColor);
+    const skinBrightness = (skinSample.r + skinSample.g + skinSample.b) / 3;
     if(playerAppearance.base==='female'){
-      playerAppearance.hair = hairSides.darkRatio > 0.38 ? 'longwave' : (hairTop.darkRatio > 0.46 ? 'bun' : 'bob');
+      playerAppearance.hair = hairSides.darkRatio > 0.38 ? 'waves' : (hairTop.darkRatio > 0.46 ? 'bun' : 'bob');
       playerAppearance.beard = 'clean';
+      if(skinBrightness > 185 && hairTop.darkRatio < 0.32) playerAppearance.model = 1;
+      else if(playerAppearance.hair === 'bob') playerAppearance.model = 7;
+      else if(hairTop.darkRatio > 0.44) playerAppearance.model = 3;
+      else playerAppearance.model = 5;
     }else{
-      if(hairSides.darkRatio < 0.18) playerAppearance.hair = 'fade';
+      if(hairSides.darkRatio < 0.18) playerAppearance.hair = 'slick';
       else if(hairTop.darkRatio > 0.5 && hairSides.darkRatio > 0.28) playerAppearance.hair = 'curly';
       else if(hairTop.darkRatio > 0.36) playerAppearance.hair = 'quiff';
-      else playerAppearance.hair = 'slick';
+      else playerAppearance.hair = 'swept';
+      if(playerAppearance.hair === 'curly') playerAppearance.model = 6;
+      else if(playerAppearance.hair === 'slick') playerAppearance.model = 2;
+      else if(skinBrightness > 176 || playerAppearance.hairColor === '#6a4b35') playerAppearance.model = 4;
+      else playerAppearance.model = 0;
     }
     playerAppearance.face = (skinSample.r - skinSample.b > 40) ? 'soft' : 'sharp';
-    playerAppearance.model = resolvePlayerModelFromTraits();
     renderCharacterCreator();
     showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
   };
@@ -7172,7 +7192,9 @@ function renderCreatorRow(elId, values, selected, kind){
     b.type='button';
     b.className='creator-chip'+(v===selected?' active':'')+(kind==='swatch'?' swatch':'')+(kind==='text'?' compact':'');
     if(kind==='swatch') b.innerHTML=`<span style="background:${v};"></span>`;
-    else b.textContent = ({
+    else{
+      const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[Number(v)];
+      b.textContent = modelMeta?.label || ({
       male:'Erkek',
       female:'Kadın',
       0:'Model 1',
@@ -7202,6 +7224,7 @@ function renderCreatorRow(elId, values, selected, kind){
       dress:'Tören',
       duty:'Görev'
     }[v]||v);
+    }
     b.onclick=()=>{
       if(elId==='creator-skin') playerAppearance.skin=v;
       else if(elId==='creator-base') setPlayerBase(v);
@@ -7223,7 +7246,7 @@ function renderCharacterCreator(){
   const modelPool = getPlayerModelPool(playerAppearance.base).map(String);
   const hairPool = playerAppearance.base==='female'
     ? ['bun','slick','waves','bob']
-    : ['quiff','crop','swept','curly'];
+    : ['quiff','slick','swept','curly'];
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-model', modelPool, String(playerAppearance.model), 'text');
