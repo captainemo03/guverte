@@ -8796,7 +8796,7 @@ function renderScene(idx){
     // Henüz son değilse atla, yoksa göster
   }
 
-  const c=CREW[sc.who]||CREW.anlatici;
+  const c=getCrewDisplay(sc.who);
   document.getElementById('dbd').textContent=sc.day;
   document.getElementById('tbd').textContent=sc.time;
   document.getElementById('lbd').textContent=sc.loc;
@@ -9210,6 +9210,15 @@ function getCrewKeyFromWho(who){
     z3:'z3', carkci:'carkci', bas2:'bas2'
   };
   return map[who] || null;
+}
+
+function getCrewDisplay(who){
+  const key = getCrewKeyFromWho(who);
+  if(key && CREW_DEFS[key]){
+    const def = CREW_DEFS[key];
+    return {name:def.name, icon:def.icon, title:def.title};
+  }
+  return CREW[who] || CREW.anlatici;
 }
 
 function renderCrewCards(){
