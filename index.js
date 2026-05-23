@@ -7134,16 +7134,7 @@ function renderSpeechPortrait(cfg){
   const slot = document.getElementById('speechchar');
   if(slot){
     const safeCfg = cfg || getPlayerPortraitConfig();
-    const base = safeCfg.base || 'male';
-    const roleClass = safeCfg.portraitAsset ? 'role-photo' : 'role-sprite';
-    slot.innerHTML = `
-      ${renderPortraitSprite(safeCfg, 'story')}
-      <div class="speech-facefx ${roleClass}" data-base="${base}">
-        <span class="speech-eye speech-eye-left"></span>
-        <span class="speech-eye speech-eye-right"></span>
-        <span class="speech-mouth"></span>
-      </div>
-    `;
+    slot.innerHTML = renderPortraitSprite(safeCfg, 'story');
   }
 }
 
