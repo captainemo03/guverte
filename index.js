@@ -4049,7 +4049,14 @@ const PLAYER_PHOTO_MODELS = {
   }
 };
 const crewPortraits = {};
-const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu','büşra','gizem','damla','sibel','gül','eda','esra','nisa','naz','sude'];
+const FEMALE_NAME_MARKERS = [
+  'serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yagmur','zeynep',
+  'nermin','pinar','ayse','aylin','burcu','eylul','sevim','dilek','merve','cansu','busra','gizem','damla',
+  'sibel','gul','eda','esra','nisa','naz','sude','nilay','melda','funda','umay','alara','idil','lara','seda',
+  'nehir','isil','duru','ceyda','ayca','selinay','bade','ceren','ilayda','buse','mina','pelin','ada','asli',
+  'ebru','hande','meltem','figen','sevda','humeyra','hulya','gulsah','meryem','berrin','ceylin','beste',
+  'koral','deniz'
+];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
 const NAME_STOPWORDS = new Set(['kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3']);
 
@@ -4066,6 +4073,9 @@ function normalizeTrAscii(v=''){
 }
 
 function inferPortraitBase(def={}){
+  const normalizedName = normalizeTrAscii(def.name || '');
+  if(/\bhanim\b/.test(normalizedName)) return 'female';
+  if(/\bbey\b/.test(normalizedName)) return 'male';
   const tokens = normalizeTrAscii(def.name || '')
     .split(/\s+/)
     .map(t => t.replace(/[^\w.]/g,''))
