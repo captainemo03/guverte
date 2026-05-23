@@ -9077,10 +9077,10 @@ const CREW_DEFS = {
 };
 
 const CREW_NAME_POOLS = {
-  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda","Kaptan Barış","Kaptan Pınar","Kaptan Cem","Kaptan Derya","Kaptan Büşra","Kaptan Erhan","Kaptan Nilay","Kaptan Kaan","Kaptan Melda","Kaptan Tolga","Kaptan Aylin","Kaptan Can","Kaptan Funda","Kaptan Kerem"],
-  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora","1. Zabit Deniz","1. Zabit Esra","1. Zabit Koral","1. Zabit Merve","1. Zabit Emre","1. Zabit Nisa","1. Zabit Burcu","1. Zabit Alp","1. Zabit İdil","1. Zabit Rüzgar","1. Zabit Lara","1. Zabit Sarp","1. Zabit Seda","1. Zabit Umut"],
-  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran","2. Zabit Damla","2. Zabit Can","2. Zabit Sude","2. Zabit Oğuz","2. Zabit Eda","2. Zabit Yiğit","2. Zabit Ceyda","2. Zabit Mirza","2. Zabit Ayça","2. Zabit Eren","2. Zabit Nehir","2. Zabit Mert","2. Zabit Selinay","2. Zabit Aras"],
-  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep","3. Zabit Ceren","3. Zabit Burak","3. Zabit Naz","3. Zabit Hazar","3. Zabit Gizem","3. Zabit Ulaş","3. Zabit Defne","3. Zabit Ekin","3. Zabit Yağız","3. Zabit İlayda","3. Zabit Tuna","3. Zabit Buse","3. Zabit Doruk","3. Zabit Mina"],
+  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda","Kaptan Barış","Kaptan Pınar","Kaptan Cem","Kaptan Derya","Kaptan Büşra","Kaptan Erhan","Kaptan Nilay","Kaptan Kaan","Kaptan Melda","Kaptan Tolga","Kaptan Aylin","Kaptan Can","Kaptan Funda","Kaptan Kerem","Kaptan Elif","Kaptan Umay","Kaptan Ekin","Kaptan Sinan","Kaptan Alara","Kaptan Ozan"],
+  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora","1. Zabit Deniz","1. Zabit Esra","1. Zabit Koral","1. Zabit Merve","1. Zabit Emre","1. Zabit Nisa","1. Zabit Burcu","1. Zabit Alp","1. Zabit İdil","1. Zabit Rüzgar","1. Zabit Lara","1. Zabit Sarp","1. Zabit Seda","1. Zabit Umut","1. Zabit Nehir","1. Zabit Işıl","1. Zabit Doruk","1. Zabit Duru"],
+  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran","2. Zabit Damla","2. Zabit Can","2. Zabit Sude","2. Zabit Oğuz","2. Zabit Eda","2. Zabit Yiğit","2. Zabit Ceyda","2. Zabit Mirza","2. Zabit Ayça","2. Zabit Eren","2. Zabit Nehir","2. Zabit Mert","2. Zabit Selinay","2. Zabit Aras","2. Zabit Bade","2. Zabit Kuzey","2. Zabit Beste","2. Zabit Batu"],
+  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep","3. Zabit Ceren","3. Zabit Burak","3. Zabit Naz","3. Zabit Hazar","3. Zabit Gizem","3. Zabit Ulaş","3. Zabit Defne","3. Zabit Ekin","3. Zabit Yağız","3. Zabit İlayda","3. Zabit Tuna","3. Zabit Buse","3. Zabit Doruk","3. Zabit Mina","3. Zabit Pelin","3. Zabit Arin","3. Zabit Ateş","3. Zabit Ada"],
   carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Ayşe","Baş Mühendis Nermin","Baş Mühendis Pınar","Baş Mühendis Serkan","Baş Mühendis Büşra","Baş Mühendis Murat","Baş Mühendis Dilek","Baş Mühendis Cenk","Baş Mühendis Fırat","Baş Mühendis Aslı","Baş Mühendis Volkan","Baş Mühendis Ebru","Baş Mühendis Orkun"],
   bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Aylin","2. Mühendis Burcu","2. Mühendis Eylül","2. Mühendis Kıvanç","2. Mühendis Esra","2. Mühendis Levent","2. Mühendis Gizem","2. Mühendis Deniz","2. Mühendis Koray","2. Mühendis Yağmur","2. Mühendis Tarık","2. Mühendis Cansu","2. Mühendis Hande"],
   lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Sibel","Lostromo Gül","Lostromo Eda","Lostromo Yusuf","Lostromo Büşra","Lostromo Cihan","Lostromo Derya","Lostromo Şahin","Lostromo Aykut","Lostromo Meltem","Lostromo Figen","Lostromo Taner","Lostromo Hakan"],
@@ -9113,6 +9113,7 @@ function makeCrewPortrait(key, def){
     return {
       __roleKey:key,
       __base:base,
+      __name:def.name || '',
       portraitSheet:supportSheet,
       sheetCols:3,
       sheetRows:2,
@@ -9131,6 +9132,7 @@ function makeCrewPortrait(key, def){
   return {
     __roleKey:key,
     __base:base,
+    __name:def.name || '',
     skin: pickRandom(PLAYER_LOOK.skin),
     base,
     age,
@@ -9154,9 +9156,16 @@ function makeCrewPortrait(key, def){
 
 function getCrewPortraitForKey(key){
   if(!CREW_DEFS[key]) return null;
+  const def = CREW_DEFS[key];
   const current = crewPortraits[key];
-  if(!current || current.__roleKey !== key){
-    crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]);
+  const nextBase = inferPortraitBase(def);
+  if(
+    !current ||
+    current.__roleKey !== key ||
+    current.__base !== nextBase ||
+    current.__name !== (def.name || '')
+  ){
+    crewPortraits[key] = makeCrewPortrait(key, def);
   }
   return crewPortraits[key];
 }
