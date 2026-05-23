@@ -6993,10 +6993,10 @@ function buildTransparentSheet(src){
         const max = Math.max(r,g,b);
         const min = Math.min(r,g,b);
         const spread = max - min;
-        if(max <= 10){
+        if(max <= 34){
           data.data[i+3] = 0;
-        }else if(max <= 22 && spread <= 10){
-          data.data[i+3] = Math.round(a * (max / 22));
+        }else if(max <= 54 && spread <= 18){
+          data.data[i+3] = Math.round(a * ((max - 34) / 20));
         }
       }
       ctx.putImageData(data,0,0);
