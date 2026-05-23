@@ -196,6 +196,8 @@ input[type=text]::placeholder{color:var(--text3);}
 #replyavatar .portrait-composite.avatar{width:42px;height:42px;}
 #replyname{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#f0d28a;font-family:'Share Tech Mono',monospace;margin-bottom:4px;}
 #replytext{font-family:'Crimson Pro',serif;font-size:13px;line-height:1.7;color:#f3ead0;white-space:pre-line;}
+#replystage.live #replybubble{animation:replyBubbleIn .28s ease;}
+#replystage.live #replyavatar{animation:replyAvatarIn .28s ease;}
 #text{position:relative;z-index:2;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-line;min-height:100px;}
 #text.typing::after{content:"";display:inline-block;width:7px;height:15px;margin-left:4px;border-radius:2px;background:rgba(207,234,255,.85);vertical-align:-2px;animation:typingCursor .75s ease-in-out infinite;}
 
@@ -305,6 +307,8 @@ input[type=text]::placeholder{color:var(--text3);}
 @keyframes speakerNod{0%{transform:translateY(4px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
 @keyframes textReveal{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
 @keyframes choiceRise{0%{opacity:0;transform:translateY(10px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes replyBubbleIn{0%{opacity:0;transform:translateY(8px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes replyAvatarIn{0%{opacity:0;transform:translateY(10px) scale(.92);}100%{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes seaBreath{0%,100%{opacity:.18;transform:translateX(-8px) translateY(0);}50%{opacity:.32;transform:translateX(10px) translateY(-2px);}}
 @keyframes nightTwinkle{0%,100%{opacity:.1;transform:translateY(0);}50%{opacity:.28;transform:translateY(-3px);}}
 @keyframes harborGlow{0%,100%{opacity:.16;transform:translateX(0);}50%{opacity:.34;transform:translateX(8px);}}

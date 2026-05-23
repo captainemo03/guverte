@@ -3195,7 +3195,7 @@ choices:[
 {text:"Ayni deniz ayni denizdir diye dusunurum",tag:"korkak",effect:{bilgi:-9,sayginlik:-8}}]},
 
 {id:"s183",gfx:"galley",alert:false,day:"Gun 13",time:"20:10",loc:"Yemekhane",sub:"Sessiz cay molasi",who:"asci",
-text:`Aksam yemegi dagildiktan sonra ortalik ilk kez sakinledi. Asci onune ince belli bardakta cay koydu.
+text:`Aksam yemegi yenildikten sonra ortalik ilk kez sakinledi. Asci onune ince belli bardakta cay koydu.
 
 "Bugun herkes yoruldu. Bazen gemide en buyuk luks, kimsenin senden bir sey istemedigi on dakikadir."
 
@@ -7384,7 +7384,10 @@ function hideReplyBubble(){
   const stage = document.getElementById('replystage');
   const text = document.getElementById('replytext');
   const name = document.getElementById('replyname');
-  if(stage) stage.classList.add('hidden');
+  if(stage){
+    stage.classList.add('hidden');
+    stage.classList.remove('live');
+  }
   if(text) text.textContent = '';
   if(name) name.textContent = pn || 'Stajyer';
 }
@@ -7397,7 +7400,12 @@ function showReplyBubble(text){
   if(name) name.textContent = pn || 'Stajyer';
   if(body) body.textContent = String(text || '');
   if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'avatar');
-  if(stage) stage.classList.remove('hidden');
+  if(stage){
+    stage.classList.remove('hidden');
+    stage.classList.remove('live');
+    void stage.offsetWidth;
+    stage.classList.add('live');
+  }
 }
 
 let speechTypingTimer = null;
