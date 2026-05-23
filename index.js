@@ -4020,8 +4020,9 @@ const PLAYER_LOOK = {
   skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
   base:['male','female'],
   model:['0','1','2','3'],
-  age:['young','mid'],
+  age:['young','mid','veteran'],
   pose:['front','angled','command'],
+  scene:['opensea','harbor','night','strait','storm'],
   face:['soft','sharp'],
   hair:['short','swept','waves','crop','parted','slick','bob','quiff','curly','bun'],
   beard:['clean','trim','full'],
@@ -4029,7 +4030,7 @@ const PLAYER_LOOK = {
   eye:['#3f2c22','#496b8d','#577149','#697089'],
   uniform:['classic','dress','duty']
 };
-let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
+let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',scene:'opensea',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 let playerReferencePhoto = '';
 let playerCameraStream = null;
 const PLAYER_PHOTO_MODELS = {
@@ -6884,7 +6885,11 @@ function getPlayerPortraitConfig(){
   };
   const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
   const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[playerAppearance.model] || {};
-  const portraitSheet = playerAppearance.age === 'mid' ? 'assets/crew-portraits-alt.png' : 'assets/crew-portraits.png';
+  const portraitSheet = playerAppearance.age === 'mid'
+    ? 'assets/crew-portraits-alt.png'
+    : playerAppearance.age === 'veteran'
+      ? 'assets/crew-portraits-veteran.png'
+      : 'assets/crew-portraits.png';
   return {
     skin:playerAppearance.skin,
     base:playerAppearance.base,
@@ -6897,6 +6902,7 @@ function getPlayerPortraitConfig(){
     uniform:playerAppearance.uniform,
     age:playerAppearance.age,
     pose:playerAppearance.pose,
+    scene:playerAppearance.scene,
     suitColor:uniform.suitColor,
     shirtColor:uniform.shirtColor,
     tieColor:uniform.tieColor,
@@ -6908,6 +6914,7 @@ function getPlayerPortraitConfig(){
 }
 
 function getPlayerModelPool(base, age=playerAppearance.age){
+  if(age==='veteran') return base==='female' ? [1,3,5,7] : [0,2,4,6];
   if(base==='female') return age==='mid' ? [5,7] : [1,3];
   return age==='mid' ? [4,6] : [0,2];
 }
@@ -6924,10 +6931,22 @@ function syncPlayerAppearanceFromModel(){
 
 function resolvePlayerModelFromTraits(){
   if(playerAppearance.base==='female'){
+    if(playerAppearance.age==='veteran'){
+      if(playerAppearance.hair==='bob') return 7;
+      if(playerAppearance.face==='sharp' || playerAppearance.hair==='slick') return 3;
+      if(playerAppearance.hair==='bun') return 1;
+      return 5;
+    }
     if(playerAppearance.age==='mid'){
       return (playerAppearance.hair==='bob' || playerAppearance.face==='sharp') ? 7 : 5;
     }
     return (playerAppearance.hair==='slick' || playerAppearance.face==='sharp') ? 3 : 1;
+  }
+  if(playerAppearance.age==='veteran'){
+    if(playerAppearance.beard==='full') return 6;
+    if(playerAppearance.hair==='slick' || playerAppearance.face==='sharp') return 2;
+    if(playerAppearance.hairColor==='#6a4b35') return 4;
+    return 0;
   }
   if(playerAppearance.age==='mid'){
     return (playerAppearance.beard==='full' || playerAppearance.hairColor==='#6a4b35') ? 6 : 4;
@@ -6992,12 +7011,13 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
 function renderPortraitTargets(){
   const avatar=document.getElementById('avatar');
   const preview=document.getElementById('creator-preview');
-  if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'avatar');
+  const portraitCfg = getPlayerPortraitConfig();
+  if(avatar) avatar.innerHTML = renderPortraitSprite(portraitCfg,'avatar');
   if(preview){
     const ref = playerReferencePhoto
       ? `<div class="creator-ref-thumb"><img src="${playerReferencePhoto}" alt="Referans foto"><div class="creator-ref-badge">Referans</div></div>`
       : '';
-    preview.innerHTML = `<div class="creator-preview-stage">${renderPortraitSprite(getPlayerPortraitConfig(),'preview')}${ref}</div>`;
+    preview.innerHTML = `<div class="creator-preview-stage scene-${portraitCfg.scene||'opensea'}">${renderPortraitSprite(portraitCfg,'preview')}${ref}</div>`;
   }
   const status = document.getElementById('creator-photo-status');
   if(status){
@@ -7205,9 +7225,15 @@ function renderCreatorRow(elId, values, selected, kind){
       female:'Kadın',
       young:'Genc',
       mid:'Orta Yas',
+      veteran:'Kidemli',
       front:'Duz',
       angled:'3/4',
       command:'Komut',
+      opensea:'Acik Deniz',
+      harbor:'Liman',
+      night:'Gece',
+      strait:'Bogaz',
+      storm:'Firtina',
       0:'Model 1',
       1:'Model 1',
       2:'Model 2',
@@ -7241,6 +7267,7 @@ function renderCreatorRow(elId, values, selected, kind){
       else if(elId==='creator-base') setPlayerBase(v);
       else if(elId==='creator-age'){ playerAppearance.age=v; playerAppearance.model = getPlayerModelPool(playerAppearance.base, playerAppearance.age)[0]; syncPlayerAppearanceFromModel(); }
       else if(elId==='creator-pose') playerAppearance.pose=v;
+      else if(elId==='creator-scene') playerAppearance.scene=v;
       else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
       else if(elId==='creator-face'){ playerAppearance.face=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
       else if(elId==='creator-hair'){ playerAppearance.hair=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
@@ -7264,6 +7291,7 @@ function renderCharacterCreator(){
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-age', PLAYER_LOOK.age, playerAppearance.age, 'text');
   renderCreatorRow('creator-pose', PLAYER_LOOK.pose, playerAppearance.pose, 'text');
+  renderCreatorRow('creator-scene', PLAYER_LOOK.scene, playerAppearance.scene, 'text');
   renderCreatorRow('creator-model', modelPool, String(playerAppearance.model), 'text');
   renderCreatorRow('creator-face', PLAYER_LOOK.face, playerAppearance.face, 'text');
   renderCreatorRow('creator-hair', hairPool, playerAppearance.hair, 'text');
@@ -8976,18 +9004,18 @@ const CREW_DEFS = {
 };
 
 const CREW_NAME_POOLS = {
-  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda","Kaptan Barış","Kaptan Pınar","Kaptan Cem","Kaptan Derya","Kaptan Büşra","Kaptan Erhan"],
-  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora","1. Zabit Deniz","1. Zabit Esra","1. Zabit Koral","1. Zabit Merve","1. Zabit Emre","1. Zabit Nisa"],
-  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran","2. Zabit Damla","2. Zabit Can","2. Zabit Sude","2. Zabit Oğuz","2. Zabit Eda","2. Zabit Yiğit"],
-  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep","3. Zabit Ceren","3. Zabit Burak","3. Zabit Naz","3. Zabit Hazar","3. Zabit Gizem","3. Zabit Ulaş"],
-  carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Ayşe","Baş Mühendis Nermin","Baş Mühendis Pınar","Baş Mühendis Serkan","Baş Mühendis Büşra","Baş Mühendis Murat","Baş Mühendis Dilek"],
-  bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Aylin","2. Mühendis Burcu","2. Mühendis Eylül","2. Mühendis Kıvanç","2. Mühendis Esra","2. Mühendis Levent","2. Mühendis Gizem"],
-  lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Sibel","Lostromo Gül","Lostromo Eda","Lostromo Yusuf","Lostromo Büşra","Lostromo Cihan","Lostromo Derya"],
-  lostromo2:["Silici Ramazan","Silici Ali","Silici Furkan","Silici Merve","Silici Cansu","Silici Gizem","Silici Tahir","Silici Damla","Silici Kadir","Silici Eda"],
-  yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan","Yağcı Barış","Yağcı Nisa","Yağcı Sarp","Yağcı Büşra"],
-  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Sevim Hanım","Aşçı Dilek Hanım","Aşçı Elif Hanım","Aşçı Hülya Hanım","Aşçı Kemal Usta","Aşçı Sude Hanım","Aşçı Murat Usta"],
-  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf","Tayfa Merve","Tayfa Koral","Tayfa Cansu","Tayfa Uğur"],
-  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa"]
+  suvari:["Kaptan Serra","Kaptan Leyla","Kaptan Murat","Kaptan Defne","Kaptan Onur","Kaptan Selda","Kaptan Barış","Kaptan Pınar","Kaptan Cem","Kaptan Derya","Kaptan Büşra","Kaptan Erhan","Kaptan Nilay","Kaptan Kaan","Kaptan Melda","Kaptan Tolga","Kaptan Aylin","Kaptan Can","Kaptan Funda","Kaptan Kerem"],
+  z1:["1. Zabit Ece","1. Zabit Arda","1. Zabit Melis","1. Zabit Cem","1. Zabit Selen","1. Zabit Bora","1. Zabit Deniz","1. Zabit Esra","1. Zabit Koral","1. Zabit Merve","1. Zabit Emre","1. Zabit Nisa","1. Zabit Burcu","1. Zabit Alp","1. Zabit İdil","1. Zabit Rüzgar","1. Zabit Lara","1. Zabit Sarp","1. Zabit Seda","1. Zabit Umut"],
+  z2:["2. Zabit Derya","2. Zabit Emre","2. Zabit İpek","2. Zabit Kerem","2. Zabit Nil","2. Zabit Baran","2. Zabit Damla","2. Zabit Can","2. Zabit Sude","2. Zabit Oğuz","2. Zabit Eda","2. Zabit Yiğit","2. Zabit Ceyda","2. Zabit Mirza","2. Zabit Ayça","2. Zabit Eren","2. Zabit Nehir","2. Zabit Mert","2. Zabit Selinay","2. Zabit Aras"],
+  z3:["3. Zabit Selin","3. Zabit Elif","3. Zabit Mert","3. Zabit Yağmur","3. Zabit Kaan","3. Zabit Zeynep","3. Zabit Ceren","3. Zabit Burak","3. Zabit Naz","3. Zabit Hazar","3. Zabit Gizem","3. Zabit Ulaş","3. Zabit Defne","3. Zabit Ekin","3. Zabit Yağız","3. Zabit İlayda","3. Zabit Tuna","3. Zabit Buse","3. Zabit Doruk","3. Zabit Mina"],
+  carkci:["Baş Mühendis Hakan","Baş Mühendis Tolga","Baş Mühendis Erdem","Baş Mühendis Ayşe","Baş Mühendis Nermin","Baş Mühendis Pınar","Baş Mühendis Serkan","Baş Mühendis Büşra","Baş Mühendis Murat","Baş Mühendis Dilek","Baş Mühendis Cenk","Baş Mühendis Fırat","Baş Mühendis Aslı","Baş Mühendis Volkan","Baş Mühendis Ebru","Baş Mühendis Orkun"],
+  bas2:["2. Mühendis Emrah","2. Mühendis Ozan","2. Mühendis Burak","2. Mühendis Aylin","2. Mühendis Burcu","2. Mühendis Eylül","2. Mühendis Kıvanç","2. Mühendis Esra","2. Mühendis Levent","2. Mühendis Gizem","2. Mühendis Deniz","2. Mühendis Koray","2. Mühendis Yağmur","2. Mühendis Tarık","2. Mühendis Cansu","2. Mühendis Hande"],
+  lostromo:["Lostromo İbrahim","Lostromo Kemal","Lostromo Erhan","Lostromo Sibel","Lostromo Gül","Lostromo Eda","Lostromo Yusuf","Lostromo Büşra","Lostromo Cihan","Lostromo Derya","Lostromo Şahin","Lostromo Aykut","Lostromo Meltem","Lostromo Figen","Lostromo Taner","Lostromo Hakan"],
+  lostromo2:["Silici Ramazan","Silici Ali","Silici Furkan","Silici Merve","Silici Cansu","Silici Gizem","Silici Tahir","Silici Damla","Silici Kadir","Silici Eda","Silici Mehmet","Silici Pelin","Silici Okan","Silici Sevda","Silici Burçin","Silici Harun"],
+  yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan","Yağcı Barış","Yağcı Nisa","Yağcı Sarp","Yağcı Büşra","Yağcı Fuat","Yağcı Hümeyra","Yağcı Onat","Yağcı Serap","Yağcı Taylan","Yağcı Ekin"],
+  asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Sevim Hanım","Aşçı Dilek Hanım","Aşçı Elif Hanım","Aşçı Hülya Hanım","Aşçı Kemal Usta","Aşçı Sude Hanım","Aşçı Murat Usta","Aşçı Gülşah Hanım","Aşçı Levent Usta","Aşçı Meryem Hanım","Aşçı Korhan Usta","Aşçı Pınar Hanım","Aşçı Burhan Usta"],
+  hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf","Tayfa Merve","Tayfa Koral","Tayfa Cansu","Tayfa Uğur","Tayfa Selçuk","Tayfa Arif","Tayfa Necla","Tayfa Soner","Tayfa Berrin","Tayfa Doğu"],
+  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa","Tayfa Alihan","Tayfa Poyraz","Tayfa Yağmur","Tayfa Ceylin","Tayfa Mertcan","Tayfa Beste"]
 };
 
 function pickRandom(list){
