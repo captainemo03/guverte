@@ -7393,8 +7393,10 @@ function showReplyBubble(text){
   const stage = document.getElementById('replystage');
   const body = document.getElementById('replytext');
   const name = document.getElementById('replyname');
+  const avatar = document.getElementById('replyavatar');
   if(name) name.textContent = pn || 'Stajyer';
   if(body) body.textContent = String(text || '');
+  if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'avatar');
   if(stage) stage.classList.remove('hidden');
 }
 

@@ -186,10 +186,14 @@ input[type=text]::placeholder{color:var(--text3);}
 #speechbubble{position:relative;min-height:132px;padding:14px 16px;border:1px solid rgba(111,168,220,.24);border-radius:18px 18px 18px 8px;background:linear-gradient(180deg, rgba(11,26,44,.97), rgba(7,19,34,.98));box-shadow:0 10px 24px rgba(0,0,0,.18);}
 #speechbubble::before{content:"";position:absolute;left:-10px;bottom:24px;width:22px;height:22px;background:linear-gradient(135deg, rgba(11,26,44,.97), rgba(7,19,34,.98));border-left:1px solid rgba(111,168,220,.24);border-bottom:1px solid rgba(111,168,220,.24);transform:rotate(45deg);}
 #speechbubble::after{content:"";position:absolute;inset:1px;border-radius:17px 17px 17px 7px;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.02), transparent 42%);}
-#replystage{display:flex;justify-content:flex-end;padding:8px 4px 0 88px;opacity:1;max-height:140px;transition:opacity .2s ease, max-height .24s ease, transform .24s ease;transform:translateY(0);}
+#replystage{display:flex;justify-content:flex-end;align-items:flex-end;gap:8px;padding:8px 4px 0 88px;opacity:1;max-height:140px;transition:opacity .2s ease, max-height .24s ease, transform .24s ease;transform:translateY(0);}
 #replystage.hidden{opacity:0;max-height:0;overflow:hidden;pointer-events:none;transform:translateY(-6px);}
 #replybubble{position:relative;max-width:82%;padding:10px 13px 11px;border:1px solid rgba(212,160,23,.28);border-radius:18px 18px 8px 18px;background:linear-gradient(180deg, rgba(36,27,7,.96), rgba(26,19,6,.98));box-shadow:0 8px 20px rgba(0,0,0,.16);}
 #replybubble::before{content:"";position:absolute;right:-10px;bottom:18px;width:22px;height:22px;background:linear-gradient(135deg, rgba(36,27,7,.96), rgba(26,19,6,.98));border-right:1px solid rgba(212,160,23,.28);border-bottom:1px solid rgba(212,160,23,.28);transform:rotate(-45deg);}
+#replyavatar{width:42px;height:42px;flex:0 0 42px;align-self:flex-end;background:rgba(9,22,36,.9);}
+#replyavatar .portrait-photo-sheet.avatar,
+#replyavatar .portrait-sprite.avatar,
+#replyavatar .portrait-composite.avatar{width:42px;height:42px;}
 #replyname{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#f0d28a;font-family:'Share Tech Mono',monospace;margin-bottom:4px;}
 #replytext{font-family:'Crimson Pro',serif;font-size:13px;line-height:1.7;color:#f3ead0;white-space:pre-line;}
 #text{position:relative;z-index:2;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-line;min-height:100px;}
