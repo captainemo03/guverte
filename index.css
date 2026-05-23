@@ -12,7 +12,7 @@ body{font-family:'Barlow',sans-serif;background:var(--navy);min-height:100vh;ove
 
 /* === CANLI ARKA PLAN === */
 #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;touch-action:none;}
-#app{width:100%;max-width:560px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;margin:0 auto;}
+#app{width:100%;max-width:620px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;margin:0 auto;}
 
 /* === GİRİŞ === */
 #intro{display:flex;flex-direction:column;align-items:center;width:100%;padding:22px 14px 60px;}
@@ -176,18 +176,24 @@ input[type=text]::placeholder{color:var(--text3);}
 #spkico svg{width:100%;height:100%;display:block;}
 #spknm{font-size:11px;font-weight:600;color:var(--gold);}
 #spktl{font-size:9px;color:var(--text3);}
-#speechstage{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;align-items:end;}
+#speechstage{display:grid;grid-template-columns:118px minmax(0,1fr) 96px;gap:12px;align-items:end;}
 #speechportrait{position:relative;height:156px;border:1px solid rgba(111,168,220,.22);border-radius:14px;background:linear-gradient(180deg, rgba(18,34,54,.92), rgba(8,19,32,.98));overflow:hidden;display:flex;align-items:flex-end;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 10px 26px rgba(0,0,0,.2);}
 #speechportrait::before,#speechportrait::after{content:none;}
 #speechchar{position:relative;z-index:2;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding-top:6px;}
+#playerstand{position:relative;height:156px;border:1px solid rgba(212,160,23,.24);border-radius:14px;background:linear-gradient(180deg, rgba(32,25,11,.84), rgba(14,11,5,.95));overflow:hidden;display:flex;align-items:flex-end;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 10px 26px rgba(0,0,0,.18);}
+#playerstand::before{content:"STAJYER";position:absolute;top:8px;right:8px;z-index:3;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#f0d28a;font-family:'Share Tech Mono',monospace;opacity:.9;}
+#playerstandchar{position:relative;z-index:2;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;padding-top:6px;}
 #speechchar .speech-facefx,
 #speechchar .speech-eye,
-#speechchar .speech-mouth{display:none !important;}
+#speechchar .speech-mouth,
+#playerstandchar .speech-facefx,
+#playerstandchar .speech-eye,
+#playerstandchar .speech-mouth{display:none !important;}
 #speechbubble{position:relative;min-height:132px;padding:14px 16px;border:1px solid rgba(111,168,220,.24);border-radius:18px 18px 18px 8px;background:linear-gradient(180deg, rgba(11,26,44,.97), rgba(7,19,34,.98));box-shadow:0 10px 24px rgba(0,0,0,.18);}
 #speechbubble::before{content:"";position:absolute;left:-10px;bottom:24px;width:22px;height:22px;background:linear-gradient(135deg, rgba(11,26,44,.97), rgba(7,19,34,.98));border-left:1px solid rgba(111,168,220,.24);border-bottom:1px solid rgba(111,168,220,.24);transform:rotate(45deg);}
 #speechbubble::after{content:"";position:absolute;inset:1px;border-radius:17px 17px 17px 7px;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.02), transparent 42%);}
-#replystage{display:flex;justify-content:flex-end;align-items:flex-end;gap:8px;padding:2px 4px 0 88px;opacity:1;max-height:180px;transition:opacity .2s ease, max-height .24s ease, transform .24s ease;transform:translateY(0);}
-#replystage.hidden{opacity:0;max-height:0;overflow:hidden;pointer-events:none;transform:translateY(-6px);}
+#replystage{display:flex;justify-content:flex-end;align-items:flex-end;gap:8px;padding:2px 0 0 120px;opacity:1;max-height:180px;transition:opacity .2s ease, max-height .24s ease, transform .24s ease;transform:translateY(0);}
+#replystage.hidden{display:none;opacity:0;max-height:0;overflow:hidden;pointer-events:none;transform:translateY(-6px);}
 #replybubble{position:relative;max-width:82%;padding:10px 13px 11px;border:1px solid rgba(212,160,23,.28);border-radius:18px 18px 8px 18px;background:linear-gradient(180deg, rgba(36,27,7,.96), rgba(26,19,6,.98));box-shadow:0 8px 20px rgba(0,0,0,.16);}
 #replybubble::before{content:"";position:absolute;right:-10px;bottom:18px;width:22px;height:22px;background:linear-gradient(135deg, rgba(36,27,7,.96), rgba(26,19,6,.98));border-right:1px solid rgba(212,160,23,.28);border-bottom:1px solid rgba(212,160,23,.28);transform:rotate(-45deg);}
 #replyavatar{width:42px;height:42px;flex:0 0 42px;align-self:flex-end;background:rgba(9,22,36,.9);}
@@ -444,8 +450,9 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes sprayPulse{0%,100%{opacity:.14;}50%{opacity:.28;}}
 
 @media(max-width:400px){
-  #speechstage{grid-template-columns:96px minmax(0,1fr);gap:10px;}
+  #speechstage{grid-template-columns:92px minmax(0,1fr) 76px;gap:10px;}
   #speechportrait{height:138px;}
+  #playerstand{height:138px;}
   .portrait-photo.story,.portrait-sprite.story{height:138px;}
   #story{min-height:228px;}
   #speechbubble{min-height:118px;padding:12px 13px;}

@@ -7378,6 +7378,10 @@ function renderSpeechPortrait(cfg){
     const safeCfg = cfg || getPlayerPortraitConfig();
     slot.innerHTML = renderPortraitSprite(safeCfg, 'story');
   }
+  const playerStand = document.getElementById('playerstandchar');
+  if(playerStand){
+    playerStand.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'story');
+  }
 }
 
 function hideReplyBubble(){
@@ -7387,6 +7391,7 @@ function hideReplyBubble(){
   if(stage){
     stage.classList.add('hidden');
     stage.classList.remove('live');
+    stage.style.display = 'none';
   }
   if(text) text.textContent = '';
   if(name) name.textContent = pn || 'Stajyer';
@@ -7401,6 +7406,7 @@ function showReplyBubble(text){
   if(body) body.textContent = String(text || '');
   if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'avatar');
   if(stage){
+    stage.style.display = 'flex';
     stage.classList.remove('hidden');
     stage.classList.remove('live');
     void stage.offsetWidth;
