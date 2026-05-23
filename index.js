@@ -4028,6 +4028,8 @@ const PLAYER_LOOK = {
   uniform:['classic','dress','duty']
 };
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
+let playerReferencePhoto = '';
+let playerCameraStream = null;
 const crewPortraits = {};
 const FEMALE_NAME_MARKERS = ['serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yağmur','zeynep','nermin','pınar','ayşe','aylin','burcu','eylül','sevim','dilek','merve','cansu','büşra','gizem','damla','sibel','gül','eda','esra','nisa','naz','sude'];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
@@ -6973,7 +6975,159 @@ function renderPortraitTargets(){
   const avatar=document.getElementById('avatar');
   const preview=document.getElementById('creator-preview');
   if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'avatar');
-  if(preview) preview.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(),'preview');
+  if(preview){
+    const ref = playerReferencePhoto
+      ? `<div class="creator-ref-thumb"><img src="${playerReferencePhoto}" alt="Referans foto"><div class="creator-ref-badge">Referans</div></div>`
+      : '';
+    preview.innerHTML = `<div class="creator-preview-stage">${renderPortraitSprite(getPlayerPortraitConfig(),'preview')}${ref}</div>`;
+  }
+  const status = document.getElementById('creator-photo-status');
+  if(status){
+    status.textContent = playerReferencePhoto
+      ? 'Referans foto yüklendi. İstersen otomatik öner ile görünüşü buna yaklaştırabiliriz.'
+      : 'İstersen bir fotoğraf yükleyip karakteri ona göre başlatabiliriz.';
+  }
+}
+
+function triggerPlayerPhotoUpload(){
+  const input = document.getElementById('player-photo-input');
+  if(input) input.click();
+}
+
+function stopPlayerCamera(){
+  if(playerCameraStream){
+    playerCameraStream.getTracks().forEach(track=>track.stop());
+    playerCameraStream = null;
+  }
+  const box = document.getElementById('creator-camera-box');
+  const video = document.getElementById('creator-camera');
+  if(video) video.srcObject = null;
+  if(box) box.style.display = 'none';
+}
+
+async function openPlayerCamera(){
+  try{
+    stopPlayerCamera();
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false});
+    playerCameraStream = stream;
+    const box = document.getElementById('creator-camera-box');
+    const video = document.getElementById('creator-camera');
+    if(video) video.srcObject = stream;
+    if(box) box.style.display = 'block';
+  }catch(err){
+    showNotif('📷','Kamera Açılamadı','Tarayıcı kamera izni vermedi ya da kamera kullanılamıyor.');
+  }
+}
+
+function loadPlayerReferencePhoto(dataUrl){
+  playerReferencePhoto = dataUrl;
+  renderPortraitTargets();
+}
+
+function handlePlayerPhotoInput(ev){
+  const file = ev?.target?.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    loadPlayerReferencePhoto(String(reader.result || ''));
+    showNotif('🖼️','Fotoğraf Alındı','Referans foto yüklendi. İstersen otomatik öneriyi çalıştır.');
+  };
+  reader.readAsDataURL(file);
+}
+
+function capturePlayerCamera(){
+  const video = document.getElementById('creator-camera');
+  if(!video || !video.videoWidth || !video.videoHeight) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const cx = canvas.getContext('2d');
+  cx.drawImage(video,0,0);
+  loadPlayerReferencePhoto(canvas.toDataURL('image/jpeg',0.92));
+  stopPlayerCamera();
+  showNotif('📸','Fotoğraf Çekildi','Kamera görüntüsü referans olarak kaydedildi.');
+}
+
+function rgbDist(a,b){
+  return Math.hypot(a.r-b.r,a.g-b.g,a.b-b.b);
+}
+
+function hexToRgb(hex){
+  const h = hex.replace('#','');
+  return {r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16)};
+}
+
+function sampleRegion(ctx, w, h, x1, y1, x2, y2){
+  const sx = Math.max(0, Math.floor(w*x1));
+  const sy = Math.max(0, Math.floor(h*y1));
+  const sw = Math.max(1, Math.floor(w*(x2-x1)));
+  const sh = Math.max(1, Math.floor(h*(y2-y1)));
+  const data = ctx.getImageData(sx, sy, sw, sh).data;
+  let r=0,g=0,b=0,c=0,dark=0;
+  for(let i=0;i<data.length;i+=4){
+    const a = data[i+3];
+    if(a<8) continue;
+    const rr = data[i], gg = data[i+1], bb = data[i+2];
+    const lum = (rr+gg+bb)/3;
+    if(lum < 88) dark++;
+    r+=rr; g+=gg; b+=bb; c++;
+  }
+  return c ? {r:r/c,g:g/c,b:b/c,darkRatio:dark/c} : {r:120,g:110,b:100,darkRatio:0};
+}
+
+function nearestPaletteColor(rgb, palette){
+  let best = palette[0];
+  let bestDist = Infinity;
+  palette.forEach(hex=>{
+    const d = rgbDist(rgb, hexToRgb(hex));
+    if(d < bestDist){
+      bestDist = d;
+      best = hex;
+    }
+  });
+  return best;
+}
+
+function applyPhotoAutoSuggestion(){
+  if(!playerReferencePhoto){
+    showNotif('ℹ️','Referans Gerekli','Önce bir fotoğraf yükle ya da kameradan çek.');
+    return;
+  }
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 96;
+    const cx = canvas.getContext('2d');
+    cx.drawImage(img,0,0,96,96);
+    const skinSample = sampleRegion(cx,96,96,0.34,0.28,0.66,0.68);
+    const hairTop = sampleRegion(cx,96,96,0.25,0.02,0.75,0.24);
+    const hairSides = sampleRegion(cx,96,96,0.08,0.16,0.92,0.42);
+    playerAppearance.skin = nearestPaletteColor(skinSample, PLAYER_LOOK.skin);
+    playerAppearance.hairColor = nearestPaletteColor(hairTop, PLAYER_LOOK.hairColor);
+    if(playerAppearance.base==='female'){
+      playerAppearance.hair = hairSides.darkRatio > 0.38 ? 'longwave' : (hairTop.darkRatio > 0.46 ? 'bun' : 'bob');
+      playerAppearance.beard = 'clean';
+    }else{
+      if(hairSides.darkRatio < 0.18) playerAppearance.hair = 'fade';
+      else if(hairTop.darkRatio > 0.5 && hairSides.darkRatio > 0.28) playerAppearance.hair = 'curly';
+      else if(hairTop.darkRatio > 0.36) playerAppearance.hair = 'quiff';
+      else playerAppearance.hair = 'slick';
+    }
+    playerAppearance.face = (skinSample.r - skinSample.b > 40) ? 'soft' : 'sharp';
+    playerAppearance.model = resolvePlayerModelFromTraits();
+    renderCharacterCreator();
+    showNotif('✨','Öneri Hazır','Fotoğrafa göre görünüş için ilk otomatik öneri uygulandı.');
+  };
+  img.src = playerReferencePhoto;
+}
+
+function clearPlayerReferencePhoto(){
+  playerReferencePhoto = '';
+  stopPlayerCamera();
+  const input = document.getElementById('player-photo-input');
+  if(input) input.value = '';
+  renderPortraitTargets();
 }
 
 function renderSpeechPortrait(cfg){

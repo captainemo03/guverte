@@ -136,6 +136,22 @@
     <div id="creator-wrap">
       <div id="creator-preview"></div>
       <div id="creator-controls">
+        <span class="flbl">Referans Foto</span>
+        <div class="creator-photo-tools">
+          <button type="button" class="creator-photo-btn" onclick="triggerPlayerPhotoUpload()">Fotoğraf Yükle</button>
+          <button type="button" class="creator-photo-btn" onclick="openPlayerCamera()">Kamera Aç</button>
+          <button type="button" class="creator-photo-btn subtle" onclick="applyPhotoAutoSuggestion()">Otomatik Öner</button>
+          <button type="button" class="creator-photo-btn subtle" onclick="clearPlayerReferencePhoto()">Temizle</button>
+        </div>
+        <input id="player-photo-input" type="file" accept="image/*" onchange="handlePlayerPhotoInput(event)" style="display:none;">
+        <div id="creator-camera-box" class="creator-camera-box" style="display:none;">
+          <video id="creator-camera" autoplay playsinline muted></video>
+          <div class="creator-camera-actions">
+            <button type="button" class="creator-photo-btn" onclick="capturePlayerCamera()">Çek</button>
+            <button type="button" class="creator-photo-btn subtle" onclick="stopPlayerCamera()">Kapat</button>
+          </div>
+        </div>
+        <div id="creator-photo-status" class="creator-photo-status">İstersen bir fotoğraf yükleyip karakteri ona göre başlatabiliriz.</div>
         <span class="flbl">Cilt Tonu</span>
         <div class="creator-row" id="creator-skin"></div>
         <span class="flbl">Karakter Tabanı</span>
