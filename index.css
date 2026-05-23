@@ -464,6 +464,10 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-sprite.crew,.portrait-photo-sheet.crew{width:38px;height:38px;background-size:470% 225%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.preview,.portrait-photo-sheet.preview{width:100%;height:210px;background-size:400% 200%;background-position:var(--px,0%) var(--py,0%);}
 .portrait-sprite.story,.portrait-photo-sheet.story{width:100%;height:156px;background-size:420% 210%;background-position:var(--px,0%) calc(var(--py,0%) + 4%);filter:drop-shadow(0 10px 24px rgba(0,0,0,.3));}
+.portrait-photo-sheet.pose-front{transform:translateX(0) scale(1);}
+.portrait-photo-sheet.pose-angled{transform:translateX(-5px) scale(1.03);}
+.portrait-photo-sheet.pose-command{transform:translateY(2px) scale(1.05);}
+.portrait-photo-sheet.age-mid.preview,.portrait-photo-sheet.age-mid.story{filter:drop-shadow(0 10px 24px rgba(0,0,0,.3)) contrast(1.03) saturate(.98);}
 .portrait-photo{display:block;object-fit:cover;object-position:center top;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22));}
 .portrait-photo.avatar{width:40px;height:40px;border-radius:50%;}
 .portrait-photo.speaker{width:42px;height:42px;border-radius:50%;}
