@@ -4095,6 +4095,18 @@ const OFFICER_SHEET_POOLS = {
     female:[1,3,6]
   }
 };
+const CREATOR_SCENE_LABELS = {
+  opensea:'Acik Deniz',
+  harbor:'Liman',
+  night:'Gece Vardiyasi',
+  strait:'Bogaz Gecisi',
+  storm:'Firtina'
+};
+const CREATOR_POSE_LABELS = {
+  front:'Duz',
+  angled:'3/4',
+  command:'Komut'
+};
 
 function portraitStripeCount(role){
   if(/süvari|suvari/i.test(role||'')) return 4;
@@ -6927,7 +6939,7 @@ function getPlayerPortraitConfig(){
     tieColor:uniform.tieColor,
     stripes:uniform.stripes,
     isPlayer:true,
-    faceAsset:playerStyledFacePhoto,
+    faceAsset:'',
     portraitSheet,
     sheetCols:4,
     sheetRows:2,
@@ -7116,12 +7128,20 @@ function renderPortraitTargets(){
   const portraitCfg = getPlayerPortraitConfig();
   if(avatar) avatar.innerHTML = renderPortraitSprite(portraitCfg,'avatar');
   if(preview){
-    preview.innerHTML = `<div class="creator-preview-stage scene-${portraitCfg.scene||'opensea'}">${renderPortraitSprite(portraitCfg,'preview')}</div>`;
+    const sceneLabel = CREATOR_SCENE_LABELS[portraitCfg.scene] || 'Acik Deniz';
+    const poseLabel = CREATOR_POSE_LABELS[portraitCfg.pose] || 'Duz';
+    preview.innerHTML = `<div class="creator-preview-stage scene-${portraitCfg.scene||'opensea'} pose-${portraitCfg.pose||'front'}">
+      <div class="creator-stage-top">
+        <span class="creator-stage-badge">${sceneLabel}</span>
+        <span class="creator-stage-badge alt">${poseLabel}</span>
+      </div>
+      ${renderPortraitSprite(portraitCfg,'preview')}
+    </div>`;
   }
   const status = document.getElementById('creator-photo-status');
   if(status){
     status.textContent = playerReferencePhoto
-      ? 'Referans foto yüklendi ve karaktere uygulandı. Gerekirse creator seçenekleriyle ince ayar yapabilirsin.'
+      ? 'Referans foto yuklendi. Gorunus onerisi uygulandi; creator secenekleriyle ince ayar yapabilirsin.'
       : 'İstersen bir fotoğraf yükleyip karakteri ona göre başlatabiliriz.';
   }
 }
