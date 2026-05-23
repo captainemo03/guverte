@@ -7046,19 +7046,6 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
   const contrast = [1,1.04,1.08][uniformIdx] || 1;
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
-  if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
-    const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
-    const cols = cfg.sheetCols || 4;
-    const rows = cfg.sheetRows || 2;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
-    const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
-    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} base-${cfg.base||'male'} face-${cfg.face||'soft'} uniform-${cfg.uniform||'classic'}">
-      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>
-      <span class="portrait-face-overlay ${variant}" style="background-image:url('${cfg.faceAsset}');"></span>
-    </span>`;
-  }
   if(cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
