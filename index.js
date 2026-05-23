@@ -6885,11 +6885,9 @@ function getPlayerPortraitConfig(){
   };
   const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
   const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[playerAppearance.model] || {};
-  const portraitSheet = playerAppearance.age === 'mid'
-    ? 'assets/crew-portraits-alt.png'
-    : playerAppearance.age === 'veteran'
-      ? 'assets/crew-portraits-veteran.png'
-      : 'assets/crew-portraits.png';
+  const portraitSheet = playerAppearance.age === 'young'
+    ? 'assets/crew-portraits-illustrated-young.png'
+    : 'assets/crew-portraits-illustrated-mid.png';
   return {
     skin:playerAppearance.skin,
     base:playerAppearance.base,
@@ -6908,6 +6906,8 @@ function getPlayerPortraitConfig(){
     tieColor:uniform.tieColor,
     stripes:uniform.stripes,
     portraitSheet,
+    sheetCols:4,
+    sheetRows:2,
     sheetIndex:modelMeta.sheetIndex,
     bg:'bridge'
   };
@@ -6991,11 +6991,13 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
   if(cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
-    const col = idx % 4;
-    const row = Math.floor(idx / 4);
-    const x = [0,33.333,66.666,100][col] ?? 0;
-    const y = row===0 ? 0 : 100;
-    return `<span class="portrait-photo-sheet ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');${visualStyle}"></span>`;
+    const cols = cfg.sheetCols || 4;
+    const rows = cfg.sheetRows || 2;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
+    const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
+    return `<span class="portrait-photo-sheet ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=4');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>`;
   }
   if(cfg.portraitAsset){
     return `<img class="portrait-photo ${variant}" style="${visualStyle}" src="${cfg.portraitAsset}?v=1" alt="">`;
@@ -9026,40 +9028,42 @@ function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
   const roleBlob = normalizeTrAscii(`${key} ${def.title||''} ${def.name||''}`);
   const base = inferPortraitBase(def);
+  const supportSheet = base==='female' ? 'assets/support-style-female.png' : 'assets/support-style-male.png';
   const supportPool = {
-    engine:{
-      male:['assets/support-engine-a.png','assets/support-engine-b.png','assets/support-engine-c.png'],
-      female:['assets/support-female-engine-a.png','assets/support-female-engine-b.png','assets/support-female-engine-c.png']
-    },
-    deck:{
-      male:['assets/support-bosun-a.png','assets/support-bosun-b.png'],
-      female:['assets/support-female-bosun-a.png','assets/support-female-bosun-b.png']
-    },
-    cook:{
-      male:['assets/support-cook-a.png','assets/support-cook-b.png'],
-      female:['assets/support-female-cook-a.png']
-    }
+    engine:[0,1,2],
+    deck:[3,4],
+    cook:[5]
   };
-  let portraitAsset = '';
-  if(/(^| )(carkci|bas2|yagci)( |$)|muhendis|makine/.test(roleBlob)) portraitAsset = pickRandom(supportPool.engine[base]);
-  else if(/(^| )(lostromo|lostromo2|hasan|musa)( |$)|guverte|silici|tayfa/.test(roleBlob)) portraitAsset = pickRandom(supportPool.deck[base]);
-  else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) portraitAsset = pickRandom(supportPool.cook[base]);
-  if(portraitAsset){
+  let supportIdx = null;
+  if(/(^| )(carkci|bas2|yagci)( |$)|muhendis|makine/.test(roleBlob)) supportIdx = pickRandom(supportPool.engine);
+  else if(/(^| )(lostromo|lostromo2|hasan|musa)( |$)|guverte|silici|tayfa/.test(roleBlob)) supportIdx = pickRandom(supportPool.deck);
+  else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
+  if(supportIdx!==null){
     return {
       __roleKey:key,
       __base:base,
-      portraitAsset,
+      portraitSheet:supportSheet,
+      sheetCols:3,
+      sheetRows:2,
+      sheetIndex:supportIdx,
       bg:'portrait'
     };
   }
   const hairPool = base==='female'
     ? ['bob','bun','waves','parted','curly','slick']
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
+  const age = pickRandom(['young','mid']);
+  const officerSheet = age==='young' ? 'assets/crew-portraits-illustrated-young.png' : 'assets/crew-portraits-illustrated-mid.png';
+  const officerIndexPool = base==='female'
+    ? (age==='young' ? [1,3] : [5,7])
+    : (age==='young' ? [0,2] : [4,6]);
   return {
     __roleKey:key,
     __base:base,
     skin: pickRandom(PLAYER_LOOK.skin),
     base,
+    age,
+    pose: pickRandom(['front','angled','command']),
     face: pickRandom(PLAYER_LOOK.face),
     hair: pickRandom(hairPool),
     hairColor: pickRandom(PLAYER_LOOK.hairColor),
@@ -9070,9 +9074,10 @@ function makeCrewPortrait(key, def){
     tieColor:'#13171d',
     stripes: stripeBias,
     bg: /köprü|seyir|süvari|zabit/i.test(def.title) ? 'bridge' : 'portrait',
-    spriteIndex: base==='female'
-      ? pickRandom([1,3,5,7])
-      : pickRandom([0,2,4,6])
+    portraitSheet: officerSheet,
+    sheetCols:4,
+    sheetRows:2,
+    sheetIndex: pickRandom(officerIndexPool)
   };
 }
 
