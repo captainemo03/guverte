@@ -11531,7 +11531,26 @@ const GLOSSARY_TERMS = [
   {term:"Chafing Gear", meaning:"Halatin surtunerek asinacagi yere konan koruyucu malzeme.", example:"Spring uzerinde chafing gear yoksa uzun beklemede sorun cikar."},
   {term:"Snap-Back Zone", meaning:"Gergin halat koparsa geri savrulup oldurucu etki yaratabilecek alan.", example:"Snap-back zone icinde gereksiz personel tutulmaz."},
   {term:"Fidley", meaning:"Makine havalandirmasi ve erisim cikisi iceren ust yapi bolumu.", example:"Fidley civarinda sicak hava ve gurultu daha belirgin hissedilir."},
-  {term:"Monkey Island", meaning:"Kopruustunun en ust acik platformu.", example:"Monkey island uzerinde pusula ve acik gorus avantaj saglar."}
+  {term:"Monkey Island", meaning:"Kopruustunun en ust acik platformu.", example:"Monkey island uzerinde pusula ve acik gorus avantaj saglar."},
+  {term:"SMCP", meaning:"Standard Marine Communication Phrases; denizde standart ve acik iletisim icin kullanilan resmi Ingilizce ifade sistemi.", example:"VHF konusmasinda SMCP kullanmak yanlis anlamayi ciddi sekilde azaltir."},
+  {term:"Stand By", meaning:"Hazir bekle veya bir sonraki komut icin teyakkuzda kal anlami tasiyan operasyon ifadesi.", example:"Pilot station yaklasirken ekip stand by komutuyla yerini aldi."},
+  {term:"Keep Clear", meaning:"Diger trafikten veya belirli bir tehlikeden net sekilde uzak kalma niyetini bildiren ifade.", example:"Dar gecitte outbound trafikten keep clear olacagimizi VHF ile bildirdik."},
+  {term:"Inbound", meaning:"Liman, bogaz veya kanal icine dogru giren trafik yonu.", example:"Inbound traffic reporting point gecis saatini VTS istedi."},
+  {term:"Outbound", meaning:"Liman, bogaz veya kanal disina dogru cikan trafik yonu.", example:"Outbound tanker icin kanal tarafi acik tutuldu."},
+  {term:"Passing Arrangement", meaning:"Iki geminin birbirini hangi taraftan ve hangi niyetle gececegini karsilikli netlestirme duzeni.", example:"Passing arrangement erken kurulunca VHF tansiyonu dustu."},
+  {term:"Port Side Alongside", meaning:"Geminin iskele bordasini rihtima veya terminale verecek sekilde yanasmasi.", example:"Pilot exchange sirasinda port side alongside bilgisi basta verildi."},
+  {term:"Starboard Side Alongside", meaning:"Geminin sancak bordasini rihtima veya terminale verecek sekilde yanasmasi.", example:"Terminal son anda starboard side alongside istedi."},
+  {term:"Present Draft", meaning:"Geminin o andaki basa ve kica draft degerlerini ifade eden operasyon bilgisi.", example:"Pilot kartinda present draft acik ve dogru yazilmalidir."},
+  {term:"Air Draft", meaning:"Su hattindan geminin en ust sabit noktasina kadar olan yukseklik.", example:"Kopru alti gecisinde air draft yanlis verilirse ciddi risk dogar."},
+  {term:"Navigation Defect", meaning:"Seyir emniyetini etkileyebilecek cihaz, sistem veya donanim arizasi.", example:"Gyro repeater arizasi navigation defect olarak pilotla paylasildi."},
+  {term:"Close Crossing Situation", meaning:"Iki geminin yollarinin yakin mesafede kesisecegi ve CPA'nin dusmekte oldugu durum.", example:"Close crossing situation olusunca nobet zabiti hemen kaldirildi."},
+  {term:"Responsible Officer", meaning:"Belirli test, kontrol veya operasyon kaydindan resmi olarak sorumlu zabit.", example:"PSC memuru weekly GMDSS test icin responsible officer'i sordu."},
+  {term:"Rest Hour Record", meaning:"STCW ve MLC kapsaminda personelin calisma ve dinlenme saatlerini gosteren resmi kayit.", example:"Rest hour record eksik veya gercek disiysa PSC sorusu buyur."},
+  {term:"Enclosed Space Entry Permit", meaning:"Kapali mahal girisinden once riskler, gaz olcumu ve emniyet tedbirlerini kayda baglayan izin formu.", example:"Enclosed space entry permit imzasizsa giris baslatilmaz."},
+  {term:"Weekly GMDSS Test", meaning:"VHF, DSC, batarya ve ilgili haberlesme ekipmanlarinin haftalik kontrol/test kaydi.", example:"Weekly GMDSS test tarihi logbook ve radio record ile uyumlu olmalidir."},
+  {term:"Readback", meaning:"Alinan komut veya bilginin ayni anlamla tekrar edilerek teyit edilmesi.", example:"Mooring station komutlarinda readback eksikse hata riski artar."},
+  {term:"Traffic Station", meaning:"VTS veya boğaz/kıyı trafik kontrol istasyonuna verilen genel hitap sekli.", example:"Traffic station cagrisinda once gemi adi ve niyet net verildi."},
+  {term:"Intention", meaning:"Geminin sonraki manevra veya seyir niyetini acik sekilde bildirmesi.", example:"VHF uzerinde intention soylemeden sadece mevki vermek yetmez."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
