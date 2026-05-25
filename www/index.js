@@ -7582,6 +7582,7 @@ function renderCharacterCreator(){
 
 function buildIntro(){
   refreshShipSpecs();
+  refreshSaveEntryActions();
   document.getElementById('yearsel').innerHTML='';
   document.getElementById('shiptype').innerHTML='';
   // Yıl seçimi
@@ -9067,6 +9068,7 @@ function renderScene(idx){
   }
   triggerLiveScenePresentation(sc, ch);
   applyLanguageUI();
+  saveGameState(false);
 }
 
 // ===== KRİZ =====
@@ -9085,6 +9087,7 @@ function showCrisis(key){
 // ===== SON =====
 function showEnd(){
   stopAllMusic();
+  deleteSavedGame(false);
   document.getElementById('game').style.display='none';
   document.getElementById('endscr').style.display='flex';
 
@@ -9208,6 +9211,7 @@ function beginGame(){
   document.getElementById('tb-photos-count').textContent='0';
   document.getElementById('contract-days').textContent=`0 / ${contractTotal} GÜN`;
   renderScene(0);
+  saveGameState(false);
   setTimeout(()=>{const cv=document.getElementById('clock-canvas');if(cv){const ev=new Event('resize');window.dispatchEvent(ev);}},100);
 }
 
@@ -9217,6 +9221,7 @@ function restartGame(){
   document.getElementById('endscr').style.display='none';
   document.getElementById('game').style.display='none';
   document.getElementById('intro').style.display='flex';
+  refreshSaveEntryActions();
   renderCharacterCreator();
 }
 
@@ -9611,6 +9616,161 @@ const ROUTE_PORTS = [
 let shipPosition = {x:85, y:130};
 let routeHistory = [{x:85,y:130}];
 let visitedPorts = new Set(["İzmir"]);
+const SAVE_KEY = 'guverte-save-v1';
+
+function hasSavedGame(){
+  try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
+}
+
+function refreshSaveEntryActions(){
+  const continueBtn = document.getElementById('continue-btn');
+  const deleteBtn = document.getElementById('delete-save-btn');
+  const exists = hasSavedGame();
+  if(continueBtn) continueBtn.style.display = exists ? 'block' : 'none';
+  if(deleteBtn) deleteBtn.style.display = exists ? 'block' : 'none';
+}
+
+function buildSavePayload(){
+  const crewNames = {};
+  Object.keys(CREW_DEFS).forEach(key=>{ crewNames[key] = CREW_DEFS[key].name; });
+  return {
+    version:1,
+    savedAt:new Date().toISOString(),
+    pn,sn,selYear,selType,selKontrat,
+    contractDays,contractTotal,
+    currentIdx,
+    sceneQueue,
+    stats,
+    mood,
+    activeEcdisPlanKey,
+    activeRadarMode,
+    delayedConsequences,
+    playerFlags,
+    careerMemory,
+    choicesMade,
+    playerAppearance,
+    selectedStartPort,
+    selectedStartScenario,
+    shipPosition,
+    routeHistory,
+    visitedPorts:Array.from(visitedPorts||[]),
+    journalEntries,
+    photos,
+    seenPhotoMoments:Array.from(seenPhotoMoments||[]),
+    scenesSinceEvent,
+    nextEventAt,
+    crewTrust,
+    crewUnlocked,
+    crewNames,
+    crewPortraits,
+    systemState:{
+      consecutiveMistakes:SYSTEM_STATE.consecutiveMistakes,
+      totalMistakes:SYSTEM_STATE.totalMistakes,
+      hiddenFailures:{...SYSTEM_STATE.hiddenFailures},
+      triggeredChains:Array.from(SYSTEM_STATE.triggeredChains||[])
+    }
+  };
+}
+
+function saveGameState(manual=false){
+  if(!sceneQueue || !sceneQueue.length) return false;
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(buildSavePayload()));
+    refreshSaveEntryActions();
+    if(manual) showNotif('💾','Oyun Kaydedildi',`Sahne ${currentIdx+1} icin kayit alindi.`);
+    return true;
+  }catch(e){
+    if(manual) showNotif('!','Kayit Basarisiz','Kayit yazilirken bir sorun oldu.');
+    return false;
+  }
+}
+
+function deleteSavedGame(showToast=true){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  refreshSaveEntryActions();
+  if(showToast) showNotif('🗑️','Kayit Silindi','Kaydedilen ilerleme temizlendi.');
+}
+
+function applyLoadedGameState(data){
+  pn = data.pn || 'Stajyer';
+  sn = data.sn || 'M/V Ege Meltem';
+  selYear = data.selYear || 2018;
+  selType = data.selType || 'kuru';
+  selKontrat = Number.isFinite(data.selKontrat) ? data.selKontrat : 0;
+  contractDays = data.contractDays || 0;
+  contractTotal = data.contractTotal || 0;
+  currentIdx = Math.max(0, data.currentIdx || 0);
+  sceneQueue = Array.isArray(data.sceneQueue) ? data.sceneQueue : [];
+  stats = data.stats || {cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
+  mood = data.mood ?? 58;
+  activeEcdisPlanKey = data.activeEcdisPlanKey || 'izmir_messina_south';
+  activeRadarMode = data.activeRadarMode || 'cpa_watch';
+  delayedConsequences = Array.isArray(data.delayedConsequences) ? data.delayedConsequences : [];
+  playerFlags = data.playerFlags || {securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
+  careerMemory = data.careerMemory || {firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
+  choicesMade = Array.isArray(data.choicesMade) ? data.choicesMade : [];
+  playerAppearance = {...playerAppearance, ...(data.playerAppearance || {})};
+  selectedStartPort = data.selectedStartPort || START_PORTS[0];
+  selectedStartScenario = data.selectedStartScenario || START_SCENARIOS[0];
+  shipPosition = data.shipPosition || {x:selectedStartPort.x, y:selectedStartPort.y};
+  routeHistory = Array.isArray(data.routeHistory) && data.routeHistory.length ? data.routeHistory : [{x:selectedStartPort.x,y:selectedStartPort.y}];
+  visitedPorts = new Set(Array.isArray(data.visitedPorts) ? data.visitedPorts : [selectedStartPort.name]);
+  journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
+  photos = Array.isArray(data.photos) ? data.photos : [];
+  seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
+  scenesSinceEvent = data.scenesSinceEvent || 0;
+  nextEventAt = data.nextEventAt || (5 + Math.floor(Math.random()*4));
+  crewTrust = data.crewTrust || {};
+  crewUnlocked = data.crewUnlocked || {};
+  if(data.crewNames){
+    Object.entries(data.crewNames).forEach(([key,name])=>{
+      if(CREW_DEFS[key] && name) CREW_DEFS[key].name = name;
+    });
+  }
+  Object.keys(CREW_DEFS).forEach(key=>{
+    if(!(key in crewTrust)) crewTrust[key] = CREW_DEFS[key].trust;
+    if(!(key in crewUnlocked)) crewUnlocked[key] = 0;
+  });
+  if(data.crewPortraits && typeof data.crewPortraits === 'object'){
+    Object.keys(crewPortraits).forEach(k=>delete crewPortraits[k]);
+    Object.assign(crewPortraits, data.crewPortraits);
+  }else{
+    Object.keys(CREW_DEFS).forEach(key=>{ crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]); });
+  }
+  const sys = data.systemState || {};
+  SYSTEM_STATE.consecutiveMistakes = sys.consecutiveMistakes || 0;
+  SYSTEM_STATE.totalMistakes = sys.totalMistakes || 0;
+  SYSTEM_STATE.hiddenFailures = sys.hiddenFailures || {bridge:0,deck:0,engine:0,compliance:0};
+  SYSTEM_STATE.triggeredChains = new Set(Array.isArray(sys.triggeredChains) ? sys.triggeredChains : []);
+}
+
+function loadSavedGame(){
+  let raw = null;
+  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(!raw){
+    refreshSaveEntryActions();
+    showNotif('!','Kayit Yok','Devam edilecek bir kayit bulunamadi.');
+    return;
+  }
+  try{
+    const data = JSON.parse(raw);
+    applyLoadedGameState(data);
+    document.getElementById('intro').style.display='none';
+    document.getElementById('crisis').style.display='none';
+    document.getElementById('endscr').style.display='none';
+    const g=document.getElementById('game');
+    g.style.display='flex';
+    g.style.flexDirection='column';
+    updateStats({});
+    renderCrewCards();
+    renderScene(currentIdx);
+    refreshSaveEntryActions();
+    showNotif('↻','Kayittan Devam','Kaydedilen oyuna geri donuldu.');
+  }catch(e){
+    deleteSavedGame(false);
+    showNotif('!','Kayit Bozulmus','Eski kayit acilamadi; temizlendi.');
+  }
+}
 let mapView = 'world';
 let selectedPortChart = 'İzmir';
 let portChartZoom = 1;
