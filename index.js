@@ -6139,7 +6139,47 @@ Sence profesyonel plan nasil kurulur?`,
   choices:[
   {text:"Bolge degisiminden once yuk cinsine gore havalandirma, kontrol turu ve jurnal planini birlikte kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
   {text:"Deniz sakin oldugu surece iklim gecisinin buyuk fark yaratmayacagini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
-  {text:"Yuk selametini sadece limanda dusunmenin yeterli oldugunu sanirim",tag:"korkak",effect:{bilgi:-13,sayginlik:-11}}]}
+  {text:"Yuk selametini sadece limanda dusunmenin yeterli oldugunu sanirim",tag:"korkak",effect:{bilgi:-13,sayginlik:-11}}]},
+  {id:"s403",gfx:"bridge",alert:false,day:"Gun 11",time:"22:40",loc:"Bridge - Night Watch",sub:"Foreign officer wants a clean English report",who:"mateintl",
+  text:`The night watch is calm until the foreign officer looks up from the radar.
+
+"Cadet, report that target on the starboard bow in English. I want bearing, range and what worries you. Short sentences."
+
+He is not testing your accent. He is testing whether you can stay clear under pressure.`,
+  choices:[
+  {text:"Target on starboard bow, bearing zero-eight-five, range four miles, CPA decreasing. I am concerned about a close crossing situation.",tag:"kritik",effect:{bilgi:18,sayginlik:13,cesaret:3}},
+  {text:"There is a ship there, sir. I think it may pass close.",tag:"akilli",effect:{bilgi:9,sayginlik:7}},
+  {text:"I point at the radar and wait for him to understand.",tag:"korkak",effect:{bilgi:-9,sayginlik:-10,cesaret:-3}}]},
+  {id:"s404",gfx:"deck",alert:false,day:"Gun 12",time:"06:35",loc:"Fore Deck - Mooring Station",sub:"Foreign AB speaks English on deck",who:"abintl",
+  text:`AB Marko checks the mooring area, then turns to you.
+
+"Can you confirm the headlines are clear and the forward spring is not riding over? Say it back to me properly."
+
+On deck, unclear language becomes a safety problem very quickly.`,
+  choices:[
+  {text:"Headlines are clear. Forward spring is clear and not riding over. Stand by at the station.",tag:"kritik",effect:{bilgi:17,sayginlik:12,cesaret:2}},
+  {text:"Looks fine to me. We can continue.",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"I stay quiet and hope he checks everything himself.",tag:"korkak",effect:{bilgi:-8,sayginlik:-9}}]},
+  {id:"s405",gfx:"engine",alert:false,day:"Gun 13",time:"10:20",loc:"Engine Room - Pump Flat",sub:"Foreign motorman uses technical English",who:"motormanintl",
+  text:`Motorman Alex taps the pump casing and speaks over the noise.
+
+"If the standby pump starts, what will you check first? Pressure, leakage, abnormal sound - tell me in English."
+
+He wants the order of thought, not random words.`,
+  choices:[
+  {text:"First I check discharge pressure, then leakage around the pump and line, then any abnormal sound or vibration.",tag:"kritik",effect:{bilgi:18,sayginlik:12}},
+  {text:"I check the pump and see if it looks normal.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
+  {text:"I just say okay and follow him without answering.",tag:"korkak",effect:{bilgi:-8,sayginlik:-9}}]},
+  {id:"s406",gfx:"sea",alert:false,day:"Gun 13",time:"18:10",loc:"Bridge Wing - Sunset Watch",sub:"A casual English exchange with foreign crew",who:"mateintl",
+  text:`The sea is calm. Daniel leans on the bridge wing and decides not to sound like an examiner for once.
+
+"Long contract, long days. In English, how would you tell a senior officer that you are tired but still fit for watch?"
+
+It is a simple question, but it is also about professionalism.`,
+  choices:[
+  {text:"I am tired, but I am fit for watch. If my condition changes, I will report it immediately.",tag:"kritik",effect:{sayginlik:13,bilgi:10,sosyal:2}},
+  {text:"I am a bit tired, but it is okay, I think.",tag:"sosyal",effect:{sayginlik:7,bilgi:4}},
+  {text:"I say nothing because I do not want to sound weak.",tag:"korkak",effect:{sayginlik:-9,cesaret:-3}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
@@ -9233,6 +9273,21 @@ const CREW_DEFS = {
   musa: {name:"Tayfa Musa", icon:"👷", title:"Genç Tayfa", trust:55,
     secrets:["İlk gemisi bu. Sen de ilk stajyersin — benzer his.","Evleneceği kız denizden korkuyor.","Gece vardiyasında yıldız sayıyor."],
     tips:["Musa ile deneyim paylaş","Zor anlarda yanında dur","Birlikte öğrenin"]},
+  mateintl: {name:"2/O Daniel Reyes", icon:"🌍", title:"Watch Officer", trust:44,
+    style:"English konusur; kisa, net ve profesyonel cevap bekler.",
+    prefs:{kritik:2,akilli:3,itaatkar:0,sosyal:1,cesur:0,korkak:-3},
+    secrets:["Dort farkli bayrakta calisti; Turkceyi sadece gunluk emir kadar biliyor.","Vardiya devrinde once radar sonra logbook bakar.","Kisa cümleyle net rapor duymayi sever."],
+    tips:["Bearing ve CPA bilgisini net ver","English bridge phrases kullan","Soruyu tekrar etmekten cekinme"]},
+  abintl: {name:"AB Marko Petrov", icon:"🪢", title:"Able Seafarer", trust:48,
+    style:"Deck islerinde hizli ve pratiktir; English ile anlasir, gostermeyi sever.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:2,cesur:1,korkak:-3},
+    secrets:["Daha once roro ve heavy-lift gemilerde calisti.","Mooring station cizimini cebinde tasir.","Sessiz gorunur ama iyi ekip oyuncusudur."],
+    tips:["Halat isimlerini English de ogren","Eline aldigin isi sesli teyit et","Deck safety dilini kisa tut"]},
+  motormanintl: {name:"Motorman Alex Costa", icon:"⚙️", title:"Engine Rating", trust:43,
+    style:"Makinede acele sevmez; English teknik kelime duzgunse sana hemen acilir.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-2},
+    secrets:["Pompa ve filtre isimlerini ezbere bilir.","Engine round sirasinda not tutmayan adama guvenmez.","Brezilya hattinda uzun sure calisti."],
+    tips:["Alarmi renk yerine isimle soyle","Valve ve pump numarasini tekrar et","Anlamadiysan tekrar sor"]},
 };
 
 const CREW_NAME_POOLS = {
@@ -9247,7 +9302,10 @@ const CREW_NAME_POOLS = {
   yagci:["Yağcı Mehmet Ali","Yağcı Volkan","Yağcı Samet","Yağcı Ferhat","Yağcı Oğuz","Yağcı Kaan","Yağcı Barış","Yağcı Nisa","Yağcı Sarp","Yağcı Büşra","Yağcı Fuat","Yağcı Hümeyra","Yağcı Onat","Yağcı Serap","Yağcı Taylan","Yağcı Ekin"],
   asci:["Aşçı Mehmet Usta","Aşçı Fikret Usta","Aşçı Nihat Usta","Aşçı Sevim Hanım","Aşçı Dilek Hanım","Aşçı Elif Hanım","Aşçı Hülya Hanım","Aşçı Kemal Usta","Aşçı Sude Hanım","Aşçı Murat Usta","Aşçı Gülşah Hanım","Aşçı Levent Usta","Aşçı Meryem Hanım","Aşçı Korhan Usta","Aşçı Pınar Hanım","Aşçı Burhan Usta"],
   hasan:["Tayfa Hasan","Tayfa Eren","Tayfa Barış","Tayfa Ahmet","Tayfa Gökhan","Tayfa Yusuf","Tayfa Merve","Tayfa Koral","Tayfa Cansu","Tayfa Uğur","Tayfa Selçuk","Tayfa Arif","Tayfa Necla","Tayfa Soner","Tayfa Berrin","Tayfa Doğu"],
-  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa","Tayfa Alihan","Tayfa Poyraz","Tayfa Yağmur","Tayfa Ceylin","Tayfa Mertcan","Tayfa Beste"]
+  musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa","Tayfa Alihan","Tayfa Poyraz","Tayfa Yağmur","Tayfa Ceylin","Tayfa Mertcan","Tayfa Beste"],
+  mateintl:["2/O Daniel Reyes","2/O Liam Walker","2/O Marco Silva","2/O Adrian Cole","2/O Ethan Brooks","2/O Jonas Keller"],
+  abintl:["AB Marko Petrov","AB Luka Marin","AB Stefan Kovac","AB Miguel Santos","AB Ivan Petrov","AB Tomas Novak"],
+  motormanintl:["Motorman Alex Costa","Motorman Bruno Lima","Motorman Diego Cruz","Motorman Pavel Sidorov","Motorman Leo Martin","Motorman Rafael Costa"]
 };
 
 function pickRandom(list){
@@ -9265,8 +9323,8 @@ function makeCrewPortrait(key, def){
     cook:[5]
   };
   let supportIdx = null;
-  if(/(^| )(carkci|bas2|yagci)( |$)|muhendis|makine/.test(roleBlob)) supportIdx = pickRandom(supportPool.engine);
-  else if(/(^| )(lostromo|lostromo2|hasan|musa)( |$)|guverte|silici|tayfa/.test(roleBlob)) supportIdx = pickRandom(supportPool.deck);
+  if(/(^| )(carkci|bas2|yagci|motormanintl)( |$)|muhendis|makine|motorman|engine rating/.test(roleBlob)) supportIdx = pickRandom(supportPool.engine);
+  else if(/(^| )(lostromo|lostromo2|hasan|musa|abintl)( |$)|guverte|silici|tayfa|able seafarer|deck/.test(roleBlob)) supportIdx = pickRandom(supportPool.deck);
   else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
   if(supportIdx!==null){
     return {
@@ -9367,7 +9425,8 @@ function getCrewKeyFromWho(who){
   const map = {
     lostromo:'lostromo', silici:'lostromo2', yagci:'yagci', asci:'asci',
     hasan:'hasan', musa:'musa', suvari:'suvari', z1:'z1', z2:'z2',
-    z3:'z3', carkci:'carkci', bas2:'bas2'
+    z3:'z3', carkci:'carkci', bas2:'bas2', mateintl:'mateintl',
+    abintl:'abintl', motormanintl:'motormanintl'
   };
   return map[who] || null;
 }
