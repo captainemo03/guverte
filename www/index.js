@@ -6209,7 +6209,37 @@ On VHF, half-right English is often worse than silence.`,
   choices:[
   {text:"Traffic station, this is motor vessel ${sn}. We are inbound, passing buoy Charlie in five minutes, intending to remain on the starboard side of the channel and keep clear of outbound traffic.",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:3}},
   {text:"This is our ship. We are coming and we will be careful.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
-  {text:"I answer with broken words and no clear intention.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]}
+  {text:"I answer with broken words and no clear intention.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]},
+  {id:"s410",gfx:"cargo",alert:false,day:"Gun 15",time:"08:10",loc:"Cargo Office - Terminal Call",sub:"Loading master call in English",who:"z1",
+  text:`The terminal line rings. The loading master wants a quick answer in English.
+
+"Confirm your hold readiness, loading sequence, and any restriction on loading rate."
+
+1. Zabiti telefonu sana uzatıyor. "Short. Clear. No theatre."`,
+  choices:[
+  {text:"All cargo holds are ready, loading sequence is hold two, hold three, then hold one, and we request a controlled loading rate due to trim and shear force limits.",tag:"kritik",effect:{bilgi:19,sayginlik:13,cesaret:2}},
+  {text:"The holds are ready and you may start loading.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
+  {text:"I hand the call back immediately because I do not want to risk my English.",tag:"korkak",effect:{bilgi:-8,sayginlik:-9}}]},
+  {id:"s411",gfx:"engine_fault",alert:true,day:"Gun 15",time:"13:45",loc:"Bridge - Internal Call",sub:"Engine alarm bridge report in English",who:"motormanintl",
+  text:`A machinery alarm comes in and the bridge wants a clean internal report.
+
+Alex looks at you: "Say it properly. What alarm, what is stable, and what we are checking now?"
+
+This is where vague English becomes operationally dangerous.`,
+  choices:[
+  {text:"Bridge, engine room. We have a low lube oil pressure alarm on the standby unit. Main engine parameters are stable. We are checking pressure, leakage, and filter condition now.",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:3}},
+  {text:"Bridge, there is an engine alarm but it seems under control.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
+  {text:"I report only that something is wrong in the engine room.",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}]},
+  {id:"s412",gfx:"cargo",alert:false,day:"Gun 16",time:"06:55",loc:"Manifold - Pre-Transfer Check",sub:"Manifold readiness check in English",who:"mateintl",
+  text:`Before cargo transfer, the foreign officer wants the readiness check spoken back in English.
+
+"Confirm manifold connection, drip tray, scupper plugs, communication line, and ESD readiness."
+
+He watches whether your answer follows an order or falls apart halfway.`,
+  choices:[
+  {text:"Manifold connection is secured, drip tray is in place, scupper plugs are fitted, communication with shore is tested, and ESD is ready for immediate use.",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"The manifold area is ready and we can start.",tag:"itaatkar",effect:{bilgi:7,sayginlik:5}},
+  {text:"I mix the checks, forget ESD, and give no clear confirmation.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
