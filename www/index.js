@@ -11550,7 +11550,30 @@ const GLOSSARY_TERMS = [
   {term:"Weekly GMDSS Test", meaning:"VHF, DSC, batarya ve ilgili haberlesme ekipmanlarinin haftalik kontrol/test kaydi.", example:"Weekly GMDSS test tarihi logbook ve radio record ile uyumlu olmalidir."},
   {term:"Readback", meaning:"Alinan komut veya bilginin ayni anlamla tekrar edilerek teyit edilmesi.", example:"Mooring station komutlarinda readback eksikse hata riski artar."},
   {term:"Traffic Station", meaning:"VTS veya boğaz/kıyı trafik kontrol istasyonuna verilen genel hitap sekli.", example:"Traffic station cagrisinda once gemi adi ve niyet net verildi."},
-  {term:"Intention", meaning:"Geminin sonraki manevra veya seyir niyetini acik sekilde bildirmesi.", example:"VHF uzerinde intention soylemeden sadece mevki vermek yetmez."}
+  {term:"Intention", meaning:"Geminin sonraki manevra veya seyir niyetini acik sekilde bildirmesi.", example:"VHF uzerinde intention soylemeden sadece mevki vermek yetmez."},
+  {term:"Manifold Connection", meaning:"Shore hose veya loading arm'in gemi manifolduna emniyetli sekilde baglanmasi.", example:"Manifold connection oncesi flange, gasket ve drip tray tekrar kontrol edildi."},
+  {term:"Shore Loading Arm", meaning:"Terminalin yuk transferi icin gemi manifolduna uzattigi sabit veya hareketli kol sistemi.", example:"Shore loading arm hareket alaninda personel tutulmadi."},
+  {term:"Vapour Return", meaning:"Ozellikle tankerlerde buharin terminal sistemine geri donduruldugu hat.", example:"Vapour return acik olmadan closed loading disiplini tamamlanmis sayilmaz."},
+  {term:"Line Displacement", meaning:"Hat icindeki urunun veya suyun baska urunle ya da inert medium ile yer degistirmesi islemi.", example:"Line displacement sirasinda hangi urunun nereye gittigi net kaydedildi."},
+  {term:"Pressure Surge", meaning:"Hat veya sistem icinde ani basinç yukselmesi.", example:"Valve hizli kapatilinca pressure surge riski buyudu."},
+  {term:"Strip to Slop", meaning:"Hat veya tank dibindeki kalan yukun slop tank'a veya uygun yere strip edilmesi.", example:"Strip to slop emrinden once line-up tekrar teyit edildi."},
+  {term:"Crossover Valve", meaning:"Iki farkli hat veya tank sistemini birbirine baglayabilen gecis vanasi.", example:"Yanlis acik kalan crossover valve butun line-up'ı bozar."},
+  {term:"Emergency Shutdown", meaning:"Operasyonu emniyet icin hizla durduran ESD mantigi veya sistemi.", example:"Emergency shutdown butonunun yeri herkes tarafindan bilinmelidir."},
+  {term:"Overflow Alarm", meaning:"Tank seviyesinin emniyetli limiti astigini bildiren uyari.", example:"Overflow alarm geldiginde gauge degil operasyon disiplini sinanir."},
+  {term:"Low Lube Oil Pressure", meaning:"Yaglama yagi basinçinin emniyetli seviyenin altina dusmesi alarmi.", example:"Low lube oil pressure gorunce sadece sesi susturmak yetmez."},
+  {term:"High Exhaust Gas Temperature", meaning:"Egzoz gaz sicakliginin beklenenden yuksek oldugunu gosteren alarm durumu.", example:"High exhaust gas temperature bir silindir sorununa isaret edebilir."},
+  {term:"Cooling Water Temperature", meaning:"Sogutma suyu sicaklik durumunu anlatan temel makine parametresi.", example:"Cooling water temperature yukseldikce chief hemen trend aradi."},
+  {term:"Standby Pump Running", meaning:"Yedek pompanin devreye girmesi veya girme gerekliligi durumu.", example:"Standby pump running oldugunda asıl arizanin nedenini de bulmak gerekir."},
+  {term:"Bilge High Level Alarm", meaning:"Bilge kuyusunda seviye artisini bildiren kritik alarm.", example:"Bilge high level alarm bazen kacak, bazen ihmaldir."},
+  {term:"Fuel Change-Over", meaning:"Bir yakit tipinden digerine gecis islemi ve bunun sicaklik/viskozite kontrol mantigi.", example:"Fuel change-over acele yapilirsa makine homurdanmaya baslar."},
+  {term:"Load Sharing", meaning:"Paralel jeneratörlerin yuk dagilimini dengeli paylasmasi.", example:"Load sharing bozulursa bir jeneratör gereksiz zorlanir."},
+  {term:"Cargo Watch", meaning:"Yukleme veya tahliye sirasinda operasyonu izleyen zabit vardiyasi.", example:"Cargo watch sirf bakmak degil, surekli capraz kontrol yapmaktir."},
+  {term:"Loading Rate", meaning:"Belirli zaman diliminde gemiye verilen veya gemiden alinan yuk miktari hizi.", example:"Loading rate artisinda shear force ve manifold pressure birlikte izlenir."},
+  {term:"Discharging Rate", meaning:"Tahliye sirasinda urunun cikis hizini anlatan operasyon degeri.", example:"Discharging rate dusunce shore ile sebep teyit edildi."},
+  {term:"Cargo Readiness", meaning:"Yuk operasyonuna baslamak icin belge, ekipman ve mahal hazirliginin tamamlanmis olmasi.", example:"Cargo readiness teyidi olmadan terminal baslat komutu verilmedi."},
+  {term:"Hold Cleanliness", meaning:"Ozellikle bulk ve general cargo'da ambar temizliginin ticari ve survey acisindan yeterli olmasi.", example:"Hold cleanliness zayifsa claim daha yuk limaninda baslayabilir."},
+  {term:"Loading Master", meaning:"Terminal veya shore tarafinda yuk operasyonunu yoneten sorumlu kisi.", example:"Loading master ile kurulan dil operasyonun tonunu belirler."},
+  {term:"Topping Off", meaning:"Tank veya yuklemenin son kisimlarinda hiz dusurup seviyeyi hassas tamamlama asamasi.", example:"Topping off en cok dikkat isteyen anlardan biridir."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
