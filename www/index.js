@@ -6179,7 +6179,37 @@ It is a simple question, but it is also about professionalism.`,
   choices:[
   {text:"I am tired, but I am fit for watch. If my condition changes, I will report it immediately.",tag:"kritik",effect:{sayginlik:13,bilgi:10,sosyal:2}},
   {text:"I am a bit tired, but it is okay, I think.",tag:"sosyal",effect:{sayginlik:7,bilgi:4}},
-  {text:"I say nothing because I do not want to sound weak.",tag:"korkak",effect:{sayginlik:-9,cesaret:-3}}]}
+  {text:"I say nothing because I do not want to sound weak.",tag:"korkak",effect:{sayginlik:-9,cesaret:-3}}]},
+  {id:"s407",gfx:"harbor",alert:false,day:"Gun 14",time:"05:50",loc:"Bridge - Pilot Station",sub:"Pilot exchange in English",who:"mateintl",
+  text:`Pilot boarding is ten minutes away. Daniel turns to you before the ladder party reports ready.
+
+"Cadet, give me the pilot exchange in English. Keep it short: draft, air draft, defects, tugs, and berth side."
+
+This is the kind of English that actually keeps operations clean.`,
+  choices:[
+  {text:"Pilot, good morning. Present draft forward seven decimal two, aft seven decimal six, no navigation defects, one tug forward and one aft, port side alongside.",tag:"kritik",effect:{bilgi:19,sayginlik:13,cesaret:3}},
+  {text:"Good morning pilot, the ship is okay and we are ready for berth.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
+  {text:"I leave the whole exchange to someone else without trying.",tag:"korkak",effect:{bilgi:-8,sayginlik:-9}}]},
+  {id:"s408",gfx:"bridge",alert:true,day:"Gun 14",time:"10:25",loc:"Accommodation - PSC Boarding",sub:"PSC officer questioning in English",who:"mateintl",
+  text:`A PSC officer steps in with quick questions and little patience.
+
+"Show me your last fire drill record, enclosed space entry permit, and rest hour record. Also tell me who is responsible for weekly GMDSS tests."
+
+The room goes quiet for a second.`,
+  choices:[
+  {text:"The fire drill record and enclosed space permit are in this file, rest hour record is updated to yesterday, and weekly GMDSS tests are under the responsible deck officer.",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"I know the records exist, sir, I just need some time to find them.",tag:"itaatkar",effect:{bilgi:7,sayginlik:5}},
+  {text:"I freeze and wait for somebody else to answer everything.",tag:"korkak",effect:{bilgi:-9,sayginlik:-10,cesaret:-2}}]},
+  {id:"s409",gfx:"bogaz",alert:true,day:"Gun 15",time:"03:15",loc:"Bridge - VHF Console",sub:"VHF standard phrases under pressure",who:"mateintl",
+  text:`Traffic thickens in the strait and the radio comes alive.
+
+"Cadet, answer that station with standard phrases. Confirm our position, intention, and that we will keep clear."
+
+On VHF, half-right English is often worse than silence.`,
+  choices:[
+  {text:"Traffic station, this is motor vessel ${sn}. We are inbound, passing buoy Charlie in five minutes, intending to remain on the starboard side of the channel and keep clear of outbound traffic.",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:3}},
+  {text:"This is our ship. We are coming and we will be careful.",tag:"akilli",effect:{bilgi:8,sayginlik:6}},
+  {text:"I answer with broken words and no clear intention.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
