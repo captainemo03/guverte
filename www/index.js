@@ -6529,7 +6529,37 @@ Senin zihninde dogru cizgi hangisi?`,
   choices:[
   {text:"Sesi dusurmek, mesafe acmak, tarafsiz kalmak, amire haber vermek ve emniyetli ayrimi saglamak birlikte dusunulur derim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
   {text:"Sert davranip herkesin ustune cikmanin en hizli cozum oldugunu dusunurum",tag:"cesur",effect:{cesaret:4,sayginlik:-5,bilgi:-4}},
-  {text:"Kavgada profesyonel bir yontemden cok kimin baskin oldugunun sonucu belirledigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
+  {text:"Kavgada profesyonel bir yontemden cok kimin baskin oldugunun sonucu belirledigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s442",gfx:"bridge",alert:true,day:"Gun 23",time:"23:50",loc:"Koprustu - Gece Vardiyasi",sub:"Yorgun cikilan vardiya emniyeti bozar",who:"z2",
+  text:`03-06 vardiyasindan once 2. Zabiti gozunun altindaki yorgunlugu fark etti.
+
+"Yorgunsan bunu saklamak profesyonellik degil" dedi. "Fatigue bazen bir hatadan once gelir. Soru su: rapor verir misin, yoksa zorlayip sessiz mi kalirsin?"
+
+Kopruustunde gurur bazen emniyetten pahaliya patlar.`,
+  choices:[
+  {text:"Yorgunlugumu durustce bildirir, yine de goreve uygunlugumu zabitle birlikte degerlendiririm",tag:"kritik",effect:{sayginlik:16,bilgi:10,cesaret:3}},
+  {text:"Bir sey olmaz diyip vardiyaya cikmaya devam ederim",tag:"itaatkar",effect:{sayginlik:3,cesaret:2,dinclik:-6}},
+  {text:"Sessiz kalir, hem yorgunlugu hem riski gizlerim",tag:"korkak",effect:{sayginlik:-10,bilgi:-7,dinclik:-8}}]},
+  {id:"s443",gfx:"deck",alert:true,day:"Gun 24",time:"08:40",loc:"Ana Guverte - Is Dagitimi",sub:"Emre itaatsizlik nasil buyur?",who:"lostromo",
+  text:`Lostromo bir tayfaya net bir yer verdi ama adam ters cevap verdi, isi baska yone cekmeye kalkti.
+
+"Mesele sertlik degil" diye homurdandi lostromo. "Emre itaatsizlik bazen egodan, bazen yorgunluktan, bazen de bozuk iletisimden cikar. Ama guvertede zincir bir yerden kirilinca risk buyur."
+
+Sen nasil yaklasirsin?`,
+  choices:[
+  {text:"Emrin ne oldugunu netlestirir, tansiyonu dusurur ve amir zinciri icinde yeniden teyit saglarim",tag:"kritik",effect:{bilgi:17,sayginlik:13,cesaret:2}},
+  {text:"Kimin daha sert cikabildigine gore isin cozulmesini beklerim",tag:"cesur",effect:{cesaret:4,sayginlik:-5,bilgi:-4}},
+  {text:"Emre itaatsizligin sadece kisisel bir surtusme oldugunu dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s444",gfx:"cabin",alert:false,day:"Gun 24",time:"18:10",loc:"Acente Ofisi Yani - Sikayet Defteri",sub:"Crew complaint nasil ele alinir?",who:"suvari",
+  text:`Bir personel yemek, vardiya dagilimi ve davranis diliyle ilgili resmi sikayet vermek istiyor.
+
+Suvari dosyayi kapatip sana bakti: "Crew complaint'i kucumseyen gemi, daha buyuk bir sorunu davet eder. Dinlemezsen kirginlik buyur; kontrol etmezsen de dedikodu sisteme doner."
+
+En dogru cizgi hangisi?`,
+  choices:[
+  {text:"Sikayeti ciddiye alir, kisiyi dinler, olay-bilgi-ayiklama yapar ve uygun amir zincirine tasirim",tag:"kritik",effect:{bilgi:18,sayginlik:14}},
+  {text:"Sikayetleri moral bozan detaylar gibi gorup gecistiririm",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Crew complaint'in genelde buyutulen kisisel meseleler oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
