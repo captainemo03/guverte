@@ -6479,7 +6479,57 @@ En saglam zabit/makine dusuncesi hangisi?`,
   choices:[
   {text:"Fiili operasyonu, ilgili record book'u ve destekleyici belgeyi birlikte tutarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
   {text:"Ana record book varsa destekleyici detaylarin ikinci planda kalabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
-  {text:"Kayitla fiili operasyon arasindaki bagin denetimde cok da aranmadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
+  {text:"Kayitla fiili operasyon arasindaki bagin denetimde cok da aranmadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s437",gfx:"galley",alert:true,day:"Gun 22",time:"19:15",loc:"Yemekhane - Aksam Servisi",sub:"Iki personel arasinda sert tartisma",who:"asci",
+  text:`Aksam servisi sirasinda ses bir anda yukseldi. Bir tayfa ile bir makine personeli birbirinin ustune yuruyor; herkes masada ama kimse rahat degil.
+
+Asci sessizce sana bakti: "Gemide kavga buyurse sadece iki kisi etkilenmez; vardiya, moral ve emniyet de bozulur."
+
+Bu anda ilk refleksin ne olur?`,
+  choices:[
+  {text:"Taraf olmayip sesi dusurmeye calisir, fiziksel temas buyumeden amire haber verir ve kalabaligi geri cekerim",tag:"kritik",effect:{sayginlik:18,cesaret:6,bilgi:8}},
+  {text:"Kendi tanidigim kisiyi sakinlestirmeye calisir, diger tarafi ikinci plana atarim",tag:"sosyal",effect:{sayginlik:6}},
+  {text:"Olaya karismayip nasilsa biri ayirir diye beklerim",tag:"korkak",effect:{sayginlik:-10,bilgi:-6}}]},
+  {id:"s438",gfx:"cabin",alert:true,day:"Gun 22",time:"19:40",loc:"Accommodation Koridoru",sub:"Kavga sonrasinda ifade ve kontrol",who:"z1",
+  text:`Tartisma dagildi ama hava hala sert. 1. Zabiti seni kenara ceker.
+
+"Gemi ici kargasa dagildi diye bitmez. Kimin nerede oldugu, alkol/uykusuzluk ihtimali, vardiya etkisi ve kimin yeniden birbirine temas etmeyecegi netlesmeli."
+
+En olgun yardim ne olur?`,
+  choices:[
+  {text:"Gordugumu tarafsiz aktarir, personelin ayrildigini teyit eder ve vardiya/emniyet etkisini not ederim",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+  {text:"Kimin hakli oldugunu anlatmaya odaklanirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Olay bittiyse kayda gerek olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s439",gfx:"bridge",alert:false,day:"Gun 22",time:"21:10",loc:"Koprustu - Gece Brifingi",sub:"Kargasa vardiya emniyetini nasil etkiler?",who:"suvari",
+  text:`Suvari gece brifinginde net konustu.
+
+"Gemide sinir patlamasi oldugunda mesele sadece insan iliskisi degil. O vardiyadaki dikkat, ekip guveni ve emir-komuta da etkilenir. Ertesi gunun kazasi bazen bugunun kavgasinda filizlenir."
+
+Bu durumda en dogru kaptan/stajyer cizgisi hangisi?`,
+  choices:[
+  {text:"Olayi insan ve emniyet meselesi birlikte gorur; vardiya uygunlugu ve ekip dagilimini yeniden degerlendiririm",tag:"kritik",effect:{bilgi:18,sayginlik:14}},
+  {text:"Kisisel tartismalarin vardiya emniyetiyle cok da bagli olmadigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Kavgayi sadece disiplin cezasi konusu gibi gorur, emniyet etkisini atlarim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s440",gfx:"deck",alert:true,day:"Gun 23",time:"09:00",loc:"Ana Guverte - Is Baslangici",sub:"Gerilimli ekibi ise nasil sokarsin?",who:"lostromo",
+  text:`Sabah is dagitimi var ama dunden kalan gerginlik yuzlerden okunuyor. Lostromo halat istasyonuna bakip homurdandi:
+
+"Kus insan gibi calismak istiyorsa once kargaşayı sogutacaksin. Yanlis ekibi yan yana koyarsan halat da, kafa da kopar."
+
+En dogru guverte refleksi ne olur?`,
+  choices:[
+  {text:"Riskli personeli ayri gorevlere dagitir, isi net boler ve ilk saat daha yakin gozetim isterim",tag:"kritik",effect:{bilgi:18,sayginlik:13,cesaret:3}},
+  {text:"Herkesi ayni duzende birakir, isin ortasinda zaten sakinlesirler diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Gerginligin is kalitesine buyuk etki etmeyecegini varsayarim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s441",gfx:"bridge",alert:false,day:"Gun 23",time:"13:30",loc:"Kaptan Kosku - Son Değerlendirme",sub:"De-escalation ne demek?",who:"suvari",
+  text:`Suvari seni son kez yokluyor:
+
+"De-escalation bazen bagirmamak, bazen ayirmak, bazen de birini susturmak degil; ortam isisini dusurmek, tarafsiz kalmak, yardim cagirmak ve emniyeti korumaktir."
+
+Senin zihninde dogru cizgi hangisi?`,
+  choices:[
+  {text:"Sesi dusurmek, mesafe acmak, tarafsiz kalmak, amire haber vermek ve emniyetli ayrimi saglamak birlikte dusunulur derim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Sert davranip herkesin ustune cikmanin en hizli cozum oldugunu dusunurum",tag:"cesur",effect:{cesaret:4,sayginlik:-5,bilgi:-4}},
+  {text:"Kavgada profesyonel bir yontemden cok kimin baskin oldugunun sonucu belirledigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
@@ -11843,7 +11893,18 @@ const GLOSSARY_TERMS = [
   {term:"Cargo Readiness", meaning:"Yuk operasyonuna baslamak icin belge, ekipman ve mahal hazirliginin tamamlanmis olmasi.", example:"Cargo readiness teyidi olmadan terminal baslat komutu verilmedi."},
   {term:"Hold Cleanliness", meaning:"Ozellikle bulk ve general cargo'da ambar temizliginin ticari ve survey acisindan yeterli olmasi.", example:"Hold cleanliness zayifsa claim daha yuk limaninda baslayabilir."},
   {term:"Loading Master", meaning:"Terminal veya shore tarafinda yuk operasyonunu yoneten sorumlu kisi.", example:"Loading master ile kurulan dil operasyonun tonunu belirler."},
-  {term:"Topping Off", meaning:"Tank veya yuklemenin son kisimlarinda hiz dusurup seviyeyi hassas tamamlama asamasi.", example:"Topping off en cok dikkat isteyen anlardan biridir."}
+  {term:"Topping Off", meaning:"Tank veya yuklemenin son kisimlarinda hiz dusurup seviyeyi hassas tamamlama asamasi.", example:"Topping off en cok dikkat isteyen anlardan biridir."},
+  {term:"De-Escalation", meaning:"Gerilim veya kavga buyumeden sesi, mesafeyi ve tehlikeyi dusurerek durumu sogutma yaklasimi.", example:"De-escalation olmadan dogru insan iliskisi bazen daha buyuk kargaşaya doner."},
+  {term:"Conflict Management", meaning:"Ekip icindeki anlasmazliklari emniyet, disiplin ve iletisim dengesinde yonetme becerisi.", example:"Kontrat uzadikca conflict management denizciligin gorunmeyen becerilerinden biri olur."},
+  {term:"Verbal Warning", meaning:"Durumu buyumeden once sozlu olarak yapilan net ve profesyonel uyari.", example:"Verbal warning zamaninda verilince fiziksel temas buyumeden durdu."},
+  {term:"Stand Down", meaning:"Personelin isi veya tartismayi bir sure birakarak geriye cekilmesi talimati.", example:"Lostromo iki kisiyi de stand down ettirip sonra yeniden gorev dagitti."},
+  {term:"Chain of Command", meaning:"Gemide emir ve sorumlulugun kime hangi sira ile gittigini belirleyen komuta zinciri.", example:"Kavga buyuyunce chain of command hizla isletildi."},
+  {term:"Witness Statement", meaning:"Bir olayi goren kisinin tarafsiz sekilde verdigi ifade veya yazili beyan.", example:"Witness statement olmadan olay sadece dedikoduya dondu."},
+  {term:"Misconduct", meaning:"Gemide disiplin, davranis veya gorev anlayisina aykiri uygunsuz hareket.", example:"Misconduct bazen sadece ahlak degil, vardiya emniyeti meselesi de olur."},
+  {term:"Fatigue Risk", meaning:"Yorgunlugun karar, davranis ve emniyet uzerinde yarattigi risk.", example:"Fatigue risk yuksekse tartisma ve hata ihtimali de artar."},
+  {term:"Crew Morale", meaning:"Murettebatin genel ruh hali, motivasyonu ve birlikte calisma istegi.", example:"Uzun seferlerde crew morale dustugunde en kucuk olay daha hizli buyur."},
+  {term:"Interpersonal Tension", meaning:"Iki veya daha fazla personel arasinda biriken kisisel gerilim.", example:"Interpersonal tension bazen is dagitiminda bile hissedilir."},
+  {term:"Cooling-Off Period", meaning:"Taraflarin hemen yeniden karsilasmamasi icin bir sure ayri tutuldugu soguma zamani.", example:"Cooling-off period verilince gece vardiyasi daha emniyetli planlandi."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
