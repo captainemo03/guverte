@@ -6239,7 +6239,247 @@ He watches whether your answer follows an order or falls apart halfway.`,
   choices:[
   {text:"Manifold connection is secured, drip tray is in place, scupper plugs are fitted, communication with shore is tested, and ESD is ready for immediate use.",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
   {text:"The manifold area is ready and we can start.",tag:"itaatkar",effect:{bilgi:7,sayginlik:5}},
-  {text:"I mix the checks, forget ESD, and give no clear confirmation.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]}
+  {text:"I mix the checks, forget ESD, and give no clear confirmation.",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}]},
+  {id:"s413",gfx:"night",alert:false,day:"Gun 16",time:"21:40",loc:"Koprustu - Gece Seyri",sub:"COLREG gorsel sinavi - gece isiklari",who:"z2",
+  text:`2. Zabiti gece ufkunu isaret etti.
+
+"Iki beyaz masthead, sancakta yesil sidelight goruyorsun. Hedef acisi da sancak tarafinda kapanmiyor. Bana crossing mi, head-on mi, overtaking mi oldugunu mantikla soyle."
+
+Bu kez ezber degil, goruntu okuma sinaniyor.`,
+  choices:[
+  {text:"Crossing durumu; hedefi sancakta goruyorum ve give-way dusuncesiyle yorumlarim",tag:"kritik",effect:{bilgi:18,sayginlik:12}},
+  {text:"Head-on gibi dusunur, iki geminin de sancaga donmesini beklerim",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Gece isiklarindan durumu ayirmanin cok da mumkun olmadigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s414",gfx:"radar",alert:false,day:"Gun 16",time:"22:05",loc:"Koprustu - Radar Konsolu",sub:"Radar / ARPA hedef secimi",who:"z2",
+  text:`Radar ekraninda uc hedef var. Biri sabit fener, biri kucuk balikci, biri de gercek carpismaya gidebilecek ticari hedef.
+
+"Yanlis target acquire edersen ARPA seni oyalayabilir. Once hangisini takip altina alirsin?"
+
+Ekran sessiz ama hata sesi hep aynidir.`,
+  choices:[
+  {text:"CPA/TCPA potansiyeli olan hareketli ticari hedefi once acquire eder, sonra digerlerini capraz kontrol ederim",tag:"kritik",effect:{bilgi:18,sayginlik:12}},
+  {text:"En parlak echo'yu once track'e alirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"ARPA'nin zaten kendi en onemli hedefi sececegini varsayarim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s415",gfx:"bridge",alert:false,day:"Gun 17",time:"04:50",loc:"ECDIS - Safety Settings",sub:"Safety contour ve guard zone mantigi",who:"z2",
+  text:`ECDIS route monitor acik. 2. Zabiti soruyor:
+
+"Safety contour'u, safety depth'i ve radar guard zone mantigini birbirine karistirma. Bu gece sığ suya yakin bir yaklasma var."
+
+Neyi once kontrol edersin?`,
+  choices:[
+  {text:"UKC dusuncesine gore safety contour/safety depth ayarini ve radar guard zone kapsamini birlikte kontrol ederim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Sadece route line gorunuyorsa yeterli oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Alarm sesi gelirse bakarim diye ayarlari o an onemsemem",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s416",gfx:"harbor",alert:false,day:"Gun 17",time:"07:15",loc:"Pilot Station Yaklasmasi",sub:"Tide / UKC / squat birlikte okunur",who:"suvari",
+  text:`Liman yaklasmasinda suvari harita ve gelgit tablosunu yan yana koydu.
+
+"Sadece charted depth yetmez. Tide var, squat var, trim var, bir de kanal darligi. UKC kagit ustunde rahat gorunup pratikte daralabilir."
+
+En profesyonel dusunce hangisi?`,
+  choices:[
+  {text:"Charted depth, gelgit yuksekligi, squat tahmini, trim ve emniyet payini birlikte okuyarak UKC kurarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"High water zamaniysa UKC'nin zaten sorun olmayacagini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"UKC'yi sadece draft ile depth farki gibi gorur, squat'i gereksiz bulurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s417",gfx:"bogaz",alert:false,day:"Gun 17",time:"11:25",loc:"Nehir Agzi - Dar Su",sub:"Squat hangi durumda buyur?",who:"z2",
+  text:`Dar suya girerken 2. Zabiti hiz tablosunu isaret etti.
+
+"Squat her gemide vardir ama dar suda ve yuksek suratte daha acimasiz hale gelir. Bazilari sancak/iskele etkisini hisseder ama altindaki sebebi kuramaz."
+
+Sence neye dikkat edilir?`,
+  choices:[
+  {text:"Surat, draft, kanal darligi ve su derinligini birlikte dusunur; gerekiyorsa konservatif hiz isterim",tag:"kritik",effect:{bilgi:18,sayginlik:12}},
+  {text:"Makine ileri gucluyse squat'in buyuk fark yaratmayacagini varsayarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Squat'in sadece buyuk tankerlerde oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s418",gfx:"cargo",alert:false,day:"Gun 17",time:"14:10",loc:"Ballast Control Sheet",sub:"Balast transferi ile list duzeltme",who:"z1",
+  text:`Gemi hafif sancaga yatik. 1. Zabiti ballast planini acti.
+
+"List duzeltmek sadece bir tank doldurmak degil. Free surface, trim, shear ve hangi tanklarin slack kalacagi birlikte dusunulur."
+
+Ilk refleksin ne olur?`,
+  choices:[
+  {text:"List sebebini, uygun tank ciftini, free surface etkisini ve trim sonucunu birlikte degerlendiririm",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"En yakin tanki basar, gemiyi hizla duzeltmeye calisirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Kucuk bir listin operasyonel onemi olmadigini dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s419",gfx:"cargo",alert:false,day:"Gun 17",time:"16:30",loc:"Ballast Tank Plan",sub:"Slack tank ve free surface riski",who:"suvari",
+  text:`Suvari tank planina kalemiyle iki tanki daire icine aldi.
+
+"En tehlikeli hata bazen yarim dolu tanki rahat sanmaktir. Slack tank, free surface ve GM kaybi bazen hic bagirmadan gelir."
+
+En dogru zabit dusuncesi hangisi?`,
+  choices:[
+  {text:"Mumkunse gereksiz slack tank birakmam, corrected GM dusuncesiyle transfer plani kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Tankta su oldugu surece free surface'in buyuk fark yaratmayacagini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Free surface'i sadece sinavlik bir konu gibi gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s420",gfx:"deck",alert:false,day:"Gun 18",time:"05:40",loc:"Bunker Station",sub:"Bunker checklist neden tek tek okunur?",who:"z3",
+  text:`Bunker almadan once checklist masaya acildi.
+
+"Manifold, sample, scupper plug, overflow watch, communication, SOPEP locker, emergency stop... Bunlar formalite degil. Bunker kazasi en cok 'zaten biliyoruz' denilen yerde olur."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"Checklist'i shore ile adim adim capraz teyit eder, imzayi ancak fiili hazirlikla eslestiririm",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Genel gorunus hazirsa checklist'in hizlica gecilebilecegini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Bunker oncesi bu kadar ayrintinin zaman kaybi oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s421",gfx:"deck",alert:true,day:"Gun 18",time:"07:10",loc:"Manifold - Bunker Sample",sub:"Sample ve overflow watch mantigi",who:"carkci",
+  text:`Bunker hatti hazir. Carkcibasi sample noktasini gosterdi.
+
+"Representative sample, watchman, overflow riski, tank line-up... Bunker operasyonu sessiz giderken bile dikkat ister."
+
+Sence en guclu kontrol hangisi?`,
+  choices:[
+  {text:"Sample zincirini, tank seviyelerini, watchman duzenini ve overflow'a karsi haberlesmeyi birlikte kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Sample alinsin yeter, geri kalan zaten makinede takip edilir diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Overflow'un alarm gelmeden once ciddi risk yaratmayacagini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s422",gfx:"cargo",alert:false,day:"Gun 18",time:"10:50",loc:"Dangerous Cargo Desk",sub:"IMDG placard ve segregation",who:"z1",
+  text:`Tehlikeli yuk evraklari masada. 1. Zabiti placard kopyalarini siraladi.
+
+"Class'i bilmeden, segregation'i okumadan ve manifesti capraz kontrol etmeden DG operasyonu guvenli sayilmaz."
+
+Hangi refleks daha dogru?`,
+  choices:[
+  {text:"UN no, class, placard, segregation geregi ve dangerous cargo manifest uyumunu birlikte kontrol ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Placard varsa yeterli oldugunu, detay manifestin ikinci planda kalacagini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"DG yukleri normal manifest mantigiyla ayni duzlemde gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s423",gfx:"cargo",alert:true,day:"Gun 18",time:"12:15",loc:"Container Bay - DG Check",sub:"Belge, etiket, stowage uyusmazligi",who:"z1",
+  text:`Bir konteynerin placard'i ile listelenen bilgi birebir oturmuyor.
+
+"Iste burada claim degil once emniyet dusunulur" diyor 1. Zabiti. "Belge, etiket ve fiili stowage birbiriyle ayni dili konusacak."
+
+Ne dersin?`,
+  choices:[
+  {text:"Uyumsuzlugu durdurucu bir emniyet konusu sayar, DG manifest ve terminal ile capraz dogrulama isterim",tag:"kritik",effect:{bilgi:19,sayginlik:14,cesaret:2}},
+  {text:"Placard kucuk fark gosteriyorsa operasyonu durdurmaya gerek olmadigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Tehlikeli yuk detayini liman tarafinin sorunu gibi gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s424",gfx:"deck",alert:false,day:"Gun 19",time:"08:30",loc:"Permit Board",sub:"Working aloft ve electrical isolation",who:"z3",
+  text:`Permit board ustunde birkac is ayni anda asili.
+
+"Hot work, enclosed space, working aloft, electrical isolation... Permit sadece imza kagidi degil; izole ettigini gercekten izole ettin mi sorusudur."
+
+En dogru is disiplini hangisi?`,
+  choices:[
+  {text:"Isi turune gore risk, izolasyon, kurtarma plani ve LOTO gerekliligini birlikte kontrol ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Permit imzaliysa saha kontrolunun ikinci planda kaldigini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Ayni mahalde birden fazla permitin ciddi fark yaratmayacagini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s425",gfx:"deck",alert:false,day:"Gun 19",time:"09:10",loc:"Switchboard Access",sub:"Lock out / tag out mantigi",who:"carkci",
+  text:`Carkcibasi switchboard yaninda durdu.
+
+"Enerjiyi kestigini sanmakla enerjiyi gercekten izole etmek ayni sey degil. Lock out / tag out unutulursa adam en sessiz sekilde yaralanir."
+
+Ilk adim ne olur?`,
+  choices:[
+  {text:"Yetkili izolasyon, fiziksel lock/tag, sifir enerji teyidi ve geri verme kontrolunu birlikte uygularim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Switch off yeterlidir, etikete gerek kalmaz diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"LOTO'yu fazla teorik bulur, pratikte cok da gerekli gormem",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s426",gfx:"harbor",alert:false,day:"Gun 19",time:"13:20",loc:"Dry Dock - Hull Side",sub:"Sac kalinligi ve coating sistemi",who:"suvari",
+  text:`Kuru havuzda saclarin uzerinde tebesir isaretleri var.
+
+"Ultrasonic thickness, pitting, coating breakdown, anodik koruma..." diyor suvari. "Bunlar geminin yasini degil, ne kadar dikkatli yaslandigini anlatir."
+
+Neye odaklanirsin?`,
+  choices:[
+  {text:"Kalınlık olcumleri, lokal korozyon, boya sistemi ve anodik korumanin birlikte okunmasina bakarim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Boya yeniyse sac kalinligi tarafinin ikinci planda kalabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Dry dock incelemelerini sadece surveyor'un isi gibi gorurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s427",gfx:"engine",alert:false,day:"Gun 19",time:"15:35",loc:"Dry Dock - Sea Chest / Propeller",sub:"Sea chest, pervane, dumen, anode kontrolu",who:"carkci",
+  text:`Pervane altinda durmak insana geminin baska bir yuzunu gosteriyor.
+
+"Sea chest, rudder clearances, propeller blade damage, rope guard, sacrificial anodes..." diye sayiyor carkcibasi. "Liste uzar ama mantik birdir: denize dokunan parcayi ihmal etme."
+
+Hangisi daha olgun cevap?`,
+  choices:[
+  {text:"Sea chest, pervane, dumen ve anodik korumayi operasyon ve omur acisindan birlikte degerlendiririm",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Pervane saglamsa digerlerinin buyuk olcude guvende oldugunu varsayarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Bu detaylarin gunluk denizcilikle ciddi bag kurmadigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s428",gfx:"bridge",alert:false,day:"Gun 20",time:"08:00",loc:"Class Survey Meeting",sub:"Surveyor neyi sorar, neyi gormek ister?",who:"suvari",
+  text:`Class surveyor dosyayla geldi. Ilk sorular teknik ama ton daha da onemli.
+
+"Test records? Class items due? Fire doors? Emergency generator? Log evidence?" diye hizla ilerliyor.
+
+Bu anda en iyi stajyer refleksi ne olur?`,
+  choices:[
+  {text:"Sorulan kalemin kaydini, fiili durumunu ve ilgili mahali birlikte hazir ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Surveyor ne isterse sonradan toplariz diye dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Survey'i sadece kaptan ve chief'in sorunu gibi gorur, geri cekilirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s429",gfx:"harbor",alert:true,day:"Gun 20",time:"09:40",loc:"PSC Follow-Up",sub:"Deficiency nasil dogar?",who:"z3",
+  text:`PSC memuru bu kez daha somut soruyor:
+
+"Show me the actual record. Show me the actual equipment. Show me that the crew understands it."
+
+Eksik sadece kagitta degilse deficiency buyur. Peki en saglam savunma nedir?`,
+  choices:[
+  {text:"Belge, ekipman ve personel bilgisi arasindaki uyumu kurar; sadece imzaya yaslanmam",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Imzali kayit varsa personel bilgisinin ikinci planda kalacagini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Deficiency'nin biraz da memurun keyfine baktigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s430",gfx:"cargo",alert:false,day:"Gun 20",time:"14:25",loc:"CCR / Tank Deck",sub:"Inert gas ve gas freeing farki",who:"carkci",
+  text:`Tanker/LNG tarafinin dili daha keskin. Carkcibasi sana bakiyor:
+
+"Inert gas, gas freeing, purging... Bunlari birbirine karistiran adam ya urunu bozar ya mahali tehlikeye acar."
+
+Ne dersin?`,
+  choices:[
+  {text:"Inerting, gas freeing ve purging'in farkli hedeflere hizmet ettigini; atmosfer ve operasyon amaciyla birlikte aciklarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Ucunu de genel olarak tanki havalandirmak gibi gorurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Bu ayrimlarin sadece gas carrier uzmanlari icin oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s431",gfx:"cargo",alert:false,day:"Gun 20",time:"16:00",loc:"Cargo Control Room",sub:"COW, reliquefaction, cargo compressor mantigi",who:"suvari",
+  text:`Suvari bu kez tanker/LNG dosyasini acti.
+
+"COW ne icin, cargo compressor ne zaman, reliquefaction neyi dengeler? Ezber cevap degil; operasyon mantigi istiyorum."
+
+En guclu yorum hangisi?`,
+  choices:[
+  {text:"Her sistemin urun, basinc, tank emniyeti ve operasyon surekliligiyle olan bagini birlikte kurarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Bu sistemleri sadece ozel tanker terimi gibi soyler gecerim",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Tanker/LNG ekipmanlarini pratikte birbirine yakin seyler gibi gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s432",gfx:"harbor",alert:false,day:"Gun 21",time:"05:20",loc:"Bridge / Pilot Station / Berth",sub:"Canli liman zinciri - ilk brifing",who:"suvari",
+  text:`Pilot station yaklasiyor. Tug plan, berth side, line handling, cargo watch ve departure hazirligi daha baslamadan ayni zincirin parcasi.
+
+"Liman operasyonu all fast ile baslayip sailing prep ile biter" diyor suvari. "Bunu tek tek degil butun gor."
+
+Ilk profesyonel bakis ne olur?`,
+  choices:[
+  {text:"Pilot, tug, berth, all fast, cargo watch ve departure hazirligini tek operasyon zinciri gibi kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Asil is all fast sonrasi baslar diye pilot/tug tarafini ikinci plana atarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Liman zincirini birbirinden kopuk gorevler gibi dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s433",gfx:"meteo_panel",alert:false,day:"Gun 21",time:"13:35",loc:"Koprustu - Hava Karari",sub:"Bulut, swell ve barometreyi birlikte oku",who:"suvari",
+  text:`Suvari bu kez seni konusturmuyor, baktiriyor.
+
+"Bulut tipi, swell yonu, basinc trendi ve gorus ayni cizginin parcalari. Her seyi bir cihazdan bekleyen zabit gec kalir."
+
+Hangi yorum daha olgun?`,
+  choices:[
+  {text:"Bulut, swell, barometre ve gorusu birlikte okuyup rota/guverte kararina ceviririm",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Barometre normalse diger isaretlerin kritik olmayabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Meteorolojinin operasyona ancak hava cok kotu oldugunda etki ettigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s434",gfx:"deck",alert:true,day:"Gun 21",time:"16:20",loc:"Mooring Station",sub:"Snap-back ve line handling guvenligi",who:"lostromo",
+  text:`Lostromo bu kez sesini bilerek sertlestirdi.
+
+"Dogru halati vermek kadar dogru yerde durmak da denizciliktir. Snap-back zone, heaving line, messenger line, bight of a line... Birini hafife alan guverteyi anlamamis sayilir."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"Hat yolunu, snap-back alanini ve personel pozisyonunu birlikte kontrol eder; komutu net tekrar ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:2}},
+  {text:"Halat saglamsa personel durusunun ikinci planda kalabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Mooring istasyonunda biraz sansin da buyuk rol oynadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s435",gfx:"deck",alert:false,day:"Gun 22",time:"09:30",loc:"MARPOL Station",sub:"Garbage, sludge, oily water, sewage, ballast water",who:"z3",
+  text:`MARPOL klasorleri masada ama 3. Zabiti kagida degil sana bakiyor.
+
+"Cop ayirma, sludge transferi, OWS mantigi, sewage, ballast water... Bunlar sirf ceza korkusu icin degil; geminin karakteri icin de okunur."
+
+En dogru cizgi hangisi?`,
+  choices:[
+  {text:"Her atik ve cevresel akisi kendi kaydi, kendi sistemi ve kendi limitleriyle ayri ayri yonetirim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"MARPOL islerinde genel dikkat yeterlidir, ayrik sistemlerin hepsine ayni gozle bakarim",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Cevre prosedurlerini daha cok ofis ve denetim isi gibi gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s436",gfx:"deck",alert:true,day:"Gun 22",time:"11:05",loc:"OWS / Sludge Transfer Area",sub:"Hangi kayit neyi savunur?",who:"carkci",
+  text:`Carkcibasi son dersi net veriyor:
+
+"Bir operasyonu yaptin diye bitmez. OWS, sludge transfer, garbage landing receipt, ballast exchange... Kayitsiz dogru is bazen denetimde yapilmamis sayilir."
+
+En saglam zabit/makine dusuncesi hangisi?`,
+  choices:[
+  {text:"Fiili operasyonu, ilgili record book'u ve destekleyici belgeyi birlikte tutarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Ana record book varsa destekleyici detaylarin ikinci planda kalabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Kayitla fiili operasyon arasindaki bagin denetimde cok da aranmadigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
