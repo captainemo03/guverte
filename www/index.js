@@ -6559,7 +6559,107 @@ En dogru cizgi hangisi?`,
   choices:[
   {text:"Sikayeti ciddiye alir, kisiyi dinler, olay-bilgi-ayiklama yapar ve uygun amir zincirine tasirim",tag:"kritik",effect:{bilgi:18,sayginlik:14}},
   {text:"Sikayetleri moral bozan detaylar gibi gorup gecistiririm",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
-  {text:"Crew complaint'in genelde buyutulen kisisel meseleler oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]}
+  {text:"Crew complaint'in genelde buyutulen kisisel meseleler oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s445",gfx:"cabin",alert:true,day:"Gun 24",time:"22:35",loc:"Accommodation Corridor",sub:"Alkol suphesi varsa ne yaparsin?",who:"suvari",
+  text:`Geceye dogru bir personelin yuruyusu bozuldu, konusmasi da daginik. Kimse dogrudan suclamaya yanaşmiyor ama vardiya guveni acikca zedeleniyor.
+
+Suvari sesi dusurerek konustu: "Alkol suphe oldugunda mesele dedikodu degil; gorev uygunlugu, witness, chain of command ve emniyetli ayirma isidir."
+
+Bu anda en profesyonel refleks hangisi?`,
+  choices:[
+  {text:"Kisiyi kalabaliktan ayirir, tek basima hukum vermeden amir zinciri ve witness mantigiyla durumu raporlarim",tag:"kritik",effect:{bilgi:19,sayginlik:14,cesaret:3}},
+  {text:"Kesin sarhostur diye acikca damgalar, olayi orada sertlestiririm",tag:"cesur",effect:{cesaret:5,sayginlik:-6,bilgi:-5}},
+  {text:"Boyle seylere karismayip gormezden gelirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s446",gfx:"cabin",alert:true,day:"Gun 25",time:"10:05",loc:"Smoking Room Yani",sub:"Mobbing supheleri nasil ele alinir?",who:"z1",
+  text:`Bir personel ayni kisiden surekli asagilayici dil, kucuk dusurme ve is ustunde hedef gosterme gordugunu soyluyor.
+
+1. Zabiti cizgiyi koydu: "Mobbing hikaye diye gecistirilirse ekip uyumu curur. Duygu baska, pattern baska, kayit baska sey."
+
+Sen nasil yardimci olursun?`,
+  choices:[
+  {text:"Kisiyi dinler, tekrar eden davranis oruntusunu ayiklar, kayit ve uygun amir/HR zincirine tasirim",tag:"kritik",effect:{bilgi:18,sayginlik:14}},
+  {text:"Iki kisi anlasamiyor diye dusunup konuyu yumusatmaya calisirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Gemide sert dil normaldir deyip konuyu kapatirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s447",gfx:"harbor",alert:false,day:"Gun 25",time:"14:25",loc:"Class Office",sub:"Surveyor once neye bakar?",who:"suvari",
+  text:`Surveyor klasor, flashlight ve not defteriyle geldi. Sordugu ilk sey sadece belge degil; belgenin gemideki fiili durumla uyumu.
+
+"Drill record, maintenance evidence, last test, defect follow-up..." diye saydi suvari. "Surveyor kagit kadar davranis da okur."
+
+En saglam hazirlik mantigi hangisi?`,
+  choices:[
+  {text:"Belge, tarih, ekipman kondisyonu ve takip edilen deficiency akisini birlikte hazir tutarim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Belge klasoru duzgunse survey'in geri kalani zaten akar diye dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Surveyorun esasen kagit imzalatip gidecegini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s448",gfx:"harbor",alert:true,day:"Gun 25",time:"16:10",loc:"PSC Walkthrough",sub:"Kucuk deficiency nasil buyur?",who:"z3",
+  text:`PSC memuru bir fire door'u acik buldu, yakinda da zayif bir kayit uyumsuzlugu cikti.
+
+3. Zabiti fısıldadı: "Deficiency tek buyuk patlamayla degil, kucuk kaymalarin zinciriyle gelir."
+
+Bu anda dogru zabit dusuncesi hangisi?`,
+  choices:[
+  {text:"Fiziki eksigi hemen emniyete alir, kayit uyumsuzlugunu da acikca duzeltme zinciriyle ele alirim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Memur fark etmediyse kayit tarafini sonra bakariz diye erteleyebilirim",tag:"itaatkar",effect:{bilgi:4,sayginlik:3}},
+  {text:"Kucuk deficiency'lerin buyuk sonuca donmeyecegini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s449",gfx:"engine",alert:false,day:"Gun 26",time:"09:30",loc:"Dry Dock - Stern Block Area",sub:"Rudder, clearance ve anode mantigi",who:"carkci",
+  text:`Havuzda geminin alti ilk kez tam acik. Dumen pala, pintle, clearance, sea chest grating ve anodik koruma tek tek bakiliyor.
+
+"Dry dock gezisi turistik degil," dedi carkcibasi. "Suyun altinda saklanan sorunlar burada gorulur."
+
+En olgun bakis hangisi?`,
+  choices:[
+  {text:"Dumen/propeller/sea chest/anode tarafini sadece gormekle kalmaz, condition ve sonraki aksiyonu birlikte not ederim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Havuz isi daha cok superintendent ve class'in gorevi gibi gorunur bana",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Suyun altindaki detaylarin stajyer icin pek degerli olmadigini dusunurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s450",gfx:"cargo",alert:false,day:"Gun 26",time:"15:45",loc:"Cargo Control Room",sub:"LNG / tanker tarafinda cargo compressor neyi degistirir?",who:"suvari",
+  text:`CCR ekraninda cargo compressor, reliquefaction ve pressure trendleri birlikte akiyor.
+
+Suvari yavasca anlatti: "Tanker/LNG disiplininde tek cihaz degil; hatlarin birbiriyle iliskisi emniyeti kurar. Inert gas, vapour path, compressor ve pressure bir aile gibidir."
+
+Bu aileyi en dogru nasil okursun?`,
+  choices:[
+  {text:"Compressor, pressure, vapour return ve operasyon amacini tek zincir gibi birlikte okurum",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Cargo compressor'u sadece makinenin ilgilendirdigi bir detay gibi gorurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"CCR ekranlarinin cogunun sembolik oldugunu, gercek riski pek degistirmedigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s451",gfx:"cargo",alert:true,day:"Gun 26",time:"18:20",loc:"Tank Deck Boundary",sub:"Gas freeing ve purging karistirilirsa ne olur?",who:"carkci",
+  text:`Tank deck brifinginde iki terim ustune takildilar: purging ve gas freeing. Bir rating ikisini ayni sey gibi anlatti.
+
+Carkcibasi hemen kesti: "Yanlis kelime bazen yanlis operasyon zincirine gider. Biri oksijen/karisim kontroluyle ilgilidir, digeri serbest gazdan cikis disipliniyle."
+
+Sen hangi cizgiyi secersin?`,
+  choices:[
+  {text:"Purging ve gas freeing'in farkini, gaz yolu ve emniyet amaciyla birlikte netlestiririm",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Ikisinin de tanki havalandirmak oldugunu dusunup ayrimi ikinci plana atarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Bu tur teknik terimlerin sahadaki pratigi fazla etkilemedigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s452",gfx:"cargo",alert:false,day:"Gun 27",time:"07:50",loc:"Ballast Control Panel",sub:"List duzeltmek icin hangi tanka gidersin?",who:"z1",
+  text:`Gemide hafif iskele listi var. 1. Zabiti paneli acip once seni konusturuyor.
+
+"Tek tanka su basmak cevap degil. Hangi tank ciftine, hangi sira ile, hangi trim sonucu ve hangi free surface cezasiyla gidecegini dusuneceksin."
+
+En saglam ballast muhakemesi hangisi?`,
+  choices:[
+  {text:"List, trim, slack tank riski ve pompa/valf dizilimini birlikte okuyup uygun tank ciftini secmeye calisirim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Gemiyi en hizli duzelten tanka gitmek yeterlidir diye dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Ballast panelini daha cok chief officer'in ezber isi gibi gorurum",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s453",gfx:"bridge",alert:false,day:"Gun 27",time:"21:40",loc:"Monkey Island",sub:"Murettebat psikolojisi de emniyet konusudur",who:"suvari",
+  text:`Uzun seferin sonu yaklasirken suvari sert ama sakin bir cizgi kurdu.
+
+"Moral duserse ses artar. Yalnizlik uzarsa insan kapanir. Ofke birikirse kucuk emir buyur. Tukenme gelirse herkes birbirini duymamaya baslar. Crew harmony luks degil, emniyet unsurudur."
+
+Bu bakisi nasil alirsin?`,
+  choices:[
+  {text:"Moral, yalnizlik, ofke, tukenme ve ekip uyumunu emniyetin insan tarafi olarak birlikte gorurum",tag:"kritik",effect:{bilgi:18,sayginlik:14,cesaret:2}},
+  {text:"Insan psikolojisinin gemide ikinci planda kaldigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Is iyi gidiyorsa moral ve uyumun ayri takip gerektirmedigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s454",gfx:"cabin",alert:false,day:"Gun 28",time:"00:15",loc:"Crew Day Room",sub:"Yalnizlik ve tukenme bazen sessiz gelir",who:"asci",
+  text:`Asci gece cay koyarken sessizce soylendi:
+
+"Bazi insanlar bagirarak degil susarak yorulur. Bir sure sonra ne yedigi, ne uyudugu, ne de kimseyle konustugu duzenli olur."
+
+Gemide insan tarafini anlayan refleks hangisi?`,
+  choices:[
+  {text:"Sessiz degisimi fark eder, kisiyi zorlamadan yoklar ve gerekiyorsa amir zincirine insani bir dille tasirim",tag:"kritik",effect:{sayginlik:17,bilgi:11}},
+  {text:"Kendi haline birakmanin her zaman en iyisi oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Boyle belirtilerin is disi ve onemsiz oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
@@ -11144,6 +11244,11 @@ const STUDENT_NOTES = [
   {head:"YUK OPERASYONU / LASHING", body:"Yuk ellecleme sirasinda isaretlesme, guvenli alan, vinc altina girmeme ve stop komutunun netligi esastir.<br>Lashing gerginligi, twist lock, turnbuckle, rod ve hava oncesi son kontrol ihmal edilmez.<br>Cargo securing manual referans dokumandir.", tip:"Near-miss de raporlanir."},
   {head:"GEMICI BAGLARI", body:buildKnotGallery(), tip:"Bag secimi kadar bagi dogru yere atmak da denizciliktir."},
   {head:"STABILITE / BALLAST", body:"GM, trim, list, free surface effect, displacement ve MCTC kavramlari temel bilinmelidir.<br>Ballast operasyonunda sounding, valf sirasi, tank secimi ve hedef trim/list birlikte dusunulur.<br>Slack tank bazen gizli dusmandir.<br>Ballast exchange ve ilgili MARPOL / ballast water kayit disiplini plansiz yurutulmez.<br>Heavy weather ballast planinda serbest yuzey, yapisal limit ve emniyetli trim birlikte ele alinir.", tip:"Bir tanki duzeltirken baska sorunu yaratma."},
+  {head:"BALLAST OPERASYON PANELI", body:"Ballast paneline bakarken soru sadece <b>hangi tanki doldurayim?</b> degildir.<br><b>1.</b> List mi duzeltiyorum, trim mi, draft mi, yoksa hepsini birden mi etkiliyorum?<br><b>2.</b> Hangi tank ciftini seciyorum; port/starboard ve fore/aft sonucu ne?<br><b>3.</b> Slack tank yaratip <b>free surface</b> cezasini buyutuyor muyum?<br><b>4.</b> Pompa, line-up, remote valve ve sounding bilgisi birbiriyle uyumlu mu?<br><b>5.</b> Heavy weather, squat, air draft veya berth draft limitini istemeden bozuyor muyum?<br><b>6.</b> Yapilan transferin kaydi, ballast water / exchange disiplini ve son durum raporu tamam mi?<br><br><b>Kisa mantik:</b> Ballast paneli bir doldur-bosalt oyunu degil; stabilite, draft, trim, free surface ve kayit disiplininin ayni anda yonetildigi bir kontrol masasidir.", tip:"En hizli transfer her zaman en dogru transfer degildir."},
+  {head:"MURETTEBAT PSIKOLOJISI", body:"Gemide insan davranisi da teknik konu kadar emniyet konusudur.<br><b>Moral</b> dustugunde en basit is bile agir hissedilir.<br><b>Yalnizlik</b> uzadikca kisi geri cekilir, iletisim azalir.<br><b>Ofke</b> birikirse emir-komuta daha cabuk surtunur.<br><b>Tukenme</b> sadece uyku eksikligi degil; zihinsel yipranma ve iste kopmadir.<br><b>Ekip uyumu / crew harmony</b> ise herkesin birbirini sevmek zorunda oldugu degil, ayni emniyet cizgisinde calisabildigi durumdur.<br><br><b>Erken isaretler:</b> ani sessizlik, asiri tepkisellik, iste daginma, yemek/uyku bozulmasi, vardiya hatalarinda artis, dedikodu ve kutuplasma.<br><b>Dogru refleks:</b> damga vurmak yerine gozlem, kayit, sakin iletisim, gerekirse amir zinciri ve personeli riske sokmayacak is dagilimi.<br><br><b>Kisa not:</b> Denizcilikte insan yonetimi yumusaklik degil; kazayi daha dogmadan durdurma becerisidir.", tip:"Crew morale luks degil, emniyet tamponudur."},
+  {head:"SURVEY / PSC / CLASS", body:"Surveyor veya PSC memuru geldiginde sadece dosya degil, geminin gunluk karakteri de denetlenir.<br><b>Survey / class</b> tarafinda class item'lar, maintenance evidence, defect follow-up, test ve condition birlikte okunur.<br><b>PSC</b> tarafinda ise belge, emniyet ekipmani, yangin kapilari, escape route, drill records, GMDSS testleri, logbook uyumu ve personelin cevap kalitesi bile tabloya girer.<br><b>Deficiency</b> cogu zaman tek buyuk hatadan degil; kucuk fiziksel eksik + kayit uyumsuzlugu + zayif takip zincirinden dogar.<br><br><b>Hazirlik mantigi:</b> belge tarihi dogru olacak, ekipman calisacak, kisi neyi neden yaptigini bilecek, gorulen eksik de saklanmayip duzeltme zincirine girecek.", tip:"Surveyor kagit kadar tavri, takip disiplinini ve gemi kondisyonunu da okur."},
+  {head:"DRY DOCK / UNDERWATER HULL", body:"Dry dock gunu geminin su altinda gizli kalan karakteri acilir.<br><b>Pervane</b> palalari, darbe, erozyon ve cavitation izi acisindan incelenir.<br><b>Rudder / dumen</b> tarafinda clearance, stock, pintle ve hareket yuzeyleri okunur.<br><b>Sea chest</b> ve grating'ler fouling, tikanma ve kaplama durumuyla kontrol edilir.<br><b>Anodik koruma</b> tukenmis mi, dengesiz mi bakilir.<br><b>Coating / boya sistemi</b> ile sac kalinligi birlikte dusunulur; sadece pasin rengi degil, metal kaybi da onemlidir.<br><br><b>Kisa mantik:</b> Havuz, su altinda gormedigimiz riskleri gormek icindir; sadece seyretmek icin degil, sonraki aksiyonu planlamak icin.", tip:"Dry dock gezisi turistik degil, derslik gibidir."},
+  {head:"TANKER / LNG DERIN PAKET", body:"Tanker ve LNG tarafinda kelimeler birbirine benzer ama operasyon amaci farklidir.<br><b>Inert gas</b> atmosferi emniyetli aralikta tutmak icin dusunulur.<br><b>Purging</b> ile <b>gas freeing</b> ayni sey degildir; gaz yolu, hedef atmosfer ve sonraki operasyon farklidir.<br><b>COW</b> cargo tank temizligine ve operasyon ekonomisine dokunur ama prosedursuz uygulanmaz.<br><b>Reliquefaction</b>, <b>cargo compressor</b>, pressure ve vapour path birlikte okunur.<br><b>CCR</b> ekranlarinda tek sayi degil; manifold, line-up, vapour return, ESD ve tank trendi bir zincir olarak gorulur.<br><br><b>Kisa not:</b> Tanker/LNG disiplininde yanlis terim bazen yanlis operasyon anlamina gelir; bu yuzden dil ve prosedur birbirinden ayrilmaz.", tip:"Bu alanlarda 'asagi yukari ayni sey' diye bir luks yoktur."},
   {head:"RASPA - BOYA / GUVERTELIK", body:"Yuzey hazirligi, pas derecesi, tuz kalintisi, astar secimi, katlar arasi bekleme ve PPE kullanimi boya isin temelidir.<br>Chipping hammer, needle gun, wire brush, primer ve top coat ne icin kullanildigi bilinmelidir.", tip:"Pasin ustunu kapatmak pasi bitirmez."},
   {head:"DENIZCILIK SOZLUGU A-F", body:"Abeam: tam yan omuzluk<br>Abaft: kicin gerisi<br>Aft: kic tarafi<br>Alongside: borda bordaya yanaşık<br>Astern: kıç tarafa dogru / geriye<br>All fast: baglama tamam<br>Air draft: su hattindan en yuksek noktaya kadar yukseklik<br>Freeboard: su hattindan guverteye olan yukseklik", tip:"Terimler kulaga oturdukca vardiya dili hizlanir."},
   {head:"DENIZCILIK SOZLUGU G-M", body:"GM: metasantrik yukseklik<br>Heading: geminin pruvasinin baktigi yon<br>COG: yer uzerindeki gercek gidis istikameti<br>SOG: yer uzerindeki hiz<br>Leeway: ruzgarla yan kayma<br>List: yan yatma<br>Trim: bas-kic oturuş farki<br>Mooring: baglama operasyonu", tip:"Ayni sey sanilan bircok kelime aslinda farkli anlama gelir."},
@@ -11935,6 +12040,25 @@ const GLOSSARY_TERMS = [
   {term:"Crew Morale", meaning:"Murettebatin genel ruh hali, motivasyonu ve birlikte calisma istegi.", example:"Uzun seferlerde crew morale dustugunde en kucuk olay daha hizli buyur."},
   {term:"Interpersonal Tension", meaning:"Iki veya daha fazla personel arasinda biriken kisisel gerilim.", example:"Interpersonal tension bazen is dagitiminda bile hissedilir."},
   {term:"Cooling-Off Period", meaning:"Taraflarin hemen yeniden karsilasmamasi icin bir sure ayri tutuldugu soguma zamani.", example:"Cooling-off period verilince gece vardiyasi daha emniyetli planlandi."}
+  ,{term:"Alcohol Suspicion", meaning:"Bir personelin alkol etkisi altinda olabilecegine dair davranis, koku, denge veya konusma bozuklugu gibi emarelerin resmi ve dikkatli sekilde ele alinmasi durumu.", example:"Alcohol suspicion varsa dedikodu degil witness ve chain of command mantigi calisir."}
+  ,{term:"Mobbing", meaning:"Tek seferlik sertlikten farkli olarak tekrar eden, kisiyi kucuk dusuren veya sistematik baski kuran davranis oruntusu.", example:"Mobbing supheleri kayitsiz birakilirsa ekip uyumu daha hizli bozulur."}
+  ,{term:"Unfit for Duty", meaning:"Personelin yorgunluk, alkol, hastalik veya zihinsel durum sebebiyle gorev icin emniyetli kabul edilememesi.", example:"Kopruustunde unfit for duty riski varsa vardiya plani hemen gozden gecirilir."}
+  ,{term:"Witness", meaning:"Bir olayi dogrudan goren veya ilgili durumu teyit eden kisi.", example:"Disiplin meselesinde witness ifadesi karari duygudan cikarip olguya yaklastirir."}
+  ,{term:"Pattern of Behavior", meaning:"Tek bir olaydan ziyade tekrar eden davranis cizgisi.", example:"Surveyor kadar kaptan da pattern of behavior gorurse konuyu daha ciddiye alir."}
+  ,{term:"Burnout", meaning:"Uzun sureli yorgunluk, baski ve anlamsizlik hissiyle gelen zihinsel ve duygusal tukenme.", example:"Burnout bazen hata yapmadan once iletisimde kopukluk olarak gorunur."}
+  ,{term:"Crew Harmony", meaning:"Murettebatin birbirine kusursuzca uyumlu olmasi degil, emniyetli calisabilecek kadar ortak cizgi tutturmasi.", example:"Crew harmony bozuldugunda en basit is dagitimi bile gerginlesir."}
+  ,{term:"Class Survey", meaning:"Geminin klas kurallarina uygunlugunu dogrulamak icin yapilan survey ve inceleme sureci.", example:"Class survey sirasinda sadece belge degil kondisyon da okunur."}
+  ,{term:"Deficiency", meaning:"Denetimde tespit edilen fiziksel, prosedurel veya kayitsal eksiklik.", example:"Kucuk bir deficiency bile diger uyumsuzluklarla birlesince buyuk sonuca gidebilir."}
+  ,{term:"Condition of Class", meaning:"Klas tarafindan belirli eksik veya takip isteyen konu icin konan resmi kosul/kisit.", example:"Condition of class varsa due date ve duzeltme plani yakindan izlenir."}
+  ,{term:"Thickness Measurement", meaning:"Sac kalinliginin ultrasonik veya uygun yontemle kontrol edilmesi.", example:"Dry dock sirasinda thickness measurement sonucu class icin kritik olabilir."}
+  ,{term:"Sea Chest", meaning:"Deniz suyu giris agzi ve ona bagli sandik/filtre hacmi.", example:"Sea chest fouling arttiginda cooling water akisi etkilenebilir."}
+  ,{term:"Sacrificial Anode", meaning:"Ana metal yerine once korozif etkiye maruz kalip tekneyi koruyan anodik parca.", example:"Sacrificial anode tukendiyse karina korumasi zayiflar."}
+  ,{term:"Gas Freeing", meaning:"Tank atmosferini yanici veya toksik gazdan arindirip daha guvenli hale getirme islemi.", example:"Gas freeing sirasi ve gaz yolu purging ile karistirilmamalidir."}
+  ,{term:"Purging", meaning:"Bir gazi veya havayi baska bir medium ile kontrollu sekilde yer degistirerek istenen atmosferi kurma islemi.", example:"Purging mantigi yanlis kurulursa sonraki operasyon emniyeti bozulur."}
+  ,{term:"Reliquefaction", meaning:"Ozellikle LNG/LPG tarafinda buharlasan urunun tekrar sivi faza dondurulmesi sistemi.", example:"Reliquefaction trendi pressure yonetiminde dogrudan rol oynar."}
+  ,{term:"Ballast Transfer", meaning:"Bir ballast tankindan digerine veya denize dogru su transferi yaparak trim/list/draft kontrol etme islemi.", example:"Ballast transfer karari free surface'i buyutuyorsa ikinci kez dusunulur."}
+  ,{term:"Slack Tank", meaning:"Tam dolu veya bos olmayan, icinde serbest yuzey olusturan tank durumu.", example:"Slack tank bazen listeden cok GM kaybiyla tehlikelidir."}
+  ,{term:"Team Cohesion", meaning:"Ekibin birlikte duzgun calisabilme, birbirine guvenebilme ve ortak ritim tutturabilme duzeyi.", example:"Team cohesion dustugunde vardiya devirleri bile daha sert gecmeye baslar."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
