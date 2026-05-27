@@ -8639,6 +8639,33 @@ const DOCUMENT_FORM_CONFIGS = {
       {id:'control', label:'Yeni kontrol adimi', placeholder:'Orn: sling check and exclusion zone reconfirmed', keywords:['sling','zone','check','reconfirm','control']}
     ]
   },
+  s447:{
+    title:'Survey Walkthrough Hazirligi',
+    hint:'Surveyor gelmeden once belge, ekipman ve takip zincirini birlikte dusun.',
+    fields:[
+      {id:'records', label:'Hazir belge / kayit', placeholder:'Orn: drill records / maintenance evidence / last tests', keywords:['drill','maintenance','test','record','evidence']},
+      {id:'equipment', label:'Fiili ekipman durumu', placeholder:'Orn: fire doors, lights, emergency gear checked', keywords:['door','light','gear','checked','condition']},
+      {id:'followup', label:'Takip edilen eksik', placeholder:'Orn: previous defect closed with evidence', keywords:['defect','closed','evidence','follow-up','previous']}
+    ]
+  },
+  s448:{
+    title:'PSC Walkthrough / Deficiency Chain',
+    hint:'Kucuk eksik, kayit uyumsuzlugu ve zayif takip birlesince deficiency buyur.',
+    fields:[
+      {id:'physical', label:'Fiziksel eksik', placeholder:'Orn: fire door held open / signage weak', keywords:['fire door','signage','open','physical','gear']},
+      {id:'record', label:'Kayit tarafı', placeholder:'Orn: drill record not matching actual status', keywords:['record','drill','status','match','logbook']},
+      {id:'action', label:'Anlik duzeltici adim', placeholder:'Orn: secure defect and raise corrective follow-up', keywords:['secure','corrective','follow-up','action','report']}
+    ]
+  },
+  s452:{
+    title:'Ballast Panel Mini Karari',
+    hint:'List duzeltirken tank ciftini, trim sonucunu ve free surface riskini ayni anda oku.',
+    fields:[
+      {id:'target', label:'Tank ciftine yaklasim', placeholder:'Orn: port-starboard pair near midship', keywords:['port','starboard','pair','midship','tank']},
+      {id:'trim', label:'Trim dusuncesi', placeholder:'Orn: avoid excessive stern trim while correcting list', keywords:['trim','stern','bow','avoid','correcting']},
+      {id:'surface', label:'Free surface kontrolu', placeholder:'Orn: avoid creating large slack tanks during transfer', keywords:['free surface','slack','tank','avoid','transfer']}
+    ]
+  },
   s365:{
     title:'Konteyner Bay / Row / Tier Karari',
     hint:'Slot degisikligi sadece yer degisikligi degil; sequence, lashing ve reefer takibini etkiler.',
@@ -8913,6 +8940,45 @@ function getOperationDocVisual(sc){
         <text x="42" y="110" fill="#ffb0b0" font-size="8" font-family="monospace">EXCLUSION ZONE</text>
         <text x="224" y="42" fill="#81f7b8" font-size="8" font-family="monospace">SWL / ANGLE</text>
       </svg><div class="doc-visual-caption">Agir yukte merkez, baglama acisi ve saha emniyeti ayni planin parcasi olur.</div></div>`;
+    case 's447':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Survey walkthrough checklist">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">SURVEY WALKTHROUGH</text>
+        <rect x="24" y="34" width="84" height="58" rx="6" fill="#132940" stroke="#4a7098"/>
+        <rect x="118" y="34" width="84" height="58" rx="6" fill="#132940" stroke="#4a7098"/>
+        <rect x="212" y="34" width="84" height="58" rx="6" fill="#132940" stroke="#4a7098"/>
+        <text x="42" y="50" fill="#cfeaff" font-size="8" font-family="monospace">RECORDS</text>
+        <text x="136" y="50" fill="#cfeaff" font-size="8" font-family="monospace">GEAR</text>
+        <text x="228" y="50" fill="#cfeaff" font-size="8" font-family="monospace">FOLLOW-UP</text>
+        <path d="M40 72 l10 10 l20 -22" stroke="#81f7b8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M134 72 l10 10 l20 -22" stroke="#ffd45a" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M228 72 l10 10 l20 -22" stroke="#7fc3ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg><div class="doc-visual-caption">Surveyor kagit, ekipman ve eksik takip zincirini birlikte okur.</div></div>`;
+    case 's448':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="PSC deficiency chain">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">PSC / DEFICIENCY CHAIN</text>
+        <rect x="22" y="46" width="72" height="28" rx="6" fill="#421717" stroke="#c97070"/>
+        <rect x="124" y="46" width="72" height="28" rx="6" fill="#4b350b" stroke="#d4a017"/>
+        <rect x="226" y="46" width="72" height="28" rx="6" fill="#17324a" stroke="#6fa8dc"/>
+        <text x="33" y="64" fill="#ffd3d3" font-size="8" font-family="monospace">PHYSICAL</text>
+        <text x="140" y="64" fill="#fff4bf" font-size="8" font-family="monospace">RECORD</text>
+        <text x="238" y="64" fill="#cfeaff" font-size="8" font-family="monospace">FOLLOW-UP</text>
+        <path d="M96 60 H122 M198 60 H224" stroke="#88a9c7" stroke-width="3" stroke-dasharray="6 4"/>
+      </svg><div class="doc-visual-caption">Kucuk eksikler tek tek degil, zincir halinde deficiency'ye doner.</div></div>`;
+    case 's452':
+      return `<div class="doc-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Ballast panel logic">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">BALLAST PANEL / LIST + TRIM</text>
+        <rect x="44" y="38" width="48" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="96" y="38" width="48" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="176" y="38" width="48" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="228" y="38" width="48" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <path d="M44 94 Q160 70 276 94" stroke="#ffd45a" stroke-width="3" fill="none"/>
+        <text x="58" y="108" fill="#cfeaff" font-size="8" font-family="monospace">PORT</text>
+        <text x="238" y="108" fill="#cfeaff" font-size="8" font-family="monospace">STBD</text>
+        <text x="130" y="34" fill="#81f7b8" font-size="8" font-family="monospace">FREE SURFACE?</text>
+      </svg><div class="doc-visual-caption">Dogru tank ciftini secmek kadar slack tank yaratmamak da onemlidir.</div></div>`;
     default:
       return '';
   }
