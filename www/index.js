@@ -10731,6 +10731,20 @@ const ROUTE_PORTS = [
   {name:"Aslan Korfezi", x:34, y:96, visited:false, kind:"waterway"},
   {name:"Umman Korfezi", x:352, y:198, visited:false, kind:"waterway"},
   {name:"Mozambik Kanali", x:166, y:228, visited:false, kind:"waterway"},
+  {name:"Kuzey Atlantik Ana Hatti", x:74, y:74, visited:false, kind:"route"},
+  {name:"Avrupa - Uzak Dogu Konteyner Rotasi", x:228, y:124, visited:false, kind:"route"},
+  {name:"Akdeniz - Suveys - Arap Denizi Hatti", x:256, y:178, visited:false, kind:"route"},
+  {name:"Transpasifik Dogu Hatti", x:228, y:82, visited:false, kind:"route"},
+  {name:"Cape of Good Hope Alternatif Rotasi", x:186, y:222, visited:false, kind:"route"},
+  {name:"Basra Korfezi - Hindistan Enerji Hatti", x:326, y:188, visited:false, kind:"route"},
+  {name:"Malakka - Guney Cin Denizi - Japonya Hatti", x:372, y:110, visited:false, kind:"route"},
+  {name:"Baltik - Kuzey Denizi Enerji Hatti", x:72, y:12, visited:false, kind:"route"},
+  {name:"Karadeniz Tahil Rotasi", x:214, y:56, visited:false, kind:"route"},
+  {name:"Brezilya - Cin Demir Cevheri Rotasi", x:206, y:198, visited:false, kind:"route"},
+  {name:"Avustralya - Kuzeydogu Asya Bulk Rotasi", x:398, y:164, visited:false, kind:"route"},
+  {name:"Batı Afrika - Avrupa Tanker Rotasi", x:70, y:146, visited:false, kind:"route"},
+  {name:"ABD Korfezi - Avrupa Bulk Hatti", x:44, y:92, visited:false, kind:"route"},
+  {name:"Kizildeniz - Babulmendep - Hint Okyanusu Rotasi", x:286, y:206, visited:false, kind:"route"},
 ];
 
 let shipPosition = {x:85, y:130};
@@ -11158,17 +11172,26 @@ function getMapRegionByPosition(pos){
 
 function getPortChartEntries(){
   return ROUTE_PORTS
-    .filter(p=>['port','waterway'].includes(p.kind))
+    .filter(p=>['port','waterway','route'].includes(p.kind))
     .slice()
     .sort((a,b)=>{
       const av = visitedPorts.has(a.name) ? 0 : 1;
       const bv = visitedPorts.has(b.name) ? 0 : 1;
       if(av !== bv) return av - bv;
-      const ak = a.kind==='port' ? 0 : 1;
-      const bk = b.kind==='port' ? 0 : 1;
+      const order = kind => kind==='port' ? 0 : kind==='waterway' ? 1 : 2;
+      const ak = order(a.kind);
+      const bk = order(b.kind);
       if(ak !== bk) return ak - bk;
       return a.name.localeCompare(b.name,'tr');
     });
+}
+
+function getPortChartTypeLabel(kind){
+  return kind==='port' ? 'liman chart' : kind==='route' ? 'ticaret rotasi charti' : 'gecit chart';
+}
+
+function getPortChartTitleLabel(kind){
+  return kind==='port' ? 'Liman Haritasi' : kind==='route' ? 'Ticaret Rotasi Haritasi' : 'Transit Haritasi';
 }
 
 function ensureSelectedPortChart(){
@@ -11183,6 +11206,15 @@ function ensureSelectedPortChart(){
 
 function getPortChartHint(name, region){
   const hay = `${name} ${region}`.toLowerCase();
+  if(/kuzey atlantik ana hatti/.test(hay)) return 'North Atlantic lane, weather routing, great circle secimi ve ECA gecisleri birlikte dusunulur.';
+  if(/avrupa - uzak dogu konteyner rotasi|akdeniz - suveys - arap denizi hatti/.test(hay)) return 'Suveys bagimliligi, convoy/gecis penceresi, Kizildeniz guvenlik riski ve schedule baskisi birlikte okunur.';
+  if(/transpasifik dogu hatti/.test(hay)) return 'Great circle, seasonal low pressure sistemleri, traffic lane ayrimi ve varis window disiplini one cikar.';
+  if(/cape of good hope alternatif rotasi/.test(hay)) return 'Suveys yerine uzun ocean passage, agir hava, bunker planning ve sapma maliyeti birlikte degerlendirilir.';
+  if(/basra korfezi - hindistan enerji hatti|bati afrika - avrupa tanker rotasi/.test(hay)) return 'Enerji koridoru, draft, security reporting ve weather routing mantigi birlikte okunur.';
+  if(/malakka - guney cin denizi - japonya hatti/.test(hay)) return 'TSS, chokepoint yogunlugu, monsoon routing ve East Asia terminal windows bir arada dusunulur.';
+  if(/baltik - kuzey denizi enerji hatti|karadeniz tahil rotasi/.test(hay)) return 'Dar su + acik deniz gecisi, mevsimsel hava ve trade pressure birlikte okunur.';
+  if(/brezilya - cin demir cevheri rotasi|avustralya - kuzeydogu asya bulk rotasi|abd korfezi - avrupa bulk hatti/.test(hay)) return 'Bulk trade lane, rota ekonomisi, current/swell ve load line / weather margin birlikte izlenir.';
+  if(/kizildeniz - babulmendep - hint okyanusu rotasi/.test(hay)) return 'Security corridor, reporting chain, convoy mantigi ve Indian Ocean swell birlikte dusunulur.';
   if(/istanbul bogazi|çanakkale bogazi|canakkale bogazi/.test(hay)) return 'Dar bogaz, akinti, yogun yerel trafik ve reporting disiplini birlikte okunur.';
   if(/cebelitarık|cebelitarik|mans denizi|dover bogazi|skagerrak|kattegat/.test(hay)) return 'Karsilasma trafigi, separation lane, akinti ve gorus disiplinini birlikte dusun.';
   if(/hurmuz bogazi|babulmendep|malakka bogazi|sunda bogazi|lombok bogazi/.test(hay)) return 'Stratejik trafik, reporting, guvenlik seviyesi ve dar gecit disiplinini birlikte oku.';
@@ -11207,22 +11239,23 @@ function getPortChartProfile(port){
   const lonBase = (-14 + port.x*0.9);
   const isTurkishPort = /izmir|istanbul|çanakkale|canakkale|ambarlı|ambarli|aliağa|aliaga|iskenderun|gemlik|samsun|trabzon|tekirdag|derince|mersin/.test(hay);
   const isWaterway = port.kind === 'waterway';
+  const isTradeRoute = port.kind === 'route';
   const profile = {
     region,
-    maxDraft: isWaterway ? (port.y > 185 ? '16.8m' : '15.2m') : (port.y > 185 ? '14.5m' : port.y < 40 ? '12.8m' : '13.6m'),
-    berth: isWaterway ? 'Transit Lane' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|singapur|yokohama|sanghay/.test(hay) ? 'Terminal 3' : 'Berth 2'),
-    pilot: isWaterway ? 'Reporting / Pilot Exchange' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|trieste/.test(hay) ? 'River / Pilot boarding' : 'Pilot Station'),
-    hazard: isWaterway ? 'Transit traffic / current line' : (/mersin|haifa|port said|suveys|cidde|dubai|abu dhabi|doha/.test(hay) ? 'Traffic lane / reporting' : 'Shallow patch'),
-    approach: isWaterway ? 'Stratejik gecit / transit chart' : (/rotterdam|anvers|hamburg|panama|new orleans|santos/.test(hay) ? 'Nehir / kanal yaklasmasi' : 'Acik denizden liman yaklasmasi'),
+    maxDraft: isTradeRoute ? (port.y > 180 ? '20.5m' : '18.8m') : isWaterway ? (port.y > 185 ? '16.8m' : '15.2m') : (port.y > 185 ? '14.5m' : port.y < 40 ? '12.8m' : '13.6m'),
+    berth: isTradeRoute ? 'Ocean Waypoint / Trade Lane' : isWaterway ? 'Transit Lane' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|singapur|yokohama|sanghay/.test(hay) ? 'Terminal 3' : 'Berth 2'),
+    pilot: isTradeRoute ? 'Routing / Reporting / Landfall' : isWaterway ? 'Reporting / Pilot Exchange' : (/rotterdam|anvers|hamburg|panama|new orleans|santos|trieste/.test(hay) ? 'River / Pilot boarding' : 'Pilot Station'),
+    hazard: isTradeRoute ? 'Weather / current / trade pressure' : isWaterway ? 'Transit traffic / current line' : (/mersin|haifa|port said|suveys|cidde|dubai|abu dhabi|doha/.test(hay) ? 'Traffic lane / reporting' : 'Shallow patch'),
+    approach: isTradeRoute ? 'Ocean passage / ana trade lane monitoring' : isWaterway ? 'Stratejik gecit / transit chart' : (/rotterdam|anvers|hamburg|panama|new orleans|santos/.test(hay) ? 'Nehir / kanal yaklasmasi' : 'Acik denizden liman yaklasmasi'),
     notes: getPortChartHint(port.name, region),
-    depthA: port.y > 185 ? '16.2' : '14.8',
-    depthB: port.y < 70 ? '11.4' : '12.9',
-    tides: /rotterdam|anvers|hamburg|dover|marsilya|singapur/.test(hay) ? 'Gelgit / akinti etkisi var' : 'Akinti / ruzgar one cikiyor',
+    depthA: isTradeRoute ? (port.y > 180 ? '85' : '62') : port.y > 185 ? '16.2' : '14.8',
+    depthB: isTradeRoute ? (port.y < 90 ? '120' : '74') : port.y < 70 ? '11.4' : '12.9',
+    tides: isTradeRoute ? 'Ocean current / weather window izlenir' : /rotterdam|anvers|hamburg|dover|marsilya|singapur/.test(hay) ? 'Gelgit / akinti etkisi var' : 'Akinti / ruzgar one cikiyor',
     chartNo:`BA ${1000 + Math.round(port.x*3 + port.y)}`,
-    publication:isWaterway ? `Admiralty Transit Chart` : `Admiralty Harbour Chart`,
+    publication:isTradeRoute ? `Ocean Passage / Trade Route Chart` : isWaterway ? `Admiralty Transit Chart` : `Admiralty Harbour Chart`,
     edition:`Ed. ${2026 - (Math.round(port.x+port.y)%4)}`,
     soundDatum:'Chart Datum',
-    scale: isWaterway ? '1:90 000' : (port.x > 340 || port.x < 30 ? '1:75 000' : '1:50 000'),
+    scale: isTradeRoute ? '1:350 000' : isWaterway ? '1:90 000' : (port.x > 340 || port.x < 30 ? '1:75 000' : '1:50 000'),
     magVar: `${(2.1 + ((port.x+port.y)%7)*0.3).toFixed(1)}°E`,
     latA:`${Math.abs(latBase).toFixed(1)}°${latBase>=0?'N':'S'}`,
     latB:`${Math.abs(latBase-0.4).toFixed(1)}°${latBase>=0?'N':'S'}`,
@@ -11230,6 +11263,7 @@ function getPortChartProfile(port){
     lonB:`${Math.abs(lonBase+0.5).toFixed(1)}°${lonBase+0.5>=0?'E':'W'}`,
     template:'default'
   };
+  if(isTradeRoute) profile.template = 'oceanroute';
   if(isTurkishPort) profile.publication = 'Turkiye Liman Yaklasma Haritasi';
   if(isWaterway) profile.publication = /panama kanali|kiel kanali|korint kanali|st\. lawrence|suveys/.test(hay) ? 'Canal / Transit Chart' : 'Strait / Transit Chart';
   if(/ambarlı|ambarli|tekirdag|derince|gemlik/.test(hay)) profile.template = 'terminal';
@@ -11247,6 +11281,20 @@ function getPortChartProfile(port){
   if(profile.template==='terminal') profile.scale = '1:25 000';
   if(profile.template==='blacksea') profile.scale = '1:32 000';
   if(profile.template==='strait') profile.scale = '1:85 000';
+  if(profile.template==='oceanroute') profile.scale = /transpasifik|brezilya|avustralya/.test(hay) ? '1:420 000' : '1:280 000';
+  if(/kuzey atlantik ana hatti/.test(hay)) profile.hazard = 'Low pressure / ECA / crossing traffic';
+  if(/avrupa - uzak dogu konteyner rotasi|akdeniz - suveys - arap denizi hatti/.test(hay)) profile.hazard = 'Canal dependency / convoy / security';
+  if(/transpasifik dogu hatti/.test(hay)) profile.hazard = 'Great circle / swell / weather routing';
+  if(/cape of good hope alternatif rotasi/.test(hay)) profile.hazard = 'Heavy weather / long bunker leg / deviation cost';
+  if(/basra korfezi - hindistan enerji hatti|bati afrika - avrupa tanker rotasi/.test(hay)) profile.hazard = 'Energy corridor / reporting / draft margin';
+  if(/malakka - guney cin denizi - japonya hatti/.test(hay)) profile.hazard = 'TSS / monsoon / dense crossing traffic';
+  if(/baltik - kuzey denizi enerji hatti|karadeniz tahil rotasi/.test(hay)) profile.hazard = 'Seasonal weather / chokepoint / convoy flow';
+  if(/brezilya - cin demir cevheri rotasi|avustralya - kuzeydogu asya bulk rotasi|abd korfezi - avrupa bulk hatti/.test(hay)) profile.hazard = 'Bulk lane / ocean current / weather margin';
+  if(/kizildeniz - babulmendep - hint okyanusu rotasi/.test(hay)) profile.hazard = 'Security corridor / reporting / Indian Ocean swell';
+  if(/kuzey atlantik ana hatti/.test(hay)) profile.approach = 'Landfall / North Atlantic passage monitoring';
+  if(/transpasifik dogu hatti/.test(hay)) profile.approach = 'Great circle / transocean passage';
+  if(/brezilya - cin demir cevheri rotasi|avustralya - kuzeydogu asya bulk rotasi/.test(hay)) profile.approach = 'Long-haul bulk corridor / ocean routing';
+  if(/avrupa - uzak dogu konteyner rotasi|malakka - guney cin denizi - japonya hatti/.test(hay)) profile.approach = 'Container trunk route / schedule routing';
   if(/singapur|yokohama|sanghay|rotterdam|anvers|hamburg/.test(hay)) profile.hazard = 'TSS / yogun trafik';
   if(/dubai|abu dhabi|doha|basra/.test(hay)) profile.hazard = 'Draft / sicak hava / traffic lane';
   if(/marsilya|napoli|pire|valensiya|malta|barselona|cenova/.test(hay)) profile.hazard = 'Breakwater / ferry traffic';
@@ -11264,8 +11312,75 @@ function getPortChartProfile(port){
   return profile;
 }
 
+function buildOceanRouteChartSvg(port, profile){
+  const hay = `${port.name} ${profile.region}`.toLowerCase();
+  const routeColor = /enerji|tanker|basra|kizildeniz|afrika/.test(hay) ? '#f0a63a' : /bulk|demir cevheri|avustralya|brezilya/.test(hay) ? '#7ad0c8' : '#71b8ff';
+  const altColor = /cape of good hope|suveys/.test(hay) ? '#d98080' : '#d4a017';
+  const noteA = /transpasifik/.test(hay) ? 'Seasonal Low / Great Circle' : /kuzey atlantik/.test(hay) ? 'North Atlantic Weather Routing' : /malakka|guney cin|japonya/.test(hay) ? 'TSS / Monsoon / Eastbound Flow' : 'Ocean Passage Monitoring';
+  const noteB = /suveys|kizildeniz|babulmendep/.test(hay) ? 'Canal / Security Chokepoint' : /cape of good hope/.test(hay) ? 'Long Bunker Leg / Heavy Weather' : /baltik|karadeniz/.test(hay) ? 'Seasonal Ice / Convoy / Pilot Reports' : 'Reporting / Waypoint Control';
+  return `
+  <defs>
+    <linearGradient id="routeSea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05111e"/>
+      <stop offset="52%" stop-color="#0a2238"/>
+      <stop offset="100%" stop-color="#12385b"/>
+    </linearGradient>
+    <linearGradient id="routeBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(113,184,255,.12)"/>
+      <stop offset="50%" stop-color="rgba(113,184,255,.26)"/>
+      <stop offset="100%" stop-color="rgba(113,184,255,.12)"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="260" rx="8" fill="url(#routeSea)"/>
+  <rect x="8" y="8" width="424" height="244" rx="6" fill="none" stroke="#284561" stroke-width="1"/>
+  <path d="M36 22 V238 M118 22 V238 M200 22 V238 M282 22 V238 M364 22 V238" stroke="#17324c" stroke-width=".8" opacity=".5" stroke-dasharray="3,4"/>
+  <path d="M18 44 H422 M18 92 H422 M18 140 H422 M18 188 H422 M18 236 H422" stroke="#17324c" stroke-width=".8" opacity=".5" stroke-dasharray="3,4"/>
+  <path d="M46 166 C122 118 164 124 218 134 C282 146 332 128 396 82" fill="none" stroke="${routeColor}" stroke-width="2.8" stroke-dasharray="8,5" opacity=".96"/>
+  <path d="M42 156 C122 104 168 110 222 120 C288 132 334 114 402 70" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="15" opacity=".16"/>
+  <path d="M54 178 C128 138 166 142 220 152 C278 164 324 150 386 110" fill="none" stroke="${altColor}" stroke-width="1.4" stroke-dasharray="4,4" opacity=".8"/>
+  <path d="M28 174 C86 148 122 154 182 164 C254 176 312 176 404 144" fill="none" stroke="#3f7aa5" stroke-width="1.1" stroke-dasharray="5,5" opacity=".48"/>
+  <rect x="36" y="26" width="156" height="18" rx="5" fill="rgba(7,25,41,.92)" stroke="#385f86" stroke-width="1"/>
+  <text x="44" y="38" fill="#8ab0c8" font-size="8" font-family="monospace">${profile.publication.toUpperCase()}</text>
+  <rect x="256" y="26" width="154" height="18" rx="5" fill="rgba(7,25,41,.92)" stroke="#385f86" stroke-width="1"/>
+  <text x="264" y="38" fill="#8ab0c8" font-size="8" font-family="monospace">${profile.chartNo} · ${profile.edition} · SCALE ${profile.scale}</text>
+  <text x="16" y="20" fill="#8ab0c8" font-size="9" font-family="monospace">${port.name.toUpperCase()} ROUTE CHART</text>
+  <text x="16" y="56" fill="#6fa8dc" font-size="8" font-family="monospace">${profile.region} · ${profile.approach}</text>
+  <text x="16" y="70" fill="#6fa8dc" font-size="7" font-family="monospace">LANDALL / REPORTING: ${profile.pilot.toUpperCase()}</text>
+  <text x="16" y="84" fill="#d7b37a" font-size="7" font-family="monospace">HAZARD: ${profile.hazard.toUpperCase()}</text>
+  <text x="18" y="110" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.latA}</text>
+  <text x="18" y="158" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.latB}</text>
+  <text x="96" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonA}</text>
+  <text x="274" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonB}</text>
+  <circle cx="66" cy="166" r="6" fill="#44d26f"/><text x="52" y="156" fill="#8fd8ab" font-size="6.5" font-family="monospace">WP-A</text>
+  <circle cx="138" cy="138" r="6" fill="#44d26f"/><text x="126" y="128" fill="#8fd8ab" font-size="6.5" font-family="monospace">WP-B</text>
+  <circle cx="218" cy="144" r="6" fill="#f0a63a"/><text x="204" y="134" fill="#f5cc8f" font-size="6.5" font-family="monospace">RPT-1</text>
+  <circle cx="302" cy="132" r="6" fill="#44d26f"/><text x="290" y="122" fill="#8fd8ab" font-size="6.5" font-family="monospace">WP-C</text>
+  <circle cx="380" cy="86" r="6" fill="#d24c4c"/><text x="364" y="76" fill="#ffb0b0" font-size="6.5" font-family="monospace">LANDFALL</text>
+  <path d="M110 196 l18 -8 l-8 18 z" fill="#d4a017"/><text x="92" y="214" fill="#f0d59b" font-size="6.5" font-family="monospace">CURRENT 1.4kt</text>
+  <path d="M254 190 l20 0 l-8 16 z" fill="#d4a017"/><text x="236" y="214" fill="#f0d59b" font-size="6.5" font-family="monospace">SET 065°</text>
+  <rect x="286" y="162" width="124" height="58" rx="6" fill="rgba(5,16,28,.92)" stroke="#385f86" stroke-width="1"/>
+  <text x="294" y="176" fill="#8ab0c8" font-size="6.6" font-family="monospace">ROUTING NOTE</text>
+  <text x="294" y="190" fill="#dce8fc" font-size="6.4" font-family="monospace">${noteA}</text>
+  <text x="294" y="202" fill="#dce8fc" font-size="6.4" font-family="monospace">${noteB}</text>
+  <text x="294" y="214" fill="#7ea0bd" font-size="6.2" font-family="monospace">WX / BUNKER / ETA window cross-check</text>
+  <rect x="34" y="192" width="164" height="34" rx="6" fill="rgba(5,16,28,.88)" stroke="#385f86" stroke-width="1"/>
+  <text x="42" y="206" fill="#8ab0c8" font-size="6.6" font-family="monospace">PRIMARY CHOKEPOINTS</text>
+  <text x="42" y="218" fill="#dce8fc" font-size="6.2" font-family="monospace">${/suveys|kizildeniz/.test(hay) ? 'Suveys / Babulmendep / HRA corridor' : /malakka|japonya/.test(hay) ? 'Malakka / South China Sea / Korea-Japan TSS' : /kuzey atlantik/.test(hay) ? 'Dover / ECA / North Atlantic weather lane' : /karadeniz/.test(hay) ? 'Turk Bogazlari / Aegean / Med linkage' : 'Open ocean routing / alternate lane / landfall'}</text>
+  <text x="42" y="228" fill="#7ea0bd" font-size="6.1" font-family="monospace">Safety depth window ${profile.depthA}m - ${profile.depthB}m / WX margin advisory</text>
+  <path d="M380 52 V84 M364 68 H396" stroke="#204a72" stroke-width="1"/>
+  <circle cx="380" cy="68" r="18" fill="none" stroke="#204a72" stroke-width="1.2"/>
+  <text x="377" y="50" fill="#8ab0c8" font-size="7" font-family="monospace">N</text>
+  <rect x="248" y="232" width="156" height="10" rx="3" fill="#081929" stroke="#385f86" stroke-width="1"/>
+  <path d="M256 237 H286 M286 237 H316 M316 237 H346 M346 237 H376" stroke="#cfd8e4" stroke-width="3"/>
+  <text x="252" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
+  <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
+  <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
+  `;
+}
+
 function buildPortChartSvg(port){
   const profile = getPortChartProfile(port);
+  if(profile.template === 'oceanroute') return buildOceanRouteChartSvg(port, profile);
   const region = profile.region;
   const hay = `${port.name} ${region}`.toLowerCase();
   const detailLevel = portChartZoom >= 3.4 ? 'high' : portChartZoom >= 1.8 ? 'mid' : 'low';
@@ -11662,7 +11777,7 @@ function renderMapLibrary(){
         <span class="map-file-ico">🗂</span>
         <span class="map-file-text">
           <span class="map-file-name">${port.name}</span>
-          <span class="map-file-sub">${getMapRegionByPosition(port)} · ${port.kind==='port'?'liman chart':'gecit chart'}</span>
+          <span class="map-file-sub">${getMapRegionByPosition(port)} · ${getPortChartTypeLabel(port.kind)}</span>
         </span>
       </span>
       <span class="map-file-tag">${visitedPorts.has(port.name)?'ugrandi':'arsiv'}</span>
@@ -11676,7 +11791,7 @@ function renderMapLibrary(){
   }
   const profile = getPortChartProfile(active);
   const region = profile.region;
-  chartTitle.textContent = `${active.name} · ${active.kind==='port'?'Liman Haritasi':'Transit Haritasi'}`;
+  chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
   chartSvg.innerHTML = buildPortChartSvg(active);
   initPortChartInteractions(chartSvg);
   chartSvg.onclick = (ev)=>handlePortChartTaskClick(chartSvg, ev, active);
@@ -11690,7 +11805,7 @@ function renderMapLibrary(){
     </div>
     <div class="chart-meta-card">
       <div class="chart-meta-label">Olcek / Bolge</div>
-      <div class="chart-meta-value">TIP: ${active.kind==='port'?'LIMAN YAKLASMA PLANI':'TRANSIT / GECIT CHARTI'}<br>BOLGE: ${region}<br>OLCEK: ${profile.scale}</div>
+      <div class="chart-meta-value">TIP: ${active.kind==='port'?'LIMAN YAKLASMA PLANI':active.kind==='route'?'OCEAN PASSAGE / TRADE ROUTE CHARTI':'TRANSIT / GECIT CHARTI'}<br>BOLGE: ${region}<br>OLCEK: ${profile.scale}</div>
     </div>
     <div class="chart-meta-card">
       <div class="chart-meta-label">Yaklasma</div>
@@ -12715,6 +12830,36 @@ const GLOSSARY_TERMS = [
   ,{term:"Ballast Transfer", meaning:"Bir ballast tankindan digerine veya denize dogru su transferi yaparak trim/list/draft kontrol etme islemi.", example:"Ballast transfer karari free surface'i buyutuyorsa ikinci kez dusunulur."}
   ,{term:"Slack Tank", meaning:"Tam dolu veya bos olmayan, icinde serbest yuzey olusturan tank durumu.", example:"Slack tank bazen listeden cok GM kaybiyla tehlikelidir."}
   ,{term:"Team Cohesion", meaning:"Ekibin birlikte duzgun calisabilme, birbirine guvenebilme ve ortak ritim tutturabilme duzeyi.", example:"Team cohesion dustugunde vardiya devirleri bile daha sert gecmeye baslar."}
+  ,{term:"Great Circle Route", meaning:"Iki nokta arasinda kuresel yuzeyde en kisa mesafeyi veren, ancak sabit kerteriz vermeyen rota mantigi.", example:"Transpasifik geciste great circle route zaman kazandirsa da hava ve akinti ile birlikte okunur."}
+  ,{term:"Rhumb Line", meaning:"Haritada sabit kerterizle giden ancak her zaman en kisa mesafe olmayan rota cizgisi.", example:"Rhumb line kullanimi planlamayi kolaylastirir ama uzun okyanus gecisinde her zaman ekonomik degildir."}
+  ,{term:"Composite Great Circle", meaning:"Buyuk daire rotasinin belirli enlem limitleri ve emniyet sinirlariyla birlestirilmis uygulamasi.", example:"Kuzey Atlantik kis gecisinde composite great circle daha emniyetli olabilir."}
+  ,{term:"Ocean Passage", meaning:"Liman yaklasmasindan farkli olarak uzun acik deniz seyri, weather routing ve waypoint zinciri ile yuruyen gecis.", example:"Ocean passage dusuncesi liman plani kadar weather margin de ister."}
+  ,{term:"Weather Routing", meaning:"Hava sistemleri, swell, akinti ve performans verisine gore rotayi optimize etme yaklasimi.", example:"Weather routing raporu bazen ETA'yi degistirir ama yapisal stresi azaltir."}
+  ,{term:"Seasonal Routeing", meaning:"Mevsim, monsoon, buz siniri veya firtina kusaklarina gore tavsiye edilen rota tercihi.", example:"Seasonal routeing dikkate alinmazsa ayni rota yazla kis arasinda cok farkli davranabilir."}
+  ,{term:"Landfall", meaning:"Uzun deniz gecisinden sonra kara, fener veya ilk seyir referansinin emniyetli sekilde alinmasi.", example:"Landfall planinda pilot station kadar ilk fix de onemlidir."}
+  ,{term:"Landfall Fix", meaning:"Acik denizden kara yaklasmasina gecerken alinan ilk guvenilir mevki teyidi.", example:"Landfall fix radar, GPS ve gorsel bilgiyle birlikte dogrulandi."}
+  ,{term:"Ocean Waypoint", meaning:"Acil deniz rotasinda kurs ve performans takibi icin belirlenen ana yol noktasi.", example:"Ocean waypoint gecis saati noon report ve ETA hesabini etkiler."}
+  ,{term:"Trade Lane", meaning:"Yuksek hacimli ticaret akisinin duzenli aktigi ana deniz tasimaciligi koridoru.", example:"Trade lane yogunlugu arttikca schedule baskisi ve bunker plani daha kritik olur."}
+  ,{term:"Chokepoint", meaning:"Dunya deniz ticaretinin toplandigi, dar veya stratejik gecit niteligindeki kritik nokta.", example:"Bir chokepoint tikanirsa alternatif rota maliyeti hizla buyur."}
+  ,{term:"Routing Chart", meaning:"Belirli okyanus bolgesi icin mevsimsel ruzgar, akinti ve tavsiye edilen gecisleri gosteren chart turu.", example:"Routing chart incelenmeden acik deniz kisa yol karari acele olabilir."}
+  ,{term:"Reporting Point", meaning:"VTS, pilotaj veya transit zincirinde gecisin rapor edilmesi gereken nokta.", example:"Reporting point atlanirsa sonraki clearance zinciri aksayabilir."}
+  ,{term:"Ocean Current", meaning:"Uzun mesafeli rota performansini etkileyen hakim deniz akintisi.", example:"Adverse ocean current bazen tum ETA hesabini yeniden yaptirir."}
+  ,{term:"Following Current", meaning:"Geminin gidis yonunu destekleyen akinti etkisi.", example:"Following current alindiginda SOG rahat gorunur ama landfall plani yine capraz kontrol ister."}
+  ,{term:"Adverse Current", meaning:"Geminin yolunu yavaslatan, yakit ve ETA'yi olumsuz etkileyen ters akinti.", example:"Adverse current uzun leglerde bunker margin'i daraltabilir."}
+  ,{term:"Monsoon Routeing", meaning:"Hint Okyanusu ve Cevresi'nde mevsimsel ruzgar donemlerine gore gecis planlama mantigi.", example:"Monsoon routeing dogru okunmazsa Malakka ve Arap Denizi gecisi oldukca zorlasabilir."}
+  ,{term:"Ice Limit", meaning:"Mevsimsel buz siniri veya buz raporlarinda seyir planini etkileyen guvenlik hattı.", example:"Baltik kis gecisinde ice limit raporu pilotaj kadar belirleyici olabilir."}
+  ,{term:"Piracy Risk Area", meaning:"Korsanlik veya guvenlik tehdidinin yuksek oldugu deniz sahasi.", example:"Piracy risk area icin BMP ve citadel hazirligi birlikte kontrol edilir."}
+  ,{term:"High Risk Area", meaning:"Guvenlik raporlamasi, BMP onlemleri ve ekstra dikkat gerektiren tehdit sahasi.", example:"High risk area gecisi ticari baski olsa da sadece hiz meselesi degildir."}
+  ,{term:"ECA", meaning:"Emission Control Area; dusuk sulfur ve emisyon kurallarinin daha siki uygulandigi bolge.", example:"ECA girisi yakit change-over zamanlamasini etkiler."}
+  ,{term:"SECA", meaning:"Sulphur Emission Control Area; sulfur limiti daha siki denetlenen emisyon sahasi.", example:"SECA oncesi fuel change-over gec kalirsa PSC sorusu buyur."}
+  ,{term:"Bunker Deviation", meaning:"Ana rotadan yakit ikmali icin kontrollu sapma yapma karari.", example:"Bunker deviation ETA kadar weather window ve charter baskisini da etkiler."}
+  ,{term:"Canal Transit Window", meaning:"Kanal veya bogaz gecisinde tahsis edilen zaman araligi.", example:"Canal transit window kacarsa butun sefer plani sarkabilir."}
+  ,{term:"Slot Allocation", meaning:"Ozellikle konteyner ve terminal operasyonunda gemiye ayrilan hizmet veya gecis kapasitesi.", example:"Slot allocation bozuldugunda planlanan all fast saati hemen kayar."}
+  ,{term:"Convoy Transit", meaning:"Kanal, bogaz veya riskli gecitte belirli sirayla toplu gecis uygulamasi.", example:"Convoy transit sirasinda tek gemi karari degil butun siranin disiplini onemlidir."}
+  ,{term:"Eastbound Lane", meaning:"TSS veya ana trade route uzerinde dogu yonlu trafik akisi icin ayrilan hat.", example:"Eastbound lane secimi yanlis yorumlanirsa crossing baskisi buyur."}
+  ,{term:"Westbound Lane", meaning:"TSS veya ana trade route uzerinde bati yonlu trafik akisi icin ayrilan hat.", example:"Westbound lane'de hiz dusururken arka trafik de dikkatle izlenmelidir."}
+  ,{term:"Waypoint Wheel-Over", meaning:"Bir waypoint'e gelmeden once dumen verilmeye baslanan donus noktasi mantigi.", example:"Waypoint wheel-over gec kalirsa TSS veya dar su girisi bozulabilir."}
+  ,{term:"ETA Window", meaning:"Varisin kabul edilebilir zaman araligi; sadece tek saat degil operasyon penceresi mantigi.", example:"ETA window kacarsa pilot, tug ve berth zinciri tekrar planlanir."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
