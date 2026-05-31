@@ -10974,9 +10974,22 @@ function adjustPortChartZoom(delta){
   if(mapView === 'library') renderMapLibrary();
 }
 
+function getActivePortChart(){
+  return ROUTE_PORTS.find(p=>p.name===selectedPortChart) || null;
+}
+
+function getPortChartEffectiveZoom(){
+  const active = getActivePortChart();
+  if(!active) return Math.max(1, portChartZoom || 1);
+  const profile = getPortChartProfile(active);
+  const baseZoom = profile.template === 'oceanroute' ? 0.82 : /strait|canal/.test(profile.template) ? 0.9 : 1;
+  return Math.max(baseZoom, +(baseZoom * Math.max(1, portChartZoom || 1)).toFixed(3));
+}
+
 function getPortChartDetailLabel(){
-  return portChartZoom >= 3.4 ? 'Close Detail'
-    : portChartZoom >= 1.8 ? 'Approach Detail'
+  const zoom = getPortChartEffectiveZoom();
+  return zoom >= 3.4 ? 'Close Detail'
+    : zoom >= 1.8 ? 'Approach Detail'
     : 'Overview';
 }
 
@@ -11083,8 +11096,9 @@ function handlePortChartTaskClick(svg, ev, port){
 
 function clampPortChartPan(panX, panY){
   const baseW = 440, baseH = 260;
-  const width = baseW / Math.max(1, portChartZoom || 1);
-  const height = baseH / Math.max(1, portChartZoom || 1);
+  const zoom = getPortChartEffectiveZoom();
+  const width = baseW / zoom;
+  const height = baseH / zoom;
   const maxX = Math.max(0, baseW - width);
   const maxY = Math.max(0, baseH - height);
   return {
@@ -11095,7 +11109,7 @@ function clampPortChartPan(panX, panY){
 
 function getPortChartViewBox(){
   const baseW = 440, baseH = 260;
-  const zoom = Math.max(1, portChartZoom || 1);
+  const zoom = getPortChartEffectiveZoom();
   const width = +(baseW / zoom).toFixed(2);
   const height = +(baseH / zoom).toFixed(2);
   const centeredX = (baseW - width) / 2;
@@ -11318,6 +11332,37 @@ function buildOceanRouteChartSvg(port, profile){
   const altColor = /cape of good hope|suveys/.test(hay) ? '#d98080' : '#d4a017';
   const noteA = /transpasifik/.test(hay) ? 'Seasonal Low / Great Circle' : /kuzey atlantik/.test(hay) ? 'North Atlantic Weather Routing' : /malakka|guney cin|japonya/.test(hay) ? 'TSS / Monsoon / Eastbound Flow' : 'Ocean Passage Monitoring';
   const noteB = /suveys|kizildeniz|babulmendep/.test(hay) ? 'Canal / Security Chokepoint' : /cape of good hope/.test(hay) ? 'Long Bunker Leg / Heavy Weather' : /baltik|karadeniz/.test(hay) ? 'Seasonal Ice / Convoy / Pilot Reports' : 'Reporting / Waypoint Control';
+  const landOverlay =
+    /basra korfezi - hindistan enerji hatti/.test(hay) ? `
+      <path d="M280 58 L340 46 L412 72 L412 134 L356 120 L304 94 Z" fill="#10283f" opacity=".92"/>
+      <path d="M30 194 L86 170 L126 166 L156 186 L94 210 L42 214 Z" fill="#10283f" opacity=".9"/>
+      <text x="322" y="66" fill="#cfd8e4" font-size="7" font-family="monospace">IRAN COAST</text>
+      <text x="58" y="206" fill="#cfd8e4" font-size="7" font-family="monospace">OMAN / ARABIAN SEA COAST</text>`
+    : /kizildeniz - babulmendep - hint okyanusu rotasi/.test(hay) ? `
+      <path d="M264 44 L322 56 L352 116 L326 174 L286 160 L274 110 Z" fill="#10283f" opacity=".92"/>
+      <path d="M124 148 L164 126 L192 130 L214 170 L172 194 L130 184 Z" fill="#10283f" opacity=".88"/>
+      <text x="288" y="54" fill="#cfd8e4" font-size="7" font-family="monospace">ARABIAN COAST / YEMEN</text>
+      <text x="134" y="204" fill="#cfd8e4" font-size="7" font-family="monospace">DJIBOUTI / HORN OF AFRICA</text>`
+    : /malakka - guney cin denizi - japonya hatti/.test(hay) ? `
+      <path d="M42 184 L98 146 L132 142 L142 174 L94 212 L46 214 Z" fill="#10283f" opacity=".9"/>
+      <path d="M268 52 L336 60 L398 94 L384 132 L318 118 L278 90 Z" fill="#10283f" opacity=".9"/>
+      <text x="54" y="224" fill="#cfd8e4" font-size="7" font-family="monospace">SUMATRA / INDONESIA</text>
+      <text x="292" y="52" fill="#cfd8e4" font-size="7" font-family="monospace">MALAYSIA / SOUTH CHINA SEA RIM</text>`
+    : /karadeniz tahil rotasi/.test(hay) ? `
+      <path d="M278 62 L362 48 L412 76 L412 126 L338 118 L286 90 Z" fill="#10283f" opacity=".92"/>
+      <path d="M54 162 L104 146 L142 150 L160 178 L106 198 L58 194 Z" fill="#10283f" opacity=".88"/>
+      <text x="308" y="58" fill="#cfd8e4" font-size="7" font-family="monospace">RUSYA / KAFKAS KIYISI</text>
+      <text x="62" y="210" fill="#cfd8e4" font-size="7" font-family="monospace">ANADOLU / TURK BOGAZLARI GIRISI</text>`
+    : /baltik - kuzey denizi enerji hatti/.test(hay) ? `
+      <path d="M292 34 L356 28 L408 58 L394 94 L330 90 L296 66 Z" fill="#10283f" opacity=".92"/>
+      <path d="M40 132 L92 118 L134 124 L142 152 L88 166 L42 160 Z" fill="#10283f" opacity=".9"/>
+      <text x="308" y="28" fill="#cfd8e4" font-size="7" font-family="monospace">SCANDINAVIA</text>
+      <text x="50" y="176" fill="#cfd8e4" font-size="7" font-family="monospace">UK / NORTH SEA APPROACH</text>`
+    : `
+      <path d="M294 54 L366 50 L412 84 L404 126 L332 118 L298 90 Z" fill="#10283f" opacity=".9"/>
+      <path d="M30 184 L92 152 L138 150 L154 178 L92 214 L40 214 Z" fill="#10283f" opacity=".86"/>
+      <text x="318" y="52" fill="#cfd8e4" font-size="7" font-family="monospace">EASTERN LANDMASS</text>
+      <text x="56" y="224" fill="#cfd8e4" font-size="7" font-family="monospace">WESTERN LANDMASS</text>`;
   return `
   <defs>
     <linearGradient id="routeSea" x1="0" y1="0" x2="0" y2="1">
@@ -11333,6 +11378,7 @@ function buildOceanRouteChartSvg(port, profile){
   </defs>
   <rect width="440" height="260" rx="8" fill="url(#routeSea)"/>
   <rect x="8" y="8" width="424" height="244" rx="6" fill="none" stroke="#284561" stroke-width="1"/>
+  ${landOverlay}
   <path d="M36 22 V238 M118 22 V238 M200 22 V238 M282 22 V238 M364 22 V238" stroke="#17324c" stroke-width=".8" opacity=".5" stroke-dasharray="3,4"/>
   <path d="M18 44 H422 M18 92 H422 M18 140 H422 M18 188 H422 M18 236 H422" stroke="#17324c" stroke-width=".8" opacity=".5" stroke-dasharray="3,4"/>
   <path d="M46 166 C122 118 164 124 218 134 C282 146 332 128 396 82" fill="none" stroke="${routeColor}" stroke-width="2.8" stroke-dasharray="8,5" opacity=".96"/>
@@ -11376,6 +11422,61 @@ function buildOceanRouteChartSvg(port, profile){
   <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
   <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
   `;
+}
+
+function buildStrategicLandOverlay(hay, coastLeft, southFacing){
+  if(/hurmuz bogazi/.test(hay)){
+    return `
+      <path d="M284 24 L358 18 L412 54 L406 118 L334 112 L292 82 Z" fill="#10283f" opacity=".95"/>
+      <path d="M18 180 L86 164 L130 170 L156 198 L108 224 L36 222 Z" fill="#10283f" opacity=".92"/>
+      <text x="314" y="28" fill="#cfd8e4" font-size="7" font-family="monospace">IRAN</text>
+      <text x="44" y="232" fill="#cfd8e4" font-size="7" font-family="monospace">OMAN / MUSANDAM</text>
+      <text x="286" y="126" fill="#8ab0c8" font-size="6.4" font-family="monospace">IRANIAN COAST</text>
+      <text x="62" y="162" fill="#8ab0c8" font-size="6.4" font-family="monospace">UAE / OMAN APPROACH</text>`;
+  }
+  if(/babulmendep/.test(hay)){
+    return `
+      <path d="M294 20 L364 28 L404 82 L376 144 L326 132 L302 84 Z" fill="#10283f" opacity=".95"/>
+      <path d="M46 164 L94 150 L136 156 L154 202 L98 224 L50 208 Z" fill="#10283f" opacity=".92"/>
+      <text x="320" y="26" fill="#cfd8e4" font-size="7" font-family="monospace">YEMEN</text>
+      <text x="60" y="232" fill="#cfd8e4" font-size="7" font-family="monospace">DJIBOUTI / ERITREA</text>`;
+  }
+  if(/malakka bogazi/.test(hay)){
+    return `
+      <path d="M284 20 L352 22 L410 64 L394 120 L330 110 L292 76 Z" fill="#10283f" opacity=".95"/>
+      <path d="M26 170 L86 146 L126 150 L142 202 L86 226 L36 212 Z" fill="#10283f" opacity=".92"/>
+      <text x="304" y="26" fill="#cfd8e4" font-size="7" font-family="monospace">MALAYSIA</text>
+      <text x="48" y="234" fill="#cfd8e4" font-size="7" font-family="monospace">SUMATRA / INDONESIA</text>`;
+  }
+  if(/istanbul bogazi/.test(hay)){
+    return `
+      <path d="M280 0 L440 0 L440 260 L312 260 L292 164 L304 108 L286 54 Z" fill="#10283f" opacity=".92"/>
+      <path d="M0 0 L148 0 L166 54 L154 118 L172 176 L154 260 L0 260 Z" fill="#10283f" opacity=".9"/>
+      <text x="330" y="24" fill="#cfd8e4" font-size="7" font-family="monospace">ANADOLU</text>
+      <text x="42" y="24" fill="#cfd8e4" font-size="7" font-family="monospace">AVRUPA YAKASI</text>`;
+  }
+  if(/çanakkale bogazi|canakkale bogazi/.test(hay)){
+    return `
+      <path d="M292 0 L440 0 L440 260 L318 260 L304 184 L320 116 L296 48 Z" fill="#10283f" opacity=".92"/>
+      <path d="M0 0 L146 0 L160 58 L148 128 L164 196 L150 260 L0 260 Z" fill="#10283f" opacity=".9"/>
+      <text x="330" y="22" fill="#cfd8e4" font-size="7" font-family="monospace">ANADOLU</text>
+      <text x="34" y="22" fill="#cfd8e4" font-size="7" font-family="monospace">GELIBOLU / AVRUPA</text>`;
+  }
+  if(/cebelitarık|cebelitarik/.test(hay)){
+    return `
+      <path d="M290 0 L440 0 L440 260 L330 260 L318 166 L330 106 L298 52 Z" fill="#10283f" opacity=".92"/>
+      <path d="M0 0 L144 0 L156 60 L146 120 L162 194 L148 260 L0 260 Z" fill="#10283f" opacity=".9"/>
+      <text x="330" y="22" fill="#cfd8e4" font-size="7" font-family="monospace">ISPANYA</text>
+      <text x="44" y="232" fill="#cfd8e4" font-size="7" font-family="monospace">FAS / AFRIKA KIYISI</text>`;
+  }
+  if(/dover bogazi|mans denizi/.test(hay)){
+    return `
+      <path d="M298 0 L440 0 L440 260 L320 260 L312 176 L328 112 L300 48 Z" fill="#10283f" opacity=".92"/>
+      <path d="M0 0 L146 0 L162 60 L150 132 L166 198 L150 260 L0 260 Z" fill="#10283f" opacity=".9"/>
+      <text x="328" y="22" fill="#cfd8e4" font-size="7" font-family="monospace">INGILTERE</text>
+      <text x="54" y="232" fill="#cfd8e4" font-size="7" font-family="monospace">FRANSA / BENELUX GIRISI</text>`;
+  }
+  return '';
 }
 
 function buildPortChartSvg(port){
@@ -11637,6 +11738,7 @@ function buildPortChartSvg(port){
     <text x="${coastLeft ? 126 : 250}" y="${channelY-82}" fill="#7ea0bd" font-size="6.1" font-family="monospace">UKC WATCH</text>
     <text x="${coastLeft ? 238 : 128}" y="${channelY+98}" fill="#7ea0bd" font-size="6.1" font-family="monospace">ECHO / RADAR CHECK</text>
     <text x="${coastLeft ? 308 : 70}" y="${channelY+48}" fill="#7ea0bd" font-size="6.1" font-family="monospace">LEADING LINE IN USE</text>`;
+  const strategicLandOverlay = /strait|canal/.test(profile.template) ? buildStrategicLandOverlay(hay, coastLeft, southFacing) : '';
   const visibleOuterContours = detailLevel !== 'low' ? outerContours : '';
   const visibleExtendedSoundings = detailLevel === 'high' ? extendedSoundings : '';
   const visibleDredgedOverlay = detailLevel !== 'low' ? dredgedOverlay : '';
@@ -11663,6 +11765,7 @@ function buildPortChartSvg(port){
   </defs>
   <rect width="440" height="260" rx="8" fill="url(#portSea)"/>
   <rect x="8" y="8" width="424" height="244" rx="6" fill="none" stroke="#284561" stroke-width="1"/>
+  ${strategicLandOverlay}
   <path d="M36 22 V238 M118 22 V238 M200 22 V238 M282 22 V238 M364 22 V238" stroke="#17324c" stroke-width=".8" opacity=".55" stroke-dasharray="3,4"/>
   <path d="M18 44 H422 M18 92 H422 M18 140 H422 M18 188 H422 M18 236 H422" stroke="#17324c" stroke-width=".8" opacity=".55" stroke-dasharray="3,4"/>
   <path d="${coastLeft ? 'M0 0 L132 0 L168 58 L168 260 L0 260 Z' : 'M440 0 L308 0 L272 58 L272 260 L440 260 Z'}" fill="#0a1b2b" opacity=".95"/>
