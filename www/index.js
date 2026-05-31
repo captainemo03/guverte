@@ -7377,6 +7377,14 @@ function getSceneOverlay(gfx,sc){
   }
   return extra;
 }
+
+function getLiveSceneOverlay(sc){
+  const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
+  if(/radar|bridge|ecdis|ais|arpa/.test(blob)){
+    return '<div class="live-ais-target t1"></div><div class="live-ais-target t2"></div><div class="live-ais-target t3"></div>';
+  }
+  return '';
+}
 function getSafeSceneMarkup(sc){
   const key = sc?.gfx || 'sea';
   const safeKey = GFX[key] ? key : 'sea';
@@ -7398,6 +7406,11 @@ let dialogueHistory=[];
 let livingShipState={thanks:false,note:false,argue:false,complaint:false};
 let sceneChoiceTimer=null;
 let sceneChoiceAutoPick=false;
+let watchState={code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
+let voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
+let consequenceTrace={office:0, psc:0, trust:0};
+let crewMemoryNotes={};
+let portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -8367,6 +8380,79 @@ function evaluateEnvironmentPressure(sc,c2){
   return {extra,notes};
 }
 
+function evaluateFatiguePressure(sc,c2){
+  const extra={};
+  const notes=[];
+  const tag=c2.tag||'akilli';
+  const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
+  const criticalScene = !!sc?.alert || /radar|ecdis|pilot|tug|psc|survey|fire|mob|vhf|ukc|squat|mooring|cargo watch|engine/.test(blob);
+  if(stats.dinclik <= 18){
+    if(tag!=='kritik'){
+      addEffectDelta(extra,'bilgi',-3);
+      addEffectDelta(extra,'sayginlik',-2);
+      notes.push('Asiri yorgunluk gec tepki ve eksik readback riski dogurdu.');
+    }
+    addEffectDelta(extra,'dinclik',-2);
+  }else if(stats.dinclik <= 35 && criticalScene){
+    if(tag==='akilli' || tag==='itaatkar'){
+      addEffectDelta(extra,'bilgi',-2);
+      notes.push('Dusuk dinclik teknik dusunceyi yavaslatti.');
+    }else if(tag==='korkak'){
+      addEffectDelta(extra,'sayginlik',-2);
+      addEffectDelta(extra,'bilgi',-2);
+      notes.push('Yorgunlukla birlikte cekingenlik ekibi daha da gerdi.');
+    }
+  }else if(stats.dinclik <= 55 && /04:|03:|anchor watch|gece|night/.test(blob) && tag!=='kritik'){
+    addEffectDelta(extra,'dinclik',-1);
+    notes.push('Uyku baskisi vardiya sonuna dogru birikti.');
+  }
+  return {extra,notes};
+}
+
+function evaluateTracePressure(sc,c2){
+  const extra={};
+  const notes=[];
+  const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
+  if(/psc|survey|class|deficiency|office/.test(blob) && consequenceTrace.psc + consequenceTrace.office >= 4){
+    addEffectDelta(extra,'sayginlik',-2);
+    if(c2.tag!=='kritik') addEffectDelta(extra,'bilgi',-1);
+    notes.push('Gecmis eksiklerin izi denetim havasini sertlestirdi.');
+  }
+  if(/pilot|tug|berth|mooring|cargo watch|departure/.test(blob) && consequenceTrace.trust >= 4 && c2.tag!=='kritik'){
+    addEffectDelta(extra,'sayginlik',-1);
+    notes.push('Ekip gecmis tereddutlerini unutmadigi icin bu sahnede daha zor ikna oldu.');
+  }
+  return {extra,notes};
+}
+
+function updateCrewMemory(sc,c2){
+  const key = getCrewKeyFromWho(sc?.who);
+  if(!key) return;
+  if(c2.tag==='kritik') crewMemoryNotes[key] = 'Sana bu konuda biraz daha guveniyor.';
+  else if(c2.tag==='akilli') crewMemoryNotes[key] = 'Gecen seferki temiz muhakemeni hatirliyor.';
+  else if(c2.tag==='sosyal') crewMemoryNotes[key] = 'Sert degil ama insan gibi iletisimini not etti.';
+  else if(c2.tag==='korkak') crewMemoryNotes[key] = 'Gecen seferki tereddudunu unutmus degil.';
+  else if(c2.tag==='itaatkar') crewMemoryNotes[key] = 'Seni izliyor; daha net inisiyatif bekliyor.';
+  else if(c2.tag==='cesur') crewMemoryNotes[key] = 'Cesaretini gordu ama kontrolunu de olcmek istiyor.';
+}
+
+function applyLingeringTrace(sc,c2){
+  const blob=`${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
+  const severe = !!sc?.alert || /survey|psc|pilot|tug|berth|bunker|imdg|permit|ukc|squat|manifold/.test(blob);
+  if(c2.tag==='korkak'){
+    consequenceTrace.trust += 2;
+    if(severe) consequenceTrace.office += 1;
+    if(/psc|survey|class/.test(blob)) consequenceTrace.psc += 2;
+  }else if(c2.tag==='itaatkar' && severe){
+    consequenceTrace.trust += 1;
+    if(/psc|survey|class/.test(blob)) consequenceTrace.psc += 1;
+  }else if(c2.tag==='kritik'){
+    consequenceTrace.trust = Math.max(0, consequenceTrace.trust-1);
+    if(/psc|survey|class/.test(blob)) consequenceTrace.psc = Math.max(0, consequenceTrace.psc-1);
+    if(/pilot|tug|berth|bunker|permit/.test(blob)) consequenceTrace.office = Math.max(0, consequenceTrace.office-1);
+  }
+}
+
 function evaluatePsychImpact(sc,c2){
   const tag=c2.tag||'akilli';
   const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
@@ -8503,6 +8589,7 @@ function updateStats(old,opts={}){
   const pct=Math.round((contractDays/contractTotal)*100);
   document.getElementById('contract-days').textContent=`${contractDays} / ${contractTotal} GÜN`;
   document.getElementById('contract-fill').style.width=Math.min(pct,100)+'%';
+  updateOpsHud(sceneQueue[currentIdx] || null);
 }
 
 function checkCrisis(){
@@ -8553,8 +8640,12 @@ function handleSceneChoice(sc, c2, ch){
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
   const envPressure = evaluateEnvironmentPressure(sc,c2);
+  const fatiguePressure = evaluateFatiguePressure(sc,c2);
+  const tracePressure = evaluateTracePressure(sc,c2);
   Object.entries(pressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
   Object.entries(envPressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
+  Object.entries(fatiguePressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
+  Object.entries(tracePressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
   const directPsychDelta={};
   Object.keys(resolvedEffect).forEach(key=>{
     if(psyche[key]!==undefined){
@@ -8575,6 +8666,8 @@ function handleSceneChoice(sc, c2, ch){
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
+  updateCrewMemory(sc,c2);
+  applyLingeringTrace(sc,c2);
   applyPsychDelta(evaluatePsychImpact(sc,c2));
   if(Object.keys(directPsychDelta).length) applyPsychDelta(directPsychDelta);
   if(directMoodDelta) adjustMood(directMoodDelta);
@@ -8592,6 +8685,14 @@ function handleSceneChoice(sc, c2, ch){
   if(envPressure.notes.length){
     setTimeout(()=>showNotif('~','Deniz Sarti',envPressure.notes[0]),700);
     addJournalEntry('[CENVRE BASKISI] '+envPressure.notes.join(' '), sc.day, sc.time);
+  }
+  if(fatiguePressure.notes.length){
+    setTimeout(()=>showNotif('⏳','Yorgunluk Baskisi',fatiguePressure.notes[0]),1050);
+    addJournalEntry('[YORGUNLUK] '+fatiguePressure.notes.join(' '), sc.day, sc.time);
+  }
+  if(tracePressure.notes.length){
+    setTimeout(()=>showNotif('🧾','Izin Birakti',tracePressure.notes[0]),1280);
+    addJournalEntry('[IZ BIRAKTI] '+tracePressure.notes.join(' '), sc.day, sc.time);
   }
 
   addJournalEntry(c2.text, sc.day, sc.time);
@@ -9643,6 +9744,10 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
   const lateInputScenes=[...regularInputScenes].sort(()=>Math.random()-0.5);
   const splitPoint = Math.max(6, Math.floor(coreMiddle.length*0.55));
   const middle=[...coreMiddle.slice(0,splitPoint), ...lateInputScenes, ...coreMiddle.slice(splitPoint)];
+  const portChainIds = ['s361','s362','s363','s364','s241','s432'];
+  const portChainScenes = portChainIds.map(id=>pool.find(s=>s.id===id)).filter(Boolean);
+  const injectAt = Math.min(middle.length, Math.max(5, Math.floor(middle.length*0.58)));
+  middle.splice(injectAt, 0, ...portChainScenes);
 
   return [...mandatory_start, ...middle, ...documentChain, ...extraRouteScenes, ...extraEquipmentScenes, ...final];
 }
@@ -9755,6 +9860,18 @@ function getSceneDetailClass(sc){
   return '';
 }
 
+function getSceneFlavorClasses(sc){
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const classes = [];
+  if(/radar|ais|ecdis|arpa|bridge/.test(hay)) classes.push('scene-live-nav');
+  if(/galley|asci|cay|kahve|coffee/.test(hay)) classes.push('scene-human-cup');
+  if(/engine|makine|rag|bez|oil|yagci|compressor/.test(hay)) classes.push('scene-human-rag');
+  if(/deck|guverte|wet deck|rain stop|mooring|halat/.test(hay)) classes.push('scene-human-wetdeck');
+  if(/harbor|terminal|liman|rihtim|rıhtım/.test(hay)) classes.push('scene-human-sodium');
+  if(/storm|firtina|salt|spray|swell/.test(hay)) classes.push('scene-human-salt');
+  return classes;
+}
+
 function getSceneTransitionClass(prevSc, sc){
   const prevProfile = getSceneBackdropProfile(prevSc);
   const nextProfile = getSceneBackdropProfile(sc);
@@ -9794,7 +9911,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
@@ -9802,6 +9919,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
     sceneArea.classList.add(getSceneAmbientClass(sc));
     const detailClass = getSceneDetailClass(sc);
     if(detailClass) sceneArea.classList.add(detailClass);
+    getSceneFlavorClasses(sc).forEach(cls=>sceneArea.classList.add(cls));
   }
   if(story){
     story.classList.remove('story-live');
@@ -9942,6 +10060,9 @@ function renderScene(idx){
   document.getElementById('dbd').textContent=sc.day;
   document.getElementById('tbd').textContent=sc.time;
   document.getElementById('lbd').textContent=sc.loc;
+  updateWatchState(sc);
+  updateVoyagePressure(sc);
+  updatePortOpsChain(sc);
   document.getElementById('scene-sub').textContent=sc.sub||'';
   const speakerKey = getCrewKeyFromWho(sc.who);
   const speakerPortraitCfg = speakerKey
@@ -9950,7 +10071,8 @@ function renderScene(idx){
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
   document.getElementById('spknm').textContent=c.name;
-  document.getElementById('spktl').textContent=c.title;
+  const memoryLine = getCrewMemoryLine(sc);
+  document.getElementById('spktl').textContent = [c.title, memoryLine].filter(Boolean).join(' · ');
   hideReplyBubble();
   runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   renderDialogueLog();
@@ -9960,8 +10082,9 @@ function renderScene(idx){
   renderPortraitTargets();
   const stObj=STYPES.find(x=>x.key===selType);
   const shipSpec=getShipSpec(selType);
-  document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear;
+  document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear+' · '+watchState.code;
   document.getElementById('contract-type').textContent=stObj.nm+' '+contractTotal+'+'+(KONTRAT_DEFS[selType]?.[selKontrat]?.izin||1)+'ay';
+  updateOpsHud(sc);
 
   const pct=Math.round((currentIdx/sceneQueue.length)*100);
   document.getElementById('progbar').style.width=pct+'%';
@@ -9973,6 +10096,7 @@ function renderScene(idx){
 
   const svg=document.getElementById('gfx-svg');
   const photo=document.getElementById('gfx-photo');
+  const foreground=document.getElementById('gfx-foreground');
   window.__bgBackdropProfile = getSceneBackdropProfile(sc);
   if(photo){
     const profile = window.__bgBackdropProfile || 'opensea';
@@ -9984,6 +10108,7 @@ function renderScene(idx){
     sceneActor.classList.add('empty');
     sceneActor.innerHTML = '';
   }
+  if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
 
   playSceneAudio(sc);
@@ -10181,6 +10306,11 @@ function beginGame(){
   seenPhotoMoments.clear();
   dialogueHistory=[];
   livingShipState={thanks:false,note:false,argue:false,complaint:false};
+  watchState={code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
+  voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
+  consequenceTrace={office:0, psc:0, trust:0};
+  crewMemoryNotes={};
+  portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
@@ -10650,6 +10780,11 @@ function buildSavePayload(){
     seenPhotoMoments:Array.from(seenPhotoMoments||[]),
     dialogueHistory,
     livingShipState,
+    watchState,
+    voyagePressure,
+    consequenceTrace,
+    crewMemoryNotes,
+    portOpsChain,
     scenesSinceEvent,
     nextEventAt,
     crewTrust,
@@ -10714,6 +10849,11 @@ function applyLoadedGameState(data){
   seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
   dialogueHistory = Array.isArray(data.dialogueHistory) ? data.dialogueHistory : [];
   livingShipState = data.livingShipState || {thanks:false,note:false,argue:false,complaint:false};
+  watchState = data.watchState || {code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
+  voyagePressure = data.voyagePressure || {swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
+  consequenceTrace = data.consequenceTrace || {office:0, psc:0, trust:0};
+  crewMemoryNotes = data.crewMemoryNotes || {};
+  portOpsChain = data.portOpsChain || {pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
   scenesSinceEvent = data.scenesSinceEvent || 0;
   nextEventAt = data.nextEventAt || (5 + Math.floor(Math.random()*4));
   crewTrust = data.crewTrust || {};
@@ -14031,6 +14171,132 @@ function updateWeather(sceneGfx){
   if(temp) temp.textContent = `${18+Math.floor(Math.random()*10)}°C`;
 }
 
+function parseSceneClock(sc){
+  const raw = String(sc?.time || '00:00');
+  const m = raw.match(/(\d{1,2}):(\d{2})/);
+  if(!m) return {hour:0, minute:0};
+  return {hour:Number(m[1]), minute:Number(m[2])};
+}
+
+function updateWatchState(sc){
+  const {hour, minute} = parseSceneClock(sc);
+  const total = hour*60 + minute;
+  const bands = [
+    {from:0, to:240, code:'0000-0400', label:'Gece Seyri'},
+    {from:240, to:480, code:'0400-0800', label:'Sabah Nobeti'},
+    {from:480, to:720, code:'0800-1200', label:'Gunduz Nobeti'},
+    {from:720, to:960, code:'1200-1600', label:'Ikindi Nobeti'},
+    {from:960, to:1200, code:'1600-2000', label:'Aksam Nobeti'},
+    {from:1200, to:1440, code:'2000-0000', label:'Ilk Gece Nobeti'}
+  ];
+  const band = bands.find(x=>total>=x.from && total<x.to) || bands[0];
+  const blob = `${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  watchState = {
+    code: band.code,
+    label: band.label,
+    handover: minute <= 8 || minute >= 52,
+    morning: hour >= 7 && hour <= 10,
+    portPrep: /pilot|tug|berth|all fast|gangway|terminal|departure|cargo watch|liman|rihtim|rıhtım/.test(blob),
+    logbook: minute >= 25 && minute <= 40
+  };
+}
+
+function updateVoyagePressure(sc){
+  const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const caution = currentWeather + (/fog|restricted visibility|storm|firtina|swell|crosswind|current|akinti|squat|ukc|bank effect/.test(blob) ? 2 : 0) + (/pilot|tug|berth|psc|survey/.test(blob) ? 1 : 0);
+  voyagePressure = {
+    swell: currentWeather >= 6 || /swell|rough|storm|firtina/.test(blob) ? 'Yuksek' : currentWeather >= 4 ? 'Orta' : 'Dusuk',
+    visibility: /fog|restricted visibility|mist|sis/.test(blob) ? 'Zayif' : /night|gece|03:|04:/.test(blob) ? 'Sinirli' : 'Acik',
+    current: /bogaz|boğaz|current|akinti|river|nehir|kanal/.test(blob) ? 'Kuvvetli' : /harbor|liman|berth/.test(blob) ? 'Orta' : 'Zayif',
+    vhf: /vhf|vts|pilot|tug|harbor|liman|bogaz|boğaz/.test(blob) ? 'Yogun' : /storm|firtina|distress/.test(blob) ? 'Gerilimli' : 'Sakin',
+    speed: currentWeather >= 6 || /squat|ukc|fog|restricted visibility|crosswind|swell|akinti/.test(blob) ? 'Speed azalt' : /pilot|tug|berth|harbor|liman/.test(blob) ? 'Dead slow hazir' : 'Sea speed',
+    caution
+  };
+}
+
+function getFatigueBand(){
+  if(stats.dinclik <= 18) return {label:'Tukenmeye yakin', className:'warn'};
+  if(stats.dinclik <= 35) return {label:'Yavas tepki riski', className:'warn'};
+  if(stats.dinclik <= 55) return {label:'Dikkat dagilabilir', className:'hot'};
+  return {label:'Dinclik normal', className:'good'};
+}
+
+function getTraceBand(){
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  if(heat >= 9) return {label:'Ofis / PSC dikkat kesildi', className:'warn'};
+  if(heat >= 5) return {label:'Iz birakmaya basladin', className:'hot'};
+  return {label:'Iz temiz', className:'good'};
+}
+
+function updateOpsHud(sc){
+  const watchChip = document.getElementById('watch-chip');
+  const seaChip = document.getElementById('sea-chip');
+  const fatigueChip = document.getElementById('fatigue-chip');
+  const traceChip = document.getElementById('trace-chip');
+  const fatigue = getFatigueBand();
+  const trace = getTraceBand();
+  if(watchChip){
+    watchChip.className = 'ops-chip' + (watchState.handover ? ' hot' : '');
+    watchChip.textContent = `${watchState.code} · ${watchState.label}${watchState.handover ? ' · Teslim' : ''}`;
+  }
+  if(seaChip){
+    const seaClass = voyagePressure.caution >= 7 ? ' warn' : voyagePressure.caution >= 5 ? ' hot' : '';
+    seaChip.className = `ops-chip${seaClass}`;
+    seaChip.textContent = `Swell ${voyagePressure.swell} · Gorus ${voyagePressure.visibility} · VHF ${voyagePressure.vhf}`;
+  }
+  if(fatigueChip){
+    fatigueChip.className = `ops-chip ${fatigue.className}`.trim();
+    fatigueChip.textContent = fatigue.label;
+  }
+  if(traceChip){
+    traceChip.className = `ops-chip ${trace.className}`.trim();
+    traceChip.textContent = trace.label;
+  }
+  const story = document.getElementById('story');
+  if(story){
+    story.classList.toggle('fatigue-low', stats.dinclik <= 35 && stats.dinclik > 18);
+    story.classList.toggle('fatigue-critical', stats.dinclik <= 18);
+  }
+  const sceneSub = document.getElementById('scene-sub');
+  if(sceneSub){
+    const chain = [
+      portOpsChain.pilot ? 'Pilot' : '',
+      portOpsChain.tug ? 'Tug' : '',
+      portOpsChain.approach ? 'Approach' : '',
+      portOpsChain.allFast ? 'All fast' : '',
+      portOpsChain.cargoWatch ? 'Cargo watch' : '',
+      portOpsChain.departure ? 'Departure prep' : ''
+    ].filter(Boolean).join(' → ');
+    const opBits = [
+      `${voyagePressure.speed}`,
+      watchState.logbook ? 'Logbook saati' : '',
+      watchState.morning ? 'Sabah kontrolu' : '',
+      watchState.portPrep ? 'Liman hazirligi' : '',
+      chain ? `Port chain: ${chain}` : ''
+    ].filter(Boolean);
+    sceneSub.textContent = opBits.join(' · ');
+  }
+}
+
+function updatePortOpsChain(sc){
+  const blob = `${sc?.id||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/pilot/.test(blob)) portOpsChain.pilot = true;
+  if(/tug|romorkor|römorkor/.test(blob)) portOpsChain.tug = true;
+  if(/approach|yaklasma|yaklaşma|berth final/.test(blob)) portOpsChain.approach = true;
+  if(/all fast/.test(blob)) portOpsChain.allFast = true;
+  if(/cargo watch|terminal/.test(blob)) portOpsChain.cargoWatch = true;
+  if(/departure|sailing prep|port clearance/.test(blob)) portOpsChain.departure = true;
+  if(!/pilot|tug|approach|all fast|cargo watch|departure|liman|berth|terminal/.test(blob) && !sc?.alert){
+    portOpsChain = {pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
+  }
+}
+
+function getCrewMemoryLine(sc){
+  const key = getCrewKeyFromWho(sc?.who);
+  if(!key || !crewMemoryNotes[key]) return '';
+  return crewMemoryNotes[key];
+}
+
 // ===== FOTOĞRAF ALBÜMİ =====
 let photos = [];
 let seenPhotoMoments = new Set();
@@ -14333,6 +14599,7 @@ function onSceneRender(sc){
   }
   // Hava güncelle
   updateWeather(sc.gfx);
+  updateOpsHud(sc);
   // Harita pozisyonunu güncelle
   updateShipPosition(sc.loc);
   // Gün sayacını güncelle
@@ -14839,24 +15106,42 @@ function playSceneAmbientLayers(sc){
       playTone(1180,'sine',0.03,0.016);
       sceneAudioLoopTimers.push(setInterval(()=>playTone(1180,'sine',0.03,0.016), 3400));
     },180));
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(420,'triangle',0.12,0.02);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(420,'triangle',0.12,0.02), 6200));
+    },720));
   }
   if(/harbor|liman|terminal|berth|all fast|mooring|halat/.test(blob)){
     sceneAudioLoopTimers.push(setTimeout(()=>{
       playTone(160,'triangle',0.06,0.04);
       sceneAudioLoopTimers.push(setInterval(()=>playTone(160,'triangle',0.06,0.04), 5200));
     },520));
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playNoise(0.12,0.018);
+      sceneAudioLoopTimers.push(setInterval(()=>playNoise(0.12,0.018), 6800));
+    },1400));
   }
   if(/storm|firtina|wind|squall|swell/.test(blob)){
     sceneAudioLoopTimers.push(setTimeout(()=>{
       playTone(92,'sawtooth',0.14,0.03);
       sceneAudioLoopTimers.push(setInterval(()=>playTone(92,'sawtooth',0.14,0.03), 4300));
     },460));
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playNoise(0.28,0.02);
+      sceneAudioLoopTimers.push(setInterval(()=>playNoise(0.28,0.02), 5100));
+    },1300));
   }
   if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik/.test(blob)){
     sceneAudioLoopTimers.push(setTimeout(()=>{
       playTone(810,'square',0.025,0.02);
       sceneAudioLoopTimers.push(setInterval(()=>playTone(810,'square',0.025,0.02), 2100));
     },240));
+  }
+  if(/engine|makine|compressor|generator|pump|ventilation|blower/.test(blob)){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(74,'sine',0.22,0.026);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(74,'sine',0.22,0.026), 2600));
+    },260));
   }
 }
 
