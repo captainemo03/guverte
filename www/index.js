@@ -7348,14 +7348,24 @@ function getSafeSceneMarkup(sc){
 }
 const tagL={cesur:"Cesur",akilli:"Akıllı",itaatkar:"İtaatkar",korkak:"Korkak",sosyal:"Sosyal",kritik:"KRİTİK"};
 let mood=58;
+let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
 let delayedConsequences=[];
 let playerFlags={securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
 let careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
+function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
+function applyPsychDelta(delta={}){
+  Object.keys(delta).forEach(key=>{
+    if(psyche[key]===undefined) return;
+    psyche[key]=clampPsych(psyche[key]+delta[key]);
+  });
+}
 function adjustMood(delta,reason=''){
   const old=mood;
   mood=clampMood(mood+delta);
+  if(delta>0) applyPsychDelta({moral:Math.round(delta*0.65), yalnizlik:-Math.round(delta*0.25), ofke:-Math.round(delta*0.2), uyum:Math.round(delta*0.18)});
+  if(delta<0) applyPsychDelta({moral:Math.round(delta*0.7), yalnizlik:Math.round(Math.abs(delta)*0.3), tukenme:Math.round(Math.abs(delta)*0.28), uyum:-Math.round(Math.abs(delta)*0.16)});
   if(reason&&old!==mood){
     setTimeout(()=>showNotif(delta>=0?':)':'...','Ruh Hali',reason+' ('+mood+')'),250);
     addJournalEntry(`[RUH HALI] ${reason} (${mood})`);
@@ -8243,6 +8253,63 @@ function evaluateEnvironmentPressure(sc,c2){
   return {extra,notes};
 }
 
+function evaluatePsychImpact(sc,c2){
+  const tag=c2.tag||'akilli';
+  const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const delta={moral:0,yalnizlik:0,ofke:0,tukenme:0,uyum:0};
+
+  if(tag==='kritik'){ delta.moral+=3; delta.uyum+=2; delta.ofke-=1; }
+  else if(tag==='akilli'){ delta.moral+=2; delta.uyum+=1; }
+  else if(tag==='sosyal'){ delta.moral+=2; delta.yalnizlik-=2; delta.uyum+=2; }
+  else if(tag==='cesur'){ delta.moral+=1; delta.ofke+=1; delta.tukenme+=1; }
+  else if(tag==='itaatkar'){ delta.moral-=1; delta.yalnizlik+=1; }
+  else if(tag==='korkak'){ delta.moral-=4; delta.yalnizlik+=3; delta.ofke+=2; delta.tukenme+=2; delta.uyum-=3; }
+
+  if(/kavga|mobbing|crew complaint|emre itaatsizlik|alkol|tartisma|de-escalation|kargasa|fatigue/.test(blob)){
+    delta.ofke += tag==='kritik' ? -2 : 2;
+    delta.uyum += tag==='kritik' ? 2 : -2;
+  }
+  if(/storm|firtina|gece vardiyasi|yorgun|restricted visibility|squat|ukc|survey|psc|dry dock|deficiency/.test(blob)){
+    delta.tukenme += tag==='kritik' ? 0 : 1;
+  }
+  if(/yalnizlik|ozlem|crew day room|galley|asci|sessiz/.test(blob)){
+    delta.yalnizlik += tag==='sosyal'||tag==='kritik' ? -2 : 1;
+  }
+  return delta;
+}
+
+function updatePsychRow(){
+  const map=[
+    {key:'moral', inverse:false},
+    {key:'yalnizlik', inverse:true},
+    {key:'ofke', inverse:true},
+    {key:'tukenme', inverse:true},
+    {key:'uyum', inverse:false}
+  ];
+  map.forEach(item=>{
+    const val=clampPsych(psyche[item.key] ?? 0);
+    const valueEl=document.getElementById(`p-${item.key}`);
+    const barEl=document.getElementById(`pb-${item.key}`);
+    if(!valueEl || !barEl) return;
+    valueEl.textContent=val;
+    barEl.style.width=`${val}%`;
+    const wrap=valueEl.closest('.psychstat');
+    if(item.inverse){
+      barEl.classList.add('bad');
+      if(wrap){
+        wrap.classList.toggle('psychwarn', val>=70);
+        wrap.classList.remove('psychgood');
+      }
+    }else{
+      barEl.classList.remove('bad');
+      if(wrap){
+        wrap.classList.toggle('psychgood', val>=70);
+        wrap.classList.toggle('psychwarn', val<=25);
+      }
+    }
+  });
+}
+
 function applyEffect(e,opts={}){
   const old={...stats};
   Object.keys(e).forEach(k=>{
@@ -8312,6 +8379,7 @@ function updateStats(old,opts={}){
   document.getElementById('b-yorgunluk').style.width=dv+'%';
   document.getElementById('b-yorgunluk').style.background=dv>=70?'#1a7a3c':dv>=40?'#c9952a':'#8b2222';
   document.getElementById('s-yorgunluk').style.color=dv>=70?'#5dbf8a':dv>=40?'#d4a017':'#c97070';
+  updatePsychRow();
 
   const s=stats.sayginlik;
   document.getElementById('repstars').textContent=s>=80?'⭐⭐⭐⭐⭐':s>=60?'⭐⭐⭐⭐':s>=40?'⭐⭐⭐':s>=20?'⭐⭐':'⭐';
@@ -8379,6 +8447,7 @@ function handleSceneChoice(sc, c2, ch){
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
+  applyPsychDelta(evaluatePsychImpact(sc,c2));
   const crisis=applyEffect(resolvedEffect);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
@@ -8777,6 +8846,17 @@ const MOORING_PLAN_CONFIGS = {
 };
 
 const EMERGENCY_PANEL_CONFIGS = {
+  s24:{
+    title:'Fire Drill Zinciri',
+    hint:'Alarm, report, muster ve area control adimlarini temiz siraya koy.',
+    steps:[
+      {id:'step1', label:'1. ilk cevap', options:['Alarmi duy ve report zincirini baslat','Kendi basina mahale kos','Biraz bekle']},
+      {id:'step2', label:'2. ikinci cevap', options:['Muster / count organize et','Kimseye haber verme','Sadece dolabi ac']},
+      {id:'step3', label:'3. ucuncu cevap', options:['Area control ve ekipman hazirligi','Kapilari acik birak','Kararsiz kal']},
+      {id:'gear', label:'Temel hazirlik', options:['Comms + PPE + uygun fire gear','Paint locker key','Pilot ladder']}
+    ],
+    expected:{step1:'Alarmi duy ve report zincirini baslat',step2:'Muster / count organize et',step3:'Area control ve ekipman hazirligi',gear:'Comms + PPE + uygun fire gear'}
+  },
   s237:{
     title:'MOB Ilk Dakika',
     hint:'Sirayi kur: bagir, isaret et, goz temasi, alarm/rapor. Sonra ekipman mantigi.',
@@ -8809,6 +8889,56 @@ const EMERGENCY_PANEL_CONFIGS = {
       {id:'gear', label:'Hazirlik mantigi', options:['Boat/raft ready + calm accountability','Makine logu yaz','Rope ladder only']}
     ],
     expected:{step1:'Muster yerine git',step2:'Can yelek / immersion suit kontrolu',step3:'Sayim ve komut zinciri',gear:'Boat/raft ready + calm accountability'}
+  }
+};
+
+const TACTICAL_PANEL_CONFIGS = {
+  s416:{
+    title:'UKC / TIDE / SQUAT PANELI',
+    hint:'Liman yaklasmasinda draft, tide, squat ve emniyet payini ayni anda oku.',
+    visual:'ukc',
+    fields:[
+      {id:'depth', label:'Charted depth mantigi', options:['Depth + tide together','Only chart depth','Only high water']},
+      {id:'squat', label:'Squat yorumu', options:['Include squat and trim margin','Ignore squat if speed normal','Think only draft-depth gap']},
+      {id:'decision', label:'Son karar cizgisi', options:['UKC with safety margin','Proceed by feeling','Pilot handles all']}
+    ],
+    expected:{depth:'Depth + tide together',squat:'Include squat and trim margin',decision:'UKC with safety margin'}
+  },
+  s452:{
+    title:'BALLAST DECISION PANELI',
+    hint:'List duzeltirken tank ciftini, trimi ve free surface etkisini birlikte dusun.',
+    visual:'ballast',
+    fields:[
+      {id:'pair', label:'Tank secimi', options:['Balanced tank pair','Nearest single tank only','Any wing tank fast']},
+      {id:'trim', label:'Trim sonucu', options:['Check trim before transfer','Trim secondary','Ignore trim for list']},
+      {id:'surface', label:'Free surface', options:['Avoid large slack tanks','Slack tanks acceptable','Surface effect minor']}
+    ],
+    expected:{pair:'Balanced tank pair',trim:'Check trim before transfer',surface:'Avoid large slack tanks'}
+  }
+};
+
+const INSPECTION_PANEL_CONFIGS = {
+  s447:{
+    title:'SURVEY WALKTHROUGH',
+    hint:'Surveyor gelmeden once belge, ekipman ve previous follow-up cizgisini birlikte kontrol et.',
+    visual:'survey',
+    fields:[
+      {id:'records', label:'Records', options:['Updated and traceable','Mostly ready','Need checking later']},
+      {id:'gear', label:'Equipment condition', options:['Checked with evidence','Looks fine visually','Surveyor can spot later']},
+      {id:'follow', label:'Previous defect trail', options:['Closed with evidence','Mention if asked','Not important now']}
+    ],
+    expected:{records:'Updated and traceable',gear:'Checked with evidence',follow:'Closed with evidence'}
+  },
+  s448:{
+    title:'PSC DEFICIENCY CHAIN',
+    hint:'Fiziksel eksik, kayit uyumu ve corrective follow-up ayni zincirin halkalari.',
+    visual:'psc',
+    fields:[
+      {id:'physical', label:'Physical issue', options:['Secure immediately','Observe first','Hide if minor']},
+      {id:'records', label:'Record match', options:['Cross-check with actual status','Fix wording later','Records are enough']},
+      {id:'follow', label:'Corrective action', options:['Raise and track follow-up','Verbal note only','No need if resolved once']}
+    ],
+    expected:{physical:'Secure immediately',records:'Cross-check with actual status',follow:'Raise and track follow-up'}
   }
 };
 
@@ -8984,9 +9114,112 @@ function getOperationDocVisual(sc){
   }
 }
 
+function getDecisionVisual(kind){
+  switch(kind){
+    case 'ukc':
+      return `<div class="decision-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="UKC and squat panel">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">DEPTH + TIDE + SQUAT</text>
+        <path d="M24 78 H298" stroke="#7fc3ff" stroke-width="2" stroke-dasharray="6 4"/>
+        <rect x="82" y="38" width="54" height="42" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="186" y="46" width="54" height="34" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <path d="M52 90 Q160 64 268 90" stroke="#ffd45a" stroke-width="3" fill="none"/>
+        <text x="34" y="104" fill="#cfeaff" font-size="8" font-family="monospace">TIDE</text>
+        <text x="138" y="104" fill="#fff4bf" font-size="8" font-family="monospace">UKC</text>
+        <text x="246" y="104" fill="#ffb0b0" font-size="8" font-family="monospace">SQUAT</text>
+      </svg></div>`;
+    case 'ballast':
+      return `<div class="decision-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Ballast transfer panel">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">BALLAST / LIST / TRIM</text>
+        <rect x="44" y="34" width="52" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="100" y="34" width="52" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="168" y="34" width="52" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <rect x="224" y="34" width="52" height="48" rx="5" fill="#17324a" stroke="#6fa8dc"/>
+        <path d="M62 96 Q160 70 258 96" stroke="#ffd45a" stroke-width="3" fill="none"/>
+        <text x="44" y="108" fill="#cfeaff" font-size="8" font-family="monospace">PAIR</text>
+        <text x="134" y="108" fill="#fff4bf" font-size="8" font-family="monospace">TRIM</text>
+        <text x="228" y="108" fill="#ffb0b0" font-size="8" font-family="monospace">FSC</text>
+      </svg></div>`;
+    case 'survey':
+      return `<div class="decision-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="Survey walkthrough panel">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">SURVEY WALKTHROUGH</text>
+        <rect x="22" y="40" width="84" height="44" rx="6" fill="#132940" stroke="#4a7098"/>
+        <rect x="118" y="40" width="84" height="44" rx="6" fill="#132940" stroke="#4a7098"/>
+        <rect x="214" y="40" width="84" height="44" rx="6" fill="#132940" stroke="#4a7098"/>
+        <text x="38" y="66" fill="#cfeaff" font-size="8" font-family="monospace">RECORDS</text>
+        <text x="138" y="66" fill="#fff4bf" font-size="8" font-family="monospace">GEAR</text>
+        <text x="230" y="66" fill="#81f7b8" font-size="8" font-family="monospace">FOLLOW</text>
+      </svg></div>`;
+    case 'psc':
+      return `<div class="decision-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="PSC deficiency chain panel">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">PSC / DEFICIENCY CHAIN</text>
+        <rect x="24" y="46" width="72" height="28" rx="6" fill="#421717" stroke="#c97070"/>
+        <rect x="124" y="46" width="72" height="28" rx="6" fill="#4b350b" stroke="#d4a017"/>
+        <rect x="224" y="46" width="72" height="28" rx="6" fill="#17324a" stroke="#6fa8dc"/>
+        <text x="34" y="64" fill="#ffd3d3" font-size="8" font-family="monospace">PHYSICAL</text>
+        <text x="141" y="64" fill="#fff4bf" font-size="8" font-family="monospace">RECORD</text>
+        <text x="237" y="64" fill="#cfeaff" font-size="8" font-family="monospace">ACTION</text>
+      </svg></div>`;
+    default:
+      return '';
+  }
+}
+
+function getDecisionOutcomeChoice(sc, values, expected){
+  let score=0;
+  Object.keys(expected).forEach(key=>{
+    if(values[key]===expected[key]) score+=2;
+  });
+  if(score>=5) return sc.choices.find(c=>c.tag==='kritik') || sc.choices[0];
+  if(score>=3) return sc.choices.find(c=>c.tag==='akilli' || c.tag==='itaatkar') || sc.choices[1] || sc.choices[0];
+  return sc.choices.find(c=>c.tag==='korkak') || sc.choices[sc.choices.length-1] || sc.choices[0];
+}
+
+function renderDecisionPanel(sc, ch, cfg){
+  const panel = document.getElementById('calc-panel');
+  if(!panel || !cfg) return false;
+  panel.className='calc-panel show';
+  panel.innerHTML = `<div class="decision-box">
+    <div class="decision-title">${cfg.title}</div>
+    <div class="decision-hint">${cfg.hint}</div>
+    ${getDecisionVisual(cfg.visual)}
+    <div class="decision-grid">
+      ${cfg.fields.map(f=>`<label class="decision-field"><span class="decision-label">${f.label}</span><select class="decision-select" data-decision="${f.id}">${f.options.map(opt=>`<option value="${opt}">${opt}</option>`).join('')}</select></label>`).join('')}
+    </div>
+    <div class="decision-actions">
+      <span class="decision-meta">Dogru cevap tek kelime degil; dogru dusunme zinciri.</span>
+      <button id="decision-submit" class="doc-submit">Degerlendir</button>
+    </div>
+    <div id="decision-feedback" class="decision-feedback"></div>
+  </div>`;
+  const submit=document.getElementById('decision-submit');
+  const feedback=document.getElementById('decision-feedback');
+  submit.onclick=()=>{
+    const values={};
+    panel.querySelectorAll('[data-decision]').forEach(el=>{ values[el.dataset.decision]=el.value; });
+    const picked=getDecisionOutcomeChoice(sc, values, cfg.expected);
+    const strong = picked && picked.tag==='kritik';
+    const mid = picked && (picked.tag==='akilli' || picked.tag==='itaatkar');
+    feedback.className=`decision-feedback ${strong?'':(mid?'warn':'bad')}`.trim();
+    feedback.textContent = strong
+      ? 'Karar zinciri oturdu; bu paneli zabit gibi okudun.'
+      : mid
+        ? 'Temel mantik var ama bir halkayi eksik biraktin.'
+        : 'Bu okuma zinciri eksik; sahada risk buyuyebilir.';
+    submit.disabled=true;
+    panel.querySelectorAll('[data-decision]').forEach(el=>el.disabled=true);
+    setTimeout(()=>handleSceneChoice(sc, picked, ch), 850);
+  };
+  return true;
+}
+
 function renderDocumentPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
   if(!panel) return false;
+  if(TACTICAL_PANEL_CONFIGS[sc?.id] || INSPECTION_PANEL_CONFIGS[sc?.id]) return false;
   const cfg = DOCUMENT_FORM_CONFIGS[sc?.id];
   if(!cfg) return false;
   panel.className='calc-panel show';
@@ -9198,6 +9431,14 @@ function renderEmergencyPanel(sc, ch){
     setTimeout(()=>handleSceneChoice(sc, picked, ch), 850);
   };
   return true;
+}
+
+function renderTacticalPanel(sc, ch){
+  return renderDecisionPanel(sc, ch, TACTICAL_PANEL_CONFIGS[sc?.id]);
+}
+
+function renderInspectionPanel(sc, ch){
+  return renderDecisionPanel(sc, ch, INSPECTION_PANEL_CONFIGS[sc?.id]);
 }
 
 // ===== RASTGELE SENARYO SIRASI =====
@@ -9597,6 +9838,8 @@ function renderScene(idx){
 
   const ch=document.getElementById('choices');ch.innerHTML='';
   renderCalcPanel(sc, ch);
+  const hasTacticalPanel = renderTacticalPanel(sc, ch);
+  const hasInspectionPanel = renderInspectionPanel(sc, ch);
   const hasDocPanel = renderDocumentPanel(sc, ch);
   const hasStowagePanel = renderStowagePanel(sc, ch);
   const hasMooringPanel = renderMooringPanel(sc, ch);
@@ -9607,7 +9850,7 @@ function renderScene(idx){
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
-  if(sc.calc || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
+  if(sc.calc || hasTacticalPanel || hasInspectionPanel || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
     ch.style.display='none';
   }else{
     ch.style.display='';
@@ -9631,6 +9874,33 @@ function showCrisis(key){
 }
 
 // ===== SON =====
+function getCareerSpecialization(){
+  const scores={seyir:0,yuk:0,emniyet:0,insanyonetimi:0,tanker:0};
+  choicesMade.forEach(c=>{
+    if(c.domain==='bridge') scores.seyir += c.tag==='kritik'?3:c.tag==='akilli'?2:1;
+    if(c.domain==='deck') scores.yuk += c.tag==='kritik'?3:c.tag==='akilli'?2:1;
+    if(c.domain==='engine') scores.tanker += c.tag==='kritik'?2:c.tag==='akilli'?1:0;
+    if(c.domain==='compliance') scores.emniyet += c.tag==='kritik'?3:c.tag==='akilli'?2:1;
+    if(c.tag==='sosyal' || c.tag==='kritik') scores.insanyonetimi += /sosyal|kritik/.test(c.tag)?2:1;
+  });
+  if(playerFlags.securityBreach===0) scores.emniyet += 4;
+  if(careerMemory.investigations>0) scores.insanyonetimi += 2;
+  if(playerFlags.nearMiss===0) scores.yuk += 2;
+  if(playerFlags.sextantGood>0) scores.seyir += 3;
+  if(psyche.uyum>=70) scores.insanyonetimi += 4;
+  if(psyche.moral>=70) scores.insanyonetimi += 2;
+  if(/tanker|lng/.test(selType)) scores.tanker += 3;
+  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const labels={
+    seyir:'Seyirci',
+    yuk:'Yuk Operasyoncusu',
+    emniyet:'Emniyet Disiplini Guclu',
+    insanyonetimi:'Insan Yonetimi Guclu',
+    tanker:'Tanker / Teknik Disiplin Guclu'
+  };
+  return {top:labels[ranked[0][0]], second:labels[ranked[1][0]], raw:scores};
+}
+
 function showEnd(){
   stopAllMusic();
   deleteSavedGame(false);
@@ -9675,6 +9945,8 @@ function showEnd(){
   }
 
   const moodLabel=mood>=75?'Saglam durdu':mood>=50?'Dalgalandi ama tuttu':mood>=30?'Zorlandi':'Icine kapandi';
+  const specialization = getCareerSpecialization();
+  const harmonyLabel=psyche.uyum>=70?'ekibi iyi tuttu':psyche.uyum>=45?'dengeyi korudu':'ekipte surtunme birakti';
   if(playerFlags.securityBreach>0) verdict+=` Security breach riski ${playerFlags.securityBreach} kez buyudu.`;
   if(playerFlags.nearMiss>0) verdict+=` Yuk elleclemede ${playerFlags.nearMiss} near-miss kaydi olustu.`;
   if(playerFlags.sextantGood>0) verdict+=` Sextant disiplininde de kendini gosterdi.`;
@@ -9690,6 +9962,8 @@ function showEnd(){
   ].filter(Boolean);
   if(memoryMoments.length) verdict+=` <br><strong>Hatira Cizgisi:</strong> ${memoryMoments.join(', ')}.`;
   verdict+=` <br><strong>Ruh Hali:</strong> ${mood}/100 - ${moodLabel}.`;
+  verdict+=` <br><strong>Psikoloji Cizgisi:</strong> moral ${psyche.moral}, yalnizlik ${psyche.yalnizlik}, ofke ${psyche.ofke}, tukenme ${psyche.tukenme}, ekip uyumu ${psyche.uyum} — ${harmonyLabel}.`;
+  verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
   document.getElementById('ende').textContent=emoji;
   document.getElementById('endt').textContent=title;
   document.getElementById('endf').textContent=flavor;
@@ -9699,7 +9973,9 @@ function showEnd(){
     '<div class="ecard"><div class="ecv" style="color:#6fa8dc;">'+Math.round(stats.cesaret)+'</div><div class="ecl">CESARET</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#d4a017;">'+Math.round(stats.bilgi)+'</div><div class="ecl">BİLGİ</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.sayginlik)+'</div><div class="ecl">SAYGINLIK</div></div>'+
-    '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.dinclik)+'</div><div class="ecl">DİNÇLİK</div></div>';
+    '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.dinclik)+'</div><div class="ecl">DİNÇLİK</div></div>'+
+    '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.uyum)+'</div><div class="ecl">EKİP UYUMU</div></div>'+
+    '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.moral)+'</div><div class="ecl">MORAL</div></div>';
 }
 
 // ===== BAŞLAT =====
@@ -9725,10 +10001,11 @@ function beginGame(){
 
   stats={cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
   mood=58;
+  psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
   activeEcdisPlanKey='izmir_messina_south';
   activeRadarMode='cpa_watch';
   delayedConsequences=[];
-  playerFlags={securityBreach:0,nearMiss:0,sextantGood:0};
+  playerFlags={securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
   choicesMade=[];
   SYSTEM_STATE.consecutiveMistakes=0;
   SYSTEM_STATE.totalMistakes=0;
@@ -10188,6 +10465,7 @@ function buildSavePayload(){
     sceneQueue,
     stats,
     mood,
+    psyche,
     activeEcdisPlanKey,
     activeRadarMode,
     delayedConsequences,
@@ -10249,6 +10527,7 @@ function applyLoadedGameState(data){
   sceneQueue = Array.isArray(data.sceneQueue) ? data.sceneQueue : [];
   stats = data.stats || {cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
   mood = data.mood ?? 58;
+  psyche = data.psyche || {moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
   activeEcdisPlanKey = data.activeEcdisPlanKey || 'izmir_messina_south';
   activeRadarMode = data.activeRadarMode || 'cpa_watch';
   delayedConsequences = Array.isArray(data.delayedConsequences) ? data.delayedConsequences : [];
