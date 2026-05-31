@@ -627,6 +627,8 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-photo-sheet.preview.pose-front,.portrait-composite.preview .portrait-photo-sheet.pose-front{transform:translateX(0) translateY(2px) scale(1);}
 .portrait-photo-sheet.preview.pose-angled,.portrait-composite.preview .portrait-photo-sheet.pose-angled{transform:translateX(-18px) translateY(4px) scale(1.06) rotate(-1.5deg);}
 .portrait-photo-sheet.preview.pose-command,.portrait-composite.preview .portrait-photo-sheet.pose-command{transform:translateY(8px) translateX(14px) scale(1.1);}
+.creator-preview-stage .portrait-photo-sheet.preview,
+.creator-preview-stage .portrait-composite.preview .portrait-photo-sheet.preview{mix-blend-mode:screen;opacity:.98;}
 .creator-preview-stage.pose-front .portrait-photo-sheet.preview{filter:drop-shadow(0 12px 26px rgba(0,0,0,.28));}
 .creator-preview-stage.pose-angled .portrait-photo-sheet.preview{filter:drop-shadow(0 14px 28px rgba(0,0,0,.32));}
 .creator-preview-stage.pose-command .portrait-photo-sheet.preview{filter:drop-shadow(0 16px 30px rgba(0,0,0,.34));}
