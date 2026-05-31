@@ -6701,7 +6701,171 @@ Gemide insan tarafini anlayan refleks hangisi?`,
   choices:[
   {text:"Sessiz degisimi fark eder, kisiyi zorlamadan yoklar ve gerekiyorsa amir zincirine insani bir dille tasirim",tag:"kritik",effect:{sayginlik:17,bilgi:11}},
   {text:"Kendi haline birakmanin her zaman en iyisi oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
-  {text:"Boyle belirtilerin is disi ve onemsiz oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]}
+  {text:"Boyle belirtilerin is disi ve onemsiz oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s455",gfx:"cargo",alert:false,day:"Gun 28",time:"09:10",loc:"Manifold Station",sub:"Bunker checklist ve pre-transfer hazirligi",who:"z1",
+  text:`Chief officer bunker oncesi seni manifold sahasina cekti.
+
+"Checklist kağıt doldurmak degil" dedi. "Scupper, drip tray, hose support, comms, sample arrangement, SOPEP ve stop signal zinciri burada baslar."
+
+Ilk bakista neyi kurarsin?`,
+  choices:[
+  {text:"Checklist'i saha hazirligi, line-up teyidi ve spill response ile birlikte kurarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Imza ve terminal teyidi varsa saha detayinin ikinci planda kalabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Bunker'in esasen hose baglantisindan ibaret oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s456",gfx:"cargo",alert:true,day:"Gun 28",time:"10:05",loc:"Bunker Manifold",sub:"Sample, overflow watch ve manifold readiness",who:"carkci",
+  text:`Bunker baslamadan hemen once hose hafif yuk aldi. Gauge tarafinda da kucuk bir belirsizlik var.
+
+"Sample alindi mi, overflow watch yerinde mi, manifold readiness temiz mi?" diye sordu carkcibasi. "Bunker hatasi hizli gelir."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"Sample, overflow watch, tank seviyeleri ve acil stop haberlesmesini birlikte teyit ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:2}},
+  {text:"Baslangicta kucuk belirsizliklerin bunkerde zamanla duzelecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Sadece manifold sızdırmiyorsa operasyonun guvende oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s457",gfx:"deck",alert:true,day:"Gun 28",time:"10:40",loc:"SOPEP Locker / Manifold",sub:"SOPEP ve communication chain ne kadar hazir?",who:"suvari",
+  text:`Suvari son bir kez durdurdu.
+
+"Spill olursa once kimin kimi arayacagi, kimin vanayi kapatacagi, kimin absorbent serecegi net degilse checklist eksiktir."
+
+Bu zinciri nasil kurarsin?`,
+  choices:[
+  {text:"SOPEP gear, stop transfer komutu, shore-gemi haberlesmesi ve ilk containment adimini birlikte netlestiririm",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Kucuk bir spill olsa da once terminali bekleriz diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"SOPEP'in daha cok denetim icin orada oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s458",gfx:"cargo",alert:false,day:"Gun 28",time:"15:20",loc:"DG Desk",sub:"IMDG placard, UN number ve segregation",who:"z3",
+  text:`Dangerous goods dosyasi acik. Ama 3. Zabiti bu kez kagittan degil senden duymak istiyor.
+
+"Placard dogru mu, UN number dogru mu, segregation mantigi dogru mu? DG isi etiket degil, uyum isidir."
+
+En saglam bakis ne olur?`,
+  choices:[
+  {text:"Placard, UN number, class, segregation ve stowage uyumunu birlikte kontrol ederim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Placard dogruysa manifest tarafinin cok da sorun cikarmayacagini dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"DG tarafinda esas sorumlulugun terminal ve shore tarafinda oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s459",gfx:"cargo",alert:true,day:"Gun 28",time:"16:10",loc:"Cargo Office",sub:"Dangerous cargo manifest uyumsuzlugu",who:"z1",
+  text:`Manifestte bir DG container sinifi ile fiili bay plani kaydi tam oturmuyor.
+
+"Yanlis stowage, yanlis ayrim, yanlis belge..." dedi 1. Zabiti. "DG tarafinda kucuk uyumsuzluk diye bir sey bazen yoktur."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"Manifest, bay plani ve DG listesi arasindaki uyumsuzlugu durdurup netlestiririm",tag:"kritik",effect:{bilgi:20,sayginlik:14,cesaret:2}},
+  {text:"Terminal tarafindan bir sorun denmediyse operasyonu cok da bekletmemeyi dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Belge farklarinin sahadaki ayristirmayi ciddi etkilemeyecegini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s460",gfx:"cabin",alert:true,day:"Gun 29",time:"08:20",loc:"Master's Office",sub:"Sirket maili geldi: gecikme aciklamasi isteniyor",who:"suvari",
+  text:`Acenta telefonu kapatir kapatmaz mail dustu.
+
+"Delay explanation required. Charter asking updated berth window. Send concise facts."
+
+Suvari ekrana bakti: "Ofis bazen cevap kadar tonu da okur."
+
+Ilk cizgin ne olur?`,
+  choices:[
+  {text:"Somut neden, operasyon etkisi, yeni ETA ve risk azaltici adimi birlikte raporlarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Kisa bir gecikme notunun charter ve ofis icin yetecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Mail baskisinda ustunkoru bir aciklamayla gecmeye calisirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s461",gfx:"cabin",alert:true,day:"Gun 29",time:"11:50",loc:"Office Follow-Up Call",sub:"Root cause beklentisi artik resmi",who:"suvari",
+  text:`Bu kez ofis sadece "ne oldu" demiyor.
+
+"What is the root cause, who owns the corrective action, and how will it be verified?"
+
+Suvari kisa konustu: "Is burada profesyonellesir."
+
+Ne dersin?`,
+  choices:[
+  {text:"Kok neden, sorumlu kisi ve dogrulama adimini tek zincir gibi kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Duzeltici aksiyon yazmanin simdilik yeterli oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Ofisin bu kadar ayrintiya girmesinin sahadaki isi fazla degistirmedigini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s462",gfx:"harbor",alert:false,day:"Gun 29",time:"18:05",loc:"Agent Desk",sub:"Charter baskisi, berth window ve profesyonel cevap",who:"z1",
+  text:`Berth window daraldi. Agent, terminal ve ofis ayni anda farkli sey soruyor.
+
+1. Zabiti dosyayi kapatti: "Charter baskisi altinda net kalamayan zabit, hatayi hizdan degil karmasadan yer."
+
+En olgun cevap hangisi?`,
+  choices:[
+  {text:"Berth window, operasyon hazirligi, pilot/tug bagimliligi ve yeni ETA'yi tek cizgide toplarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Tek odagim hizlanmak olur; diger bagimliliklar sonradan toparlanir diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Charter baskisinin daha cok kaptan ve acentenin isi oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s463",gfx:"harbor",alert:false,day:"Gun 30",time:"04:40",loc:"Pilot Ladder",sub:"Pilot boarding anini bir zincirin baslangici gibi okumak",who:"suvari",
+  text:`Pilot ladder asildi. VHF, embarkation side, speed, lee ve deck team ayni anda okunuyor.
+
+"Pilot boarding tek basina olay degil," dedi suvari. "Tum liman zincirinin ilk acilisi."
+
+Neyi dusunursun?`,
+  choices:[
+  {text:"Pilot boarding'i comms, speed, side, deck readiness ve sonraki exchange ile birlikte kurarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Pilot ciktiktan sonra asil operasyonun basladigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Pilot boarding'i daha cok formalite gibi gorurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s464",gfx:"harbor",alert:false,day:"Gun 30",time:"05:20",loc:"Forward Tug Station",sub:"Tug made fast sonrasi komut zinciri",who:"lostromo",
+  text:`Tug line tension altina girdi. Forward station daha da resmi hale geldi.
+
+Lostromo kisa kesti: "Tug made fast olduktan sonra komut tekrar, line angle ve emniyet alani ciddilesir."
+
+En profesyonel refleks?`,
+  choices:[
+  {text:"Readback, line angle, snap-back ve pilot komutunu tek baglamda tutarim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Line tension oturduysa sonraki seyin pilotun isi oldugunu dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Tug hattinda saha tarafinin buyuk olcude sansla yurutuldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s465",gfx:"harbor",alert:false,day:"Gun 30",time:"08:10",loc:"Terminal Face",sub:"Cargo watch devri nasil verilir?",who:"z2",
+  text:`All fast sonrasi is bitmiyor; cargo watch devri basliyor.
+
+2. Zabiti seni durdurdu: "Operasyon acildiginda sahayi, drafti, weather riski ve stop kriterini devretmiyorsan nobet devretmiyorsun."
+
+Neyi aktarmayi secersin?`,
+  choices:[
+  {text:"Saha durumu, manifold/hold status, weather, stop criteria ve next report noktasini devrederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Devri daha cok saat ve isim uzerinden kurarim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Cargo watch devrinin cok da detay istemedigini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s466",gfx:"harbor",alert:false,day:"Gun 30",time:"17:35",loc:"Departure Prep Desk",sub:"Sailing preparation ve son clearing zinciri",who:"suvari",
+  text:`Sailing prep basladi: documents, pilot order, tug request, draft, gangway clear, crew count.
+
+"Departure prep son dakikada bagirilan liste degildir" dedi suvari. "Tum liman zincirinin kapanisidir."
+
+Son profesyonel bakisin ne olur?`,
+  choices:[
+  {text:"Pilot/tug order, documents, draft, gangway clear ve crew readiness zincirini birlikte kapatirim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Departure prep'te son anda cikan eksiklerin kolay toparlanacagini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Sailing tarafinda ana sorumlulugun diger zabitlerde oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s467",gfx:"fire",alert:true,day:"Gun 30",time:"21:30",loc:"Muster Station",sub:"Yangin refleksi: sirayi nasil kurarsin?",who:"z3",
+  text:`Alarm caliyor. Bu kez bilgi degil, refleks ve sira sinaniyor.
+
+"Dogru ekipmani dogru sirada secmezsen iyi niyet bile zarar verir" dedi 3. Zabiti.
+
+Ilk saniyelerde neyi hangi sirayla kurarsin?`,
+  choices:[
+  {text:"Alarm / report, muster-count, area control ve uygun fire gear zinciri kurarim",tag:"kritik",effect:{bilgi:19,sayginlik:14,cesaret:2}},
+  {text:"Dogrudan ekipman kapip mahalin icine odaklanirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Kalabaligin ne yaptigina bakip ona gore gec refleks veririm",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s468",gfx:"fire",alert:true,day:"Gun 30",time:"21:55",loc:"Boat Deck",sub:"Abandon ship zinciri panikte nasil bozulmaz?",who:"suvari",
+  text:`Abandon ship karari verildi varsay. Muster, sayim, role, craft, komut ve son kontrol tek cizgiye inmeli.
+
+Suvari: "Panikte ilk kaybolan sey sira duygusudur."
+
+Hangi cizgi daha profesyonel?`,
+  choices:[
+  {text:"Muster list, count, lifejacket, craft assignment ve komut zincirini net tutarim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Herkes can aracina yoneldikten sonra sayim zaten tamam olur diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Abandon ship'te refleksin plandan daha onemli oldugunu sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s469",gfx:"engine",alert:false,day:"Gun 31",time:"10:00",loc:"Dry Dock Walkthrough",sub:"Propeller, rudder, sea chest, anode, coating, steel renewal",who:"carkci",
+  text:`Kuru havuz walkthrough basladi. Not defteri elinde ama gozun once neye bakacagini secmen gerekiyor.
+
+"Her sey ayni anda onemli degil" dedi carkcibasi. "Ama hangisinin neden onemli oldugunu bilirsen gezi tur olmaktan cikar."
+
+Ilk walkthrough mantigin ne olur?`,
+  choices:[
+  {text:"Yapisal kondisyon, akim yolu, sea chest, moving parts ve renewal gerektiren alanlari birlikte tararim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Gozle temiz gorunen yerde walkthough'un buyuk olcude tamam sayilabilecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Dry dock detaylarinin operasyonla bagini zayif gorurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s470",gfx:"deck",alert:false,day:"Gun 31",time:"15:00",loc:"MARPOL Record Desk",sub:"Garbage, sludge, OWS, ballast water ve ORB mantigi",who:"z3",
+  text:`MARPOL tarafi bu kez tek tek degil, akiş zinciri olarak onunde.
+
+"Atigin kendisi bir sey, kaydi baska, sistemi baska, limit baska" dedi 3. Zabiti. "Hepsini birden okuyamazsan denetimde dagilirsin."
+
+En saglam cevap?`,
+  choices:[
+  {text:"Garbage, sludge, OWS, ballast water ve ORB kaydini kendi sistem ve limitleriyle ayri ayri yonetirim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"MARPOL kalemlerinin cogu ayni disipline ciktigi icin tek mantikta toplayabilecegimi dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Record book varsa fiili ayrimin ikinci planda kalabilecegini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
@@ -7411,6 +7575,7 @@ let voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Saki
 let consequenceTrace={office:0, psc:0, trust:0};
 let crewMemoryNotes={};
 let portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
+let companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -7982,7 +8147,7 @@ function summarizeDialogueText(text){
 function renderDialogueLog(){
   const wrap = document.getElementById('dialogue-log');
   if(!wrap) return;
-  const items = dialogueHistory.slice(-4);
+  const items = dialogueHistory.slice(-10);
   if(!items.length){
     wrap.innerHTML = '';
     return;
@@ -8478,6 +8643,44 @@ function evaluatePsychImpact(sc,c2){
   return delta;
 }
 
+function applyScenePsychDrift(sc){
+  if(!sc) return;
+  const blob=`${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''}`.toLowerCase();
+  const delta={moral:0,yalnizlik:0,ofke:0,tukenme:0,uyum:0};
+  if(/night|03:|04:|gece vardiyasi|watch/.test(blob)) delta.tukenme += 1;
+  if(/storm|firtina|swell|ukc|squat|psc|survey|deficiency|office/.test(blob)) delta.tukenme += 1;
+  if(/galley|asci|tesekkur|day room|relief|gun dogumu|sunrise/.test(blob)){ delta.moral += 1; delta.yalnizlik -= 1; }
+  if(/kavga|mobbing|complaint|itaatsizlik|alkol/.test(blob)){ delta.ofke += 1; delta.uyum -= 1; }
+  applyPsychDelta(delta);
+}
+
+function getOfficeBand(){
+  const heat = consequenceTrace.office + consequenceTrace.psc;
+  if(heat >= 8) return {label:'Ofis maili sert · Root cause bekleniyor', className:'warn'};
+  if(heat >= 5) return {label:'Charter / ofis baskisi artti', className:'hot'};
+  if(heat >= 2) return {label:'Ofis dikkat kesildi', className:'hot'};
+  return {label:'Ofis sakin', className:'good'};
+}
+
+function maybeTriggerCompanyPressureBeat(sc){
+  const heat = consequenceTrace.office + consequenceTrace.psc;
+  if(heat >= 2 && !companyPressureState.mailSeen){
+    companyPressureState.mailSeen = true;
+    showNotif('✉️','Sirket Maili','Gecikme ve operasyon notlari ofisin radarina girdi. Bundan sonra rapor dili daha onemli.');
+    addJournalEntry('[OFIS] Sirket ilk kez gecikme ve operasyon kalemi icin geri bildirim istedi.', sc?.day, sc?.time);
+  }
+  if(heat >= 5 && !companyPressureState.charterSeen){
+    companyPressureState.charterSeen = true;
+    showNotif('⚓','Charter Baskisi','Terminal ve charter tarafindan hiz, berth window ve aciklama baskisi artti.');
+    addJournalEntry('[OFIS] Charter / terminal baskisi buyudu; sonraki kararlar daha sert okunacak.', sc?.day, sc?.time);
+  }
+  if(heat >= 8 && !companyPressureState.rootSeen){
+    companyPressureState.rootSeen = true;
+    showNotif('🧾','Root Cause Beklentisi','Ofis artik sadece duzeltme degil, kok neden ve follow-up bekliyor.');
+    addJournalEntry('[OFIS] Root cause, corrective action ve takip zinciri artik resmi beklenti haline geldi.', sc?.day, sc?.time);
+  }
+}
+
 function updatePsychRow(){
   const map=[
     {key:'moral', inverse:false},
@@ -8966,6 +9169,78 @@ const DOCUMENT_FORM_CONFIGS = {
       {id:'surface', label:'Free surface kontrolu', placeholder:'Orn: avoid creating large slack tanks during transfer', keywords:['free surface','slack','tank','avoid','transfer']}
     ]
   },
+  s455:{
+    title:'Bunker Checklist / Pre-Transfer',
+    hint:'Checklist sadece imza degil; saha, line-up ve spill hazirligi zinciridir.',
+    fields:[
+      {id:'area', label:'Saha hazirligi', placeholder:'Orn: scupper plugged / drip tray set / hose support ready', keywords:['scupper','drip','hose','support','ready']},
+      {id:'lineup', label:'Line-up / transfer yolu', placeholder:'Orn: manifold to bunker tank checked', keywords:['line-up','manifold','tank','checked','transfer']},
+      {id:'response', label:'Spill hazirligi', placeholder:'Orn: SOPEP gear standby / stop signal agreed', keywords:['sopep','spill','stop','signal','gear']}
+    ]
+  },
+  s456:{
+    title:'Overflow Watch / Sample Discipline',
+    hint:'Bunker baslamadan once sample, watch ve seviyeler temiz okunur.',
+    fields:[
+      {id:'sample', label:'Sample durumu', placeholder:'Orn: sealed sample bottles prepared', keywords:['sample','sealed','bottle','prepared']},
+      {id:'watch', label:'Overflow watch', placeholder:'Orn: dedicated watch on manifold and tank soundings', keywords:['overflow','watch','manifold','sounding','tank']},
+      {id:'levels', label:'Seviye / stop mantigi', placeholder:'Orn: high level and emergency stop confirmed', keywords:['high level','stop','emergency','level','confirmed']}
+    ]
+  },
+  s457:{
+    title:'SOPEP / Communication Chain',
+    hint:'Spill refleksi insan, ekipman ve haberlesme zinciriyle kurulur.',
+    fields:[
+      {id:'gear', label:'SOPEP gear', placeholder:'Orn: absorbents, booms and PPE ready', keywords:['absorbent','boom','ppe','ready']},
+      {id:'call', label:'Kimi ararsin?', placeholder:'Orn: terminal, bridge, engine room in order', keywords:['terminal','bridge','engine','call','order']},
+      {id:'contain', label:'Ilk containment', placeholder:'Orn: stop transfer and contain at scupper line', keywords:['stop','contain','scupper','transfer','line']}
+    ]
+  },
+  s458:{
+    title:'IMDG Placard / UN / Segregation',
+    hint:'DG tarafinda etiket, sinif ve ayrim mantigi ayni anda kontrol edilir.',
+    fields:[
+      {id:'placard', label:'Placard / class', placeholder:'Orn: class 3 placard matches manifest', keywords:['class','placard','matches','manifest']},
+      {id:'un', label:'UN number', placeholder:'Orn: UN 1203 cross-checked', keywords:['un','1203','cross','checked']},
+      {id:'segregation', label:'Segregation', placeholder:'Orn: away from foodstuffs / incompatible cargo separated', keywords:['segregation','away','incompatible','separated']}
+    ]
+  },
+  s459:{
+    title:'Dangerous Manifest Mismatch',
+    hint:'Manifest, bay plani ve DG listesi farkliysa operasyon durup netlesir.',
+    fields:[
+      {id:'source', label:'Uyumsuz kaynak', placeholder:'Orn: manifest and bay plan do not match', keywords:['manifest','bay plan','match','mismatch']},
+      {id:'risk', label:'Risk', placeholder:'Orn: wrong stowage / wrong separation / PSC exposure', keywords:['wrong','stowage','separation','psc']},
+      {id:'action', label:'Ilk adim', placeholder:'Orn: hold and verify with loading master', keywords:['hold','verify','loading master','terminal']}
+    ]
+  },
+  s460:{
+    title:'Delay Mail / Office Update',
+    hint:'Ofis ve charter tarafina duygusuz, net ve izlenebilir cevap verilir.',
+    fields:[
+      {id:'cause', label:'Gecikme nedeni', placeholder:'Orn: tug delay / weather hold / terminal pause', keywords:['delay','tug','weather','terminal']},
+      {id:'impact', label:'Operasyon etkisi', placeholder:'Orn: ETA slipped 2h / berth window at risk', keywords:['eta','berth','window','risk','2h']},
+      {id:'plan', label:'Yeni plan', placeholder:'Orn: updated ETA and mitigation sent', keywords:['updated','eta','mitigation','sent']}
+    ]
+  },
+  s461:{
+    title:'Root Cause / Follow-Up Mail',
+    hint:'Ofis artik sadece olay ozetini degil kok neden ve sahiplenmeyi ister.',
+    fields:[
+      {id:'root', label:'Root cause', placeholder:'Orn: poor handover and weak verification', keywords:['root','handover','verification','poor']},
+      {id:'owner', label:'Owner', placeholder:'Orn: chief officer / master / company follow-up', keywords:['chief','master','company','owner']},
+      {id:'verify', label:'Verification', placeholder:'Orn: next operation audit and signed closure', keywords:['next','audit','signed','closure']}
+    ]
+  },
+  s462:{
+    title:'Charter Pressure / Berth Window',
+    hint:'Charter baskisi altinda tek veri degil tum bagimliliklar net anlatilir.',
+    fields:[
+      {id:'window', label:'Berth window', placeholder:'Orn: next available window 2100 LT', keywords:['window','2100','available','lt']},
+      {id:'dependency', label:'Bagimlilik', placeholder:'Orn: pilot and tug availability linked', keywords:['pilot','tug','availability','linked']},
+      {id:'eta', label:'Yeni ETA', placeholder:'Orn: revised ETA sent to charter and terminal', keywords:['revised','eta','charter','terminal']}
+    ]
+  },
   s365:{
     title:'Konteyner Bay / Row / Tier Karari',
     hint:'Slot degisikligi sadece yer degisikligi degil; sequence, lashing ve reefer takibini etkiler.',
@@ -9120,6 +9395,28 @@ const EMERGENCY_PANEL_CONFIGS = {
       {id:'gear', label:'Hazirlik mantigi', options:['Boat/raft ready + calm accountability','Makine logu yaz','Rope ladder only']}
     ],
     expected:{step1:'Muster yerine git',step2:'Can yelek / immersion suit kontrolu',step3:'Sayim ve komut zinciri',gear:'Boat/raft ready + calm accountability'}
+  },
+  s467:{
+    title:'Yangin Refleks Modu',
+    hint:'Alarm, mahal teyidi, muster ve uygun ekipman zincirini zaman baskisinda temiz kur.',
+    steps:[
+      {id:'step1', label:'1. ilk refleks', options:['Alarmi ciddiye al ve mahali teyit et','Biraz daha bekle','Yangini uzaktan tahmin et']},
+      {id:'step2', label:'2. ikinci refleks', options:['Zabite/bridge rapor ver ve muster baslat','Kimseye soylemeden in','Sadece yangin dolabina git']},
+      {id:'step3', label:'3. ucuncu refleks', options:['Area control, kapali kapilar ve ekip hazirligi','Kapilari acik birak','Herkesi farkli yone gonder']},
+      {id:'gear', label:'Ilk uygun hazirlik', options:['Comms + PPE + uygun extinguisher/hose','Can sali painteri','Pilot ladder']},
+    ],
+    expected:{step1:'Alarmi ciddiye al ve mahali teyit et',step2:'Zabite/bridge rapor ver ve muster baslat',step3:'Area control, kapali kapilar ve ekip hazirligi',gear:'Comms + PPE + uygun extinguisher/hose'}
+  },
+  s468:{
+    title:'Abandon Ship Refleks Modu',
+    hint:'Terk karari panikte degil; muster, sayim, ekipman ve craft readiness ile yurur.',
+    steps:[
+      {id:'step1', label:'1. ilk adim', options:['Muster yerine git ve komut bekle','Kamaraya saklan','Rastgele filikaya yonel']},
+      {id:'step2', label:'2. ikinci adim', options:['Can yelek / immersion suit kontrolu','Telefon sarja tak','Kisisel esya toplamaya devam et']},
+      {id:'step3', label:'3. ucuncu adim', options:['Sayim, yarali kontrolu ve komut zinciri','Herkesi tekneye kosustur','Sessizce kenarda bekle']},
+      {id:'gear', label:'Terk hazirligi', options:['Boat/raft readiness + calm accountability','Makine logu yazmaya don','Bos halat ara']},
+    ],
+    expected:{step1:'Muster yerine git ve komut bekle',step2:'Can yelek / immersion suit kontrolu',step3:'Sayim, yarali kontrolu ve komut zinciri',gear:'Boat/raft readiness + calm accountability'}
   }
 };
 
@@ -9145,6 +9442,28 @@ const TACTICAL_PANEL_CONFIGS = {
       {id:'surface', label:'Free surface', options:['Avoid large slack tanks','Slack tanks acceptable','Surface effect minor']}
     ],
     expected:{pair:'Balanced tank pair',trim:'Check trim before transfer',surface:'Avoid large slack tanks'}
+  },
+  s469:{
+    title:'DRY DOCK WALKTHROUGH',
+    hint:'Rudder, propeller, sea chest ve coating hattini sadece bakarak degil, sistematik yurut.',
+    visual:'drydock',
+    fields:[
+      {id:'focus', label:'Ilk odak', options:['Propeller-rudder-sea chest as a chain','Only paint gloss','Just walk for photos']},
+      {id:'verify', label:'Ne dogrulanir?', options:['Anode wear, coating damage, clearance evidence','Only if class asks','Nothing until sailing']},
+      {id:'follow', label:'Takip adimi', options:['Raise findings and steel/coating follow-up','Remember mentally','Leave it to yard only']},
+    ],
+    expected:{focus:'Propeller-rudder-sea chest as a chain',verify:'Anode wear, coating damage, clearance evidence',follow:'Raise findings and steel/coating follow-up'}
+  },
+  s470:{
+    title:'MARPOL CEVRE PANELI',
+    hint:'Garbage, sludge, OWS, ballast water ve ORB birbiriyle konusan tek cevre zinciridir.',
+    visual:'marpol',
+    fields:[
+      {id:'stream', label:'Atik akisi', options:['Separate stream and legal route','Mix and sort later','Chief will know somehow']},
+      {id:'record', label:'Kayit disiplini', options:['Record with time, quantity and route','Write only totals','Fix if inspected']},
+      {id:'system', label:'Sistem limiti', options:['OWS/ballast/sewage limits respected','Use if sea looks clear','Equipment decides itself']},
+    ],
+    expected:{stream:'Separate stream and legal route',record:'Record with time, quantity and route',system:'OWS/ballast/sewage limits respected'}
   }
 };
 
@@ -10311,6 +10630,7 @@ function beginGame(){
   consequenceTrace={office:0, psc:0, trust:0};
   crewMemoryNotes={};
   portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
+  companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
@@ -10799,6 +11119,7 @@ function buildSavePayload(){
     consequenceTrace,
     crewMemoryNotes,
     portOpsChain,
+    companyPressureState,
     scenesSinceEvent,
     nextEventAt,
     crewTrust,
@@ -10868,6 +11189,7 @@ function applyLoadedGameState(data){
   consequenceTrace = data.consequenceTrace || {office:0, psc:0, trust:0};
   crewMemoryNotes = data.crewMemoryNotes || {};
   portOpsChain = data.portOpsChain || {pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
+  companyPressureState = data.companyPressureState || {stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
   scenesSinceEvent = data.scenesSinceEvent || 0;
   nextEventAt = data.nextEventAt || (5 + Math.floor(Math.random()*4));
   crewTrust = data.crewTrust || {};
@@ -14481,8 +14803,10 @@ function updateOpsHud(sc){
   const seaChip = document.getElementById('sea-chip');
   const fatigueChip = document.getElementById('fatigue-chip');
   const traceChip = document.getElementById('trace-chip');
+  const officeChip = document.getElementById('office-chip');
   const fatigue = getFatigueBand();
   const trace = getTraceBand();
+  const office = getOfficeBand();
   if(watchChip){
     watchChip.className = 'ops-chip' + (watchState.handover ? ' hot' : '');
     watchChip.textContent = `${watchState.code} · ${watchState.label}${watchState.handover ? ' · Teslim' : ''}`;
@@ -14499,6 +14823,10 @@ function updateOpsHud(sc){
   if(traceChip){
     traceChip.className = `ops-chip ${trace.className}`.trim();
     traceChip.textContent = trace.label;
+  }
+  if(officeChip){
+    officeChip.className = `ops-chip ${office.className}`.trim();
+    officeChip.textContent = office.label;
   }
   const story = document.getElementById('story');
   if(story){
@@ -14716,8 +15044,12 @@ const TIMED_SCENE_CONFIGS = {
   s237:{seconds:9, title:'MOB saniyeleri akiyor', timeoutText:'MOB aninda gec kalmak gozden kaybetme riskini buyuttu.'},
   s409:{seconds:12, title:'VHF cevabi bekliyor', timeoutText:'VHF cevabini geciktirdin; profesyonel akista bosluk olustu.'},
   s420:{seconds:14, title:'Bunker check baskisi', timeoutText:'Checklist gecikince terminal baskiyi artirdi.'},
+  s456:{seconds:13, title:'Overflow watch baskisi', timeoutText:'Sample ve overflow disiplini gecikince bunker riski buyudu.'},
+  s460:{seconds:16, title:'Ofis cevap bekliyor', timeoutText:'Gec kalan ofis cevabi baskiyi daha da buyuttu.'},
   s447:{seconds:18, title:'Surveyor bekliyor', timeoutText:'Cevap gecikince surveyor once duzensizlige odaklandi.'},
-  s448:{seconds:16, title:'PSC not dusuyor', timeoutText:'Gec kalan refleks deficiency zincirini sertlestirdi.'}
+  s448:{seconds:16, title:'PSC not dusuyor', timeoutText:'Gec kalan refleks deficiency zincirini sertlestirdi.'},
+  s467:{seconds:11, title:'Yangin refleksi zamanla yarisa girdi', timeoutText:'Yanginda gecikme ilk kontrol sansini zayiflatti.'},
+  s468:{seconds:12, title:'Terk zinciri panige donuyor', timeoutText:'Abandon ship sirasinda gecikme sayim ve komutu dagitti.'}
 };
 
 const LIVING_SHIP_BEATS = [
@@ -14848,6 +15180,8 @@ function onSceneRender(sc){
   // Hava güncelle
   updateWeather(sc.gfx);
   updateOpsHud(sc);
+  applyScenePsychDrift(sc);
+  maybeTriggerCompanyPressureBeat(sc);
   // Harita pozisyonunu güncelle
   updateShipPosition(sc.loc);
   // Gün sayacını güncelle
