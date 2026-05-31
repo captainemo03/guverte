@@ -3994,6 +3994,48 @@ choices:[
 {text:"Birkaç temel ayrimi bilsem yeter diyerek siniflari yuzeysel gecerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
 {text:"Yangin siniflarinin pratikte cok fark yaratmadigini dusunurum",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}]},
 
+{id:"s455",gfx:"galley",alert:false,day:"Gun 21",time:"20:35",loc:"Yemekhane - Gece Sonu",sub:"Ascinin sessiz ikrami",who:"asci",
+text:`Aksam servisi bittikten sonra galley ilk kez sessizledi.\n\nAsci tezgaha kucuk bir bardak cay koydu.\n\n"Bugun herkes sertti. Sen yine de ortaligi karistirmadin. Bazen gemide en buyuk is, sesi biraz dusurmektir."`,
+choices:[
+{text:"Cayi alir, tesekkur eder ve gunun gerginligini biraz birakirim",tag:"sosyal",effect:{sayginlik:6,dinclik:5}},
+{text:"Sadece basimla onaylayip sakin kalirim",tag:"akilli",effect:{dinclik:4,mood:2}},
+{text:"'Vakit yok' deyip cikar giderim",tag:"korkak",effect:{sayginlik:-4,moral:-2}}]},
+
+{id:"s456",gfx:"bridge",alert:false,day:"Gun 22",time:"04:20",loc:"Kopruustu - Seher Vakti",sub:"Uykusuz zabit ve sessiz vardiya",who:"z2",
+text:`2. Zabiti kahveyi bitirmis, hala radar ve rota arasinda gidip geliyor.\n\n"Gecenin son saati adamı ele verir," dedi. "Yorgunluk hata gibi degil; yavas gelir."`,
+choices:[
+{text:"Kisa ve net bir devir ozeti yapip dikkat dagilan noktayi soylerim",tag:"kritik",effect:{bilgi:10,sayginlik:8}},
+{text:"Kahve teklif edip gozlemimi paylasirim",tag:"sosyal",effect:{sayginlik:7,moral:3}},
+{text:"Sessiz kalip sadece ekrana bakarim",tag:"itaatkar",effect:{bilgi:3}}]},
+
+{id:"s457",gfx:"harbor",alert:false,day:"Gun 23",time:"18:10",loc:"Rihtim - All Fast Sonrasi",sub:"Sessiz tesekkur",who:"lostromo",
+text:`Son spring oturduktan sonra Lostromo halata son kez baktı.\n\nYanından geçerken sadece omzuna hafifçe vurdu.\n\n"Bazen fazla konuşmamak da iş bilmektir."`,
+choices:[
+{text:"Kisa bir 'eyvallah usta' deyip bunu not ederim",tag:"sosyal",effect:{sayginlik:7,uyum:4}},
+{text:"Sessizce gulumseyip isime devam ederim",tag:"akilli",effect:{sayginlik:5,mood:2}},
+{text:"Bunu cok da onemsemem",tag:"korkak",effect:{sayginlik:-3}}]},
+
+{id:"s458",gfx:"cabin",alert:false,day:"Gun 24",time:"06:05",loc:"Chart Room - Sabah",sub:"Birakilan not",who:"anlatici",
+text:`Chart room masasinda kucuk bir kagit var:\n\n"Gece yagmur bastirinca radar echoes dagildi. Gain'i sonuna kadar acma. - 2/O"\n\nGemide bazen egitim resmi degil, boyle sessiz gelir.`,
+choices:[
+{text:"Notu cebime koyar, ilk firsatta ayni durumda denerim",tag:"kritik",effect:{bilgi:10,sayginlik:6}},
+{text:"Notu deftere gecirip rutine eklerim",tag:"akilli",effect:{bilgi:8}},
+{text:"Kisa bir not diye gecip unuturum",tag:"korkak",effect:{bilgi:-4}}]},
+
+{id:"s459",gfx:"cabin",alert:false,day:"Gun 25",time:"21:50",loc:"Koridor - Gec Saat",sub:"Iki tayfa arasi surtusme",who:"hasan",
+text:`Koridorda iki kisinin sesi yeni dusmus.\n\nHasan seni gorunce kisa kesti:\n\n"Uzatmadik ama herkes yorgun. Simdi birine laf atarsan buyur."`,
+choices:[
+{text:"Konuyu alevlendirmeden kimin vardiyada oldugunu ve emniyete etkisini sorarim",tag:"kritik",effect:{sayginlik:8,uyum:5}},
+{text:"Taraf olmadan ortaligin sogumasini beklerim",tag:"akilli",effect:{uyum:3,moral:2}},
+{text:"Meraktan kim hakli diye kurcalarim",tag:"korkak",effect:{uyum:-5,ofke:3}}]},
+
+{id:"s460",gfx:"sunrise",alert:false,day:"Gun 26",time:"05:48",loc:"Kopruustu - Gun Dogumu",sub:"Gece sabaha donuyor",who:"suvari",
+text:`Ufukta renk yavas yavas aciliyor. Kaptan bir sure konusmadi.\n\nSonra sadece sunu dedi:\n\n"Denizde bazen en iyi karar, bir an durup resmi tamamiyla gormektir."`,
+choices:[
+{text:"Bunu seyir muhakemesi gibi algilar, acele etmeme dersi olarak alirim",tag:"kritik",effect:{bilgi:8,sayginlik:8}},
+{text:"Sessizce disari bakip gunu oyle baslatirim",tag:"sosyal",effect:{moral:4,dinclik:3}},
+{text:"Sozu romantik bulup gecistiririm",tag:"itaatkar",effect:{sayginlik:2}}]},
+
 {id:"FINAL",gfx:"bridge",alert:false,day:"Son Gün",time:"15:00",loc:"Konferans Salonu",sub:"Staj değerlendirme — kontrat sona erdi",who:"z1",
 text:`Son değerlendirme toplantısı.\n\n1. Zabiti, 2. Zabiti, Lostromo. Önlerinde staj formu.\n\n"${n}. ${yr} yılında, ${sn}'de. Fırtına, yük denetimi, gece nöbetleri, yangın tatbikatı, liman operasyonları, krizler.\n\nRaporun birinci satırına ne yazayım?"`,
 choices:[
@@ -7352,6 +7394,10 @@ let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
 let delayedConsequences=[];
 let playerFlags={securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
 let careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
+let dialogueHistory=[];
+let livingShipState={thanks:false,note:false,argue:false,complaint:false};
+let sceneChoiceTimer=null;
+let sceneChoiceAutoPick=false;
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -7914,6 +7960,74 @@ function renderSpeechPortrait(cfg){
   }
 }
 
+function summarizeDialogueText(text){
+  const raw = String(text || '').replace(/\s+/g,' ').trim();
+  if(raw.length <= 180) return raw;
+  return raw.slice(0,177).trimEnd() + '...';
+}
+
+function renderDialogueLog(){
+  const wrap = document.getElementById('dialogue-log');
+  if(!wrap) return;
+  const items = dialogueHistory.slice(-4);
+  if(!items.length){
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = items.map(entry=>`
+    <div class="dialogue-entry ${entry.side}">
+      <div class="dialogue-avatar">${renderPortraitSprite(entry.portrait, 'avatar')}</div>
+      <div class="dialogue-card">
+        <div class="dialogue-name">${entry.name}</div>
+        <div class="dialogue-body">${summarizeDialogueText(entry.text)}</div>
+      </div>
+    </div>
+  `).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function pushDialogueEntry(side, portrait, name, text){
+  dialogueHistory.push({
+    side: side === 'right' ? 'right' : 'left',
+    portrait: portrait || getPlayerPortraitConfig(),
+    name: name || 'Stajyer',
+    text: String(text || '')
+  });
+  if(dialogueHistory.length > 18) dialogueHistory = dialogueHistory.slice(-18);
+  renderDialogueLog();
+}
+
+function getSceneEmotion(sc, role='speaker'){
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/yangin|fire|mob|alarm|pirate|korsan|blackout|panic|acil/.test(hay)) return role === 'player' ? 'alert' : 'stern';
+  if(/kavga|mobbing|itaatsizlik|sikayet|complaint|argue|tension/.test(hay)) return 'angry';
+  if(/tesekkur|tebrik|rahatlama|sessizce|cay|coffee|cook|galley/.test(hay)) return 'warm';
+  if(/yorgun|uykusuz|fatigue|yalnizlik|homesick|gece 04|03:|04:/.test(hay) || psyche.tukenme >= 68) return 'tired';
+  if(mood <= 35) return role === 'player' ? 'tired' : 'stern';
+  return 'calm';
+}
+
+function applySceneEmotions(sc){
+  const speech = document.getElementById('speechportrait');
+  const player = document.getElementById('playerstand');
+  if(speech) speech.dataset.emotion = getSceneEmotion(sc, 'speaker');
+  if(player) player.dataset.emotion = getSceneEmotion(sc, 'player');
+}
+
+function clearSceneChoiceTimer(){
+  if(sceneChoiceTimer){
+    clearInterval(sceneChoiceTimer);
+    sceneChoiceTimer = null;
+  }
+  sceneChoiceAutoPick = false;
+  const chip = document.getElementById('scene-timer-chip');
+  if(chip){
+    chip.classList.add('hidden');
+    chip.classList.remove('warn');
+    chip.textContent = '';
+  }
+}
+
 function hideReplyBubble(){
   const stage = document.getElementById('replystage');
   const text = document.getElementById('replytext');
@@ -8425,17 +8539,31 @@ function getCalcOutcomeChoice(sc, numericAnswer){
 
 function handleSceneChoice(sc, c2, ch){
   sfxClick();
+  clearSceneChoiceTimer();
   const calcPanel = document.getElementById('calc-panel');
   if(calcPanel) calcPanel.className='';
   if(ch){
     ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
   }
+  const speakerKey = getCrewKeyFromWho(sc.who);
+  const speakerPortrait = speakerKey ? getCrewPortraitForKey(speakerKey) : getPlayerPortraitConfig();
+  pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, typeof sc.text==='function'?sc.text(pn,sn):sc.text);
+  pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', c2.text);
   showReplyBubble(c2.text);
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
   const envPressure = evaluateEnvironmentPressure(sc,c2);
   Object.entries(pressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
   Object.entries(envPressure.extra).forEach(([k,v])=>{resolvedEffect[k]=(resolvedEffect[k]||0)+v;});
+  const directPsychDelta={};
+  Object.keys(resolvedEffect).forEach(key=>{
+    if(psyche[key]!==undefined){
+      directPsychDelta[key]=resolvedEffect[key];
+      delete resolvedEffect[key];
+    }
+  });
+  const directMoodDelta = Number(resolvedEffect.mood || 0);
+  if('mood' in resolvedEffect) delete resolvedEffect.mood;
   if(c2.routePlanKey&&ECDIS_ROUTE_PLANS[c2.routePlanKey]){
     activeEcdisPlanKey=c2.routePlanKey;
     addJournalEntry(`[SEYIR PLANI] ${ECDIS_ROUTE_PLANS[c2.routePlanKey].label} ECDIS uzerinde aktif edildi.`, sc.day, sc.time);
@@ -8448,6 +8576,8 @@ function handleSceneChoice(sc, c2, ch){
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
   applyPsychDelta(evaluatePsychImpact(sc,c2));
+  if(Object.keys(directPsychDelta).length) applyPsychDelta(directPsychDelta);
+  if(directMoodDelta) adjustMood(directMoodDelta);
   const crisis=applyEffect(resolvedEffect);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
@@ -9615,6 +9745,26 @@ function getSceneAmbientClass(sc){
   return 'scene-ambient-sea';
 }
 
+function getSceneDetailClass(sc){
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
+  if(/radar|ais|ecdis|arpa/.test(hay)) return 'scene-detail-radar';
+  if(/engine|makine|generator|pump|compressor/.test(hay)) return 'scene-detail-engine';
+  if(/harbor|liman|terminal|tug|pilot|berth/.test(hay)) return 'scene-detail-harbor';
+  if(/güverte|guverte|mooring|halat|deck|lashing/.test(hay)) return 'scene-detail-deck';
+  if(/storm|firtina|squall|swell/.test(hay)) return 'scene-detail-stormglass';
+  return '';
+}
+
+function getSceneTransitionClass(prevSc, sc){
+  const prevProfile = getSceneBackdropProfile(prevSc);
+  const nextProfile = getSceneBackdropProfile(sc);
+  if(prevProfile === nextProfile) return '';
+  if(prevProfile === 'night' && nextProfile === 'opensea') return 'scene-transition-dawn';
+  if(prevProfile === 'harbor' && nextProfile === 'opensea') return 'scene-transition-offshore';
+  if(/engine|makine/.test(`${sc?.gfx||''} ${sc?.loc||''}`.toLowerCase())) return 'scene-transition-enginebay';
+  return 'scene-transition-generic';
+}
+
 function getSceneActorMode(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(/storm|firtina|swell|rough|crosswind|squall/.test(hay)) return 'storm';
@@ -9644,12 +9794,14 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
     if(motionClass) sceneArea.classList.add(motionClass);
     sceneArea.classList.add(getSceneAmbientClass(sc));
+    const detailClass = getSceneDetailClass(sc);
+    if(detailClass) sceneArea.classList.add(detailClass);
   }
   if(story){
     story.classList.remove('story-live');
@@ -9778,6 +9930,7 @@ function renderScene(idx){
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
   const sc=sceneQueue[currentIdx];
+  const prevSc = currentIdx>0 ? sceneQueue[currentIdx-1] : null;
   if(!sc){showEnd();return;}
   const delayedCrisis=resolveDelayedConsequences(sc);
   if(delayedCrisis){showCrisis(delayedCrisis);return;}
@@ -9800,6 +9953,8 @@ function renderScene(idx){
   document.getElementById('spktl').textContent=c.title;
   hideReplyBubble();
   runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
+  renderDialogueLog();
+  applySceneEmotions(sc);
   document.getElementById('charname').textContent=pn;
   document.getElementById('charrole').textContent='GÜV. STAJYERİ · '+sc.day.toUpperCase();
   renderPortraitTargets();
@@ -9840,6 +9995,7 @@ function renderScene(idx){
   renderCalcPanel(sc, ch);
   const hasTacticalPanel = renderTacticalPanel(sc, ch);
   const hasInspectionPanel = renderInspectionPanel(sc, ch);
+  const hasInteractionPanel = renderInteractionPanel(sc, ch);
   const hasDocPanel = renderDocumentPanel(sc, ch);
   const hasStowagePanel = renderStowagePanel(sc, ch);
   const hasMooringPanel = renderMooringPanel(sc, ch);
@@ -9850,18 +10006,25 @@ function renderScene(idx){
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
-  if(sc.calc || hasTacticalPanel || hasInspectionPanel || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
+  if(sc.calc || hasTacticalPanel || hasInspectionPanel || hasInteractionPanel || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
     ch.style.display='none';
   }else{
     ch.style.display='';
   }
   triggerLiveScenePresentation(sc, ch);
+  const sceneArea=document.getElementById('scene-area');
+  if(sceneArea){
+    const transitionClass = getSceneTransitionClass(prevSc, sc);
+    if(transitionClass) sceneArea.classList.add(transitionClass);
+  }
+  startSceneChoiceTimer(sc, ch);
   applyLanguageUI();
   saveGameState(false);
 }
 
 // ===== KRİZ =====
 function showCrisis(key){
+  clearSceneChoiceTimer();
   stopAllMusic();sfxFail();
   document.getElementById('game').style.display='none';
   const cs=document.getElementById('crisis');cs.style.display='flex';
@@ -9902,6 +10065,7 @@ function getCareerSpecialization(){
 }
 
 function showEnd(){
+  clearSceneChoiceTimer();
   stopAllMusic();
   deleteSavedGame(false);
   document.getElementById('game').style.display='none';
@@ -10015,6 +10179,8 @@ function beginGame(){
   journalEntries=[];
   photos=[];
   seenPhotoMoments.clear();
+  dialogueHistory=[];
+  livingShipState={thanks:false,note:false,argue:false,complaint:false};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
@@ -10039,6 +10205,7 @@ function beginGame(){
 }
 
 function restartGame(){
+  clearSceneChoiceTimer();
   stopAllMusic();
   document.getElementById('crisis').style.display='none';
   document.getElementById('endscr').style.display='none';
@@ -10481,6 +10648,8 @@ function buildSavePayload(){
     journalEntries,
     photos,
     seenPhotoMoments:Array.from(seenPhotoMoments||[]),
+    dialogueHistory,
+    livingShipState,
     scenesSinceEvent,
     nextEventAt,
     crewTrust,
@@ -10543,6 +10712,8 @@ function applyLoadedGameState(data){
   journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
   photos = Array.isArray(data.photos) ? data.photos : [];
   seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
+  dialogueHistory = Array.isArray(data.dialogueHistory) ? data.dialogueHistory : [];
+  livingShipState = data.livingShipState || {thanks:false,note:false,argue:false,complaint:false};
   scenesSinceEvent = data.scenesSinceEvent || 0;
   nextEventAt = data.nextEventAt || (5 + Math.floor(Math.random()*4));
   crewTrust = data.crewTrust || {};
@@ -14026,6 +14197,131 @@ const COLREG_HINTS = {
   kriz17:{icon:'ğŸ“¡', title:'COLREG - Dar Kanal', body:'VHF yardimcidir; asil olan sancak sinirina yakin kalmak ve gecisi engellememektir.'}
 };
 
+const TIMED_SCENE_CONFIGS = {
+  s238:{seconds:10, title:'Yangin cevabi gecikiyor', timeoutText:'Yangin alarminda gec kaldin; ilk saniyeler cok degerliydi.'},
+  s237:{seconds:9, title:'MOB saniyeleri akiyor', timeoutText:'MOB aninda gec kalmak gozden kaybetme riskini buyuttu.'},
+  s409:{seconds:12, title:'VHF cevabi bekliyor', timeoutText:'VHF cevabini geciktirdin; profesyonel akista bosluk olustu.'},
+  s420:{seconds:14, title:'Bunker check baskisi', timeoutText:'Checklist gecikince terminal baskiyi artirdi.'},
+  s447:{seconds:18, title:'Surveyor bekliyor', timeoutText:'Cevap gecikince surveyor once duzensizlige odaklandi.'},
+  s448:{seconds:16, title:'PSC not dusuyor', timeoutText:'Gec kalan refleks deficiency zincirini sertlestirdi.'}
+};
+
+const LIVING_SHIP_BEATS = [
+  {id:'thanks', icon:'🙂', title:'Sessiz Tesekkur', text:'Asci, tabagi toplarken sadece basiyla tesekkur etti. Gemide bazen en buyuk cümle bu oluyor.', once:true, delta:{moral:3,uyum:2}},
+  {id:'note', icon:'📝', title:'Bir Not Birakilmis', text:"Nobet masasinda kisa bir not var: \"Radar echoes bugun yagmur icinde zor okunuyor. Gain'i dikkatli ac.\"", once:true, delta:{moral:1}},
+  {id:'argue', icon:'⚠️', title:'Koridorda Gerginlik', text:'Iki tayfanin koridorda surtustugu belli. Sesler dusmus ama hava hala gergin.', once:true, delta:{uyum:-3,ofke:2}},
+  {id:'complaint', icon:'📣', title:'Sessiz Sikayet', text:'Murettebattan biri dinlenme saatlerinin yine daraldigini homurdanarak anlatti.', once:true, delta:{moral:-2,tukenme:2,yalnizlik:1}}
+];
+
+const INTERACTION_PANEL_CONFIGS = {
+  s414:{
+    title:'RADAR HEDEF SECIMI',
+    hint:'Ham echo ile ARPA yorumunu birlikte okuyup tehlikeli hedefi isaretle.',
+    caption:'Sari vektor ve daralan CPA cizgisi tehlikeli hedefi ele verir.',
+    expected:'target2',
+    correctTag:'kritik',
+    midTag:'akilli',
+    hotspots:[
+      {id:'target1', x:88, y:68, r:18, label:'T1'},
+      {id:'target2', x:168, y:52, r:22, label:'T2'},
+      {id:'target3', x:238, y:88, r:18, label:'T3'}
+    ]
+  },
+  s415:{
+    title:'ECDIS SAFETY CONTOUR',
+    hint:'No-go alani ve safety contour mantigina gore riskli bolgeyi sec.',
+    caption:'Kirmizi/amber sinir no-go dusuncesine en yakin alan.',
+    expected:'zone2',
+    correctTag:'kritik',
+    midTag:'itaatkar',
+    hotspots:[
+      {id:'zone1', x:82, y:84, r:16, label:'A'},
+      {id:'zone2', x:176, y:62, r:24, label:'B'},
+      {id:'zone3', x:258, y:44, r:16, label:'C'}
+    ]
+  }
+};
+
+function startSceneChoiceTimer(sc, ch){
+  clearSceneChoiceTimer();
+  if(!sc || !ch || ch.style.display === 'none') return;
+  const cfg = TIMED_SCENE_CONFIGS[sc.id];
+  if(!cfg) return;
+  const chip = document.getElementById('scene-timer-chip');
+  if(!chip) return;
+  let left = cfg.seconds;
+  chip.textContent = `${left}s`;
+  chip.classList.remove('hidden');
+  chip.classList.remove('warn');
+  sceneChoiceAutoPick = false;
+  sceneChoiceTimer = setInterval(()=>{
+    left -= 1;
+    chip.textContent = `${left}s`;
+    if(left <= 5) chip.classList.add('warn');
+    if(left > 0) return;
+    clearSceneChoiceTimer();
+    if(sceneChoiceAutoPick) return;
+    sceneChoiceAutoPick = true;
+    const fallback = (sc.choices || []).find(c=>c.tag==='korkak') || (sc.choices || [])[sc.choices.length-1];
+    if(fallback){
+      showNotif('⏱️', cfg.title, cfg.timeoutText);
+      addJournalEntry(`[ZAMAN BASKISI] ${cfg.timeoutText}`, sc.day, sc.time);
+      handleSceneChoice(sc, fallback, ch);
+    }
+  },1000);
+}
+
+function maybeTriggerLivingShipBeat(sc){
+  if(!sc || sc.alert || Math.random() > 0.18) return;
+  const candidates = LIVING_SHIP_BEATS.filter(beat => !beat.once || !livingShipState[beat.id]);
+  if(!candidates.length) return;
+  const beat = candidates[Math.floor(Math.random()*candidates.length)];
+  livingShipState[beat.id] = true;
+  applyPsychDelta(beat.delta || {});
+  showNotif(beat.icon, beat.title, beat.text);
+  addJournalEntry(`[GEMI YASIYOR] ${beat.text}`, sc.day, sc.time);
+}
+
+function renderInteractionPanel(sc, ch){
+  const panel = document.getElementById('calc-panel');
+  const cfg = INTERACTION_PANEL_CONFIGS[sc?.id];
+  if(!panel || !cfg) return false;
+  panel.className='calc-panel show';
+  panel.innerHTML = `<div class="decision-box">
+    <div class="decision-title">${cfg.title}</div>
+    <div class="decision-hint">${cfg.hint}</div>
+    <div class="doc-visual">
+      <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${cfg.title}">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <circle cx="160" cy="60" r="42" fill="none" stroke="#214a62" stroke-width="1.5"/>
+        <circle cx="160" cy="60" r="28" fill="none" stroke="#214a62" stroke-width="1.2"/>
+        <path d="M160 60 L212 28" stroke="#81f7b8" stroke-width="2.6" stroke-linecap="round"/>
+        ${cfg.hotspots.map(h=>`<g><circle cx="${h.x}" cy="${h.y}" r="${h.r}" fill="rgba(127,195,255,.08)" stroke="#7fc3ff" stroke-dasharray="5 4"/><text x="${h.x-4}" y="${h.y+3}" fill="#cfeaff" font-size="8" font-family="monospace">${h.label}</text></g>`).join('')}
+      </svg>
+      <div class="doc-visual-caption">${cfg.caption}</div>
+    </div>
+    <div class="interaction-hotspots">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot" data-hotspot="${h.id}">${h.label}</button>`).join('')}
+    </div>
+    <div id="interaction-feedback" class="decision-feedback"></div>
+  </div>`;
+  panel.querySelectorAll('[data-hotspot]').forEach(btn=>{
+    btn.onclick=()=>{
+      const pickedId = btn.dataset.hotspot;
+      const picked = pickedId === cfg.expected
+        ? (sc.choices.find(c=>c.tag===cfg.correctTag) || sc.choices[0])
+        : (sc.choices.find(c=>c.tag===cfg.midTag) || sc.choices[1] || sc.choices[0]);
+      const feedback = document.getElementById('interaction-feedback');
+      const good = pickedId === cfg.expected;
+      feedback.className = `decision-feedback ${good?'':'warn'}`.trim();
+      feedback.textContent = good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.';
+      panel.querySelectorAll('[data-hotspot]').forEach(el=>el.disabled=true);
+      setTimeout(()=>handleSceneChoice(sc,picked,ch),850);
+    };
+  });
+  return true;
+}
+
 // ===== SİSTEMLERİ ENTEGRE ET =====
 // Bu fonksiyon mevcut renderScene'e ek olarak çalışır
 function onSceneRender(sc){
@@ -14076,6 +14372,7 @@ function onSceneRender(sc){
   if(sc.id==='s366' || sc.id==='s381') tryAddMomentPhoto('ops-tanker-manifold','Manifold Hatti','Terminal tarafinda line-up ve ESD teyidi bende ilk kez gercek operasyon hissi yaratti.','cargo');
   if(sc.id==='s367' || sc.id==='s382') tryAddMomentPhoto('ops-bulk-loading','Bulk Yuk Akisi','Trim, draft ve loading order ayni anda kafamda oturmaya basladi.','cargo');
   if(sc.id==='s383') tryAddMomentPhoto('ops-project-cargo','Agir Yuk Gunu','COG, sling angle ve exclusion zone bir anda kagittan cikti, sahaya indi.','cargo');
+  if(sc.id==='s447') tryAddMomentPhoto('career-first-survey','Ilk Survey','Surveyor gemiye adim attiginda herkes ayni anda daha dik durmaya basladi.','harbor');
   if(sc.id==='s391' || sc.id==='s397' || sc.id==='s398') tryAddMomentPhoto('career-incident-followup','Soruşturma Dosyasi','Near-miss raporunun kapanmasi degil, takibi ve dersi asil agir kismiymis.','bridge');
   const hint = COLREG_HINTS[sc.id];
   if(hint && !seenColregHints.has(sc.id)){
@@ -14085,6 +14382,7 @@ function onSceneRender(sc){
       addJournalEntry(`[COLREG] ${hint.body}`, sc.day, sc.time);
     }, 250);
   }
+  maybeTriggerLivingShipBeat(sc);
   // Rastgele olay
   maybeTrigerEvent();
 }
@@ -14534,6 +14832,34 @@ function playHomesickAmbiance(sc){
   setTimeout(sfx, 420);
 }
 
+function playSceneAmbientLayers(sc){
+  const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/bridge|kopruustu|radar|ecdis|ais|arpa/.test(blob)){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(1180,'sine',0.03,0.016);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(1180,'sine',0.03,0.016), 3400));
+    },180));
+  }
+  if(/harbor|liman|terminal|berth|all fast|mooring|halat/.test(blob)){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(160,'triangle',0.06,0.04);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(160,'triangle',0.06,0.04), 5200));
+    },520));
+  }
+  if(/storm|firtina|wind|squall|swell/.test(blob)){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(92,'sawtooth',0.14,0.03);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(92,'sawtooth',0.14,0.03), 4300));
+    },460));
+  }
+  if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik/.test(blob)){
+    sceneAudioLoopTimers.push(setTimeout(()=>{
+      playTone(810,'square',0.025,0.02);
+      sceneAudioLoopTimers.push(setInterval(()=>playTone(810,'square',0.025,0.02), 2100));
+    },240));
+  }
+}
+
 // Sahneye göre ses çal
 function playSceneAudio(sc){
   const gfx = sc.gfx || '';
@@ -14598,6 +14924,7 @@ function playSceneAudio(sc){
       sceneAudioLoopTimers.push(setInterval(()=>playTone(210, 'square', 0.09, 0.05), 1650));
     }, 100));
   }
+  playSceneAmbientLayers(sc);
 }
 
 
