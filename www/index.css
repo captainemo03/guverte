@@ -813,9 +813,16 @@ animation:straitFlow 2.8s linear infinite;}
 .device-key:hover{border-color:var(--gold);color:var(--text);transform:translateY(-1px);}
 .device-key.good{border-color:rgba(93,191,138,.45);color:#a8f5c2;}
 .device-key.bad{border-color:rgba(214,92,92,.45);color:#ffb0b0;}
+.device-key.folder{border-color:rgba(127,195,255,.32);color:#bde7ff;background:linear-gradient(180deg,rgba(20,43,61,.96),rgba(8,20,34,.96));}
+.device-key.back{border-color:rgba(212,160,23,.35);color:#ffd98a;background:linear-gradient(180deg,rgba(45,33,10,.96),rgba(18,14,6,.96));}
 #device-task{margin-top:10px;border:1px solid rgba(212,160,23,.2);border-radius:10px;background:rgba(28,21,7,.45);padding:10px;font-size:11px;line-height:1.55;color:var(--text2);}
 .device-task-head{font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:5px;letter-spacing:1px;}
+.device-task-path{margin-top:7px;color:#8fd8ab;font-size:10px;font-family:'Share Tech Mono',monospace;}
 #device-log{margin-top:10px;min-height:44px;border:1px solid rgba(111,146,178,.18);border-radius:10px;background:rgba(5,13,23,.72);padding:8px 10px;color:var(--text3);font-size:10px;line-height:1.5;font-family:'Share Tech Mono',monospace;}
+.device-screen-menu{position:absolute;right:12px;top:12px;width:184px;border:1px solid rgba(111,146,178,.28);border-radius:9px;background:rgba(4,12,20,.86);box-shadow:0 12px 28px rgba(0,0,0,.28);padding:8px;pointer-events:none;}
+.device-screen-menu-head{font-size:8px;color:#ffd98a;font-family:'Share Tech Mono',monospace;margin-bottom:6px;letter-spacing:.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-screen-menu-row{font-size:8px;color:#bde7ff;font-family:'Share Tech Mono',monospace;padding:4px 5px;border-top:1px solid rgba(111,146,178,.12);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-screen-menu-row.target{color:#a8f5c2;background:rgba(93,191,138,.08);border-radius:5px;}
 @media (max-width:760px){
   #devices-layout{grid-template-columns:1fr;}
   #devices-list{max-height:180px;}

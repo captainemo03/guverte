@@ -15011,6 +15011,7 @@ function closeColreg(){ document.getElementById('colreg-panel').classList.remove
 let activeDeviceKey = 'vhf';
 let devicePracticeScore = {ok:0,total:0};
 let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.';
+let deviceMenuPath = {};
 
 const DEVICE_TRAINER = [
   {key:'vhf', ico:'VHF', name:'VHF DSC Radio', sub:'CH16, CH70 DSC, distress, urgency, safety, dual watch', task:'Mayday relay hazirligi: once CH16 dinle, DSC distress menusu ve konum bilgisini kontrol et.', correct:'DISTRESS MENU',
@@ -15043,6 +15044,80 @@ const DEVICE_TRAINER = [
     keys:['ACK / ACTIVE','TIMER SET','STAGE 1','STAGE 2','CABIN ALARM','TEST','BYPASS LOG','RESET']}
 ];
 
+const DEVICE_MENU_TREE = {
+  vhf:{
+    root:[mSub('WATCH','watch'),mSub('DSC CALL','dsc'),mSub('DISTRESS','distress'),mSub('SETUP','setup')],
+    watch:[mAct('CH16 WATCH'),mAct('DUAL WATCH'),mAct('SCAN'),mAct('SQUELCH')],
+    dsc:[mAct('INDIVIDUAL CALL'),mAct('GROUP CALL'),mAct('TEST CALL'),mAct('RECEIVED LOG')],
+    distress:[mAct('DISTRESS MENU'),mAct('NATURE OF DISTRESS'),mAct('POSITION / UTC'),mAct('SEND DISTRESS', true)],
+    setup:[mAct('TX POWER'),mAct('GPS INPUT'),mAct('MMSI CHECK'),mAct('RADIO LOG')]
+  },
+  mfhf:{
+    root:[mSub('FREQUENCY','freq'),mSub('DSC','dsc'),mSub('WATCH','watch'),mSub('SETUP','setup')],
+    freq:[mAct('2182 VOICE'),mAct('2187.5 DSC'),mAct('8414.5 DSC'),mAct('TELEX')],
+    dsc:[mAct('DISTRESS'),mAct('URGENCY'),mAct('SAFETY'),mAct('TEST CALL', true)],
+    watch:[mAct('RX WATCH'),mAct('SCAN BANDS'),mAct('NBDP WATCH'),mAct('TRAFFIC LIST')],
+    setup:[mAct('ANT TUNE'),mAct('GROUND'),mAct('OCEAN AREA'),mAct('TIME SYNC')]
+  },
+  epirb:{
+    root:[mSub('STATUS','status'),mSub('TEST','test'),mSub('RELEASE','release'),mSub('DATA','data')],
+    status:[mAct('ARMED'),mAct('GPS FIX'),mAct('BATTERY DATE'),mAct('HRU DATE')],
+    test:[mAct('SELF TEST'),mAct('GNSS TEST'),mAct('LED / BUZZER'),mAct('TEST LOG', true)],
+    release:[mAct('MANUAL RELEASE'),mAct('WATER SWITCH'),mAct('FLOAT FREE'),mAct('FALSE ALERT CANCEL')],
+    data:[mAct('MMSI CHECK'),mAct('HEX ID'),mAct('VESSEL DATA'),mAct('SERVICE DUE')]
+  },
+  ecdis:{
+    root:[mSub('ROUTE','route'),mSub('CHART','chart'),mSub('ALARMS','alarms'),mSub('SENSORS','sensors')],
+    route:[mAct('ROUTE CHECK'),mAct('XTD LIMIT'),mAct('WHEEL-OVER'),mAct('NEXT WP')],
+    chart:[mAct('SAFETY CONTOUR'),mAct('SAFETY DEPTH'),mAct('NO-GO AREA'),mAct('ENC UPDATE')],
+    alarms:[mAct('ALARM LIST'),mAct('ACKNOWLEDGE'),mAct('LOOK-AHEAD'),mAct('DANGER QUERY')],
+    sensors:[mAct('SENSOR STATUS'),mAct('GPS SOURCE'),mAct('GYRO INPUT'),mAct('RADAR OVERLAY')]
+  },
+  sart:{
+    root:[mSub('MODE','mode'),mSub('TEST','test'),mSub('MOUNT','mount'),mSub('INFO','info')],
+    mode:[mAct('STANDBY'),mAct('ACTIVATE'),mAct('RECOVERY'),mAct('AIS-SART MMSI')],
+    test:[mAct('TEST MODE'),mAct('RADAR PATTERN'),mAct('BEEP / LED'),mAct('TEST COMPLETE', true)],
+    mount:[mAct('MOUNT HIGH'),mAct('LIFERAFT POLE'),mAct('CLEAR VIEW'),mAct('KEEP DRY')],
+    info:[mAct('BATTERY DATE'),mAct('SERVICE DATE'),mAct('SERIAL NO'),mAct('LOGBOOK')]
+  },
+  radar:{
+    root:[mSub('DISPLAY','display'),mSub('TUNE','tune'),mSub('ARPA','arpa'),mSub('TOOLS','tools')],
+    display:[mAct('RANGE 6NM'),mAct('HEAD-UP'),mAct('NORTH-UP'),mAct('COURSE-UP')],
+    tune:[mAct('GAIN'),mAct('SEA CLUTTER'),mAct('RAIN CLUTTER'),mAct('TUNE AUTO')],
+    arpa:[mAct('ARPA ACQUIRE'),mAct('LOST TARGET'),mAct('CPA/TCPA'),mAct('TRIAL MANEUVER')],
+    tools:[mAct('EBL/VRM'),mAct('GUARD ZONE'),mAct('PARALLEL INDEX'),mAct('TRAILS')]
+  },
+  ais:{
+    root:[mSub('TARGETS','targets'),mSub('DATA','data'),mSub('MESSAGES','messages'),mSub('FILTER','filter')],
+    targets:[mAct('TARGET LIST'),mAct('TARGET DETAIL'),mAct('CPA SORT'),mAct('LOST AIS')],
+    data:[mAct('VOYAGE DATA'),mAct('STATIC DATA'),mAct('DRAUGHT'),mAct('DESTINATION')],
+    messages:[mAct('SAFETY MSG'),mAct('RECEIVED MSG'),mAct('SEND MSG'),mAct('ACK MSG')],
+    filter:[mAct('CLASS A/B'),mAct('RANGE FILTER'),mAct('SENSOR CHECK'),mAct('NAME FILTER')]
+  },
+  navtex:{
+    root:[mSub('MESSAGES','messages'),mSub('STATION','station'),mSub('FILTER','filter'),mSub('SYSTEM','system')],
+    messages:[mAct('WARNINGS'),mAct('WEATHER'),mAct('SAR'),mAct('PRINT LOG')],
+    station:[mAct('STATION SELECT'),mAct('518 KHZ'),mAct('490 KHZ'),mAct('4209.5 KHZ')],
+    filter:[mAct('MSG TYPE'),mAct('NAV WARN'),mAct('MET WARN'),mAct('PILOT MSG')],
+    system:[mAct('TIME SYNC'),mAct('DELETE OLD'),mAct('PRINTER TEST'),mAct('LANGUAGE')]
+  },
+  inmc:{
+    root:[mSub('MESSAGES','messages'),mSub('DISTRESS','distress'),mSub('REPORT','report'),mSub('SYSTEM','system')],
+    messages:[mAct('EGC INBOX'),mAct('SEND MSG'),mAct('ADDRESS BOOK'),mAct('PRINT')],
+    distress:[mAct('DISTRESS'),mAct('NATURE'),mAct('POSITION'),mAct('CANCEL FALSE')],
+    report:[mAct('POSITION REPORT'),mAct('LOGIN'),mAct('OCEAN REGION'),mAct('POLLING')],
+    system:[mAct('TERMINAL TEST'),mAct('ANTENNA STATUS'),mAct('LES SELECT'),mAct('LOGS')]
+  },
+  gyro:{root:[mSub('SOURCE','source'),mSub('REPEATER','repeater'),mSub('ALARM','alarm'),mSub('OUTPUT','output')],source:[mAct('SOURCE CHECK'),mAct('TRUE HDG'),mAct('BACKUP MAG'),mAct('GPS INPUT')],repeater:[mAct('REPEATER'),mAct('SYNC'),mAct('BRIDGE WING'),mAct('STEERING')],alarm:[mAct('ALARM ACK'),mAct('ERROR LOG'),mAct('RATE ERROR'),mAct('POWER FAIL')],output:[mAct('OUTPUT'),mAct('NMEA'),mAct('RADAR FEED'),mAct('ECDIS FEED')]},
+  echo:{root:[mSub('DEPTH','depth'),mSub('ALARM','alarm'),mSub('DISPLAY','display'),mSub('LOG','log')],depth:[mAct('DBK/DBT'),mAct('OFFSET'),mAct('RANGE'),mAct('GAIN')],alarm:[mAct('SHALLOW ALARM'),mAct('DEEP ALARM'),mAct('RESET MIN'),mAct('ACK')],display:[mAct('TREND'),mAct('ZOOM'),mAct('DAY/NIGHT'),mAct('UNITS')],log:[mAct('PRINT'),mAct('HISTORY'),mAct('MARK'),mAct('CLEAR OLD')]},
+  speedlog:{root:[mSub('SPEED','speed'),mSub('MODE','mode'),mSub('CAL','cal'),mSub('LOG','log')],speed:[mAct('STW/SOG'),mAct('TRIP RESET'),mAct('AVERAGE'),mAct('CURRENT CLUE')],mode:[mAct('WATER TRACK'),mAct('BOTTOM TRACK'),mAct('AUTO MODE'),mAct('MANUAL MODE')],cal:[mAct('CALIBRATION'),mAct('SENSOR CLEAN'),mAct('OFFSET'),mAct('TEST')],log:[mAct('HISTORY'),mAct('OUTPUT'),mAct('ALARM'),mAct('NMEA')]},
+  autopilot:{root:[mSub('MODE','mode'),mSub('LIMITS','limits'),mSub('TRACK','track'),mSub('MANUAL','manual')],mode:[mAct('AUTO HDG'),mAct('TRACK MODE'),mAct('STANDBY'),mAct('NFU READY')],limits:[mAct('RUDDER LIMIT'),mAct('RATE LIMIT'),mAct('OFF COURSE'),mAct('ALARM ACK')],track:[mAct('TURN RADIUS'),mAct('WHEEL-OVER'),mAct('XTD SOURCE'),mAct('ECDIS LINK')],manual:[mAct('HAND STEER'),mAct('FOLLOW UP'),mAct('NON FOLLOW UP'),mAct('PILOT MODE')]},
+  bnwas:{root:[mSub('WATCH','watch'),mSub('TIMERS','timers'),mSub('ALARMS','alarms'),mSub('LOG','log')],watch:[mAct('ACK / ACTIVE'),mAct('RESET'),mAct('TEST'),mAct('WATCH ON')],timers:[mAct('TIMER SET'),mAct('STAGE 1'),mAct('STAGE 2'),mAct('STAGE 3')],alarms:[mAct('CABIN ALARM'),mAct('BRIDGE ALARM'),mAct('SOUND TEST'),mAct('LAMP TEST')],log:[mAct('BYPASS LOG'),mAct('EVENT LOG'),mAct('DUTY OFFICER'),mAct('PRINT')]}
+};
+
+function mSub(label,target){ return {label,type:'submenu',target}; }
+function mAct(label,extraGood=false){ return {label,type:'action',extraGood}; }
+
 function getDeviceDef(key){
   return DEVICE_TRAINER.find(d=>d.key===key) || DEVICE_TRAINER[0];
 }
@@ -15058,18 +15133,47 @@ function closeDevices(){
 }
 function selectDevice(key){
   activeDeviceKey = key;
+  deviceMenuPath[key] = 'root';
   deviceLogLine = `${getDeviceDef(key).name} acildi. Menulerden goreve uygun adimi sec.`;
   renderDevices();
 }
-function useDeviceKey(label){
+function getDeviceMenuId(key){
+  return deviceMenuPath[key] || 'root';
+}
+function getDeviceMenuEntries(def){
+  const tree = DEVICE_MENU_TREE[def.key];
+  const menuId = getDeviceMenuId(def.key);
+  if(tree && tree[menuId]) return tree[menuId];
+  return (def.keys || []).map(k=>mAct(k));
+}
+function getDeviceBreadcrumb(def){
+  const menuId = getDeviceMenuId(def.key);
+  if(menuId === 'root') return 'MAIN MENU';
+  const root = DEVICE_MENU_TREE[def.key]?.root || [];
+  const item = root.find(x=>x.target === menuId);
+  return `MAIN MENU / ${item ? item.label : menuId.toUpperCase()}`;
+}
+function useDeviceKey(label, type='action', target=''){
   const def = getDeviceDef(activeDeviceKey);
+  if(type === 'back'){
+    deviceMenuPath[def.key] = 'root';
+    deviceLogLine = `${def.name}: ana menuye donuldu.`;
+    renderDevices();
+    return;
+  }
+  if(type === 'submenu'){
+    deviceMenuPath[def.key] = target || 'root';
+    deviceLogLine = `${def.name}: ${label} menusu acildi.`;
+    renderDevices();
+    return;
+  }
   devicePracticeScore.total++;
   if(label === def.correct){
     devicePracticeScore.ok++;
-    deviceLogLine = `DOGRU: ${label}. ${def.name} icin uygulama kayda alindi.`;
-    addJournalEntry(`[CIHAZ] ${def.name}: ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
+    deviceLogLine = `DOGRU: ${getDeviceBreadcrumb(def)} > ${label}. ${def.name} icin uygulama kayda alindi.`;
+    addJournalEntry(`[CIHAZ] ${def.name}: ${getDeviceBreadcrumb(def)} > ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
   }else{
-    deviceLogLine = `YANLIS / EKSIK: ${label}. Bu gorevde beklenen menu: ${def.correct}.`;
+    deviceLogLine = `YANLIS / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Bu gorevde beklenen adim: ${def.correct}.`;
   }
   renderDevices();
 }
@@ -15092,8 +15196,14 @@ function renderDevices(){
   if(sub) sub.textContent = def.sub;
   if(score) score.textContent = `${devicePracticeScore.ok}/${devicePracticeScore.total}`;
   screen.innerHTML = buildDeviceScreen(def);
-  keys.innerHTML = def.keys.map(k=>`<button class="device-key ${k===def.correct?'good':''}" onclick="useDeviceKey('${k.replace(/'/g,"\\'")}')">${k}</button>`).join('');
-  if(task) task.innerHTML = `<div class="device-task-head">UYGULAMA GOREVI</div>${def.task}`;
+  const menuId = getDeviceMenuId(def.key);
+  const entries = getDeviceMenuEntries(def);
+  const backBtn = menuId !== 'root' ? `<button class="device-key back" onclick="useDeviceKey('BACK','back','')">GERI / MENU</button>` : '';
+  keys.innerHTML = backBtn + entries.map(k=>{
+    const cls = [k.label===def.correct?'good':'', k.type==='submenu'?'folder':''].filter(Boolean).join(' ');
+    return `<button class="device-key ${cls}" onclick="useDeviceKey('${k.label.replace(/'/g,"\\'")}','${k.type}','${k.target||''}')">${k.type==='submenu'?'▸ ':''}${k.label}</button>`;
+  }).join('');
+  if(task) task.innerHTML = `<div class="device-task-head">UYGULAMA GOREVI · ${getDeviceBreadcrumb(def)}</div>${def.task}<div class="device-task-path">Beklenen adim: ${def.correct}</div>`;
   if(log) log.textContent = deviceLogLine;
 }
 
@@ -15113,7 +15223,11 @@ function buildDeviceScreen(def){
 }
 
 function buildDeviceMenuOverlay(def){
-  return '';
+  const entries = getDeviceMenuEntries(def);
+  return `<div class="device-screen-menu">
+    <div class="device-screen-menu-head">${getDeviceBreadcrumb(def)}</div>
+    ${entries.map(e=>`<div class="device-screen-menu-row ${e.label===def.correct?'target':''}">${e.type==='submenu'?'DIR':'KEY'} · ${e.label}</div>`).join('')}
+  </div>`;
 }
 
 function buildGmdssDeviceSvg(def){
