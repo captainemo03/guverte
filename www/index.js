@@ -10683,9 +10683,7 @@ function renderScene(idx){
   }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
-  const actorBlob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  const shouldShowSceneActor = sc.alert || /storm|firtina|engine|makine|harbor|liman|terminal|pilot|tug|radar|ecdis|ais|arpa|bridge|kopruustu|köprüüstü/.test(actorBlob);
-  renderSceneActor(sc, shouldShowSceneActor ? speakerPortraitCfg : null);
+  renderSceneActor(sc, null);
 
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
@@ -15012,6 +15010,7 @@ let activeDeviceKey = 'vhf';
 let devicePracticeScore = {ok:0,total:0};
 let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.';
 let deviceMenuPath = {};
+let devicePracticeProgress = {};
 
 const DEVICE_TRAINER = [
   {key:'vhf', ico:'VHF', name:'VHF DSC Radio', sub:'CH16, CH70 DSC, distress, urgency, safety, dual watch', task:'Mayday relay hazirligi: once CH16 dinle, DSC distress menusu ve konum bilgisini kontrol et.', correct:'DISTRESS MENU',
@@ -15118,6 +15117,23 @@ const DEVICE_MENU_TREE = {
 function mSub(label,target){ return {label,type:'submenu',target}; }
 function mAct(label,extraGood=false){ return {label,type:'action',extraGood}; }
 
+const DEVICE_PRACTICE = {
+  vhf:{title:'VHF Mayday Relay Pratigi', phrase:'MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY. This is motor vessel ... Position ..., nature of distress ..., over.', steps:['CH16 WATCH','DISTRESS MENU','NATURE OF DISTRESS','POSITION / UTC','SEND DISTRESS']},
+  mfhf:{title:'MF/HF Urgency DSC Pratigi', phrase:'PAN-PAN hazirligi: once uygun DSC frekansi, sonra urgency category ve ses frekansi.', steps:['RX WATCH','2187.5 DSC','URGENCY','2182 VOICE','TEST CALL']},
+  inmc:{title:'Inmarsat-C / EGC Mesaj Pratigi', phrase:'SafetyNET mesaji geldi: once EGC inbox, sonra yazdirma/kayit, gerekiyorsa position report.', steps:['EGC INBOX','PRINT','POSITION REPORT']},
+  navtex:{title:'NAVTEX MSI Ayiklama Pratigi', phrase:'Yeni MSI mesaji geldi: warning tipini oku, weather/nav ayrimini yap, log/print ile kayda al.', steps:['WARNINGS','WEATHER','PRINT LOG']},
+  epirb:{title:'EPIRB Hazirlik ve Test Pratigi', phrase:'Gercek alarm vermeden beacon hazirligini kontrol et: GPS, HRU/battery ve self-test sirasi.', steps:['GPS FIX','HRU DATE','SELF TEST','TEST LOG']},
+  sart:{title:'SART Tatbikat Pratigi', phrase:'SART’i aktif distress moduna almadan test et; radar pattern bilgisini dogrula.', steps:['TEST MODE','RADAR PATTERN','TEST COMPLETE']},
+  radar:{title:'Radar / ARPA Carpismayi Onleme Pratigi', phrase:'CPA dusuyor: goruntu ayari, acquire, EBL/VRM ve guard zone sirasi.', steps:['RANGE 6NM','ARPA ACQUIRE','EBL/VRM','GUARD ZONE']},
+  ais:{title:'AIS / Radar Cross-check Pratigi', phrase:'AIS etiketi kayik gorunuyor: hedef detayini ac, CPA sirala, sensor kontrolu yap.', steps:['TARGET LIST','TARGET DETAIL','CPA SORT','SENSOR CHECK']},
+  ecdis:{title:'ECDIS Yaklasma Kontrol Pratigi', phrase:'Liman yaklasmasinda rota, chart emniyeti, alarm ve sensor kontrolu birlikte yapilir.', steps:['ROUTE CHECK','SAFETY CONTOUR','ALARM LIST','SENSOR STATUS']},
+  gyro:{title:'Gyro Source Hata Pratigi', phrase:'Overlay kaymasinda gyro kaynagini, repeater sync ve ECDIS/radar feed zincirini kontrol et.', steps:['SOURCE CHECK','REPEATER','SYNC','RADAR FEED']},
+  echo:{title:'Echo Sounder Dar Su Pratigi', phrase:'Dar suya girmeden offset ve shallow alarm dogru okunmali.', steps:['OFFSET','SHALLOW ALARM','DBK/DBT','TREND']},
+  speedlog:{title:'Speed Log Akinti Pratigi', phrase:'Akinti supheli: STW/SOG farki ve track mode bilgisi birlikte okunur.', steps:['STW/SOG','WATER TRACK','BOTTOM TRACK','HISTORY']},
+  autopilot:{title:'Pilotaj Oncesi Otopilot Pratigi', phrase:'Pilotajda takip modu kapatilir, standby/manuel hazirlik ve limitler kontrol edilir.', steps:['TRACK MODE','STANDBY','RUDDER LIMIT','NFU READY']},
+  bnwas:{title:'BNWAS Vardiya Baslangic Pratigi', phrase:'Vardiya basinda watch active, timer ve alarm zinciri kontrol edilir.', steps:['ACK / ACTIVE','TIMER SET','STAGE 1','EVENT LOG']}
+};
+
 function getDeviceDef(key){
   return DEVICE_TRAINER.find(d=>d.key===key) || DEVICE_TRAINER[0];
 }
@@ -15134,6 +15150,7 @@ function closeDevices(){
 function selectDevice(key){
   activeDeviceKey = key;
   deviceMenuPath[key] = 'root';
+  if(!(key in devicePracticeProgress)) devicePracticeProgress[key] = 0;
   deviceLogLine = `${getDeviceDef(key).name} acildi. Menulerden goreve uygun adimi sec.`;
   renderDevices();
 }
@@ -15153,6 +15170,39 @@ function getDeviceBreadcrumb(def){
   const item = root.find(x=>x.target === menuId);
   return `MAIN MENU / ${item ? item.label : menuId.toUpperCase()}`;
 }
+function getDevicePractice(def){
+  return DEVICE_PRACTICE[def.key] || null;
+}
+function getDevicePracticeIndex(def){
+  const practice = getDevicePractice(def);
+  if(!practice) return 0;
+  return Math.min(devicePracticeProgress[def.key] || 0, practice.steps.length);
+}
+function getDeviceExpectedAction(def){
+  const practice = getDevicePractice(def);
+  if(!practice) return def.correct;
+  const idx = getDevicePracticeIndex(def);
+  return practice.steps[idx] || practice.steps[practice.steps.length - 1] || def.correct;
+}
+function resetDevicePractice(){
+  const def = getDeviceDef(activeDeviceKey);
+  devicePracticeProgress[def.key] = 0;
+  deviceMenuPath[def.key] = 'root';
+  deviceLogLine = `${def.name}: pratik sifirlandi. Ilk adimdan basla.`;
+  renderDevices();
+}
+function renderDevicePracticeTask(def){
+  const practice = getDevicePractice(def);
+  const expected = getDeviceExpectedAction(def);
+  if(!practice) return `${def.task}<div class="device-task-path">Beklenen adim: ${expected}</div>`;
+  const idx = getDevicePracticeIndex(def);
+  const done = idx >= practice.steps.length;
+  return `<div class="device-practice-title">${practice.title}</div>
+    <div class="device-practice-phrase">${practice.phrase}</div>
+    <div class="device-practice-steps">${practice.steps.map((s,i)=>`<span class="${i<idx?'done':i===idx?'active':''}">${i+1}. ${s}</span>`).join('')}</div>
+    <div class="device-task-path">${done?'Pratik tamamlandi. Istersen sifirlayip tekrar dene.':'Siradaki adim: '+expected}</div>
+    <button class="device-mini-btn" onclick="resetDevicePractice()">Pratigi sifirla</button>`;
+}
 function useDeviceKey(label, type='action', target=''){
   const def = getDeviceDef(activeDeviceKey);
   if(type === 'back'){
@@ -15167,13 +15217,26 @@ function useDeviceKey(label, type='action', target=''){
     renderDevices();
     return;
   }
+  const practice = getDevicePractice(def);
+  const expected = getDeviceExpectedAction(def);
   devicePracticeScore.total++;
-  if(label === def.correct){
+  if(label === expected){
     devicePracticeScore.ok++;
-    deviceLogLine = `DOGRU: ${getDeviceBreadcrumb(def)} > ${label}. ${def.name} icin uygulama kayda alindi.`;
-    addJournalEntry(`[CIHAZ] ${def.name}: ${getDeviceBreadcrumb(def)} > ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
+    if(practice){
+      const next = (devicePracticeProgress[def.key] || 0) + 1;
+      devicePracticeProgress[def.key] = next;
+      if(next >= practice.steps.length){
+        deviceLogLine = `PRATIK TAMAM: ${practice.title}. Haberlesme/cihaz zinciri dogru sirayla uygulandi.`;
+        addJournalEntry(`[CIHAZ] ${def.name}: ${practice.title} tamamlandi.`, 'Egitim', 'Simulator');
+      }else{
+        deviceLogLine = `DOGRU ADIM: ${label}. Siradaki adim: ${practice.steps[next]}.`;
+      }
+    }else{
+      deviceLogLine = `DOGRU: ${getDeviceBreadcrumb(def)} > ${label}. ${def.name} icin uygulama kayda alindi.`;
+      addJournalEntry(`[CIHAZ] ${def.name}: ${getDeviceBreadcrumb(def)} > ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
+    }
   }else{
-    deviceLogLine = `YANLIS / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Bu gorevde beklenen adim: ${def.correct}.`;
+    deviceLogLine = `YANLIS SIRA / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Beklenen adim: ${expected}.`;
   }
   renderDevices();
 }
@@ -15198,12 +15261,13 @@ function renderDevices(){
   screen.innerHTML = buildDeviceScreen(def);
   const menuId = getDeviceMenuId(def.key);
   const entries = getDeviceMenuEntries(def);
+  const expected = getDeviceExpectedAction(def);
   const backBtn = menuId !== 'root' ? `<button class="device-key back" onclick="useDeviceKey('BACK','back','')">GERI / MENU</button>` : '';
   keys.innerHTML = backBtn + entries.map(k=>{
-    const cls = [k.label===def.correct?'good':'', k.type==='submenu'?'folder':''].filter(Boolean).join(' ');
+    const cls = [k.label===expected?'good':'', k.type==='submenu'?'folder':''].filter(Boolean).join(' ');
     return `<button class="device-key ${cls}" onclick="useDeviceKey('${k.label.replace(/'/g,"\\'")}','${k.type}','${k.target||''}')">${k.type==='submenu'?'▸ ':''}${k.label}</button>`;
   }).join('');
-  if(task) task.innerHTML = `<div class="device-task-head">UYGULAMA GOREVI · ${getDeviceBreadcrumb(def)}</div>${def.task}<div class="device-task-path">Beklenen adim: ${def.correct}</div>`;
+  if(task) task.innerHTML = `<div class="device-task-head">SIMULASYON PRATIGI · ${getDeviceBreadcrumb(def)}</div>${renderDevicePracticeTask(def)}`;
   if(log) log.textContent = deviceLogLine;
 }
 
@@ -15224,9 +15288,10 @@ function buildDeviceScreen(def){
 
 function buildDeviceMenuOverlay(def){
   const entries = getDeviceMenuEntries(def);
+  const expected = getDeviceExpectedAction(def);
   return `<div class="device-screen-menu">
     <div class="device-screen-menu-head">${getDeviceBreadcrumb(def)}</div>
-    ${entries.map(e=>`<div class="device-screen-menu-row ${e.label===def.correct?'target':''}">${e.type==='submenu'?'DIR':'KEY'} · ${e.label}</div>`).join('')}
+    ${entries.map(e=>`<div class="device-screen-menu-row ${e.label===expected?'target':''}">${e.type==='submenu'?'DIR':'KEY'} · ${e.label}</div>`).join('')}
   </div>`;
 }
 
