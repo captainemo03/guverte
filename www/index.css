@@ -486,14 +486,16 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-location-galley #scene-graphic{background:linear-gradient(180deg,#18120b,#060b12);}
 .scene-location-cabin #scene-graphic{background:linear-gradient(180deg,#090d18,#040812);}
 .live-radar-screen,.live-ecdis-screen,.live-vhf-panel,.live-engine-panel{position:absolute;border:1px solid rgba(111,168,220,.24);background:rgba(3,10,18,.72);box-shadow:0 0 18px rgba(46,134,191,.12), inset 0 0 18px rgba(84,180,255,.06);border-radius:8px;pointer-events:none;}
-.live-radar-screen{right:7%;top:13%;width:92px;height:92px;border-radius:50%;overflow:hidden;}
-.live-radar-screen::before{content:"";position:absolute;inset:9px;border:1px solid rgba(104,244,170,.2);border-radius:50%;box-shadow:inset 0 0 0 14px rgba(104,244,170,.025),inset 0 0 0 28px rgba(104,244,170,.02);}
-.live-radar-screen i{position:absolute;left:50%;top:50%;width:42%;height:1px;background:linear-gradient(90deg, rgba(104,244,170,.9), transparent);transform-origin:left center;animation:radar-sweep 2.2s linear infinite;}
-.live-radar-screen b{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(104,244,170,.7);box-shadow:0 0 8px rgba(104,244,170,.35);}
-.live-radar-screen .r1{left:58%;top:32%;}.live-radar-screen .r2{left:35%;top:64%;}.live-radar-screen .r3{left:70%;top:62%;}
-.live-ecdis-screen{left:8%;top:14%;width:128px;height:84px;overflow:hidden;}
-.live-ecdis-screen::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg, rgba(40,92,128,.22), transparent 45%),linear-gradient(90deg, rgba(84,180,255,.12) 1px, transparent 1px),linear-gradient(0deg, rgba(84,180,255,.08) 1px, transparent 1px);background-size:auto,22px 22px,22px 22px;}
-.live-ecdis-screen .route{position:absolute;left:18px;top:55px;width:92px;height:2px;background:rgba(255,214,92,.86);transform:rotate(-18deg);box-shadow:0 0 8px rgba(255,214,92,.28);}
+.live-radar-screen{right:6%;top:10%;width:148px;height:104px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,rgba(20,30,34,.92),rgba(5,12,13,.96));border-color:rgba(80,118,128,.42);box-shadow:0 10px 28px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.04);}
+.live-radar-screen::before{content:"";position:absolute;left:18px;top:11px;width:78px;height:78px;border:1px solid rgba(72,255,160,.5);border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(72,255,160,.08), rgba(2,11,8,.95) 68%);box-shadow:inset 0 0 0 13px rgba(72,255,160,.045),inset 0 0 0 26px rgba(72,255,160,.032),inset 0 0 0 39px rgba(72,255,160,.02);}
+.live-radar-screen::after{content:"X-BAND 6NM\A ARPA ACQ\A GAIN 68";white-space:pre;position:absolute;right:9px;top:15px;color:#bde7ff;font:6.2px/1.55 'Share Tech Mono',monospace;opacity:.9;}
+.live-radar-screen i{position:absolute;left:57px;top:50px;width:38px;height:1px;background:linear-gradient(90deg, rgba(104,244,170,.95), transparent);transform-origin:left center;animation:radar-sweep 2.2s linear infinite;z-index:1;}
+.live-radar-screen b{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(104,244,170,.86);box-shadow:0 0 8px rgba(104,244,170,.38);z-index:1;}
+.live-radar-screen .r1{left:72px;top:31px}.live-radar-screen .r2{left:42px;top:66px}.live-radar-screen .r3{left:84px;top:70px}
+.live-ecdis-screen{left:7%;top:12%;width:156px;height:96px;overflow:hidden;background:#d8eef7;border-color:rgba(106,157,179,.55);}
+.live-ecdis-screen::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg, rgba(240,223,171,.96) 0 24%, transparent 24% 78%, rgba(240,223,171,.95) 78%),linear-gradient(90deg, rgba(77,148,184,.28) 1px, transparent 1px),linear-gradient(0deg, rgba(77,148,184,.22) 1px, transparent 1px);background-size:auto,22px 22px,22px 22px;}
+.live-ecdis-screen::after{content:"ECDIS N-UP";position:absolute;left:8px;top:7px;color:#23445a;font:6px 'Share Tech Mono',monospace;}
+.live-ecdis-screen .route{position:absolute;left:22px;top:62px;width:110px;height:2px;background:#94333a;transform:rotate(-18deg);box-shadow:0 0 4px rgba(148,51,58,.22);}
 .live-ecdis-screen .wp{position:absolute;width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,214,92,.92);background:rgba(5,14,24,.8);}
 .live-ecdis-screen .w1{left:22px;top:58px}.live-ecdis-screen .w2{left:61px;top:46px}.live-ecdis-screen .w3{left:100px;top:33px}
 .live-ecdis-screen .ship{position:absolute;left:42px;top:47px;width:10px;height:16px;background:rgba(255,255,255,.85);clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);animation:ecdisShipMove 5.6s ease-in-out infinite;}

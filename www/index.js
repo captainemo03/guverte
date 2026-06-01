@@ -645,44 +645,58 @@ storm:`<rect width="480" height="145" fill="#020a14"/>
 <path d="M214 84 Q226 78 238 84" fill="none" stroke="#b7d0e2" stroke-width="1.8" opacity=".62"/>
 <path d="M336 78 Q348 72 360 78" fill="none" stroke="#b7d0e2" stroke-width="1.8" opacity=".54"/>`,
 
-radar:`<rect width="480" height="145" fill="#030d0d"/>
-<rect x="18" y="12" width="284" height="120" rx="8" fill="#061111" stroke="#11433d" stroke-width="1.6"/>
-<circle cx="160" cy="72" r="56" fill="#03110b"/>
-<circle cx="160" cy="72" r="56" fill="none" stroke="#12604f" stroke-width="1.6"/>
-<circle cx="160" cy="72" r="14" fill="none" stroke="#114d3a" stroke-width=".9" opacity=".7"/>
-<circle cx="160" cy="72" r="28" fill="none" stroke="#114d3a" stroke-width=".9" opacity=".6"/>
-<circle cx="160" cy="72" r="42" fill="none" stroke="#114d3a" stroke-width=".9" opacity=".48"/>
-<circle cx="160" cy="72" r="54" fill="none" stroke="#114d3a" stroke-width=".8" opacity=".32"/>
-<line x1="104" y1="72" x2="216" y2="72" stroke="#114d3a" stroke-width=".9" opacity=".46"/>
-<line x1="160" y1="16" x2="160" y2="128" stroke="#114d3a" stroke-width=".9" opacity=".46"/>
-<path d="M160 72 L160 16 A56 56 0 0 1 208 99 Z" fill="#35ff7a" opacity=".05"/>
-<g class="radar-sweep" style="transform-origin:160px 72px">
-<line x1="160" y1="72" x2="160" y2="16" stroke="#35ff7a" stroke-width="1.7" opacity=".88"/>
+radar:`<rect width="480" height="145" fill="#05090b"/>
+<rect x="10" y="8" width="460" height="129" rx="14" fill="#151c1f" stroke="#2e3d42" stroke-width="2"/>
+<rect x="18" y="16" width="444" height="111" rx="10" fill="#07100f" stroke="#0c2420" stroke-width="1.2"/>
+<rect x="30" y="24" width="86" height="91" rx="5" fill="#10191b" stroke="#233438" stroke-width="1"/>
+<rect x="364" y="24" width="86" height="91" rx="5" fill="#10191b" stroke="#233438" stroke-width="1"/>
+<text x="42" y="38" fill="#9fb5bd" font-size="6.5" font-family="monospace">X-BAND RADAR</text>
+<text x="42" y="52" fill="#63f2a6" font-size="7" font-family="monospace">TX ON</text>
+<text x="42" y="65" fill="#c7e5f0" font-size="6.2" font-family="monospace">RANGE 6 NM</text>
+<text x="42" y="78" fill="#c7e5f0" font-size="6.2" font-family="monospace">H-UP  REL</text>
+<text x="42" y="91" fill="#ffd783" font-size="6.2" font-family="monospace">GAIN 68</text>
+<text x="42" y="104" fill="#ffd783" font-size="6.2" font-family="monospace">SEA 24 RAIN 10</text>
+<text x="376" y="38" fill="#9fb5bd" font-size="6.5" font-family="monospace">ARPA / AIS</text>
+<text x="376" y="52" fill="#63f2a6" font-size="6.2" font-family="monospace">TGT 01 CPA 0.8</text>
+<text x="376" y="65" fill="#ffca67" font-size="6.2" font-family="monospace">TGT 02 TCPA 12</text>
+<text x="376" y="78" fill="#c7e5f0" font-size="6.2" font-family="monospace">TRAIL 3 MIN</text>
+<text x="376" y="91" fill="#c7e5f0" font-size="6.2" font-family="monospace">EBL 045 VRM 1.6</text>
+<text x="376" y="104" fill="#ff8d8d" font-size="6.2" font-family="monospace">GUARD ZONE ARMED</text>
+<rect x="125" y="14" width="230" height="117" rx="9" fill="#020806" stroke="#1f5f4d" stroke-width="2.2"/>
+<circle cx="240" cy="72" r="56" fill="#010907"/>
+<circle cx="240" cy="72" r="56" fill="none" stroke="#2bd889" stroke-width="1.4" opacity=".8"/>
+<circle cx="240" cy="72" r="42" fill="none" stroke="#1b7d59" stroke-width=".8" opacity=".62"/>
+<circle cx="240" cy="72" r="28" fill="none" stroke="#1b7d59" stroke-width=".75" opacity=".55"/>
+<circle cx="240" cy="72" r="14" fill="none" stroke="#1b7d59" stroke-width=".7" opacity=".48"/>
+<line x1="184" y1="72" x2="296" y2="72" stroke="#1b7d59" stroke-width=".75" opacity=".58"/>
+<line x1="240" y1="16" x2="240" y2="128" stroke="#1b7d59" stroke-width=".75" opacity=".58"/>
+<line x1="200.4" y1="32.4" x2="279.6" y2="111.6" stroke="#134d3a" stroke-width=".55" opacity=".4"/>
+<line x1="279.6" y1="32.4" x2="200.4" y2="111.6" stroke="#134d3a" stroke-width=".55" opacity=".4"/>
+<path d="M240 72 L240 16 A56 56 0 0 1 288 100 Z" fill="#35ff7a" opacity=".045"/>
+<g class="radar-sweep" style="transform-origin:240px 72px">
+<line x1="240" y1="72" x2="240" y2="16" stroke="#4cff9a" stroke-width="1.7" opacity=".95"/>
+<path d="M240 72 L240 16 A56 56 0 0 1 256 18 Z" fill="#4cff9a" opacity=".08"/>
 </g>
-<circle cx="182" cy="50" r="2.6" fill="#35ff7a" opacity=".95" class="blink"/>
-<circle cx="194" cy="86" r="2.2" fill="#35ff7a" opacity=".68"/>
-<circle cx="132" cy="61" r="1.8" fill="#35ff7a" opacity=".52"/>
-<circle cx="168" cy="102" r="1.9" fill="#35ff7a" opacity=".58"/>
-<circle cx="160" cy="72" r="2.6" fill="#7fc3ff"/>
-<line x1="160" y1="72" x2="182" y2="50" stroke="#ffd45a" stroke-width="1" stroke-dasharray="3,2" opacity=".72"/>
-<text x="157" y="22" fill="#1f7c63" font-size="6.5" font-family="monospace">000</text>
-<text x="213" y="75" fill="#1f7c63" font-size="6.5" font-family="monospace">090</text>
-<text x="156" y="126" fill="#1f7c63" font-size="6.5" font-family="monospace">180</text>
-<text x="96" y="75" fill="#1f7c63" font-size="6.5" font-family="monospace">270</text>
-<text x="166" y="58" fill="#1f7c63" font-size="5.5" font-family="monospace">1.5</text>
-<text x="166" y="44" fill="#1f7c63" font-size="5.5" font-family="monospace">3.0</text>
-<text x="166" y="30" fill="#1f7c63" font-size="5.5" font-family="monospace">6.0 NM</text>
-<rect x="314" y="14" width="148" height="118" rx="8" fill="#071420" stroke="#10304e" stroke-width="1.6"/>
-<rect x="326" y="24" width="124" height="18" rx="4" fill="#04111c" stroke="#174464" stroke-width=".8"/>
-<text x="336" y="36" fill="#cfeaff" font-size="7" font-family="monospace">RADAR / ARPA STATUS</text>
-<text x="330" y="56" fill="#81f7b8" font-size="7" font-family="monospace">RANGE   6.0 NM</text>
-<text x="330" y="69" fill="#7fc3ff" font-size="7" font-family="monospace">MODE    HEAD-UP RM</text>
-<text x="330" y="82" fill="#fff4bf" font-size="7" font-family="monospace">GAIN    68</text>
-<text x="330" y="95" fill="#fff4bf" font-size="7" font-family="monospace">SEA     24   RAIN 10</text>
-<text x="330" y="108" fill="#5dbf8a" font-size="7" font-family="monospace">TRAIL   3 MIN</text>
-<rect x="326" y="114" width="124" height="8" rx="3" fill="#0d2840"/>
-<rect x="326" y="114" width="74" height="8" rx="3" fill="#35ff7a" opacity=".7"/>
-<text x="24" y="140" fill="#7fc3ff" font-size="6.5" font-family="monospace">X-BAND   12 kW   STBY OFF   TX ON</text>`,
+<path d="M205 96 L295 47" stroke="#ffd45a" stroke-width="1.05" stroke-dasharray="5,3" opacity=".82"/>
+<circle cx="240" cy="72" r="2.8" fill="#9fd8ff"/>
+<path d="M240 72 l7 -4 l-2 8 z" fill="#9fd8ff"/>
+<circle cx="270" cy="52" r="2.8" fill="#4cff9a" opacity=".95" class="blink"/>
+<path d="M270 52 l18 -9" stroke="#4cff9a" stroke-width=".9" opacity=".8"/>
+<circle cx="292" cy="88" r="2.4" fill="#ffd45a" opacity=".8"/>
+<path d="M292 88 l15 8" stroke="#ffd45a" stroke-width=".8" opacity=".7"/>
+<circle cx="216" cy="62" r="2" fill="#8ed0ff" opacity=".65"/>
+<circle cx="225" cy="101" r="1.8" fill="#4cff9a" opacity=".5"/>
+<path d="M190 40 Q207 47 222 44 Q239 41 256 46" fill="none" stroke="#4cff9a" stroke-width="1.2" opacity=".28"/>
+<text x="236" y="24" fill="#45d98e" font-size="6.5" font-family="monospace">000</text>
+<text x="292" y="75" fill="#45d98e" font-size="6.5" font-family="monospace">090</text>
+<text x="236" y="124" fill="#45d98e" font-size="6.5" font-family="monospace">180</text>
+<text x="178" y="75" fill="#45d98e" font-size="6.5" font-family="monospace">270</text>
+<text x="246" y="59" fill="#2aa36e" font-size="5.2" font-family="monospace">1.5</text>
+<text x="246" y="45" fill="#2aa36e" font-size="5.2" font-family="monospace">3.0</text>
+<text x="246" y="31" fill="#2aa36e" font-size="5.2" font-family="monospace">6.0 NM</text>
+<rect x="36" y="119" width="24" height="8" rx="3" fill="#26363b"/><rect x="70" y="119" width="24" height="8" rx="3" fill="#26363b"/><rect x="386" y="119" width="24" height="8" rx="3" fill="#26363b"/><rect x="420" y="119" width="24" height="8" rx="3" fill="#26363b"/>
+<circle cx="130" cy="135" r="4" fill="#202a2e" stroke="#3e555d"/><circle cx="155" cy="135" r="4" fill="#202a2e" stroke="#3e555d"/><circle cx="325" cy="135" r="4" fill="#202a2e" stroke="#3e555d"/><circle cx="350" cy="135" r="4" fill="#202a2e" stroke="#3e555d"/>
+<text x="24" y="139" fill="#7fc3ff" font-size="6.2" font-family="monospace">FURUNO STYLE PPI   RM TRUE VECTORS   ARPA ACQ 2/10</text>`,
 
 compass:`<rect width="480" height="145" fill="#040d1a"/>
 <line x1="0" y1="30" x2="480" y2="30" stroke="#0a1e30" stroke-width="1" opacity=".4"/>
@@ -719,33 +733,48 @@ compass:`<rect width="480" height="145" fill="#040d1a"/>
 <text x="368" y="96" fill="#d4a017" font-size="7" font-family="monospace">ETA: 06:42</text>
 <text x="368" y="107" fill="#5dbf8a" font-size="7" font-family="monospace">RNG: 38nm</text>`,
 
-ecdis_panel:`<rect width="480" height="145" fill="#04101b"/>
-<rect x="24" y="18" width="432" height="108" rx="6" fill="#03111c" stroke="#10304e" stroke-width="2"/>
-<path d="M42 38 h392 M42 58 h392 M42 78 h392 M42 98 h392" stroke="#0d2a48" stroke-width=".8" opacity=".5"/>
-<path d="M72 26 v92 M120 26 v92 M168 26 v92 M216 26 v92 M264 26 v92 M312 26 v92 M360 26 v92 M408 26 v92" stroke="#0d2a48" stroke-width=".8" opacity=".45"/>
-<polyline points="76,94 118,88 164,90 208,76 250,72 286,68 322,60 364,52 406,42" fill="none" stroke="#d4a017" stroke-width="2.4" stroke-dasharray="6,3"/>
-<circle cx="76" cy="94" r="3" fill="#1aff50"/><circle cx="164" cy="90" r="3" fill="#1aff50"/><circle cx="250" cy="72" r="3" fill="#1aff50"/><circle cx="364" cy="52" r="3" fill="#1aff50"/>
-<path d="M78 102 l10 -5 l-3 9 z" fill="#6fa8dc"/>
-<circle cx="78" cy="102" r="4" fill="#6fa8dc"/>
-<text x="36" y="14" fill="#81f7b8" font-size="8" font-family="monospace">ECDIS ROUTE MONITOR</text>
-<text x="40" y="134" fill="#d4a017" font-size="7" font-family="monospace">SAFETY CONTOUR 30m</text>
-<text x="216" y="134" fill="#6fa8dc" font-size="7" font-family="monospace">XTD 0.24 nm</text>
-<text x="334" y="134" fill="#5dbf8a" font-size="7" font-family="monospace">WP NEXT 042</text>`,
+ecdis_panel:`<rect width="480" height="145" fill="#071018"/>
+<rect x="12" y="9" width="456" height="127" rx="12" fill="#182026" stroke="#354550" stroke-width="1.8"/>
+<rect x="24" y="20" width="320" height="100" rx="5" fill="#cfe8f0" stroke="#657f8d" stroke-width="1.3"/>
+<path d="M24 20 h320 v100 h-320z" fill="#d8eef7"/>
+<path d="M32 43 h304 M32 66 h304 M32 89 h304 M60 26 v88 M100 26 v88 M140 26 v88 M180 26 v88 M220 26 v88 M260 26 v88 M300 26 v88" stroke="#8bb5c5" stroke-width=".55" opacity=".62"/>
+<path d="M24 20 L112 20 L132 52 L126 120 L24 120 Z" fill="#f0dfab" stroke="#9b8356" stroke-width=".8"/>
+<path d="M344 20 L292 20 L274 52 L282 120 L344 120 Z" fill="#f0dfab" stroke="#9b8356" stroke-width=".8"/>
+<path d="M132 52 Q180 78 274 52" fill="none" stroke="#4d94b8" stroke-width="1.1" opacity=".78"/>
+<path d="M126 86 Q196 96 282 86" fill="none" stroke="#4d94b8" stroke-width="1" opacity=".55"/>
+<polyline points="64,96 104,88 150,90 194,76 234,72 272,65 316,48" fill="none" stroke="#94333a" stroke-width="2.2" stroke-dasharray="7,4"/>
+<circle cx="64" cy="96" r="3.1" fill="#94333a"/><circle cx="150" cy="90" r="3.1" fill="#94333a"/><circle cx="234" cy="72" r="3.1" fill="#94333a"/><circle cx="316" cy="48" r="3.1" fill="#94333a"/>
+<path d="M92 102 l11 -5 l-3 10 z" fill="#172d42"/><circle cx="92" cy="102" r="3.5" fill="#172d42"/>
+<circle cx="210" cy="78" r="11" fill="none" stroke="#b34242" stroke-dasharray="4,3" opacity=".8"/>
+<text x="38" y="34" fill="#23445a" font-size="6.2" font-family="monospace">SAFETY CONTOUR 30m</text>
+<text x="248" y="112" fill="#23445a" font-size="6.2" font-family="monospace">XTD 0.24 NM</text>
+<rect x="356" y="20" width="98" height="100" rx="5" fill="#07121d" stroke="#1d4059" stroke-width="1.1"/>
+<text x="368" y="35" fill="#bde7ff" font-size="6.4" font-family="monospace">ECDIS MONITOR</text>
+<text x="368" y="51" fill="#ffd783" font-size="6.1" font-family="monospace">ACTIVE ROUTE 042</text>
+<text x="368" y="64" fill="#8fd8ab" font-size="6.1" font-family="monospace">ENC UPDATED</text>
+<text x="368" y="77" fill="#8fd8ab" font-size="6.1" font-family="monospace">GPS PRIMARY OK</text>
+<text x="368" y="90" fill="#ffb0b0" font-size="6.1" font-family="monospace">NO-GO CHECK ON</text>
+<text x="368" y="103" fill="#bde7ff" font-size="6.1" font-family="monospace">NEXT WP 1.8 NM</text>
+<text x="25" y="134" fill="#bde7ff" font-size="6.5" font-family="monospace">ECDIS S-57 ENC DISPLAY   N-UP   ROUTE MONITOR   SENSOR STATUS NORMAL</text>`,
 
-ais_panel:`<rect width="480" height="145" fill="#07121d"/>
-<rect x="30" y="18" width="420" height="108" rx="6" fill="#03111c" stroke="#0d2a48" stroke-width="2"/>
-<rect x="42" y="30" width="176" height="84" rx="4" fill="#051522"/>
-<circle cx="130" cy="72" r="32" fill="none" stroke="#0d3a18" stroke-width="1.2"/>
-<circle cx="130" cy="72" r="20" fill="none" stroke="#0d3a18" stroke-width=".9"/>
-<circle cx="154" cy="56" r="3" fill="#1aff50"/><circle cx="112" cy="86" r="2.6" fill="#d4a017"/><circle cx="142" cy="88" r="2.4" fill="#6fa8dc"/>
-<path d="M130 72 L154 56" stroke="#6fa8dc" stroke-width="1" stroke-dasharray="3,2"/>
-<rect x="236" y="30" width="200" height="84" rx="4" fill="#051522"/>
-<text x="248" y="44" fill="#81f7b8" font-size="7" font-family="monospace">AIS TARGET LIST</text>
-<text x="248" y="60" fill="#d4a017" font-size="7" font-family="monospace">MV AEGEAN STAR   CPA 1.2</text>
-<text x="248" y="74" fill="#6fa8dc" font-size="7" font-family="monospace">TANKER LARA      TCPA 14</text>
-<text x="248" y="88" fill="#5dbf8a" font-size="7" font-family="monospace">PILOT BOAT       2.4 NM</text>
-<text x="248" y="102" fill="#c97070" font-size="7" font-family="monospace">DATA OFFSET ?</text>
-<text x="34" y="14" fill="#81f7b8" font-size="8" font-family="monospace">AIS TERMINAL</text>`,
+ais_panel:`<rect width="480" height="145" fill="#071018"/>
+<rect x="18" y="14" width="444" height="116" rx="10" fill="#121c24" stroke="#2c4250" stroke-width="1.8"/>
+<rect x="34" y="26" width="150" height="88" rx="6" fill="#06121c" stroke="#1d4059" stroke-width="1"/>
+<circle cx="109" cy="70" r="34" fill="#03111c" stroke="#2c7a58" stroke-width="1.1"/>
+<circle cx="109" cy="70" r="22" fill="none" stroke="#2c7a58" stroke-width=".8" opacity=".55"/>
+<line x1="75" y1="70" x2="143" y2="70" stroke="#2c7a58" stroke-width=".7" opacity=".42"/>
+<line x1="109" y1="36" x2="109" y2="104" stroke="#2c7a58" stroke-width=".7" opacity=".42"/>
+<path d="M109 70 l8 -5 l-2 10 z" fill="#9fd8ff"/>
+<path d="M109 70 L151 52" stroke="#9fd8ff" stroke-dasharray="3,2" opacity=".65"/>
+<circle cx="151" cy="52" r="3" fill="#8fd8ab"/><circle cx="96" cy="90" r="2.7" fill="#ffd783"/><circle cx="132" cy="88" r="2.6" fill="#8fbfed"/>
+<rect x="202" y="26" width="242" height="88" rx="6" fill="#06121c" stroke="#1d4059" stroke-width="1"/>
+<text x="216" y="41" fill="#bde7ff" font-size="6.5" font-family="monospace">AIS TARGET LIST / CPA SORT</text>
+<path d="M212 48 H434 M212 64 H434 M212 80 H434 M212 96 H434" stroke="#19364b" stroke-width=".7"/>
+<text x="216" y="59" fill="#ffd783" font-size="6.1" font-family="monospace">MMSI 271000111  MV AEGEAN STAR  CPA 1.2</text>
+<text x="216" y="75" fill="#8fbfed" font-size="6.1" font-family="monospace">MMSI 235884321  TANKER LARA     TCPA 14</text>
+<text x="216" y="91" fill="#8fd8ab" font-size="6.1" font-family="monospace">MMSI 271PILOT   PILOT BOAT      2.4 NM</text>
+<text x="216" y="107" fill="#ffb0b0" font-size="6.1" font-family="monospace">STATIC DATA OFFSET - RADAR CROSS CHECK</text>
+<text x="34" y="134" fill="#bde7ff" font-size="6.5" font-family="monospace">AIS CLASS A   RX/TX OK   GPS INPUT OK   SAFETY MESSAGE READY</text>`,
 
 gyro_panel:`<rect width="480" height="145" fill="#06101a"/>
 <circle cx="138" cy="74" r="48" fill="#071828" stroke="#1a3a5f" stroke-width="2"/>
@@ -817,17 +846,24 @@ bnwas_panel:`<rect width="480" height="145" fill="#061019"/>
 <text x="112" y="102" fill="#c97070" font-size="8" font-family="monospace">TIMER 02:30</text>
 <text x="248" y="102" fill="#6fa8dc" font-size="8" font-family="monospace">STAGE 1 READY</text>`,
 
-gmdss_panel:`<rect width="480" height="145" fill="#06111c"/>
-<rect x="34" y="22" width="412" height="102" rx="8" fill="#071828" stroke="#10304e" stroke-width="2"/>
-<text x="52" y="42" fill="#81f7b8" font-size="8" font-family="monospace">GMDSS CONSOLE</text>
-<rect x="52" y="54" width="92" height="50" rx="4" fill="#03111c" stroke="#0d2a48" stroke-width="1"/><text x="64" y="74" fill="#d4a017" font-size="8" font-family="monospace">VHF DSC</text><text x="64" y="90" fill="#6fa8dc" font-size="7" font-family="monospace">CH16 READY</text>
-<rect x="160" y="54" width="92" height="50" rx="4" fill="#03111c" stroke="#0d2a48" stroke-width="1"/><text x="176" y="74" fill="#d4a017" font-size="8" font-family="monospace">MF/HF</text><text x="176" y="90" fill="#6fa8dc" font-size="7" font-family="monospace">2187.5 kHz</text>
-<rect x="268" y="54" width="72" height="50" rx="4" fill="#03111c" stroke="#0d2a48" stroke-width="1"/><text x="282" y="74" fill="#d4a017" font-size="8" font-family="monospace">EPIRB</text><text x="282" y="90" fill="#6fa8dc" font-size="7" font-family="monospace">ARMED</text>
-<rect x="354" y="54" width="72" height="50" rx="4" fill="#03111c" stroke="#0d2a48" stroke-width="1"/><text x="370" y="74" fill="#d4a017" font-size="8" font-family="monospace">SART</text><text x="368" y="90" fill="#6fa8dc" font-size="7" font-family="monospace">TEST OK</text>
-<rect x="52" y="108" width="78" height="10" rx="3" fill="#03111c" stroke="#0d2a48" stroke-width=".8"/><text x="60" y="115" fill="#81f7b8" font-size="6" font-family="monospace">NAVTEX</text>
-<rect x="138" y="108" width="92" height="10" rx="3" fill="#03111c" stroke="#0d2a48" stroke-width=".8"/><text x="146" y="115" fill="#81f7b8" font-size="6" font-family="monospace">INM-C / EGC</text>
-<rect x="238" y="108" width="86" height="10" rx="3" fill="#03111c" stroke="#0d2a48" stroke-width=".8"/><text x="246" y="115" fill="#81f7b8" font-size="6" font-family="monospace">COSPAS LINK</text>
-<rect x="332" y="108" width="94" height="10" rx="3" fill="#03111c" stroke="#0d2a48" stroke-width=".8"/><text x="340" y="115" fill="#81f7b8" font-size="6" font-family="monospace">PORTABLE VHF</text>`,
+gmdss_panel:`<rect width="480" height="145" fill="#071018"/>
+<rect x="16" y="13" width="448" height="118" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/>
+<rect x="32" y="26" width="126" height="82" rx="7" fill="#06121c" stroke="#1d4059" stroke-width="1.1"/>
+<text x="45" y="42" fill="#bde7ff" font-size="6.6" font-family="monospace">VHF DSC / CH16</text>
+<rect x="48" y="52" width="74" height="20" rx="3" fill="#0b2233" stroke="#315879"/><text x="58" y="66" fill="#ffd783" font-size="8" font-family="monospace">DISTRESS</text>
+<circle cx="138" cy="62" r="9" fill="#b34242" class="blink"/><text x="45" y="88" fill="#8fd8ab" font-size="6.2" font-family="monospace">WATCH RX OK</text><text x="45" y="101" fill="#8fbfed" font-size="6.2" font-family="monospace">CH 70 DSC READY</text>
+<rect x="174" y="26" width="126" height="82" rx="7" fill="#06121c" stroke="#1d4059" stroke-width="1.1"/>
+<text x="188" y="42" fill="#bde7ff" font-size="6.6" font-family="monospace">MF/HF + INM-C</text>
+<text x="188" y="59" fill="#ffd783" font-size="6.1" font-family="monospace">2187.5 kHz DSC</text>
+<text x="188" y="72" fill="#8fbfed" font-size="6.1" font-family="monospace">8414.5 kHz WATCH</text>
+<text x="188" y="85" fill="#8fd8ab" font-size="6.1" font-family="monospace">EGC SAFETYNET OK</text>
+<text x="188" y="98" fill="#8fd8ab" font-size="6.1" font-family="monospace">PRINTER READY</text>
+<rect x="316" y="26" width="126" height="82" rx="7" fill="#06121c" stroke="#1d4059" stroke-width="1.1"/>
+<text x="330" y="42" fill="#bde7ff" font-size="6.6" font-family="monospace">EPIRB / SART</text>
+<rect x="332" y="54" width="42" height="30" rx="5" fill="#ff9a3d" stroke="#ffd783"/><text x="339" y="72" fill="#281305" font-size="6.5" font-family="monospace">EPIRB</text>
+<rect x="386" y="54" width="34" height="30" rx="5" fill="#e8edf2" stroke="#8fbfed"/><text x="392" y="72" fill="#172d42" font-size="6.5" font-family="monospace">SART</text>
+<text x="330" y="100" fill="#8fd8ab" font-size="6.1" font-family="monospace">BATTERY / HRU DATE OK</text>
+<text x="34" y="124" fill="#bde7ff" font-size="6.4" font-family="monospace">GMDSS A1/A2/A3 CONSOLE   NAVTEX / EGC / DSC WATCH   RADIO LOG REQUIRED</text>`,
 
 engine:`<rect width="480" height="145" fill="#040c10"/>
 <rect x="60" y="33" width="100" height="82" rx="3" fill="#071828"/>
