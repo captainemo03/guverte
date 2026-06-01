@@ -720,16 +720,16 @@ animation:straitFlow 2.8s linear infinite;}
 /* ===== ROTA HARİTASI ===== */
 #map-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;align-items:center;justify-content:center;}
 #map-panel.show{display:flex;}
-#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:calc(100% - 24px);max-width:1240px;max-height:92vh;padding:16px;position:relative;overflow:auto;}
+#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:calc(100% - 18px);max-width:1580px;max-height:94vh;padding:16px;position:relative;overflow:auto;}
 #map-title{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;}
 #map-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
 .map-tab{background:var(--navy3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--text3);cursor:pointer;font-family:'Share Tech Mono',monospace;}
 .map-tab.active,.map-tab:hover{border-color:var(--gold);color:var(--text);background:rgba(24,48,76,0.95);}
 #map-world-view{display:block;}
-#map-library-view{display:none;grid-template-columns:270px minmax(0,1fr);gap:14px;align-items:start;}
+#map-library-view{display:none;grid-template-columns:250px minmax(0,1fr);gap:14px;align-items:start;}
 #map-panel.library #map-world-view{display:none;}
 #map-panel.library #map-library-view{display:grid;}
-#map-svg{width:100%;border-radius:6px;background:#030d1a;}
+#map-svg{width:100%;min-height:560px;aspect-ratio:11/6.5;border-radius:8px;background:#d8eef7;border:1px solid rgba(74,112,152,.34);display:block;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),0 14px 38px rgba(0,0,0,.22);}
 #map-close{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;color:var(--text2);font-size:11px;cursor:pointer;}
 #map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:10px;max-height:74vh;overflow:auto;display:flex;flex-direction:column;gap:7px;}
 .map-file{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(8,22,40,.95);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text2);font-size:11px;cursor:pointer;font-family:'Share Tech Mono',monospace;text-align:left;}
@@ -749,7 +749,8 @@ animation:straitFlow 2.8s linear infinite;}
 .chart-zoom-btn{background:rgba(8,23,39,.95);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;color:var(--text);font-size:12px;cursor:pointer;font-family:'Share Tech Mono',monospace;line-height:1;}
 .chart-zoom-btn:hover{border-color:var(--gold);color:var(--gold);}
 #port-chart-zoom-label{min-width:44px;text-align:center;color:var(--text3);font-size:10px;font-family:'Share Tech Mono',monospace;}
-#port-chart-svg{width:100%;min-height:520px;max-height:72vh;aspect-ratio:11/6.5;border-radius:8px;background:#030d1a;border:1px solid rgba(74,112,152,.25);display:block;cursor:grab;touch-action:none;}
+#port-chart-svg{width:100%;min-height:680px;max-height:78vh;aspect-ratio:11/6.5;border-radius:8px;background:#d8eef7;border:1px solid rgba(74,112,152,.34);display:block;cursor:grab;touch-action:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),0 14px 38px rgba(0,0,0,.22);}
+#port-chart-svg text{letter-spacing:0;}
 #port-chart-svg.dragging{cursor:grabbing;}
 #port-chart-meta{margin-top:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
 .chart-meta-card{border:1px solid rgba(111,146,178,0.22);border-radius:8px;background:rgba(8,22,40,.88);padding:8px 9px;}

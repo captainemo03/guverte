@@ -11553,15 +11553,15 @@ function getPortChartEffectiveZoom(){
   const active = getActivePortChart();
   if(!active) return Math.max(1, portChartZoom || 1);
   const profile = getPortChartProfile(active);
-  const baseZoom = profile.template === 'oceanroute' ? 0.82 : /strait|canal/.test(profile.template) ? 0.9 : 1;
+  const baseZoom = profile.template === 'oceanroute' ? 0.72 : /strait|canal/.test(profile.template) ? 0.82 : 0.92;
   return Math.max(baseZoom, +(baseZoom * Math.max(1, portChartZoom || 1)).toFixed(3));
 }
 
 function getPortChartDetailLabel(){
   const zoom = getPortChartEffectiveZoom();
-  return zoom >= 3.4 ? 'Close Detail'
-    : zoom >= 1.8 ? 'Approach Detail'
-    : 'Overview';
+  return zoom >= 3.2 ? 'Close Detail'
+    : zoom >= 1.7 ? 'Approach Detail'
+    : 'ECDIS Overview';
 }
 
 function getPortChartTaskGeometry(port){
@@ -12092,7 +12092,8 @@ function buildPortChartSvg(port){
   if(profile.template === 'oceanroute') return buildOceanRouteChartSvg(port, profile);
   const region = profile.region;
   const hay = `${port.name} ${region}`.toLowerCase();
-  const detailLevel = portChartZoom >= 3.4 ? 'high' : portChartZoom >= 1.8 ? 'mid' : 'low';
+  const effectiveZoom = getPortChartEffectiveZoom();
+  const detailLevel = effectiveZoom >= 3.2 ? 'high' : effectiveZoom >= 1.7 ? 'mid' : 'low';
   const coastLeft = port.x < 110;
   const southFacing = port.y > 170;
   const harborColor = visitedPorts.has(port.name) ? '#d4a017' : '#6fa8dc';
@@ -12348,6 +12349,11 @@ function buildPortChartSvg(port){
     <text x="${coastLeft ? 308 : 70}" y="${channelY+48}" fill="#7ea0bd" font-size="6.1" font-family="monospace">LEADING LINE IN USE</text>`;
   const strategicLandOverlay = /strait|canal/.test(profile.template) ? buildStrategicLandOverlay(hay, coastLeft, southFacing) : '';
   const visibleOuterContours = detailLevel !== 'low' ? outerContours : '';
+  const visibleSoundingText = detailLevel === 'low'
+    ? (coastLeft
+      ? `<text x="224" y="${channelY+18}" fill="#1b3550" font-size="7" font-family="monospace">13.6</text><text x="306" y="${channelY-2}" fill="#1b3550" font-size="7" font-family="monospace">16.4</text>`
+      : `<text x="198" y="${channelY-6}" fill="#1b3550" font-size="7" font-family="monospace">14.8</text><text x="84" y="${channelY+8}" fill="#1b3550" font-size="7" font-family="monospace">16.3</text>`)
+    : soundingText;
   const visibleExtendedSoundings = detailLevel === 'high' ? extendedSoundings : '';
   const visibleDredgedOverlay = detailLevel !== 'low' ? dredgedOverlay : '';
   const visibleCableOverlay = detailLevel === 'high' ? cableOverlay : '';
@@ -12367,35 +12373,51 @@ function buildPortChartSvg(port){
   return `
   <defs>
     <linearGradient id="portSea" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${topWater}"/>
-      <stop offset="100%" stop-color="${bottomWater}"/>
+      <stop offset="0%" stop-color="#d8eef7"/>
+      <stop offset="48%" stop-color="#b9ddeb"/>
+      <stop offset="100%" stop-color="#8fbfd1"/>
     </linearGradient>
+    <filter id="ecdisSoft"><feDropShadow dx="0" dy=".4" stdDeviation=".35" flood-color="#ffffff" flood-opacity=".35"/></filter>
   </defs>
+  <style>
+    .ecdis-chart text{font-family:"Share Tech Mono",monospace;paint-order:stroke;stroke:#eef7fb;stroke-width:.7px;stroke-opacity:.78;letter-spacing:0;}
+    .ecdis-chart .ecdis-minor text{font-size:5.8px;}
+    .ecdis-chart.detail-low .ecdis-approach,.ecdis-chart.detail-low .ecdis-close{display:none;}
+    .ecdis-chart.detail-mid .ecdis-close{display:none;}
+    .ecdis-chart.detail-low text{font-size:6.2px;}
+    .ecdis-chart .land{fill:#f2e7ba;stroke:#9f8752;stroke-width:.8;}
+    .ecdis-chart .shallow{fill:#9fd1df;opacity:.72;}
+    .ecdis-chart .channel{stroke:#94333a;stroke-width:2.4;stroke-dasharray:8,5;fill:none;}
+    .ecdis-chart .contour{stroke:#4d94b8;stroke-width:1;fill:none;opacity:.72;}
+    .ecdis-chart .route-line{stroke:#94333a;stroke-width:2.2;fill:none;}
+    .ecdis-chart .safety{stroke:#b34242;stroke-width:1.1;stroke-dasharray:5,4;fill:none;}
+  </style>
+  <g class="ecdis-chart detail-${detailLevel}">
   <rect width="440" height="260" rx="8" fill="url(#portSea)"/>
-  <rect x="8" y="8" width="424" height="244" rx="6" fill="none" stroke="#284561" stroke-width="1"/>
+  <rect x="8" y="8" width="424" height="244" rx="6" fill="none" stroke="#6a9db3" stroke-width="1"/>
   ${strategicLandOverlay}
-  <path d="M36 22 V238 M118 22 V238 M200 22 V238 M282 22 V238 M364 22 V238" stroke="#17324c" stroke-width=".8" opacity=".55" stroke-dasharray="3,4"/>
-  <path d="M18 44 H422 M18 92 H422 M18 140 H422 M18 188 H422 M18 236 H422" stroke="#17324c" stroke-width=".8" opacity=".55" stroke-dasharray="3,4"/>
-  <path d="${coastLeft ? 'M0 0 L132 0 L168 58 L168 260 L0 260 Z' : 'M440 0 L308 0 L272 58 L272 260 L440 260 Z'}" fill="#0a1b2b" opacity=".95"/>
-  <path d="${coastLeft ? 'M132 0 L176 64 L176 260 L168 260 L168 58 Z' : 'M308 0 L264 64 L264 260 L272 260 L272 58 Z'}" fill="#10283f" opacity=".9"/>
-  <path d="${coastLeft ? 'M168 64 L214 98 L214 224 L176 260 L176 64 Z' : 'M272 64 L226 98 L226 224 L264 260 L264 64 Z'}" fill="#112e46" opacity=".85"/>
-  <path d="${coastLeft ? 'M208 22 L236 34 L244 56 L222 64 L198 48 Z' : 'M232 22 L204 34 L196 56 L218 64 L242 48 Z'}" fill="#0d2337" opacity=".85"/>
-  <path d="${coastLeft ? 'M246 198 L270 210 L264 228 L236 224 Z' : 'M194 198 L170 210 L176 228 L204 224 Z'}" fill="#0d2337" opacity=".8"/>
-  <path d="${coastLeft ? 'M84 210 L112 218 L108 234 L76 232 Z' : 'M356 210 L328 218 L332 234 L364 232 Z'}" fill="#0d2337" opacity=".72"/>
-  ${islandLabels}
+  <path d="M36 22 V238 M118 22 V238 M200 22 V238 M282 22 V238 M364 22 V238" stroke="#8db5c3" stroke-width=".65" opacity=".38" stroke-dasharray="3,5"/>
+  <path d="M18 44 H422 M18 92 H422 M18 140 H422 M18 188 H422 M18 236 H422" stroke="#8db5c3" stroke-width=".65" opacity=".38" stroke-dasharray="3,5"/>
+  <path class="land" d="${coastLeft ? 'M0 0 L132 0 L168 58 L168 260 L0 260 Z' : 'M440 0 L308 0 L272 58 L272 260 L440 260 Z'}"/>
+  <path class="shallow" d="${coastLeft ? 'M132 0 L176 64 L176 260 L168 260 L168 58 Z' : 'M308 0 L264 64 L264 260 L272 260 L272 58 Z'}"/>
+  <path class="shallow" d="${coastLeft ? 'M168 64 L214 98 L214 224 L176 260 L176 64 Z' : 'M272 64 L226 98 L226 224 L264 260 L264 64 Z'}"/>
+  <path class="land" d="${coastLeft ? 'M208 22 L236 34 L244 56 L222 64 L198 48 Z' : 'M232 22 L204 34 L196 56 L218 64 L242 48 Z'}"/>
+  <path class="land" d="${coastLeft ? 'M246 198 L270 210 L264 228 L236 224 Z' : 'M194 198 L170 210 L176 228 L204 224 Z'}"/>
+  <path class="land" d="${coastLeft ? 'M84 210 L112 218 L108 234 L76 232 Z' : 'M356 210 L328 218 L332 234 L364 232 Z'}"/>
+  <g class="ecdis-approach">${islandLabels}</g>
   ${contourOverlay}
-  ${visibleOuterContours}
-  <path d="M${channelStartX} ${channelY} Q${(channelStartX+channelEndX)/2} ${channelY-18} ${channelEndX} ${channelY}" fill="none" stroke="#4f8fc7" stroke-width="2.2" stroke-dasharray="7,5" opacity=".9"/>
+  <g class="ecdis-approach">${visibleOuterContours}</g>
+  <path class="channel" d="M${channelStartX} ${channelY} Q${(channelStartX+channelEndX)/2} ${channelY-18} ${channelEndX} ${channelY}"/>
   <path d="M${channelStartX} ${channelY-14} Q${(channelStartX+channelEndX)/2} ${channelY-32} ${channelEndX} ${channelY-14}" fill="none" stroke="#1d5d95" stroke-width="1" stroke-dasharray="4,4" opacity=".45"/>
   <path d="M${channelStartX} ${channelY+14} Q${(channelStartX+channelEndX)/2} ${channelY-4} ${channelEndX} ${channelY+14}" fill="none" stroke="#1d5d95" stroke-width="1" stroke-dasharray="4,4" opacity=".45"/>
   <path d="M${coastLeft ? 170 : 270} ${channelY-44} L${berthX} ${channelY-20} L${berthX} ${channelY+36} L${coastLeft ? 176 : 264} ${channelY+18} Z" fill="#17324c" opacity=".72"/>
-  ${visibleDredgedOverlay}
-  ${visibleCableOverlay}
+  <g class="ecdis-approach">${visibleDredgedOverlay}</g>
+  <g class="ecdis-close">${visibleCableOverlay}</g>
   <path d="M${berthX} ${channelY-26} V${channelY+42}" stroke="#cfd8e4" stroke-width="4"/>
   <path d="M${berthX + (coastLeft?-24:24)} ${channelY-18} V${channelY+32}" stroke="#7ea0bd" stroke-width="1" opacity=".7"/>
   <path d="M${berthX + (coastLeft?-36:36)} ${channelY-10} V${channelY+24}" stroke="#7ea0bd" stroke-width="1" opacity=".55"/>
   <path d="M${berthX + (coastLeft?-18:18)} ${channelY-10} V${channelY+26}" stroke="#8eb2d1" stroke-width="1.4" stroke-dasharray="3,3" opacity=".8"/>
-  ${berthNumbers}
+  <g class="ecdis-approach">${berthNumbers}</g>
   <circle cx="${turningBasinX}" cy="${channelY}" r="22" fill="none" stroke="#2f6ea5" stroke-width="1.2" opacity=".4"/>
   <circle cx="${turningBasinX}" cy="${channelY}" r="14" fill="none" stroke="#2f6ea5" stroke-width="1" opacity=".25" stroke-dasharray="5,4"/>
   <circle cx="${channelEndX}" cy="${channelY}" r="5" fill="${harborColor}"/>
@@ -12417,12 +12439,12 @@ function buildPortChartSvg(port){
   <circle cx="${coastLeft ? 196 : 244}" cy="54" r="4" fill="#d4a017"/>
   <path d="M${coastLeft ? 180 : 260} 210 L${coastLeft ? 218 : 222} 192" stroke="#5dbf8a" stroke-width="1.8" stroke-dasharray="5,4"/>
   <circle cx="${coastLeft ? 180 : 260}" cy="210" r="4" fill="#5dbf8a"/>
-  <rect x="${coastLeft ? 52 : 328}" y="${southFacing ? 178 : 46}" width="42" height="18" rx="4" fill="#081929" stroke="#385f86" stroke-width="1"/>
+  <g class="ecdis-approach"><rect x="${coastLeft ? 52 : 328}" y="${southFacing ? 178 : 46}" width="42" height="18" rx="4" fill="#eaf3f7" stroke="#6a9db3" stroke-width="1"/>
   <text x="${coastLeft ? 60 : 336}" y="${southFacing ? 190 : 58}" fill="#8ab0c8" font-size="8" font-family="monospace">VTS</text>
-  <rect x="${coastLeft ? 98 : 282}" y="${southFacing ? 178 : 46}" width="58" height="18" rx="4" fill="#081929" stroke="#385f86" stroke-width="1"/>
-  <text x="${coastLeft ? 106 : 290}" y="${southFacing ? 190 : 58}" fill="#8ab0c8" font-size="8" font-family="monospace">PILOT CH.12</text>
-  <path d="M${coastLeft ? 140 : 300} ${southFacing ? 116 : 198} h58" stroke="#c97070" stroke-width="1.4" stroke-dasharray="5,3" opacity=".8"/>
-  <text x="${coastLeft ? 142 : 302}" y="${southFacing ? 110 : 192}" fill="#c97070" font-size="7" font-family="monospace">${profile.hazard.toUpperCase()}</text>
+  <rect x="${coastLeft ? 98 : 282}" y="${southFacing ? 178 : 46}" width="58" height="18" rx="4" fill="#eaf3f7" stroke="#6a9db3" stroke-width="1"/>
+  <text x="${coastLeft ? 106 : 290}" y="${southFacing ? 190 : 58}" fill="#8ab0c8" font-size="8" font-family="monospace">PILOT CH.12</text></g>
+  <g class="ecdis-approach"><path class="safety" d="M${coastLeft ? 140 : 300} ${southFacing ? 116 : 198} h58"/>
+  <text x="${coastLeft ? 142 : 302}" y="${southFacing ? 110 : 192}" fill="#94333a" font-size="7" font-family="monospace">${profile.hazard.toUpperCase()}</text></g>
   <text x="${coastLeft ? 124 : 252}" y="${channelY-58}" fill="#9cc8ef" font-size="7" font-family="monospace">DEPTH ${profile.depthA}m</text>
   <text x="${coastLeft ? 230 : 120}" y="${channelY+74}" fill="#9cc8ef" font-size="7" font-family="monospace">DEPTH ${profile.depthB}m</text>
   <text x="16" y="20" fill="#8ab0c8" font-size="9" font-family="monospace">${port.name.toUpperCase()} PORT CHART</text>
@@ -12436,10 +12458,10 @@ function buildPortChartSvg(port){
   <text x="${coastLeft ? 286 : 42}" y="${channelY-14}" fill="#6fa8dc" font-size="8" font-family="monospace">APPROACH CHANNEL</text>
   <text x="${shipX-20}" y="${channelY+54}" fill="#d4a017" font-size="8" font-family="monospace">OWN SHIP</text>
   <text x="${turningBasinX-24}" y="${channelY+4}" fill="#5f92bf" font-size="7" font-family="monospace">TURN</text>
-  ${reportingOverlay}
-  ${tidalOverlay}
-  ${shoalOverlay}
-  ${leadingLineOverlay}
+  <g class="ecdis-approach">${visibleReportingOverlay}</g>
+  <g class="ecdis-approach">${visibleTidalOverlay}</g>
+  <g class="ecdis-close">${visibleShoalOverlay}</g>
+  <g class="ecdis-approach">${visibleLeadingLineOverlay}</g>
   <circle cx="394" cy="44" r="22" fill="none" stroke="#204a72" stroke-width="1.4"/>
   <path d="M394 28 V60 M378 44 H410" stroke="#204a72" stroke-width="1"/>
   <text x="391" y="26" fill="#8ab0c8" font-size="7" font-family="monospace">N</text>
@@ -12448,26 +12470,23 @@ function buildPortChartSvg(port){
   <text x="18" y="150" fill="#7ea0bd" font-size="7" font-family="monospace">${Math.abs(parseFloat(profile.latB)-0.4).toFixed(1)}°${profile.latA.includes('N')?'N':'S'}</text>
   <text x="96" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonA}</text>
   <text x="264" y="252" fill="#7ea0bd" font-size="7" font-family="monospace">${profile.lonB}</text>
-  ${soundingText}
-  ${visibleExtendedSoundings}
+  <g class="ecdis-minor">${visibleSoundingText}</g>
+  <g class="ecdis-close ecdis-minor">${visibleExtendedSoundings}</g>
   <rect x="${scaleBarX}" y="236" width="108" height="10" rx="3" fill="#081929" stroke="#385f86" stroke-width="1"/>
   <path d="M${scaleBarX+8} 241 H${scaleBarX+28} M${scaleBarX+28} 241 H${scaleBarX+48} M${scaleBarX+48} 241 H${scaleBarX+68} M${scaleBarX+68} 241 H${scaleBarX+88}" stroke="#cfd8e4" stroke-width="3"/>
   <text x="${scaleBarX+4}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
   <text x="${scaleBarX+40}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">1</text>
   <text x="${scaleBarX+80}" y="233" fill="#7ea0bd" font-size="7" font-family="monospace">2 NM</text>
-  ${visiblePilotGroundOverlay}
-  ${visibleReportingOverlay}
-  ${visibleTidalOverlay}
-  ${visibleShoalOverlay}
-  ${visibleLeadingLineOverlay}
-  ${visibleNoAnchoringOverlay}
-  ${visibleTrafficArrowOverlay}
-  ${visibleSectorLightOverlay}
-  ${visibleSpecialOverlay}
-  ${visibleOverviewInset}
-  ${visibleSpecialInset}
-  ${visibleBuoyDetailOverlay}
-  ${visibleMicroNoteOverlay}
+  <g class="ecdis-approach">${visiblePilotGroundOverlay}</g>
+  <g class="ecdis-close">${visibleNoAnchoringOverlay}</g>
+  <g class="ecdis-close">${visibleTrafficArrowOverlay}</g>
+  <g class="ecdis-close">${visibleSectorLightOverlay}</g>
+  <g class="ecdis-approach">${visibleSpecialOverlay}</g>
+  <g class="ecdis-approach">${visibleOverviewInset}</g>
+  <g class="ecdis-close">${visibleSpecialInset}</g>
+  <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
+  <g class="ecdis-close ecdis-minor">${visibleMicroNoteOverlay}</g>
+  </g>
   `;
 }
 
@@ -12604,36 +12623,46 @@ function renderMap(){
   const svg = document.getElementById('map-svg');
   const legend = document.getElementById('map-legend');
   const region = getMapRegionByPosition(shipPosition);
-  const regionFill =
-    region==='ORTA AKDENIZ' ? '#03101d' :
-    region==='TURK BOGAZLARI / ADRIYATIK' ? '#041320' :
-    region==='KARADENIZ / AZAK' ? '#061626' :
-    region==='KUZEY DENIZI / BALTIK' ? '#071725' :
-    region==='ATLANTIK / BATI AVRUPA' ? '#031420' :
-    region==='AMERIKA / KARAYIPLER' ? '#041726' :
-    region==='GUNEY AMERIKA' ? '#071724' :
-    region==='KIZILDENIZ / HINT OKYANUSU GIRISI' ? '#10161f' :
-    region==='BASRA KORFEZI / ARAP DENIZI' ? '#121722' :
-    region==='GUNEYDOGU ASYA' ? '#071a20' :
-    region==='DOGU ASYA' ? '#081821' :
-    region==='KUZEY PASIFIK / JAPONYA' ? '#0a1824' :
-    '#04111b';
-  let s = `<rect width="440" height="260" fill="${regionFill}" rx="6"/>`;
+  const regionTint =
+    region==='ORTA AKDENIZ' ? '#cfeaf3' :
+    region==='TURK BOGAZLARI / ADRIYATIK' ? '#c7e6f0' :
+    region==='KARADENIZ / AZAK' ? '#c2e1ed' :
+    region==='KUZEY DENIZI / BALTIK' ? '#c0ddea' :
+    region==='ATLANTIK / BATI AVRUPA' ? '#c9e6f1' :
+    region==='AMERIKA / KARAYIPLER' ? '#ccebf4' :
+    region==='GUNEY AMERIKA' ? '#c8e3ef' :
+    region==='KIZILDENIZ / HINT OKYANUSU GIRISI' ? '#c7e4ee' :
+    region==='BASRA KORFEZI / ARAP DENIZI' ? '#c4e2ec' :
+    region==='GUNEYDOGU ASYA' ? '#c6eaf1' :
+    region==='DOGU ASYA' ? '#c1e4ee' :
+    region==='KUZEY PASIFIK / JAPONYA' ? '#bedfea' :
+    '#d8eef7';
+  let s = `<rect width="440" height="260" fill="${regionTint}" rx="6"/>`;
+  s+=`<style>
+    .world-chart text{font-family:'Share Tech Mono',monospace;letter-spacing:0}
+    .world-land{fill:#f0dfab;stroke:#9b8356;stroke-width:.8}
+    .world-coast{fill:#ead6a0;stroke:#8a744c;stroke-width:.55}
+    .world-lane{fill:none;stroke:#9b3151;stroke-width:1.35;stroke-dasharray:6 5;opacity:.46}
+    .world-lane.secondary{stroke:#245f9a;stroke-width:1;opacity:.34}
+    .world-grid{stroke:#7fb2c4;stroke-width:.45;opacity:.22}
+  </style><g class="world-chart">`;
+  for(let x=40;x<440;x+=40) s+=`<path class="world-grid" d="M${x} 16 V248"/>`;
+  for(let y=40;y<260;y+=40) s+=`<path class="world-grid" d="M10 ${y} H430"/>`;
   // Sea texture
   for(let i=0;i<8;i++){
-    s+=`<path d="M${i*60} ${80+i*20} Q${i*60+30} ${75+i*20} ${i*60+60} ${80+i*20}" fill="none" stroke="#0a2448" stroke-width="1" opacity=".4"/>`;
+    s+=`<path d="M${i*60} ${80+i*20} Q${i*60+30} ${75+i*20} ${i*60+60} ${80+i*20}" fill="none" stroke="#8cbfd0" stroke-width="1" opacity=".35"/>`;
   }
   // Land masses (simplified Mediterranean)
-  s+=`<path d="M0 60 Q50 40 100 50 Q150 45 200 60 Q250 55 300 70 Q350 65 400 80 L440 85 L440 0 L0 0 Z" fill="#071828" opacity=".7"/>`;
-  s+=`<path d="M0 260 Q60 240 120 250 Q180 245 240 255 Q300 248 360 258 L440 255 L440 160 Q400 170 350 165 Q300 160 250 170 Q200 175 150 168 Q100 162 50 170 Q20 175 0 168 Z" fill="#071828" opacity=".5"/>`;
+  s+=`<path class="world-land" d="M0 60 Q50 40 100 50 Q150 45 200 60 Q250 55 300 70 Q350 65 400 80 L440 85 L440 0 L0 0 Z"/>`;
+  s+=`<path class="world-land" d="M0 260 Q60 240 120 250 Q180 245 240 255 Q300 248 360 258 L440 255 L440 160 Q400 170 350 165 Q300 160 250 170 Q200 175 150 168 Q100 162 50 170 Q20 175 0 168 Z" opacity=".82"/>`;
   // Italy/Greece simplified
-  s+=`<path d="M120 90 Q130 100 125 115 Q120 125 115 120 Q110 110 115 95 Z" fill="#0a1e2e" opacity=".6"/>`;
-  s+=`<path d="M80 70 Q95 65 100 75 Q98 85 90 82 Q82 78 80 70 Z" fill="#0a1e2e" opacity=".6"/>`;
-  s+=`<path d="M18 118 Q68 98 132 110 Q210 126 272 120 Q346 112 420 124" fill="none" stroke="#184878" stroke-width="1.2" stroke-dasharray="6,5" opacity=".45"/>`;
-  s+=`<path d="M152 82 Q194 70 236 76 Q286 83 348 78" fill="none" stroke="#1c5a92" stroke-width="1" stroke-dasharray="4,4" opacity=".35"/>`;
-  s+=`<circle cx="${120*4.4}" cy="${160*2.6}" r="11" fill="none" stroke="#d4a017" stroke-width="1" opacity=".18"/>`;
-  s+=`<circle cx="${200*4.4}" cy="${210*2.6}" r="11" fill="none" stroke="#d4a017" stroke-width="1" opacity=".18"/>`;
-  s+=`<circle cx="${95*4.4}" cy="${175*2.6}" r="11" fill="none" stroke="#d4a017" stroke-width="1" opacity=".18"/>`;
+  s+=`<path class="world-coast" d="M120 90 Q130 100 125 115 Q120 125 115 120 Q110 110 115 95 Z"/>`;
+  s+=`<path class="world-coast" d="M80 70 Q95 65 100 75 Q98 85 90 82 Q82 78 80 70 Z"/>`;
+  s+=`<path class="world-lane" d="M18 118 Q68 98 132 110 Q210 126 272 120 Q346 112 420 124"/>`;
+  s+=`<path class="world-lane secondary" d="M152 82 Q194 70 236 76 Q286 83 348 78"/>`;
+  s+=`<circle cx="120" cy="160" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".22"/>`;
+  s+=`<circle cx="200" cy="210" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
+  s+=`<circle cx="95" cy="175" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
 
   // Route line
   if(routeHistory.length > 1){
@@ -12644,18 +12673,34 @@ function renderMap(){
     s+=`<path d="${d}" fill="none" stroke="#2e6bbf" stroke-width="1.5" stroke-dasharray="5,3" opacity=".7"/>`;
   }
 
+  const labelWhitelist = new Set([
+    'İstanbul','Çanakkale','İzmir','Ambarli','Aliaga','Rotterdam','Singapur','Panama Kanali','Suveys Kanali',
+    'Hurmuz Bogazi','Babulmendep','Malakka Bogazi','Dover Bogazi','Gibraltar','Kiel Kanali',
+    'Kuzey Atlantik Ana Hatti','Avrupa - Uzak Dogu Konteyner Rotasi','Transpasifik Dogu Hatti',
+    'Basra Korfezi Tanker Hatti','Cape of Good Hope Alternatif Rotasi'
+  ]);
+  const distToShip = p => Math.hypot(p.x - shipPosition.x, p.y - shipPosition.y);
+
   // Ports
   ROUTE_PORTS.forEach(p => {
     const px = p.x*4.4, py = p.y*2.6;
     const visited = visitedPorts.has(p.name);
-    const color = p.kind==='waterway' ? (visited ? '#d4a017' : '#6cbbe0') : (visited ? '#5dbf8a' : '#2e6bbf');
+    const nearby = distToShip(p) < 28;
+    const important = labelWhitelist.has(p.name);
+    const labeled = visited || nearby || important;
+    const color = p.kind==='waterway' ? (visited ? '#9b3151' : '#264f75') : p.kind==='route' ? '#7b3550' : (visited ? '#287b57' : '#29577d');
+    const markOpacity = labeled ? (visited ? 1 : .82) : (p.kind==='route' ? .22 : .34);
     if(p.kind==='waterway'){
-      const sz = visited ? 5 : 3.5;
-      s+=`<path d="M${px} ${py-sz} L${px+sz} ${py} L${px} ${py+sz} L${px-sz} ${py} Z" fill="${color}" opacity="${visited?1:.75}"/>`;
+      const sz = labeled ? (visited ? 5 : 3.8) : 2.7;
+      s+=`<path d="M${px} ${py-sz} L${px+sz} ${py} L${px} ${py+sz} L${px-sz} ${py} Z" fill="${color}" opacity="${markOpacity}"/>`;
     }else{
-      s+=`<circle cx="${px}" cy="${py}" r="${visited?5:3}" fill="${color}" opacity="${visited?1:.6}"/>`;
+      const r = labeled ? (visited ? 5 : p.kind==='route' ? 3 : 3.3) : (p.kind==='route' ? 1.8 : 2.2);
+      s+=`<circle cx="${px}" cy="${py}" r="${r}" fill="${color}" opacity="${markOpacity}"/>`;
     }
-    s+=`<text x="${px+7}" y="${py+4}" fill="${color}" font-size="8" font-family="monospace" opacity="${visited?1:.7}">${p.name}</text>`;
+    if(labeled){
+      const fontSize = important || visited ? 7.2 : 6.4;
+      s+=`<text x="${px+7}" y="${py+4}" fill="${color}" font-size="${fontSize}" opacity="${visited?1:.76}">${p.name}</text>`;
+    }
     if(visited){
       s+=`<circle cx="${px}" cy="${py}" r="9" fill="none" stroke="${color}" stroke-width="1" opacity=".3"/>`;
     }
@@ -12666,11 +12711,13 @@ function renderMap(){
   s+=`<circle cx="${sx}" cy="${sy}" r="5" fill="#d4a017"/>`;
   s+=`<path d="M${sx-4} ${sy} L${sx} ${sy-8} L${sx+4} ${sy} Z" fill="#d4a017"/>`;
   s+=`<circle cx="${sx}" cy="${sy}" r="10" fill="none" stroke="#d4a017" stroke-width="1" opacity=".5" class="blink"/>`;
-  s+=`<text x="${sx+12}" y="${sy+4}" fill="#d4a017" font-size="8" font-family="monospace">${sn||'Gemi'}</text>`;
-  s+=`<text x="12" y="16" fill="#8ab0c8" font-size="8" font-family="monospace" opacity=".85">${region}</text>`;
-  s+=`<path d="M28 214 h26 l7 3 h7 v2 h-40 z" fill="#0c1b2d" opacity=".8"/>`;
-  s+=`<rect x="35" y="207" width="10" height="7" rx="1" fill="#184878" opacity=".9"/>`;
-  s+=`<path d="M362 68 h22 l7 3 h6 v2 h-35 z" fill="#0c1b2d" opacity=".65"/>`;
+  s+=`<text x="${sx+12}" y="${sy+4}" fill="#9b3151" font-size="8">${sn||'Gemi'}</text>`;
+  s+=`<text x="12" y="16" fill="#264f75" font-size="8" opacity=".85">${region}</text>`;
+  s+=`<text x="12" y="248" fill="#627c8f" font-size="7" opacity=".82">ECDIS OVERVIEW - isimler yakin/stratejik noktalarda acilir</text>`;
+  s+=`<path d="M28 214 h26 l7 3 h7 v2 h-40 z" fill="#204765" opacity=".62"/>`;
+  s+=`<rect x="35" y="207" width="10" height="7" rx="1" fill="#9b3151" opacity=".72"/>`;
+  s+=`<path d="M362 68 h22 l7 3 h6 v2 h-35 z" fill="#204765" opacity=".45"/>`;
+  s+=`</g>`;
 
   svg.innerHTML = s;
   legend.textContent = `🟢 Uğranan liman  🔵 Planlanan liman  🔷 Kanal/bogaz/nehir/korfez  🟡 ${sn||'Gemimiz'}  — ${visitedPorts.size} nokta işlendi`;
