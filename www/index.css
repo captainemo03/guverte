@@ -165,6 +165,7 @@ input[type=text]::placeholder{color:var(--text3);}
 #scene-area::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:2;mix-blend-mode:screen;}
 #scene-area::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
 #scene-graphic{width:100%;background:var(--navy);min-height:145px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-origin:50% 50%;}
+#scene-graphic::before,#scene-graphic::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5;}
 #gfx-photo{position:absolute;inset:-2%;background-size:cover;background-position:center center;background-repeat:no-repeat;opacity:.42;filter:saturate(1.05) contrast(1.02) brightness(.9);transform:scale(1.04);}
 #gfx-parallax{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.34;}
 #gfx-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;}
@@ -467,6 +468,14 @@ input[type=text]::placeholder{color:var(--text3);}
 .scene-human-wetdeck #gfx-foreground::before{content:"";position:absolute;left:8%;bottom:16px;width:34%;height:10px;background:linear-gradient(90deg, transparent, rgba(165,208,255,.16), rgba(255,255,255,.06), transparent);border-radius:999px;animation:wetDeckShimmer 4.8s ease-in-out infinite;}
 .scene-human-sodium #gfx-photo{filter:saturate(1.08) contrast(1.04) brightness(.96) sepia(.06);}
 .scene-human-salt #gfx-foreground::before{content:"";position:absolute;inset:0;background:linear-gradient(108deg, transparent 0 22%, rgba(231,241,255,.05) 26%, transparent 32%, rgba(231,241,255,.06) 46%, transparent 55%, rgba(231,241,255,.05) 66%, transparent 74%);mix-blend-mode:screen;animation:saltStreaks 7.4s linear infinite;}
+.scene-real-grain #scene-graphic::after{opacity:.16;background:repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px),repeating-linear-gradient(90deg, rgba(0,0,0,.04) 0 1px, transparent 1px 4px);mix-blend-mode:overlay;animation:realismGrain 1.8s steps(3,end) infinite;}
+.scene-glass-reflection #scene-graphic::before{opacity:.34;background:linear-gradient(112deg, transparent 0 19%, rgba(218,238,255,.09) 24%, transparent 31%, rgba(218,238,255,.05) 45%, transparent 54%),linear-gradient(180deg, rgba(255,255,255,.04), transparent 38%);mix-blend-mode:screen;animation:glassSlide 8.5s ease-in-out infinite;}
+.scene-weather-heavy #scene-graphic::before{opacity:.46;background:repeating-linear-gradient(106deg, rgba(222,236,255,.14) 0 1px, transparent 2px 12px),linear-gradient(180deg, rgba(184,210,235,.06), transparent 42%, rgba(225,240,255,.08));mix-blend-mode:screen;animation:rainSweep .42s linear infinite;}
+.scene-light-bloom #scene-graphic::before{opacity:.38;background:radial-gradient(circle at 18% 62%, rgba(255,188,82,.2) 0 4%, transparent 18%),radial-gradient(circle at 74% 45%, rgba(255,206,126,.18) 0 5%, transparent 20%),radial-gradient(circle at 52% 72%, rgba(96,159,230,.14) 0 4%, transparent 18%);mix-blend-mode:screen;animation:sodiumPulse 4.6s ease-in-out infinite;}
+.scene-fog-bank #scene-graphic::before{opacity:.48;background:linear-gradient(180deg, transparent 18%, rgba(186,212,231,.1) 38%, rgba(226,238,246,.18) 58%, rgba(186,212,231,.08) 76%, transparent 100%);filter:blur(2px);animation:fogDrift 9s ease-in-out infinite;}
+.scene-port-depth #scene-graphic::after{opacity:.24;background:linear-gradient(90deg, transparent 0%, rgba(255,205,118,.09) 16%, transparent 32%, rgba(94,151,218,.08) 60%, transparent 82%);mix-blend-mode:screen;animation:harborLightSweep 5.2s ease-in-out infinite;}
+.scene-engine-heat #scene-graphic::before{opacity:.28;background:repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,170,90,.07) 19px 21px, transparent 22px 38px);filter:blur(1px);mix-blend-mode:screen;animation:heatHaze 1.35s ease-in-out infinite;}
+.scene-wake-layer #scene-graphic::before{opacity:.22;background:linear-gradient(165deg, transparent 0 54%, rgba(170,214,255,.13) 59%, transparent 64%),linear-gradient(195deg, transparent 0 62%, rgba(255,255,255,.08) 66%, transparent 72%);mix-blend-mode:screen;animation:wakeFoam 6.8s ease-in-out infinite;}
 .scene-transition-dawn #scene-graphic{animation:sceneFade .52s ease, photoDriftSea 12s ease-in-out infinite;}
 .scene-transition-offshore #scene-graphic{animation:sceneFade .56s ease, harborDrift 6s ease-in-out infinite;}
 .scene-transition-enginebay #scene-graphic{animation:sceneFade .44s ease, engineHum .24s linear infinite;}
@@ -533,6 +542,12 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes mouthSpeak{0%,100%{transform:scaleX(.86) scaleY(.8);opacity:.76;}18%{transform:scaleX(1.06) scaleY(1.18);opacity:.92;}42%{transform:scaleX(.94) scaleY(.92);opacity:.72;}68%{transform:scaleX(1.12) scaleY(1.24);opacity:.96;}}
 @keyframes typingCursor{0%,100%{opacity:1;}50%{opacity:.12;}}
 @keyframes rainSweep{0%{transform:translateX(0) translateY(-8px);}100%{transform:translateX(-16px) translateY(10px);}}
+@keyframes realismGrain{0%{transform:translate(0,0);}33%{transform:translate(1px,-1px);}66%{transform:translate(-1px,1px);}100%{transform:translate(0,0);}}
+@keyframes glassSlide{0%,100%{transform:translateX(-3%);opacity:.24;}50%{transform:translateX(4%);opacity:.38;}}
+@keyframes fogDrift{0%,100%{transform:translateX(-4%) scale(1.02);}50%{transform:translateX(5%) scale(1.06);}}
+@keyframes sodiumPulse{0%,100%{filter:saturate(1) brightness(1);opacity:.3;}50%{filter:saturate(1.25) brightness(1.08);opacity:.44;}}
+@keyframes heatHaze{0%,100%{transform:translateX(-2px) skewX(-.4deg);}50%{transform:translateX(3px) skewX(.5deg);}}
+@keyframes wakeFoam{0%,100%{transform:translateX(-2%) translateY(0);opacity:.16;}50%{transform:translateX(4%) translateY(-2px);opacity:.28;}}
 @keyframes seaShineMove{0%{transform:translateX(-24px);}100%{transform:translateX(28px);}}
 @keyframes harborLightSweep{0%,100%{opacity:.18;transform:translateX(0);}50%{opacity:.34;transform:translateX(10px);}}
 @keyframes nightStarsDrift{0%,100%{opacity:.18;transform:translateY(0);}50%{opacity:.3;transform:translateY(-2px);}}

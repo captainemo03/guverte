@@ -10370,13 +10370,16 @@ function getSceneDetailClass(sc){
 
 function getSceneFlavorClasses(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  const classes = [];
-  if(/radar|ais|ecdis|arpa|bridge/.test(hay)) classes.push('scene-live-nav');
+  const classes = ['scene-real-grain'];
+  if(/radar|ais|ecdis|arpa|bridge|kopruustu|köprüüstü/.test(hay)) classes.push('scene-live-nav','scene-glass-reflection');
   if(/galley|asci|cay|kahve|coffee/.test(hay)) classes.push('scene-human-cup');
   if(/engine|makine|rag|bez|oil|yagci|compressor/.test(hay)) classes.push('scene-human-rag');
   if(/deck|guverte|wet deck|rain stop|mooring|halat/.test(hay)) classes.push('scene-human-wetdeck');
-  if(/harbor|terminal|liman|rihtim|rıhtım/.test(hay)) classes.push('scene-human-sodium');
-  if(/storm|firtina|salt|spray|swell/.test(hay)) classes.push('scene-human-salt');
+  if(/harbor|terminal|liman|rihtim|rıhtım/.test(hay)) classes.push('scene-human-sodium','scene-light-bloom','scene-port-depth');
+  if(/storm|firtina|salt|spray|swell|rain|yagmur|yağmur/.test(hay)) classes.push('scene-human-salt','scene-weather-heavy');
+  if(/fog|mist|sis|restricted visibility|gorus kisitli|görüş kısıtlı/.test(hay)) classes.push('scene-fog-bank');
+  if(/engine|makine|exhaust|egzoz|generator|compressor|pump/.test(hay)) classes.push('scene-engine-heat');
+  if(/sea|acik deniz|açık deniz|open sea|offshore|sailing|seyir/.test(hay)) classes.push('scene-wake-layer');
   return classes;
 }
 
@@ -10419,7 +10422,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
