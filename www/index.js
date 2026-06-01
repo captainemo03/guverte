@@ -6865,7 +6865,77 @@ En saglam cevap?`,
   choices:[
   {text:"Garbage, sludge, OWS, ballast water ve ORB kaydini kendi sistem ve limitleriyle ayri ayri yonetirim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
   {text:"MARPOL kalemlerinin cogu ayni disipline ciktigi icin tek mantikta toplayabilecegimi dusunurum",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
-  {text:"Record book varsa fiili ayrimin ikinci planda kalabilecegini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]}
+  {text:"Record book varsa fiili ayrimin ikinci planda kalabilecegini sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s471",gfx:"harbor",alert:false,day:"Gun 32",time:"05:45",loc:"Pilot Boarding Ground",sub:"Liman operasyon zinciri 2: pilot boarding",who:"z2",
+  text:`Pilot boat bordaya yaklasiyor. Bu kez olay tek sahne degil; boarding, exchange, tug, approach ve all fast birbirine bagli akacak.
+
+2. Zabiti: "Pilot daha gemiye cikmadan zincir baslar. Ladder, lee, speed, light ve bridge readiness birlikte okunur."
+
+Ilk halka nasil kurulur?`,
+  choices:[
+  {text:"Pilot ladder, lee side, speed, lighting, standby crew ve bridge readiness'i birlikte teyit ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Pilot gemiye cikinca asil surecin baslayacagini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Pilot boarding tarafini daha cok guverte ekibinin isi sayarim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s472",gfx:"bridge",alert:false,day:"Gun 32",time:"06:05",loc:"Bridge",sub:"MPX / master-pilot exchange 2. seviye",who:"suvari",
+  text:`Pilot kopruustunde. Hava, draft, tug plan, berth, speed limit, UKC ve abort point konusuluyor.
+
+Suvari sana bakti: "MPX nezaket degil; ortak zihinsel modeldir."
+
+Neyi not alirsin?`,
+  choices:[
+  {text:"Draft, UKC, tug plan, abort point, berth approach ve communication plan'i tek MPX notuna toplarim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"Pilotun yerel bilgisine guvenip sadece genel not alirim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"MPX'in kaptan-pilot arasinda kalmasinin daha dogru oldugunu dusunurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s473",gfx:"harbor",alert:false,day:"Gun 32",time:"06:40",loc:"Forward Station",sub:"Tug made fast ve line monitoring",who:"lostromo",
+  text:`Tug line bas tarafa verildi. Halat calisiyor; pilot komutu, tug pull, line angle ve snap-back alanlari ayni anda yasiyor.
+
+Lostromo: "Tug made fast demek is bitti degil; enerji hatta girdi demektir."
+
+Ne yaparsin?`,
+  choices:[
+  {text:"Tug line angle, snap-back, readback ve station report'u surekli takip ederim",tag:"kritik",effect:{bilgi:18,sayginlik:13}},
+  {text:"Tug baglandiktan sonra daha cok bridge komutlarini beklerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Tug hattini sadece römorkor ekibinin kontrol edecegini sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s474",gfx:"harbor",alert:true,day:"Gun 32",time:"07:05",loc:"Berth Final Approach",sub:"Final approach / all fast gecisi",who:"z1",
+  text:`Son 0.2 mil. Crosswind var, tug pull degisiyor, berth master hizli bilgi istiyor.
+
+1. Zabiti: "Final approach'ta gereksiz cumle degil, net durum resmi lazim."
+
+En iyi rapor cizgisi?`,
+  choices:[
+  {text:"Speed, distance, tug status, line readiness ve abort margin'i kisa raporlarim",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Sadece mesafeyi ve hizimizi soylemenin yetecegini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Bu noktada konuşmamak ve pilotun kararini beklemek daha iyi sanirim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}]},
+  {id:"s475",gfx:"harbor",alert:false,day:"Gun 32",time:"08:00",loc:"Gangway / Cargo Watch",sub:"All fast sonrasi cargo watch ve departure prep'e baglanir",who:"z2",
+  text:`All fast dendi ama zincir bitmedi. Gangway, mooring watch, draft, cargo readiness, terminal safety ve departure documents notu acildi.
+
+2. Zabiti: "Iyi zabit all fast'te rahatlamaz; mod degistirir."
+
+Neyi kurarsin?`,
+  choices:[
+  {text:"Mooring watch, gangway safety, cargo watch handover ve departure document trail'i birlikte baslatirim",tag:"kritik",effect:{bilgi:19,sayginlik:14}},
+  {text:"All fast sonrasi ilk odagin biraz dinlenmek olmasi gerektigini dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4,dinclik:2}},
+  {text:"Cargo watch ve departure prep'in ayri ayri kisilerin isi oldugunu sanirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s476",gfx:"cargo",alert:false,day:"Gun 33",time:"13:30",loc:"Specialty Desk",sub:"Gemi tipi uzmanlik yolu aciliyor",who:"z1",
+  text:`1. Zabiti gemi tipine gore farkli bir mini dosya acti.
+
+"Konteynerde bay-row-tier, tankerde line-up/IG, bulk'ta trim/hold, LNG'de pressure/vapour. Ayni denizcilik ama ayni refleks degil."
+
+Kendi gemi tipin icin nasil calisirsin?`,
+  choices:[
+  {text:"Gemi tipimin ana risk dilini ayri bir uzmanlik yolu gibi calisirim",tag:"kritik",effect:{bilgi:19,sayginlik:13}},
+  {text:"Temel zabitlik bilgisi cogu gemi tipi icin yeter diye dusunurum",tag:"itaatkar",effect:{bilgi:5,sayginlik:4}},
+  {text:"Gemi tipi farklarini pratikte cok abartili bulurum",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}]},
+  {id:"s477",gfx:"harbor",alert:true,day:"Gun 34",time:"09:15",loc:"PSC / Class Desk",sub:"Denetim modu: belge, ekipman, deficiency riski",who:"z3",
+  text:`Surveyor ve PSC ayni gun farkli dosyalar istedi: certificates, drill records, fire door, emergency light, OWS familiarization.
+
+3. Zabiti: "Denetimde iyi cevap, belgeyi bulmak degil; belge-fiili durum-risk ucgenini ayni anda gostermektir."
+
+Neyi yaparsin?`,
+  choices:[
+  {text:"Belge, fiili ekipman durumu, previous defect ve corrective action izini birlikte gosteririm",tag:"kritik",effect:{bilgi:20,sayginlik:14}},
+  {text:"Once belgeleri acar, ekipman sorulursa sonra bakarim",tag:"itaatkar",effect:{bilgi:6,sayginlik:4}},
+  {text:"Denetimde eksigi gizleyip sorulursa aciklamanin daha iyi olacagini sanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}}]}
 ];
 
 function getEcdisRouteOverlay(sc){
@@ -7576,6 +7646,8 @@ let consequenceTrace={office:0, psc:0, trust:0};
 let crewMemoryNotes={};
 let portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
 let companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
+let investigationDossier=[];
+let watchCycleLog={handovers:0, logbook:0, portPrep:0};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -8140,14 +8212,13 @@ function renderSpeechPortrait(cfg){
 
 function summarizeDialogueText(text){
   const raw = String(text || '').replace(/\s+/g,' ').trim();
-  if(raw.length <= 180) return raw;
-  return raw.slice(0,177).trimEnd() + '...';
+  return raw;
 }
 
 function renderDialogueLog(){
   const wrap = document.getElementById('dialogue-log');
   if(!wrap) return;
-  const items = dialogueHistory.slice(-10);
+  const items = dialogueHistory.slice(-16);
   if(!items.length){
     wrap.innerHTML = '';
     return;
@@ -8171,7 +8242,7 @@ function pushDialogueEntry(side, portrait, name, text){
     name: name || 'Stajyer',
     text: String(text || '')
   });
-  if(dialogueHistory.length > 18) dialogueHistory = dialogueHistory.slice(-18);
+  if(dialogueHistory.length > 40) dialogueHistory = dialogueHistory.slice(-40);
   renderDialogueLog();
 }
 
@@ -8439,7 +8510,7 @@ function addEffectDelta(effect,key,delta){
 function getSceneDomain(sc){
   const blob=`${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.who||''}`.toLowerCase();
   if(/engine|makine|carkci|bas2|yagci/.test(blob)) return 'engine';
-  if(/solas|marpol|stcw|loadline|bunker|bunkers|afs|atina|montreux|charter|isps|gmdss|compliance/.test(blob)) return 'compliance';
+  if(/solas|marpol|stcw|loadline|bunker|bunkers|afs|atina|montreux|charter|isps|gmdss|compliance|psc|survey|class|deficiency|dry dock|denetim/.test(blob)) return 'compliance';
   if(/bridge|radar|compass|bogaz|tss|köprü|kopru|vhf|night/.test(blob)) return 'bridge';
   return 'deck';
 }
@@ -8593,12 +8664,42 @@ function evaluateTracePressure(sc,c2){
 function updateCrewMemory(sc,c2){
   const key = getCrewKeyFromWho(sc?.who);
   if(!key) return;
-  if(c2.tag==='kritik') crewMemoryNotes[key] = 'Sana bu konuda biraz daha guveniyor.';
-  else if(c2.tag==='akilli') crewMemoryNotes[key] = 'Gecen seferki temiz muhakemeni hatirliyor.';
-  else if(c2.tag==='sosyal') crewMemoryNotes[key] = 'Sert degil ama insan gibi iletisimini not etti.';
-  else if(c2.tag==='korkak') crewMemoryNotes[key] = 'Gecen seferki tereddudunu unutmus degil.';
-  else if(c2.tag==='itaatkar') crewMemoryNotes[key] = 'Seni izliyor; daha net inisiyatif bekliyor.';
-  else if(c2.tag==='cesur') crewMemoryNotes[key] = 'Cesaretini gordu ama kontrolunu de olcmek istiyor.';
+  const prev = crewMemoryNotes[key] && typeof crewMemoryNotes[key] === 'object'
+    ? crewMemoryNotes[key]
+    : {good:0,bad:0,line:crewMemoryNotes[key] || ''};
+  if(c2.tag==='kritik' || c2.tag==='akilli' || c2.tag==='sosyal') prev.good += c2.tag==='kritik' ? 2 : 1;
+  if(c2.tag==='korkak') prev.bad += 2;
+  if(c2.tag==='itaatkar') prev.bad += 1;
+  if(c2.tag==='cesur') prev.good += 1;
+  if(prev.good >= 5 && prev.bad <= 2) prev.line = 'Sana guveniyor; kritik anda sozunu daha hizli kabul ediyor.';
+  else if(prev.bad >= 5) prev.line = 'Onceki tereddutlerini hatirliyor; seni daha sert siniyor.';
+  else if(c2.tag==='kritik') prev.line = 'Sana bu konuda biraz daha guveniyor.';
+  else if(c2.tag==='akilli') prev.line = 'Gecen seferki temiz muhakemeni hatirliyor.';
+  else if(c2.tag==='sosyal') prev.line = 'Sert degil ama insan gibi iletisimini not etti.';
+  else if(c2.tag==='korkak') prev.line = 'Gecen seferki tereddudunu unutmus degil.';
+  else if(c2.tag==='itaatkar') prev.line = 'Seni izliyor; daha net inisiyatif bekliyor.';
+  else if(c2.tag==='cesur') prev.line = 'Cesaretini gordu ama kontrolunu de olcmek istiyor.';
+  crewMemoryNotes[key] = prev;
+}
+
+function addInvestigationDossierEntry(sc,c2,kind='Olay'){
+  const blob = `${sc?.id||''} ${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  const relevant = /near|ramak|root cause|corrective|office|psc|survey|deficiency|kaza|ifade|soruşturma|sorusturma|accident/.test(blob);
+  if(!relevant) return;
+  const entry = {
+    id: `${Date.now()}-${investigationDossier.length}`,
+    day: sc?.day || '—',
+    time: sc?.time || '—',
+    kind,
+    scene: sc?.sub || sc?.loc || sc?.id || 'Olay',
+    statement: String(c2?.text || '').slice(0,240),
+    root: /root cause|kok neden|kök neden/.test(blob) ? 'Kok neden beklentisi acildi' : 'Inceleme bekliyor',
+    action: c2?.tag === 'kritik' ? 'Corrective action guclu kuruldu' : c2?.tag === 'korkak' ? 'Follow-up zayif kaldi' : 'Takip gerekiyor',
+    office: /office|charter|mail|psc|survey/.test(blob) ? 'Ofis/denetim izine girdi' : 'Gemi ici takip'
+  };
+  investigationDossier.push(entry);
+  if(investigationDossier.length > 12) investigationDossier = investigationDossier.slice(-12);
+  if(c2?.tag === 'kritik') careerMemory.investigations = Math.max(careerMemory.investigations, investigationDossier.length);
 }
 
 function applyLingeringTrace(sc,c2){
@@ -8870,6 +8971,7 @@ function handleSceneChoice(sc, c2, ch){
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
   updateCrewMemory(sc,c2);
+  addInvestigationDossierEntry(sc,c2);
   applyLingeringTrace(sc,c2);
   applyPsychDelta(evaluatePsychImpact(sc,c2));
   if(Object.keys(directPsychDelta).length) applyPsychDelta(directPsychDelta);
@@ -9464,6 +9566,72 @@ const TACTICAL_PANEL_CONFIGS = {
       {id:'system', label:'Sistem limiti', options:['OWS/ballast/sewage limits respected','Use if sea looks clear','Equipment decides itself']},
     ],
     expected:{stream:'Separate stream and legal route',record:'Record with time, quantity and route',system:'OWS/ballast/sewage limits respected'}
+  },
+  s471:{
+    title:'PILOT BOARDING CHAIN',
+    hint:'Pilot henuz gemiye cikmadan speed, lee, ladder ve bridge readiness zinciri baslar.',
+    visual:'pilot',
+    fields:[
+      {id:'ladder', label:'Pilot ladder', options:['Rigged, lit and manned','Looks ready from bridge','Pilot boat will advise']},
+      {id:'ship', label:'Ship handling', options:['Lee side, speed and course agreed','Maintain sea speed','Wait for pilot only']},
+      {id:'bridge', label:'Bridge readiness', options:['MPX data ready','Only coffee ready','No need until pilot onboard']},
+    ],
+    expected:{ladder:'Rigged, lit and manned',ship:'Lee side, speed and course agreed',bridge:'MPX data ready'}
+  },
+  s472:{
+    title:'MPX DECISION PANEL',
+    hint:'Master-pilot exchange ortak durum resmi kurar: draft, UKC, tug, abort point ve berth approach.',
+    visual:'mpx',
+    fields:[
+      {id:'data', label:'Kritik veri', options:['Draft, UKC, air draft and limits','Only berth name','Only pilot card']},
+      {id:'tugs', label:'Tug / berth', options:['Tug plan and abort point agreed','Tugs decide locally','Abort point unnecessary']},
+      {id:'comms', label:'Communication', options:['Closed-loop readback plan','Informal talk enough','Only VHF channel']},
+    ],
+    expected:{data:'Draft, UKC, air draft and limits',tugs:'Tug plan and abort point agreed',comms:'Closed-loop readback plan'}
+  },
+  s473:{
+    title:'TUG MADE FAST PANEL',
+    hint:'Tug hattinda enerji, line angle ve snap-back riski birlikte izlenir.',
+    visual:'tug',
+    fields:[
+      {id:'line', label:'Line monitoring', options:['Angle, tension and snap-back watched','Only line secured','Only tug master watches']},
+      {id:'readback', label:'Readback', options:['Pilot orders repeated cleanly','Only nod visually','No repeat needed']},
+      {id:'station', label:'Station report', options:['Station status to bridge','Wait until asked','Report after all fast']},
+    ],
+    expected:{line:'Angle, tension and snap-back watched',readback:'Pilot orders repeated cleanly',station:'Station status to bridge'}
+  },
+  s474:{
+    title:'FINAL APPROACH PANEL',
+    hint:'Son yaklasmada speed, distance, tug status ve abort margin kisa ama net akar.',
+    visual:'berth',
+    fields:[
+      {id:'speed', label:'Speed / distance', options:['Speed and distance reported','Only distance','Only pilot sees it']},
+      {id:'tug', label:'Tug status', options:['Tug pull and line readiness monitored','Tug already made fast','Ignore until problem']},
+      {id:'abort', label:'Abort margin', options:['Abort margin kept alive','Too late to abort','Not trainee concern']},
+    ],
+    expected:{speed:'Speed and distance reported',tug:'Tug pull and line readiness monitored',abort:'Abort margin kept alive'}
+  },
+  s475:{
+    title:'ALL FAST TO CARGO WATCH',
+    hint:'All fast rahatlama degil; mooring watch, gangway, cargo watch ve departure prep moduna gecistir.',
+    visual:'cargo',
+    fields:[
+      {id:'mooring', label:'Mooring watch', options:['Lines and gangway monitored','Leave to deck only','Check after meal']},
+      {id:'cargo', label:'Cargo watch', options:['Stop criteria and next report set','Terminal will advise','Only draft later']},
+      {id:'departure', label:'Departure trail', options:['Documents and pilot/tug plan tracked','Later if needed','Agent handles all']},
+    ],
+    expected:{mooring:'Lines and gangway monitored',cargo:'Stop criteria and next report set',departure:'Documents and pilot/tug plan tracked'}
+  },
+  s476:{
+    title:'GEMI TIPI UZMANLIK MODU',
+    hint:'Ayni zabitlik farkli gemi tiplerinde farkli refleks ister.',
+    visual:'specialty',
+    fields:[
+      {id:'risk', label:'Ana risk dili', options:['Ship-type risk language first','General seamanship only','Learn after incident']},
+      {id:'panel', label:'Mini egitim yolu', options:['Container/tanker/bulk/LNG path opened','One common path enough','Skip specialization']},
+      {id:'follow', label:'Takip', options:['Use notes, panels and scenes together','Remember orally','Ask only when needed']},
+    ],
+    expected:{risk:'Ship-type risk language first',panel:'Container/tanker/bulk/LNG path opened',follow:'Use notes, panels and scenes together'}
   }
 };
 
@@ -9489,6 +9657,17 @@ const INSPECTION_PANEL_CONFIGS = {
       {id:'follow', label:'Corrective action', options:['Raise and track follow-up','Verbal note only','No need if resolved once']}
     ],
     expected:{physical:'Secure immediately',records:'Cross-check with actual status',follow:'Raise and track follow-up'}
+  },
+  s477:{
+    title:'DENETIM MODU / PSC + CLASS',
+    hint:'Denetci belge, ekipman ve deficiency riskini ayni anda okur. Sen de ayni anda gostermelisin.',
+    visual:'inspection',
+    fields:[
+      {id:'docs', label:'Documents', options:['Certificates and records traceable','Only certificates ready','Find when asked']},
+      {id:'equipment', label:'Equipment', options:['Physical condition shown with evidence','Looks acceptable','Hide weak items']},
+      {id:'deficiency', label:'Deficiency risk', options:['Defect and corrective action tracked','Verbal promise only','Delay until office asks']},
+    ],
+    expected:{docs:'Certificates and records traceable',equipment:'Physical condition shown with evidence',deficiency:'Defect and corrective action tracked'}
   }
 };
 
@@ -9714,7 +9893,17 @@ function getDecisionVisual(kind){
         <text x="237" y="64" fill="#cfeaff" font-size="8" font-family="monospace">ACTION</text>
       </svg></div>`;
     default:
-      return '';
+      return kind ? `<div class="decision-visual"><svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${kind} operation panel">
+        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+        <text x="18" y="20" fill="#f4d172" font-size="10" font-family="monospace">${String(kind).toUpperCase()} / DECISION CHAIN</text>
+        <rect x="24" y="46" width="74" height="30" rx="6" fill="#132940" stroke="#4a7098"/>
+        <rect x="123" y="46" width="74" height="30" rx="6" fill="#18324e" stroke="#d4a017"/>
+        <rect x="222" y="46" width="74" height="30" rx="6" fill="#133a2a" stroke="#5dbf8a"/>
+        <path d="M100 61 H121 M199 61 H220" stroke="#88a9c7" stroke-width="3" stroke-dasharray="6 4"/>
+        <text x="43" y="65" fill="#cfeaff" font-size="8" font-family="monospace">CHECK</text>
+        <text x="144" y="65" fill="#fff4bf" font-size="8" font-family="monospace">CONFIRM</text>
+        <text x="242" y="65" fill="#bfffd4" font-size="8" font-family="monospace">REPORT</text>
+      </svg></div>` : '';
   }
 }
 
@@ -10569,6 +10758,8 @@ function showEnd(){
     careerMemory.firstPraise?'ilk tebrik':''
   ].filter(Boolean);
   if(memoryMoments.length) verdict+=` <br><strong>Hatira Cizgisi:</strong> ${memoryMoments.join(', ')}.`;
+  if(investigationDossier.length) verdict+=` <br><strong>Soruşturma Dosyasi:</strong> ${investigationDossier.length} olay kaydi, son aksiyon: ${investigationDossier[investigationDossier.length-1].action}.`;
+  verdict+=` <br><strong>Vardiya Akisi:</strong> ${watchCycleLog.handovers} teslim ani, ${watchCycleLog.logbook} logbook penceresi, ${watchCycleLog.portPrep} liman hazirligi izi.`;
   verdict+=` <br><strong>Ruh Hali:</strong> ${mood}/100 - ${moodLabel}.`;
   verdict+=` <br><strong>Psikoloji Cizgisi:</strong> moral ${psyche.moral}, yalnizlik ${psyche.yalnizlik}, ofke ${psyche.ofke}, tukenme ${psyche.tukenme}, ekip uyumu ${psyche.uyum} — ${harmonyLabel}.`;
   verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
@@ -10631,6 +10822,8 @@ function beginGame(){
   crewMemoryNotes={};
   portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
   companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
+  investigationDossier=[];
+  watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
@@ -11120,6 +11313,8 @@ function buildSavePayload(){
     crewMemoryNotes,
     portOpsChain,
     companyPressureState,
+    investigationDossier,
+    watchCycleLog,
     scenesSinceEvent,
     nextEventAt,
     crewTrust,
@@ -11190,6 +11385,8 @@ function applyLoadedGameState(data){
   crewMemoryNotes = data.crewMemoryNotes || {};
   portOpsChain = data.portOpsChain || {pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
   companyPressureState = data.companyPressureState || {stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
+  investigationDossier = Array.isArray(data.investigationDossier) ? data.investigationDossier : [];
+  watchCycleLog = data.watchCycleLog || {handovers:0, logbook:0, portPrep:0};
   scenesSinceEvent = data.scenesSinceEvent || 0;
   nextEventAt = data.nextEventAt || (5 + Math.floor(Math.random()*4));
   crewTrust = data.crewTrust || {};
@@ -11252,6 +11449,7 @@ let portChartDragState = null;
 let portChartDidPan = false;
 let activeMapTaskIndex = 0;
 const completedMapTasks = new Set();
+let mapRouteDraftPoints = [];
 
 const MAP_TASKS = [
   {
@@ -11274,6 +11472,24 @@ const MAP_TASKS = [
     id:'berth',
     title:'Berth\'e Yaklasma Planini Isaretle',
     desc:'Berth\'e girmeden once donus basinini / approach turn point\'i sec.'
+  },
+  {
+    id:'reporting',
+    title:'Reporting Point Sec',
+    desc:'Stratejik gecit veya ticaret rotasinda reporting point / VTS temas noktasini sec.',
+    chartKind:'transit'
+  },
+  {
+    id:'noanchoring',
+    title:'No Anchoring Alanini Ayir',
+    desc:'Demir atilmamasi gereken kablo / dar gecit / trafik alanini isaretle.',
+    chartKind:'transit'
+  },
+  {
+    id:'alternateroute',
+    title:'Alternatif Rota Sec',
+    desc:'Okyanus rotasinda hava, ECA veya piracy baskisina gore daha emniyetli alternatif hat bolgesini sec.',
+    chartKind:'route'
   }
 ];
 
@@ -11288,6 +11504,7 @@ function setMapView(view){
 }
 function selectPortChart(name){
   selectedPortChart = name;
+  mapRouteDraftPoints = [];
   if(mapView !== 'library') mapView = 'library';
   renderMap();
 }
@@ -11343,6 +11560,7 @@ function ensureTaskPort(task){
 
 function nextMapTask(){
   activeMapTaskIndex = (activeMapTaskIndex + 1) % MAP_TASKS.length;
+  mapRouteDraftPoints = [];
   ensureTaskPort(getCurrentMapTask());
   if(mapView !== 'library') mapView = 'library';
   renderMap();
@@ -11350,6 +11568,9 @@ function nextMapTask(){
 
 function getMapTaskTarget(task, port){
   const geo = getPortChartTaskGeometry(port);
+  if(task.id === 'reporting') return {x: 222, y: 96, tol: 34};
+  if(task.id === 'noanchoring') return {x: 300, y: 164, tol: 32};
+  if(task.id === 'alternateroute') return {x: 256, y: 72, tol: 42};
   if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 20};
   if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 24};
   if(task.id === 'tss') return {x: geo.channelStartX + 56, y: geo.channelY - 24, tol: 28};
@@ -11366,11 +11587,16 @@ function updateMapTaskBox(port){
   const btn = document.getElementById('port-task-next');
   if(!title || !desc || !status) return;
   const effectivePort = ROUTE_PORTS.find(p=>p.name===selectedPortChart) || port;
-  if(effectivePort?.kind !== 'port'){
+  const taskAllowed = effectivePort?.kind === 'port'
+    || (task.chartKind === 'route' && effectivePort?.kind === 'route')
+    || (task.chartKind === 'transit' && effectivePort?.kind !== 'port');
+  if(!taskAllowed){
     title.textContent = `${effectivePort?.name || 'Chart'} · Stratejik Gecit`;
-    desc.textContent = 'Bu chart liman plani degil, transit / stratejik gecit inceleme chartidir. Gorev kutusu liman chartlarinda aktif calisir; burada enlem-boylam, derinlik, reporting point ve traffic flow okumaya odaklan.';
+    desc.textContent = effectivePort?.kind === 'port'
+      ? 'Bu gorev transit veya okyanus rota charti ister. Liman gorevleri icin pilot, anchorage veya berth gorevini sec.'
+      : 'Bu gorev liman plani ister. Stratejik chartlarda reporting point, no anchoring veya alternatif rota gorevlerini kullan.';
     status.className = 'warn';
-    status.textContent = 'Inceleme modundasin. Gorev yapmak istersen bir liman charti sec.';
+    status.textContent = 'Chart tipi bu gorev icin uygun degil. Sonraki goreve gecebilir veya uygun chart secebilirsin.';
     if(btn) btn.textContent = activeMapTaskIndex === MAP_TASKS.length-1 ? 'Basa Don' : 'Sonraki';
     return;
   }
@@ -11384,11 +11610,14 @@ function updateMapTaskBox(port){
 function handlePortChartTaskClick(svg, ev, port){
   const task = getCurrentMapTask();
   if(!task || !port) return;
-  if(port.kind !== 'port'){
+  const allowed = port.kind === 'port'
+    || (task.chartKind === 'route' && port.kind === 'route')
+    || (task.chartKind === 'transit' && port.kind !== 'port');
+  if(!allowed){
     const status = document.getElementById('port-chart-taskstatus');
     if(status){
       status.className = 'warn';
-      status.textContent = 'Bu chart transit inceleme icin acik. Gorev kutusu liman chartlarinda aktif calisir.';
+      status.textContent = 'Bu chart tipi aktif gorev icin uygun degil.';
     }
     return;
   }
@@ -11401,6 +11630,22 @@ function handlePortChartTaskClick(svg, ev, port){
   const x = vb.x + ((ev.clientX - rect.left) / rect.width) * vb.width;
   const y = vb.y + ((ev.clientY - rect.top) / rect.height) * vb.height;
   const target = getMapTaskTarget(task, port);
+  if(task.id === 'alternateroute'){
+    mapRouteDraftPoints.push({x:+x.toFixed(1), y:+y.toFixed(1)});
+    renderMapRouteDraftOverlay(svg);
+    if(mapRouteDraftPoints.length >= 3 || Math.hypot(x-target.x, y-target.y) <= target.tol){
+      completedMapTasks.add(task.id);
+      if(status){
+        status.className = '';
+        status.textContent = 'Alternatif rota cizildi. Hava routing / ECA / risk alanini dikkate alan hat kabul edildi.';
+      }
+      addJournalEntry(`[HARITA GOREVI] Alternatif rota cizildi (${port.name}).`, 'Harita', '--:--');
+    }else if(status){
+      status.className = 'warn';
+      status.textContent = `${mapRouteDraftPoints.length}. rota noktasi alindi. En az 3 nokta veya uygun alternatif hat bolgesi sec.`;
+    }
+    return;
+  }
   const dist = Math.hypot(x-target.x, y-target.y);
   const status = document.getElementById('port-chart-taskstatus');
   if(dist <= target.tol){
@@ -11520,6 +11765,15 @@ function getPortChartEntries(){
       if(ak !== bk) return ak - bk;
       return a.name.localeCompare(b.name,'tr');
     });
+}
+
+function renderMapRouteDraftOverlay(svg){
+  if(!svg) return;
+  svg.querySelectorAll('.map-route-draft').forEach(el=>el.remove());
+  if(!mapRouteDraftPoints.length) return;
+  const points = mapRouteDraftPoints.map(p=>`${p.x},${p.y}`).join(' ');
+  const circles = mapRouteDraftPoints.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#ffd45a" stroke="#1b2435" stroke-width="1.2"/><text x="${p.x+6}" y="${p.y-6}" fill="#fff4bf" font-size="7" font-family="monospace">WP${i+1}</text>`).join('');
+  svg.insertAdjacentHTML('beforeend', `<g class="map-route-draft"><polyline points="${points}" fill="none" stroke="#ffd45a" stroke-width="2.5" stroke-dasharray="7 4"/>${circles}</g>`);
 }
 
 function getPortChartTypeLabel(kind){
@@ -12221,6 +12475,7 @@ function renderMapLibrary(){
   initPortChartInteractions(chartSvg);
   chartSvg.onclick = (ev)=>handlePortChartTaskClick(chartSvg, ev, active);
   chartSvg.setAttribute('viewBox', getPortChartViewBox());
+  renderMapRouteDraftOverlay(chartSvg);
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
   if(chartDetailLabel) chartDetailLabel.textContent = getPortChartDetailLabel();
   chartMeta.innerHTML = `
@@ -14644,7 +14899,20 @@ function renderJournal(){
     c.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:10px;">Henüz günlük girişi yok. Sahnelerdeki kararların burada görünecek.</div>';
     return;
   }
-  c.innerHTML = journalEntries.slice().reverse().map(e => `
+  const dossier = investigationDossier.length ? `
+    <div class="journal-dossier">
+      <div class="journal-dossier-head">KAZA / NEAR-MISS DOSYASI</div>
+      ${investigationDossier.slice().reverse().map(d=>`
+        <div class="journal-dossier-row">
+          <div class="journal-entry-day">${d.day} · ${d.time} · ${d.kind}</div>
+          <strong>${d.scene}</strong><br>
+          Ifade: ${d.statement}<br>
+          Root: ${d.root}<br>
+          Aksiyon: ${d.action}<br>
+          Ofis: ${d.office}
+        </div>`).join('')}
+    </div>` : '';
+  c.innerHTML = dossier + journalEntries.slice().reverse().map(e => `
     <div class="journal-entry">
       <div class="journal-entry-day">${e.day} · ${e.time}</div>
       ${e.text}
@@ -14769,6 +15037,9 @@ function updateWatchState(sc){
     portPrep: /pilot|tug|berth|all fast|gangway|terminal|departure|cargo watch|liman|rihtim|rıhtım/.test(blob),
     logbook: minute >= 25 && minute <= 40
   };
+  if(watchState.handover) watchCycleLog.handovers++;
+  if(watchState.logbook) watchCycleLog.logbook++;
+  if(watchState.portPrep) watchCycleLog.portPrep++;
 }
 
 function updateVoyagePressure(sc){
@@ -14809,7 +15080,8 @@ function updateOpsHud(sc){
   const office = getOfficeBand();
   if(watchChip){
     watchChip.className = 'ops-chip' + (watchState.handover ? ' hot' : '');
-    watchChip.textContent = `${watchState.code} · ${watchState.label}${watchState.handover ? ' · Teslim' : ''}`;
+    const dutyMark = watchState.logbook ? ' · Logbook' : watchState.portPrep ? ' · Liman haz.' : watchState.handover ? ' · Teslim' : '';
+    watchChip.textContent = `${watchState.code} · ${watchState.label}${dutyMark}`;
   }
   if(seaChip){
     const seaClass = voyagePressure.caution >= 7 ? ' warn' : voyagePressure.caution >= 5 ? ' hot' : '';
@@ -14870,7 +15142,7 @@ function updatePortOpsChain(sc){
 function getCrewMemoryLine(sc){
   const key = getCrewKeyFromWho(sc?.who);
   if(!key || !crewMemoryNotes[key]) return '';
-  return crewMemoryNotes[key];
+  return typeof crewMemoryNotes[key] === 'object' ? crewMemoryNotes[key].line : crewMemoryNotes[key];
 }
 
 // ===== FOTOĞRAF ALBÜMİ =====
