@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=28">
+<link rel="stylesheet" href="./index.css?v=29">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -66,6 +66,28 @@
   <div id="journal-box">
     <div id="journal-title"><span>📓 SEYİR GÜNLÜĞİ</span><button class="journal-close" onclick="closeJournal()">✕ Kapat</button></div>
     <div id="journal-entries"></div>
+  </div>
+</div>
+
+<div id="devices-panel">
+  <div id="devices-box">
+    <div id="devices-title"><span>CIHAZ EGITIM MERKEZI</span><button class="journal-close" onclick="closeDevices()">X Kapat</button></div>
+    <div id="devices-layout">
+      <div id="devices-list"></div>
+      <div id="device-workbench">
+        <div id="device-head">
+          <div>
+            <div id="device-name">Cihaz</div>
+            <div id="device-sub">Gercekci menu ve uygulama alani</div>
+          </div>
+          <div id="device-score">0/0</div>
+        </div>
+        <div id="device-screen"></div>
+        <div id="device-softkeys"></div>
+        <div id="device-task"></div>
+        <div id="device-log"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -244,6 +266,7 @@
     <button class="tb-btn" onclick="openColreg()">COLREG</button>
     <button class="tb-btn" onclick="openNotes()">🧭 NOTLARIM</button>
     <button class="tb-btn" onclick="openMap()">🗺️ HARİTA</button>
+    <button class="tb-btn" onclick="openDevices()">📡 CİHAZLAR</button>
     <button class="tb-btn" onclick="openJournal()">📓 GÜNLÜK</button>
     <button class="tb-btn" onclick="openAlbum()">📷 ALBÜM<span id="tb-photos-count">0</span></button>
     <button class="tb-btn" onclick="toggleCrew()">👥 EKİP</button>
@@ -312,6 +335,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=29"></script>
+<script src="./index.js?v=30"></script>
 </body>
 </html>

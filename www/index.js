@@ -15008,6 +15008,141 @@ function setGlossaryCategory(cat){
 function openColreg(){ document.getElementById('colreg-panel').classList.add('show'); }
 function closeColreg(){ document.getElementById('colreg-panel').classList.remove('show'); }
 
+let activeDeviceKey = 'vhf';
+let devicePracticeScore = {ok:0,total:0};
+let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.';
+
+const DEVICE_TRAINER = [
+  {key:'vhf', ico:'VHF', name:'VHF DSC Radio', sub:'CH16, CH70 DSC, distress, urgency, safety, dual watch', task:'Mayday relay hazirligi: once CH16 dinle, DSC distress menusu ve konum bilgisini kontrol et.', correct:'DISTRESS MENU',
+    keys:['CH16 WATCH','DSC CALL','DISTRESS MENU','DUAL WATCH','SQUELCH','TX POWER','SCAN','RADIO LOG']},
+  {key:'mfhf', ico:'HF', name:'MF/HF DSC Console', sub:'2182 kHz, 2187.5 kHz DSC, telex, frequency watch, sea area A2/A3/A4', task:'Uzak mesafe urgency mesaji icin DSC frekansini ve uygun bandi sec.', correct:'2187.5 DSC',
+    keys:['2182 VOICE','2187.5 DSC','8414.5 DSC','TELEX','GROUND','ANT TUNE','RX WATCH','TEST CALL']},
+  {key:'epirb', ico:'EPB', name:'406 MHz EPIRB', sub:'COSPAS-SARSAT beacon, GPS position, HRU, battery, self-test', task:'Terk gemi hazirliginda EPIRB durumunu kontrol et; gercek alarm vermeden self-test yap.', correct:'SELF TEST',
+    keys:['ARMED','SELF TEST','MANUAL RELEASE','GPS FIX','HRU DATE','BATTERY DATE','MMSI CHECK','FALSE ALERT CANCEL']},
+  {key:'ecdis', ico:'ECD', name:'ECDIS / ENC Station', sub:'route monitor, ENC update, safety contour, sensor status, alarm list', task:'Liman yaklasmasi oncesi safety contour ve route check ekranini ac.', correct:'ROUTE CHECK',
+    keys:['ROUTE CHECK','SAFETY CONTOUR','ENC UPDATE','SENSOR STATUS','ALARM LIST','XTD LIMIT','NO-GO AREA','N-UP C-UP']},
+  {key:'sart', ico:'SRT', name:'SART / AIS-SART', sub:'search and rescue transponder, radar 12-dot pattern, test mode', task:'Arama kurtarma tatbikatinda SART testini yap; aktif distress moduna alma.', correct:'TEST MODE',
+    keys:['TEST MODE','STANDBY','ACTIVATE','BATTERY DATE','RADAR PATTERN','AIS-SART MMSI','MOUNT HIGH','RECOVERY']},
+  {key:'radar', ico:'RDR', name:'X-Band Radar / ARPA', sub:'PPI, gain, sea/rain clutter, EBL/VRM, guard zone, ARPA acquire', task:'CPA dusuyor: hedefi acquire et, EBL/VRM ile mesafeyi takip et.', correct:'ARPA ACQUIRE',
+    keys:['RANGE 6NM','GAIN','SEA CLUTTER','RAIN CLUTTER','EBL/VRM','ARPA ACQUIRE','GUARD ZONE','TRIAL MANEUVER']},
+  {key:'ais', ico:'AIS', name:'AIS Class A', sub:'target list, static data, voyage data, safety message', task:'Radar hedefi ile AIS etiketi kayik gorunuyor; target detail ve sensor cross-check yap.', correct:'TARGET DETAIL',
+    keys:['TARGET LIST','TARGET DETAIL','VOYAGE DATA','STATIC DATA','SAFETY MSG','CPA SORT','FILTER','SENSOR CHECK']},
+  {key:'navtex', ico:'NTX', name:'NAVTEX Receiver', sub:'MSI, navigational warning, weather warning, station/filter setup', task:'Yeni METAREA warning geldi; weather/nav warning filtresini kontrol et.', correct:'WARNINGS',
+    keys:['WARNINGS','STATION SELECT','518 KHZ','490 KHZ','PRINT LOG','MSG TYPE','DELETE OLD','TIME SYNC']},
+  {key:'inmc', ico:'INM', name:'Inmarsat-C / EGC', sub:'SafetyNET, distress, telex style messages, position reporting', task:'EGC SafetyNET mesajini kontrol edip distress menusu yerine normal inbox kullan.', correct:'EGC INBOX',
+    keys:['EGC INBOX','DISTRESS','POSITION REPORT','LOGIN','OCEAN REGION','PRINT','ADDRESS BOOK','SEND MSG']},
+  {key:'gyro', ico:'GYR', name:'Gyro Compass / Repeaters', sub:'heading source, error check, repeater alignment, steering input', task:'Radar overlay kayik: gyro source ve repeater error kontrolu yap.', correct:'SOURCE CHECK',
+    keys:['SOURCE CHECK','REPEATER','ERROR LOG','TRUE HDG','ALARM ACK','SYNC','BACKUP MAG','OUTPUT']},
+  {key:'echo', ico:'ECO', name:'Echo Sounder', sub:'depth below keel/transducer, shallow alarm, paper trend', task:'Dar suya girerken shallow alarm limitini ve offset bilgisini kontrol et.', correct:'SHALLOW ALARM',
+    keys:['SHALLOW ALARM','OFFSET','RANGE','GAIN','TREND','PRINT','DBK/DBT','RESET MIN']},
+  {key:'speedlog', ico:'LOG', name:'Speed Log', sub:'STW/SOG comparison, water track, bottom track, current clue', task:'Akinti supheli; STW ile SOG farkini okuyup log modunu kontrol et.', correct:'STW/SOG',
+    keys:['STW/SOG','WATER TRACK','BOTTOM TRACK','CALIBRATION','TRIP RESET','ALARM','OUTPUT','HISTORY']},
+  {key:'autopilot', ico:'AP', name:'Autopilot / Track Control', sub:'heading mode, track mode, rudder limit, off-course alarm', task:'Pilotaj oncesi otomatik takipten manuel/standby hazirligina gec.', correct:'STANDBY',
+    keys:['AUTO HDG','TRACK MODE','STANDBY','RUDDER LIMIT','OFF COURSE','RATE LIMIT','TURN RADIUS','NFU READY']},
+  {key:'bnwas', ico:'BNW', name:'BNWAS', sub:'bridge navigational watch alarm system, stage timers, acknowledgement', task:'Vardiya basinda BNWAS aktif mi ve stage timer dogru mu kontrol et.', correct:'ACK / ACTIVE',
+    keys:['ACK / ACTIVE','TIMER SET','STAGE 1','STAGE 2','CABIN ALARM','TEST','BYPASS LOG','RESET']}
+];
+
+function getDeviceDef(key){
+  return DEVICE_TRAINER.find(d=>d.key===key) || DEVICE_TRAINER[0];
+}
+
+function openDevices(){
+  const p = document.getElementById('devices-panel');
+  if(p) p.classList.add('show');
+  renderDevices();
+}
+function closeDevices(){
+  const p = document.getElementById('devices-panel');
+  if(p) p.classList.remove('show');
+}
+function selectDevice(key){
+  activeDeviceKey = key;
+  deviceLogLine = `${getDeviceDef(key).name} acildi. Menulerden goreve uygun adimi sec.`;
+  renderDevices();
+}
+function useDeviceKey(label){
+  const def = getDeviceDef(activeDeviceKey);
+  devicePracticeScore.total++;
+  if(label === def.correct){
+    devicePracticeScore.ok++;
+    deviceLogLine = `DOGRU: ${label}. ${def.name} icin uygulama kayda alindi.`;
+    addJournalEntry(`[CIHAZ] ${def.name}: ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
+  }else{
+    deviceLogLine = `YANLIS / EKSIK: ${label}. Bu gorevde beklenen menu: ${def.correct}.`;
+  }
+  renderDevices();
+}
+function renderDevices(){
+  const list = document.getElementById('devices-list');
+  const name = document.getElementById('device-name');
+  const sub = document.getElementById('device-sub');
+  const score = document.getElementById('device-score');
+  const screen = document.getElementById('device-screen');
+  const keys = document.getElementById('device-softkeys');
+  const task = document.getElementById('device-task');
+  const log = document.getElementById('device-log');
+  if(!list || !screen || !keys) return;
+  const def = getDeviceDef(activeDeviceKey);
+  list.innerHTML = DEVICE_TRAINER.map(d=>`
+    <button class="device-tab ${d.key===activeDeviceKey?'active':''}" onclick="selectDevice('${d.key}')">
+      <span class="device-tab-ico">${d.ico}</span><span>${d.name}<small>${d.sub}</small></span>
+    </button>`).join('');
+  if(name) name.textContent = def.name;
+  if(sub) sub.textContent = def.sub;
+  if(score) score.textContent = `${devicePracticeScore.ok}/${devicePracticeScore.total}`;
+  screen.innerHTML = buildDeviceScreen(def);
+  keys.innerHTML = def.keys.map(k=>`<button class="device-key ${k===def.correct?'good':''}" onclick="useDeviceKey('${k.replace(/'/g,"\\'")}')">${k}</button>`).join('');
+  if(task) task.innerHTML = `<div class="device-task-head">UYGULAMA GOREVI</div>${def.task}`;
+  if(log) log.textContent = deviceLogLine;
+}
+
+function buildDeviceScreen(def){
+  const panel = {
+    radar:GFX.radar,
+    ecdis:GFX.ecdis_panel,
+    ais:GFX.ais_panel,
+    gyro:GFX.gyro_panel,
+    echo:GFX.echo_panel,
+    speedlog:GFX.speedlog_panel,
+    autopilot:GFX.autopilot_panel,
+    bnwas:GFX.bnwas_panel
+  }[def.key];
+  if(panel) return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${panel}</svg>${buildDeviceMenuOverlay(def)}`;
+  return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${buildGmdssDeviceSvg(def)}</svg>${buildDeviceMenuOverlay(def)}`;
+}
+
+function buildDeviceMenuOverlay(def){
+  return '';
+}
+
+function buildGmdssDeviceSvg(def){
+  if(def.key === 'vhf') return `<rect width="480" height="145" fill="#071018"/>
+  <rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/>
+  <rect x="38" y="30" width="168" height="76" rx="8" fill="#06121c" stroke="#1d4059"/>
+  <text x="54" y="48" fill="#bde7ff" font-size="8" font-family="monospace">VHF DSC RADIOTELEPHONE</text>
+  <text x="58" y="78" fill="#ffd783" font-size="28" font-family="monospace">CH 16</text>
+  <text x="58" y="96" fill="#8fd8ab" font-size="7" font-family="monospace">CH70 DSC WATCH - GPS OK</text>
+  <rect x="230" y="30" width="214" height="76" rx="8" fill="#06121c" stroke="#1d4059"/>
+  <text x="246" y="50" fill="#ffb0b0" font-size="8" font-family="monospace">DISTRESS COVER CLOSED</text>
+  <text x="246" y="68" fill="#bde7ff" font-size="7" font-family="monospace">SQL 42  PWR HIGH  DW ON</text>
+  <text x="246" y="86" fill="#8fd8ab" font-size="7" font-family="monospace">LAST RX: ISTANBUL VTS</text>
+  <text x="34" y="128" fill="#bde7ff" font-size="6.5" font-family="monospace">MENUS: DSC CALL / DISTRESS / SCAN / DUAL WATCH / RADIO LOG</text>`;
+  if(def.key === 'mfhf') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#141d25" stroke="#354550" stroke-width="1.8"/>
+  <rect x="34" y="28" width="190" height="86" rx="8" fill="#06121c" stroke="#1d4059"/><text x="50" y="48" fill="#bde7ff" font-size="8" font-family="monospace">MF/HF DSC CONTROLLER</text>
+  <text x="50" y="72" fill="#ffd783" font-size="16" font-family="monospace">2187.5 kHz DSC</text><text x="50" y="91" fill="#8fd8ab" font-size="7" font-family="monospace">RX WATCH: 2/4/6/8/12/16 MHz</text>
+  <rect x="246" y="28" width="198" height="86" rx="8" fill="#06121c" stroke="#1d4059"/><text x="262" y="49" fill="#bde7ff" font-size="7" font-family="monospace">ANT TUNE OK</text><text x="262" y="67" fill="#8fd8ab" font-size="7" font-family="monospace">GROUND: NORMAL</text><text x="262" y="85" fill="#ffb0b0" font-size="7" font-family="monospace">DISTRESS GUARD CLOSED</text><text x="34" y="128" fill="#bde7ff" font-size="6.5" font-family="monospace">SEA AREA A2/A3/A4 - DSC FREQUENCY SELECTION</text>`;
+  if(def.key === 'epirb') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/>
+  <rect x="74" y="26" width="112" height="92" rx="18" fill="#ff8a32" stroke="#ffd783" stroke-width="2"/><rect x="108" y="16" width="44" height="22" rx="8" fill="#e8edf2" stroke="#8fbfed"/><circle cx="130" cy="70" r="16" fill="#071018" stroke="#ffd783"/><text x="114" y="74" fill="#ffd783" font-size="8" font-family="monospace">406</text>
+  <rect x="230" y="32" width="174" height="78" rx="8" fill="#06121c" stroke="#1d4059"/><text x="248" y="52" fill="#bde7ff" font-size="8" font-family="monospace">EPIRB STATUS</text><text x="248" y="70" fill="#8fd8ab" font-size="7" font-family="monospace">GPS FIX READY</text><text x="248" y="86" fill="#8fd8ab" font-size="7" font-family="monospace">HRU / BATTERY IN DATE</text><text x="248" y="102" fill="#ffb0b0" font-size="7" font-family="monospace">LIVE ALERT PROTECTED</text>`;
+  if(def.key === 'sart') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/>
+  <rect x="70" y="24" width="42" height="94" rx="16" fill="#f1f5f8" stroke="#8fbfed" stroke-width="2"/><rect x="82" y="14" width="18" height="18" rx="6" fill="#ff8a32"/><circle cx="91" cy="72" r="8" fill="#071018" stroke="#8fd8ab"/>
+  <rect x="154" y="28" width="270" height="84" rx="8" fill="#06121c" stroke="#1d4059"/><text x="172" y="48" fill="#bde7ff" font-size="8" font-family="monospace">SART RADAR RETURN</text><path d="M178 86 H394" stroke="#2c7a58"/><circle cx="206" cy="70" r="2" fill="#8fd8ab"/><circle cx="222" cy="68" r="2" fill="#8fd8ab"/><circle cx="238" cy="66" r="2" fill="#8fd8ab"/><circle cx="254" cy="64" r="2" fill="#8fd8ab"/><circle cx="270" cy="62" r="2" fill="#8fd8ab"/><text x="172" y="104" fill="#ffd783" font-size="7" font-family="monospace">12 DOT PATTERN WHEN INTERROGATED</text>`;
+  if(def.key === 'navtex') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/><rect x="38" y="28" width="404" height="84" rx="7" fill="#e6edf0" stroke="#8fbfed"/><text x="54" y="48" fill="#172d42" font-size="8" font-family="monospace">NAVTEX 518 KHZ - MSI</text><text x="54" y="66" fill="#172d42" font-size="7" font-family="monospace">ZCZC KA52 GALE WARNING - MARMARA SEA</text><text x="54" y="82" fill="#94333a" font-size="7" font-family="monospace">NAV WARNING: LIGHT BUOY UNLIT</text><text x="54" y="98" fill="#172d42" font-size="7" font-family="monospace">FILTER: NAV / MET / SAR / PILOT</text>`;
+  if(def.key === 'inmc') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/><rect x="44" y="30" width="392" height="78" rx="7" fill="#06121c" stroke="#1d4059"/><text x="60" y="50" fill="#bde7ff" font-size="8" font-family="monospace">INMARSAT-C / EGC TERMINAL</text><text x="60" y="68" fill="#8fd8ab" font-size="7" font-family="monospace">LOGGED IN: IOR   POSITION REPORT READY</text><text x="60" y="84" fill="#ffd783" font-size="7" font-family="monospace">EGC SAFETYNET MESSAGE INBOX: 03</text><text x="60" y="100" fill="#ffb0b0" font-size="7" font-family="monospace">DISTRESS BUTTON COVER CLOSED</text>`;
+  return GFX.gmdss_panel;
+}
+
 function renderJournal(){
   const c = document.getElementById('journal-entries');
   if(journalEntries.length === 0){
