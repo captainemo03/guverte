@@ -7613,11 +7613,26 @@ function getSceneOverlay(gfx,sc){
 }
 
 function getLiveSceneOverlay(sc){
-  const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
-  if(/radar|bridge|ecdis|ais|arpa/.test(blob)){
-    return '<div class="live-ais-target t1"></div><div class="live-ais-target t2"></div><div class="live-ais-target t3"></div>';
+  const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const parts = [];
+  if(/radar|bridge|kopruustu|köprüüstü|ecdis|ais|arpa/.test(blob)){
+    parts.push('<div class="live-radar-screen"><i></i><b class="r1"></b><b class="r2"></b><b class="r3"></b></div>');
+    parts.push('<div class="live-ecdis-screen"><span class="route"></span><span class="wp w1"></span><span class="wp w2"></span><span class="wp w3"></span><span class="ship"></span></div>');
+    parts.push('<div class="live-ais-target t1"></div><div class="live-ais-target t2"></div><div class="live-ais-target t3"></div>');
   }
-  return '';
+  if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik|pilot exchange|vts/.test(blob)){
+    parts.push('<div class="live-vhf-panel"><span></span><span></span><span></span></div>');
+  }
+  if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)){
+    parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div>');
+  }
+  if(/storm|firtina|swell|rain|yagmur|yağmur|salt|spray|sis|fog|mist/.test(blob)){
+    parts.push('<div class="live-rain-glass"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div>');
+  }
+  if(/engine|makine|generator|compressor|pump|egzoz|exhaust/.test(blob)){
+    parts.push('<div class="live-engine-panel"><span></span><span></span><span></span><b></b></div>');
+  }
+  return parts.join('');
 }
 function getSafeSceneMarkup(sc){
   const key = sc?.gfx || 'sea';
@@ -10370,7 +10385,7 @@ function getSceneDetailClass(sc){
 
 function getSceneFlavorClasses(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  const classes = ['scene-real-grain'];
+  const classes = ['scene-real-grain','scene-cinematic'];
   if(/radar|ais|ecdis|arpa|bridge|kopruustu|köprüüstü/.test(hay)) classes.push('scene-live-nav','scene-glass-reflection');
   if(/galley|asci|cay|kahve|coffee/.test(hay)) classes.push('scene-human-cup');
   if(/engine|makine|rag|bez|oil|yagci|compressor/.test(hay)) classes.push('scene-human-rag');
@@ -10380,6 +10395,11 @@ function getSceneFlavorClasses(sc){
   if(/fog|mist|sis|restricted visibility|gorus kisitli|görüş kısıtlı/.test(hay)) classes.push('scene-fog-bank');
   if(/engine|makine|exhaust|egzoz|generator|compressor|pump/.test(hay)) classes.push('scene-engine-heat');
   if(/sea|acik deniz|açık deniz|open sea|offshore|sailing|seyir/.test(hay)) classes.push('scene-wake-layer');
+  if(/bridge|kopruustu|köprüüstü|radar|ecdis|ais|arpa/.test(hay)) classes.push('scene-location-bridge');
+  if(/engine|makine|control room|pump|compressor|generator/.test(hay)) classes.push('scene-location-engine');
+  if(/deck|guverte|mooring|halat|lashing|manifold/.test(hay)) classes.push('scene-location-deck');
+  if(/galley|asci|aşçı|yemekhane|cay|çay|coffee/.test(hay)) classes.push('scene-location-galley');
+  if(/cabin|kamara|uyku|yalnizlik|yalnızlık/.test(hay)) classes.push('scene-location-cabin');
   return classes;
 }
 
@@ -10406,6 +10426,12 @@ function getSceneActorMode(sc){
 function renderSceneActor(sc, actorCfg){
   const actor = document.getElementById('gfx-actor');
   if(!actor) return;
+  if(actorCfg === null){
+    actor.classList.add('empty');
+    actor.innerHTML = '';
+    actor.removeAttribute('data-mode');
+    return;
+  }
   const cfg = actorCfg || getPlayerPortraitConfig();
   if(!cfg){
     actor.classList.add('empty');
@@ -10422,7 +10448,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer','scene-cinematic','scene-location-bridge','scene-location-engine','scene-location-deck','scene-location-galley','scene-location-cabin');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
@@ -10621,6 +10647,9 @@ function renderScene(idx){
   }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
+  const actorBlob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const shouldShowSceneActor = sc.alert || /storm|firtina|engine|makine|harbor|liman|terminal|pilot|tug|radar|ecdis|ais|arpa|bridge|kopruustu|köprüüstü/.test(actorBlob);
+  renderSceneActor(sc, shouldShowSceneActor ? speakerPortraitCfg : null);
 
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
