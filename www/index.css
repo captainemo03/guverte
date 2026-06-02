@@ -977,6 +977,47 @@ animation:straitFlow 2.8s linear infinite;}
 .ops-chip.good{border-color:rgba(93,191,138,.28);color:#98e0ba;background:rgba(10,31,20,.92);}
 .ops-chip.hot{border-color:rgba(212,160,23,.32);color:#ffd98a;background:rgba(42,28,8,.92);}
 
+#live-watch-feed{display:flex;gap:6px;align-items:center;overflow:hidden;padding:5px 10px;background:rgba(3,10,18,.9);border-bottom:1px solid var(--border2);min-height:30px;}
+.watch-feed-item{flex:0 0 auto;border:1px solid rgba(111,146,178,.18);border-radius:999px;background:rgba(8,22,40,.82);color:#c8ddf5;padding:5px 9px;font-size:9px;font-family:'Share Tech Mono',monospace;animation:feedIn .35s ease;}
+.watch-feed-item.warn{border-color:rgba(214,92,92,.36);color:#ffb8b8;background:rgba(50,16,16,.82);}
+.watch-feed-item.good{border-color:rgba(93,191,138,.3);color:#a8f5c2;background:rgba(10,31,20,.82);}
+@keyframes feedIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+#phone-fab{position:fixed;right:14px;bottom:34px;z-index:58;width:48px;height:48px;border-radius:50%;border:1px solid rgba(127,195,255,.42);background:linear-gradient(180deg,#152b42,#071323);color:#dff1ff;font-size:11px;font-family:'Share Tech Mono',monospace;box-shadow:0 12px 28px rgba(0,0,0,.42);cursor:pointer;}
+#phone-fab:hover{border-color:var(--gold);color:#fff;}
+#ship-phone{display:none;position:fixed;right:14px;bottom:84px;z-index:59;}
+#ship-phone.show{display:block;animation:phoneSlide .22s ease;}
+@keyframes phoneSlide{from{opacity:0;transform:translateY(18px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+#phone-frame{width:238px;height:404px;border-radius:24px;background:#07111d;border:3px solid #1b3349;box-shadow:0 20px 55px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;display:flex;flex-direction:column;}
+#phone-status{height:22px;background:#02080f;color:#dcefff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-size:9px;font-family:'Share Tech Mono',monospace;}
+#phone-title{height:34px;background:linear-gradient(180deg,#3e6f9e,#1b3858);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;letter-spacing:.7px;}
+#phone-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#081422;border-bottom:1px solid rgba(111,146,178,.22);}
+.phone-tab{border:none;background:#0d2033;color:#9dbdd5;font-size:10px;padding:7px 3px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
+.phone-tab.active{background:#183a5c;color:#fff;}
+#phone-body{flex:1;overflow:auto;padding:9px;background:linear-gradient(180deg,#102034,#07111d);}
+#phone-compose{display:flex;gap:5px;padding:8px;background:#050b13;border-top:1px solid rgba(111,146,178,.2);}
+#phone-input{flex:1;min-width:0;background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:999px;color:#fff;padding:7px 9px;font-size:11px;outline:none;}
+#phone-compose button,.phone-small-btn{border:1px solid rgba(127,195,255,.28);border-radius:8px;background:#17324e;color:#dff1ff;padding:7px 9px;font-size:10px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
+#phone-compose button:hover,.phone-small-btn:hover{border-color:var(--gold);color:#fff;}
+.phone-msg{margin-bottom:8px;display:flex;flex-direction:column;gap:2px;}
+.phone-msg.me{align-items:flex-end;}
+.phone-msg-name{font-size:8px;color:#9dbdd5;font-family:'Share Tech Mono',monospace;}
+.phone-bubble{max-width:86%;border-radius:12px;padding:8px 9px;background:#152b42;color:#dcefff;font-size:11px;line-height:1.45;}
+.phone-msg.me .phone-bubble{background:#2d6a4f;color:#fff;}
+.phone-contact{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid rgba(111,146,178,.18);border-radius:10px;background:rgba(8,22,40,.78);padding:8px;margin-bottom:7px;color:#dcefff;font-size:11px;}
+.phone-contact small{display:block;color:#9dbdd5;font-size:9px;margin-top:2px;}
+.phone-add{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:8px;}
+.phone-add input{background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:8px;color:#fff;padding:8px;font-size:11px;outline:none;}
+.phone-app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.phone-app{border:1px solid rgba(111,146,178,.18);border-radius:12px;background:linear-gradient(180deg,#17324e,#0b1b2d);min-height:58px;color:#dcefff;font-size:9px;font-family:'Share Tech Mono',monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;text-align:center;}
+.phone-app b{font-size:18px;}
+.phone-app:hover{border-color:var(--gold);}
+@media (max-width:520px){
+  #ship-phone{right:8px;bottom:76px;}
+  #phone-frame{width:218px;height:372px;}
+  #phone-fab{right:10px;bottom:30px;}
+}
+
 /* ===== FOTOĞRAF ALBÜMİ ===== */
 #album-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:60;align-items:flex-start;justify-content:center;padding:20px 10px;overflow-y:auto;}
 #album-panel.show{display:flex;flex-wrap:wrap;gap:10px;}
