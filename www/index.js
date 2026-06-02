@@ -4364,6 +4364,7 @@ function renderPortraitSvg(cfg={}, opts={}){
 let stats={cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
 let scenes=[], currentIdx=0, choicesMade=[];
 let contractDays=0, contractTotal=6;
+const CONTRACT_SCENES_PER_MONTH = 10;
 let sceneQueue=[], usedScenes=new Set();
 const START_PORTS=[
   {name:"İzmir", dock:"İzmir Limanı — İskele", office:"İzmir Limanı — Limancı Ofisi", departureLine:"İzmir Körfezi geride kaldı", x:85, y:130},
@@ -7734,7 +7735,7 @@ function adjustMood(delta,reason=''){
     stats.dinclik=clamp(stats.dinclik-4);
     stats.sayginlik=clamp(stats.sayginlik-2);
     setTimeout(()=>showNotif('!','Icine Kapaniyorsun','Dusuk moral vardiyada dikkatini ve enerjini zorluyor.'),400);
-    updateStats({});
+    updateStats({},{skipContractTick:true});
     playerFlags.lowMoodSpiral++;
     queueDelayedConsequence({dinclik:-4,bilgi:-2},'Uykusuz Gece','Dusuk moral gece uykunu bozdu; sabah daha dagin uyandin.',2,-4);
   }
@@ -8970,12 +8971,23 @@ function updateStats(old,opts={}){
   const s=stats.sayginlik;
   document.getElementById('repstars').textContent=s>=80?'⭐⭐⭐⭐⭐':s>=60?'⭐⭐⭐⭐':s>=40?'⭐⭐⭐':s>=20?'⭐⭐':'⭐';
 
-  // Kontrat bar
-  contractDays++;
-  const pct=Math.round((contractDays/contractTotal)*100);
-  document.getElementById('contract-days').textContent=`${contractDays} / ${contractTotal} GÜN`;
-  document.getElementById('contract-fill').style.width=Math.min(pct,100)+'%';
+  if(!opts.skipContractTick) contractDays = Math.min(contractTotal, contractDays + 1);
+  updateContractProgress();
   updateOpsHud(sceneQueue[currentIdx] || null);
+}
+
+function getContractTotalMonths(){
+  return Math.max(1, Math.ceil((contractTotal || CONTRACT_SCENES_PER_MONTH) / CONTRACT_SCENES_PER_MONTH));
+}
+
+function updateContractProgress(){
+  const pct = contractTotal ? Math.round((contractDays / contractTotal) * 100) : 0;
+  const monthNow = Math.min(getContractTotalMonths(), Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const label = `Sahne ${contractDays} / ${contractTotal} · Ay ${monthNow} / ${getContractTotalMonths()}`;
+  const daysEl = document.getElementById('contract-days');
+  const fillEl = document.getElementById('contract-fill');
+  if(daysEl) daysEl.textContent = label;
+  if(fillEl) fillEl.style.width = Math.min(pct,100)+'%';
 }
 
 function checkCrisis(){
@@ -10688,7 +10700,7 @@ function renderScene(idx){
   const stObj=STYPES.find(x=>x.key===selType);
   const shipSpec=getShipSpec(selType);
   document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear+' · '+watchState.code;
-  document.getElementById('contract-type').textContent=stObj.nm+' '+contractTotal+'+'+(KONTRAT_DEFS[selType]?.[selKontrat]?.izin||1)+'ay';
+  document.getElementById('contract-type').textContent=stObj.nm+' '+getContractTotalMonths()+' ay · '+contractTotal+' sahne';
   updateOpsHud(sc);
   updateLivingWatch(sc);
   renderPhone();
@@ -10800,7 +10812,6 @@ function getCareerSpecialization(){
 function showEnd(){
   clearSceneChoiceTimer();
   stopAllMusic();
-  deleteSavedGame(false);
   document.getElementById('game').style.display='none';
   document.getElementById('endscr').style.display='flex';
 
@@ -10809,12 +10820,14 @@ function showEnd(){
   const kritikC=choicesMade.filter(c=>c.tag==='kritik').length;
   const stObj=STYPES.find(x=>x.key===selType);
   const kont=KONTRAT_DEFS[selType]?.[selKontrat]||{ay:6,bonus:'—'};
+  const totalMonths = getContractTotalMonths();
+  const completedScenes = contractDays;
 
   let emoji,title,flavor,desc,verdict;
   if(kritikC>=2&&stats.cesaret>=60&&avg>=60){
     emoji='🛡️';title='Krizlerin Denizcisi';
     flavor=`"Bu stajyer dört krizde donmadı." — Süvari, ${selYear}`;
-    desc=`${pn}, ${contractTotal} aylık ${stObj.nm} kontratında makine arızası, boğazda sürüklenme ve korsan alarmında doğru kararlar aldı.`;
+    desc=`${pn}, ${totalMonths} aylik ${stObj.nm} kontratinda ${completedScenes} sahne tamamlayarak makine arizasi, bogaz gecisi ve kriz kararlarinda iz birakti.`;
     verdict=`<strong>Staj Raporu (${selYear}):</strong> Kriz yönetimi olağanüstü. ${kont.bonus} kazanıldı. İleri kademe eğitim tavsiye edilir.`;
     setTimeout(sfxSuccess,300);
   }else if(stats.sayginlik>=70&&avg>=65){
@@ -10862,7 +10875,9 @@ function showEnd(){
   verdict+=` <br><strong>Vardiya Akisi:</strong> ${watchCycleLog.handovers} teslim ani, ${watchCycleLog.logbook} logbook penceresi, ${watchCycleLog.portPrep} liman hazirligi izi.`;
   verdict+=` <br><strong>Ruh Hali:</strong> ${mood}/100 - ${moodLabel}.`;
   verdict+=` <br><strong>Psikoloji Cizgisi:</strong> moral ${psyche.moral}, yalnizlik ${psyche.yalnizlik}, ofke ${psyche.ofke}, tukenme ${psyche.tukenme}, ekip uyumu ${psyche.uyum} — ${harmonyLabel}.`;
+  verdict+=` <br><strong>Kontrat Ritmi:</strong> 10 sahne = 1 ay. Bu kontratta ${completedScenes}/${contractTotal} sahne, yaklasik ${totalMonths} ay tamamlandi.`;
   verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
+  verdict+=` <br><br><strong>Karar:</strong> Gemide kalirsan ayni ekip hafizasi, statlar, telefon mesajlari ve kayitlarla yeni senaryo paketine devam edersin. Ayrilirsan bu kontrat kariyer raporu olarak kapanir.`;
   document.getElementById('ende').textContent=emoji;
   document.getElementById('endt').textContent=title;
   document.getElementById('endf').textContent=flavor;
@@ -10875,6 +10890,42 @@ function showEnd(){
     '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.dinclik)+'</div><div class="ecl">DİNÇLİK</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.uyum)+'</div><div class="ecl">EKİP UYUMU</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.moral)+'</div><div class="ecl">MORAL</div></div>';
+  saveGameState(false);
+}
+
+function continueContractOnShip(){
+  clearSceneChoiceTimer();
+  const stObj=STYPES.find(x=>x.key===selType);
+  const oldFinal = sceneQueue.find(s=>s.id==='FINAL') || null;
+  selectedStartPort=START_PORTS[Math.floor(Math.random()*START_PORTS.length)];
+  selectedStartScenario=START_SCENARIOS[Math.floor(Math.random()*START_SCENARIOS.length)];
+  const pool=buildScenePool(pn,sn,selYear,selType,selectedStartPort,selectedStartScenario);
+  const nextQueue=buildSceneQueue(pool, contractTotal, selYear)
+    .filter(s=>s && s.id!=='s01' && s.id!=='FINAL');
+  const finalScene = oldFinal || pool.find(s=>s.id==='FINAL');
+  if(!nextQueue.length || !finalScene){
+    showNotif('!','Devam Hazirlanamadi','Yeni senaryo paketi olusturulurken sorun oldu.');
+    return;
+  }
+  const finalIdx = sceneQueue.findIndex(s=>s.id==='FINAL');
+  const insertIdx = finalIdx >= 0 ? finalIdx : sceneQueue.length;
+  if(finalIdx >= 0) sceneQueue.splice(finalIdx, sceneQueue.length - finalIdx, ...nextQueue, finalScene);
+  else sceneQueue.push(...nextQueue, finalScene);
+  currentIdx = insertIdx;
+  contractDays = 0;
+  scenesSinceEvent = 0;
+  nextEventAt = 5+Math.floor(Math.random()*4);
+  portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
+  addJournalEntry(`[KONTRAT UZATMA] ${pn}, ${stObj?.nm || 'gemi'} uzerinde kalmayi secti. Yeni senaryo paketi acildi.`, 'Yeni Kontrat', '00:00');
+  pushPhoneMessage('Kaptan','Gemide kalma kararini aldim. Yeni kontrat uzatmasinda ayni disiplinle devam edecegiz.', {open:false});
+  document.getElementById('endscr').style.display='none';
+  const g=document.getElementById('game');
+  g.style.display='flex';
+  g.style.flexDirection='column';
+  updateContractProgress();
+  renderScene(currentIdx);
+  saveGameState(false);
+  showNotif('⚓','Gemide Kaldin','Yeni senaryo paketine kaldigin kariyer hafizasiyla devam ediyorsun.');
 }
 
 // ===== BAŞLAT =====
@@ -10885,7 +10936,7 @@ function beginGame(){
   sn=si||(SNAMES[selType]||['M/V Ege Meltem'])[0];
 
   const kont=KONTRAT_DEFS[selType]?.[selKontrat]||{ay:6,izin:1};
-  contractTotal=(kont.ay+kont.izin)*4; // Her ay ~4 sahne
+  contractTotal=(kont.ay+kont.izin)*CONTRACT_SCENES_PER_MONTH; // 10 sahne = 1 ay
   contractDays=0;
 
   // Kontrat uzunluğuna göre sahne pool'u oluştur
@@ -10962,10 +11013,10 @@ function beginGame(){
   setTimeout(()=>{if(window._drawClock)window._drawClock();},50);
   setTimeout(()=>{if(window._drawClock)window._drawClock();},300);
   setTimeout(()=>{if(window._drawClock)window._drawClock();},600);
-  updateStats({});
+  updateStats({},{skipContractTick:true});
   document.getElementById('contract-fill').style.width='0%';
   document.getElementById('tb-photos-count').textContent='0';
-  document.getElementById('contract-days').textContent=`0 / ${contractTotal} GÜN`;
+  updateContractProgress();
   renderScene(0);
   saveGameState(false);
   setTimeout(()=>{const cv=document.getElementById('clock-canvas');if(cv){const ev=new Event('resize');window.dispatchEvent(ev);}},100);
@@ -11602,7 +11653,7 @@ function loadSavedGame(){
     const g=document.getElementById('game');
     g.style.display='flex';
     g.style.flexDirection='column';
-    updateStats({});
+    updateStats({},{skipContractTick:true});
     renderCrewCards();
     renderScene(currentIdx);
     refreshSaveEntryActions();

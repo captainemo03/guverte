@@ -1045,6 +1045,10 @@ animation:straitFlow 2.8s linear infinite;}
 .photo-img{width:100%;border-radius:4px;margin-bottom:4px;}
 .photo-cap{font-size:9px;color:var(--text3);font-family:'Crimson Pro',serif;font-style:italic;}
 #album-close-btn{position:fixed;top:10px;right:10px;z-index:61;background:var(--navy3);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text);font-size:12px;cursor:pointer;}
+.end-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.end-actions + .rbtn{display:none;}
+.rbtn.secondary{background:rgba(7,19,36,.88);border-color:rgba(111,146,178,.28);color:var(--text2);}
+.rbtn.secondary:hover{border-color:var(--accent);color:#fff;}
 
 /* ===== ANİ OLAY KARTI ===== */
 #event-card{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:80;align-items:center;justify-content:center;}
