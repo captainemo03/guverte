@@ -10895,18 +10895,23 @@ function beginGame(){
   phoneOpen=false;
   phoneTab='messages';
   activePhoneContact='Kaptan';
+  activePhoneSite='home';
   phoneContacts=[
     {name:'Kaptan', number:'100', role:'Master / night orders'},
     {name:'Kopruustu', number:'101', role:'Bridge watch'},
     {name:'Makine', number:'200', role:'Engine control room'},
     {name:'Lostromo', number:'300', role:'Deck / mooring station'},
     {name:'Asci', number:'400', role:'Galley'},
-    {name:'VTS', number:'VHF 12', role:'Traffic service'}
+    {name:'VTS', number:'VHF 12', role:'Traffic service'},
+    {name:'Anne', number:'+90 5xx 100 01 01', role:'Aile'},
+    {name:'Baba', number:'+90 5xx 100 02 02', role:'Aile'},
+    {name:'Kardes', number:'+90 5xx 100 03 03', role:'Aile'}
   ];
   phoneMessages=[
     {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
     {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
-    {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false}
+    {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
+    {from:'Anne', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false}
   ];
   watchFeedItems=[];
   devicePracticeProgress={};
@@ -11406,6 +11411,7 @@ function buildSavePayload(){
     phoneMessages,
     activePhoneContact,
     phoneTab,
+    activePhoneSite,
     watchFeedItems,
     devicePracticeProgress,
     devicePracticeScore,
@@ -11485,6 +11491,7 @@ function applyLoadedGameState(data){
   phoneMessages = Array.isArray(data.phoneMessages) ? data.phoneMessages : phoneMessages;
   activePhoneContact = data.activePhoneContact || activePhoneContact;
   phoneTab = data.phoneTab || 'messages';
+  activePhoneSite = data.activePhoneSite || 'home';
   watchFeedItems = Array.isArray(data.watchFeedItems) ? data.watchFeedItems : [];
   devicePracticeProgress = data.devicePracticeProgress || {};
   devicePracticeScore = data.devicePracticeScore || {ok:0,total:0};
@@ -15051,20 +15058,34 @@ let devicePracticeProgress = {};
 let phoneOpen = false;
 let phoneTab = 'messages';
 let activePhoneContact = 'Kaptan';
+let activePhoneSite = 'home';
 let phoneContacts = [
   {name:'Kaptan', number:'100', role:'Master / night orders'},
   {name:'Kopruustu', number:'101', role:'Bridge watch'},
   {name:'Makine', number:'200', role:'Engine control room'},
   {name:'Lostromo', number:'300', role:'Deck / mooring station'},
   {name:'Asci', number:'400', role:'Galley'},
-  {name:'VTS', number:'VHF 12', role:'Traffic service'}
+  {name:'VTS', number:'VHF 12', role:'Traffic service'},
+  {name:'Anne', number:'+90 5xx 100 01 01', role:'Aile'},
+  {name:'Baba', number:'+90 5xx 100 02 02', role:'Aile'},
+  {name:'Kardes', number:'+90 5xx 100 03 03', role:'Aile'}
 ];
 let phoneMessages = [
   {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
   {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
-  {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false}
+  {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
+  {from:'Anne', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false}
 ];
 let watchFeedItems = [];
+
+const PHONE_SITES = [
+  {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
+  {key:'weather', title:'OceanWX', url:'wx.met/route', desc:'Ruzgar, swell, gorus ve barometre ozeti.'},
+  {key:'company', title:'Company Mail', url:'mail.company/fleet', desc:'Ofis mesajlari, charter baskisi ve operasyon notlari.'},
+  {key:'crew', title:'Crew Portal', url:'crew.portal/ship', desc:'Murettebat duyurulari, menu, izin ve moral notlari.'},
+  {key:'vts', title:'Port / VTS Info', url:'portinfo/vts', desc:'Pilot station, tug, berth ve raporlama bilgileri.'},
+  {key:'training', title:'Training Hub', url:'training/device', desc:'Cihaz pratikleri ve acilan tekrar gorevleri.'}
+];
 
 const DEVICE_TRAINER = [
   {key:'vhf', ico:'VHF', name:'VHF DSC Radio', sub:'CH16, CH70 DSC, distress, urgency, safety, dual watch', task:'Mayday relay hazirligi: once CH16 dinle, DSC distress menusu ve konum bilgisini kontrol et.', correct:'DISTRESS MENU',
@@ -15389,6 +15410,14 @@ function setPhoneContact(name){
   phoneTab = 'messages';
   renderPhone();
 }
+function setPhoneSite(key){
+  activePhoneSite = key || 'home';
+  phoneTab = 'web';
+  renderPhone();
+}
+function phoneSafe(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
 function addPhoneContact(){
   const name = (document.getElementById('phone-new-name')?.value || '').trim();
   const number = (document.getElementById('phone-new-number')?.value || '').trim();
@@ -15413,8 +15442,17 @@ function sendPhoneMessage(){
     'Guzel. Bir sonraki kontrolde tekrar teyit et.',
     'Anlasildi. Emniyetli tarafta kal.'
   ];
+  const familyReplies = [
+    'Sesini duymak iyi geldi. Yorulduysan firsat bulunca biraz uyu.',
+    'Merak etme, biz iyiyiz. Sen kendine dikkat et.',
+    'Limana varinca foto at, herkes seni soruyor.',
+    'Gurur duyuyoruz ama vardiyada dikkatini dagitma.'
+  ];
+  const crewReplies = activePhoneContact === 'Anne' || activePhoneContact === 'Baba' || activePhoneContact === 'Kardes'
+    ? familyReplies
+    : replies;
   setTimeout(()=>{
-    phoneMessages.push({from:activePhoneContact, text:replies[Math.floor(Math.random()*replies.length)], me:false});
+    phoneMessages.push({from:activePhoneContact, text:crewReplies[Math.floor(Math.random()*crewReplies.length)], me:false});
     renderPhone();
   }, 450);
   renderPhone();
@@ -15442,6 +15480,16 @@ function updateLivingWatch(sc){
   if(/galley|asci|cay|yemek/.test(blob)) feed.push(['Asci: sicak cay ve vardiya menusu hazir','good']);
   if(/storm|firtina|swell|rain|sis|fog/.test(blob)) feed.push(['Hava: gorus/deniz baskisi artiyor','warn']);
   if(!feed.length) feed.push(['Kopruustu: vardiya sakin, cihazlar normal','']);
+  const livingBits = [
+    ['Kapi notu: kaptan gece emirlerini guncelledi',''],
+    ['Crew chat: Forward station durum raporu bekliyor',''],
+    ['Telefon: aile sohbetinde yeni mesaj olabilir','good'],
+    ['Company mail: ETA ve rapor basligi kontrol ediliyor','warn'],
+    ['Gemi ici: kahve fincani, radar bipleri, VHF artalani',''],
+    ['Makine log: sicaklik trendi vardiya defterine dustu','warn'],
+    ['Aşci menusu: sicak cay vardiya arasina hazir','good']
+  ];
+  if(Math.random() < .55) feed.push(livingBits[Math.floor(Math.random()*livingBits.length)]);
   const picked = feed[Math.floor(Math.random()*feed.length)];
   addWatchFeed(picked[0], picked[1]);
   maybeSendScenePhoneMessage(sc, blob);
@@ -15457,6 +15505,16 @@ function maybeSendScenePhoneMessage(sc, blob){
   else if(/ecdis|route|enc|xtd/.test(blob)) pushPhoneMessage('2. Zabit','ECDIS route check, safety contour ve sensor status birlikte okunacak. Cihaz pratigi iyi olur.');
   else if(/harbor|liman|mooring|tug|berth/.test(blob)) pushPhoneMessage('Lostromo','Guvartede hazirlik tamam. Halat sirasi ve snap-back notunu unutma.');
   else if(/galley|asci|cay|yemek/.test(blob)) pushPhoneMessage('Asci','Bugun cay var. Ama vardiya devrini geciktirme.');
+  const familyChance = stats.dinclik < 35 || /night|gece|liman|harbor|storm|firtina|swell/.test(blob) ? .55 : .18;
+  if(Math.random() < familyChance){
+    const family = ['Anne','Baba','Kardes'][Math.floor(Math.random()*3)];
+    const lines = {
+      Anne:['Bugun hava nasil? Uykusuz kalma tamam mi?','Mesajini gordum. Vardiyan bitince iki kelime yaz.'],
+      Baba:['Gemide isler yolunda mi? Kaptanin sozunu dinle, acele karar verme.','Deniz sakaya gelmez. Cihazlari iki kere kontrol et.'],
+      Kardes:['Abi/abla denizden foto at. Telefon cekiyor mu orada?','Sen oyundaki gibi kaptan oldun mu artik?']
+    };
+    pushPhoneMessage(family, lines[family][Math.floor(Math.random()*lines[family].length)]);
+  }
 }
 function openDeviceFromPhone(key){
   phoneOpen = false;
@@ -15496,16 +15554,25 @@ function renderPhone(){
   const phone = document.getElementById('ship-phone');
   const body = document.getElementById('phone-body');
   const clock = document.getElementById('phone-clock');
+  const compose = document.getElementById('phone-compose');
   if(phone) phone.classList.toggle('show', phoneOpen);
+  if(compose) compose.style.display = phoneTab === 'messages' ? 'flex' : 'none';
   if(clock) clock.textContent = (document.getElementById('tbd')?.textContent || '19:35').replace(/[^\d:]/g,'').slice(0,5) || '19:35';
-  document.querySelectorAll('.phone-tab').forEach(btn=>btn.classList.toggle('active', btn.textContent.toLowerCase().includes(phoneTab==='messages'?'mesaj':phoneTab==='contacts'?'rehber':'uygulama')));
+  document.querySelectorAll('.phone-tab').forEach(btn=>{
+    const label = phoneTab==='messages' ? 'mesaj' : phoneTab==='contacts' ? 'rehber' : phoneTab==='web' ? 'net' : 'uygulama';
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(label));
+  });
   if(!body) return;
   if(phoneTab === 'contacts'){
     body.innerHTML = `<div class="phone-add">
       <input id="phone-new-name" placeholder="Isim">
       <input id="phone-new-number" placeholder="Numara / Kanal">
       <button class="phone-small-btn" onclick="addPhoneContact()">Numara ekle</button>
-    </div>` + phoneContacts.map(c=>`<div class="phone-contact"><div><b>${c.name}</b><small>${c.number} · ${c.role}</small></div><button class="phone-small-btn" onclick="setPhoneContact('${c.name.replace(/'/g,"\\'")}')">Mesaj</button></div>`).join('');
+    </div>` + phoneContacts.map(c=>`<div class="phone-contact"><div><b>${phoneSafe(c.name)}</b><small>${phoneSafe(c.number)} · ${phoneSafe(c.role)}</small></div><button class="phone-small-btn" onclick="setPhoneContact('${String(c.name).replace(/'/g,"\\'")}')">Mesaj</button></div>`).join('');
+    return;
+  }
+  if(phoneTab === 'web'){
+    body.innerHTML = renderPhoneWeb();
     return;
   }
   if(phoneTab === 'apps'){
@@ -15522,9 +15589,70 @@ function renderPhone(){
     </div>`;
     return;
   }
-  const visible = phoneMessages.filter(m=>m.me || m.from === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit'].includes(m.from)).slice(-28);
-  body.innerHTML = visible.map(m=>`<div class="phone-msg ${m.me?'me':''}"><div class="phone-msg-name">${m.me?'Sen':m.from}</div><div class="phone-bubble">${m.text}</div></div>`).join('');
+  const visible = phoneMessages.filter(m=>m.me || m.from === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit','Anne','Baba','Kardes','Egitim'].includes(m.from)).slice(-28);
+  body.innerHTML = visible.map(m=>`<div class="phone-msg ${m.me?'me':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${phoneSafe(m.text)}</div></div>`).join('');
   body.scrollTop = body.scrollHeight;
+}
+
+function getPhoneSite(key){
+  return PHONE_SITES.find(s=>s.key===key) || PHONE_SITES[0];
+}
+function phoneSiteCards(key){
+  const route = selectedStartPort?.name || 'mevcut rota';
+  const alertCount = Math.max(0, Math.round(voyagePressure.caution || 0));
+  const trainingCount = Object.keys(devicePracticeProgress || {}).filter(k=>devicePracticeProgress[k]===0).length;
+  const cards = {
+    home:[
+      `Saat ${document.getElementById('tbd')?.textContent || '--:--'} · ${watchState.code} vardiyasi`,
+      `Son gemi ici not: ${watchFeedItems[0]?.text || 'Cihazlar normal'}`,
+      `Aileden okunmamis gibi duran mesajlar: ${phoneMessages.filter(m=>['Anne','Baba','Kardes'].includes(m.from) && !m.me).slice(-3).length}`
+    ],
+    weather:[
+      `Swell: ${voyagePressure.swell} · Gorus: ${voyagePressure.visibility}`,
+      `Akinti: ${voyagePressure.current} · Hava baskisi: ${alertCount}/10`,
+      alertCount >= 6 ? 'UYARI: radar/VHF cross-check ve rota emniyeti zorunlu.' : 'Rota hava acisindan izlenebilir.'
+    ],
+    company:[
+      `Ofis durumu: ${companyPressureState.stage>1?'baski var':'normal takip'}`,
+      `Charter / ETA notu: ${voyagePressure.speed}`,
+      `Iz birakma riski: office ${consequenceTrace.office || 0}, PSC ${consequenceTrace.psc || 0}`
+    ],
+    crew:[
+      `Menu: corba, pilav, vardiya cayi`,
+      `Ekip uyumu: ${Math.round(psyche.uyum)} · moral: ${Math.round(psyche.moral)}`,
+      stats.dinclik < 30 ? 'Kisisel not: yorgunluk gorunuyor, kisa mola planla.' : 'Kisisel not: vardiya ritmi idare eder.'
+    ],
+    vts:[
+      `Bolge: ${route}`,
+      `VHF: ${voyagePressure.vhf} · raporlama noktasi takipte`,
+      `Pilot / tug zinciri: ${portOpsChain.pilot?'pilot alindi':'pilot bekleniyor'} · ${portOpsChain.tug?'tug baglandi':'tug bekleniyor'}`
+    ],
+    training:[
+      `Acik cihaz pratikleri: ${trainingCount}`,
+      `Skor: ${devicePracticeScore.ok}/${devicePracticeScore.total}`,
+      `Oneri: sahnede zorlandiysan VHF, Radar, ECDIS veya AIS uygulamasindan tekrar et.`
+    ]
+  };
+  return cards[key] || cards.home;
+}
+function renderPhoneWeb(){
+  const site = getPhoneSite(activePhoneSite);
+  if(activePhoneSite === 'home'){
+    return `<div class="phone-web-search">
+      <input id="phone-web-input" placeholder="Adres veya arama yaz..." onkeydown="if(event.key==='Enter') setPhoneSite('training')">
+      <button class="phone-small-btn" onclick="setPhoneSite('training')">Git</button>
+    </div>
+    <div class="phone-site-list">
+      ${PHONE_SITES.map(s=>`<button class="phone-site" onclick="setPhoneSite('${s.key}')"><b>${phoneSafe(s.title)}</b><small>${phoneSafe(s.url)} · ${phoneSafe(s.desc)}</small></button>`).join('')}
+    </div>`;
+  }
+  return `<div class="phone-page">
+    <div class="phone-page-head"><button class="phone-small-btn" onclick="setPhoneSite('home')">Geri</button><span>${phoneSafe(site.url)}</span></div>
+    <div class="phone-page-content">
+      <strong>${phoneSafe(site.title)}</strong><br>${phoneSafe(site.desc)}
+      ${phoneSiteCards(activePhoneSite).map((line,i)=>`<div class="phone-page-card ${/UYARI|yorgunluk|baski/i.test(line)?'warn':''}">${phoneSafe(line)}</div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function renderJournal(){

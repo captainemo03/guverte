@@ -991,7 +991,7 @@ animation:straitFlow 2.8s linear infinite;}
 #phone-frame{width:238px;height:404px;border-radius:24px;background:#07111d;border:3px solid #1b3349;box-shadow:0 20px 55px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;display:flex;flex-direction:column;}
 #phone-status{height:22px;background:#02080f;color:#dcefff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-size:9px;font-family:'Share Tech Mono',monospace;}
 #phone-title{height:34px;background:linear-gradient(180deg,#3e6f9e,#1b3858);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;letter-spacing:.7px;}
-#phone-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#081422;border-bottom:1px solid rgba(111,146,178,.22);}
+#phone-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#081422;border-bottom:1px solid rgba(111,146,178,.22);}
 .phone-tab{border:none;background:#0d2033;color:#9dbdd5;font-size:10px;padding:7px 3px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
 .phone-tab.active{background:#183a5c;color:#fff;}
 #phone-body{flex:1;overflow:auto;padding:9px;background:linear-gradient(180deg,#102034,#07111d);}
@@ -1012,6 +1012,17 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-app{border:1px solid rgba(111,146,178,.18);border-radius:12px;background:linear-gradient(180deg,#17324e,#0b1b2d);min-height:58px;color:#dcefff;font-size:9px;font-family:'Share Tech Mono',monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;text-align:center;}
 .phone-app b{font-size:18px;}
 .phone-app:hover{border-color:var(--gold);}
+.phone-web-search{display:flex;gap:5px;margin-bottom:8px;}
+.phone-web-search input{flex:1;min-width:0;background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:8px;color:#fff;padding:8px;font-size:10px;outline:none;}
+.phone-site-list{display:grid;grid-template-columns:1fr;gap:7px;}
+.phone-site{border:1px solid rgba(111,146,178,.18);border-radius:10px;background:rgba(8,22,40,.78);padding:8px;color:#dcefff;text-align:left;cursor:pointer;}
+.phone-site b{display:block;color:#fff;font-size:11px;margin-bottom:3px;}
+.phone-site small{display:block;color:#9dbdd5;font-size:9px;line-height:1.35;}
+.phone-page{border:1px solid rgba(111,146,178,.22);border-radius:12px;background:rgba(5,14,24,.88);overflow:hidden;}
+.phone-page-head{display:flex;align-items:center;justify-content:space-between;background:#12304d;color:#fff;padding:8px;font-size:10px;font-family:'Share Tech Mono',monospace;}
+.phone-page-content{padding:9px;color:#dcefff;font-size:11px;line-height:1.45;}
+.phone-page-card{border:1px solid rgba(111,146,178,.14);border-radius:8px;background:rgba(255,255,255,.04);padding:7px;margin-top:7px;}
+.phone-page-card.warn{border-color:rgba(214,92,92,.34);color:#ffcccc;}
 @media (max-width:520px){
   #ship-phone{right:8px;bottom:76px;}
   #phone-frame{width:218px;height:372px;}
