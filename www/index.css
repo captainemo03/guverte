@@ -1013,7 +1013,10 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-msg-name{font-size:8px;color:#9dbdd5;font-family:'Share Tech Mono',monospace;}
 .phone-bubble{max-width:86%;border-radius:12px;padding:8px 9px;background:#152b42;color:#dcefff;font-size:11px;line-height:1.45;}
 .phone-msg.me .phone-bubble{background:#2d6a4f;color:#fff;}
+.phone-msg.family .phone-msg-name{color:#ffe2a2;}
+.phone-msg.family .phone-bubble{background:#12304d;border:1px solid rgba(255,226,162,.12);}
 .phone-contact{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid rgba(111,146,178,.18);border-radius:10px;background:rgba(8,22,40,.78);padding:8px;margin-bottom:7px;color:#dcefff;font-size:11px;}
+.phone-contact.group{border-color:rgba(93,191,138,.34);background:rgba(10,31,20,.78);}
 .phone-contact small{display:block;color:#9dbdd5;font-size:9px;margin-top:2px;}
 .phone-add{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:8px;}
 .phone-add input{background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:8px;color:#fff;padding:8px;font-size:11px;outline:none;}

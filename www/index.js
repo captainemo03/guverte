@@ -10891,7 +10891,10 @@ function doFreeTimeAction(key){
   const a=actions[key]; if(!a) return;
   applyEffect(a.effect,{skipContractTick:true});
   adjustMood(a.mood,a.msg);
-  if(key==='family'){ familyUnread=0; pushPhoneMessage('Anne','Sesini duymak iyi geldi. Kendine dikkat et.', {open:false}); }
+  if(key==='family'){
+    pushPhoneMessage('Anne','Sesini duymak iyi geldi. Kendine dikkat et.', {open:false});
+    familyUnread=0;
+  }
   addJournalEntry('[SERBEST ZAMAN] '+a.msg);
   renderCareerPanel();
 }
@@ -11170,15 +11173,15 @@ function beginGame(){
     {name:'Lostromo', number:'300', role:'Deck / mooring station'},
     {name:'Asci', number:'400', role:'Galley'},
     {name:'VTS', number:'VHF 12', role:'Traffic service'},
-    {name:'Anne', number:'+90 5xx 100 01 01', role:'Aile'},
-    {name:'Baba', number:'+90 5xx 100 02 02', role:'Aile'},
-    {name:'Kardes', number:'+90 5xx 100 03 03', role:'Aile'}
+    {name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'}
   ];
   phoneMessages=[
     {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
     {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
     {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
-    {from:'Anne', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false}
+    {from:'Anne', chat:'AILE', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false},
+    {from:'Baba', chat:'AILE', text:'Denizde isler nasildir bilirim; acele karar verme, iki kere kontrol et.', me:false},
+    {from:'Kardes', chat:'AILE', text:'Internetten geminin nerede olduguna baktim. Foto atarsan gruba koyarim :)', me:false}
   ];
   watchFeedItems=[];
   devicePracticeProgress={};
@@ -15425,15 +15428,15 @@ let phoneContacts = [
   {name:'Lostromo', number:'300', role:'Deck / mooring station'},
   {name:'Asci', number:'400', role:'Galley'},
   {name:'VTS', number:'VHF 12', role:'Traffic service'},
-  {name:'Anne', number:'+90 5xx 100 01 01', role:'Aile'},
-  {name:'Baba', number:'+90 5xx 100 02 02', role:'Aile'},
-  {name:'Kardes', number:'+90 5xx 100 03 03', role:'Aile'}
+  {name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'}
 ];
 let phoneMessages = [
   {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
   {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
   {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
-  {from:'Anne', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false}
+  {from:'Anne', chat:'AILE', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false},
+  {from:'Baba', chat:'AILE', text:'Denizde isler nasildir bilirim; acele karar verme, iki kere kontrol et.', me:false},
+  {from:'Kardes', chat:'AILE', text:'Internetten geminin nerede olduguna baktim. Foto atarsan gruba koyarim :)', me:false}
 ];
 let watchFeedItems = [];
 
@@ -15777,6 +15780,74 @@ function setPhoneSite(key){
 function phoneSafe(value){
   return String(value ?? '').replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+function isFamilyChat(name){
+  return name === 'AILE';
+}
+function familyNames(){
+  return ['Anne','Baba','Kardes'];
+}
+function ensureFamilyGroup(){
+  const oldFamily = new Set(familyNames());
+  phoneContacts = (phoneContacts || []).filter(c=>!oldFamily.has(c.name));
+  if(!phoneContacts.some(c=>c.name === 'AILE')){
+    phoneContacts.push({name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'});
+  }
+  phoneMessages = (phoneMessages || []).map(m=>{
+    if(oldFamily.has(m.from) || m.chat === 'AILE') return {...m, chat:'AILE'};
+    return m;
+  });
+  if(oldFamily.has(activePhoneContact)) activePhoneContact = 'AILE';
+}
+function pushFamilyGroupMessage(from,text,opts={}){
+  phoneMessages.push({from, chat:'AILE', text, me:false});
+  if(phoneMessages.length > 100) phoneMessages = phoneMessages.slice(-100);
+  familyUnread++;
+  if(opts.open){
+    phoneOpen = true;
+    activePhoneContact = 'AILE';
+    phoneTab = 'messages';
+  }
+  renderPhone();
+}
+function getFamilyReplyPool(text=''){
+  const t = normalizeTrAscii(text);
+  const tired = stats.dinclik < 35 || psyche.tukenme > 60 || /yorgun|uyku|bitkin|dinclik/.test(t);
+  const port = /liman|pilot|rihtim|yana|all fast|demir|tug|halat/.test(t);
+  const storm = /firtina|swell|ruzgar|deniz|dalga|sis|fog|hava/.test(t);
+  const money = /para|maas|kurs|izin|ev|gonder|gönder/.test(t);
+  const missed = /ozledim|özledim|yalniz|yalnız|moral|kotu|kötü|canim/.test(t);
+  return {
+    Anne:[
+      tired ? 'Yorgun yaziyorsun gibi geldi. Firsat bulunca biraz uyu olur mu?' : 'Mesajini gorunce icim rahatladi. Kendine dikkat et.',
+      storm ? 'Hava kotuyse kendini zorlama, gorevini sakin sakin yap.' : 'Bugun yemek yedin mi? Sadece kahveyle durma.',
+      missed ? 'Biz de seni ozledik. Ama orada guclu durdugunu biliyorum.' : 'Vardiyan bitince iki satir daha yaz, merak ediyorum.',
+      'Uykusuzsan telefonda cok oyalanma. Bir bardak su ic, sonra dinlen.'
+    ],
+    Baba:[
+      port ? 'Liman isi sabir ister. Halat, pilot, tug; hepsinde once emniyet.' : 'Denizde acele karar verme. Cihazi da gozunu de capraz kullan.',
+      storm ? 'Kotu havada kahramanlik degil disiplin lazim.' : 'Kaptanin sozunu dinle ama kendi muhakemeni de kaybetme.',
+      money ? 'Para gelir gider. Onemli olan meslegi dogru ogrenmen.' : 'Bugun bir sey ogrendiysen o gun bos gecmemistir.',
+      'Vardiya devrinde eksik bir sey birakma. Sonra en cok o yoruyor insani.'
+    ],
+    Kardes:[
+      port ? 'Limandaysan foto at! Gemi dev gibi gorunuyor mu?' : 'Abi/abla senin oyun gibi hayat yasadigini sananlar var burada :)',
+      storm ? 'Dalga varsa video cek demecegim, annem kiziyor. Ama iyi misin?' : 'Telefon cekince yaz. Evde herkes grubu kontrol ediyor.',
+      missed ? 'Biz de ozledik. Donunce bana gemi hikayesi anlatacaksin.' : 'Bugun kaptan sana kizdi mi yoksa artik profesyonel misin?',
+      'Ben gruba yazmasam da okuyorum. Havali meslek secmissin kabul.'
+    ]
+  };
+}
+function simulateFamilyGroupReply(text){
+  const pool = getFamilyReplyPool(text);
+  const count = 1 + Math.floor(Math.random()*2);
+  const order = familyNames().sort(()=>Math.random()-.5).slice(0,count);
+  order.forEach((name,idx)=>{
+    setTimeout(()=>{
+      const arr = pool[name] || [];
+      pushFamilyGroupMessage(name, arr[Math.floor(Math.random()*arr.length)] || 'Buradayiz, yazinca goruyoruz.');
+    }, 450 + idx*700);
+  });
+}
 function addPhoneContact(){
   const name = (document.getElementById('phone-new-name')?.value || '').trim();
   const number = (document.getElementById('phone-new-number')?.value || '').trim();
@@ -15790,38 +15861,39 @@ function addPhoneContact(){
   renderPhone();
 }
 function sendPhoneMessage(){
+  ensureFamilyGroup();
   const inp = document.getElementById('phone-input');
   const text = (inp?.value || '').trim();
   if(!text) return;
-  phoneMessages.push({from:activePhoneContact, text, me:true});
   if(inp) inp.value = '';
+  if(isFamilyChat(activePhoneContact)){
+    phoneMessages.push({from:'Sen', chat:'AILE', text, me:true});
+    familyUnread = Math.max(0, familyUnread-1);
+    adjustMood(4,'Aile grubuna yazmak iyi geldi');
+    applyPsychDelta({yalnizlik:-5,moral:3});
+    simulateFamilyGroupReply(text);
+    renderPhone();
+    return;
+  }
+  phoneMessages.push({from:activePhoneContact, text, me:true});
   const replies = [
     'Alindi. Logbook notunu unutma.',
     'Tamam stajyer, bunu vardiya devrine ekle.',
     'Guzel. Bir sonraki kontrolde tekrar teyit et.',
     'Anlasildi. Emniyetli tarafta kal.'
   ];
-  const familyReplies = [
-    'Sesini duymak iyi geldi. Yorulduysan firsat bulunca biraz uyu.',
-    'Merak etme, biz iyiyiz. Sen kendine dikkat et.',
-    'Limana varinca foto at, herkes seni soruyor.',
-    'Gurur duyuyoruz ama vardiyada dikkatini dagitma.'
-  ];
-  const crewReplies = activePhoneContact === 'Anne' || activePhoneContact === 'Baba' || activePhoneContact === 'Kardes'
-    ? familyReplies
-    : replies;
-  if(activePhoneContact === 'Anne' || activePhoneContact === 'Baba' || activePhoneContact === 'Kardes'){
-    familyUnread = Math.max(0, familyUnread-1);
-    adjustMood(4,'Aileyle mesajlasmak iyi geldi');
-    applyPsychDelta({yalnizlik:-5,moral:3});
-  }
   setTimeout(()=>{
-    phoneMessages.push({from:activePhoneContact, text:crewReplies[Math.floor(Math.random()*crewReplies.length)], me:false});
+    phoneMessages.push({from:activePhoneContact, text:replies[Math.floor(Math.random()*replies.length)], me:false});
     renderPhone();
   }, 450);
   renderPhone();
 }
 function pushPhoneMessage(from,text,opts={}){
+  ensureFamilyGroup();
+  if(familyNames().includes(from)){
+    pushFamilyGroupMessage(from,text,opts);
+    return;
+  }
   phoneMessages.push({from,text,me:false});
   if(phoneMessages.length > 80) phoneMessages = phoneMessages.slice(-80);
   if(opts.open) phoneOpen = true;
@@ -15877,8 +15949,7 @@ function maybeSendScenePhoneMessage(sc, blob){
       Baba:['Gemide isler yolunda mi? Kaptanin sozunu dinle, acele karar verme.','Deniz sakaya gelmez. Cihazlari iki kere kontrol et.'],
       Kardes:['Abi/abla denizden foto at. Telefon cekiyor mu orada?','Sen oyundaki gibi kaptan oldun mu artik?']
     };
-    pushPhoneMessage(family, lines[family][Math.floor(Math.random()*lines[family].length)]);
-    familyUnread++;
+    pushFamilyGroupMessage(family, lines[family][Math.floor(Math.random()*lines[family].length)]);
     if(familyUnread>=4){
       adjustMood(-3,'Aile mesajlarini cevapsiz biraktin');
       applyPsychDelta({yalnizlik:4});
@@ -15920,6 +15991,7 @@ function maybeQueueDevicePracticeFromScene(sc,c2){
   addWatchFeed(`Egitim gorevi: ${name}`, 'warn');
 }
 function renderPhone(){
+  ensureFamilyGroup();
   const phone = document.getElementById('ship-phone');
   const body = document.getElementById('phone-body');
   const clock = document.getElementById('phone-clock');
@@ -15937,7 +16009,7 @@ function renderPhone(){
       <input id="phone-new-name" placeholder="Isim">
       <input id="phone-new-number" placeholder="Numara / Kanal">
       <button class="phone-small-btn" onclick="addPhoneContact()">Numara ekle</button>
-    </div>` + phoneContacts.map(c=>`<div class="phone-contact"><div><b>${phoneSafe(c.name)}</b><small>${phoneSafe(c.number)} · ${phoneSafe(c.role)}</small></div><button class="phone-small-btn" onclick="setPhoneContact('${String(c.name).replace(/'/g,"\\'")}')">Mesaj</button></div>`).join('');
+    </div>` + phoneContacts.map(c=>`<div class="phone-contact ${c.name==='AILE'?'group':''}"><div><b>${phoneSafe(c.name)}</b><small>${phoneSafe(c.number)} · ${phoneSafe(c.role)}</small></div><button class="phone-small-btn" onclick="setPhoneContact('${String(c.name).replace(/'/g,"\\'")}')">Mesaj</button></div>`).join('');
     return;
   }
   if(phoneTab === 'web'){
@@ -15958,8 +16030,14 @@ function renderPhone(){
     </div>`;
     return;
   }
-  const visible = phoneMessages.filter(m=>m.me || m.from === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit','Anne','Baba','Kardes','Egitim'].includes(m.from)).slice(-28);
-  body.innerHTML = visible.map(m=>`<div class="phone-msg ${m.me?'me':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${phoneSafe(m.text)}</div></div>`).join('');
+  const visible = isFamilyChat(activePhoneContact)
+    ? phoneMessages.filter(m=>(m.chat || '') === 'AILE' || familyNames().includes(m.from)).slice(-36)
+    : phoneMessages.filter(m=>{
+        const chat = m.chat || m.from;
+        if(chat === 'AILE' || familyNames().includes(m.from)) return false;
+        return m.me || m.from === activePhoneContact || chat === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit','Egitim','Şirket'].includes(m.from);
+      }).slice(-28);
+  body.innerHTML = visible.map(m=>`<div class="phone-msg ${m.me?'me':''} ${isFamilyChat(activePhoneContact)&&!m.me?'family':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${phoneSafe(m.text)}</div></div>`).join('');
   body.scrollTop = body.scrollHeight;
 }
 
@@ -15974,7 +16052,7 @@ function phoneSiteCards(key){
     home:[
       `Saat ${document.getElementById('tbd')?.textContent || '--:--'} · ${watchState.code} vardiyasi`,
       `Son gemi ici not: ${watchFeedItems[0]?.text || 'Cihazlar normal'}`,
-      `Aileden okunmamis gibi duran mesajlar: ${phoneMessages.filter(m=>['Anne','Baba','Kardes'].includes(m.from) && !m.me).slice(-3).length}`
+      `AILE grubu okunmamis: ${familyUnread}`
     ],
     weather:[
       `Swell: ${voyagePressure.swell} · Gorus: ${voyagePressure.visibility}`,
