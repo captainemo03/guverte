@@ -4095,18 +4095,18 @@ const KONTRAT_DEFS={
 let pn="Stajyer", sn="M/V Ege Meltem";
 let selYear=2018, selType="kuru", selKontrat=0;
 const PLAYER_LOOK = {
-  skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43'],
+  skin:['#f2c7a5','#d9a27c','#b77858','#8d5a43','#6f4637','#e8b48f'],
   base:['male','female'],
   model:['0','1','2','3'],
-  age:['young','mid','veteran'],
-  pose:['front','angled','command'],
-  scene:['opensea','harbor','night','strait','storm'],
-  face:['soft','sharp'],
-  hair:['short','swept','waves','crop','parted','slick','bob','quiff','curly','bun'],
-  beard:['clean','trim','full'],
-  hairColor:['#1e1612','#3a271b','#6a4b35','#202735'],
-  eye:['#3f2c22','#496b8d','#577149','#697089'],
-  uniform:['classic','dress','duty']
+  age:['young','mid','veteran','senior'],
+  pose:['front','angled','command','relaxed','bridgewing'],
+  scene:['opensea','harbor','night','strait','storm','engine','galley','deck'],
+  face:['soft','sharp','round','long','square'],
+  hair:['short','swept','waves','crop','parted','slick','bob','quiff','curly','bun','buzz','fade','undercut','long','ponytail','braid'],
+  beard:['clean','stubble','trim','goatee','moustache','full'],
+  hairColor:['#1e1612','#3a271b','#6a4b35','#202735','#b48a55','#d7d0bd'],
+  eye:['#3f2c22','#496b8d','#577149','#697089','#2d5d66','#765a3a'],
+  uniform:['classic','dress','duty','engine','deck','galley','cadet']
 };
 let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',scene:'opensea',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
 let playerReferencePhoto = '';
@@ -4117,13 +4117,21 @@ const PLAYER_PHOTO_MODELS = {
     0:{sheetIndex:0,label:'Atlas',hair:'quiff',beard:'trim',face:'sharp',hairColor:'#1e1612'},
     2:{sheetIndex:2,label:'Kuzey',hair:'slick',beard:'clean',face:'sharp',hairColor:'#1e1612'},
     4:{sheetIndex:4,label:'Mert',hair:'swept',beard:'clean',face:'soft',hairColor:'#6a4b35'},
-    6:{sheetIndex:6,label:'Baran',hair:'curly',beard:'full',face:'sharp',hairColor:'#1e1612'}
+    6:{sheetIndex:6,label:'Baran',hair:'curly',beard:'full',face:'sharp',hairColor:'#1e1612'},
+    8:{sheetIndex:0,label:'Emir',hair:'fade',beard:'stubble',face:'square',hairColor:'#202735'},
+    10:{sheetIndex:2,label:'Aras',hair:'buzz',beard:'goatee',face:'long',hairColor:'#3a271b'},
+    12:{sheetIndex:4,label:'Tuna',hair:'undercut',beard:'moustache',face:'round',hairColor:'#b48a55'},
+    14:{sheetIndex:6,label:'Kaan',hair:'long',beard:'full',face:'square',hairColor:'#1e1612'}
   },
   female:{
     1:{sheetIndex:1,label:'Lina',hair:'bun',beard:'clean',face:'soft',hairColor:'#6a4b35'},
     3:{sheetIndex:3,label:'Alya',hair:'slick',beard:'clean',face:'sharp',hairColor:'#1e1612'},
     5:{sheetIndex:5,label:'Deniz',hair:'waves',beard:'clean',face:'soft',hairColor:'#1e1612'},
-    7:{sheetIndex:7,label:'Ece',hair:'bob',beard:'clean',face:'sharp',hairColor:'#6a4b35'}
+    7:{sheetIndex:7,label:'Ece',hair:'bob',beard:'clean',face:'sharp',hairColor:'#6a4b35'},
+    9:{sheetIndex:1,label:'Mina',hair:'ponytail',beard:'clean',face:'round',hairColor:'#202735'},
+    11:{sheetIndex:3,label:'Selin',hair:'braid',beard:'clean',face:'long',hairColor:'#3a271b'},
+    13:{sheetIndex:5,label:'Derya',hair:'long',beard:'clean',face:'square',hairColor:'#b48a55'},
+    15:{sheetIndex:7,label:'Nehir',hair:'crop',beard:'clean',face:'soft',hairColor:'#d7d0bd'}
   }
 };
 const crewPortraits = {};
@@ -4165,12 +4173,12 @@ function inferPortraitBase(def={}){
 const PLAYER_MODEL_PRESETS = PLAYER_PHOTO_MODELS;
 const OFFICER_SHEET_POOLS = {
   young:{
-    male:[0,2,4,6],
-    female:[1,3,5,7]
+    male:[0,2,4,6,8,10,12,14],
+    female:[1,3,5,7,9,11,13,15]
   },
   mid:{
-    male:[0,2,4,5,7],
-    female:[1,3,6]
+    male:[0,2,4,6,8,10,12,14],
+    female:[1,3,5,7,9,11,13,15]
   }
 };
 const CREATOR_SCENE_LABELS = {
@@ -4178,12 +4186,17 @@ const CREATOR_SCENE_LABELS = {
   harbor:'Liman',
   night:'Gece Vardiyasi',
   strait:'Bogaz Gecisi',
-  storm:'Firtina'
+  storm:'Firtina',
+  engine:'Makine',
+  galley:'Kuzine',
+  deck:'Guverte'
 };
 const CREATOR_POSE_LABELS = {
   front:'Duz',
   angled:'3/4',
-  command:'Komut'
+  command:'Komut',
+  relaxed:'Rahat',
+  bridgewing:'Kanat'
 };
 const TRANSPARENT_SHEET_CACHE = {};
 const TRANSPARENT_SHEET_PENDING = new Set();
@@ -7793,7 +7806,11 @@ function getPlayerPortraitConfig(){
   const uniformMap = {
     classic:{suitColor:'#1b2435', shirtColor:'#f2f0ea', tieColor:'#13171d', stripes:1},
     dress:{suitColor:'#141f2f', shirtColor:'#f6f4ef', tieColor:'#0f141b', stripes:2},
-    duty:{suitColor:'#223244', shirtColor:'#eef1f4', tieColor:'#16202b', stripes:1}
+    duty:{suitColor:'#223244', shirtColor:'#eef1f4', tieColor:'#16202b', stripes:1},
+    engine:{suitColor:'#263548', shirtColor:'#d5dee8', tieColor:'#17202a', stripes:0},
+    deck:{suitColor:'#1d3142', shirtColor:'#e6edf3', tieColor:'#15202d', stripes:0},
+    galley:{suitColor:'#f0f2ee', shirtColor:'#ffffff', tieColor:'#2c333b', stripes:0},
+    cadet:{suitColor:'#162234', shirtColor:'#edf0f2', tieColor:'#11161d', stripes:1}
   };
   const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
   const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[playerAppearance.model] || {};
@@ -7898,8 +7915,8 @@ function getPortraitSheetUrl(src){
 }
 
 function getPlayerModelPool(base, age=playerAppearance.age){
-  if(age==='veteran') return OFFICER_SHEET_POOLS.mid[base] || OFFICER_SHEET_POOLS.mid.male;
-  return OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
+  if(age==='veteran' || age==='senior') return OFFICER_SHEET_POOLS.mid[base] || OFFICER_SHEET_POOLS.mid.male;
+  return OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young[base] || OFFICER_SHEET_POOLS.young.male;
 }
 
 function syncPlayerAppearanceFromModel(){
@@ -7914,6 +7931,10 @@ function syncPlayerAppearanceFromModel(){
 
 function resolvePlayerModelFromTraits(){
   if(playerAppearance.base==='female'){
+    if(playerAppearance.hair==='ponytail') return 9;
+    if(playerAppearance.hair==='braid') return 11;
+    if(playerAppearance.hair==='long') return 13;
+    if(playerAppearance.hair==='crop' || playerAppearance.hairColor==='#d7d0bd') return 15;
     if(playerAppearance.age==='veteran'){
       if(playerAppearance.hair==='bob') return 7;
       if(playerAppearance.face==='sharp' || playerAppearance.hair==='slick') return 3;
@@ -7925,6 +7946,10 @@ function resolvePlayerModelFromTraits(){
     }
     return (playerAppearance.hair==='slick' || playerAppearance.face==='sharp') ? 3 : 1;
   }
+  if(playerAppearance.hair==='fade' || playerAppearance.beard==='stubble') return 8;
+  if(playerAppearance.hair==='buzz' || playerAppearance.beard==='goatee') return 10;
+  if(playerAppearance.hair==='undercut' || playerAppearance.beard==='moustache' || playerAppearance.hairColor==='#b48a55') return 12;
+  if(playerAppearance.hair==='long' || playerAppearance.face==='square') return 14;
   if(playerAppearance.age==='veteran'){
     if(playerAppearance.beard==='full') return 6;
     if(playerAppearance.hair==='slick' || playerAppearance.face==='sharp') return 2;
@@ -7949,12 +7974,18 @@ function getPortraitSpriteIndex(cfg={}){
   const face = cfg.face || 'soft';
   const hairColor = cfg.hairColor || '#1e1612';
   if(base==='female'){
+    if(hair==='ponytail') return 1;
+    if(hair==='braid') return 3;
+    if(hair==='long') return 5;
     if(hair==='bob') return 7;
     if(hair==='bun') return 1;
     if(hair==='slick') return 3;
     if(hair==='curly') return 5;
     return hairColor==='#6a4b35' ? 1 : 3;
   }
+  if(hair==='fade' || hair==='undercut') return 0;
+  if(hair==='buzz') return 2;
+  if(hair==='long') return 6;
   if(hair==='curly') return 6;
   if(hair==='crop' || hair==='short') return 2;
   if(hair==='quiff' || hair==='swept') return 0;
@@ -8459,8 +8490,8 @@ function renderCreatorRow(elId, values, selected, kind){
 function renderCharacterCreator(){
   const modelPool = getPlayerModelPool(playerAppearance.base, playerAppearance.age).map(String);
   const hairPool = playerAppearance.base==='female'
-    ? ['bun','slick','waves','bob']
-    : ['quiff','slick','swept','curly'];
+    ? ['bun','slick','waves','bob','crop','curly','long','ponytail','braid']
+    : ['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'];
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-age', PLAYER_LOOK.age, playerAppearance.age, 'text');
@@ -11351,6 +11382,37 @@ const ROUTE_PORTS = [
   {name:"Batı Afrika - Avrupa Tanker Rotasi", x:70, y:146, visited:false, kind:"route"},
   {name:"ABD Korfezi - Avrupa Bulk Hatti", x:44, y:92, visited:false, kind:"route"},
   {name:"Kizildeniz - Babulmendep - Hint Okyanusu Rotasi", x:286, y:206, visited:false, kind:"route"},
+  {name:"Kuzey Denizi - Baltik Feeder Hatti", x:62, y:18, visited:false, kind:"route"},
+  {name:"Norvec - Avrupa LNG Hatti", x:60, y:2, visited:false, kind:"route"},
+  {name:"Karadeniz - Akdeniz Tahil Koridoru", x:190, y:74, visited:false, kind:"route"},
+  {name:"Turkiye - Adriyatik Ro-Ro Hatti", x:118, y:104, visited:false, kind:"route"},
+  {name:"Doğu Akdeniz Enerji Hatti", x:202, y:174, visited:false, kind:"route"},
+  {name:"Suveys - Akdeniz Konteyner Hatti", x:232, y:190, visited:false, kind:"route"},
+  {name:"Arap Denizi - Malakka Ham Petrol Hatti", x:324, y:174, visited:false, kind:"route"},
+  {name:"Hurmuz - Uzak Dogu LNG Hatti", x:356, y:184, visited:false, kind:"route"},
+  {name:"Malakka - Singapur Bunker Gecidi", x:350, y:164, visited:false, kind:"route"},
+  {name:"Guney Cin Denizi Ana Konteyner Hatti", x:382, y:130, visited:false, kind:"route"},
+  {name:"Tayvan - Japonya Feeder Hatti", x:400, y:100, visited:false, kind:"route"},
+  {name:"Kore - Cin Konteyner Hatti", x:396, y:82, visited:false, kind:"route"},
+  {name:"Avustralya - Cin Demir Cevheri Hatti", x:392, y:186, visited:false, kind:"route"},
+  {name:"Endonezya - Cin Komur Hatti", x:366, y:176, visited:false, kind:"route"},
+  {name:"Cape Town Bunker Sapma Hatti", x:134, y:236, visited:false, kind:"route"},
+  {name:"Batı Afrika Offshore Supply Hatti", x:96, y:190, visited:false, kind:"route"},
+  {name:"Brezilya - Avrupa Meyve / Reefer Hatti", x:54, y:214, visited:false, kind:"route"},
+  {name:"Panama - ABD Bati Kiyisi Hatti", x:18, y:142, visited:false, kind:"route"},
+  {name:"Panama - Uzak Dogu Konteyner Hatti", x:178, y:148, visited:false, kind:"route"},
+  {name:"Great Lakes - St. Lawrence Hatti", x:50, y:58, visited:false, kind:"route"},
+  {name:"Amazon Nehir Agzi Pilotaj Hatti", x:50, y:206, visited:false, kind:"waterway"},
+  {name:"Parana - River Plate Hatti", x:66, y:238, visited:false, kind:"waterway"},
+  {name:"Rio de la Plata", x:68, y:240, visited:false, kind:"waterway"},
+  {name:"Dardanel - Marmara - Bosphorus Zinciri", x:154, y:92, visited:false, kind:"waterway"},
+  {name:"Turkish Straits TSS", x:170, y:88, visited:false, kind:"waterway"},
+  {name:"Jebel Ali - Hurmuz Cikis Hatti", x:348, y:206, visited:false, kind:"route"},
+  {name:"Fujairah Bunker Anchorage", x:356, y:198, visited:false, kind:"waterway"},
+  {name:"Suez South Anchorage", x:246, y:212, visited:false, kind:"waterway"},
+  {name:"Port Klang - Malakka Approach", x:342, y:166, visited:false, kind:"waterway"},
+  {name:"Dover TSS - English Channel", x:32, y:26, visited:false, kind:"waterway"},
+  {name:"Singapore Strait TSS", x:352, y:166, visited:false, kind:"waterway"},
 ];
 
 let shipPosition = {x:85, y:130};
@@ -13697,6 +13759,55 @@ const GLOSSARY_TERMS = [
   ,{term:"Westbound Lane", meaning:"TSS veya ana trade route uzerinde bati yonlu trafik akisi icin ayrilan hat.", example:"Westbound lane'de hiz dusururken arka trafik de dikkatle izlenmelidir."}
   ,{term:"Waypoint Wheel-Over", meaning:"Bir waypoint'e gelmeden once dumen verilmeye baslanan donus noktasi mantigi.", example:"Waypoint wheel-over gec kalirsa TSS veya dar su girisi bozulabilir."}
   ,{term:"ETA Window", meaning:"Varisin kabul edilebilir zaman araligi; sadece tek saat degil operasyon penceresi mantigi.", example:"ETA window kacarsa pilot, tug ve berth zinciri tekrar planlanir."}
+  ,{term:"Noon Report", meaning:"Geminin her gun belirli saatte ofise gonderdigi mevki, mesafe, yakit, hava ve ETA raporu.", example:"Noon report yanlis yakit degeri verirse sefer ekonomisi de yanlis okunur."}
+  ,{term:"Sea Passage Plan", meaning:"Liman cikisindan varis limanina kadar rota, waypoint, emniyet marjı ve hava durumunu kapsayan seyir plani.", example:"Sea passage plan sadece cizgi degil, risklerin yazili dusunulmus halidir."}
+  ,{term:"Bridge Resource Management", meaning:"Kopruustunde insan, cihaz, zaman ve iletisim kaynaklarini birlikte kullanma disiplini; BRM.", example:"BRM iyi degilse tek zabit dogru bile bilse ekip resmi kacirabilir."}
+  ,{term:"Challenge and Response", meaning:"Pilotaj veya kritik manevrada bir komutun sorgulanabilir ve teyitli sekilde uygulanmasi teknigi.", example:"Challenge and response sayesinde yanlis heading erken yakalandi."}
+  ,{term:"Closed-Loop Communication", meaning:"Komutun verilmesi, tekrar edilmesi ve uygulanmasinin teyit edilmesiyle tamamlanan iletisim dongusu.", example:"Closed-loop communication olmadiginda makine telgrafi hatasi buyur."}
+  ,{term:"Position Cross-Check", meaning:"Mevkiyi GPS, radar range/bearing, visual mark, echo sounder veya AIS gibi farkli kaynaklarla dogrulama.", example:"Position cross-check ECDIS'e kor guveni azaltir."}
+  ,{term:"Sensor Integrity", meaning:"ECDIS/radar/autopilot gibi cihazlara gelen GPS, gyro, speed log ve AIS verilerinin guvenilirlik durumu.", example:"Sensor integrity zayifsa ekran guzel gorunse bile karar bozulabilir."}
+  ,{term:"Route Monitoring", meaning:"Aktif rotanin ECDIS veya seyir sistemi uzerinde alarm, XTD, WP ve sensorlerle surekli izlenmesi.", example:"Route monitoring kapaliysa rota plani kagit ustunde kalir."}
+  ,{term:"XTD Limit", meaning:"Cross Track Distance limiti; geminin rota hattindan izin verilen yanal sapma siniri.", example:"XTD limit dar kanalda acik denizdeki gibi genis tutulmaz."}
+  ,{term:"Guard Zone", meaning:"Radar uzerinde belirlenen alana hedef girerse alarm veren izleme bolgesi.", example:"Guard zone sisli gecede erken uyari icin kuruldu."}
+  ,{term:"Trial Manoeuvre", meaning:"ARPA/radar uzerinde planlanan rota veya hiz degisikliginin hedeflerle etkisini onceden deneme.", example:"Trial manoeuvre CPA'yi artıracak manevrayi gormeye yaradi."}
+  ,{term:"Parallel Indexing", meaning:"Radar uzerinde sahil veya sabit hedefe paralel cizgi ile emniyetli rota takibi yapma yontemi.", example:"Parallel indexing boğazda rota hattini sessizce kontrol eder."}
+  ,{term:"Wheel-Over Point", meaning:"Donuse baslanacak nokta; geminin donus yaricapi ve hizina gore waypoint'ten once belirlenir.", example:"Wheel-over point kacarsa berth approach hattina gec kalinir."}
+  ,{term:"Tug Line", meaning:"Romorkorden gemiye veya gemiden romorkore verilen cekme/itme amacli hat.", example:"Tug line bos kalinca pilot tekrar tension istedi."}
+  ,{term:"Gob Rope", meaning:"Romorkorun cekme noktasini kontrol etmek ve guvenli aci saglamak icin kullanilan duzen.", example:"Gob rope ayari yanlis olursa tug performansi dusar."}
+  ,{term:"Bollard Pull", meaning:"Romorkorun statik cekme gucunu ton olarak ifade eden kapasite.", example:"Pilot iki adet 60 ton bollard pull tug istedi."}
+  ,{term:"Heaving Messenger", meaning:"Daha kalin halati cekebilmek icin atilan ilk ince hat veya haberci.", example:"Heaving messenger islak guvertede dolasinca operasyon durdu."}
+  ,{term:"Breast Line", meaning:"Gemiyi rihtima dogru/rihtimdan uzak yanal hareketlere karsi tutan baglama halati.", example:"Breast line olmadan gemi ruzgarda bordadan acildi."}
+  ,{term:"Shore Power", meaning:"Limanda geminin elektrik ihtiyacini karadan almasi sistemi.", example:"Shore power baglaninca yardimci jeneratör durduruldu."}
+  ,{term:"Cold Ironing", meaning:"Geminin limanda kendi jeneratörlerini kapatip karadan elektrik kullanmasi uygulamasi.", example:"Cold ironing emisyonu dusurur ama baglanti disiplini ister."}
+  ,{term:"Bunker Delivery Note", meaning:"Alinan yakitin miktar, kalite, sulfur ve teslim detaylarini gosteren resmi belge; BDN.", example:"BDN olmadan bunker operasyonu ticari olarak eksik kalir."}
+  ,{term:"MARPOL Sample", meaning:"Bunker yakitindan kurala uygun alinan ve muhurlenen resmi numune.", example:"MARPOL sample numarasi logbook ve BDN ile uyumlu yazildi."}
+  ,{term:"Drip Tray", meaning:"Manifold veya transfer noktasi altinda damlama/sizinti toplamak icin bulunan tepsi.", example:"Drip tray bos degilse bunker baslatilmaz."}
+  ,{term:"SOPEP Locker", meaning:"Oil pollution acil durum ekipmanlarinin tutuldugu kilitli/etiketli alan.", example:"SOPEP locker kilidi ve envanteri bunker oncesi kontrol edildi."}
+  ,{term:"Oil Record Book", meaning:"Yakit, sludge, bilge ve benzeri petrol kaynakli islemlerin kaydedildigi resmi defter; ORB.", example:"Oil Record Book ile fiili transfer saatleri uyusmali."}
+  ,{term:"Garbage Record Book", meaning:"MARPOL Annex V kapsaminda cop atimi, teslimi ve ayrimini kaydeden defter.", example:"Garbage record book bosluklari PSC'de soru dogurur."}
+  ,{term:"Ballast Water Management Plan", meaning:"Ballast suyunun alinmasi, degisimi, aritimi ve kaydi icin gemiye ozgu plan.", example:"Ballast water management plan olmadan transfer sadece pompa isi degildir."}
+  ,{term:"IMDG Segregation", meaning:"Tehlikeli yuklerin siniflarina gore birbirinden emniyetli ayrilma kurali.", example:"IMDG segregation hatasi stowage planini gecersiz yapabilir."}
+  ,{term:"UN Number", meaning:"Tehlikeli maddelerin uluslararasi tanim numarasi.", example:"UN number yanlis okunursa placard ve manifest de yanlis gider."}
+  ,{term:"Packing Group", meaning:"Tehlikeli yuklerde tehlike derecesini gosteren paketleme grubu.", example:"Packing group bilgisi stowage riskini etkiler."}
+  ,{term:"Flash Point", meaning:"Bir sivi buharinin tutusabilir karisim olusturdugu en dusuk sicaklik.", example:"Flash point dusuk yukler ekstra yangin disiplini ister."}
+  ,{term:"Hot Work Permit", meaning:"Kaynak, kesme veya kivilcim cikarabilecek isler icin verilen kontrollu izin.", example:"Hot work permit olmadan guvertede spiral bile calistirilmaz."}
+  ,{term:"Lock Out Tag Out", meaning:"Enerji kaynaginin izole edilip etiketlenerek istemsiz calismayi onleme sistemi; LOTO.", example:"LOTO yapilmadan elektrik panosunda is baslamaz."}
+  ,{term:"Gas Detector Bump Test", meaning:"Gaz dedektorunun tepki verip vermedigini test gaziyle hizli kontrol etme islemi.", example:"Bump test yapilmayan dedektor kapali mahal icin guven vermez."}
+  ,{term:"Permit Issuer", meaning:"Permit to work sisteminde izni kontrol edip veren yetkili kisi.", example:"Permit issuer sahayi gormeden imza atarsa sistem kagida doner."}
+  ,{term:"Toolbox Talk", meaning:"Is oncesi risk, rol, ekipman ve acil durumun kisa ekip brifingi.", example:"Toolbox talk iyi gecerse guvertede herkes ayni resmi gorur."}
+  ,{term:"Dynamic Risk Assessment", meaning:"Is devam ederken sartlar degistiginde riskleri yeniden degerlendirme.", example:"Ruzgar artinca dynamic risk assessment ile is durduruldu."}
+  ,{term:"Stop Work Authority", meaning:"Emniyetsiz durum goren kisinin isi durdurma yetkisi.", example:"Stop work authority rütbe degil emniyet meselesidir."}
+  ,{term:"Near Miss", meaning:"Kaza olmadan atlatilan ama potansiyel zarar tasiyan olay.", example:"Near miss raporu yazilmazsa ayni olay bir sonraki sefer kaza olur."}
+  ,{term:"Root Cause", meaning:"Bir olayın yuzeydeki belirtisinin altindaki temel neden veya nedenler zinciri.", example:"Root cause sadece 'dikkatsizlik' yazip gecilmez."}
+  ,{term:"Corrective Action", meaning:"Tespit edilen eksigi gidermek icin yapilan somut duzeltme islemi.", example:"Corrective action tarih, sorumlu ve kanit ister."}
+  ,{term:"Preventive Action", meaning:"Ayni olay tekrar olmasin diye onceden kurulan onleyici tedbir.", example:"Preventive action proseduru ve egitimi birlikte degistirdi."}
+  ,{term:"Defect List", meaning:"Gemide takip edilen ariza, eksik ve duzeltme maddelerinin listesi.", example:"Defect list guncel degilse ofis ve PSC ayni soruyu sorar."}
+  ,{term:"Planned Maintenance System", meaning:"Bakim, test ve kontrol islerini planlayan ve kaydeden sistem; PMS.", example:"PMS gecikmeleri survey sirasinda cabuk gorunur."}
+  ,{term:"Critical Equipment", meaning:"Arizasi emniyet, çevre veya operasyonu ciddi etkileyebilecek ekipman.", example:"Critical equipment icin bypass ve erteleme karari daha siki tutulur."}
+  ,{term:"Redundancy", meaning:"Bir sistem arizalansa da yedek sistemle fonksiyonun surdurulebilmesi.", example:"Steering gear redundancy liman oncesi test edilir."}
+  ,{term:"Fail-Safe", meaning:"Ariza halinde sistemi daha emniyetli duruma gecirecek tasarim mantigi.", example:"Fail-safe vana enerjisi kesilince kapandi."}
+  ,{term:"Blackout Recovery", meaning:"Gemide elektrik kaybi sonrasi jeneratör, switchboard ve kritik sistemleri geri alma sureci.", example:"Blackout recovery sirasi ezbere degil prosedurle yapilir."}
+  ,{term:"Dead Ship", meaning:"Geminin kendi gucuyle sevk ve elektrik uretemedigi ciddi durum.", example:"Dead ship condition icin acil cekme ve haberlesme planlandi."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
