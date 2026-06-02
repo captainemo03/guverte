@@ -7701,6 +7701,11 @@ let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
 let delayedConsequences=[];
 let playerFlags={securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
 let careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
+const CAREER_RANKS=['Stajyer','3. Zabit','2. Zabit','1. Zabit','Süvari'];
+let careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
+let specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
+let shipOffers=[];
+let familyUnread=0;
 let dialogueHistory=[];
 let livingShipState={thanks:false,note:false,argue:false,complaint:false};
 let sceneChoiceTimer=null;
@@ -10809,9 +10814,172 @@ function getCareerSpecialization(){
   return {top:labels[ranked[0][0]], second:labels[ranked[1][0]], raw:scores};
 }
 
+function getRankName(){
+  return CAREER_RANKS[Math.max(0, Math.min(CAREER_RANKS.length-1, careerState.rankIndex||0))];
+}
+
+function updateSpecialtyFromContract(){
+  const domains = choicesMade.map(c=>c.domain || '');
+  domains.forEach(d=>{
+    if(/bridge|seyir|radar|ecdis|colreg/.test(d)) specialtyXP.navigation += 1;
+    if(/deck|yuk|cargo|lashing|stowage/.test(d)) specialtyXP.container += selType==='kont' ? 2 : 1;
+    if(/engine|tanker|lng|manifold|cargo/.test(d)){
+      if(selType==='lng') specialtyXP.lng += 2;
+      else specialtyXP.tanker += 1;
+    }
+    if(/compliance|emniyet|fire|mob|permit|psc/.test(d)) specialtyXP.safety += 1;
+    if(/crew|murettebat|psikoloji|conflict/.test(d)) specialtyXP.people += 1;
+  });
+  if(selType==='bulk') specialtyXP.bulk += 3;
+  if(selType==='roro') specialtyXP.roro += 3;
+}
+
+function calculatePromotionReport(){
+  const avg = (stats.cesaret+stats.bilgi+stats.sayginlik)/3;
+  const rank = careerState.rankIndex || 0;
+  const required = [52,58,66,74,999][rank] || 999;
+  const eligible = avg >= required && stats.sayginlik >= 45 && careerState.companyOpinion >= 38 && playerFlags.securityBreach < 3;
+  const nextRank = CAREER_RANKS[Math.min(CAREER_RANKS.length-1, rank+1)];
+  return {eligible, avg:Math.round(avg), required, nextRank};
+}
+
+function closeContractCareerBooks(){
+  if(careerState.lastContractClosed) return;
+  updateSpecialtyFromContract();
+  careerState.contracts += 1;
+  careerState.seaMonths += getContractTotalMonths();
+  careerState.leaveDays += Math.max(5, Math.round(getContractTotalMonths()*3));
+  careerState.money += Math.round((careerState.salary || 1200) * getContractTotalMonths());
+  careerState.companyOpinion = clamp((careerState.companyOpinion || 50) + Math.round((stats.sayginlik-50)/8) + (playerFlags.nearMiss ? -4 : 3) + (playerFlags.securityBreach ? -5 : 2));
+  const promo = calculatePromotionReport();
+  if(promo.eligible && careerState.rankIndex < CAREER_RANKS.length-1){
+    careerState.rankIndex += 1;
+    careerState.salary = Math.round((careerState.salary || 1200) * 1.32);
+    careerState.referenceLetters.push(`${selYear} ${sn}: ${promo.nextRank} terfi referansi`);
+    pushPhoneMessage('Şirket','Kontrat raporun olumlu. Terfi dosyan acildi: '+promo.nextRank+'.', {open:false});
+  }else{
+    careerState.referenceLetters.push(`${selYear} ${sn}: kontrat performans mektubu`);
+  }
+  careerState.lastContractClosed = true;
+  shipOffers = buildShipOffers();
+}
+
+function buildShipOffers(){
+  const basePay = careerState.salary || 1200;
+  return [
+    {key:'same', label:'Ayni Gemide Kal', type:selType, ship:sn, pay:basePay, note:'Ekip hafizasi aynen korunur.'},
+    {key:'container', label:'Konteyner Teklifi', type:'kont', ship:'M/V Atlas Express', pay:Math.round(basePay*1.08), note:'Bay-row-tier, reefer ve lashing agir basar.'},
+    {key:'tanker', label:'Tanker Teklifi', type:'tanker', ship:'M/T Marmara Star', pay:Math.round(basePay*1.18), note:'Manifold, ESD, inert gas ve cargo watch agirlasir.'},
+    {key:'lng', label:'LNG Teklifi', type:'lng', ship:'LNG Anatolia', pay:Math.round(basePay*1.28), note:'Reliquefaction, gas freeing ve compressor disiplini.'}
+  ];
+}
+
+function takeShipOffer(key){ continueContractOnShip(key || 'same'); }
+
+function openCareer(){ document.getElementById('career-panel')?.classList.add('show'); renderCareerPanel(); }
+function closeCareer(){ document.getElementById('career-panel')?.classList.remove('show'); }
+
+function doFreeTimeAction(key){
+  const actions={
+    study:{effect:{bilgi:6,dinclik:-3},mood:2,msg:'Kamarada not calistin; ECDIS/Radar kafanda biraz daha oturdu.'},
+    deck:{effect:{cesaret:4,bilgi:2,dinclik:-4},mood:1,msg:'Güverte turunda halat, iskele ve emniyet noktalarini tekrar gordun.'},
+    engine:{effect:{bilgi:5,dinclik:-5},mood:1,msg:'Makineye indin; alarm mantigi ve pompa hatlari daha netlesti.'},
+    cook:{effect:{sayginlik:3,dinclik:4},mood:5,msg:'Aşçıyla çay içtin; gemi biraz daha ev gibi hissettirdi.'},
+    sport:{effect:{dinclik:6,cesaret:2},mood:3,msg:'Kisa spor yaptin; beden toparlaninca kafa da toparlandi.'},
+    family:{effect:{dinclik:2},mood:8,msg:'Aileyi aradin; yalnizlik biraz azaldi.'}
+  };
+  const a=actions[key]; if(!a) return;
+  applyEffect(a.effect,{skipContractTick:true});
+  adjustMood(a.mood,a.msg);
+  if(key==='family'){ familyUnread=0; pushPhoneMessage('Anne','Sesini duymak iyi geldi. Kendine dikkat et.', {open:false}); }
+  addJournalEntry('[SERBEST ZAMAN] '+a.msg);
+  renderCareerPanel();
+}
+
+function buyCareerCourse(key){
+  const courses={
+    gmdss:{name:'GMDSS Refresher',cost:450,effect:{bilgi:8},xp:'safety'},
+    ecdis:{name:'ECDIS Refresh',cost:550,effect:{bilgi:10},xp:'navigation'},
+    tanker:{name:'Tanker Familiarization',cost:700,effect:{bilgi:7,sayginlik:2},xp:'tanker'},
+    brm:{name:'BRM / Bridge Resource Management',cost:500,effect:{bilgi:6,sayginlik:4},xp:'people'}
+  };
+  const c=courses[key]; if(!c) return;
+  if((careerState.money||0) < c.cost){ showNotif('!','Para Yetmedi',c.name+' icin yeterli bakiyen yok.'); return; }
+  careerState.money -= c.cost;
+  specialtyXP[c.xp] = (specialtyXP[c.xp]||0)+6;
+  applyEffect(c.effect,{skipContractTick:true});
+  addJournalEntry('[KURS] '+c.name+' tamamlandi.');
+  showNotif('✓','Kurs Tamamlandi',c.name+' bilgi ve kariyer dosyana eklendi.');
+  renderCareerPanel();
+}
+
+function runExamMode(key){
+  const exams={
+    colreg:{name:'COLREG Gorsel Sinav',gain:{bilgi:5,sayginlik:2},xp:'navigation'},
+    gmdss:{name:'GMDSS Cihaz Sinavi',gain:{bilgi:5},xp:'safety'},
+    ecdis:{name:'ECDIS Route Check Sinavi',gain:{bilgi:6},xp:'navigation'},
+    radar:{name:'Radar / ARPA Sinavi',gain:{bilgi:6},xp:'navigation'},
+    meteo:{name:'Meteoroloji Sinavi',gain:{bilgi:4},xp:'navigation'},
+    stability:{name:'Stabilite Sinavi',gain:{bilgi:5},xp:'bulk'},
+    ship:{name:'Gemi Yapisi Sinavi',gain:{bilgi:4},xp:'safety'}
+  };
+  const e=exams[key]; if(!e) return;
+  const pass = (stats.bilgi + Math.random()*45) > 48;
+  if(pass){
+    applyEffect(e.gain,{skipContractTick:true});
+    specialtyXP[e.xp]=(specialtyXP[e.xp]||0)+3;
+    showNotif('✓','Sinav Gecti',e.name+' kariyer dosyana islendi.');
+    addJournalEntry('[SINAV] '+e.name+' basarili.');
+  }else{
+    applyEffect({dinclik:-3},{skipContractTick:true});
+    showNotif('~','Sinav Zor Geldi',e.name+' tekrar calisma istiyor.');
+    addJournalEntry('[SINAV] '+e.name+' tekrar gerektiriyor.');
+  }
+  renderCareerPanel();
+}
+
+function getTopSpecialtyLabel(){
+  const labels={container:'Konteynerci',tanker:'Tankerci',bulk:'Bulkci',lng:'LNGci',offshore:'Offshore',roro:'Ro-Ro',safety:'Emniyetci',navigation:'Seyirci',people:'Insan Yoneten'};
+  const top=Object.entries(specialtyXP).sort((a,b)=>b[1]-a[1])[0] || ['navigation',0];
+  return `${labels[top[0]]||top[0]} (${top[1]})`;
+}
+
+function renderCareerPanel(){
+  const body=document.getElementById('career-body'); if(!body) return;
+  const promo=calculatePromotionReport();
+  const offers=(shipOffers.length?shipOffers:buildShipOffers());
+  body.innerHTML=`<div class="career-grid">
+    <div class="career-card"><b>Rütbe</b><strong>${getRankName()}</strong><br>Sonraki: ${promo.nextRank}<br>Terfi skoru: ${promo.avg}/${promo.required}</div>
+    <div class="career-card"><b>Para / Maaş</b><strong>$${careerState.money}</strong><br>Aylik: $${careerState.salary}<br>Izin: ${careerState.leaveDays} gun</div>
+    <div class="career-card"><b>Şirket Görüşü</b><strong>${careerState.companyOpinion}/100</strong><br>Kontrat: ${careerState.contracts}<br>Deniz ayi: ${careerState.seaMonths}</div>
+    <div class="career-card"><b>Uzmanlık</b><strong>${getTopSpecialtyLabel()}</strong><br>Referans: ${careerState.referenceLetters.length}</div>
+  </div>
+  <div class="career-card"><b>Serbest Zaman</b><div class="career-actions">
+    <button class="career-btn" onclick="doFreeTimeAction('study')">Kamarada Ders<small>Bilgi artar, biraz yorulursun.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('deck')">Güverte Turu<small>Pratik ve cesaret artar.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('engine')">Makineye İn<small>Teknik bilgi artar.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('cook')">Aşçıyla Çay<small>Moral ve saygınlık artar.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('sport')">Spor Yap<small>Dinçlik toparlar.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('family')">Aileyi Ara<small>Yalnızlık azalır.</small></button>
+  </div></div>
+  <div class="career-card"><b>Kurslar</b><div class="career-actions">
+    <button class="career-btn" onclick="buyCareerCourse('gmdss')">GMDSS Refresher<small>$450 · Haberleşme ve emniyet.</small></button>
+    <button class="career-btn" onclick="buyCareerCourse('ecdis')">ECDIS Refresh<small>$550 · Route check ve sensor.</small></button>
+    <button class="career-btn" onclick="buyCareerCourse('tanker')">Tanker Familiarization<small>$700 · Manifold / ESD / IG.</small></button>
+    <button class="career-btn" onclick="buyCareerCourse('brm')">BRM<small>$500 · Köprüüstü ekip yönetimi.</small></button>
+  </div></div>
+  <div class="career-card"><b>Denizcilik Sınav Modu</b><div class="career-actions">
+    ${['colreg','gmdss','ecdis','radar','meteo','stability','ship'].map(k=>`<button class="career-btn" onclick="runExamMode('${k}')">${k.toUpperCase()}<small>Mini sınav, başarıya göre kariyer puanı.</small></button>`).join('')}
+  </div></div>
+  <div class="career-card"><b>Kontrat Sonu Teklifleri</b><div class="offer-grid">
+    ${offers.map(o=>`<button class="offer-btn" onclick="takeShipOffer('${o.key}')"><b>${o.label}</b>${o.ship}<br>$${o.pay}/ay<br>${o.note}</button>`).join('')}
+  </div></div>`;
+}
+
 function showEnd(){
   clearSceneChoiceTimer();
   stopAllMusic();
+  closeContractCareerBooks();
   document.getElementById('game').style.display='none';
   document.getElementById('endscr').style.display='flex';
 
@@ -10876,6 +11044,9 @@ function showEnd(){
   verdict+=` <br><strong>Ruh Hali:</strong> ${mood}/100 - ${moodLabel}.`;
   verdict+=` <br><strong>Psikoloji Cizgisi:</strong> moral ${psyche.moral}, yalnizlik ${psyche.yalnizlik}, ofke ${psyche.ofke}, tukenme ${psyche.tukenme}, ekip uyumu ${psyche.uyum} — ${harmonyLabel}.`;
   verdict+=` <br><strong>Kontrat Ritmi:</strong> 10 sahne = 1 ay. Bu kontratta ${completedScenes}/${contractTotal} sahne, yaklasik ${totalMonths} ay tamamlandi.`;
+  verdict+=` <br><strong>Kariyer:</strong> rütbe ${getRankName()}, şirket görüşü ${careerState.companyOpinion}/100, bakiye $${careerState.money}, izin ${careerState.leaveDays} gün.`;
+  verdict+=` <br><strong>Gemi Tipi Uzmanlığı:</strong> ${getTopSpecialtyLabel()}.`;
+  verdict+=` <br><strong>Terfi Mülakati:</strong> "Neden ${calculatePromotionReport().nextRank} icin hazirsin?", "Son near miss sana ne ogretti?", "Radar ve AIS celisirse hangisini nasil teyit edersin?"`;
   verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
   verdict+=` <br><br><strong>Karar:</strong> Gemide kalirsan ayni ekip hafizasi, statlar, telefon mesajlari ve kayitlarla yeni senaryo paketine devam edersin. Ayrilirsan bu kontrat kariyer raporu olarak kapanir.`;
   document.getElementById('ende').textContent=emoji;
@@ -10890,12 +11061,24 @@ function showEnd(){
     '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.dinclik)+'</div><div class="ecl">DİNÇLİK</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.uyum)+'</div><div class="ecl">EKİP UYUMU</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#8de0b4;">'+Math.round(psyche.moral)+'</div><div class="ecl">MORAL</div></div>';
+  const actions = document.querySelector('#endscr .end-actions');
+  if(actions){
+    actions.innerHTML = shipOffers.map(o=>`<button class="rbtn" onclick="takeShipOffer('${o.key}')">${o.label}<br><small>${o.ship} · $${o.pay}/ay</small></button>`).join('') +
+      '<button class="rbtn secondary" onclick="restartGame()">Ayril / Yeni Oyun</button>';
+  }
   saveGameState(false);
 }
 
-function continueContractOnShip(){
+function continueContractOnShip(offerKey='same'){
   clearSceneChoiceTimer();
   const stObj=STYPES.find(x=>x.key===selType);
+  const offer = (shipOffers.length?shipOffers:buildShipOffers()).find(o=>o.key===offerKey) || buildShipOffers()[0];
+  if(offer && offer.key !== 'same'){
+    selType = offer.type || selType;
+    sn = offer.ship || sn;
+    careerState.salary = offer.pay || careerState.salary;
+    pushPhoneMessage('Şirket',`${offer.label} kabul edildi. Yeni gemi: ${sn}.`, {open:false});
+  }
   const oldFinal = sceneQueue.find(s=>s.id==='FINAL') || null;
   selectedStartPort=START_PORTS[Math.floor(Math.random()*START_PORTS.length)];
   selectedStartScenario=START_SCENARIOS[Math.floor(Math.random()*START_SCENARIOS.length)];
@@ -10913,6 +11096,8 @@ function continueContractOnShip(){
   else sceneQueue.push(...nextQueue, finalScene);
   currentIdx = insertIdx;
   contractDays = 0;
+  careerState.lastContractClosed = false;
+  shipOffers = [];
   scenesSinceEvent = 0;
   nextEventAt = 5+Math.floor(Math.random()*4);
   portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:false,departure:false};
@@ -11000,6 +11185,10 @@ function beginGame(){
   devicePracticeScore={ok:0,total:0};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
+  careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
+  specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
+  shipOffers=[];
+  familyUnread=0;
   routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts=new Set([selectedStartPort.name]);
   shipPosition={x:selectedStartPort.x,y:selectedStartPort.y};
@@ -11501,6 +11690,10 @@ function buildSavePayload(){
     delayedConsequences,
     playerFlags,
     careerMemory,
+    careerState,
+    specialtyXP,
+    shipOffers,
+    familyUnread,
     choicesMade,
     playerAppearance,
     selectedStartPort,
@@ -11581,6 +11774,10 @@ function applyLoadedGameState(data){
   delayedConsequences = Array.isArray(data.delayedConsequences) ? data.delayedConsequences : [];
   playerFlags = data.playerFlags || {securityBreach:0,nearMiss:0,sextantGood:0,lowMoodSpiral:0};
   careerMemory = data.careerMemory || {firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
+  careerState = {...careerState, ...(data.careerState || {})};
+  specialtyXP = {...specialtyXP, ...(data.specialtyXP || {})};
+  shipOffers = Array.isArray(data.shipOffers) ? data.shipOffers : [];
+  familyUnread = data.familyUnread || 0;
   choicesMade = Array.isArray(data.choicesMade) ? data.choicesMade : [];
   playerAppearance = {...playerAppearance, ...(data.playerAppearance || {})};
   selectedStartPort = data.selectedStartPort || START_PORTS[0];
@@ -15613,6 +15810,11 @@ function sendPhoneMessage(){
   const crewReplies = activePhoneContact === 'Anne' || activePhoneContact === 'Baba' || activePhoneContact === 'Kardes'
     ? familyReplies
     : replies;
+  if(activePhoneContact === 'Anne' || activePhoneContact === 'Baba' || activePhoneContact === 'Kardes'){
+    familyUnread = Math.max(0, familyUnread-1);
+    adjustMood(4,'Aileyle mesajlasmak iyi geldi');
+    applyPsychDelta({yalnizlik:-5,moral:3});
+  }
   setTimeout(()=>{
     phoneMessages.push({from:activePhoneContact, text:crewReplies[Math.floor(Math.random()*crewReplies.length)], me:false});
     renderPhone();
@@ -15676,6 +15878,11 @@ function maybeSendScenePhoneMessage(sc, blob){
       Kardes:['Abi/abla denizden foto at. Telefon cekiyor mu orada?','Sen oyundaki gibi kaptan oldun mu artik?']
     };
     pushPhoneMessage(family, lines[family][Math.floor(Math.random()*lines[family].length)]);
+    familyUnread++;
+    if(familyUnread>=4){
+      adjustMood(-3,'Aile mesajlarini cevapsiz biraktin');
+      applyPsychDelta({yalnizlik:4});
+    }
   }
 }
 function openDeviceFromPhone(key){
