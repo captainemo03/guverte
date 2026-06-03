@@ -375,6 +375,63 @@
         cx.stroke();
       }
     }
+    // Extra parallax / particles: foreground wave foam, rain, fog and moving harbor work lights
+    const foamSpeed = isStorm ? 3.8 : isHarbor ? 1.4 : 2.1;
+    for(let i=0;i<8;i++){
+      const x = (i*W/7 + t*foamSpeed)%(W+120)-60;
+      const y = H*(0.78 + (i%3)*0.045) + Math.sin(t*.025+i)*4;
+      cx.strokeStyle = `rgba(200,228,255,${isStorm?0.16:0.08})`;
+      cx.lineWidth = isStorm ? 2 : 1;
+      cx.beginPath();
+      cx.moveTo(x,y);
+      cx.quadraticCurveTo(x+28,y-5,x+62,y+1);
+      cx.stroke();
+    }
+    if(isStorm){
+      cx.strokeStyle='rgba(224,238,255,0.16)';
+      cx.lineWidth=1;
+      for(let i=0;i<42;i++){
+        const x=(i*47 + t*7)%(W+120)-80;
+        const y=(i*31 + t*9)%(H+90)-70;
+        cx.beginPath();
+        cx.moveTo(x,y);
+        cx.lineTo(x-18,y+46);
+        cx.stroke();
+      }
+    }
+    if(isHarbor || isStrait){
+      for(let i=0;i<6;i++){
+        const x=(W*(.12+i*.15)+Math.sin(t*.015+i)*12)%W;
+        const y=H*(.58+.03*Math.sin(i));
+        cx.fillStyle=`rgba(255,198,100,${0.12+Math.sin(t*.04+i)*0.08})`;
+        cx.beginPath();
+        cx.arc(x,y,2.2,0,Math.PI*2);
+        cx.fill();
+        cx.fillStyle=`rgba(255,198,100,${0.03+Math.sin(t*.04+i)*0.03})`;
+        cx.fillRect(x-1,y+3,2,H*.18);
+      }
+      const tugX=(W*.08 + (t*1.2)%(W*.92));
+      cx.save();
+      cx.translate(tugX,H*.705+Math.sin(t*.04)*2);
+      cx.scale(.42,.42);
+      cx.fillStyle='rgba(8,18,30,.95)';
+      cx.fillRect(-28,-5,58,12);
+      cx.fillStyle='#1f4968';
+      cx.fillRect(-8,-20,22,16);
+      cx.fillStyle=`rgba(255,226,164,${0.4+Math.sin(t*.08)*0.24})`;
+      cx.beginPath();cx.arc(18,-15,3,0,Math.PI*2);cx.fill();
+      cx.strokeStyle='rgba(190,225,255,.18)';
+      cx.beginPath();cx.moveTo(-32,7);cx.quadraticCurveTo(-46,4,-54,9);cx.stroke();
+      cx.restore();
+    }
+    if(isNight || isOpenSea){
+      cx.fillStyle='rgba(210,230,255,.08)';
+      for(let i=0;i<9;i++){
+        const x=(W*(.1+i*.11)+Math.sin(t*.006+i)*24)%W;
+        const y=H*(.18+.05*Math.sin(t*.01+i));
+        cx.beginPath();cx.arc(x,y,1.1+Math.sin(t*.02+i)*.4,0,Math.PI*2);cx.fill();
+      }
+    }
     // Moon reflection
     if(!isStorm){
       cx.fillStyle=`rgba(180,200,220,${isHarbor?0.035:0.05})`;
@@ -7674,13 +7731,19 @@ function getLiveSceneOverlay(sc){
     parts.push('<div class="live-vhf-panel"><span></span><span></span><span></span></div>');
   }
   if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)){
-    parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div>');
+    parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div><div class="live-forklift"></div><div class="live-tug-light"></div>');
   }
   if(/storm|firtina|swell|rain|yagmur|yağmur|salt|spray|sis|fog|mist/.test(blob)){
     parts.push('<div class="live-rain-glass"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div>');
   }
+  if(/sis|fog|mist|restricted visibility|gorus kisitli|görüş kısıtlı/.test(blob)){
+    parts.push('<div class="live-fog-bank f1"></div><div class="live-fog-bank f2"></div>');
+  }
   if(/engine|makine|generator|compressor|pump|egzoz|exhaust/.test(blob)){
-    parts.push('<div class="live-engine-panel"><span></span><span></span><span></span><b></b></div>');
+    parts.push('<div class="live-engine-panel"><span></span><span></span><span></span><b></b></div><div class="live-steam s1"></div><div class="live-steam s2"></div><div class="live-sparks"></div>');
+  }
+  if(/galley|asci|aşçı|cay|çay|coffee|kahve|kamara|cabin|logbook|chart room|harita/.test(blob)){
+    parts.push('<div class="live-coffee-cup"></div><div class="live-pencil"></div>');
   }
   return parts.join('');
 }
