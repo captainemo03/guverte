@@ -4165,7 +4165,7 @@ const PLAYER_LOOK = {
   eye:['#3f2c22','#496b8d','#577149','#697089','#2d5d66','#765a3a'],
   uniform:['classic','dress','duty','engine','deck','galley','cadet']
 };
-let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',scene:'opensea',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic'};
+let playerAppearance = {skin:'#d9a27c',base:'male',model:0,age:'young',pose:'front',scene:'opensea',face:'soft',hair:'quiff',beard:'trim',hairColor:'#1e1612',eye:'#496b8d',uniform:'classic',height:175,weight:72};
 let playerReferencePhoto = '';
 let playerStyledFacePhoto = '';
 let playerCameraStream = null;
@@ -7896,6 +7896,8 @@ function getPlayerPortraitConfig(){
     hairColor:playerAppearance.hairColor,
     eye:playerAppearance.eye,
     uniform:playerAppearance.uniform,
+    height:playerAppearance.height || 175,
+    weight:playerAppearance.weight || 72,
     age:playerAppearance.age,
     pose:playerAppearance.pose,
     scene:playerAppearance.scene,
@@ -7904,7 +7906,7 @@ function getPlayerPortraitConfig(){
     tieColor:uniform.tieColor,
     stripes:uniform.stripes,
     isPlayer:true,
-    faceAsset:'',
+    faceAsset:playerStyledFacePhoto || '',
     portraitSheet,
     sheetCols:4,
     sheetRows:2,
@@ -8034,7 +8036,13 @@ function resolvePlayerModelFromTraits(){
 function setPlayerBase(base){
   playerAppearance.base = base;
   playerAppearance.model = getPlayerModelPool(base, playerAppearance.age)[0];
-  syncPlayerAppearanceFromModel();
+  if(base === 'female'){
+    playerAppearance.beard = 'clean';
+    if(!['bun','slick','waves','bob','crop','curly','long','ponytail','braid'].includes(playerAppearance.hair)) playerAppearance.hair = 'waves';
+  }else{
+    if(!['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'].includes(playerAppearance.hair)) playerAppearance.hair = 'quiff';
+    if(!playerAppearance.beard || playerAppearance.beard === 'clean') playerAppearance.beard = 'trim';
+  }
 }
 
 function getPortraitSpriteIndex(cfg={}){
@@ -8137,6 +8145,13 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const saturate = [0.98,1.04,1.08,0.95][eyeIdx] || 1;
   const contrast = [1,1.04,1.08][uniformIdx] || 1;
   const visualStyle = `filter:brightness(${brightness}) saturate(${saturate}) contrast(${contrast}) hue-rotate(${hue}deg);`;
+  const h = Number(cfg.height || 175);
+  const w = Number(cfg.weight || 72);
+  const bodyScaleY = Math.max(.9, Math.min(1.12, 1 + (h - 175) / 260));
+  const bodyScaleX = Math.max(.88, Math.min(1.18, 1 + (w - 72) / 210));
+  const traitStyle = `--hair:${cfg.hairColor || '#1e1612'};--skin:${cfg.skin || '#d9a27c'};--eye:${cfg.eye || '#496b8d'};--body-x:${bodyScaleX};--body-y:${bodyScaleY};`;
+  const traitClasses = `hair-${cfg.hair||'short'} beard-${cfg.beard||'clean'} face-${cfg.face||'soft'} base-${cfg.base||'male'} uniform-${cfg.uniform||'classic'}`;
+  const traitLayers = `<span class="creator-trait hair-layer"></span><span class="creator-trait beard-layer"></span><span class="creator-trait eye-layer"></span>`;
   if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
@@ -8145,9 +8160,10 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
     const row = Math.floor(idx / cols);
     const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
     const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
-    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} base-${cfg.base||'male'} face-${cfg.face||'soft'} uniform-${cfg.uniform||'classic'}">
-      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=5');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>
+    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} ${traitClasses}" style="${traitStyle}">
+      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=5');background-size:${cols*100}% ${rows*100}%;${visualStyle} transform:scaleX(var(--body-x)) scaleY(var(--body-y));transform-origin:50% 100%;"></span>
       <span class="portrait-face-overlay ${variant} pose-${cfg.pose||'front'} base-${cfg.base||'male'}" style="background-image:url('${cfg.faceAsset}');"></span>
+      ${traitLayers}
     </span>`;
   }
   if(cfg.portraitSheet){
@@ -8158,7 +8174,10 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
     const row = Math.floor(idx / cols);
     const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
     const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
-    return `<span class="portrait-photo-sheet ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${getPortraitSheetUrl(cfg.portraitSheet)}');background-size:${cols*100}% ${rows*100}%;${visualStyle}"></span>`;
+    return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} ${traitClasses}" style="${traitStyle}">
+      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${getPortraitSheetUrl(cfg.portraitSheet)}');background-size:${cols*100}% ${rows*100}%;${visualStyle} transform:scaleX(var(--body-x)) scaleY(var(--body-y));transform-origin:50% 100%;"></span>
+      ${traitLayers}
+    </span>`;
   }
   if(cfg.portraitAsset){
     return `<img class="portrait-photo ${variant}" style="${visualStyle}" src="${cfg.portraitAsset}?v=1" alt="">`;
@@ -8503,11 +8522,16 @@ function renderCreatorRow(elId, values, selected, kind){
       front:'Duz',
       angled:'3/4',
       command:'Komut',
+      relaxed:'Rahat',
+      bridgewing:'Kanat',
       opensea:'Acik Deniz',
       harbor:'Liman',
       night:'Gece',
       strait:'Bogaz',
       storm:'Firtina',
+      engine:'Makine',
+      galley:'Kuzine',
+      deck:'Guverte',
       0:'Model 1',
       1:'Model 1',
       2:'Model 2',
@@ -8526,34 +8550,67 @@ function renderCreatorRow(elId, values, selected, kind){
       quiff:'Kabartı',
       curly:'Kıvırcık',
       bun:'Topuz',
+      buzz:'3 Numara',
+      fade:'Fade',
+      undercut:'Undercut',
+      long:'Uzun',
+      ponytail:'At Kuyrugu',
+      braid:'Orgulu',
       clean:'Yok',
+      stubble:'Kirli',
       trim:'Kısa',
+      goatee:'Keçi',
+      moustache:'Bıyık',
       full:'Tam',
       soft:'Yumuşak',
       sharp:'Keskin',
+      round:'Yuvarlak',
+      square:'Kare',
       classic:'Klasik',
       dress:'Tören',
-      duty:'Görev'
+      duty:'Görev',
+      cadet:'Stajyer'
     }[v]||v);
     }
     b.onclick=()=>{
       if(elId==='creator-skin') playerAppearance.skin=v;
       else if(elId==='creator-base') setPlayerBase(v);
-      else if(elId==='creator-age'){ playerAppearance.age=v; playerAppearance.model = getPlayerModelPool(playerAppearance.base, playerAppearance.age)[0]; syncPlayerAppearanceFromModel(); }
+      else if(elId==='creator-age'){ playerAppearance.age=v; if(!getPlayerModelPool(playerAppearance.base, playerAppearance.age).includes(playerAppearance.model)) playerAppearance.model = getPlayerModelPool(playerAppearance.base, playerAppearance.age)[0]; }
       else if(elId==='creator-pose') playerAppearance.pose=v;
       else if(elId==='creator-scene') playerAppearance.scene=v;
       else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
-      else if(elId==='creator-face'){ playerAppearance.face=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
-      else if(elId==='creator-hair'){ playerAppearance.hair=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
-      else if(elId==='creator-beard'){ playerAppearance.beard=v; playerAppearance.model = resolvePlayerModelFromTraits(); }
+      else if(elId==='creator-face') playerAppearance.face=v;
+      else if(elId==='creator-hair') playerAppearance.hair=v;
+      else if(elId==='creator-beard') playerAppearance.beard=v;
       else if(elId==='creator-haircolor') playerAppearance.hairColor=v;
       else if(elId==='creator-eye') playerAppearance.eye=v;
       else if(elId==='creator-uniform') playerAppearance.uniform=v;
-      if(elId==='creator-haircolor' || elId==='creator-eye') playerAppearance.model = resolvePlayerModelFromTraits();
       renderCharacterCreator();
     };
     row.appendChild(b);
   });
+}
+
+function adjustCreatorNumber(key, delta){
+  if(key === 'height') playerAppearance.height = Math.max(150, Math.min(205, (playerAppearance.height || 175) + delta));
+  if(key === 'weight') playerAppearance.weight = Math.max(45, Math.min(130, (playerAppearance.weight || 72) + delta));
+  renderCharacterCreator();
+}
+
+function renderCreatorBodyControls(){
+  const row = document.getElementById('creator-body');
+  if(!row) return;
+  row.innerHTML = `
+    <div class="creator-stepper">
+      <button type="button" onclick="adjustCreatorNumber('height',-1)">‹</button>
+      <span>${playerAppearance.height || 175} CM</span>
+      <button type="button" onclick="adjustCreatorNumber('height',1)">›</button>
+    </div>
+    <div class="creator-stepper">
+      <button type="button" onclick="adjustCreatorNumber('weight',-1)">‹</button>
+      <span>${playerAppearance.weight || 72} KG</span>
+      <button type="button" onclick="adjustCreatorNumber('weight',1)">›</button>
+    </div>`;
 }
 
 function renderCharacterCreator(){
@@ -8565,6 +8622,7 @@ function renderCharacterCreator(){
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-age', PLAYER_LOOK.age, playerAppearance.age, 'text');
   renderCreatorRow('creator-pose', PLAYER_LOOK.pose, playerAppearance.pose, 'text');
+  renderCreatorBodyControls();
   renderCreatorRow('creator-scene', PLAYER_LOOK.scene, playerAppearance.scene, 'text');
   renderCreatorRow('creator-model', modelPool, String(playerAppearance.model), 'text');
   renderCreatorRow('creator-face', PLAYER_LOOK.face, playerAppearance.face, 'text');
@@ -11806,6 +11864,8 @@ function buildSavePayload(){
     familyUnread,
     choicesMade,
     playerAppearance,
+    playerReferencePhoto,
+    playerStyledFacePhoto,
     selectedStartPort,
     selectedStartScenario,
     shipPosition,
@@ -11895,6 +11955,8 @@ function applyLoadedGameState(data){
   familyUnread = data.familyUnread || 0;
   choicesMade = Array.isArray(data.choicesMade) ? data.choicesMade : [];
   playerAppearance = {...playerAppearance, ...(data.playerAppearance || {})};
+  playerReferencePhoto = data.playerReferencePhoto || '';
+  playerStyledFacePhoto = data.playerStyledFacePhoto || '';
   selectedStartPort = data.selectedStartPort || START_PORTS[0];
   selectedStartScenario = data.selectedStartScenario || START_SCENARIOS[0];
   shipPosition = data.shipPosition || {x:selectedStartPort.x, y:selectedStartPort.y};
