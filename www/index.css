@@ -1002,6 +1002,16 @@ animation:straitFlow 2.8s linear infinite;}
 #phone-toast-from{font-size:9px;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:3px;}
 #phone-toast-text{font-size:11px;line-height:1.35;color:#dcefff;}
 @keyframes phoneToastIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+#phone-call{display:none;position:fixed;inset:0;z-index:85;align-items:center;justify-content:center;background:rgba(0,0,0,.56);}
+#phone-call.show{display:flex;}
+#phone-call-card{width:min(300px,86vw);border:1px solid rgba(127,195,255,.42);border-radius:22px;background:linear-gradient(180deg,#102743,#06111e);box-shadow:0 24px 70px rgba(0,0,0,.62);padding:18px;text-align:center;color:#dff1ff;animation:popin .22s ease;}
+#phone-call-label{font-size:10px;color:#8fbfed;font-family:'Share Tech Mono',monospace;letter-spacing:1px;margin-bottom:8px;}
+#phone-call-from{font-size:24px;color:#fff;font-weight:700;margin-bottom:4px;}
+#phone-call-note{font-size:12px;color:#9dbdd5;margin-bottom:16px;}
+#phone-call-actions{display:flex;gap:10px;justify-content:center;}
+#phone-call-actions button{border:1px solid rgba(127,195,255,.32);border-radius:999px;background:#17324e;color:#fff;padding:9px 18px;font-size:12px;cursor:pointer;}
+#phone-call-actions button:first-child{background:#1f7a4b;border-color:#58c08a;}
+#phone-call-actions button:last-child{background:#6d2630;border-color:#d65c5c;}
 #phone-frame{width:238px;height:404px;border-radius:24px;background:#07111d;border:3px solid #1b3349;box-shadow:0 20px 55px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;display:flex;flex-direction:column;}
 #phone-status{height:22px;background:#02080f;color:#dcefff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-size:9px;font-family:'Share Tech Mono',monospace;}
 #phone-title{height:34px;background:linear-gradient(180deg,#3e6f9e,#1b3858);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;letter-spacing:.7px;}
@@ -1101,6 +1111,26 @@ animation:straitFlow 2.8s linear infinite;}
 .offer-btn{border:1px solid rgba(212,160,23,.28);border-radius:8px;background:rgba(42,28,8,.74);color:#ffe2a2;padding:9px;font-size:10px;cursor:pointer;text-align:left;}
 .offer-btn b{display:block;color:#fff;margin-bottom:4px;}
 @media (max-width:720px){.career-grid,.career-actions,.offer-grid{grid-template-columns:1fr 1fr;}}
+
+#logbook-panel,#cabin-panel,#shipwalk-panel,#achievements-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:67;align-items:center;justify-content:center;padding:14px;}
+#logbook-panel.show,#cabin-panel.show,#shipwalk-panel.show,#achievements-panel.show{display:flex;}
+.life-box{width:min(820px,96vw);max-height:88vh;overflow:auto;background:linear-gradient(180deg,#0c1b2d,#06101c);border:1px solid var(--border);border-radius:10px;box-shadow:0 24px 70px rgba(0,0,0,.55);}
+.life-title{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border2);font-family:'Share Tech Mono',monospace;color:var(--gold);font-size:12px;letter-spacing:.5px;}
+.life-title button{background:var(--navy3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:6px 10px;cursor:pointer;}
+#live-logbook-body,#cabin-body,#shipwalk-body,#achievements-body{padding:12px;display:grid;gap:10px;}
+.life-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.life-card{border:1px solid rgba(111,146,178,.2);border-radius:8px;background:rgba(7,19,36,.72);padding:10px;color:var(--text2);font-size:11px;line-height:1.45;}
+.life-card b{display:block;color:#fff;margin-bottom:5px;font-size:12px;}
+.life-card button{margin-top:8px;border:1px solid rgba(127,195,255,.28);border-radius:7px;background:#17324e;color:#dff1ff;padding:7px 9px;font-size:10px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
+.life-card button:hover{border-color:var(--gold);}
+.log-row{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;border:1px solid rgba(111,146,178,.16);border-radius:8px;background:rgba(5,14,24,.72);padding:8px;font-size:11px;color:#dcefff;}
+.log-row input{background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:6px;color:#fff;padding:6px;font-size:10px;}
+.shipwalk-map{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.ship-zone{min-height:78px;border:1px solid rgba(127,195,255,.22);border-radius:9px;background:rgba(8,22,40,.86);color:#dcefff;padding:9px;text-align:left;cursor:pointer;}
+.ship-zone b{display:block;color:#fff;margin-bottom:4px;}
+.achievement{border-color:rgba(212,160,23,.25);background:rgba(42,28,8,.56);}
+.achievement.done{border-color:rgba(93,191,138,.35);background:rgba(10,31,20,.72);}
+@media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}}
 
 /* ===== ANİ OLAY KARTI ===== */
 #event-card{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:80;align-items:center;justify-content:center;}

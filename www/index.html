@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=39">
+<link rel="stylesheet" href="./index.css?v=40">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -88,6 +88,34 @@
         <div id="device-log"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="logbook-panel">
+  <div class="life-box">
+    <div class="life-title"><span>CANLI VARDIYA DEFTERI</span><button onclick="closeLifePanel('logbook-panel')">Kapat</button></div>
+    <div id="live-logbook-body"></div>
+  </div>
+</div>
+
+<div id="cabin-panel">
+  <div class="life-box">
+    <div class="life-title"><span>KAMARAM</span><button onclick="closeLifePanel('cabin-panel')">Kapat</button></div>
+    <div id="cabin-body"></div>
+  </div>
+</div>
+
+<div id="shipwalk-panel">
+  <div class="life-box">
+    <div class="life-title"><span>GEMI ICI MINI HARITA</span><button onclick="closeLifePanel('shipwalk-panel')">Kapat</button></div>
+    <div id="shipwalk-body"></div>
+  </div>
+</div>
+
+<div id="achievements-panel">
+  <div class="life-box">
+    <div class="life-title"><span>BASARILAR</span><button onclick="closeLifePanel('achievements-panel')">Kapat</button></div>
+    <div id="achievements-body"></div>
   </div>
 </div>
 
@@ -342,6 +370,17 @@
     <div id="phone-toast-from">SeaPhone</div>
     <div id="phone-toast-text">Yeni bildirim</div>
   </div>
+  <div id="phone-call">
+    <div id="phone-call-card">
+      <div id="phone-call-label">GELEN ARAMA</div>
+      <div id="phone-call-from">Kaptan</div>
+      <div id="phone-call-note">Kisa gorusme</div>
+      <div id="phone-call-actions">
+        <button onclick="answerPhoneCall()">Ac</button>
+        <button onclick="declinePhoneCall()">Mesgul</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- KRİZ SONU -->
@@ -371,6 +410,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=40"></script>
+<script src="./index.js?v=41"></script>
 </body>
 </html>

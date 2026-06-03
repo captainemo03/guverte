@@ -9061,10 +9061,12 @@ function handleSceneChoice(sc, c2, ch){
   if(c2.routePlanKey&&ECDIS_ROUTE_PLANS[c2.routePlanKey]){
     activeEcdisPlanKey=c2.routePlanKey;
     addJournalEntry(`[SEYIR PLANI] ${ECDIS_ROUTE_PLANS[c2.routePlanKey].label} ECDIS uzerinde aktif edildi.`, sc.day, sc.time);
+    addLiveLogbook('ROTA',`ECDIS route: ${ECDIS_ROUTE_PLANS[c2.routePlanKey].label}`,true);
   }
   if(c2.radarMode&&RADAR_TRAINING_MODES[c2.radarMode]){
     activeRadarMode=c2.radarMode;
     addJournalEntry(`[RADAR] ${RADAR_TRAINING_MODES[c2.radarMode].label} ekran duzeni aktif edildi.`, sc.day, sc.time);
+    addLiveLogbook('CPA / RADAR',`Radar mode: ${RADAR_TRAINING_MODES[c2.radarMode].label}`,true);
   }
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
   maybeQueueDevicePracticeFromScene(sc,c2);
@@ -9101,6 +9103,10 @@ function handleSceneChoice(sc, c2, ch){
   }
 
   addJournalEntry(c2.text, sc.day, sc.time);
+  const logBlob = `${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
+  if(/vhf|mayday|pan-pan|pilot/.test(logBlob)) addLiveLogbook('VHF',c2.text,true);
+  if(/engine|makine|alarm/.test(logBlob)) addLiveLogbook('MAKINE ALARMI',c2.text,true);
+  if(/all fast|berth|mooring|halat/.test(logBlob)) addLiveLogbook('LIMAN / ALL FAST',c2.text,true);
   const nextFn=()=>{
     if(c2.next==='end'||currentIdx>=sceneQueue.length-1){showEnd();}
     else if(crisis){showCrisis(crisis);}
@@ -10849,7 +10855,9 @@ function closeContractCareerBooks(){
   careerState.contracts += 1;
   careerState.seaMonths += getContractTotalMonths();
   careerState.leaveDays += Math.max(5, Math.round(getContractTotalMonths()*3));
-  careerState.money += Math.round((careerState.salary || 1200) * getContractTotalMonths());
+  const paidMonths = careerState.paidMonths || 0;
+  careerState.money += Math.round((careerState.salary || 1200) * Math.max(0, getContractTotalMonths() - paidMonths));
+  careerState.paidMonths = 0;
   careerState.companyOpinion = clamp((careerState.companyOpinion || 50) + Math.round((stats.sayginlik-50)/8) + (playerFlags.nearMiss ? -4 : 3) + (playerFlags.securityBreach ? -5 : 2));
   const promo = calculatePromotionReport();
   if(promo.eligible && careerState.rankIndex < CAREER_RANKS.length-1){
@@ -10904,6 +10912,7 @@ function doFreeTimeAction(key){
   if(key==='family'){
     pushPhoneMessage('Anne','Sesini duymak iyi geldi. Kendine dikkat et.', {open:false});
     familyUnread=0;
+    unlockAchievement('family_anchor');
   }
   if(['logbook','weather','gmdss','safety','sounding'].includes(key)){
     pushPhoneMessage('Kaptan','Rutin gorevi kayda aldım. Boyle devam edersen vardiya devri temiz kalir.', {open:false});
@@ -11119,6 +11128,7 @@ function continueContractOnShip(offerKey='same'){
   currentIdx = insertIdx;
   contractDays = 0;
   careerState.lastContractClosed = false;
+  careerState.paidMonths = 0;
   shipOffers = [];
   scenesSinceEvent = 0;
   nextEventAt = 5+Math.floor(Math.random()*4);
@@ -11208,11 +11218,16 @@ function beginGame(){
   ];
   watchFeedItems=[];
   livingPulseState={lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
+  liveLogbookEntries=[];
+  achievementsUnlocked={};
+  pendingPhoneCall=null;
+  crewFatigueState={deck:22,engine:18,bridge:20,galley:12};
+  deviceFaultState={radar:false,ecdis:false,gyro:false,ais:false};
   devicePracticeProgress={};
   devicePracticeScore={ok:0,total:0};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
-  careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
+  careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,paidMonths:0,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
   specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
   shipOffers=[];
   familyUnread=0;
@@ -11478,6 +11493,10 @@ function renderCrewCards(){
     const unlocked = crewUnlocked[key] || 0;
     const color = trust>=70?'#5dbf8a':trust>=50?'#d4a017':'#c97070';
     const relation = trust>=75?'Guveniyor ama gozunu uzerinde tutuyor':trust>=55?'Seni tartiyor':trust>=40?'Mesafeyi koruyor':'Henuz kolay acilmiyor';
+    const fatigueKey = /lostromo|musa|hasan|abintl/.test(key) ? 'deck' : /carkci|bas2|yagci|motormanintl/.test(key) ? 'engine' : key==='asci' ? 'galley' : 'bridge';
+    const fatigue = Math.round(crewFatigueState[fatigueKey] || 20);
+    const distance = Math.max(0, 100 - trust);
+    const hurt = Math.max(0, (crewMemoryNotes[key]?.bad || 0) * 18 - (crewMemoryNotes[key]?.good || 0) * 8);
     const div = document.createElement('div');
     div.className = 'crew-card';
     const portrait = renderPortraitSprite(getCrewPortraitForKey(key) || makeCrewPortrait(key, def), 'crew');
@@ -11490,6 +11509,7 @@ function renderCrewCards(){
     <div class="crew-title-small" style="margin-bottom:6px;color:${color};line-height:1.35;">${relation}</div>
     <div class="crew-trust-bar"><div class="crew-trust-fill" style="width:${trust}%;background:${color};"></div></div>
     <div class="crew-trust-lbl"><span>${trust>=70?'Güveniyor':trust>=50?'Tanışıyor':'Mesafeli'}</span><span>🔓 ${unlocked}/3</span></div>
+    <div class="crew-title-small" style="margin-top:6px;color:var(--text3);line-height:1.45;">Yorgunluk ${fatigue}/100 · Mesafe ${distance}/100 · Kirginlik ${Math.min(100,hurt)}/100</div>
     ${unlocked>0?`<div class="crew-unlocked">💬 "${def.secrets[unlocked-1]?.substring(0,50)}..."</div>`:''}`;
     c.appendChild(div);
   });
@@ -11747,6 +11767,10 @@ function buildSavePayload(){
     activePhoneSite,
     watchFeedItems,
     livingPulseState,
+    liveLogbookEntries,
+    achievementsUnlocked,
+    crewFatigueState,
+    deviceFaultState,
     devicePracticeProgress,
     devicePracticeScore,
     watchCycleLog,
@@ -11832,6 +11856,11 @@ function applyLoadedGameState(data){
   activePhoneSite = data.activePhoneSite || 'home';
   watchFeedItems = Array.isArray(data.watchFeedItems) ? data.watchFeedItems : [];
   livingPulseState = data.livingPulseState || {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
+  liveLogbookEntries = Array.isArray(data.liveLogbookEntries) ? data.liveLogbookEntries : [];
+  achievementsUnlocked = data.achievementsUnlocked || {};
+  pendingPhoneCall = null;
+  crewFatigueState = data.crewFatigueState || {deck:22,engine:18,bridge:20,galley:12};
+  deviceFaultState = data.deviceFaultState || {radar:false,ecdis:false,gyro:false,ais:false};
   devicePracticeProgress = data.devicePracticeProgress || {};
   devicePracticeScore = data.devicePracticeScore || {ok:0,total:0};
   phoneOpen = false;
@@ -15470,6 +15499,11 @@ let phoneMessages = [
 ];
 let watchFeedItems = [];
 let livingPulseState = {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
+let liveLogbookEntries = [];
+let achievementsUnlocked = {};
+let pendingPhoneCall = null;
+let crewFatigueState = {deck:22,engine:18,bridge:20,galley:12};
+let deviceFaultState = {radar:false,ecdis:false,gyro:false,ais:false};
 
 const PHONE_SITES = [
   {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
@@ -15870,6 +15904,40 @@ function showPhoneToast(from,text){
   clearTimeout(showPhoneToast._timer);
   showPhoneToast._timer = setTimeout(()=>toast.classList.remove('show'),3600);
 }
+function triggerPhoneCall(from,note,effect={},declineEffect={}){
+  if(pendingPhoneCall) return;
+  pendingPhoneCall = {from,note,effect,declineEffect};
+  const panel=document.getElementById('phone-call');
+  const fromEl=document.getElementById('phone-call-from');
+  const noteEl=document.getElementById('phone-call-note');
+  if(fromEl) fromEl.textContent=from;
+  if(noteEl) noteEl.textContent=note || 'Kisa gorusme';
+  panel?.classList.add('show');
+  if(soundEnabled){
+    playTone(660,'sine',0.12,0.04,0);
+    playTone(660,'sine',0.12,0.04,.28);
+    playTone(880,'sine',0.12,0.035,.56);
+  }
+}
+function answerPhoneCall(){
+  if(!pendingPhoneCall) return;
+  const call = pendingPhoneCall;
+  pendingPhoneCall = null;
+  document.getElementById('phone-call')?.classList.remove('show');
+  applyEffect(call.effect || {},{skipContractTick:true});
+  pushPhoneMessage(call.from,`Arama cevaplandi: ${call.note}`,{open:false});
+  addJournalEntry(`[ARAMA] ${call.from}: ${call.note}`, 'Telefon', '--:--');
+  if(call.from==='AILE') unlockAchievement('family_anchor');
+}
+function declinePhoneCall(){
+  if(!pendingPhoneCall) return;
+  const call = pendingPhoneCall;
+  pendingPhoneCall = null;
+  document.getElementById('phone-call')?.classList.remove('show');
+  applyEffect(call.declineEffect || {sayginlik:-1},{skipContractTick:true});
+  pushPhoneMessage(call.from,`Aramayi mesgule attin. Sonra donus bekleniyor.`,{open:false});
+  addJournalEntry(`[CEVAPSIZ ARAMA] ${call.from}`, 'Telefon', '--:--');
+}
 function getFamilyReplyPool(text=''){
   const t = normalizeTrAscii(text);
   const tired = stats.dinclik < 35 || psyche.tukenme > 60 || /yorgun|uyku|bitkin|dinclik/.test(t);
@@ -15983,6 +16051,11 @@ function maybeRunRoutineTasks(sc, blob){
   const monthNow = Math.ceil(sceneNo / CONTRACT_SCENES_PER_MONTH);
   if(monthNow !== livingPulseState.lastRoutineMonth){
     livingPulseState.lastRoutineMonth = monthNow;
+    if((careerState.paidMonths || 0) < monthNow){
+      careerState.paidMonths = monthNow;
+      careerState.money += Math.round(careerState.salary || 1200);
+      pushPhoneMessage('Şirket',`Banka bildirimi: Ay ${monthNow} maasin yatti. Bakiye $${careerState.money}.`);
+    }
     const routines = [
       'Aylik GMDSS test kaydi, EPIRB tarih kontrolu ve NAVTEX filtreleri bekliyor.',
       'Fire patrol, emergency light ve muster list kontrolu bu ayin rutinine eklendi.',
@@ -16040,6 +16113,65 @@ function maybeRunBridgeVisualPulse(sc, blob){
   const pick = details[Math.floor(Math.random()*details.length)];
   addWatchFeed(pick[0], pick[1]);
 }
+function playVhfPracticeBurst(){
+  if(!soundEnabled) return;
+  playTone(420,'sawtooth',0.06,0.018,0);
+  playTone(520,'square',0.05,0.012,0.08);
+  playTone(360,'sawtooth',0.08,0.014,0.18);
+}
+function maybeTriggerPhoneCall(sc, blob){
+  if(Math.random() > 0.16 || pendingPhoneCall) return;
+  if(/pilot|liman|harbor|berth|all fast/.test(blob)) triggerPhoneCall('Kaptan','Pilot/liman hazirligini sozlu teyit etmek istiyor.',{sayginlik:2,bilgi:1},{sayginlik:-2});
+  else if(/engine|makine|alarm/.test(blob)) triggerPhoneCall('Makine','Alarm trendi icin kopru teyidi istiyor.',{bilgi:2},{bilgi:-1,sayginlik:-1});
+  else if(stats.dinclik < 30) triggerPhoneCall('AILE','Sesin yorgun geliyor, iyi misin diye ariyorlar.',{dinclik:2,mood:3},{mood:-3});
+  else if(companyPressureState.stage > 0) triggerPhoneCall('Şirket','ETA ve rapor dili hakkinda kisa gorusme istiyor.',{sayginlik:1},{sayginlik:-2});
+}
+function maybeAddTaskChain(sc, blob){
+  if(!/vhf|mayday|pan-pan|pilot|radar|arpa|ecdis|engine|makine|alarm/.test(blob) || Math.random() > 0.42) return;
+  const chain = [];
+  if(/vhf|mayday|pan-pan|pilot/.test(blob)) chain.push('VHF cagrisi dinle', 'karsi istasyon tekrarini bekle');
+  if(/radar|arpa/.test(blob)) chain.push('radar target acquire et', 'CPA/TCPA notunu al');
+  if(/ecdis/.test(blob)) chain.push('ECDIS alarm satirini kontrol et');
+  if(/engine|makine|alarm/.test(blob)) chain.push('makine alarmini kaptana bildir');
+  chain.push('logbook satirini tamamla', 'sirket/ust zabite net rapor ver');
+  addWatchFeed('Gorev zinciri: '+chain.slice(0,3).join(' -> '),'warn');
+  addLiveLogbook('GOREV ZINCIRI', chain.join(' -> '), true);
+}
+function maybeDeviceFault(sc, blob){
+  if(Math.random() > 0.11) return;
+  const faults = [
+    ['radar','Radar overlay kaydi; gyro/source cross-check gerekli.'],
+    ['ecdis','ECDIS sensor lost verdi; GPS/gyro kaynagini kontrol et.'],
+    ['gyro','Gyro repeater farki supheli; radar ve pusula feedlerini karsilastir.'],
+    ['ais','AIS hedef adi/rota bilgisi tutarsiz; radarla dogrula.']
+  ];
+  const pick = faults[Math.floor(Math.random()*faults.length)];
+  deviceFaultState[pick[0]] = true;
+  pushPhoneMessage('Kopruustu',pick[1]);
+  addLiveLogbook('CIHAZ ARIZASI',pick[1],true);
+  addWatchFeed(pick[1],'warn');
+}
+function applyCrewFatigueDrift(sc, blob){
+  const storm = /storm|firtina|swell|rain|sis|fog/.test(blob) ? 4 : 1;
+  crewFatigueState.bridge = clamp((crewFatigueState.bridge||20) + 1 + (stats.dinclik<35?2:0));
+  if(/deck|mooring|halat|tug|liman|harbor/.test(blob)) crewFatigueState.deck = clamp((crewFatigueState.deck||20) + storm + 2);
+  if(/engine|makine|alarm|pump|generator/.test(blob)) crewFatigueState.engine = clamp((crewFatigueState.engine||20) + storm + 2);
+  if(/galley|asci|yemek|cay/.test(blob)) crewFatigueState.galley = clamp((crewFatigueState.galley||12) + 1);
+  if((crewFatigueState.deck||0) > 72) addWatchFeed('Crew fatigue: guverte ekibi yorgun, halat riski artti','warn');
+  if((crewFatigueState.engine||0) > 72) addWatchFeed('Crew fatigue: makine vardiyasi yorgun, alarm kacirma riski var','warn');
+}
+function maybeMonthlyCaptainReview(sc){
+  const sceneNo = Math.max(1,currentIdx+1);
+  if(sceneNo % CONTRACT_SCENES_PER_MONTH !== 0) return;
+  triggerPhoneCall('Kaptan','Aylik degerlendirme: iyi yaptigin, hata yaptigin ve gelecek ay hedefin.',{sayginlik:2,bilgi:1},{sayginlik:-2});
+  addLiveLogbook('KAPTAN REVIEW',`Ay ${Math.ceil(sceneNo/CONTRACT_SCENES_PER_MONTH)} degerlendirmesi: iyi/hata/hedef notu bekleniyor.`,true);
+}
+function checkSceneAchievements(sc, blob){
+  if(/vhf|mayday|pan-pan|pilot/.test(blob)) unlockAchievement('vhf_first');
+  if(/all fast/i.test(blob) || sc?.id==='s364') unlockAchievement('first_allfast');
+  if(/psc|survey|class/.test(blob) && stats.sayginlik > 55) unlockAchievement('psc_clean');
+  if(/storm|firtina|swell/.test(blob)) unlockAchievement('storm_watch');
+}
 function updateLivingWatch(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const feed = [];
@@ -16063,8 +16195,18 @@ function updateLivingWatch(sc){
   const picked = feed[Math.floor(Math.random()*feed.length)];
   addWatchFeed(picked[0], picked[1]);
   maybeRunBridgeVisualPulse(sc, blob);
+  if(/vhf|mayday|pan-pan|pilot|vts/.test(blob)){
+    playVhfPracticeBurst();
+    addWatchFeed('VHF: karsi istasyon gecikmeli tekrar verdi','warn');
+  }
   maybeRunRoutineTasks(sc, blob);
   maybeRunCrewSocialPulse(sc, blob);
+  maybeTriggerPhoneCall(sc, blob);
+  maybeAddTaskChain(sc, blob);
+  maybeDeviceFault(sc, blob);
+  applyCrewFatigueDrift(sc, blob);
+  maybeMonthlyCaptainReview(sc);
+  checkSceneAchievements(sc, blob);
   maybeSendScenePhoneMessage(sc, blob);
 }
 function maybeSendScenePhoneMessage(sc, blob){
@@ -16137,15 +16279,113 @@ function renderPhoneAppMenu(){
     <button class="phone-app menu camera" onclick="phoneTakePhoto()"><b>CAM</b>Fotograf</button>
     <button class="phone-app menu photos" onclick="openAlbum()"><b>IMG</b>Fotograflar</button>
     <button class="phone-app menu notes" onclick="openNotes()"><b>NOT</b>Notlar</button>
-    <button class="phone-app menu cabin" onclick="setPhoneSite('cabin')"><b>CAB</b>Kamaram</button>
+    <button class="phone-app menu cabin" onclick="openCabin()"><b>CAB</b>Kamaram</button>
     <button class="phone-app menu crew" onclick="setPhoneContact('Crew Chat')"><b>CREW</b>Crew Chat</button>
     <button class="phone-app menu bank" onclick="setPhoneSite('bank')"><b>$</b>Banka</button>
     <button class="phone-app menu weather" onclick="setPhoneSite('weather')"><b>WX</b>Hava</button>
     <button class="phone-app menu course" onclick="setPhoneSite('courses')"><b>CRS</b>Kurs</button>
+    <button class="phone-app menu maps" onclick="openShipWalk()"><b>SHIP</b>Gemi</button>
+    <button class="phone-app menu log" onclick="openLiveLogbook()"><b>DEF</b>Defter</button>
+    <button class="phone-app menu photos" onclick="openAchievements()"><b>ACH</b>Basari</button>
     <button class="phone-app menu log" onclick="openJournal()"><b>LOG</b>Gunluk</button>
     <button class="phone-app menu settings" onclick="setPhoneAppView('settings')"><b>SET</b>Ayarlar</button>
   </div>
   <div class="phone-menu-hint">Cihaz egitimleri artik telefon uygulamasi gibi durmuyor; sahnelerden ve Cihaz Egitim Merkezi'nden aciliyor.</div>`;
+}
+function closeLifePanel(id){ document.getElementById(id)?.classList.remove('show'); }
+function openLiveLogbook(){ document.getElementById('logbook-panel')?.classList.add('show'); renderLiveLogbook(); }
+function addLiveLogbook(type,text,editable=true){
+  liveLogbookEntries.unshift({type,text,editable,ts:Date.now(),scene:currentIdx+1});
+  liveLogbookEntries = liveLogbookEntries.slice(0,30);
+}
+function editLiveLogbook(i,val){
+  if(!liveLogbookEntries[i]) return;
+  liveLogbookEntries[i].text = val;
+  addJournalEntry('[LOGBOOK DUZELTME] '+val, 'Logbook', '--:--');
+  unlockAchievement('logkeeper');
+}
+function renderLiveLogbook(){
+  const body=document.getElementById('live-logbook-body'); if(!body) return;
+  if(!liveLogbookEntries.length){
+    addLiveLogbook('HAVA',`WX ${voyagePressure.swell} · gorus ${voyagePressure.visibility} · VHF ${voyagePressure.vhf}`,true);
+    addLiveLogbook('ROTA',`${selectedStartPort?.name || 'Rota'} uzerinde vardiya takibi`,true);
+  }
+  body.innerHTML = `<div class="life-card"><b>Kritik satirlari duzelt</b>Hava, rota, CPA, makine alarmi, pilot boarding ve all fast satirlari burada tutulur. Yanlis/eksik satiri duzeltmek bilgi ve sayginlik kazandirir.</div>
+    ${liveLogbookEntries.map((e,i)=>`<div class="log-row"><b>${phoneSafe(e.type)}</b><input value="${phoneSafe(e.text)}" ${e.editable?'':'disabled'} onchange="editLiveLogbook(${i},this.value)"><button onclick="editLiveLogbook(${i},this.previousElementSibling.value); applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true}); showNotif('OK','Logbook','Satir duzeltildi.')">Kaydet</button></div>`).join('')}`;
+}
+function openCabin(){ document.getElementById('cabin-panel')?.classList.add('show'); renderCabin(); }
+function renderCabin(){
+  const body=document.getElementById('cabin-body'); if(!body) return;
+  body.innerHTML = `<div class="life-grid">
+    <div class="life-card"><b>Yatak</b>Dinclik ${stats.dinclik}. Uyku eksikse sahnelerde baski artar.<button onclick="doFreeTimeAction('sleep'); renderCabin()">Kisa uyu</button></div>
+    <div class="life-card"><b>Masa / Kitap</b>ECDIS, COLREG, Radar notlari.<button onclick="doFreeTimeAction('study'); renderCabin()">Ders calis</button></div>
+    <div class="life-card"><b>Telefon</b>Aile ve gemi ici sosyal hayat.<button onclick="closeLifePanel('cabin-panel'); togglePhone()">Telefonu ac</button></div>
+    <div class="life-card"><b>Takvim</b>Kontrat: ${contractDays}/${contractTotal} sahne.<button onclick="openCareer()">Kariyeri ac</button></div>
+    <div class="life-card"><b>Aile Fotografı</b>Yalnizlik ${Math.round(psyche.yalnizlik)}.<button onclick="doFreeTimeAction('family'); renderCabin()">Aileyi ara</button></div>
+    <div class="life-card"><b>Canta</b>Kurs, evrak ve kisilik dosyan.<button onclick="setPhoneSite('courses'); togglePhone()">Kurs portalı</button></div>
+  </div>`;
+}
+function openShipWalk(){ document.getElementById('shipwalk-panel')?.classList.add('show'); renderShipWalk(); }
+function visitShipZone(zone){
+  const actions={
+    bridge:['Kopruustu','Radar sweep, VHF cizirtisi ve ECDIS rota kontrolu canli.','logbook'],
+    deck:['Lostromo','Guvartede halat, islak zemin ve snap-back kontrolu var.','deck'],
+    engine:['Makine','Ana makine sicaklik trendi ve alarm paneli kontrol edildi.','engine'],
+    cabin:['Kamara','Kisa mola ve kisisel not zamani.','sleep'],
+    mess:['Crew Chat','Messroomda ekip yorgun ama sohbet ediyor.','cook'],
+    galley:['Asci','Bugunku menu ve cay vardiya moralini toparladi.','cook']
+  };
+  const a=actions[zone]; if(!a) return;
+  pushPhoneMessage(a[0],a[1]);
+  addWatchFeed(a[1], zone==='engine'?'warn':zone==='mess'||zone==='galley'?'good':'');
+  if(a[2]) doFreeTimeAction(a[2]);
+  renderShipWalk();
+}
+function renderShipWalk(){
+  const body=document.getElementById('shipwalk-body'); if(!body) return;
+  const zones=[
+    ['bridge','Köprüüstü','Radar, ECDIS, VHF, gece emirleri'],
+    ['deck','Güverte','Halat, snap-back, safety round'],
+    ['engine','Makine','Alarm paneli, generator, pompa'],
+    ['cabin','Kamara','Uyku, ders, aile, takvim'],
+    ['mess','Messroom','Moral, ekip sohbeti, dedikodu'],
+    ['galley','Galley','Aşçı, menü, çay']
+  ];
+  body.innerHTML = `<div class="shipwalk-map">${zones.map(z=>`<button class="ship-zone" onclick="visitShipZone('${z[0]}')"><b>${z[1]}</b>${z[2]}</button>`).join('')}</div>
+    <div class="life-card"><b>Ekip yorgunluğu</b>Güverte ${Math.round(crewFatigueState.deck)} · Makine ${Math.round(crewFatigueState.engine)} · Köprüüstü ${Math.round(crewFatigueState.bridge)} · Galley ${Math.round(crewFatigueState.galley)}</div>`;
+}
+const ACHIEVEMENTS = [
+  {key:'vhf_first',title:'Ilk Duzgun VHF',hint:'VHF/pilot/distress sahnesinde iyi karar ver.'},
+  {key:'first_allfast',title:'Ilk All Fast',hint:'Liman zincirinde all fast anini gor.'},
+  {key:'psc_clean',title:'PSC Temiz Gecti',hint:'Survey/PSC kararlarinda iyi performans.'},
+  {key:'storm_watch',title:'Ilk Firtina Vardiyasi',hint:'Firtina sahnesini tamamla.'},
+  {key:'logkeeper',title:'Temiz Logbook',hint:'Logbook satiri duzelt.'},
+  {key:'family_anchor',title:'Aile Baglantisi',hint:'Aileyle yazis veya ara.'}
+];
+function unlockAchievement(key){
+  if(achievementsUnlocked[key]) return;
+  achievementsUnlocked[key] = Date.now();
+  const ach = ACHIEVEMENTS.find(a=>a.key===key);
+  showNotif('🏅','Basari Acildi',ach?.title || key);
+  pushPhoneMessage('Crew Chat',`Basari acildi: ${ach?.title || key}`,{open:false});
+}
+function openAchievements(){ document.getElementById('achievements-panel')?.classList.add('show'); renderAchievements(); }
+function renderAchievements(){
+  const body=document.getElementById('achievements-body'); if(!body) return;
+  body.innerHTML = `<div class="life-grid">${ACHIEVEMENTS.map(a=>`<div class="life-card achievement ${achievementsUnlocked[a.key]?'done':''}"><b>${a.title}</b>${achievementsUnlocked[a.key]?'Açıldı':'Kilitli'}<br>${a.hint}</div>`).join('')}</div>`;
+}
+function spendMoney(kind){
+  const ops={
+    home:{cost:150,msg:'Eve para gonderdin. Aile grubunda hava hemen yumusadi.',effect:{mood:4}},
+    internet:{cost:40,msg:'Internet paketi aldin. Aile ve kurs portalina erisim daha rahat.',effect:{dinclik:1}},
+    gear:{cost:90,msg:'Kisisel ekipman ve not defteri aldin. Rutinlerde daha duzenlisin.',effect:{bilgi:2,sayginlik:1}}
+  };
+  const o=ops[kind]; if(!o) return;
+  if((careerState.money||0) < o.cost){ showNotif('!','Bakiye Yetmedi','Banka bakiyesi bu islem icin yetersiz.'); return; }
+  careerState.money -= o.cost;
+  applyEffect(o.effect,{skipContractTick:true});
+  if(kind==='home') pushFamilyGroupMessage('Baba','Para geldi, sag ol. Ama once kendini de dusun.');
+  showNotif('$','Banka Islemi',o.msg);
 }
 function getRemedialDeviceForScene(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
@@ -16230,7 +16470,8 @@ function phoneSiteCards(key){
     weather:[
       `Swell: ${voyagePressure.swell} · Gorus: ${voyagePressure.visibility}`,
       `Akinti: ${voyagePressure.current} · Hava baskisi: ${alertCount}/10`,
-      alertCount >= 6 ? 'UYARI: radar/VHF cross-check ve rota emniyeti zorunlu.' : 'Rota hava acisindan izlenebilir.'
+      alertCount >= 6 ? 'UYARI: radar/VHF cross-check ve rota emniyeti zorunlu.' : 'Rota hava acisindan izlenebilir.',
+      Math.random() > .5 ? 'Dunya haberi: liman grevi ve berth window gecikmeleri takip ediliyor.' : 'Nav warning: bolgesel hava uyarilari vardiya defterine islenmeli.'
     ],
     company:[
       `Ofis durumu: ${companyPressureState.stage>1?'baski var':'normal takip'}`,
@@ -16265,7 +16506,8 @@ function phoneSiteCards(key){
     training:[
       `Acik cihaz pratikleri: ${trainingCount}`,
       `Skor: ${devicePracticeScore.ok}/${devicePracticeScore.total}`,
-      `Oneri: sahnede zorlandiysan VHF, Radar, ECDIS veya AIS uygulamasindan tekrar et.`
+      `Oneri: sahnede zorlandiysan VHF, Radar, ECDIS veya AIS uygulamasindan tekrar et.`,
+      `Aktif ariza: ${Object.entries(deviceFaultState).filter(([,v])=>v).map(([k])=>k.toUpperCase()).join(', ') || 'yok'}`
     ]
   };
   return cards[key] || cards.home;
@@ -16281,11 +16523,27 @@ function renderPhoneWeb(){
       ${PHONE_SITES.map(s=>`<button class="phone-site" onclick="setPhoneSite('${s.key}')"><b>${phoneSafe(s.title)}</b><small>${phoneSafe(s.url)} · ${phoneSafe(s.desc)}</small></button>`).join('')}
     </div>`;
   }
+  const webActions = activePhoneSite === 'bank'
+    ? `<div class="phone-app-panel">
+        <button class="phone-wide-btn" onclick="spendMoney('home')">Eve $150 gonder</button>
+        <button class="phone-wide-btn" onclick="spendMoney('internet')">Internet paketi $40</button>
+        <button class="phone-wide-btn" onclick="spendMoney('gear')">Kisisel ekipman $90</button>
+      </div>`
+    : activePhoneSite === 'courses'
+      ? `<div class="phone-app-panel">
+          <button class="phone-wide-btn" onclick="buyCareerCourse('gmdss')">GMDSS Refresher</button>
+          <button class="phone-wide-btn" onclick="buyCareerCourse('ecdis')">ECDIS Refresh</button>
+          <button class="phone-wide-btn" onclick="buyCareerCourse('brm')">BRM Kursu</button>
+        </div>`
+      : activePhoneSite === 'cabin'
+        ? `<div class="phone-app-panel"><button class="phone-wide-btn" onclick="openCabin()">Kamara ekranini ac</button></div>`
+        : '';
   return `<div class="phone-page">
     <div class="phone-page-head"><button class="phone-small-btn" onclick="setPhoneSite('home')">Geri</button><span>${phoneSafe(site.url)}</span></div>
     <div class="phone-page-content">
       <strong>${phoneSafe(site.title)}</strong><br>${phoneSafe(site.desc)}
       ${phoneSiteCards(activePhoneSite).map((line,i)=>`<div class="phone-page-card ${/UYARI|yorgunluk|baski/i.test(line)?'warn':''}">${phoneSafe(line)}</div>`).join('')}
+      ${webActions}
     </div>
   </div>`;
 }
@@ -16765,6 +17023,8 @@ function startSceneChoiceTimer(sc, ch){
   const chip = document.getElementById('scene-timer-chip');
   if(!chip) return;
   let left = cfg.seconds;
+  if(stats.dinclik < 25) left = Math.max(5, left - 4);
+  else if(stats.dinclik < 40) left = Math.max(6, left - 2);
   chip.textContent = `${left}s`;
   chip.classList.remove('hidden');
   chip.classList.remove('warn');
