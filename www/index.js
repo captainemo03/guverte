@@ -11166,6 +11166,7 @@ function beginGame(){
   phoneTab='messages';
   activePhoneContact='Kaptan';
   activePhoneSite='home';
+  phoneAppView='home';
   phoneContacts=[
     {name:'Kaptan', number:'100', role:'Master / night orders'},
     {name:'Kopruustu', number:'101', role:'Bridge watch'},
@@ -15421,6 +15422,7 @@ let phoneOpen = false;
 let phoneTab = 'messages';
 let activePhoneContact = 'Kaptan';
 let activePhoneSite = 'home';
+let phoneAppView = 'home';
 let phoneContacts = [
   {name:'Kaptan', number:'100', role:'Master / night orders'},
   {name:'Kopruustu', number:'101', role:'Bridge watch'},
@@ -15777,6 +15779,11 @@ function setPhoneSite(key){
   phoneTab = 'web';
   renderPhone();
 }
+function setPhoneAppView(view='home'){
+  phoneAppView = view;
+  phoneTab = 'apps';
+  renderPhone();
+}
 function phoneSafe(value){
   return String(value ?? '').replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -15964,6 +15971,48 @@ function openDeviceFromPhone(key){
   openDevices();
   renderPhone();
 }
+function phoneTakePhoto(){
+  const sc = scenes[currentIdx] || {};
+  const gfx = sc.gfx || 'sea';
+  const titles = {
+    bridge:'Kopruustu Vardiyasi',
+    engine:'Makine Notu',
+    harbor:'Liman Anı',
+    storm:'Firtina Vardiyasi',
+    night:'Gece Vardiyasi',
+    sunrise:'Sabah Vardiyasi',
+    sea:'Acik Deniz'
+  };
+  const title = titles[gfx] || 'Gemi Hatirasi';
+  const caption = `${sc.loc || selectedStartPort?.name || 'Gemide'} bolgesinde telefona kaydedilen an.`;
+  addPhoto(title, caption, GFX[gfx] ? gfx : 'sea');
+  showNotif('CAM','Foto Kaydedildi',`${title} albume eklendi.`);
+  setPhoneAppView('home');
+}
+function renderPhoneSettings(){
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Ayarlar</span></div>
+    <div class="phone-setting-row"><b>SeaPhone</b><small>Gemi ici telefon · mesaj, web, album, not ve kayit menusu</small></div>
+    <div class="phone-setting-row"><b>AILE grubu</b><small>Okunmamis: ${familyUnread}</small></div>
+    <div class="phone-setting-row"><b>Vardiya</b><small>${watchState.code} · ${watchState.label}</small></div>
+    <div class="phone-setting-row"><b>Kayit</b><small>Oyunu telefondan manuel kaydedebilirsin.</small></div>
+    <button class="phone-wide-btn" onclick="saveGameState(true)">Oyunu kaydet</button>
+  </div>`;
+}
+function renderPhoneAppMenu(){
+  return `<div class="phone-app-grid phone-menu-grid">
+    <button class="phone-app menu" onclick="setPhoneTab('messages')"><b>MSG</b>Mesajlar</button>
+    <button class="phone-app menu mail" onclick="setPhoneSite('company')"><b>@</b>Mail</button>
+    <button class="phone-app menu web" onclick="setPhoneSite('home')"><b>NET</b>Internet</button>
+    <button class="phone-app menu camera" onclick="phoneTakePhoto()"><b>CAM</b>Fotograf</button>
+    <button class="phone-app menu photos" onclick="openAlbum()"><b>IMG</b>Fotograflar</button>
+    <button class="phone-app menu notes" onclick="openNotes()"><b>NOT</b>Notlar</button>
+    <button class="phone-app menu maps" onclick="openMap()"><b>MAP</b>Haritalar</button>
+    <button class="phone-app menu log" onclick="openJournal()"><b>LOG</b>Gunluk</button>
+    <button class="phone-app menu settings" onclick="setPhoneAppView('settings')"><b>SET</b>Ayarlar</button>
+  </div>
+  <div class="phone-menu-hint">Cihaz egitimleri artik telefon uygulamasi gibi durmuyor; sahnelerden ve Cihaz Egitim Merkezi'nden aciliyor.</div>`;
+}
 function getRemedialDeviceForScene(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(/vhf|mayday|pan-pan|vts|pilot|distress/.test(blob)) return 'vhf';
@@ -15987,7 +16036,7 @@ function maybeQueueDevicePracticeFromScene(sc,c2){
   devicePracticeProgress[key] = 0;
   const def = getDeviceDef(key);
   const name = def ? def.name : key.toUpperCase();
-  pushPhoneMessage('Egitim', `${name} pratigi acildi. Telefonda Uygulama > ${def?.ico || key.toUpperCase()} uzerinden tekrar et.`, {open:false});
+  pushPhoneMessage('Egitim', `${name} pratigi acildi. Cihaz Egitim Merkezi uzerinden tekrar et.`, {open:false});
   addWatchFeed(`Egitim gorevi: ${name}`, 'warn');
 }
 function renderPhone(){
@@ -16017,17 +16066,7 @@ function renderPhone(){
     return;
   }
   if(phoneTab === 'apps'){
-    body.innerHTML = `<div class="phone-app-grid">
-      <button class="phone-app" onclick="openDeviceFromPhone('vhf')"><b>VHF</b>Mayday</button>
-      <button class="phone-app" onclick="openDeviceFromPhone('radar')"><b>RDR</b>ARPA</button>
-      <button class="phone-app" onclick="openDeviceFromPhone('ecdis')"><b>ECD</b>Route</button>
-      <button class="phone-app" onclick="openDeviceFromPhone('ais')"><b>AIS</b>Targets</button>
-      <button class="phone-app" onclick="openDeviceFromPhone('epirb')"><b>EPB</b>Self-test</button>
-      <button class="phone-app" onclick="openNotes()"><b>NOT</b>Notes</button>
-      <button class="phone-app" onclick="openMap()"><b>MAP</b>Charts</button>
-      <button class="phone-app" onclick="openJournal()"><b>LOG</b>Journal</button>
-      <button class="phone-app" onclick="saveGameState(true)"><b>SAV</b>Save</button>
-    </div>`;
+    body.innerHTML = phoneAppView === 'settings' ? renderPhoneSettings() : renderPhoneAppMenu();
     return;
   }
   const visible = isFamilyChat(activePhoneContact)
