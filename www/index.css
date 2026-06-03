@@ -997,6 +997,11 @@ animation:straitFlow 2.8s linear infinite;}
 #ship-phone{display:none;position:fixed;right:14px;bottom:84px;z-index:59;}
 #ship-phone.show{display:block;animation:phoneSlide .22s ease;}
 @keyframes phoneSlide{from{opacity:0;transform:translateY(18px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+#phone-toast{display:none;position:fixed;right:72px;bottom:38px;z-index:58;width:230px;border:1px solid rgba(127,195,255,.36);border-radius:13px;background:rgba(7,18,31,.96);box-shadow:0 14px 34px rgba(0,0,0,.45);padding:9px 11px;color:#dff1ff;cursor:pointer;animation:phoneToastIn .25s ease;}
+#phone-toast.show{display:block;}
+#phone-toast-from{font-size:9px;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:3px;}
+#phone-toast-text{font-size:11px;line-height:1.35;color:#dcefff;}
+@keyframes phoneToastIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 #phone-frame{width:238px;height:404px;border-radius:24px;background:#07111d;border:3px solid #1b3349;box-shadow:0 20px 55px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;display:flex;flex-direction:column;}
 #phone-status{height:22px;background:#02080f;color:#dcefff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-size:9px;font-family:'Share Tech Mono',monospace;}
 #phone-title{height:34px;background:linear-gradient(180deg,#3e6f9e,#1b3858);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;letter-spacing:.7px;}
@@ -1035,6 +1040,11 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-app.menu.maps{background:linear-gradient(180deg,#4a9b68,#1d5632);}
 .phone-app.menu.log{background:linear-gradient(180deg,#bf6058,#6e2b2b);}
 .phone-app.menu.settings{background:linear-gradient(180deg,#526475,#27313c);}
+.phone-app.menu.cabin{background:linear-gradient(180deg,#965fcb,#4a2d70);}
+.phone-app.menu.bank{background:linear-gradient(180deg,#4d9360,#225233);}
+.phone-app.menu.weather{background:linear-gradient(180deg,#3388b8,#16445e);}
+.phone-app.menu.crew{background:linear-gradient(180deg,#b05a82,#613047);}
+.phone-app.menu.course{background:linear-gradient(180deg,#7280c8,#323d78);}
 .phone-menu-hint{margin-top:10px;border:1px solid rgba(111,146,178,.16);border-radius:10px;background:rgba(5,14,24,.62);padding:8px;color:#9dbdd5;font-size:9px;line-height:1.45;font-family:'Share Tech Mono',monospace;}
 .phone-app-panel{display:grid;gap:8px;}
 .phone-app-head{display:flex;align-items:center;justify-content:space-between;color:#fff;font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:2px;}
@@ -1056,6 +1066,7 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-page-card.warn{border-color:rgba(214,92,92,.34);color:#ffcccc;}
 @media (max-width:520px){
   #ship-phone{right:8px;bottom:76px;}
+  #phone-toast{right:62px;bottom:34px;width:205px;}
   #phone-frame{width:218px;height:372px;}
   #phone-fab{right:10px;bottom:30px;}
 }

@@ -10859,7 +10859,11 @@ function closeContractCareerBooks(){
     pushPhoneMessage('Şirket','Kontrat raporun olumlu. Terfi dosyan acildi: '+promo.nextRank+'.', {open:false});
   }else{
     careerState.referenceLetters.push(`${selYear} ${sn}: kontrat performans mektubu`);
+    pushPhoneMessage('Şirket','Kontrat performans raporun dosyalandi. Bir sonraki teklif icin disiplinli kapanis bekliyoruz.', {open:false});
   }
+  pushFamilyGroupMessage('Anne','Kontrat bitiyorsa ne zaman doneceksin? Evde herkes tarih soruyor.');
+  pushPhoneMessage('Crew Chat','Lostromo: Gemide kalirsan yine forward stationda gorusuruz. Inersen yolun acik olsun.', {open:false});
+  tryAddMomentPhoto(`contract-${careerState.contracts+1}-memory`,'Kontrat Hatirasi',`${sn} uzerinde ${getContractTotalMonths()} ayin ozeti: ${getTopSpecialtyLabel()}, ${choicesMade.length} karar, ${photos.length} hatira.`, 'bridge');
   careerState.lastContractClosed = true;
   shipOffers = buildShipOffers();
 }
@@ -10882,11 +10886,17 @@ function closeCareer(){ document.getElementById('career-panel')?.classList.remov
 function doFreeTimeAction(key){
   const actions={
     study:{effect:{bilgi:6,dinclik:-3},mood:2,msg:'Kamarada not calistin; ECDIS/Radar kafanda biraz daha oturdu.'},
+    sleep:{effect:{dinclik:12},mood:3,msg:'Kamarada kisa uyku yakaladin; vardiya oncesi gozlerin biraz acildi.'},
     deck:{effect:{cesaret:4,bilgi:2,dinclik:-4},mood:1,msg:'Güverte turunda halat, iskele ve emniyet noktalarini tekrar gordun.'},
     engine:{effect:{bilgi:5,dinclik:-5},mood:1,msg:'Makineye indin; alarm mantigi ve pompa hatlari daha netlesti.'},
     cook:{effect:{sayginlik:3,dinclik:4},mood:5,msg:'Aşçıyla çay içtin; gemi biraz daha ev gibi hissettirdi.'},
     sport:{effect:{dinclik:6,cesaret:2},mood:3,msg:'Kisa spor yaptin; beden toparlaninca kafa da toparlandi.'},
-    family:{effect:{dinclik:2},mood:8,msg:'Aileyi aradin; yalnizlik biraz azaldi.'}
+    family:{effect:{dinclik:2},mood:8,msg:'Aileyi aradin; yalnizlik biraz azaldi.'},
+    logbook:{effect:{bilgi:4,sayginlik:2,dinclik:-2},mood:1,msg:'Logbook, hava ve trafik notlarini temiz girdin; vardiya devri daha profesyonel oldu.'},
+    weather:{effect:{bilgi:5,dinclik:-1},mood:1,msg:'Hava raporu, barometre trendi ve swell yonunu kontrol ettin.'},
+    gmdss:{effect:{bilgi:5,sayginlik:2,dinclik:-2},mood:1,msg:'GMDSS test, DSC log ve NAVTEX filtrelerini rutin olarak kontrol ettin.'},
+    safety:{effect:{sayginlik:4,bilgi:2,dinclik:-3},mood:1,msg:'Fire patrol ve safety round yaptin; eksikleri buyumeden yakaladin.'},
+    sounding:{effect:{bilgi:4,sayginlik:2,dinclik:-3},mood:1,msg:'Tank sounding ve sludge/fresh water notlarini kontrol ettin.'}
   };
   const a=actions[key]; if(!a) return;
   applyEffect(a.effect,{skipContractTick:true});
@@ -10894,6 +10904,9 @@ function doFreeTimeAction(key){
   if(key==='family'){
     pushPhoneMessage('Anne','Sesini duymak iyi geldi. Kendine dikkat et.', {open:false});
     familyUnread=0;
+  }
+  if(['logbook','weather','gmdss','safety','sounding'].includes(key)){
+    pushPhoneMessage('Kaptan','Rutin gorevi kayda aldım. Boyle devam edersen vardiya devri temiz kalir.', {open:false});
   }
   addJournalEntry('[SERBEST ZAMAN] '+a.msg);
   renderCareerPanel();
@@ -10959,11 +10972,17 @@ function renderCareerPanel(){
   </div>
   <div class="career-card"><b>Serbest Zaman</b><div class="career-actions">
     <button class="career-btn" onclick="doFreeTimeAction('study')">Kamarada Ders<small>Bilgi artar, biraz yorulursun.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('sleep')">Kisa Uyku<small>Dinçlik ciddi toparlar.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('deck')">Güverte Turu<small>Pratik ve cesaret artar.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('engine')">Makineye İn<small>Teknik bilgi artar.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('cook')">Aşçıyla Çay<small>Moral ve saygınlık artar.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('sport')">Spor Yap<small>Dinçlik toparlar.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('family')">Aileyi Ara<small>Yalnızlık azalır.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('logbook')">Logbook<small>Vardiya notlarini temizle.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('weather')">Hava Raporu<small>WX, barometre, swell.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('gmdss')">GMDSS Test<small>DSC/NAVTEX rutin kontrol.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('safety')">Safety Round<small>Fire patrol ve ekipman.</small></button>
+    <button class="career-btn" onclick="doFreeTimeAction('sounding')">Tank Sounding<small>Tank ve tüketim takibi.</small></button>
   </div></div>
   <div class="career-card"><b>Kurslar</b><div class="career-actions">
     <button class="career-btn" onclick="buyCareerCourse('gmdss')">GMDSS Refresher<small>$450 · Haberleşme ve emniyet.</small></button>
@@ -11174,17 +11193,21 @@ function beginGame(){
     {name:'Lostromo', number:'300', role:'Deck / mooring station'},
     {name:'Asci', number:'400', role:'Galley'},
     {name:'VTS', number:'VHF 12', role:'Traffic service'},
+    {name:'Şirket', number:'mail.company', role:'Office / crewing'},
+    {name:'Crew Chat', number:'Grup', role:'Gemi ici sohbet'},
     {name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'}
   ];
   phoneMessages=[
     {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
     {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
     {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
+    {from:'Crew Chat', text:'Asci: Cay hazir. Vardiyadan cikan ugrasin.', me:false},
     {from:'Anne', chat:'AILE', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false},
     {from:'Baba', chat:'AILE', text:'Denizde isler nasildir bilirim; acele karar verme, iki kere kontrol et.', me:false},
     {from:'Kardes', chat:'AILE', text:'Internetten geminin nerede olduguna baktim. Foto atarsan gruba koyarim :)', me:false}
   ];
   watchFeedItems=[];
+  livingPulseState={lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   devicePracticeProgress={};
   devicePracticeScore={ok:0,total:0};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
@@ -11723,6 +11746,7 @@ function buildSavePayload(){
     phoneTab,
     activePhoneSite,
     watchFeedItems,
+    livingPulseState,
     devicePracticeProgress,
     devicePracticeScore,
     watchCycleLog,
@@ -11807,6 +11831,7 @@ function applyLoadedGameState(data){
   phoneTab = data.phoneTab || 'messages';
   activePhoneSite = data.activePhoneSite || 'home';
   watchFeedItems = Array.isArray(data.watchFeedItems) ? data.watchFeedItems : [];
+  livingPulseState = data.livingPulseState || {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   devicePracticeProgress = data.devicePracticeProgress || {};
   devicePracticeScore = data.devicePracticeScore || {ok:0,total:0};
   phoneOpen = false;
@@ -15430,23 +15455,30 @@ let phoneContacts = [
   {name:'Lostromo', number:'300', role:'Deck / mooring station'},
   {name:'Asci', number:'400', role:'Galley'},
   {name:'VTS', number:'VHF 12', role:'Traffic service'},
+  {name:'Şirket', number:'mail.company', role:'Office / crewing'},
+  {name:'Crew Chat', number:'Grup', role:'Gemi ici sohbet'},
   {name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'}
 ];
 let phoneMessages = [
   {from:'Kaptan', text:'Pilot stationdan once beni cagir. VHF kaydini da temiz tut.', me:false},
   {from:'Makine', text:'Standby generator online. Ana makine alarm trendini izliyoruz.', me:false},
   {from:'Lostromo', text:'Forward station ready. Snap-back zone bos tutuldu.', me:false},
+  {from:'Crew Chat', text:'Asci: Cay hazir. Vardiyadan cikan ugrasin.', me:false},
   {from:'Anne', chat:'AILE', text:'Vardiyan bitince haber ver olur mu? Kendine dikkat et.', me:false},
   {from:'Baba', chat:'AILE', text:'Denizde isler nasildir bilirim; acele karar verme, iki kere kontrol et.', me:false},
   {from:'Kardes', chat:'AILE', text:'Internetten geminin nerede olduguna baktim. Foto atarsan gruba koyarim :)', me:false}
 ];
 let watchFeedItems = [];
+let livingPulseState = {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
 
 const PHONE_SITES = [
   {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
   {key:'weather', title:'OceanWX', url:'wx.met/route', desc:'Ruzgar, swell, gorus ve barometre ozeti.'},
   {key:'company', title:'Company Mail', url:'mail.company/fleet', desc:'Ofis mesajlari, charter baskisi ve operasyon notlari.'},
   {key:'crew', title:'Crew Portal', url:'crew.portal/ship', desc:'Murettebat duyurulari, menu, izin ve moral notlari.'},
+  {key:'cabin', title:'Kamaram', url:'cabin.local/free-time', desc:'Serbest zaman, dinlenme, ders ve kisisel durum.'},
+  {key:'bank', title:'Banka / Maas', url:'bank.seafarer/pay', desc:'Maas, eve para gonderme ve kurs butcesi.'},
+  {key:'courses', title:'Kurs Portali', url:'training.portal/courses', desc:'GMDSS, ECDIS, BRM ve tanker kurslari.'},
   {key:'vts', title:'Port / VTS Info', url:'portinfo/vts', desc:'Pilot station, tug, berth ve raporlama bilgileri.'},
   {key:'training', title:'Training Hub', url:'training/device', desc:'Cihaz pratikleri ve acilan tekrar gorevleri.'}
 ];
@@ -15796,6 +15828,12 @@ function familyNames(){
 function ensureFamilyGroup(){
   const oldFamily = new Set(familyNames());
   phoneContacts = (phoneContacts || []).filter(c=>!oldFamily.has(c.name));
+  if(!phoneContacts.some(c=>c.name === 'Şirket')){
+    phoneContacts.push({name:'Şirket', number:'mail.company', role:'Office / crewing'});
+  }
+  if(!phoneContacts.some(c=>c.name === 'Crew Chat')){
+    phoneContacts.push({name:'Crew Chat', number:'Grup', role:'Gemi ici sohbet'});
+  }
   if(!phoneContacts.some(c=>c.name === 'AILE')){
     phoneContacts.push({name:'AILE', number:'Grup', role:'Anne · Baba · Kardes'});
   }
@@ -15809,12 +15847,28 @@ function pushFamilyGroupMessage(from,text,opts={}){
   phoneMessages.push({from, chat:'AILE', text, me:false});
   if(phoneMessages.length > 100) phoneMessages = phoneMessages.slice(-100);
   familyUnread++;
+  showPhoneToast('AILE · '+from, text);
   if(opts.open){
     phoneOpen = true;
     activePhoneContact = 'AILE';
     phoneTab = 'messages';
   }
   renderPhone();
+}
+function showPhoneToast(from,text){
+  const toast = document.getElementById('phone-toast');
+  const fromEl = document.getElementById('phone-toast-from');
+  const textEl = document.getElementById('phone-toast-text');
+  if(!toast || !fromEl || !textEl) return;
+  fromEl.textContent = from || 'SeaPhone';
+  textEl.textContent = text || 'Yeni bildirim';
+  toast.classList.add('show');
+  if(soundEnabled){
+    playTone(880,'sine',0.08,0.035,0);
+    playTone(1175,'sine',0.07,0.025,0.09);
+  }
+  clearTimeout(showPhoneToast._timer);
+  showPhoneToast._timer = setTimeout(()=>toast.classList.remove('show'),3600);
 }
 function getFamilyReplyPool(text=''){
   const t = normalizeTrAscii(text);
@@ -15903,6 +15957,7 @@ function pushPhoneMessage(from,text,opts={}){
   }
   phoneMessages.push({from,text,me:false});
   if(phoneMessages.length > 80) phoneMessages = phoneMessages.slice(-80);
+  showPhoneToast(from,text);
   if(opts.open) phoneOpen = true;
   renderPhone();
 }
@@ -15912,6 +15967,78 @@ function addWatchFeed(text,type=''){
   const el = document.getElementById('live-watch-feed');
   if(!el) return;
   el.innerHTML = watchFeedItems.map(item=>`<span class="watch-feed-item ${item.type||''}">${item.text}</span>`).join('');
+}
+function getCrewMemoryPulse(){
+  const entries = Object.entries(crewMemoryNotes || {}).filter(([,v])=>v);
+  if(!entries.length) return '';
+  const [key,val] = entries[Math.floor(Math.random()*entries.length)];
+  const def = CREW_DEFS[key];
+  const mem = typeof val === 'object' ? val : {good:0,bad:0,line:val};
+  if(mem.good > mem.bad) return `${def?.name || 'Murettebat'}: Gecen sefer iyi toparladin, bunu unutmadim.`;
+  if(mem.bad > mem.good) return `${def?.name || 'Murettebat'}: Onceki hatani hâlâ izliyorum, bu kez daha net ol.`;
+  return mem.line || '';
+}
+function maybeRunRoutineTasks(sc, blob){
+  const sceneNo = Math.max(1, currentIdx + 1);
+  const monthNow = Math.ceil(sceneNo / CONTRACT_SCENES_PER_MONTH);
+  if(monthNow !== livingPulseState.lastRoutineMonth){
+    livingPulseState.lastRoutineMonth = monthNow;
+    const routines = [
+      'Aylik GMDSS test kaydi, EPIRB tarih kontrolu ve NAVTEX filtreleri bekliyor.',
+      'Fire patrol, emergency light ve muster list kontrolu bu ayin rutinine eklendi.',
+      'Tank sounding, fresh water tüketimi ve sludge log girisi kontrol listesine dustu.',
+      'Hava raporu, barometre trendi ve rota uzeri swell notu vardiya defterine islenecek.'
+    ];
+    const msg = routines[(monthNow-1) % routines.length];
+    pushPhoneMessage('Şirket', `Ay ${monthNow} rutin gorevleri: ${msg}`);
+    addJournalEntry(`[RUTIN GOREV] Ay ${monthNow}: ${msg}`, sc?.day, sc?.time);
+    addWatchFeed(`Aylik rutin: ${msg}`, 'warn');
+    tryAddMomentPhoto(`month-${monthNow}-memory`, `Ay ${monthNow} Hatirasi`, `${msg} Bu ay gemide rutinin de hikayenin parcasi oldu.`, sc?.gfx || 'bridge');
+  }
+  if(sceneNo - (livingPulseState.lastShiftScene || 0) >= 4){
+    livingPulseState.lastShiftScene = sceneNo;
+    const shiftTasks = [
+      ['Kaptan','Gece emri guncellendi: CPA, hava ve waypoint notunu vardiya devrine ekle.'],
+      ['Makine','Alarm trendi sakin ama generator load paylasimi loga girilecek.'],
+      ['Lostromo','Safety round bitti. Islak zemin ve snap-back alanlari tekrar isaretlendi.'],
+      ['Crew Chat','Asci: Bugun corba iyi tuttu. Vardiyadan cikan gec kalmasin.'],
+      ['Kopruustu','Logbook icin hava, gorus, barometre ve trafik notu bekliyorum.']
+    ];
+    const pick = shiftTasks[Math.floor(Math.random()*shiftTasks.length)];
+    pushPhoneMessage(pick[0], pick[1]);
+    addWatchFeed(pick[1], pick[0]==='Crew Chat'?'good':'');
+  }
+}
+function maybeRunCrewSocialPulse(sc, blob){
+  const sceneNo = Math.max(1, currentIdx + 1);
+  if(sceneNo - (livingPulseState.lastSocialScene || 0) < 5 || Math.random() > 0.55) return;
+  livingPulseState.lastSocialScene = sceneNo;
+  const memoryLine = getCrewMemoryPulse();
+  const social = [
+    ['Crew Chat','Lostromo ile makineci guverte is programi icin tartisti. Konu buyumeden vardiya zabiti araya girdi.','warn'],
+    ['Crew Chat','Aşci sessizce cay birakti. Bugun gemide herkes biraz yorgun.','good'],
+    ['Kaptan', memoryLine || 'Vardiya tavrini izliyorum. Sakin kalirsan ekip de sakin kaliyor.',''],
+    ['Crew Chat','Bir tayfa, izin tarihlerini soruyor. Moral konusu hafiften kabardi.','warn'],
+    ['Makine','Baş mühendis: Gereksiz alarm bypass istemiyorum, herkes proseduru takip edecek.','warn']
+  ].filter(x=>x[1]);
+  const pick = social[Math.floor(Math.random()*social.length)];
+  pushPhoneMessage(pick[0], pick[1]);
+  addWatchFeed(pick[1], pick[2]);
+  addJournalEntry(`[GEMI ICI AKIS] ${pick[1]}`, sc?.day, sc?.time);
+}
+function maybeRunBridgeVisualPulse(sc, blob){
+  const sceneNo = Math.max(1, currentIdx + 1);
+  if(sceneNo - (livingPulseState.lastBridgePulse || 0) < 2) return;
+  livingPulseState.lastBridgePulse = sceneNo;
+  const details = [];
+  if(/radar|arpa|ais|bridge|kopruustu|köprüüstü/.test(blob)) details.push(['Radar sweep donuyor · AIS target izi yavas kayiyor','']);
+  if(/ecdis|route|enc|wp|waypoint/.test(blob)) details.push(['ECDIS rota cizgisi ve XTD koridoru parliyor','']);
+  if(/vhf|vts|pilot|mayday|pan-pan/.test(blob)) details.push(['VHF cizirtisi araya giriyor · hoparlor kisa patliyor','warn']);
+  if(/storm|firtina|rain|swell|sis|fog/.test(blob)) details.push(['Camda su izi akiyor · ruzgar sesi arada yukseliyor','warn']);
+  if(/harbor|liman|terminal|berth|tug|mooring/.test(blob)) details.push(['Terminal isiklari ve vinc hareketleri ufukta canlaniyor','good']);
+  if(!details.length) details.push(['Kopruustunde kahve kupasi titriyor · cihaz fanlari ugulduyor','']);
+  const pick = details[Math.floor(Math.random()*details.length)];
+  addWatchFeed(pick[0], pick[1]);
 }
 function updateLivingWatch(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
@@ -15935,6 +16062,9 @@ function updateLivingWatch(sc){
   if(Math.random() < .55) feed.push(livingBits[Math.floor(Math.random()*livingBits.length)]);
   const picked = feed[Math.floor(Math.random()*feed.length)];
   addWatchFeed(picked[0], picked[1]);
+  maybeRunBridgeVisualPulse(sc, blob);
+  maybeRunRoutineTasks(sc, blob);
+  maybeRunCrewSocialPulse(sc, blob);
   maybeSendScenePhoneMessage(sc, blob);
 }
 function maybeSendScenePhoneMessage(sc, blob){
@@ -16007,7 +16137,11 @@ function renderPhoneAppMenu(){
     <button class="phone-app menu camera" onclick="phoneTakePhoto()"><b>CAM</b>Fotograf</button>
     <button class="phone-app menu photos" onclick="openAlbum()"><b>IMG</b>Fotograflar</button>
     <button class="phone-app menu notes" onclick="openNotes()"><b>NOT</b>Notlar</button>
-    <button class="phone-app menu maps" onclick="openMap()"><b>MAP</b>Haritalar</button>
+    <button class="phone-app menu cabin" onclick="setPhoneSite('cabin')"><b>CAB</b>Kamaram</button>
+    <button class="phone-app menu crew" onclick="setPhoneContact('Crew Chat')"><b>CREW</b>Crew Chat</button>
+    <button class="phone-app menu bank" onclick="setPhoneSite('bank')"><b>$</b>Banka</button>
+    <button class="phone-app menu weather" onclick="setPhoneSite('weather')"><b>WX</b>Hava</button>
+    <button class="phone-app menu course" onclick="setPhoneSite('courses')"><b>CRS</b>Kurs</button>
     <button class="phone-app menu log" onclick="openJournal()"><b>LOG</b>Gunluk</button>
     <button class="phone-app menu settings" onclick="setPhoneAppView('settings')"><b>SET</b>Ayarlar</button>
   </div>
@@ -16074,7 +16208,7 @@ function renderPhone(){
     : phoneMessages.filter(m=>{
         const chat = m.chat || m.from;
         if(chat === 'AILE' || familyNames().includes(m.from)) return false;
-        return m.me || m.from === activePhoneContact || chat === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit','Egitim','Şirket'].includes(m.from);
+        return m.me || m.from === activePhoneContact || chat === activePhoneContact || ['Kaptan','Makine','Lostromo','Kopruustu','Asci','2. Zabit','Crew Chat','Egitim','Şirket'].includes(m.from);
       }).slice(-28);
   body.innerHTML = visible.map(m=>`<div class="phone-msg ${m.me?'me':''} ${isFamilyChat(activePhoneContact)&&!m.me?'family':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${phoneSafe(m.text)}</div></div>`).join('');
   body.scrollTop = body.scrollHeight;
@@ -16107,6 +16241,21 @@ function phoneSiteCards(key){
       `Menu: corba, pilav, vardiya cayi`,
       `Ekip uyumu: ${Math.round(psyche.uyum)} · moral: ${Math.round(psyche.moral)}`,
       stats.dinclik < 30 ? 'Kisisel not: yorgunluk gorunuyor, kisa mola planla.' : 'Kisisel not: vardiya ritmi idare eder.'
+    ],
+    cabin:[
+      `Kamara durumu: ${stats.dinclik < 35 ? 'uyku sart' : 'kisa mola icin uygun'}`,
+      `Serbest zaman onerisi: ${psyche.yalnizlik > 55 ? 'AILE grubuna yaz' : stats.bilgi < 55 ? 'kamarada ders calis' : 'kisa spor yap'}`,
+      `Kisisel hal: moral ${Math.round(psyche.moral)} · tukenme ${Math.round(psyche.tukenme)}`
+    ],
+    bank:[
+      `Bakiye: $${careerState.money || 0} · aylik maas: $${careerState.salary || 0}`,
+      `Izin bakiyesi: ${careerState.leaveDays || 0} gun · deniz ayi: ${careerState.seaMonths || 0}`,
+      `Oneri: kurs, aileye para ve izin planini kontrat sonuna gore ayarla.`
+    ],
+    courses:[
+      `Onerilen kurs: ${stats.bilgi < 55 ? 'ECDIS Refresh' : specialtyXP.tanker > specialtyXP.navigation ? 'Tanker Familiarization' : 'BRM'}`,
+      `Sinav modu: COLREG, GMDSS, ECDIS, Radar, Meteoroloji, Stabilite`,
+      `Kariyer uzmani: ${getTopSpecialtyLabel()}`
     ],
     vts:[
       `Bolge: ${route}`,
