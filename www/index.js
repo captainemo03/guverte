@@ -7961,8 +7961,8 @@ function buildTransparentSheet(src){
         const max = Math.max(r,g,b);
         const min = Math.min(r,g,b);
         const spread = max - min;
-        const darkNeutral = max <= 92 && spread <= 34;
-        const darkBlueBlack = max <= 108 && b >= r && spread <= 48;
+        const darkNeutral = max <= 72 && spread <= 26;
+        const darkBlueBlack = max <= 84 && b >= r && spread <= 34;
         return darkNeutral || darkBlueBlack;
       };
       const pushIfBg = (x,y) => {
@@ -7974,7 +7974,6 @@ function buildTransparentSheet(src){
       };
       for(let x=0;x<w;x++){
         pushIfBg(x,0);
-        pushIfBg(x,h-1);
       }
       for(let y=0;y<h;y++){
         pushIfBg(0,y);
@@ -16062,18 +16061,23 @@ function pushFamilyGroupMessage(from,text,opts={}){
 }
 function showPhoneToast(from,text){
   const toast = document.getElementById('phone-toast');
+  const fab = document.getElementById('phone-fab');
   const fromEl = document.getElementById('phone-toast-from');
   const textEl = document.getElementById('phone-toast-text');
   if(!toast || !fromEl || !textEl) return;
   fromEl.textContent = from || 'SeaPhone';
   textEl.textContent = text || 'Yeni bildirim';
   toast.classList.add('show');
+  if(fab) fab.classList.add('phone-alert');
   if(soundEnabled){
     playTone(880,'sine',0.08,0.035,0);
     playTone(1175,'sine',0.07,0.025,0.09);
   }
   clearTimeout(showPhoneToast._timer);
-  showPhoneToast._timer = setTimeout(()=>toast.classList.remove('show'),3600);
+  showPhoneToast._timer = setTimeout(()=>{
+    toast.classList.remove('show');
+    if(fab) fab.classList.remove('phone-alert');
+  },3600);
 }
 function triggerPhoneCall(from,note,effect={},declineEffect={}){
   if(pendingPhoneCall) return;
@@ -17158,6 +17162,19 @@ const LIVING_SHIP_BEATS = [
 ];
 
 const INTERACTION_PANEL_CONFIGS = {
+  s409:{
+    title:'VHF KANAL / CAGRI SECIMI',
+    hint:'Baski altinda dogru kanal ve cagri tipini isaretle.',
+    caption:'Distress/urgency/safety ayrimi, gecikmeden once dogru kanali secmekle baslar.',
+    expected:'vhf16',
+    correctTag:'kritik',
+    midTag:'akilli',
+    hotspots:[
+      {id:'vhf13', x:82, y:78, r:18, label:'13'},
+      {id:'vhf16', x:160, y:52, r:24, label:'16'},
+      {id:'vhf70', x:238, y:78, r:18, label:'70'}
+    ]
+  },
   s414:{
     title:'RADAR HEDEF SECIMI',
     hint:'Ham echo ile ARPA yorumunu birlikte okuyup tehlikeli hedefi isaretle.',
@@ -17182,6 +17199,19 @@ const INTERACTION_PANEL_CONFIGS = {
       {id:'zone1', x:82, y:84, r:16, label:'A'},
       {id:'zone2', x:176, y:62, r:24, label:'B'},
       {id:'zone3', x:258, y:44, r:16, label:'C'}
+    ]
+  },
+  s252:{
+    title:'YANGIN PANELI / BOLGE SECIMI',
+    hint:'Galley yangininda once dogru mahal ve dogru ilk aksiyonu isaretle.',
+    caption:'Yag yangini ve elektrik panosu ayni refleksle sonmez; bolgeyi net sec.',
+    expected:'galley',
+    correctTag:'kritik',
+    midTag:'itaatkar',
+    hotspots:[
+      {id:'panel', x:82, y:62, r:18, label:'P'},
+      {id:'galley', x:166, y:56, r:24, label:'G'},
+      {id:'store', x:246, y:82, r:18, label:'S'}
     ]
   }
 };

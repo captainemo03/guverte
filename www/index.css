@@ -1079,14 +1079,19 @@ animation:straitFlow 2.8s linear infinite;}
 .ops-chip.good{border-color:rgba(93,191,138,.28);color:#98e0ba;background:rgba(10,31,20,.92);}
 .ops-chip.hot{border-color:rgba(212,160,23,.32);color:#ffd98a;background:rgba(42,28,8,.92);}
 
-#live-watch-feed{display:flex;gap:6px;align-items:center;overflow:hidden;padding:5px 10px;background:rgba(3,10,18,.9);border-bottom:1px solid var(--border2);min-height:30px;}
-.watch-feed-item{flex:0 0 auto;border:1px solid rgba(111,146,178,.18);border-radius:999px;background:rgba(8,22,40,.82);color:#c8ddf5;padding:5px 9px;font-size:9px;font-family:'Share Tech Mono',monospace;animation:feedIn .35s ease;}
+#live-watch-feed{display:flex;gap:6px;align-items:center;overflow:hidden;padding:5px 10px;background:linear-gradient(90deg,rgba(3,10,18,.94),rgba(8,25,43,.9),rgba(3,10,18,.94));border-bottom:1px solid var(--border2);min-height:30px;position:relative;}
+#live-watch-feed::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(127,195,255,.08),transparent);animation:feedSweep 5.8s ease-in-out infinite;}
+.watch-feed-item{flex:0 0 auto;border:1px solid rgba(111,146,178,.18);border-radius:999px;background:rgba(8,22,40,.82);color:#c8ddf5;padding:5px 9px;font-size:9px;font-family:'Share Tech Mono',monospace;animation:feedIn .35s ease, feedPulse 4.8s ease-in-out infinite;position:relative;z-index:1;}
 .watch-feed-item.warn{border-color:rgba(214,92,92,.36);color:#ffb8b8;background:rgba(50,16,16,.82);}
 .watch-feed-item.good{border-color:rgba(93,191,138,.3);color:#a8f5c2;background:rgba(10,31,20,.82);}
 @keyframes feedIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes feedSweep{0%,100%{transform:translateX(-60%);opacity:.18;}50%{transform:translateX(60%);opacity:.36;}}
+@keyframes feedPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.12);}}
 
 #phone-fab{position:fixed;right:14px;bottom:34px;z-index:58;width:48px;height:48px;border-radius:50%;border:1px solid rgba(127,195,255,.42);background:linear-gradient(180deg,#152b42,#071323);color:#dff1ff;font-size:11px;font-family:'Share Tech Mono',monospace;box-shadow:0 12px 28px rgba(0,0,0,.42);cursor:pointer;}
 #phone-fab:hover{border-color:var(--gold);color:#fff;}
+#phone-fab.phone-alert{animation:phoneFabPulse 1.2s ease-in-out infinite;}
+@keyframes phoneFabPulse{0%,100%{box-shadow:0 12px 28px rgba(0,0,0,.42),0 0 0 0 rgba(127,195,255,.22);}50%{box-shadow:0 12px 28px rgba(0,0,0,.42),0 0 0 8px rgba(127,195,255,0);}}
 #ship-phone{display:none;position:fixed;right:14px;bottom:84px;z-index:59;}
 #ship-phone.show{display:block;animation:phoneSlide .22s ease;}
 @keyframes phoneSlide{from{opacity:0;transform:translateY(18px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
