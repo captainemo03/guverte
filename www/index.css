@@ -773,7 +773,7 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-sprite.speaker,.portrait-photo-sheet.speaker{width:42px;height:42px;background-size:460% 220%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.crew,.portrait-photo-sheet.crew{width:38px;height:38px;background-size:470% 225%;background-position:var(--px,0%) calc(var(--py,0%) + 2%);border-radius:50%;}
 .portrait-sprite.preview,.portrait-photo-sheet.preview{width:90%;height:206px;background-size:400% 200%;background-position:var(--px,0%) var(--py,0%);}
-.portrait-sprite.story,.portrait-photo-sheet.story{width:100%;height:190px;background-size:420% 210%;background-position:var(--px,0%) calc(var(--py,0%) + 4%);filter:drop-shadow(0 10px 24px rgba(0,0,0,.3));}
+.portrait-sprite.story,.portrait-photo-sheet.story{width:100%;height:190px;background-size:420% 210%;background-position:var(--px,0%) var(--py,0%);filter:drop-shadow(0 10px 24px rgba(0,0,0,.3));}
 .portrait-photo-sheet.pose-front{transform:translateX(0) scale(1);}
 .portrait-photo-sheet.pose-angled{transform:translateX(-8px) scale(1.05) rotate(-1deg);}
 .portrait-photo-sheet.pose-command{transform:translateY(4px) translateX(7px) scale(1.09);}
@@ -804,7 +804,7 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-photo.preview{width:100%;height:210px;border-radius:0;object-position:center 8%;}
 .portrait-photo.story{width:100%;height:190px;border-radius:0;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 10px 24px rgba(0,0,0,.3));}
 .portrait-photo.actor{width:150px;height:190px;object-fit:contain;object-position:right bottom;border-radius:0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));}
-.portrait-sprite.actor,.portrait-photo-sheet.actor{width:150px;height:190px;background-size:420% 210%;background-position:var(--px,0%) calc(var(--py,0%) + 4%);filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));}
+.portrait-sprite.actor,.portrait-photo-sheet.actor{width:150px;height:190px;background-size:420% 210%;background-position:var(--px,0%) var(--py,0%);filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));}
 #gfx-actor .portrait-composite.actor,
 #gfx-actor .portrait-photo-sheet.actor,
 #gfx-actor .portrait-sprite.actor,
