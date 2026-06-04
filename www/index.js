@@ -8423,11 +8423,11 @@ function renderSpeechPortrait(cfg){
   const slot = document.getElementById('speechchar');
   if(slot){
     const safeCfg = cfg || getPlayerPortraitConfig();
-    slot.innerHTML = renderPortraitSprite(safeCfg, 'story');
+    slot.innerHTML = renderPortraitSprite(safeCfg, 'actor');
   }
   const playerStand = document.getElementById('playerstandchar');
   if(playerStand){
-    playerStand.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'story');
+    playerStand.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'actor');
   }
 }
 

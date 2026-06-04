@@ -576,8 +576,12 @@ animation:straitFlow 2.8s linear infinite;}
 .story-live #speechchar .portrait-sprite.story{animation:actorSettle .42s ease;}
 .story-live #speechchar .portrait-composite.story,
 .story-live #playerstandchar .portrait-composite.story,
+.story-live #speechchar .portrait-composite.actor,
+.story-live #playerstandchar .portrait-composite.actor,
 .story-live #speechchar .portrait-photo-sheet.story,
-.story-live #playerstandchar .portrait-photo-sheet.story{animation:characterBreathe 5.8s ease-in-out infinite;}
+.story-live #playerstandchar .portrait-photo-sheet.story,
+.story-live #speechchar .portrait-photo-sheet.actor,
+.story-live #playerstandchar .portrait-photo-sheet.actor{animation:characterBreathe 5.8s ease-in-out infinite;}
 #speechportrait[data-emotion="alert"] #speechchar,
 #playerstand[data-emotion="alert"] #playerstandchar{animation:microAlert .9s ease-in-out infinite;}
 #speechportrait[data-emotion="tired"] #speechchar,
