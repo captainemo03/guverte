@@ -7949,19 +7949,57 @@ function buildTransparentSheet(src){
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img,0,0);
       const data = ctx.getImageData(0,0,canvas.width,canvas.height);
-      for(let i=0;i<data.data.length;i+=4){
-        const r = data.data[i];
-        const g = data.data[i+1];
-        const b = data.data[i+2];
-        const a = data.data[i+3];
-        if(a===0) continue;
+      const px = data.data;
+      const w = canvas.width;
+      const h = canvas.height;
+      const seen = new Uint8Array(w*h);
+      const stack = [];
+      const isBackgroundPixel = (p) => {
+        const i = p * 4;
+        const r = px[i];
+        const g = px[i+1];
+        const b = px[i+2];
+        const a = px[i+3];
+        if(a===0) return false;
         const max = Math.max(r,g,b);
         const min = Math.min(r,g,b);
         const spread = max - min;
-        if(max <= 34){
-          data.data[i+3] = 0;
-        }else if(max <= 54 && spread <= 18){
-          data.data[i+3] = Math.round(a * ((max - 34) / 20));
+        const darkNeutral = max <= 92 && spread <= 34;
+        const darkBlueBlack = max <= 108 && b >= r && spread <= 48;
+        return darkNeutral || darkBlueBlack;
+      };
+      const pushIfBg = (x,y) => {
+        if(x<0 || y<0 || x>=w || y>=h) return;
+        const p = y*w + x;
+        if(seen[p] || !isBackgroundPixel(p)) return;
+        seen[p] = 1;
+        stack.push(p);
+      };
+      for(let x=0;x<w;x++){
+        pushIfBg(x,0);
+        pushIfBg(x,h-1);
+      }
+      for(let y=0;y<h;y++){
+        pushIfBg(0,y);
+        pushIfBg(w-1,y);
+      }
+      while(stack.length){
+        const p = stack.pop();
+        const x = p % w;
+        const y = Math.floor(p / w);
+        pushIfBg(x+1,y);
+        pushIfBg(x-1,y);
+        pushIfBg(x,y+1);
+        pushIfBg(x,y-1);
+      }
+      for(let p=0;p<seen.length;p++){
+        const i = p * 4;
+        const r = px[i];
+        const g = px[i+1];
+        const b = px[i+2];
+        const max = Math.max(r,g,b);
+        if(seen[p] || max <= 18){
+          px[i+3] = 0;
         }
       }
       ctx.putImageData(data,0,0);
@@ -8151,7 +8189,7 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const bodyScaleX = Math.max(.88, Math.min(1.18, 1 + (w - 72) / 210));
   const traitStyle = `--hair:${cfg.hairColor || '#1e1612'};--skin:${cfg.skin || '#d9a27c'};--eye:${cfg.eye || '#496b8d'};--body-x:${bodyScaleX};--body-y:${bodyScaleY};`;
   const traitClasses = `hair-${cfg.hair||'short'} beard-${cfg.beard||'clean'} face-${cfg.face||'soft'} base-${cfg.base||'male'} uniform-${cfg.uniform||'classic'}`;
-  const traitLayers = `<span class="creator-trait hair-layer"></span><span class="creator-trait beard-layer"></span><span class="creator-trait eye-layer"></span>`;
+  const traitLayers = '';
   if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
@@ -8161,7 +8199,7 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
     const x = cols<=1 ? 0 : (col * 100 / (cols - 1));
     const y = rows<=1 ? 0 : (row * 100 / (rows - 1));
     return `<span class="portrait-composite ${variant} pose-${cfg.pose||'front'} age-${cfg.age||'young'} ${traitClasses}" style="${traitStyle}">
-      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${cfg.portraitSheet}?v=5');background-size:${cols*100}% ${rows*100}%;${visualStyle} transform:scaleX(var(--body-x)) scaleY(var(--body-y));transform-origin:50% 100%;"></span>
+      <span class="portrait-photo-sheet ${variant} body-layer pose-${cfg.pose||'front'} age-${cfg.age||'young'}" style="--px:${x}%;--py:${y}%;background-image:url('${getPortraitSheetUrl(cfg.portraitSheet)}');background-size:${cols*100}% ${rows*100}%;${visualStyle} transform:scaleX(var(--body-x)) scaleY(var(--body-y));transform-origin:50% 100%;"></span>
       <span class="portrait-face-overlay ${variant} pose-${cfg.pose||'front'} base-${cfg.base||'male'}" style="background-image:url('${cfg.faceAsset}');"></span>
       ${traitLayers}
     </span>`;
