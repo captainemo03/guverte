@@ -7927,7 +7927,6 @@ function rerenderVisiblePortraits(){
         const spk = document.getElementById('spkico');
         if(spk) spk.innerHTML = renderPortraitSprite(speakerPortraitCfg,'speaker');
         renderSpeechPortrait(speakerPortraitCfg);
-        renderSceneActor(sc, getSceneActorPortrait(sc, speakerPortraitCfg));
       }
     }
   }catch(err){
@@ -10903,7 +10902,7 @@ function renderScene(idx){
   }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
-  renderSceneActor(sc, getSceneActorPortrait(sc, speakerPortraitCfg));
+  renderSceneActor(sc, null);
 
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
