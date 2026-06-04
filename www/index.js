@@ -7923,13 +7923,11 @@ function rerenderVisiblePortraits(){
     if(game && game.style.display !== 'none'){
       const sc = sceneQueue[currentIdx];
       if(sc){
-        const speakerKey = getCrewKeyFromWho(sc.who);
-        const speakerPortraitCfg = speakerKey
-          ? getCrewPortraitForKey(speakerKey)
-          : getPlayerPortraitConfig();
+        const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
         const spk = document.getElementById('spkico');
         if(spk) spk.innerHTML = renderPortraitSprite(speakerPortraitCfg,'speaker');
         renderSpeechPortrait(speakerPortraitCfg);
+        renderSceneActor(sc, getSceneActorPortrait(sc, speakerPortraitCfg));
       }
     }
   }catch(err){
@@ -8404,6 +8402,21 @@ function clearPlayerReferencePhoto(){
   const input = document.getElementById('player-photo-input');
   if(input) input.value = '';
   renderPortraitTargets();
+}
+
+function getSceneSpeakerPortrait(sc){
+  const key = getCrewKeyFromWho(sc?.who);
+  if(key){
+    return getCrewPortraitForKey(key) || getPlayerPortraitConfig();
+  }
+  return getPlayerPortraitConfig();
+}
+
+function getSceneActorPortrait(sc, speakerPortrait){
+  if(!sc) return getPlayerPortraitConfig();
+  const who = String(sc.who || '');
+  if(who === 'anlatici') return getPlayerPortraitConfig();
+  return speakerPortrait || getSceneSpeakerPortrait(sc);
 }
 
 function renderSpeechPortrait(cfg){
@@ -9194,8 +9207,7 @@ function handleSceneChoice(sc, c2, ch){
   if(ch){
     ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
   }
-  const speakerKey = getCrewKeyFromWho(sc.who);
-  const speakerPortrait = speakerKey ? getCrewPortraitForKey(speakerKey) : getPlayerPortraitConfig();
+  const speakerPortrait = getSceneSpeakerPortrait(sc);
   pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', c2.text);
   showReplyBubble(c2.text);
@@ -10851,10 +10863,7 @@ function renderScene(idx){
   updateVoyagePressure(sc);
   updatePortOpsChain(sc);
   document.getElementById('scene-sub').textContent=sc.sub||'';
-  const speakerKey = getCrewKeyFromWho(sc.who);
-  const speakerPortraitCfg = speakerKey
-    ? getCrewPortraitForKey(speakerKey)
-    : getPlayerPortraitConfig();
+  const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
   document.getElementById('spknm').textContent=c.name;
@@ -10892,14 +10901,9 @@ function renderScene(idx){
     photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
   }
-  const sceneActor = document.getElementById('gfx-actor');
-  if(sceneActor){
-    sceneActor.classList.add('empty');
-    sceneActor.innerHTML = '';
-  }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
-  renderSceneActor(sc, null);
+  renderSceneActor(sc, getSceneActorPortrait(sc, speakerPortraitCfg));
 
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
@@ -11491,6 +11495,11 @@ const CREW_DEFS = {
     prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-2},
     secrets:["Pompa ve filtre isimlerini ezbere bilir.","Engine round sirasinda not tutmayan adama guvenmez.","Brezilya hattinda uzun sure calisti."],
     tips:["Alarmi renk yerine isimle soyle","Valve ve pump numarasini tekrar et","Anlamadiysan tekrar sor"]},
+  gazsubay: {name:"Gaz Kontrol Subayı Elif", icon:"🔵", title:"LNG / Gas Safety", trust:42,
+    style:"Gaz emniyetinde netlik bekler; tahminle konusani hemen durdurur.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["IGF ve tanker familiarization notlarini kendi arşivinde tutar.","Gaz ölçüm cihazını vardiya başında iki kez kontrol eder.","Sessizdir ama doğru raporu duyunca hemen destek olur."],
+    tips:["LEL/O2/H2S değerlerini net oku","Permit ve gas test saatini karıştırma","Gaz emniyetinde emin değilsen durdur"]},
 };
 
 const CREW_NAME_POOLS = {
@@ -11628,8 +11637,8 @@ function getCrewKeyFromWho(who){
   const map = {
     lostromo:'lostromo', silici:'lostromo2', yagci:'yagci', asci:'asci',
     hasan:'hasan', musa:'musa', suvari:'suvari', z1:'z1', z2:'z2',
-    z3:'z3', carkci:'carkci', bas2:'bas2', mateintl:'mateintl',
-    abintl:'abintl', motormanintl:'motormanintl'
+    z3:'z3', carkci:'carkci', bascarkci:'carkci', bas2:'bas2', mateintl:'mateintl',
+    abintl:'abintl', motormanintl:'motormanintl', gazsubay:'gazsubay'
   };
   return map[who] || null;
 }
