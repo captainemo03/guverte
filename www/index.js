@@ -11053,6 +11053,8 @@ function closeContractCareerBooks(){
   pushFamilyGroupMessage('Anne','Kontrat bitiyorsa ne zaman doneceksin? Evde herkes tarih soruyor.');
   pushPhoneMessage('Crew Chat','Lostromo: Gemide kalirsan yine forward stationda gorusuruz. Inersen yolun acik olsun.', {open:false});
   tryAddMomentPhoto(`contract-${careerState.contracts+1}-memory`,'Kontrat Hatirasi',`${sn} uzerinde ${getContractTotalMonths()} ayin ozeti: ${getTopSpecialtyLabel()}, ${choicesMade.length} karar, ${photos.length} hatira.`, 'bridge');
+  phonePhotoShares.unshift({title:'Kontrat Sonu Albumu', caption:`${getContractTotalMonths()} ay · ${photos.length} fotograf · ${getTopSpecialtyLabel()} · aile/crew mesajlari kaydedildi.`, gfx:'bridge', scene:currentIdx+1, sent:false});
+  addCompanyMailThread('Kontrat kapanis raporu', `Guclu alan: ${getTopSpecialtyLabel()}. Zayif alanlar, cihaz tekrar gorevleri ve aile/crew moral etkisi kontrat dosyasina eklendi.`, 'info');
   careerState.lastContractClosed = true;
   shipOffers = buildShipOffers();
 }
@@ -11401,7 +11403,9 @@ function beginGame(){
     AILE:['Anne','Baba','Kardes'],
     'Crew Chat':['Kaptan','1. Zabit','Bas Muhendis','Lostromo','Asci']
   };
-  familyConversationMemory={lastSpeaker:'', recentTopics:[], warmth:55};
+  familyConversationMemory={lastSpeaker:'', recentTopics:[], warmth:55, lastUserMessage:'', lastPhotoTitle:'', unanswered:0};
+  phonePhotoShares=[];
+  companyMailState={stage:0,lastSubject:'',threads:[]};
   watchFeedItems=[];
   livingPulseState={lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   liveLogbookEntries=[];
@@ -11957,6 +11961,8 @@ function buildSavePayload(){
     phoneMessages,
     phoneGroups,
     familyConversationMemory,
+    phonePhotoShares,
+    companyMailState,
     activePhoneContact,
     phoneTab,
     activePhoneSite,
@@ -12050,6 +12056,8 @@ function applyLoadedGameState(data){
   phoneMessages = Array.isArray(data.phoneMessages) ? data.phoneMessages : phoneMessages;
   phoneGroups = data.phoneGroups && typeof data.phoneGroups === 'object' ? data.phoneGroups : phoneGroups;
   familyConversationMemory = data.familyConversationMemory && typeof data.familyConversationMemory === 'object' ? {...familyConversationMemory, ...data.familyConversationMemory} : familyConversationMemory;
+  phonePhotoShares = Array.isArray(data.phonePhotoShares) ? data.phonePhotoShares : phonePhotoShares;
+  companyMailState = data.companyMailState && typeof data.companyMailState === 'object' ? {...companyMailState, ...data.companyMailState} : companyMailState;
   activePhoneContact = data.activePhoneContact || activePhoneContact;
   phoneTab = data.phoneTab || 'messages';
   activePhoneSite = data.activePhoneSite || 'home';
@@ -15700,7 +15708,9 @@ let phoneGroups = {
   AILE:['Anne','Baba','Kardes'],
   'Crew Chat':['Kaptan','1. Zabit','Bas Muhendis','Lostromo','Asci']
 };
-let familyConversationMemory = {lastSpeaker:'', recentTopics:[], warmth:55};
+let familyConversationMemory = {lastSpeaker:'', recentTopics:[], warmth:55, lastUserMessage:'', lastPhotoTitle:'', unanswered:0};
+let phonePhotoShares = [];
+let companyMailState = {stage:0,lastSubject:'',threads:[]};
 let watchFeedItems = [];
 let livingPulseState = {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
 let liveLogbookEntries = [];
@@ -16109,6 +16119,7 @@ function pushFamilyGroupMessage(from,text,opts={}){
   phoneMessages.push({from, chat:'AILE', text, me:false});
   if(phoneMessages.length > 100) phoneMessages = phoneMessages.slice(-100);
   familyUnread++;
+  familyConversationMemory.unanswered = (familyConversationMemory.unanswered || 0) + 1;
   showPhoneToast('AILE · '+from, text);
   if(opts.open){
     phoneOpen = true;
@@ -16180,8 +16191,10 @@ function getFamilyReplyPool(text=''){
   const missed = /ozledim|özledim|yalniz|yalnız|moral|kotu|kötü|canim/.test(t);
   const success = /iyi|guzel|basard|tebrik|all fast|temiz|dogru|gecirdik/.test(t);
   const problem = /kavga|kaza|alarm|hata|azarl|kork|stres|sikinti|zor/.test(t);
+  const remembered = getFamilyMemoryLine();
   return {
     Anne:[
+      remembered || 'Mesajini okuyunca hemen gruba baktim.',
       tired ? 'Yorgun yaziyorsun gibi geldi. Firsat bulunca biraz uyu olur mu?' : 'Mesajini gorunce icim rahatladi. Kendine dikkat et.',
       storm ? 'Hava kotuyse kendini zorlama, gorevini sakin sakin yap.' : 'Bugun yemek yedin mi? Sadece kahveyle durma.',
       missed ? 'Biz de seni ozledik. Ama orada guclu durdugunu biliyorum.' : 'Vardiyan bitince iki satir daha yaz, merak ediyorum.',
@@ -16232,6 +16245,19 @@ function inferFamilyTopic(text=''){
   if(/iyi|guzel|basard|tebrik|temiz|dogru/.test(t)) return 'basari';
   return 'gunluk';
 }
+function getFamilyMemoryLine(){
+  const topics = familyConversationMemory.recentTopics || [];
+  const last = topics[1] || topics[0] || '';
+  if(familyConversationMemory.lastPhotoTitle){
+    return `Attigin ${familyConversationMemory.lastPhotoTitle} fotografini gorduk. Gemi hayati daha gercek geldi.`;
+  }
+  if(last === 'yorgunluk') return 'Gecen mesajinda yorgun gibiydin, biraz toparlayabildin mi?';
+  if(last === 'hava') return 'Bir onceki hava mesajindan beri merak ettik, deniz biraz sakinledi mi?';
+  if(last === 'liman') return 'Liman isleri bitince mutlaka yaz, orada yogunluk insanin aklini dagitir.';
+  if(last === 'sorun') return 'Az once anlattigin sorun kafama takildi, simdi durum daha iyi mi?';
+  if(last === 'ozlem') return 'Ozledim demistin ya, evde de herkes ayni halde.';
+  return '';
+}
 function fallbackFamilyReply(name,text=''){
   const topic = inferFamilyTopic(text);
   const warm = familyConversationMemory.warmth || 55;
@@ -16269,6 +16295,8 @@ function simulateFamilyGroupReply(text){
   const topic = inferFamilyTopic(text);
   familyConversationMemory.recentTopics = [topic, ...(familyConversationMemory.recentTopics || [])].slice(0,6);
   familyConversationMemory.warmth = clamp((familyConversationMemory.warmth || 55) + 1, 0, 100);
+  familyConversationMemory.lastUserMessage = text;
+  familyConversationMemory.unanswered = 0;
   const order = chooseFamilyResponders(text);
   order.forEach((name,idx)=>{
     setTimeout(()=>{
@@ -16278,6 +16306,27 @@ function simulateFamilyGroupReply(text){
       pushFamilyGroupMessage(name, reply);
     }, 450 + idx*700);
   });
+}
+function pushPhoneVoiceMessage(from, chat, text, opts={}){
+  ensureFamilyGroup();
+  phoneMessages.push({from, chat:chat || (isPhoneGroup(from) ? from : ''), text, me:false, type:'voice', duration:opts.duration || (8 + Math.floor(Math.random()*22))});
+  if(phoneMessages.length > 130) phoneMessages = phoneMessages.slice(-130);
+  showPhoneToast(chat || from, `Sesli mesaj: ${from}`);
+  if(opts.open){
+    phoneOpen = true;
+    activePhoneContact = chat || from;
+    phoneTab = 'messages';
+  }
+  renderPhone();
+}
+function playPhoneVoice(encodedText){
+  const text = decodeURIComponent(encodedText || '');
+  if(soundEnabled){
+    playTone(520,'sine',0.08,0.018,0);
+    playTone(420,'sine',0.07,0.016,.11);
+    playTone(610,'sine',0.08,0.018,.24);
+  }
+  showNotif('VOICE','Sesli Mesaj',text || 'Sesli mesaj dinlendi.');
 }
 function addPhoneContact(){
   const name = (document.getElementById('phone-new-name')?.value || '').trim();
@@ -16370,10 +16419,15 @@ function pushPhoneMessage(from,text,opts={}){
     pushFamilyGroupMessage(from,text,opts);
     return;
   }
-  phoneMessages.push({from,text,me:false});
-  if(phoneMessages.length > 80) phoneMessages = phoneMessages.slice(-80);
+  const isGroup = isPhoneGroup(from);
+  phoneMessages.push({from:isGroup ? 'Sistem' : from, chat:isGroup ? from : '', text, me:false});
+  if(phoneMessages.length > 130) phoneMessages = phoneMessages.slice(-130);
   showPhoneToast(from,text);
-  if(opts.open) phoneOpen = true;
+  if(opts.open){
+    phoneOpen = true;
+    activePhoneContact = isGroup ? from : activePhoneContact;
+    phoneTab = 'messages';
+  }
   renderPhone();
 }
 function addWatchFeed(text,type=''){
@@ -16443,6 +16497,10 @@ function maybeRunCrewSocialPulse(sc, blob){
   ].filter(x=>x[1]);
   const pick = social[Math.floor(Math.random()*social.length)];
   pushPhoneMessage(pick[0], pick[1]);
+  if(pick[0] === 'Crew Chat' && Math.random() < .35){
+    const speaker = ['Lostromo','Bas Muhendis','Asci','1. Zabit'][Math.floor(Math.random()*4)];
+    pushPhoneVoiceMessage(speaker, 'Crew Chat', pick[1], {duration:12 + Math.floor(Math.random()*14)});
+  }
   addWatchFeed(pick[1], pick[2]);
   addJournalEntry(`[GEMI ICI AKIS] ${pick[1]}`, sc?.day, sc?.time);
 }
@@ -16498,6 +16556,16 @@ function maybeDeviceFault(sc, blob){
   addLiveLogbook('CIHAZ ARIZASI',pick[1],true);
   addWatchFeed(pick[1],'warn');
 }
+function maybeTriggerVoiceNote(sc, blob){
+  if(Math.random() > 0.12) return;
+  if(/storm|firtina|swell|gece|night/.test(blob)){
+    pushPhoneVoiceMessage('Anne','AILE','Sesini duyunca rahatlariz. Firsat bulunca iyi oldugunu yaz.',{duration:18});
+  }else if(/pilot|liman|berth|harbor/.test(blob)){
+    pushPhoneVoiceMessage('Kaptan','Crew Chat','Pilot hazirliginda herkes kisa ve net konusacak. Gereksiz muhabere yok.',{duration:11});
+  }else if(/engine|makine|alarm/.test(blob)){
+    pushPhoneVoiceMessage('Bas Muhendis','Crew Chat','Alarm trendini izliyoruz. Kopru ustu raporu net tutsun.',{duration:14});
+  }
+}
 function maybeRunExternalWorldPulse(sc, blob){
   const sceneNo = Math.max(1, currentIdx + 1);
   if(sceneNo - (livingPulseState.lastExternalScene || 0) < 6 || Math.random() > 0.5) return;
@@ -16511,9 +16579,20 @@ function maybeRunExternalWorldPulse(sc, blob){
   ];
   const pick = items[Math.floor(Math.random()*items.length)];
   pushPhoneMessage(pick[0], pick[1]);
+  if(pick[0] === 'Şirket'){
+    addCompanyMailThread('Operasyon takip notu', pick[1], pick[2] || 'warn');
+  }
   addWatchFeed(`${pick[0]}: ${pick[1]}`, pick[2]);
   addLiveLogbook('DIS DUNYA', `${pick[0]} - ${pick[1]}`, true);
   if(/charter|eta|gecikme/i.test(pick[1])) companyPressureState.stage = Math.min(3, (companyPressureState.stage || 0) + 1);
+}
+function applyFamilySilencePressure(){
+  const unanswered = familyConversationMemory.unanswered || 0;
+  if(unanswered < 4) return;
+  familyConversationMemory.unanswered = 1;
+  adjustMood(-3,'Aile mesajlari cevapsiz kaldi');
+  applyPsychDelta({yalnizlik:4,tukenme:1});
+  pushFamilyGroupMessage('Anne','Yazamadigini biliyorum ama sadece iyi misin diye bir nokta bile atsan yeter.');
 }
 function applyCrewFatigueDrift(sc, blob){
   const storm = /storm|firtina|swell|rain|sis|fog/.test(blob) ? 4 : 1;
@@ -16566,6 +16645,7 @@ function updateLivingWatch(sc){
   maybeRunRoutineTasks(sc, blob);
   maybeRunCrewSocialPulse(sc, blob);
   maybeTriggerPhoneCall(sc, blob);
+  maybeTriggerVoiceNote(sc, blob);
   maybeAddTaskChain(sc, blob);
   maybeDeviceFault(sc, blob);
   maybeRunExternalWorldPulse(sc, blob);
@@ -16573,16 +16653,26 @@ function updateLivingWatch(sc){
   maybeMonthlyCaptainReview(sc);
   checkSceneAchievements(sc, blob);
   maybeSendScenePhoneMessage(sc, blob);
+  applyFamilySilencePressure();
 }
 function maybeSendScenePhoneMessage(sc, blob){
   if(!sc) return;
   const base = `${sc.id||''}-${currentIdx}`;
   if(sc._phoneMsgSent === base) return;
   sc._phoneMsgSent = base;
-  if(/engine|makine|generator|pump|alarm/.test(blob)) pushPhoneMessage('Makine','Alarm trendi telefona dustu. Cihazlar > Gyro/Echo degil, once ilgili makine notunu ve VHF raporunu net tut.');
-  else if(/vhf|mayday|pan-pan|vts|pilot/.test(blob)) pushPhoneMessage('Kopruustu','VHF pratigi acik dursun. Gerekirse Cihazlar > VHF DSC uzerinden Mayday Relay zincirini tekrar et.');
-  else if(/radar|arpa|ais/.test(blob)) pushPhoneMessage('Kaptan','Radar/AIS cross-check zayifsa Cihazlar > Radar veya AIS pratigi yap. Hedefi sadece etiketten okuma.');
-  else if(/ecdis|route|enc|xtd/.test(blob)) pushPhoneMessage('2. Zabit','ECDIS route check, safety contour ve sensor status birlikte okunacak. Cihaz pratigi iyi olur.');
+  if(/engine|makine|generator|pump|alarm/.test(blob)){
+    pushPhoneMessage('Makine','Alarm trendi telefona dustu. Cihazlar > Gyro/Echo degil, once ilgili makine notunu ve VHF raporunu net tut.');
+    pushEmergencyPhoneNotification('Makine Alarmi','Alarm raporu, kaptan bilgilendirme ve logbook sirasi bekleniyor.','engine');
+  }else if(/vhf|mayday|pan-pan|vts|pilot/.test(blob)){
+    pushPhoneMessage('Kopruustu','VHF pratigi acik dursun. Gerekirse Cihazlar > VHF DSC uzerinden Mayday Relay zincirini tekrar et.');
+    pushEmergencyPhoneNotification('VHF / Pilot Cagrisi','Dogru kanal, tekrar ve logbook zinciri kontrol edilmeli.','vhf');
+  }else if(/radar|arpa|ais/.test(blob)){
+    pushPhoneMessage('Kaptan','Radar/AIS cross-check zayifsa Cihazlar > Radar veya AIS pratigi yap. Hedefi sadece etiketten okuma.');
+    pushEmergencyPhoneNotification('Radar/AIS Uyarisi','Target acquire, CPA/TCPA ve sensor cross-check pratigi onerildi.','radar');
+  }else if(/ecdis|route|enc|xtd/.test(blob)){
+    pushPhoneMessage('2. Zabit','ECDIS route check, safety contour ve sensor status birlikte okunacak. Cihaz pratigi iyi olur.');
+    pushEmergencyPhoneNotification('ECDIS Uyarisi','Route check ve safety contour pratigi acilmali.','ecdis');
+  }
   else if(/harbor|liman|mooring|tug|berth/.test(blob)) pushPhoneMessage('Lostromo','Guvartede hazirlik tamam. Halat sirasi ve snap-back notunu unutma.');
   else if(/galley|asci|cay|yemek/.test(blob)) pushPhoneMessage('Asci','Bugun cay var. Ama vardiya devrini geciktirme.');
   const familyChance = stats.dinclik < 35 || /night|gece|liman|harbor|storm|firtina|swell/.test(blob) ? .55 : .18;
@@ -16623,8 +16713,92 @@ function phoneTakePhoto(){
   const title = titles[gfx] || 'Gemi Hatirasi';
   const caption = `${sc.loc || selectedStartPort?.name || 'Gemide'} bolgesinde telefona kaydedilen an.`;
   addPhoto(title, caption, GFX[gfx] ? gfx : 'sea');
+  phonePhotoShares.unshift({title, caption, gfx:GFX[gfx] ? gfx : 'sea', scene:currentIdx+1, sent:false});
+  phonePhotoShares = phonePhotoShares.slice(0,24);
   showNotif('CAM','Foto Kaydedildi',`${title} albume eklendi.`);
-  setPhoneAppView('home');
+  setPhoneAppView('photos');
+}
+function pushEmergencyPhoneNotification(title,text,deviceKey){
+  pushPhoneMessage('Egitim', `${title}: ${text}`, {open:false});
+  if(deviceKey) devicePracticeProgress[deviceKey] = 0;
+  addLiveLogbook('TELEFON UYARISI', `${title} - ${text}`, true);
+}
+function sharePhonePhotoToFamily(index=0){
+  const ph = phonePhotoShares[index] || phonePhotoShares[0] || photos[photos.length-1];
+  if(!ph){
+    showNotif('!','Foto Yok','Once telefondan fotograf cek.');
+    return;
+  }
+  ensureFamilyGroup();
+  familyConversationMemory.lastPhotoTitle = ph.title || 'gemi';
+  if(phonePhotoShares[index]) phonePhotoShares[index].sent = true;
+  phoneMessages.push({from:'Sen', chat:'AILE', text:`[Fotograf] ${ph.title}: ${ph.caption || 'Gemiden bir an.'}`, me:true, type:'photo'});
+  familyUnread = 0;
+  adjustMood(3,'Aileye fotograf gonderdin');
+  applyPsychDelta({yalnizlik:-4,moral:3});
+  setTimeout(()=>simulateFamilyGroupReply(`foto ${ph.title} ${ph.caption || ''}`), 350);
+  activePhoneContact = 'AILE';
+  phoneTab = 'messages';
+  renderPhone();
+}
+function renderPhonePhotosApp(){
+  const list = phonePhotoShares.length ? phonePhotoShares : photos.map((p,i)=>({...p, gfx:p.svgKey, scene:i+1, sent:false})).slice(-8).reverse();
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Fotograflar</span></div>
+    <button class="phone-wide-btn" onclick="phoneTakePhoto()">Yeni fotograf cek</button>
+    ${list.length ? list.map((p,i)=>`<div class="phone-photo-card"><div class="phone-photo-thumb ${phoneSafe(p.gfx || 'sea')}"></div><div><b>${phoneSafe(p.title)}</b><small>${phoneSafe(p.caption || '')}</small><button class="phone-small-btn" onclick="sharePhonePhotoToFamily(${i})">${p.sent?'Tekrar gonder':'AILE grubuna gonder'}</button></div></div>`).join('') : '<div class="phone-setting-row"><b>Album bos</b><small>Telefon kamerasi ile sahneden fotograf cekebilirsin.</small></div>'}
+  </div>`;
+}
+function addCompanyMailThread(subject, body, tone='warn'){
+  companyMailState.stage = Math.min(5, (companyMailState.stage || 0) + 1);
+  companyMailState.lastSubject = subject;
+  companyMailState.threads = [{subject, body, tone, scene:currentIdx+1, answered:false}, ...(companyMailState.threads || [])].slice(0,12);
+  pushPhoneMessage('Şirket', `Mail: ${subject}`);
+}
+function answerCompanyMail(index=0, style='formal'){
+  const mail = companyMailState.threads?.[index];
+  if(!mail) return;
+  mail.answered = true;
+  const good = style === 'formal';
+  applyEffect(good ? {sayginlik:2,bilgi:1} : {sayginlik:-1},{skipContractTick:true});
+  pushPhoneMessage('Şirket', good ? 'Cevabin alindi. Rapor dili uygun, takipte kal.' : 'Cevabin kisa kaldi. Ofis ek aciklama isteyebilir.');
+  showNotif('MAIL', good ? 'Cevap Gonderildi' : 'Eksik Cevap', good ? 'Ofis resmi cevabi kabul etti.' : 'Ofis daha net rapor bekliyor.');
+  renderPhone();
+}
+function renderPhoneMailApp(){
+  if(!(companyMailState.threads || []).length){
+    addCompanyMailThread('Aylik operasyon ozeti', 'ETA, rutin testler, aile/crew moral notu ve varsa cihaz tekrar gorevleri tek raporda beklenecek.', 'info');
+  }
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Şirket Mail</span></div>
+    ${(companyMailState.threads || []).map((m,i)=>`<div class="phone-mail-card ${m.tone||''}"><b>${phoneSafe(m.subject)}</b><small>${phoneSafe(m.body)}</small><div class="phone-mail-actions"><button class="phone-small-btn" onclick="answerCompanyMail(${i},'formal')">Resmi cevap</button><button class="phone-small-btn" onclick="answerCompanyMail(${i},'short')">Kisa cevap</button></div><em>${m.answered?'Cevaplandi':'Cevap bekliyor'}</em></div>`).join('')}
+  </div>`;
+}
+function renderPhoneBankApp(){
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Banka / Maas</span></div>
+    <div class="phone-setting-row"><b>Bakiye</b><small>$${careerState.money || 0} · Aylik maas $${careerState.salary || 1200}</small></div>
+    <button class="phone-wide-btn" onclick="spendMoney('home'); renderPhone()">Eve $150 gonder</button>
+    <button class="phone-wide-btn" onclick="spendMoney('internet'); renderPhone()">Internet paketi $40</button>
+    <button class="phone-wide-btn" onclick="spendMoney('gear'); renderPhone()">Kisisel ekipman $90</button>
+  </div>`;
+}
+function renderPhoneWeatherApp(){
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Hava</span></div>
+    <div class="phone-setting-row"><b>Swell</b><small>${phoneSafe(voyagePressure.swell)} · gorus ${phoneSafe(voyagePressure.visibility)} · akinti ${phoneSafe(voyagePressure.current)}</small></div>
+    <div class="phone-setting-row"><b>VHF / Operasyon</b><small>${phoneSafe(voyagePressure.vhf)} · ${phoneSafe(voyagePressure.speed)} · caution ${Math.round(voyagePressure.caution || 0)}/10</small></div>
+    <button class="phone-wide-btn" onclick="addLiveLogbook('WX','${String(`Swell ${voyagePressure.swell} · gorus ${voyagePressure.visibility} · akinti ${voyagePressure.current}`).replace(/'/g,"\\'")}',true); showNotif('WX','Hava Loga Eklendi','Hava notu vardiya defterine dustu.')">Logbook'a ekle</button>
+  </div>`;
+}
+function renderPhoneNotesApp(){
+  const recent = (liveLogbookEntries || []).slice(0,5);
+  return `<div class="phone-app-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Notlar</span></div>
+    <div class="phone-setting-row"><b>Kisa not</b><small>Notlarim ana ekranina gecmeden telefondaki son vardiya satirlarini gor.</small></div>
+    ${recent.map(e=>`<div class="phone-setting-row"><b>${phoneSafe(e.type)}</b><small>${phoneSafe(e.text)}</small></div>`).join('')}
+    <button class="phone-wide-btn" onclick="openNotes()">Notlarim panelini ac</button>
+  </div>`;
 }
 function renderPhoneSettings(){
   return `<div class="phone-app-panel">
@@ -16637,17 +16811,23 @@ function renderPhoneSettings(){
   </div>`;
 }
 function renderPhoneAppMenu(){
+  if(phoneAppView === 'settings') return renderPhoneSettings();
+  if(phoneAppView === 'photos') return renderPhonePhotosApp();
+  if(phoneAppView === 'mail') return renderPhoneMailApp();
+  if(phoneAppView === 'bank') return renderPhoneBankApp();
+  if(phoneAppView === 'weather') return renderPhoneWeatherApp();
+  if(phoneAppView === 'notes') return renderPhoneNotesApp();
   return `<div class="phone-app-grid phone-menu-grid">
     <button class="phone-app menu" onclick="setPhoneTab('messages')"><b>MSG</b>Mesajlar</button>
-    <button class="phone-app menu mail" onclick="setPhoneSite('company')"><b>@</b>Mail</button>
+    <button class="phone-app menu mail" onclick="setPhoneAppView('mail')"><b>@</b>Mail</button>
     <button class="phone-app menu web" onclick="setPhoneSite('home')"><b>NET</b>Internet</button>
     <button class="phone-app menu camera" onclick="phoneTakePhoto()"><b>CAM</b>Fotograf</button>
-    <button class="phone-app menu photos" onclick="openAlbum()"><b>IMG</b>Fotograflar</button>
-    <button class="phone-app menu notes" onclick="openNotes()"><b>NOT</b>Notlar</button>
+    <button class="phone-app menu photos" onclick="setPhoneAppView('photos')"><b>IMG</b>Fotograflar</button>
+    <button class="phone-app menu notes" onclick="setPhoneAppView('notes')"><b>NOT</b>Notlar</button>
     <button class="phone-app menu cabin" onclick="openCabin()"><b>CAB</b>Kamaram</button>
     <button class="phone-app menu crew" onclick="setPhoneContact('Crew Chat')"><b>CREW</b>Crew Chat</button>
-    <button class="phone-app menu bank" onclick="setPhoneSite('bank')"><b>$</b>Banka</button>
-    <button class="phone-app menu weather" onclick="setPhoneSite('weather')"><b>WX</b>Hava</button>
+    <button class="phone-app menu bank" onclick="setPhoneAppView('bank')"><b>$</b>Banka</button>
+    <button class="phone-app menu weather" onclick="setPhoneAppView('weather')"><b>WX</b>Hava</button>
     <button class="phone-app menu course" onclick="setPhoneSite('courses')"><b>CRS</b>Kurs</button>
     <button class="phone-app menu maps" onclick="openShipWalk()"><b>SHIP</b>Gemi</button>
     <button class="phone-app menu log" onclick="openLiveLogbook()"><b>DEF</b>Defter</button>
@@ -16818,7 +16998,7 @@ function renderPhone(){
     return;
   }
   if(phoneTab === 'apps'){
-    body.innerHTML = phoneAppView === 'settings' ? renderPhoneSettings() : renderPhoneAppMenu();
+    body.innerHTML = renderPhoneAppMenu();
     return;
   }
   const visible = isPhoneGroup(activePhoneContact)
@@ -16831,7 +17011,15 @@ function renderPhone(){
   const groupTools = isPhoneGroup(activePhoneContact)
     ? `<div class="phone-chat-head"><b>${phoneSafe(activePhoneContact)}</b><small>${phoneSafe(getPhoneGroupMembers(activePhoneContact).join(' · '))}</small><div class="phone-inline-add"><input id="phone-inline-member" placeholder="Gruba kisi ekle"><button class="phone-small-btn" onclick="addPhoneGroupMember('${String(activePhoneContact).replace(/'/g,"\\'")}')">Ekle</button></div></div>`
     : '';
-  body.innerHTML = groupTools + visible.map(m=>`<div class="phone-msg ${m.me?'me':''} ${isFamilyChat(activePhoneContact)&&!m.me?'family':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${phoneSafe(m.text)}</div></div>`).join('');
+  body.innerHTML = groupTools + visible.map(m=>{
+    let bubble = phoneSafe(m.text);
+    if(m.type === 'voice'){
+      bubble = `<div class="phone-voice"><button onclick="playPhoneVoice('${encodeURIComponent(m.text || '')}')">Dinle</button><span>${Math.round(m.duration || 12)} sn sesli mesaj</span></div><small>${phoneSafe(m.text)}</small>`;
+    }else if(m.type === 'photo'){
+      bubble = `<div class="phone-photo-msg"><div class="phone-photo-icon">IMG</div><span>${phoneSafe(m.text)}</span></div>`;
+    }
+    return `<div class="phone-msg ${m.me?'me':''} ${isFamilyChat(activePhoneContact)&&!m.me?'family':''}"><div class="phone-msg-name">${m.me?'Sen':phoneSafe(m.from)}</div><div class="phone-bubble">${bubble}</div></div>`;
+  }).join('');
   body.scrollTop = body.scrollHeight;
 }
 
