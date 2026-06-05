@@ -12434,6 +12434,7 @@ let portChartDidPan = false;
 let activeMapTaskIndex = 0;
 const completedMapTasks = new Set();
 let mapRouteDraftPoints = [];
+let lastAutoVoyageChartScene = '';
 
 const MAP_TASKS = [
   {
@@ -12495,6 +12496,22 @@ function selectPortChart(name){
 function adjustPortChartZoom(delta){
   portChartZoom = Math.max(1, Math.min(6, +(portChartZoom + delta).toFixed(2)));
   if(mapView === 'library') renderMapLibrary();
+}
+
+function autoOpenVoyageChart(sc){
+  if(!sc?.voyageRouteKey) return;
+  const route = getActiveVoyageRoute();
+  const wp = route?.waypoints?.[sc.voyageWpIndex || 0];
+  if(!wp) return;
+  selectedPortChart = wp.chart || route.chart || selectedPortChart;
+  mapView = 'library';
+  const sceneKey = `${sc.id}-${selectedPortChart}`;
+  if(lastAutoVoyageChartScene !== sceneKey){
+    lastAutoVoyageChartScene = sceneKey;
+    document.getElementById('map-panel')?.classList.add('show');
+    showNotif('ECDIS','Chart otomatik yuklendi',`${selectedPortChart} · ${wp.name}`);
+  }
+  renderMap();
 }
 
 function getActivePortChart(){
@@ -12762,6 +12779,56 @@ function renderMapRouteDraftOverlay(svg){
   svg.insertAdjacentHTML('beforeend', `<g class="map-route-draft"><polyline points="${points}" fill="none" stroke="#ffd45a" stroke-width="2.5" stroke-dasharray="7 4"/>${circles}</g>`);
 }
 
+function getActiveVoyageChartSet(){
+  const route = getActiveVoyageRoute();
+  return new Set([route?.chart, ...(route?.charts || []), ...(route?.waypoints || []).map(w=>w.chart)].filter(Boolean));
+}
+function projectVoyageWaypointToChart(wp, route){
+  const xs = route.waypoints.map(w=>w.x);
+  const ys = route.waypoints.map(w=>w.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const nx = (wp.x - minX) / Math.max(1, maxX - minX);
+  const ny = (wp.y - minY) / Math.max(1, maxY - minY);
+  return {
+    x: +(48 + nx * 344).toFixed(1),
+    y: +(62 + ny * 132).toFixed(1)
+  };
+}
+function buildActiveVoyageChartOverlay(chartName){
+  const route = getActiveVoyageRoute();
+  if(!route?.waypoints?.length) return '';
+  const chartSet = getActiveVoyageChartSet();
+  if(!chartSet.has(chartName)) return '';
+  const pts = route.waypoints.map(w=>projectVoyageWaypointToChart(w, route));
+  const line = pts.map(p=>`${p.x},${p.y}`).join(' ');
+  const currentIdx = Math.max(0, Math.min(route.waypoints.length-1, activeVoyageProgress || 0));
+  const current = pts[currentIdx] || pts[0];
+  const next = pts[Math.min(pts.length-1, currentIdx+1)] || current;
+  const wpMarks = pts.map((p,i)=>{
+    const wp = route.waypoints[i];
+    const done = i <= currentIdx;
+    const label = i===0 || i===currentIdx || i===pts.length-1
+      ? `<text x="${p.x+6}" y="${p.y-6}" fill="${done?'#fff4bf':'#9cc8ef'}" font-size="6.2" font-family="monospace">${i+1}. ${phoneSafe(wp.name).slice(0,18)}</text>`
+      : '';
+    return `<circle cx="${p.x}" cy="${p.y}" r="${done?4.4:3}" fill="${done?'#d4a017':'#173a5e'}" stroke="#fff4bf" stroke-width="${done?1.1:.7}" opacity="${done?1:.74}"/>${label}`;
+  }).join('');
+  const anim = currentIdx < pts.length-1
+    ? `<circle r="5.2" fill="#ffd45a" stroke="#111827" stroke-width="1.2">
+         <animate attributeName="cx" values="${current.x};${next.x};${current.x}" dur="7s" repeatCount="indefinite"/>
+         <animate attributeName="cy" values="${current.y};${next.y};${current.y}" dur="7s" repeatCount="indefinite"/>
+       </circle>
+       <path d="M${current.x} ${current.y} L${next.x} ${next.y}" stroke="#ffd45a" stroke-width="2.4" stroke-dasharray="7,4" opacity=".95"/>`
+    : `<circle cx="${current.x}" cy="${current.y}" r="5.2" fill="#ffd45a" stroke="#111827" stroke-width="1.2"/>`;
+  return `<g class="active-voyage-chart-overlay">
+    <rect x="14" y="226" width="246" height="20" rx="5" fill="rgba(5,16,28,.9)" stroke="#d4a017" stroke-width=".8"/>
+    <text x="22" y="239" fill="#fff4bf" font-size="7" font-family="monospace">ACTIVE VOYAGE: ${phoneSafe(route.name).slice(0,42)} · ${getVoyageLegProgress()}%</text>
+    <polyline points="${line}" fill="none" stroke="#ffd45a" stroke-width="2.1" stroke-dasharray="8,5" opacity=".86"/>
+    ${wpMarks}
+    ${anim}
+  </g>`;
+}
+
 function getPortChartTypeLabel(kind){
   return kind==='port' ? 'liman chart' : kind==='route' ? 'ticaret rotasi charti' : 'gecit chart';
 }
@@ -12983,6 +13050,7 @@ function buildOceanRouteChartSvg(port, profile){
   <text x="252" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
   <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
   <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
+  ${buildActiveVoyageChartOverlay(port.name)}
   `;
 }
 
@@ -13440,6 +13508,7 @@ function buildPortChartSvg(port){
   <g class="ecdis-close">${visibleSpecialInset}</g>
   <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
   <g class="ecdis-close ecdis-minor">${visibleMicroNoteOverlay}</g>
+  ${buildActiveVoyageChartOverlay(port.name)}
   </g>
   `;
 }
@@ -13633,6 +13702,17 @@ function renderMap(){
       }
     });
     const currentWp = getVoyageWaypoint();
+    const curIdx = Math.max(0, Math.min(activeRoute.waypoints.length-1, activeVoyageProgress || 0));
+    const cur = activeRoute.waypoints[curIdx];
+    const nxt = activeRoute.waypoints[Math.min(activeRoute.waypoints.length-1, curIdx+1)];
+    if(cur && nxt && cur !== nxt){
+      const cx1 = cur.x*4.4, cy1 = cur.y*2.6, cx2 = nxt.x*4.4, cy2 = nxt.y*2.6;
+      s+=`<path d="M${cx1} ${cy1} L${cx2} ${cy2}" stroke="#ffd45a" stroke-width="3" opacity=".34"/>
+        <circle r="6" fill="#ffd45a" stroke="#102033" stroke-width="1.4">
+          <animate attributeName="cx" values="${cx1};${cx2};${cx1}" dur="8s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="${cy1};${cy2};${cy1}" dur="8s" repeatCount="indefinite"/>
+        </circle>`;
+    }
     s+=`<rect x="238" y="10" width="192" height="42" rx="7" fill="rgba(255,255,255,.72)" stroke="#9b8356" stroke-width=".8"/>`;
     s+=`<text x="246" y="24" fill="#7b3550" font-size="7.2">${activeRoute.name}</text>`;
     s+=`<text x="246" y="36" fill="#264f75" font-size="6.5">${activeRoute.trade} · ${activeRoute.distanceNm} NM · ETA ${activeRoute.etaDays} gun</text>`;
@@ -18146,6 +18226,7 @@ function onSceneRender(sc){
   }else{
     updateShipPosition(sc.loc);
   }
+  autoOpenVoyageChart(sc);
   // Gün sayacını güncelle
   if(sc.day) {
     const m = sc.day.match(/\d+/);
