@@ -4441,6 +4441,7 @@ const START_PORTS=[
   {name:"Marsilya", dock:"Marsilya Limanı — Terminal", office:"Marsilya Limanı — Limancı Ofisi", departureLine:"Provence kıyıları geride kaldı", x:40, y:92},
   {name:"Napoli", dock:"Napoli Limanı — Rıhtım", office:"Napoli Limanı — Limancı Ofisi", departureLine:"Napoli Körfezi yavaşça geride kaldı", x:88, y:120},
   {name:"Hamburg", dock:"Hamburg Limanı — Rıhtım", office:"Hamburg Limanı — Limancı Ofisi", departureLine:"Elbe hattı arkada kaldı", x:42, y:10},
+  {name:"Rotterdam", dock:"Rotterdam Maasvlakte — Konteyner Rıhtımı", office:"Rotterdam Acentesi", departureLine:"Maas approach ve Kuzey Denizi trafiği kıçta kaldı", x:25, y:18},
   {name:"Limasol", dock:"Limasol Limanı — Terminal", office:"Limasol Limanı — Limancı Ofisi", departureLine:"Kıbrıs kıyısı iskelede kaldı", x:176, y:172},
   {name:"Cidde", dock:"Cidde Limanı — Ticari Rıhtım", office:"Cidde Limanı — Limancı Ofisi", departureLine:"Kızıldeniz hattı açılmaya başladı", x:260, y:210},
   {name:"Dubai", dock:"Dubai Limanı — Jebel Ali Terminali", office:"Dubai Limanı — Limancı Ofisi", departureLine:"Basra Körfezi trafiği arkada kaldı", x:336, y:218},
@@ -9296,6 +9297,20 @@ function handleSceneChoice(sc, c2, ch){
   if(/vhf|mayday|pan-pan|pilot/.test(logBlob)) addLiveLogbook('VHF',c2.text,true);
   if(/engine|makine|alarm/.test(logBlob)) addLiveLogbook('MAKINE ALARMI',c2.text,true);
   if(/all fast|berth|mooring|halat/.test(logBlob)) addLiveLogbook('LIMAN / ALL FAST',c2.text,true);
+  if(sc?.voyageRouteKey){
+    const route = getActiveVoyageRoute();
+    const wp = route?.waypoints?.[sc.voyageWpIndex];
+    if(c2.chartName) selectedPortChart = c2.chartName;
+    if(c2.voyageAdvance !== false){
+      activeVoyageProgress = Math.max(activeVoyageProgress, sc.voyageWpIndex || 0);
+      const moved = advanceVoyageRoute(1,'scene-choice') || wp;
+      addJournalEntry(`[SEYIR] ${route?.name || 'Rota'} uzerinde ${moved?.name || wp?.name || 'waypoint'} gecildi.`, sc.day, sc.time);
+      pushPhoneMessage('Kopruustu', `Route monitor: ${route?.name || 'aktif rota'} %${getVoyageLegProgress()} tamamlandi. Sonraki chart: ${getVoyageWaypoint()?.chart || 'ECDIS route'}.`, {open:false});
+    }else{
+      addLiveLogbook('ROUTE RISK', `${route?.name || 'Rota'}: ${wp?.name || 'waypoint'} uzerinde route check zayif kaldi.`, true);
+      pushEmergencyPhoneNotification('Route Check Zayif','ECDIS route monitor ve harita gorevi tekrar edilmeli.','ecdis');
+    }
+  }
   const nextFn=()=>{
     if(c2.next==='end'||currentIdx>=sceneQueue.length-1){showEnd();}
     else if(crisis){showCrisis(crisis);}
@@ -10479,6 +10494,8 @@ function renderInspectionPanel(sc, ch){
 function buildSceneQueue(pool, totalDays, yr=selYear){
   const extraRouteScenes = getExtraRouteScenesForYear(yr);
   const extraEquipmentScenes = getExtraEquipmentScenesForYear(yr);
+  const route = getActiveVoyageRoute();
+  const voyageScenes = buildVoyageScenesForRoute(route, totalDays);
   const delayedInputSceneIds = new Set(Object.keys(DOCUMENT_FORM_CONFIGS));
   // Zorunlu sahneler: s01 (başlangıç), FINAL (son)
   const mandatory_start = pool.filter(s=>s.id==='s01');
@@ -10508,7 +10525,7 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
 
   // Düzenli sahneleri karıştır ve totalDays - (başlangıç+kriz+final) kadar seç
   const shuffledRegular=[...regular].sort(()=>Math.random()-0.5);
-  const needed=Math.max(5, totalDays - selectedCrisis.length - 2 - extraRouteScenes.length - extraEquipmentScenes.length - documentChain.length);
+  const needed=Math.max(5, totalDays - selectedCrisis.length - 2 - extraRouteScenes.length - extraEquipmentScenes.length - documentChain.length - voyageScenes.length);
   let selectedRegular=shuffledRegular.slice(0,needed);
 
   // Dinclik toparlanma sahneleri kuyrukta gercekten yer bulsun.
@@ -10547,6 +10564,11 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
   const lateInputScenes=[...regularInputScenes].sort(()=>Math.random()-0.5);
   const splitPoint = Math.max(6, Math.floor(coreMiddle.length*0.55));
   const middle=[...coreMiddle.slice(0,splitPoint), ...lateInputScenes, ...coreMiddle.slice(splitPoint)];
+  const routeSpacing = Math.max(3, Math.floor(Math.max(1, middle.length) / Math.max(1, voyageScenes.length)));
+  voyageScenes.forEach((sc,i)=>{
+    const pos = Math.min(middle.length, 2 + i*routeSpacing);
+    middle.splice(pos,0,sc);
+  });
   const portChainIds = ['s361','s362','s363','s364','s241','s432'];
   const portChainScenes = portChainIds.map(id=>pool.find(s=>s.id===id)).filter(Boolean);
   const injectAt = Math.min(middle.length, Math.max(5, Math.floor(middle.length*0.58)));
@@ -11294,8 +11316,10 @@ function continueContractOnShip(offerKey='same'){
     pushPhoneMessage('Şirket',`${offer.label} kabul edildi. Yeni gemi: ${sn}.`, {open:false});
   }
   const oldFinal = sceneQueue.find(s=>s.id==='FINAL') || null;
-  selectedStartPort=START_PORTS[Math.floor(Math.random()*START_PORTS.length)];
+  const nextRoute = selectVoyageRouteForShipType(selType);
+  selectedStartPort=findStartPortByName(nextRoute.start);
   selectedStartScenario=START_SCENARIOS[Math.floor(Math.random()*START_SCENARIOS.length)];
+  activateVoyageRoute(nextRoute);
   const pool=buildScenePool(pn,sn,selYear,selType,selectedStartPort,selectedStartScenario);
   const nextQueue=buildSceneQueue(pool, contractTotal, selYear)
     .filter(s=>s && s.id!=='s01' && s.id!=='FINAL');
@@ -11340,8 +11364,10 @@ function beginGame(){
   contractDays=0;
 
   // Kontrat uzunluğuna göre sahne pool'u oluştur
-  selectedStartPort=START_PORTS[Math.floor(Math.random()*START_PORTS.length)];
+  const nextRoute = selectVoyageRouteForShipType(selType);
+  selectedStartPort=findStartPortByName(nextRoute.start);
   selectedStartScenario=START_SCENARIOS[Math.floor(Math.random()*START_SCENARIOS.length)];
+  activateVoyageRoute(nextRoute);
   const pool=buildScenePool(pn,sn,selYear,selType,selectedStartPort,selectedStartScenario);
   sceneQueue=buildSceneQueue(pool, contractTotal, selYear);
   const birthdayScene = buildBirthdaySurpriseScene();
@@ -11421,13 +11447,16 @@ function beginGame(){
   specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
   shipOffers=[];
   familyUnread=0;
-  routeHistory=[{x:selectedStartPort.x,y:selectedStartPort.y}];
-  visitedPorts=new Set([selectedStartPort.name]);
-  shipPosition={x:selectedStartPort.x,y:selectedStartPort.y};
+  activateVoyageRoute(activeVoyageRoute || selectVoyageRouteForShipType(selType));
   scenesSinceEvent=0;
   nextEventAt=5+Math.floor(Math.random()*4);
   randomizeCrewRoster();
   initCrewSystem();
+  const routeInfo = getActiveVoyageRoute();
+  if(routeInfo){
+    phoneMessages.push({from:'Şirket', text:`Sefer emri: ${routeInfo.name}. ${routeInfo.start} -> ${routeInfo.end}, yaklasik ${routeInfo.distanceNm} NM / ${routeInfo.etaDays} gun. Haritalarim sekmesindeki sefer chartlarini kullan.`, me:false});
+    addLiveLogbook('SEFER EMRI', `${routeInfo.name}: ${routeInfo.start} -> ${routeInfo.end} · ${routeInfo.distanceNm} NM`, true);
+  }
 
   document.getElementById('intro').style.display='none';
   const g=document.getElementById('game');g.style.display='flex';g.style.flexDirection='column';
@@ -11900,6 +11929,106 @@ const ROUTE_PORTS = [
 let shipPosition = {x:85, y:130};
 let routeHistory = [{x:85,y:130}];
 let visitedPorts = new Set(["İzmir"]);
+let activeVoyageRoute = null;
+let activeVoyageProgress = 0;
+const TRADE_VOYAGE_ROUTES = [
+  {
+    key:'eu_far_east',
+    name:'Avrupa - Uzak Dogu Konteyner Servisi',
+    trade:'Konteyner ana hat',
+    chart:'Avrupa - Uzak Dogu Konteyner Rotasi',
+    start:'Rotterdam',
+    end:'Singapur',
+    distanceNm:8350,
+    etaDays:24,
+    charts:['Rotterdam','Dover TSS - English Channel','Cebelitarık','Suveys','Babulmendep','Aden Korfezi','Colombo','Malakka Bogazi','Singapur'],
+    waypoints:[
+      {name:'Rotterdam / Maas Approach', x:25, y:18, note:'Pilot disembark, Dover TSS hazirligi', chart:'Rotterdam', risk:'Traffic / ECA'},
+      {name:'Dover Strait TSS', x:34, y:24, note:'Eastbound lane ve crossing ferry takibi', chart:'Dover TSS - English Channel', risk:'TSS / traffic'},
+      {name:'Gibraltar landfall', x:8, y:120, note:'Akdeniz girisi, reporting ve trafik yogunlugu', chart:'Cebelitarık', risk:'Traffic lane'},
+      {name:'Suez Northbound/Southbound convoy', x:245, y:212, note:'Canal ETA, pilot, speed order', chart:'Suveys', risk:'Canal / UKC'},
+      {name:'Bab el-Mandeb transit', x:282, y:218, note:'Security watch ve VHF discipline', chart:'Babulmendep', risk:'Security'},
+      {name:'Colombo waypoint', x:300, y:170, note:'Monsoon swell ve bunker alternatifi', chart:'Colombo', risk:'Weather routing'},
+      {name:'Malacca west entrance', x:344, y:162, note:'TSS, fishing craft, dense AIS', chart:'Malakka Bogazi', risk:'Congestion'},
+      {name:'Singapore pilot station', x:350, y:166, note:'VTIS report, anchorage, berth window', chart:'Singapur', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'gulf_asia_energy',
+    name:'Hurmuz - Uzak Dogu LNG / Ham Petrol Hatti',
+    trade:'Enerji tasimaciligi',
+    chart:'Hurmuz - Uzak Dogu LNG Hatti',
+    start:'Ras Tanura',
+    end:'Yokohama',
+    distanceNm:6600,
+    etaDays:18,
+    charts:['Ras Tanura','Hurmuz Bogazi','Fujairah','Arap Denizi - Malakka Ham Petrol Hatti','Malakka Bogazi','Singapore Strait TSS','Guney Cin Denizi Ana Konteyner Hatti','Yokohama'],
+    waypoints:[
+      {name:'Ras Tanura sea berth', x:350, y:210, note:'Terminal clearance, manifold, cargo docs', chart:'Ras Tanura', risk:'Tanker ops'},
+      {name:'Hormuz outbound lane', x:342, y:206, note:'Iran/Oman sahilleri arasinda reporting ve security watch', chart:'Hurmuz Bogazi', risk:'Security / narrow water'},
+      {name:'Fujairah bunker anchorage', x:356, y:196, note:'Bunker plan, SOPEP, sample control', chart:'Fujairah Bunker Anchorage', risk:'Anchorage density'},
+      {name:'Arabian Sea monsoon leg', x:324, y:174, note:'Swell, current, speed log farki', chart:'Arap Denizi - Malakka Ham Petrol Hatti', risk:'Monsoon'},
+      {name:'Malacca TSS', x:344, y:162, note:'Eastbound lane, fishing traffic, CPA pressure', chart:'Malakka Bogazi', risk:'TSS'},
+      {name:'South China Sea lane', x:382, y:130, note:'Weather cell, AIS clutter, route monitor', chart:'Guney Cin Denizi Ana Konteyner Hatti', risk:'Squall / traffic'},
+      {name:'Japan approach', x:414, y:86, note:'VTS, coastal traffic, pilot card', chart:'Yokohama', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'blacksea_grain_med',
+    name:'Karadeniz - Akdeniz Tahil Koridoru',
+    trade:'Bulk / tahil',
+    chart:'Karadeniz - Akdeniz Tahil Koridoru',
+    start:'Samsun',
+    end:'İskenderiye',
+    distanceNm:1450,
+    etaDays:5,
+    charts:['Samsun','İstanbul Bogazi','Çanakkale Bogazi','Pire','İskenderiye'],
+    waypoints:[
+      {name:'Samsun departure', x:206, y:40, note:'Swell ve draft survey kapanisi', chart:'Samsun', risk:'Black Sea swell'},
+      {name:'Bosphorus north entrance', x:178, y:84, note:'Turk Straits reporting, current, local traffic', chart:'İstanbul Bogazi', risk:'Current / pilot'},
+      {name:'Dardanelles southbound', x:132, y:98, note:'TSS, ferry crossing, speed order', chart:'Çanakkale Bogazi', risk:'TSS / current'},
+      {name:'Aegean open leg', x:120, y:160, note:'Weather window ve fuel margin', chart:'Pire', risk:'Weather'},
+      {name:'Alexandria approach', x:200, y:210, note:'Pilot station, anchorage, cargo docs', chart:'İskenderiye', risk:'Port congestion'}
+    ]
+  },
+  {
+    key:'brazil_china_bulk',
+    name:'Brezilya - Cin Demir Cevheri Rotasi',
+    trade:'Cape size bulk',
+    chart:'Brezilya - Cin Demir Cevheri Rotasi',
+    start:'Santos',
+    end:'Şanghay',
+    distanceNm:11200,
+    etaDays:34,
+    charts:['Santos','Cape of Good Hope Alternatif Rotasi','Cape Town','Malakka Bogazi','Şanghay'],
+    waypoints:[
+      {name:'Santos / Atlantic departure', x:58, y:236, note:'Long ocean passage, stability and draft', chart:'Santos', risk:'Long leg'},
+      {name:'South Atlantic weather route', x:96, y:220, note:'Great circle vs weather routing', chart:'Brezilya - Cin Demir Cevheri Rotasi', risk:'Weather routing'},
+      {name:'Cape of Good Hope', x:126, y:246, note:'Heavy weather, bunker reserve, engine readiness', chart:'Cape of Good Hope Alternatif Rotasi', risk:'Heavy weather'},
+      {name:'Indian Ocean leg', x:260, y:198, note:'Swell, fatigue, ECDIS route monitor', chart:'Cape Town Bunker Sapma Hatti', risk:'Fatigue'},
+      {name:'Malacca / Singapore traffic', x:350, y:166, note:'Dense traffic and TSS', chart:'Malakka Bogazi', risk:'Traffic'},
+      {name:'Shanghai approach', x:392, y:78, note:'Yangtze VTS, pilot, berth window', chart:'Şanghay', risk:'River approach'}
+    ]
+  },
+  {
+    key:'transpacific',
+    name:'Transpasifik Dogu Hatti',
+    trade:'Konteyner / Pasifik',
+    chart:'Transpasifik Dogu Hatti',
+    start:'Yokohama',
+    end:'Los Angeles',
+    distanceNm:4800,
+    etaDays:12,
+    charts:['Yokohama','Transpasifik Dogu Hatti','Los Angeles'],
+    waypoints:[
+      {name:'Yokohama pilot out', x:414, y:86, note:'Coastal traffic, VTS, departure report', chart:'Yokohama', risk:'Coastal traffic'},
+      {name:'North Pacific great circle', x:300, y:62, note:'Great circle, low pressure avoidance', chart:'Transpasifik Dogu Hatti', risk:'Weather routing'},
+      {name:'Date line watch', x:210, y:72, note:'Time zone, logbook, fatigue', chart:'Transpasifik Dogu Hatti', risk:'Long ocean watch'},
+      {name:'US west coast landfall', x:70, y:92, note:'Traffic lane and ECA speed', chart:'Panama - ABD Bati Kiyisi Hatti', risk:'ECA / traffic'},
+      {name:'Los Angeles approach', x:8, y:104, note:'VTS, pilot station, berth queue', chart:'Los Angeles', risk:'Port congestion'}
+    ]
+  }
+];
 const SAVE_KEY = 'guverte-save-v1';
 
 function hasSavedGame(){
@@ -11945,6 +12074,8 @@ function buildSavePayload(){
     shipPosition,
     routeHistory,
     visitedPorts:Array.from(visitedPorts||[]),
+    activeVoyageRoute,
+    activeVoyageProgress,
     journalEntries,
     photos,
     seenPhotoMoments:Array.from(seenPhotoMoments||[]),
@@ -12040,6 +12171,8 @@ function applyLoadedGameState(data){
   shipPosition = data.shipPosition || {x:selectedStartPort.x, y:selectedStartPort.y};
   routeHistory = Array.isArray(data.routeHistory) && data.routeHistory.length ? data.routeHistory : [{x:selectedStartPort.x,y:selectedStartPort.y}];
   visitedPorts = new Set(Array.isArray(data.visitedPorts) ? data.visitedPorts : [selectedStartPort.name]);
+  activeVoyageRoute = data.activeVoyageRoute || activeVoyageRoute;
+  activeVoyageProgress = Number.isFinite(data.activeVoyageProgress) ? data.activeVoyageProgress : activeVoyageProgress;
   journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
   photos = Array.isArray(data.photos) ? data.photos : [];
   seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
@@ -12437,12 +12570,14 @@ function getMapRegionByPosition(pos){
 }
 
 function getPortChartEntries(){
+  const route = getActiveVoyageRoute();
+  const activeCharts = new Set([route?.chart, ...(route?.charts || []), ...(route?.waypoints || []).map(w=>w.chart)].filter(Boolean));
   return ROUTE_PORTS
     .filter(p=>['port','waterway','route'].includes(p.kind))
     .slice()
     .sort((a,b)=>{
-      const av = visitedPorts.has(a.name) ? 0 : 1;
-      const bv = visitedPorts.has(b.name) ? 0 : 1;
+      const av = activeCharts.has(a.name) ? 0 : visitedPorts.has(a.name) ? 1 : 2;
+      const bv = activeCharts.has(b.name) ? 0 : visitedPorts.has(b.name) ? 1 : 2;
       if(av !== bv) return av - bv;
       const order = kind => kind==='port' ? 0 : kind==='waterway' ? 1 : 2;
       const ak = order(a.kind);
@@ -13154,6 +13289,8 @@ function renderMapLibrary(){
   ensureTaskPort(getCurrentMapTask());
   const active = ensureSelectedPortChart();
   const entries = getPortChartEntries();
+  const activeRoute = getActiveVoyageRoute();
+  const activeCharts = new Set([activeRoute?.chart, ...(activeRoute?.charts || []), ...(activeRoute?.waypoints || []).map(w=>w.chart)].filter(Boolean));
   files.innerHTML = entries.map(port=>`
     <button class="map-file ${port.name===selectedPortChart?'active':''}" onclick="selectPortChart('${port.name.replace(/'/g,"\\'")}')">
       <span class="map-file-main">
@@ -13163,7 +13300,7 @@ function renderMapLibrary(){
           <span class="map-file-sub">${getMapRegionByPosition(port)} · ${getPortChartTypeLabel(port.kind)}</span>
         </span>
       </span>
-      <span class="map-file-tag">${visitedPorts.has(port.name)?'ugrandi':'arsiv'}</span>
+      <span class="map-file-tag">${activeCharts.has(port.name)?'sefer':visitedPorts.has(port.name)?'ugrandi':'arsiv'}</span>
     </button>
   `).join('');
   if(!active){
@@ -13205,7 +13342,7 @@ function renderMapLibrary(){
     </div>
     <div class="chart-meta-card">
       <div class="chart-meta-label">Chart Notu</div>
-      <div class="chart-meta-value">${profile.notes}</div>
+      <div class="chart-meta-value">${profile.notes}<br>${activeCharts.has(active.name)?`AKTIF SEFER DOSYASI: ${activeRoute.name} icin gerekli chart.`:'Arsiv chart; sefer rota dosyasina dahil degil.'}</div>
     </div>`;
   updateMapTaskBox(active);
 }
@@ -13317,6 +13454,25 @@ function renderMap(){
   s+=`<circle cx="200" cy="210" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
   s+=`<circle cx="95" cy="175" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
 
+  const activeRoute = getActiveVoyageRoute();
+  if(activeRoute?.waypoints?.length){
+    const pts = activeRoute.waypoints.map(w=>`${w.x*4.4},${w.y*2.6}`).join(' ');
+    s+=`<polyline points="${pts}" fill="none" stroke="#d4a017" stroke-width="2.3" stroke-dasharray="9 5" opacity=".72"/>`;
+    activeRoute.waypoints.forEach((w,i)=>{
+      const wx=w.x*4.4, wy=w.y*2.6;
+      const done = i <= activeVoyageProgress;
+      s+=`<circle cx="${wx}" cy="${wy}" r="${done?5:3.2}" fill="${done?'#d4a017':'#0b304f'}" stroke="#ffd783" stroke-width="${done?1.4:.8}" opacity="${done?1:.82}"/>`;
+      if(i===activeVoyageProgress || i===0 || i===activeRoute.waypoints.length-1){
+        s+=`<text x="${wx+7}" y="${wy-6}" fill="#7b3550" font-size="6.6">${i+1}. ${w.name}</text>`;
+      }
+    });
+    const currentWp = getVoyageWaypoint();
+    s+=`<rect x="238" y="10" width="192" height="42" rx="7" fill="rgba(255,255,255,.72)" stroke="#9b8356" stroke-width=".8"/>`;
+    s+=`<text x="246" y="24" fill="#7b3550" font-size="7.2">${activeRoute.name}</text>`;
+    s+=`<text x="246" y="36" fill="#264f75" font-size="6.5">${activeRoute.trade} · ${activeRoute.distanceNm} NM · ETA ${activeRoute.etaDays} gun</text>`;
+    s+=`<text x="246" y="48" fill="#264f75" font-size="6.5">Aktif WP: ${currentWp?.name || '-'} · ${getVoyageLegProgress()}%</text>`;
+  }
+
   // Route line
   if(routeHistory.length > 1){
     let d = `M${routeHistory[0].x*4.4} ${routeHistory[0].y*2.6}`;
@@ -13373,7 +13529,7 @@ function renderMap(){
   s+=`</g>`;
 
   svg.innerHTML = s;
-  legend.textContent = `🟢 Uğranan liman  🔵 Planlanan liman  🔷 Kanal/bogaz/nehir/korfez  🟡 ${sn||'Gemimiz'}  — ${visitedPorts.size} nokta işlendi`;
+  legend.textContent = `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
 }
 
 // ===== SEYİR GÜNLÜĞİ =====
@@ -16056,6 +16212,111 @@ function setPhoneContact(name){
   phoneTab = 'messages';
   renderPhone();
 }
+
+function getVoyageRouteByKey(key){
+  return TRADE_VOYAGE_ROUTES.find(r=>r.key === key) || TRADE_VOYAGE_ROUTES[0];
+}
+function selectVoyageRouteForShipType(type=selType){
+  const typeKey = String(type || '').toLowerCase();
+  let candidates = TRADE_VOYAGE_ROUTES;
+  if(/tanker|lng/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/energy|gulf/.test(r.key));
+  else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil/.test(r.key));
+  else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific/.test(r.key));
+  else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|eu_far_east/.test(r.key));
+  return candidates[Math.floor(Math.random()*candidates.length)] || TRADE_VOYAGE_ROUTES[0];
+}
+function findStartPortByName(name){
+  const clean = normalizeTrAscii(name || '');
+  return START_PORTS.find(p=>normalizeTrAscii(p.name) === clean)
+    || START_PORTS.find(p=>normalizeTrAscii(p.name).includes(clean) || clean.includes(normalizeTrAscii(p.name)))
+    || START_PORTS[0];
+}
+function activateVoyageRoute(routeOrKey){
+  const route = typeof routeOrKey === 'string' ? getVoyageRouteByKey(routeOrKey) : (routeOrKey || selectVoyageRouteForShipType());
+  activeVoyageRoute = JSON.parse(JSON.stringify(route));
+  activeVoyageProgress = 0;
+  const first = activeVoyageRoute.waypoints[0];
+  if(first){
+    shipPosition = {x:first.x, y:first.y};
+    routeHistory = [{x:first.x,y:first.y}];
+    visitedPorts = new Set([activeVoyageRoute.start, first.name, first.chart].filter(Boolean));
+    selectedPortChart = first.chart || activeVoyageRoute.chart;
+  }
+  return activeVoyageRoute;
+}
+function getActiveVoyageRoute(){
+  if(!activeVoyageRoute) activateVoyageRoute(selectVoyageRouteForShipType());
+  return activeVoyageRoute;
+}
+function getVoyageWaypoint(index=activeVoyageProgress){
+  const route = getActiveVoyageRoute();
+  return route?.waypoints?.[Math.max(0, Math.min(route.waypoints.length-1, index))] || null;
+}
+function getVoyageLegProgress(){
+  const route = getActiveVoyageRoute();
+  if(!route?.waypoints?.length) return 0;
+  return Math.round((Math.max(0, activeVoyageProgress) / Math.max(1, route.waypoints.length-1)) * 100);
+}
+function advanceVoyageRoute(step=1, reason='seyir'){
+  const route = getActiveVoyageRoute();
+  if(!route?.waypoints?.length) return null;
+  activeVoyageProgress = Math.max(0, Math.min(route.waypoints.length-1, activeVoyageProgress + step));
+  const wp = getVoyageWaypoint(activeVoyageProgress);
+  if(wp){
+    shipPosition = {x:wp.x, y:wp.y};
+    routeHistory.push({x:wp.x, y:wp.y});
+    visitedPorts.add(wp.name);
+    if(wp.chart) visitedPorts.add(wp.chart);
+    if(wp.chart) selectedPortChart = wp.chart;
+    addLiveLogbook('ROUTE MONITOR', `${route.name}: ${wp.name} · ${wp.note}`, true);
+    addWatchFeed(`Rota ilerledi: ${wp.name}`, /security|weather|traffic|tss/i.test(wp.risk||'') ? 'warn' : '');
+  }
+  return wp;
+}
+function makeVoyageScene(route, wp, idx){
+  const isFirst = idx === 0;
+  const isLast = idx >= route.waypoints.length - 1;
+  const risk = wp.risk || 'Route monitoring';
+  const loc = isFirst ? `${wp.name} - Departure` : isLast ? `${wp.name} - Landfall / Approach` : `${wp.name} - Passage Monitor`;
+  const gfx = /weather|swell|heavy|monsoon/i.test(risk) ? 'storm' : /pilot|approach|port|berth/i.test(risk+wp.note) ? 'harbor' : /traffic|tss|security|canal|narrow/i.test(risk) ? 'radar' : 'ecdis_panel';
+  return {
+    id:`voyage_${route.key}_${idx}`,
+    gfx,
+    alert:/security|heavy|alarm|traffic|tss/i.test(risk),
+    day:`Seyir ${idx+1}`,
+    time:['04:20','08:00','12:00','16:00','20:00'][idx%5],
+    loc,
+    sub:`${route.name} · ${route.trade}`,
+    who: idx%3===0?'z2':idx%3===1?'z1':'suvari',
+    voyageRouteKey:route.key,
+    voyageWpIndex:idx,
+    text:`ECDIS route monitor ${route.name} hattini gosteriyor.
+
+Aktif waypoint: ${wp.name}
+Chart: ${wp.chart || route.chart}
+Not: ${wp.note}
+Risk: ${risk}
+
+2. Zabiti senden seyir mantigini net duymak istiyor: bu noktada once neyi kontrol edersin?`,
+    choices:[
+      {text:'ECDIS route monitor, radar/AIS cross-check, waypoint notu ve logbook zincirini birlikte kontrol ederim',tag:'kritik',effect:{bilgi:16,sayginlik:10,dinclik:-2},voyageAdvance:true,chartName:wp.chart},
+      {text:'Once harita chartini acar, TSS/reporting/UKC veya hava notunu okuyup kaptana kisa rapor veririm',tag:'akilli',effect:{bilgi:13,sayginlik:8},voyageAdvance:true,chartName:wp.chart},
+      {text:'Sadece ETA iyi gorunuyorsa rotayi aynen takip ederim',tag:'itaatkar',effect:{bilgi:3,sayginlik:-2,dinclik:1},voyageAdvance:true,chartName:wp.chart},
+      {text:'Hiz kazanmak icin safety contour ve alternatif rota uyarilarini sonra kontrol ederim',tag:'hileli',effect:{bilgi:-10,sayginlik:-9,dinclik:-3},voyageAdvance:false,chartName:wp.chart}
+    ]
+  };
+}
+function buildVoyageScenesForRoute(route, totalDays){
+  const maxScenes = Math.min(route.waypoints.length, Math.max(4, Math.floor(totalDays / 5)));
+  const picks = [];
+  const last = route.waypoints.length - 1;
+  for(let i=0;i<maxScenes;i++){
+    const idx = maxScenes === 1 ? 0 : Math.round((i/(maxScenes-1))*last);
+    if(!picks.includes(idx)) picks.push(idx);
+  }
+  if(!picks.includes(last)) picks.push(last);
+  return picks.slice(0, Math.min(7, picks.length)).map(idx=>makeVoyageScene(route, route.waypoints[idx], idx));
+}
 function setPhoneSite(key){
   activePhoneSite = key || 'home';
   phoneTab = 'web';
@@ -17707,7 +17968,18 @@ function onSceneRender(sc){
   applyScenePsychDrift(sc);
   maybeTriggerCompanyPressureBeat(sc);
   // Harita pozisyonunu güncelle
-  updateShipPosition(sc.loc);
+  if(sc?.voyageRouteKey){
+    const route = getActiveVoyageRoute();
+    const wp = route?.waypoints?.[sc.voyageWpIndex || 0];
+    if(wp){
+      shipPosition = {x:wp.x, y:wp.y};
+      selectedPortChart = wp.chart || route.chart || selectedPortChart;
+      visitedPorts.add(wp.name);
+      if(wp.chart) visitedPorts.add(wp.chart);
+    }
+  }else{
+    updateShipPosition(sc.loc);
+  }
   // Gün sayacını güncelle
   if(sc.day) {
     const m = sc.day.match(/\d+/);
