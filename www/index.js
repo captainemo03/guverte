@@ -8465,6 +8465,26 @@ function pushDialogueEntry(side, portrait, name, text){
   renderDialogueLog();
 }
 
+function maybePushDialogueInterjection(sc,c2){
+  if(!sc || !c2) return;
+  const blob = `${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
+  let key = '';
+  let line = '';
+  if(c2.tag === 'korkak' || c2.tag === 'hileli'){
+    key = /engine|makine|pump|generator|alarm/.test(blob) ? 'carkci' : /deck|halat|mooring|tug|guverte/.test(blob) ? 'lostromo' : 'suvari';
+    line = 'Bu cevap kayda girdi. Simdi bunu nasil toparlayacagini gormek istiyorum.';
+  }else if(c2.tag === 'kritik'){
+    key = /engine|makine|pump|generator|alarm/.test(blob) ? 'carkci' : /vhf|radar|ecdis|arpa|ais|bridge|kopruustu/.test(blob) ? 'z2' : 'suvari';
+    line = 'Bu daha profesyonel oldu. Sebebini de logbook satirinda net yaz.';
+  }else if(/pilot|vhf|radar|ecdis|engine|makine|fire|yangin|mooring|halat|survey|psc/.test(blob) && Math.random() < .72){
+    key = /fire|yangin|psc|survey|permit|muster/.test(blob) ? 'z3' : /engine|makine/.test(blob) ? 'carkci' : /mooring|halat|deck|guverte/.test(blob) ? 'lostromo' : 'z1';
+    line = 'Ben de bunu takip edecegim. Bir sonraki adimi atlamadan kapat.';
+  }
+  if(!key || !CREW_DEFS[key]) return;
+  pushDialogueEntry('left', getCrewPortraitForKey(key), CREW_DEFS[key].name, line);
+  addWatchFeed(`${CREW_DEFS[key].name}: ${line}`, c2.tag === 'korkak' || c2.tag === 'hileli' ? 'warn' : 'good');
+}
+
 function getSceneEmotion(sc, role='speaker'){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(/yangin|fire|mob|alarm|pirate|korsan|blackout|panic|acil/.test(hay)) return role === 'player' ? 'alert' : 'stern';
@@ -9208,6 +9228,7 @@ function handleSceneChoice(sc, c2, ch){
   const speakerPortrait = getSceneSpeakerPortrait(sc);
   pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', c2.text);
+  maybePushDialogueInterjection(sc,c2);
   showReplyBubble(c2.text);
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
@@ -16326,6 +16347,23 @@ function maybeDeviceFault(sc, blob){
   addLiveLogbook('CIHAZ ARIZASI',pick[1],true);
   addWatchFeed(pick[1],'warn');
 }
+function maybeRunExternalWorldPulse(sc, blob){
+  const sceneNo = Math.max(1, currentIdx + 1);
+  if(sceneNo - (livingPulseState.lastExternalScene || 0) < 6 || Math.random() > 0.5) return;
+  livingPulseState.lastExternalScene = sceneNo;
+  const items = [
+    ['Şirket','Charter tarafı ETA güncellemesi istedi. Gecikme dili resmi kayda girecek.','warn'],
+    ['Acenta','Liman sahasında yoğunluk var; pilot penceresi değişebilir.','warn'],
+    ['Weather Desk','Yeni MSI: rota üzerinde görüş düşüşü ve swell artışı bekleniyor.','warn'],
+    ['AILE','Evden kısa bir mesaj geldi: sesini duymak istiyoruz, müsait olunca yaz.','good'],
+    ['Training Hub','Bugünkü zayıf alanın için cihaz pratiği önerisi hazır.','']
+  ];
+  const pick = items[Math.floor(Math.random()*items.length)];
+  pushPhoneMessage(pick[0], pick[1]);
+  addWatchFeed(`${pick[0]}: ${pick[1]}`, pick[2]);
+  addLiveLogbook('DIS DUNYA', `${pick[0]} - ${pick[1]}`, true);
+  if(/charter|eta|gecikme/i.test(pick[1])) companyPressureState.stage = Math.min(3, (companyPressureState.stage || 0) + 1);
+}
 function applyCrewFatigueDrift(sc, blob){
   const storm = /storm|firtina|swell|rain|sis|fog/.test(blob) ? 4 : 1;
   crewFatigueState.bridge = clamp((crewFatigueState.bridge||20) + 1 + (stats.dinclik<35?2:0));
@@ -16379,6 +16417,7 @@ function updateLivingWatch(sc){
   maybeTriggerPhoneCall(sc, blob);
   maybeAddTaskChain(sc, blob);
   maybeDeviceFault(sc, blob);
+  maybeRunExternalWorldPulse(sc, blob);
   applyCrewFatigueDrift(sc, blob);
   maybeMonthlyCaptainReview(sc);
   checkSceneAchievements(sc, blob);
@@ -16498,6 +16537,11 @@ function renderCabin(){
     <div class="life-card"><b>Takvim</b>Kontrat: ${contractDays}/${contractTotal} sahne.<button onclick="openCareer()">Kariyeri ac</button></div>
     <div class="life-card"><b>Aile Fotografı</b>Yalnizlik ${Math.round(psyche.yalnizlik)}.<button onclick="doFreeTimeAction('family'); renderCabin()">Aileyi ara</button></div>
     <div class="life-card"><b>Canta</b>Kurs, evrak ve kisilik dosyan.<button onclick="setPhoneSite('courses'); togglePhone()">Kurs portalı</button></div>
+    <div class="life-card"><b>Spor Lastigi</b>Vardiya disi kisa hareket.<button onclick="doFreeTimeAction('sport'); renderCabin()">Spor yap</button></div>
+    <div class="life-card"><b>Hava Panosu</b>WX, barometre, swell ve gorus.<button onclick="doFreeTimeAction('weather'); renderCabin()">Hava raporu al</button></div>
+    <div class="life-card"><b>GMDSS Rutini</b>DSC/NAVTEX test disiplini.<button onclick="doFreeTimeAction('gmdss'); renderCabin()">GMDSS test</button></div>
+    <div class="life-card"><b>Safety Round</b>Fire patrol ve ekipman kontrolu.<button onclick="doFreeTimeAction('safety'); renderCabin()">Safety round</button></div>
+    <div class="life-card"><b>Tank Sounding</b>Tank ve tuketim takibi.<button onclick="doFreeTimeAction('sounding'); renderCabin()">Sounding al</button></div>
   </div>`;
 }
 function openShipWalk(){ document.getElementById('shipwalk-panel')?.classList.add('show'); renderShipWalk(); }
