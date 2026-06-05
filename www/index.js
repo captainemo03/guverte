@@ -12027,6 +12027,172 @@ const TRADE_VOYAGE_ROUTES = [
       {name:'US west coast landfall', x:70, y:92, note:'Traffic lane and ECA speed', chart:'Panama - ABD Bati Kiyisi Hatti', risk:'ECA / traffic'},
       {name:'Los Angeles approach', x:8, y:104, note:'VTS, pilot station, berth queue', chart:'Los Angeles', risk:'Port congestion'}
     ]
+  },
+  {
+    key:'north_atlantic',
+    name:'Kuzey Atlantik Ana Hatti',
+    trade:'Konteyner / Atlantik',
+    chart:'Kuzey Atlantik Ana Hatti',
+    start:'Felixstowe',
+    end:'New Orleans',
+    distanceNm:4750,
+    etaDays:13,
+    charts:['Felixstowe','Dover TSS - English Channel','Kuzey Atlantik Ana Hatti','Great Lakes - St. Lawrence Hatti','New Orleans'],
+    waypoints:[
+      {name:'Felixstowe departure', x:32, y:20, note:'Pilot out, North Sea traffic and ECA speed', chart:'Felixstowe', risk:'ECA / traffic'},
+      {name:'English Channel westbound', x:28, y:24, note:'Dover TSS, ferry crossing, watch density', chart:'Dover TSS - English Channel', risk:'TSS / traffic'},
+      {name:'Biscay weather gate', x:10, y:70, note:'Low pressure, swell and speed reduction decision', chart:'Biskay Korfezi', risk:'Weather routing'},
+      {name:'North Atlantic great circle', x:74, y:74, note:'Ocean weather routing, ETA and fuel margin', chart:'Kuzey Atlantik Ana Hatti', risk:'Heavy weather'},
+      {name:'US Gulf approach', x:24, y:134, note:'Traffic separation, pilot boarding window', chart:'Meksika Korfezi', risk:'Traffic'},
+      {name:'New Orleans river pilot', x:36, y:128, note:'Mississippi pilotage, current, river traffic', chart:'New Orleans', risk:'River pilotage'}
+    ]
+  },
+  {
+    key:'panama_far_east',
+    name:'Panama - Uzak Dogu Konteyner Hatti',
+    trade:'Konteyner / kanal gecisi',
+    chart:'Panama - Uzak Dogu Konteyner Hatti',
+    start:'Panama',
+    end:'Busan',
+    distanceNm:8900,
+    etaDays:25,
+    charts:['Panama','Panama Kanali','Panama - Uzak Dogu Konteyner Hatti','Transpasifik Dogu Hatti','Kaohsiung','Busan'],
+    waypoints:[
+      {name:'Balboa anchorage', x:18, y:170, note:'Canal slot, pilot boarding and lock prep', chart:'Panama', risk:'Canal schedule'},
+      {name:'Panama Canal transit', x:22, y:172, note:'Locks, tug lines, pilot orders', chart:'Panama Kanali', risk:'Canal / lock'},
+      {name:'Pacific outbound lane', x:78, y:150, note:'Traffic lane and ocean passage plan', chart:'Panama - Uzak Dogu Konteyner Hatti', risk:'Traffic'},
+      {name:'Central Pacific passage', x:178, y:148, note:'Long leg, weather route and fuel margin', chart:'Panama - Uzak Dogu Konteyner Hatti', risk:'Long ocean watch'},
+      {name:'Taiwan Strait approach', x:386, y:116, note:'Fishing traffic, VTS, monsoon squalls', chart:'Tayvan Bogazi', risk:'Traffic / weather'},
+      {name:'Busan pilot station', x:404, y:76, note:'Korea Strait traffic, pilot card and berth', chart:'Busan', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'australia_china_iron',
+    name:'Avustralya - Cin Demir Cevheri Hatti',
+    trade:'Bulk / demir cevheri',
+    chart:'Avustralya - Cin Demir Cevheri Hatti',
+    start:'Sydney',
+    end:'Şanghay',
+    distanceNm:4700,
+    etaDays:14,
+    charts:['Sydney','Torres Bogazi','Avustralya - Cin Demir Cevheri Hatti','Guney Cin Denizi Ana Konteyner Hatti','Şanghay'],
+    waypoints:[
+      {name:'Sydney departure', x:420, y:232, note:'Coastal traffic and deep draft checks', chart:'Sydney', risk:'Coastal traffic'},
+      {name:'Torres Strait pilotage', x:396, y:210, note:'Reef pilotage, UKC, current and reporting', chart:'Torres Bogazi', risk:'Reef / UKC'},
+      {name:'Coral Sea weather leg', x:388, y:196, note:'Swell and tropical weather monitoring', chart:'Avustralya - Cin Demir Cevheri Hatti', risk:'Weather'},
+      {name:'South China Sea northbound', x:382, y:130, note:'Squall line, AIS clutter, fishing vessels', chart:'Guney Cin Denizi Ana Konteyner Hatti', risk:'Traffic / squall'},
+      {name:'Shanghai bulk approach', x:392, y:78, note:'Yangtze VTS, draft, tide and berth window', chart:'Şanghay', risk:'River approach'}
+    ]
+  },
+  {
+    key:'indonesia_china_coal',
+    name:'Endonezya - Cin Komur Hatti',
+    trade:'Bulk / komur',
+    chart:'Endonezya - Cin Komur Hatti',
+    start:'Singapur',
+    end:'Şanghay',
+    distanceNm:2900,
+    etaDays:8,
+    charts:['Singapur','Sunda Bogazi','Lombok Bogazi','Endonezya - Cin Komur Hatti','Tayvan Bogazi','Şanghay'],
+    waypoints:[
+      {name:'Singapore bunker / clearance', x:350, y:166, note:'Bunker, document clearance and TSS entry', chart:'Singapur', risk:'Bunker / traffic'},
+      {name:'Sunda alternate gate', x:350, y:186, note:'Weather alternate, current and traffic', chart:'Sunda Bogazi', risk:'Current'},
+      {name:'Lombok deep-water option', x:360, y:194, note:'Deep draft route option and swell', chart:'Lombok Bogazi', risk:'Swell / deep draft'},
+      {name:'South China Sea coal route', x:366, y:176, note:'Monsoon rain, visibility and cargo heating watch', chart:'Endonezya - Cin Komur Hatti', risk:'Weather / cargo'},
+      {name:'Taiwan Strait northbound', x:386, y:116, note:'Fishing fleets and crossing traffic', chart:'Tayvan Bogazi', risk:'Traffic'},
+      {name:'Shanghai river pilot', x:392, y:78, note:'Tide, draft and pilot boarding', chart:'Şanghay', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'west_africa_europe_tanker',
+    name:'Bati Afrika - Avrupa Tanker Rotasi',
+    trade:'Tanker / ham petrol',
+    chart:'Batı Afrika - Avrupa Tanker Rotasi',
+    start:'Cape Town',
+    end:'Rotterdam',
+    distanceNm:6200,
+    etaDays:18,
+    charts:['Cape Town','Batı Afrika - Avrupa Tanker Rotasi','Gine Korfezi','Cebelitarık','Dover TSS - English Channel','Rotterdam'],
+    waypoints:[
+      {name:'Cape Town bunker departure', x:126, y:246, note:'Bunker, weather window and engine readiness', chart:'Cape Town', risk:'Bunker / weather'},
+      {name:'West Africa offshore leg', x:96, y:190, note:'Security watch and offshore traffic', chart:'Batı Afrika Offshore Supply Hatti', risk:'Security'},
+      {name:'Gulf of Guinea tanker lane', x:88, y:188, note:'HRA watch, VHF discipline and piracy reporting', chart:'Gine Korfezi', risk:'Security'},
+      {name:'Canary / Gibraltar routeing', x:8, y:120, note:'Landfall and traffic lane entry', chart:'Cebelitarık', risk:'Traffic'},
+      {name:'English Channel inbound', x:34, y:24, note:'Dover TSS, ECA speed and pilot ETA', chart:'Dover TSS - English Channel', risk:'TSS'},
+      {name:'Rotterdam Maas approach', x:25, y:18, note:'Pilot station, terminal clearance and port docs', chart:'Rotterdam', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'us_gulf_europe_bulk',
+    name:'ABD Korfezi - Avrupa Bulk Hatti',
+    trade:'Bulk / tahil veya petcoke',
+    chart:'ABD Korfezi - Avrupa Bulk Hatti',
+    start:'Houston',
+    end:'Hamburg',
+    distanceNm:5200,
+    etaDays:15,
+    charts:['Houston','Meksika Korfezi','Kuzey Atlantik Ana Hatti','Dover TSS - English Channel','Hamburg','Elbe Nehri'],
+    waypoints:[
+      {name:'Houston channel departure', x:18, y:142, note:'Pilotage, river traffic and draft limits', chart:'Houston', risk:'Pilotage / draft'},
+      {name:'Gulf of Mexico outbound', x:24, y:134, note:'Offshore platforms and weather watch', chart:'Meksika Korfezi', risk:'Weather / offshore'},
+      {name:'Atlantic crossing', x:74, y:74, note:'Weather routing and fuel ROB', chart:'Kuzey Atlantik Ana Hatti', risk:'Weather routing'},
+      {name:'Dover eastbound lane', x:34, y:24, note:'Ferries, TSS and dense targets', chart:'Dover TSS - English Channel', risk:'TSS'},
+      {name:'Elbe river pilot', x:40, y:12, note:'Tide window, river pilot and UKC', chart:'Elbe Nehri', risk:'Tide / river'},
+      {name:'Hamburg berth approach', x:42, y:10, note:'Terminal ETA and mooring plan', chart:'Hamburg', risk:'Berthing'}
+    ]
+  },
+  {
+    key:'baltic_northsea_feeder',
+    name:'Baltik - Kuzey Denizi Feeder Hatti',
+    trade:'Feeder konteyner / Ro-Ro',
+    chart:'Kuzey Denizi - Baltik Feeder Hatti',
+    start:'Gdansk',
+    end:'Rotterdam',
+    distanceNm:850,
+    etaDays:3,
+    charts:['Gdansk','Baltik - Kuzey Denizi Enerji Hatti','Kiel Kanali','Kattegat','Skagerrak','Rotterdam'],
+    waypoints:[
+      {name:'Gdansk departure', x:88, y:6, note:'Baltic traffic and pilot out', chart:'Gdansk', risk:'Coastal traffic'},
+      {name:'Baltic westbound', x:72, y:12, note:'Ice season / traffic route monitoring', chart:'Baltik - Kuzey Denizi Enerji Hatti', risk:'Seasonal ice'},
+      {name:'Kiel Canal option', x:46, y:8, note:'Canal pilot, speed and lock timing', chart:'Kiel Kanali', risk:'Canal'},
+      {name:'Kattegat / Skagerrak', x:56, y:8, note:'Current, ferries and fishing traffic', chart:'Kattegat', risk:'Traffic / current'},
+      {name:'Rotterdam feeder arrival', x:25, y:18, note:'Maas approach, pilot and berth window', chart:'Rotterdam', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'turkey_adriatic_roro',
+    name:'Turkiye - Adriyatik Ro-Ro Hatti',
+    trade:'Ro-Ro / kisa deniz tasimaciligi',
+    chart:'Turkiye - Adriyatik Ro-Ro Hatti',
+    start:'Ambarlı',
+    end:'Koper',
+    distanceNm:1050,
+    etaDays:4,
+    charts:['Ambarlı','Çanakkale Bogazi','Otranto Bogazi','Split','Koper'],
+    waypoints:[
+      {name:'Ambarli departure', x:172, y:92, note:'Marmara traffic, pilot out, Ro-Ro cargo lashings', chart:'Ambarlı', risk:'Traffic / cargo'},
+      {name:'Dardanelles southbound', x:132, y:98, note:'Current, TSS and ferry crossing', chart:'Çanakkale Bogazi', risk:'Current / TSS'},
+      {name:'Aegean westbound', x:118, y:104, note:'Weather window and passenger/cargo schedule pressure', chart:'Turkiye - Adriyatik Ro-Ro Hatti', risk:'Schedule pressure'},
+      {name:'Otranto gate', x:112, y:112, note:'Adriatic entry, crossing traffic and wind', chart:'Otranto Bogazi', risk:'Traffic / wind'},
+      {name:'Koper approach', x:100, y:60, note:'Pilot station, berth and stern ramp planning', chart:'Koper', risk:'Berthing'}
+    ]
+  },
+  {
+    key:'norway_europe_lng',
+    name:'Norvec - Avrupa LNG Hatti',
+    trade:'LNG / kisa enerji hattı',
+    chart:'Norvec - Avrupa LNG Hatti',
+    start:'Hamburg',
+    end:'Rotterdam',
+    distanceNm:980,
+    etaDays:3,
+    charts:['Hamburg','Kuzey Denizi - Baltik Feeder Hatti','Norvec - Avrupa LNG Hatti','Rotterdam'],
+    waypoints:[
+      {name:'Elbe LNG departure', x:42, y:10, note:'Terminal clearance, cargo condition and pilotage', chart:'Hamburg', risk:'LNG terminal'},
+      {name:'North Sea gas route', x:60, y:2, note:'Offshore installations, weather and ECA speed', chart:'Norvec - Avrupa LNG Hatti', risk:'Offshore / weather'},
+      {name:'Traffic lane crossing', x:44, y:18, note:'Ferries, wind farms and CPA management', chart:'Kuzey Denizi - Baltik Feeder Hatti', risk:'Traffic'},
+      {name:'Rotterdam LNG approach', x:25, y:18, note:'Pilot, tugs, terminal safety zone', chart:'Rotterdam', risk:'Pilotage / terminal'}
+    ]
   }
 ];
 const SAVE_KEY = 'guverte-save-v1';
@@ -16219,10 +16385,10 @@ function getVoyageRouteByKey(key){
 function selectVoyageRouteForShipType(type=selType){
   const typeKey = String(type || '').toLowerCase();
   let candidates = TRADE_VOYAGE_ROUTES;
-  if(/tanker|lng/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/energy|gulf/.test(r.key));
-  else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil/.test(r.key));
-  else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific/.test(r.key));
-  else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|eu_far_east/.test(r.key));
+  if(/tanker|lng/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/energy|gulf|tanker|lng|west_africa|norway/.test(`${r.key} ${r.trade}`));
+  else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil|australia|indonesia|us_gulf|bulk|komur|cevheri|tahil/.test(`${r.key} ${r.trade}`));
+  else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific|north_atlantic|panama_far_east|feeder|konteyner/.test(`${r.key} ${r.trade}`));
+  else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/roro|feeder|turkey_adriatic|blacksea|eu_far_east/.test(`${r.key} ${r.trade}`));
   return candidates[Math.floor(Math.random()*candidates.length)] || TRADE_VOYAGE_ROUTES[0];
 }
 function findStartPortByName(name){
