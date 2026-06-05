@@ -11439,6 +11439,7 @@ function beginGame(){
   pendingPhoneCall=null;
   crewFatigueState={deck:22,engine:18,bridge:20,galley:12};
   deviceFaultState={radar:false,ecdis:false,gyro:false,ais:false};
+  deviceChartOverlayState={radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
   devicePracticeProgress={};
   devicePracticeScore={ok:0,total:0};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
@@ -11931,6 +11932,7 @@ let routeHistory = [{x:85,y:130}];
 let visitedPorts = new Set(["İzmir"]);
 let activeVoyageRoute = null;
 let activeVoyageProgress = 0;
+let deviceChartOverlayState = {radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
 const TRADE_VOYAGE_ROUTES = [
   {
     key:'eu_far_east',
@@ -12242,6 +12244,7 @@ function buildSavePayload(){
     visitedPorts:Array.from(visitedPorts||[]),
     activeVoyageRoute,
     activeVoyageProgress,
+    deviceChartOverlayState,
     journalEntries,
     photos,
     seenPhotoMoments:Array.from(seenPhotoMoments||[]),
@@ -12339,6 +12342,7 @@ function applyLoadedGameState(data){
   visitedPorts = new Set(Array.isArray(data.visitedPorts) ? data.visitedPorts : [selectedStartPort.name]);
   activeVoyageRoute = data.activeVoyageRoute || activeVoyageRoute;
   activeVoyageProgress = Number.isFinite(data.activeVoyageProgress) ? data.activeVoyageProgress : activeVoyageProgress;
+  deviceChartOverlayState = data.deviceChartOverlayState && typeof data.deviceChartOverlayState === 'object' ? {...deviceChartOverlayState, ...data.deviceChartOverlayState} : deviceChartOverlayState;
   journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
   photos = Array.isArray(data.photos) ? data.photos : [];
   seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
@@ -12828,6 +12832,48 @@ function buildActiveVoyageChartOverlay(chartName){
     ${anim}
   </g>`;
 }
+function buildDeviceChartOverlay(chartName){
+  const st = deviceChartOverlayState || {};
+  if(!st.radar && !st.ais && !st.arpa && !st.cpa && !st.guard && !st.ebl && !st.trial) return '';
+  const route = getActiveVoyageRoute();
+  const wp = getVoyageWaypoint();
+  const chartSet = getActiveVoyageChartSet();
+  if(chartSet.size && !chartSet.has(chartName) && chartName !== selectedPortChart) return '';
+  const own = wp && route ? projectVoyageWaypointToChart(wp, route) : {x:220,y:136};
+  const t1 = {x:Math.max(40, own.x + 74), y:Math.max(44, own.y - 38)};
+  const t2 = {x:Math.min(400, own.x - 92), y:Math.min(210, own.y + 34)};
+  const cpaX = (own.x + t1.x) / 2;
+  const cpaY = (own.y + t1.y) / 2;
+  const arpa = st.arpa ? `
+    <circle cx="${t1.x}" cy="${t1.y}" r="7" fill="none" stroke="#81f7b8" stroke-width="1.4"/>
+    <path d="M${t1.x} ${t1.y} L${t1.x-22} ${t1.y+18}" stroke="#81f7b8" stroke-width="1.3"/>
+    <text x="${t1.x+8}" y="${t1.y-8}" fill="#81f7b8" font-size="6.5" font-family="monospace">ARPA TGT 01</text>` : '';
+  const ais = st.ais ? `
+    <rect x="${t2.x-15}" y="${t2.y-10}" width="30" height="20" rx="4" fill="rgba(42,91,132,.86)" stroke="#7fc3ff" stroke-width="1"/>
+    <path d="M${t2.x} ${t2.y-7} L${t2.x+7} ${t2.y+7} L${t2.x-7} ${t2.y+7} Z" fill="#7fc3ff"/>
+    <text x="${t2.x+18}" y="${t2.y+3}" fill="#9cc8ef" font-size="6.4" font-family="monospace">AIS CPA SORT</text>` : '';
+  const cpa = st.cpa ? `
+    <path d="M${own.x} ${own.y} Q${cpaX} ${cpaY-18} ${t1.x} ${t1.y}" fill="none" stroke="#ffcc66" stroke-width="1.6" stroke-dasharray="5,4"/>
+    <circle cx="${cpaX}" cy="${cpaY-10}" r="4" fill="#ffcc66"/>
+    <text x="${cpaX+8}" y="${cpaY-12}" fill="#fff4bf" font-size="6.5" font-family="monospace">CPA 0.8 NM / TCPA 12</text>` : '';
+  const guard = st.guard ? `
+    <circle cx="${own.x}" cy="${own.y}" r="52" fill="rgba(201,48,48,.08)" stroke="#ff8d8d" stroke-width="1.3" stroke-dasharray="6,4"/>
+    <text x="${own.x-48}" y="${own.y+62}" fill="#ffb0b0" font-size="6.5" font-family="monospace">GUARD ZONE ARMED</text>` : '';
+  const ebl = st.ebl ? `
+    <path d="M${own.x} ${own.y} L${own.x+118} ${own.y-76}" stroke="#cfeaff" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <circle cx="${own.x}" cy="${own.y}" r="28" fill="none" stroke="#cfeaff" stroke-width=".9" opacity=".65"/>
+    <text x="${own.x+74}" y="${own.y-70}" fill="#dcefff" font-size="6.3" font-family="monospace">EBL/VRM 085° 4.0NM</text>` : '';
+  const trial = st.trial ? `
+    <path d="M${own.x} ${own.y} C${own.x+38} ${own.y-34} ${own.x+82} ${own.y-30} ${own.x+126} ${own.y-18}" fill="none" stroke="#d4a017" stroke-width="2" stroke-dasharray="8,4"/>
+    <text x="${own.x+42}" y="${own.y-40}" fill="#ffd783" font-size="6.4" font-family="monospace">TRIAL +20° CPA 1.7</text>` : '';
+  return `<g class="device-chart-overlay">
+    <rect x="268" y="226" width="158" height="21" rx="5" fill="rgba(5,16,28,.92)" stroke="#7fc3ff" stroke-width=".8"/>
+    <text x="276" y="239" fill="#cfeaff" font-size="6.7" font-family="monospace">RADAR / AIS OVERLAY · ${phoneSafe(st.source || 'DEVICE')}</text>
+    <circle cx="${own.x}" cy="${own.y}" r="5.5" fill="#ffd45a" stroke="#111827" stroke-width="1.2"/>
+    <text x="${own.x+8}" y="${own.y+4}" fill="#fff4bf" font-size="6.3" font-family="monospace">OWN SHIP</text>
+    ${arpa}${ais}${cpa}${guard}${ebl}${trial}
+  </g>`;
+}
 
 function getPortChartTypeLabel(kind){
   return kind==='port' ? 'liman chart' : kind==='route' ? 'ticaret rotasi charti' : 'gecit chart';
@@ -13051,6 +13097,7 @@ function buildOceanRouteChartSvg(port, profile){
   <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
   <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
   ${buildActiveVoyageChartOverlay(port.name)}
+  ${buildDeviceChartOverlay(port.name)}
   `;
 }
 
@@ -13509,6 +13556,7 @@ function buildPortChartSvg(port){
   <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
   <g class="ecdis-close ecdis-minor">${visibleMicroNoteOverlay}</g>
   ${buildActiveVoyageChartOverlay(port.name)}
+  ${buildDeviceChartOverlay(port.name)}
   </g>
   `;
 }
@@ -16324,6 +16372,37 @@ function renderDevicePracticeTask(def){
     <div class="device-task-path">${done?'Pratik tamamlandi. Istersen sifirlayip tekrar dene.':'Siradaki adim: '+expected}</div>
     <button class="device-mini-btn" onclick="resetDevicePractice()">Pratigi sifirla</button>`;
 }
+function updateDeviceChartOverlay(def, label, ok=false){
+  if(!def || !['radar','ais','ecdis'].includes(def.key)) return;
+  const l = String(label || '').toUpperCase();
+  const next = {...deviceChartOverlayState, updatedAt:Date.now(), source:def.name};
+  if(def.key === 'radar'){
+    next.radar = true;
+    if(/ARPA ACQUIRE/.test(l)) next.arpa = true;
+    if(/CPA|TCPA/.test(l)) next.cpa = true;
+    if(/GUARD ZONE/.test(l)) next.guard = true;
+    if(/EBL|VRM/.test(l)) next.ebl = true;
+    if(/TRIAL/.test(l)) next.trial = true;
+    if(/RANGE|GAIN|CLUTTER/.test(l)) next.radar = true;
+  }
+  if(def.key === 'ais'){
+    next.ais = true;
+    if(/CPA SORT|TARGET DETAIL|SENSOR CHECK/.test(l)) next.cpa = true;
+  }
+  if(def.key === 'ecdis'){
+    if(/ROUTE CHECK|ALARM LIST|SENSOR STATUS/.test(l)) next.radar = next.radar || deviceChartOverlayState.radar;
+  }
+  deviceChartOverlayState = next;
+  const chart = getVoyageWaypoint()?.chart || selectedPortChart;
+  if(chart) selectedPortChart = chart;
+  mapView = 'library';
+  if(ok || /ARPA ACQUIRE|CPA|GUARD ZONE|EBL|VRM|CPA SORT|TARGET DETAIL/.test(l)){
+    addLiveLogbook('RADAR / CHART OVERLAY', `${def.name}: ${label} harita uzerine isaretlendi.`, true);
+    showNotif('MAP','Harita Overlay',`${label} chart ustunde gorunuyor.`);
+    document.getElementById('map-panel')?.classList.add('show');
+  }
+  if(document.getElementById('map-panel')?.classList.contains('show')) renderMap();
+}
 function useDeviceKey(label, type='action', target=''){
   const def = getDeviceDef(activeDeviceKey);
   if(type === 'back'){
@@ -16343,6 +16422,7 @@ function useDeviceKey(label, type='action', target=''){
   devicePracticeScore.total++;
   if(label === expected){
     devicePracticeScore.ok++;
+    updateDeviceChartOverlay(def, label, true);
     if(practice){
       const next = (devicePracticeProgress[def.key] || 0) + 1;
       devicePracticeProgress[def.key] = next;
@@ -16357,6 +16437,7 @@ function useDeviceKey(label, type='action', target=''){
       addJournalEntry(`[CIHAZ] ${def.name}: ${getDeviceBreadcrumb(def)} > ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
     }
   }else{
+    updateDeviceChartOverlay(def, label, false);
     deviceLogLine = `YANLIS SIRA / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Beklenen adim: ${expected}.`;
   }
   renderDevices();
