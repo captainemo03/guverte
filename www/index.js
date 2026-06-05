@@ -8015,8 +8015,7 @@ function buildTransparentSheet(src){
 
 function getPortraitSheetUrl(src){
   if(!src) return '';
-  buildTransparentSheet(src);
-  return TRANSPARENT_SHEET_CACHE[src] || `${src}?v=1`;
+  return `${src}?v=raw2`;
 }
 
 function getPlayerModelPool(base, age=playerAppearance.age){
@@ -8421,11 +8420,11 @@ function renderSpeechPortrait(cfg){
   const slot = document.getElementById('speechchar');
   if(slot){
     const safeCfg = cfg || getPlayerPortraitConfig();
-    slot.innerHTML = `<span class="speech-portrait-fallback">${renderPortraitSprite(safeCfg, 'speaker')}</span>`;
+    slot.innerHTML = renderPortraitSprite(safeCfg, 'story');
   }
   const playerStand = document.getElementById('playerstandchar');
   if(playerStand){
-    playerStand.innerHTML = `<span class="speech-portrait-fallback player">${renderPortraitSprite(getPlayerPortraitConfig(), 'speaker')}</span>`;
+    playerStand.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'story');
   }
 }
 
