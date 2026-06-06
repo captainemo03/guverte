@@ -8050,23 +8050,28 @@ function getSceneOverlay(gfx,sc){
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
+  parts.push('<div class="live-watch-silhouette"></div><div class="live-status-strip"><span></span><span></span><span></span></div>');
+  if(!/engine|makine|galley|asci|aşçı|kamara|cabin/.test(blob)){
+    parts.push('<div class="live-passing-light l1"></div><div class="live-passing-light l2"></div>');
+  }
   if(/radar|bridge|kopruustu|köprüüstü|ecdis|ais|arpa/.test(blob)){
     parts.push('<div class="live-radar-screen"><i></i><b class="r1"></b><b class="r2"></b><b class="r3"></b></div>');
     parts.push('<div class="live-ecdis-screen"><span class="route"></span><span class="wp w1"></span><span class="wp w2"></span><span class="wp w3"></span><span class="ship"></span></div>');
     parts.push('<div class="live-ais-target t1"></div><div class="live-ais-target t2"></div><div class="live-ais-target t3"></div>');
+    parts.push('<div class="live-bridge-alarm-row"><i></i><i></i><i></i><i></i></div>');
   }
   if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik|pilot exchange|vts/.test(blob)){
     parts.push('<div class="live-vhf-panel"><span></span><span></span><span></span></div>');
     parts.push('<div class="live-radio-lines"><b>MAYDAY / PAN-PAN</b><span></span><span></span><span></span></div>');
   }
   if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)){
-    parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div><div class="live-forklift"></div><div class="live-tug-light"></div>');
+    parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div><div class="live-forklift"></div><div class="live-tug-light"></div><div class="live-container-lift"></div><div class="live-berth-beacon"></div>');
   }
   if(/mooring|halat|snap-back|snap back|all fast|fore spring|aft spring|breast line/.test(blob)){
     parts.push('<div class="live-mooring-line"></div><div class="live-snapback-zone">SNAP-BACK</div>');
   }
   if(/storm|firtina|swell|rain|yagmur|yağmur|salt|spray|sis|fog|mist/.test(blob)){
-    parts.push('<div class="live-rain-glass"></div><div class="live-lightning"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div>');
+    parts.push('<div class="live-rain-glass"></div><div class="live-lightning"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div><div class="live-spray-burst"></div>');
   }
   if(/sis|fog|mist|restricted visibility|gorus kisitli|görüş kısıtlı/.test(blob)){
     parts.push('<div class="live-fog-bank f1"></div><div class="live-fog-bank f2"></div>');
@@ -13191,6 +13196,13 @@ function getPortChartTaskGeometry(port){
   return {region,hay,coastLeft,southFacing,berthX,channelStartX,channelEndX,channelY,turningBasinX,profile};
 }
 
+function isMapTaskAllowedForPort(task, port){
+  if(!task || !port) return false;
+  return port.kind === 'port'
+    || (task.chartKind === 'route' && port.kind === 'route')
+    || (task.chartKind === 'transit' && port.kind !== 'port');
+}
+
 function getCurrentMapTask(){
   return MAP_TASKS[activeMapTaskIndex % MAP_TASKS.length];
 }
@@ -13213,14 +13225,48 @@ function nextMapTask(){
 
 function getMapTaskTarget(task, port){
   const geo = getPortChartTaskGeometry(port);
-  if(task.id === 'reporting') return {x: 222, y: 96, tol: 34};
-  if(task.id === 'noanchoring') return {x: 300, y: 164, tol: 32};
-  if(task.id === 'alternateroute') return {x: 256, y: 72, tol: 42};
-  if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 20};
-  if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 24};
-  if(task.id === 'tss') return {x: geo.channelStartX + 56, y: geo.channelY - 24, tol: 28};
-  if(task.id === 'berth') return {x: geo.turningBasinX, y: geo.channelY, tol: 22};
-  return {x: geo.channelEndX, y: geo.channelY, tol: 20};
+  if(task.id === 'reporting') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 36, label:'REPORTING / VTS'};
+  if(task.id === 'noanchoring') return {x: geo.coastLeft ? 282 : 158, y: geo.southFacing ? 196 : 194, tol: 38, label:'NO ANCHORING'};
+  if(task.id === 'alternateroute') return {x: 256, y: 158, tol: 48, label:'ALTERNATE ROUTE'};
+  if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 38, label:'PILOT BOARDING'};
+  if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 36, label:'ANCHORAGE'};
+  if(task.id === 'tss') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 40, label:'TSS / TRAFFIC FLOW'};
+  if(task.id === 'berth') return {x: geo.turningBasinX, y: geo.channelY, tol: 34, label:'TURN / BERTH APPROACH'};
+  return {x: geo.channelEndX, y: geo.channelY, tol: 28, label:'TARGET'};
+}
+
+function getSvgClickPoint(svg, ev){
+  if(svg?.createSVGPoint && svg.getScreenCTM()){
+    const pt = svg.createSVGPoint();
+    pt.x = ev.clientX;
+    pt.y = ev.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  const rect = svg.getBoundingClientRect();
+  const vb = svg.viewBox.baseVal;
+  return {
+    x: vb.x + ((ev.clientX - rect.left) / rect.width) * vb.width,
+    y: vb.y + ((ev.clientY - rect.top) / rect.height) * vb.height
+  };
+}
+
+function buildMapTaskTargetOverlay(port){
+  const task = getCurrentMapTask();
+  if(!isMapTaskAllowedForPort(task, port)) return '';
+  const target = getMapTaskTarget(task, port);
+  const tx = Math.max(34, Math.min(406, target.x));
+  const ty = Math.max(34, Math.min(226, target.y));
+  const labelX = tx > 260 ? tx - 118 : tx + 18;
+  const labelY = ty < 52 ? ty + 32 : ty - 20;
+  const rayEndX = tx > 260 ? tx - 10 : tx + 10;
+  return `
+    <g class="map-task-target" data-task="${task.id}" data-x="${target.x}" data-y="${target.y}">
+      <circle cx="${tx}" cy="${ty}" r="${Math.min(34, target.tol)}" fill="rgba(255,212,90,.12)" stroke="#ffd45a" stroke-width="2" stroke-dasharray="7,4"/>
+      <circle cx="${tx}" cy="${ty}" r="6" fill="#ffd45a" stroke="#07131f" stroke-width="1.4"/>
+      <path d="M${labelX} ${labelY} H${rayEndX}" stroke="#ffd45a" stroke-width="1.3" stroke-dasharray="4,3"/>
+      <rect x="${labelX-6}" y="${labelY-15}" width="112" height="17" rx="5" fill="rgba(5,16,28,.92)" stroke="#ffd45a" stroke-width="1"/>
+      <text x="${labelX}" y="${labelY-4}" fill="#ffd45a" font-size="7.2" font-family="monospace">BURAYA TIKLA · ${target.label || task.title}</text>
+    </g>`;
 }
 
 function updateMapTaskBox(port){
@@ -13232,9 +13278,7 @@ function updateMapTaskBox(port){
   const btn = document.getElementById('port-task-next');
   if(!title || !desc || !status) return;
   const effectivePort = ROUTE_PORTS.find(p=>p.name===selectedPortChart) || port;
-  const taskAllowed = effectivePort?.kind === 'port'
-    || (task.chartKind === 'route' && effectivePort?.kind === 'route')
-    || (task.chartKind === 'transit' && effectivePort?.kind !== 'port');
+  const taskAllowed = isMapTaskAllowedForPort(task, effectivePort);
   if(!taskAllowed){
     title.textContent = `${effectivePort?.name || 'Chart'} · Stratejik Gecit`;
     desc.textContent = effectivePort?.kind === 'port'
@@ -13255,9 +13299,7 @@ function updateMapTaskBox(port){
 function handlePortChartTaskClick(svg, ev, port){
   const task = getCurrentMapTask();
   if(!task || !port) return;
-  const allowed = port.kind === 'port'
-    || (task.chartKind === 'route' && port.kind === 'route')
-    || (task.chartKind === 'transit' && port.kind !== 'port');
+  const allowed = isMapTaskAllowedForPort(task, port);
   if(!allowed){
     const status = document.getElementById('port-chart-taskstatus');
     if(status){
@@ -13270,11 +13312,9 @@ function handlePortChartTaskClick(svg, ev, port){
     portChartDidPan = false;
     return;
   }
-  const rect = svg.getBoundingClientRect();
-  const vb = svg.viewBox.baseVal;
-  const x = vb.x + ((ev.clientX - rect.left) / rect.width) * vb.width;
-  const y = vb.y + ((ev.clientY - rect.top) / rect.height) * vb.height;
+  const {x, y} = getSvgClickPoint(svg, ev);
   const target = getMapTaskTarget(task, port);
+  const status = document.getElementById('port-chart-taskstatus');
   if(task.id === 'alternateroute'){
     mapRouteDraftPoints.push({x:+x.toFixed(1), y:+y.toFixed(1)});
     renderMapRouteDraftOverlay(svg);
@@ -13292,7 +13332,6 @@ function handlePortChartTaskClick(svg, ev, port){
     return;
   }
   const dist = Math.hypot(x-target.x, y-target.y);
-  const status = document.getElementById('port-chart-taskstatus');
   if(dist <= target.tol){
     completedMapTasks.add(task.id);
     if(status){
@@ -13302,7 +13341,7 @@ function handlePortChartTaskClick(svg, ev, port){
     addJournalEntry(`[HARITA GOREVI] ${task.title} basariyla tamamlandi (${port.name}).`, 'Harita', '--:--');
   }else if(status){
     status.className = 'bad';
-    status.textContent = 'Bu nokta zayif kaldi. Harita isaretlerini yeniden okuyup bir daha dene.';
+    status.textContent = `Hedef bu degil. Sari halka icindeki "${target.label || task.title}" isaretine tikla.`;
   }
 }
 
@@ -13736,6 +13775,7 @@ function buildOceanRouteChartSvg(port, profile){
   <text x="252" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
   <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
   <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
+  ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
   `;
@@ -14195,6 +14235,7 @@ function buildPortChartSvg(port){
   <g class="ecdis-close">${visibleSpecialInset}</g>
   <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
   <g class="ecdis-close ecdis-minor">${visibleMicroNoteOverlay}</g>
+  ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
   </g>
@@ -14268,6 +14309,32 @@ function renderMapLibrary(){
       <div class="chart-meta-value">${profile.notes}<br>${activeCharts.has(active.name)?`AKTIF SEFER DOSYASI: ${activeRoute.name} icin gerekli chart.`:'Arsiv chart; sefer rota dosyasina dahil degil.'}</div>
     </div>`;
   updateMapTaskBox(active);
+}
+
+function getWorldMapPoint(p, i=0, total=1){
+  const x = Math.max(8, Math.min(432, Number(p?.x || 0)));
+  const rawY = Math.max(10, Math.min(250, Number(p?.y || 0)));
+  const t = total > 1 ? i / (total - 1) : .5;
+  const routeBias = 126 + Math.sin(t * Math.PI * 1.12) * 18 + Math.sin((x / 440) * Math.PI * 2) * 6;
+  const isRoutePoint = p && (p.chart || p.risk || p.note || p.name?.startsWith?.('WP'));
+  const y = isRoutePoint ? Math.max(76, Math.min(176, rawY * .28 + routeBias * .72)) : rawY;
+  return {x:+x.toFixed(1), y:+y.toFixed(1)};
+}
+
+function handleWorldMapClick(svg, ev){
+  const pos = getSvgClickPoint(svg, ev);
+  let best = null;
+  ROUTE_PORTS.forEach((p)=>{
+    const wp = getWorldMapPoint(p);
+    const d = Math.hypot(pos.x - wp.x, pos.y - wp.y);
+    if(!best || d < best.d) best = {port:p, d};
+  });
+  if(!best || best.d > 22) return;
+  selectedPortChart = best.port.name;
+  visitedPorts.add(best.port.name);
+  mapView = 'library';
+  showNotif('HARITA', 'Chart acildi', `${best.port.name} chart dosyasi yuklendi.`);
+  renderMap();
 }
 
 function updateShipPosition(sceneLoc){
@@ -14379,10 +14446,11 @@ function renderMap(){
 
   const activeRoute = getActiveVoyageRoute();
   if(activeRoute?.waypoints?.length){
-    const pts = activeRoute.waypoints.map(w=>`${w.x*4.4},${w.y*2.6}`).join(' ');
+    const routePoints = activeRoute.waypoints.map((w,i)=>getWorldMapPoint(w, i, activeRoute.waypoints.length));
+    const pts = routePoints.map(w=>`${w.x},${w.y}`).join(' ');
     s+=`<polyline points="${pts}" fill="none" stroke="#d4a017" stroke-width="2.3" stroke-dasharray="9 5" opacity=".72"/>`;
     activeRoute.waypoints.forEach((w,i)=>{
-      const wx=w.x*4.4, wy=w.y*2.6;
+      const {x:wx, y:wy} = routePoints[i];
       const done = i <= activeVoyageProgress;
       s+=`<circle cx="${wx}" cy="${wy}" r="${done?5:3.2}" fill="${done?'#d4a017':'#0b304f'}" stroke="#ffd783" stroke-width="${done?1.4:.8}" opacity="${done?1:.82}"/>`;
       if(i===activeVoyageProgress || i===0 || i===activeRoute.waypoints.length-1){
@@ -14394,7 +14462,9 @@ function renderMap(){
     const cur = activeRoute.waypoints[curIdx];
     const nxt = activeRoute.waypoints[Math.min(activeRoute.waypoints.length-1, curIdx+1)];
     if(cur && nxt && cur !== nxt){
-      const cx1 = cur.x*4.4, cy1 = cur.y*2.6, cx2 = nxt.x*4.4, cy2 = nxt.y*2.6;
+      const p1 = routePoints[curIdx];
+      const p2 = routePoints[Math.min(activeRoute.waypoints.length-1, curIdx+1)];
+      const cx1 = p1.x, cy1 = p1.y, cx2 = p2.x, cy2 = p2.y;
       s+=`<path d="M${cx1} ${cy1} L${cx2} ${cy2}" stroke="#ffd45a" stroke-width="3" opacity=".34"/>
         <circle r="6" fill="#ffd45a" stroke="#102033" stroke-width="1.4">
           <animate attributeName="cx" values="${cx1};${cx2};${cx1}" dur="8s" repeatCount="indefinite"/>
@@ -14409,9 +14479,10 @@ function renderMap(){
 
   // Route line
   if(routeHistory.length > 1){
-    let d = `M${routeHistory[0].x*4.4} ${routeHistory[0].y*2.6}`;
+    const historyPoints = routeHistory.map((p,i)=>getWorldMapPoint(p, i, routeHistory.length));
+    let d = `M${historyPoints[0].x} ${historyPoints[0].y}`;
     for(let i=1;i<routeHistory.length;i++){
-      d += ` L${routeHistory[i].x*4.4} ${routeHistory[i].y*2.6}`;
+      d += ` L${historyPoints[i].x} ${historyPoints[i].y}`;
     }
     s+=`<path d="${d}" fill="none" stroke="#2e6bbf" stroke-width="1.5" stroke-dasharray="5,3" opacity=".7"/>`;
   }
@@ -14426,7 +14497,7 @@ function renderMap(){
 
   // Ports
   ROUTE_PORTS.forEach(p => {
-    const px = p.x*4.4, py = p.y*2.6;
+    const {x:px, y:py} = getWorldMapPoint(p);
     const visited = visitedPorts.has(p.name);
     const nearby = distToShip(p) < 28;
     const important = labelWhitelist.has(p.name);
@@ -14450,7 +14521,8 @@ function renderMap(){
   });
 
   // Ship position
-  const sx = shipPosition.x*4.4, sy = shipPosition.y*2.6;
+  const shipMapPoint = getWorldMapPoint(shipPosition);
+  const sx = shipMapPoint.x, sy = shipMapPoint.y;
   s+=`<circle cx="${sx}" cy="${sy}" r="5" fill="#d4a017"/>`;
   s+=`<path d="M${sx-4} ${sy} L${sx} ${sy-8} L${sx+4} ${sy} Z" fill="#d4a017"/>`;
   s+=`<circle cx="${sx}" cy="${sy}" r="10" fill="none" stroke="#d4a017" stroke-width="1" opacity=".5" class="blink"/>`;
@@ -14463,6 +14535,7 @@ function renderMap(){
   s+=`</g>`;
 
   svg.innerHTML = s;
+  svg.onclick = (ev)=>handleWorldMapClick(svg, ev);
   legend.textContent = `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
 }
 
