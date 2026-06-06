@@ -530,7 +530,24 @@ const STYPES=[
   {key:"roro",  ico:"🚗",nm:"Ro-Ro",      ds:"Araç rampalı",ton:"12.000 GT", spd:"18 kn",kontracts:[{ay:3,izin:1,ucret:"Orta"},{ay:5,izin:1,ucret:"Orta+"}]},
   {key:"bulk",  ico:"⛏️",nm:"Bulk",        ds:"Maden/tahıl", ton:"55.000 DWT",spd:"13 kn",kontracts:[{ay:6,izin:2,ucret:"Orta"},{ay:9,izin:2,ucret:"Orta+"}]},
   {key:"lng",   ico:"🔵",nm:"LNG",         ds:"Sıvı gaz",    ton:"75.000 m³", spd:"19 kn",kontracts:[{ay:4,izin:1,ucret:"Çok Yüksek"},{ay:6,izin:2,ucret:"Maksimum"}]},
+  {key:"proje", ico:"🏗",nm:"Proje Gemisi",ds:"Ağır yük",    ton:"18.500 DWT",spd:"12 kn",premium:true,kontracts:[{ay:4,izin:1,ucret:"Premium"},{ay:6,izin:2,ucret:"Premium+"}]},
+  {key:"kruvaziyer",ico:"🛳",nm:"Kruvaziyer",ds:"Yolcu/hotel",ton:"92.000 GT",spd:"21 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
 ];
+
+const PREMIUM_KEY = 'guverte-premium-v1';
+let premiumUnlocked = (()=>{try{return localStorage.getItem(PREMIUM_KEY)==='1';}catch(e){return false;}})();
+function isPremiumShipType(typeKey){
+  return !!STYPES.find(x=>x.key===typeKey && x.premium);
+}
+function canUseShipType(typeKey){
+  return !isPremiumShipType(typeKey) || premiumUnlocked;
+}
+function unlockPremiumPackage(){
+  premiumUnlocked = true;
+  try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
+  showNotif('🔓','Premium Aktif','Proje gemisi ve kruvaziyer paketleri acildi.');
+  buildIntro();
+}
 
 const SHIP_TON_PROFILES={
   kuru:{min:18000,max:32000,step:1000,unit:"DWT"},
@@ -539,6 +556,8 @@ const SHIP_TON_PROFILES={
   roro:{min:9000,max:18000,step:1000,unit:"GT"},
   bulk:{min:42000,max:82000,step:2000,unit:"DWT"},
   lng:{min:68000,max:174000,step:2000,unit:"m³"},
+  proje:{min:12000,max:32000,step:1000,unit:"DWT"},
+  kruvaziyer:{min:62000,max:145000,step:3000,unit:"GT"},
 };
 let CURRENT_SHIP_SPECS={};
 
@@ -570,6 +589,8 @@ const SNAMES={
   roro:["MV Ataşehir","MV Kadıköy","MV Üsküdar"],
   bulk:["M/V Trakya","M/V Anadolu","M/V Kayseri"],
   lng:["LNG Barbaros","LNG Fatih","LNG Yavuz"],
+  proje:["M/V Atlas Heavy Lift","M/V Anatolia Project","M/V Orion Carrier","M/V Marmara Modul","M/V Titan Trader"],
+  kruvaziyer:["M/V Ege Dream","M/V Meridian Star","M/V Blue Horizon","M/V Anatolian Pearl","M/V Aegean Palace"],
 };
 
 const ERA_TECH={
@@ -1398,6 +1419,109 @@ Duzeltilmis GM = GM - FSC / displacement. Gercek GM'yi bul; sonra bu gemi gece v
   ];
 }
 
+function buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec){
+  if(stype==='proje'){
+    return [
+      {id:"proje01",gfx:"cargo",alert:false,day:"Premium Gun 2",time:"07:20",loc:"Ağır Yük Güvertesi",sub:"Lift plan ve COG kontrolu",who:"z1",
+      text:`${sn} bu sefer iki adet rüzgar türbini nacelle'i taşıyor. Liman superintendent dosyayı masaya koydu.\n\n"Bu yük 184 ton. COG işareti manifestoda var ama sling açısı değişirse crane load da değişir. Planı imzalamadan önce neye bakarsın?"`,
+      choices:shuffleChoices([
+        {text:"COG, sling angle, crane SWL ve weather limit'i ayni dosyada dogrularim",tag:"kritik",effect:{bilgi:16,sayginlik:12,cesaret:3}},
+        {text:"Sadece yük ağırlığını kontrol eder, imzalarım",tag:"itaatkar",effect:{bilgi:4,sayginlik:-4}},
+        {text:"Operasyon gecikmesin diye rüzgar limitini sonra sorarim",tag:"korkak",effect:{bilgi:-8,sayginlik:-10}}
+      ])},
+      {id:"proje02",gfx:"harbor",alert:false,day:"Premium Gun 3",time:"11:05",loc:"Rıhtım - Heavy Lift Operasyonu",sub:"Tandem lift baskisi",who:"lostromo",
+      text:`İki mobil vinç aynı anda yük alacak. Liman telsizden acele ediyor.\n\nLostromo sana döndü: "Tandem lift'te herkes aynı komutu duymadan kanca kalkmaz. Sen telsiz zincirini izle."`,
+      choices:shuffleChoices([
+        {text:"Tek komut kaynagi, stop command ve exclusion zone'u netlestiririm",tag:"kritik",effect:{bilgi:14,sayginlik:10}},
+        {text:"Sadece izlerim, liman ekibi zaten biliyordur",tag:"itaatkar",effect:{sayginlik:2}},
+        {text:"Bir tayfayi yükün altindan gecirip hizlandiririm",tag:"korkak",effect:{sayginlik:-15,bilgi:-10,cesaret:-4}}
+      ])},
+      {id:"proje03",gfx:"storm",alert:true,day:"Premium Gun 5",time:"03:40",loc:"Açık Deniz",sub:"Sea fastening alarmı",who:"z2",
+      text:`Swell bordadan geliyor. Deck cargo üstündeki iki lash titreşimle gevşemiş gibi görünüyor.\n\n2. Zabit: "Bu yük kayarsa sadece yük değil, geminin stabilitesi de gider. Gece ne yapıyoruz?"`,
+      choices:shuffleChoices([
+        {text:"Hizi/rotayi duzeltip guverte emniyetiyle kontrollu yeniden sikma planlarim",tag:"kritik",effect:{bilgi:15,sayginlik:12,dinclik:-4}},
+        {text:"Hemen tek basima guverteye kosarim",tag:"cesur",effect:{cesaret:5,sayginlik:-6,dinclik:-8}},
+        {text:"Sabaha kadar bekleyelim, hava biraz duser",tag:"korkak",effect:{bilgi:-10,sayginlik:-12}}
+      ])},
+      {id:"proje04",gfx:"compass",alert:false,day:"Premium Gun 6",time:"15:10",loc:"Köprüüstü",sub:"Overdeck cargo route limit",who:"suvari",
+      text:`Yük güverteden yüksek. Rüzgar alanı arttı, lashing limitleri daha hassas.\n\nKaptan haritaya bakıyor: "Normal rota kısa. Ama yarın beam sea var. Overdeck cargo ile neyi değiştirirsin?"`,
+      choices:shuffleChoices([
+        {text:"Weather routing, heading/speed ve lashing inspection araligini birlikte ayarlarim",tag:"kritik",effect:{bilgi:16,sayginlik:11}},
+        {text:"ETA icin en kisa rotada kalirim",tag:"cesur",effect:{cesaret:4,sayginlik:-7,bilgi:-5}},
+        {text:"Sadece kaptanin soyledigini beklerim",tag:"itaatkar",effect:{sayginlik:3}}
+      ])},
+      {id:"proje05",gfx:"cargo",alert:false,day:"Premium Gun 7",time:"09:30",loc:"Ballast Kontrol",sub:"Ağır yükte list düzeltme",who:"carkci",
+      text:`Nacelle iskele tarafa alındığında gemi yavaşça yatıyor. Çarkçıbaşı ballast panelini gösterdi.\n\n"Bu operasyon crane değil, stabilite işidir. Hangi sırayla ilerlersin?"`,
+      choices:shuffleChoices([
+        {text:"Lift adimina gore ballast planini, free surface riskini ve list limitini izlerim",tag:"kritik",effect:{bilgi:17,sayginlik:10}},
+        {text:"Tek tank doldurup hizlica duzeltirim",tag:"korkak",effect:{bilgi:-9,sayginlik:-8}},
+        {text:"Listeyi gorunce başmakinistin kararini beklerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:3}}
+      ])},
+      {id:"proje06",gfx:"harbor",alert:false,day:"Premium Gun 9",time:"18:15",loc:"Proje Terminali",sub:"Cargo damage protest",who:"z1",
+      text:`Yük tesliminde bir flange kapağında darbe izi görüldü. Terminal "gemiden önce vardı" diyor.\n\n1. Zabit sana fotoğraf ve mate's receipt dosyasını uzattı.`,
+      choices:shuffleChoices([
+        {text:"Foto, zaman, witness ve protest notunu ayni dosyada toplarim",tag:"kritik",effect:{bilgi:13,sayginlik:10}},
+        {text:"Terminalle tartisip hemen suclu ararim",tag:"cesur",effect:{cesaret:4,sayginlik:-6}},
+        {text:"Kucuk hasar diye kayda almam",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}
+      ])}
+    ];
+  }
+  if(stype==='kruvaziyer'){
+    return [
+      {id:"cruise01",gfx:"harbor",alert:false,day:"Premium Gun 1",time:"16:30",loc:"Cruise Terminal",sub:"Passenger embarkation pressure",who:"z1",
+      text:`${sn} yolcu alıyor. Gangway önünde kuyruk büyüdü, terminal ETA baskısı yapıyor.\n\n1. Zabit: "Bu gemide emniyet kadar kalabalık yönetimi de seyirdir. Ne kontrol edersin?"`,
+      choices:shuffleChoices([
+        {text:"Gangway emniyeti, sayim, security screening ve muster bilgisini birlikte takip ederim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Yolcular hizli binsin diye kontrolu gevsetirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-12}},
+        {text:"Sadece guverte ekibinin ritmini izlerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:3}}
+      ])},
+      {id:"cruise02",gfx:"bridge",alert:false,day:"Premium Gun 2",time:"09:00",loc:"Köprüüstü",sub:"Muster drill koordinasyonu",who:"suvari",
+      text:`Kaptan anons metnini kontrol ediyor.\n\n"Yolcu gemisinde drill bir formalite degil. Panik aninda herkes nereye gidecegini daha once duymus olmali. Stajyer, eksik kalirsa ilk ne bozulur?"`,
+      choices:shuffleChoices([
+        {text:"Muster station sayimi, lifejacket kontrolu ve crew role dagilimi bozulur",tag:"kritik",effect:{bilgi:16,sayginlik:11}},
+        {text:"Sadece anons gecikirse sorun olur",tag:"itaatkar",effect:{bilgi:5}},
+        {text:"Yolcular zaten tatilde, fazla uzatmayalim",tag:"korkak",effect:{sayginlik:-12,bilgi:-8}}
+      ])},
+      {id:"cruise03",gfx:"sea",alert:true,day:"Premium Gun 3",time:"22:18",loc:"Açık Deniz",sub:"Medical evacuation hazirligi",who:"z3",
+      text:`Revirden çağrı geldi. Bir yolcuda ciddi göğüs ağrısı var. MRCC helikopter opsiyonunu soruyor.\n\n3. Zabit: "Medical evacuation sadece revir işi değil. Köprüüstü ne hazırlar?"`,
+      choices:shuffleChoices([
+        {text:"Position, course/speed, lee side, helicopter area ve communication chain hazirlarim",tag:"kritik",effect:{bilgi:16,sayginlik:12,cesaret:4}},
+        {text:"Revir ilgilenir, köprü sadece bekler",tag:"korkak",effect:{bilgi:-9,sayginlik:-10}},
+        {text:"Yolcular duymasın diye hiçbir anons yapmam",tag:"itaatkar",effect:{sayginlik:-5,bilgi:-4}}
+      ])},
+      {id:"cruise04",gfx:"harbor",alert:false,day:"Premium Gun 4",time:"07:45",loc:"Tender Platform",sub:"Tender boat operasyonu",who:"lostromo",
+      text:`Liman rıhtım vermedi, yolcu tender ile karaya çıkacak. Swell kısa ama platform hareketli.\n\nLostromo: "Yolcu gemisinde küçük salınım bile kalabalıkta büyür. Sen nerede durursun?"`,
+      choices:shuffleChoices([
+        {text:"Boarding hattinda sayim, el yardimi, platform stop yetkisi ve hava limitini izlerim",tag:"kritik",effect:{bilgi:14,sayginlik:10}},
+        {text:"Foto ceken yolculari gormezden gelirim",tag:"itaatkar",effect:{sayginlik:-2}},
+        {text:"Tender hizlansin diye iki grup birden bindiririm",tag:"korkak",effect:{sayginlik:-13,bilgi:-9}}
+      ])},
+      {id:"cruise05",gfx:"galley",alert:false,day:"Premium Gun 5",time:"13:20",loc:"Hotel Galley",sub:"Norovirus supheli vaka",who:"asci",
+      text:`Aşçıbaşı bu kez neşeli değil. İki yolcuda mide şikayeti, housekeeping alarmda.\n\n"Bu gemide hijyen gecikirse tatil değil kriz olur. İlk zincir ne?"`,
+      choices:shuffleChoices([
+        {text:"Medical log, izolasyon, el hijyeni, food handling ve housekeeping zincirini baslatirim",tag:"kritik",effect:{bilgi:15,sayginlik:9}},
+        {text:"Yolcular moral bozmasin diye kayda gecirmem",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}},
+        {text:"Sadece mutfagi temizletirim",tag:"itaatkar",effect:{bilgi:4}}
+      ])},
+      {id:"cruise06",gfx:"engine",alert:true,day:"Premium Gun 6",time:"20:55",loc:"Makine Kontrol Odası",sub:"Hotel load / blackout riski",who:"carkci",
+      text:`Show saatinde hotel load yükseldi. Jeneratörlerden biri alarm verdi, ışıklar bir an kısıldı.\n\nÇarkçıbaşı: "Cruise gemisinde blackout sadece makine arızası değildir; panik ve yolcu güvenliği de var."`,
+      choices:shuffleChoices([
+        {text:"Standby generator, load shedding, köprü raporu ve passenger announcement zincirini izlerim",tag:"kritik",effect:{bilgi:16,sayginlik:11}},
+        {text:"Sadece makinenin toparlamasini beklerim",tag:"itaatkar",effect:{bilgi:3}},
+        {text:"Alarmi susturup yolcular fark etmesin isterim",tag:"korkak",effect:{bilgi:-10,sayginlik:-12}}
+      ])},
+      {id:"cruise07",gfx:"compass",alert:false,day:"Premium Gun 7",time:"05:50",loc:"Köprüüstü",sub:"Scenic passage ve rota disiplini",who:"z2",
+      text:`Sabah manzarası için kıyıya yakın scenic passage planlanmış. Yolcular güvertede, fotoğraf saatini bekliyor.\n\n2. Zabit: "Güzel manzara seyir limitlerini değiştirmez. Neyi kırmızı çizgi yaparsın?"`,
+      choices:shuffleChoices([
+        {text:"UKC, no-go area, CPA, speed limit ve VTS raporunu manzara baskisinin ustunde tutarim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Foto saati icin rotayi biraz daha kiyıya alirim",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}},
+        {text:"Sadece ECDIS alarm verirse geri donerim",tag:"itaatkar",effect:{bilgi:3}}
+      ])}
+    ];
+  }
+  return [];
+}
+
 // ===== 60 SENARYO HAVUZU =====
 function buildScenePool(n,sn,yr,stype,startPort=selectedStartPort,startScenario=selectedStartScenario){
   const era=ERA_TECH[yr]||ERA_TECH[2018];
@@ -1410,7 +1534,7 @@ function buildScenePool(n,sn,yr,stype,startPort=selectedStartPort,startScenario=
   // next:'end' → oyun biter
   // alert:true → ACİL banner + ses efekti
 
-  return [
+  const baseScenes = [
 // ---- GÜN 1 SAHNELERİ ----
 {id:"s01",gfx:"harbor",alert:false,day:"Gun 1",time:startScenario.time,loc:startPort.dock,sub:startSub,who:"anlatici",
 text:`${startPort.name}, ${yr} yili.\n\n${startScenario.intro}\n\nCantan sirtinda, staj belgelerin avucunda iskeleye geldin. Onunde ${sn} - ${shipSpec.tonLabel||st.ton} ${st.nm} gemisi.\n\n${startScenario.bridgeCall.replace('${n}',n)}`,
@@ -4136,6 +4260,7 @@ choices:[
 {text:"'Bu hayatı seçiyorum — her zorluğuyla'",tag:"cesur",effect:{cesaret:15,sayginlik:12},next:'end'},
 {text:"'Henüz tam emin değilim ama devam edeceğim'",tag:"itaatkar",effect:{sayginlik:8,bilgi:5},next:'end'}]},
   ];
+  return baseScenes.concat(buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec));
 }
 
 // ===== KONTRAT SİSTEMİ =====
@@ -4146,6 +4271,8 @@ const KONTRAT_DEFS={
   roro:[{ay:3,izin:1,ucret:"Orta",bonus:"Araç operasyon sertifikası"},{ay:5,izin:1,ucret:"Orta+",bonus:"Trim uzmanlığı"}],
   bulk:[{ay:6,izin:2,ucret:"Orta",bonus:"Dökme yük sertifikası"},{ay:9,izin:2,ucret:"Orta+",bonus:"Trim ve stabilite"}],
   lng:[{ay:4,izin:1,ucret:"Çok Yüksek",bonus:"IGF temel sertifikası"},{ay:6,izin:2,ucret:"Maksimum",bonus:"LNG uzman sertifikası"}],
+  proje:[{ay:4,izin:1,ucret:"Premium",bonus:"Heavy lift / sea fastening dosyasi"},{ay:6,izin:2,ucret:"Premium+",bonus:"Project cargo superintendent tecrubesi"}],
+  kruvaziyer:[{ay:3,izin:1,ucret:"Premium",bonus:"Passenger ship safety ve crowd management"},{ay:5,izin:1,ucret:"Premium+",bonus:"Cruise bridge / hotel ops tecrubesi"}],
 };
 
 // ===== OYUN DEĞİŞKENLERİ =====
@@ -8731,12 +8858,23 @@ function buildIntro(){
     const konts=KONTRAT_DEFS[t.key]||[];
     const kontStr=konts.map(k=>`${k.ay}+1`).join(' / ');
     const spec=getShipSpec(t.key);
+    const locked=t.premium && !premiumUnlocked;
     const d=document.createElement('div');
-    d.className='selb'+(t.key===selType?' active':'');
-    d.innerHTML=`<span class="sb-ico">${t.ico}</span><span class="sb-nm">${t.nm}</span><span class="sb-kont">${spec.tonLabel}<br>${kontStr} ay</span>`;
-    d.onclick=()=>{selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();};
+    d.className='selb'+(t.key===selType?' active':'')+(locked?' locked':'')+(t.premium?' premium':'');
+    d.innerHTML=`<span class="sb-ico">${locked?'🔒':t.ico}</span><span class="sb-nm">${t.nm}</span><span class="sb-kont">${spec.tonLabel}<br>${locked?'Premium Paket':kontStr+' ay'}</span>${t.premium?'<span class="premium-chip">PREMIUM</span>':''}`;
+    d.onclick=()=>{
+      if(locked){
+        showNotif('🔒','Premium Gerekli','Proje gemisi ve kruvaziyer paketleri premium icindedir.');
+        return;
+      }
+      selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();
+    };
     st.appendChild(d);
   });
+  const p=document.createElement('div');
+  p.className='premium-pack-card'+(premiumUnlocked?' active':'');
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Kilitli'}</b><span>Proje gemisi + kruvaziyer rotalari ve ozel senaryolar</span><button type="button" onclick="unlockPremiumPackage()">${premiumUnlocked?'Aktif':'Premiumu Ac'}</button>`;
+  st.appendChild(p);
   updateKontrat();
   updateSugs();
   renderCharacterCreator();
@@ -8746,6 +8884,10 @@ function updateKontrat(){
   const konts=KONTRAT_DEFS[selType]||[];
   const c=document.getElementById('kontratsel');
   c.innerHTML='';
+  if(isPremiumShipType(selType) && !premiumUnlocked){
+    c.innerHTML='<div class="kont-card locked">Premium paket olmadan bu kontrat acilmaz.</div>';
+    return;
+  }
   konts.forEach((k,i)=>{
     const d=document.createElement('div');
     d.className='kont-card'+(i===selKontrat?' active':'');
@@ -10555,6 +10697,18 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
     }
   }
 
+  const premiumPrefix = selType==='proje' ? 'proje' : selType==='kruvaziyer' ? 'cruise' : '';
+  if(premiumPrefix){
+    const premiumScenes = regular.filter(s=>String(s.id||'').startsWith(premiumPrefix) && !selectedRegular.some(x=>x.id===s.id));
+    const guaranteed = premiumScenes.sort(()=>Math.random()-0.5).slice(0, Math.min(5, premiumScenes.length));
+    if(guaranteed.length){
+      selectedRegular = [
+        ...guaranteed,
+        ...selectedRegular.filter(s=>!String(s.id||'').startsWith(premiumPrefix))
+      ];
+    }
+  }
+
   // Yazı yazmalı belge/form sahneleri oyunun başına çok yük bindirmesin.
   const regularInputScenes = selectedRegular.filter(s=>delayedInputSceneIds.has(s.id));
   const regularCoreScenes = selectedRegular.filter(s=>!delayedInputSceneIds.has(s.id));
@@ -11083,12 +11237,19 @@ function closeContractCareerBooks(){
 
 function buildShipOffers(){
   const basePay = careerState.salary || 1200;
-  return [
+  const offers = [
     {key:'same', label:'Ayni Gemide Kal', type:selType, ship:sn, pay:basePay, note:'Ekip hafizasi aynen korunur.'},
     {key:'container', label:'Konteyner Teklifi', type:'kont', ship:'M/V Atlas Express', pay:Math.round(basePay*1.08), note:'Bay-row-tier, reefer ve lashing agir basar.'},
     {key:'tanker', label:'Tanker Teklifi', type:'tanker', ship:'M/T Marmara Star', pay:Math.round(basePay*1.18), note:'Manifold, ESD, inert gas ve cargo watch agirlasir.'},
     {key:'lng', label:'LNG Teklifi', type:'lng', ship:'LNG Anatolia', pay:Math.round(basePay*1.28), note:'Reliquefaction, gas freeing ve compressor disiplini.'}
   ];
+  if(premiumUnlocked){
+    offers.push(
+      {key:'project', label:'Proje Gemisi Teklifi', type:'proje', ship:'M/V Atlas Heavy Lift', pay:Math.round(basePay*1.34), note:'Heavy lift, sea fastening ve COG disiplini.'},
+      {key:'cruise', label:'Kruvaziyer Teklifi', type:'kruvaziyer', ship:'M/V Ege Dream', pay:Math.round(basePay*1.26), note:'Passenger safety, hotel load ve crowd management.'}
+    );
+  }
+  return offers;
 }
 
 function takeShipOffer(key){ continueContractOnShip(key || 'same'); }
@@ -11309,6 +11470,10 @@ function continueContractOnShip(offerKey='same'){
   clearSceneChoiceTimer();
   const stObj=STYPES.find(x=>x.key===selType);
   const offer = (shipOffers.length?shipOffers:buildShipOffers()).find(o=>o.key===offerKey) || buildShipOffers()[0];
+  if(isPremiumShipType(offer.type) && !premiumUnlocked){
+    showNotif('🔒','Premium Gerekli','Bu gemi tipi premium pakete dahil.');
+    return;
+  }
   if(offer && offer.key !== 'same'){
     selType = offer.type || selType;
     sn = offer.ship || sn;
@@ -11356,6 +11521,10 @@ function continueContractOnShip(offerKey='same'){
 function beginGame(){
   const ni=document.getElementById('nameinp').value.trim();
   const si=document.getElementById('shipnameinp').value.trim();
+  if(isPremiumShipType(selType) && !premiumUnlocked){
+    showNotif('🔒','Premium Gerekli','Proje gemisi ve kruvaziyer ile baslamak icin premium paket gerekli.');
+    return;
+  }
   pn=ni||'Stajyer';
   sn=si||(SNAMES[selType]||['M/V Ege Meltem'])[0];
 
@@ -12195,6 +12364,84 @@ const TRADE_VOYAGE_ROUTES = [
       {name:'Traffic lane crossing', x:44, y:18, note:'Ferries, wind farms and CPA management', chart:'Kuzey Denizi - Baltik Feeder Hatti', risk:'Traffic'},
       {name:'Rotterdam LNG approach', x:25, y:18, note:'Pilot, tugs, terminal safety zone', chart:'Rotterdam', risk:'Pilotage / terminal'}
     ]
+  },
+  {
+    key:'project_europe_gulf_heavylift',
+    name:'Avrupa - Korfez Proje Yuk Hatti',
+    trade:'Proje yuk / heavy lift',
+    chart:'Avrupa - Korfez Proje Yuk Hatti',
+    start:'Rotterdam',
+    end:'Dubai',
+    distanceNm:6100,
+    etaDays:20,
+    charts:['Rotterdam','Dover TSS - English Channel','Cebelitarık','Suveys','Babulmendep','Fujairah','Dubai'],
+    waypoints:[
+      {name:'Maas heavy-lift departure', x:25, y:18, note:'Deck cargo survey, sea fastening certificate, pilot out', chart:'Rotterdam', risk:'Deck cargo / traffic'},
+      {name:'Dover wind gate', x:34, y:24, note:'Overdeck cargo windage, TSS CPA and lashing watch', chart:'Dover TSS - English Channel', risk:'Wind / TSS'},
+      {name:'Gibraltar heavy weather check', x:8, y:120, note:'Weather routing before Mediterranean leg', chart:'Cebelitarık', risk:'Weather routing'},
+      {name:'Suez canal convoy', x:245, y:212, note:'Air draft, pilot orders, deck clearance', chart:'Suveys', risk:'Canal / clearance'},
+      {name:'Bab el-Mandeb security watch', x:282, y:218, note:'Project cargo visible on deck, security reporting', chart:'Babulmendep', risk:'Security'},
+      {name:'Fujairah lashing inspection', x:356, y:196, note:'Anchorage roll, lash retension, bunker plan', chart:'Fujairah', risk:'Anchorage / lashing'},
+      {name:'Jebel Ali heavy-lift berth', x:336, y:218, note:'Lift plan, tandem crane, cargo damage protest readiness', chart:'Dubai', risk:'Heavy-lift berth'}
+    ]
+  },
+  {
+    key:'project_asia_australia_modules',
+    name:'Asya - Avustralya Modul Proje Hatti',
+    trade:'Proje yuk / modul tasima',
+    chart:'Asya - Avustralya Modul Proje Hatti',
+    start:'Şanghay',
+    end:'Sydney',
+    distanceNm:4300,
+    etaDays:15,
+    charts:['Şanghay','Tayvan Bogazi','Guney Cin Denizi Ana Konteyner Hatti','Lombok Bogazi','Torres Bogazi','Sydney'],
+    waypoints:[
+      {name:'Shanghai module loadout', x:392, y:78, note:'COG marks, cargo survey, river pilot', chart:'Şanghay', risk:'River / heavy cargo'},
+      {name:'Taiwan Strait weather lane', x:386, y:116, note:'Fishing traffic, beam wind on high deck cargo', chart:'Tayvan Bogazi', risk:'Traffic / windage'},
+      {name:'South China Sea monsoon gate', x:382, y:130, note:'Squall line, speed reduction, lashing rounds', chart:'Guney Cin Denizi Ana Konteyner Hatti', risk:'Squall'},
+      {name:'Lombok deep water passage', x:360, y:194, note:'Deep draft route and swell angle', chart:'Lombok Bogazi', risk:'Swell / current'},
+      {name:'Torres pilotage', x:396, y:210, note:'Reef pilotage, UKC, no-go areas', chart:'Torres Bogazi', risk:'Reef / UKC'},
+      {name:'Sydney project discharge', x:420, y:232, note:'Port captain, tandem lift, damage survey', chart:'Sydney', risk:'Heavy-lift discharge'}
+    ]
+  },
+  {
+    key:'cruise_med_loop',
+    name:'Batı - Doğu Akdeniz Kruvaziyer Devresi',
+    trade:'Kruvaziyer / passenger',
+    chart:'Akdeniz Kruvaziyer Devresi',
+    start:'Marsilya',
+    end:'İstanbul',
+    distanceNm:1850,
+    etaDays:7,
+    charts:['Marsilya','Cenova','Napoli','Pire','Limasol','İstanbul Bogazi','İstanbul'],
+    waypoints:[
+      {name:'Marseille passenger embarkation', x:40, y:92, note:'Passenger count, security screening, gangway safety', chart:'Marsilya', risk:'Embarkation'},
+      {name:'Genoa scenic departure', x:60, y:80, note:'Harbor traffic, pilot out, hotel load', chart:'Cenova', risk:'Pilotage / hotel load'},
+      {name:'Naples turnaround', x:88, y:120, note:'Shore excursion return pressure and gangway crowd', chart:'Napoli', risk:'Crowd management'},
+      {name:'Piraeus tender plan', x:120, y:160, note:'Tender operation, swell and passenger safety', chart:'Pire', risk:'Tender / swell'},
+      {name:'Limassol medical diversion option', x:176, y:172, note:'Medical evacuation and MRCC communication', chart:'Limasol', risk:'Medical / comms'},
+      {name:'Bosphorus scenic transit', x:178, y:84, note:'VTS, current, passenger deck control', chart:'İstanbul Bogazi', risk:'VTS / scenic pressure'},
+      {name:'Istanbul cruise terminal', x:180, y:85, note:'All fast, immigration, passenger disembarkation', chart:'İstanbul', risk:'Terminal ops'}
+    ]
+  },
+  {
+    key:'cruise_asia_island_hop',
+    name:'Singapur - Japonya Kruvaziyer Hatti',
+    trade:'Kruvaziyer / Asya passenger',
+    chart:'Singapur - Japonya Kruvaziyer Hatti',
+    start:'Singapur',
+    end:'Yokohama',
+    distanceNm:3300,
+    etaDays:10,
+    charts:['Singapur','Malakka Bogazi','Hong Kong','Kaohsiung','Busan','Yokohama'],
+    waypoints:[
+      {name:'Singapore cruise terminal', x:350, y:166, note:'Passenger embarkation, VTIS report, pilotage', chart:'Singapur', risk:'Traffic / embarkation'},
+      {name:'Malacca night transit', x:344, y:162, note:'Dense traffic, passenger comfort and CPA watch', chart:'Malakka Bogazi', risk:'TSS / fatigue'},
+      {name:'Hong Kong port call', x:384, y:126, note:'Shore excursion, gangway crowd and immigration timing', chart:'Hong Kong', risk:'Port call pressure'},
+      {name:'Kaohsiung weather gate', x:388, y:108, note:'Typhoon advisory, hotel load and route change', chart:'Kaohsiung', risk:'Weather'},
+      {name:'Busan pilot / VTS', x:404, y:76, note:'Coastal traffic, VTS and passenger announcement', chart:'Busan', risk:'Pilotage'},
+      {name:'Yokohama arrival', x:414, y:86, note:'All fast, customs, disembarkation and next cruise prep', chart:'Yokohama', risk:'Turnaround'}
+    ]
   }
 ];
 const SAVE_KEY = 'guverte-save-v1';
@@ -12217,6 +12464,7 @@ function buildSavePayload(){
   return {
     version:1,
     savedAt:new Date().toISOString(),
+    premiumUnlocked,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
     currentIdx,
@@ -12312,6 +12560,7 @@ function deleteSavedGame(showToast=true){
 function applyLoadedGameState(data){
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
+  premiumUnlocked = !!data.premiumUnlocked || premiumUnlocked;
   selYear = data.selYear || 2018;
   selType = data.selType || 'kuru';
   selKontrat = Number.isFinite(data.selKontrat) ? data.selKontrat : 0;
@@ -16550,6 +16799,8 @@ function selectVoyageRouteForShipType(type=selType){
   else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil|australia|indonesia|us_gulf|bulk|komur|cevheri|tahil/.test(`${r.key} ${r.trade}`));
   else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific|north_atlantic|panama_far_east|feeder|konteyner/.test(`${r.key} ${r.trade}`));
   else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/roro|feeder|turkey_adriatic|blacksea|eu_far_east/.test(`${r.key} ${r.trade}`));
+  else if(/proje|project/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/project|proje|heavy|modul/.test(`${r.key} ${r.trade}`));
+  else if(/kruvaziyer|cruise/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/cruise|kruvaziyer|passenger/.test(`${r.key} ${r.trade}`));
   return candidates[Math.floor(Math.random()*candidates.length)] || TRADE_VOYAGE_ROUTES[0];
 }
 function findStartPortByName(name){

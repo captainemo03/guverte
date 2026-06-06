@@ -97,6 +97,15 @@ input[type=text]::placeholder{color:var(--text3);}
 .selb .sb-ico{font-size:16px;display:block;margin-bottom:2px;}
 .selb .sb-nm{font-size:10px;font-weight:600;line-height:1.2;display:block;}
 .selb .sb-kont{font-size:8px;opacity:.75;margin-top:2px;display:block;font-family:'Share Tech Mono',monospace;color:#5dbf8a;}
+.selb.locked{filter:saturate(.6);opacity:.72;border-color:rgba(212,160,23,.28);background:rgba(18,13,5,.78);}
+.selb.locked:hover{border-color:rgba(212,160,23,.55);background:rgba(45,30,8,.82);}
+.selb.premium{position:relative;overflow:hidden;}
+.premium-chip{position:absolute;top:4px;right:4px;border:1px solid rgba(232,184,75,.45);background:rgba(48,31,6,.92);color:#ffd985;border-radius:999px;padding:1px 4px;font-size:6px;font-family:'Share Tech Mono',monospace;letter-spacing:.5px;}
+.premium-pack-card{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:3px 8px;align-items:center;background:linear-gradient(135deg,rgba(47,31,7,.92),rgba(8,23,38,.9));border:1px solid rgba(232,184,75,.32);border-radius:8px;padding:8px 10px;color:#f2dc9c;}
+.premium-pack-card b{font-size:11px;}
+.premium-pack-card span{font-size:9px;color:var(--text3);}
+.premium-pack-card button{grid-row:1/3;grid-column:2;border:1px solid rgba(232,184,75,.44);border-radius:7px;background:rgba(8,20,32,.82);color:#ffe2a2;padding:7px 10px;font-size:10px;font-family:'Barlow',sans-serif;cursor:pointer;}
+.premium-pack-card.active{border-color:rgba(93,191,138,.48);background:linear-gradient(135deg,rgba(12,51,33,.92),rgba(8,23,38,.9));color:#b9ffd4;}
 
 /* === KONTRAT SEÇİMİ === */
 .kont-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0;width:100%;}
@@ -107,6 +116,7 @@ input[type=text]::placeholder{color:var(--text3);}
 .kont-card .kc-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
 .kont-card .kc-izin{font-size:9px;color:#5dbf8a;margin-top:3px;}
 .kont-card .kc-ucret{font-size:8px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace;}
+.kont-card.locked{grid-column:1/-1;cursor:default;color:#e0bc79;border-color:rgba(232,184,75,.32);background:rgba(32,22,8,.82);}
 
 /* === ÖNERİLEN GEMİ ADLARI === */
 .ssugs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
