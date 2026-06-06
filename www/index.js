@@ -8057,18 +8057,49 @@ function getLiveSceneOverlay(sc){
   }
   if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik|pilot exchange|vts/.test(blob)){
     parts.push('<div class="live-vhf-panel"><span></span><span></span><span></span></div>');
+    parts.push('<div class="live-radio-lines"><b>MAYDAY / PAN-PAN</b><span></span><span></span><span></span></div>');
   }
   if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)){
     parts.push('<div class="live-crane c1"></div><div class="live-crane c2"></div><div class="live-terminal-lights"></div><div class="live-forklift"></div><div class="live-tug-light"></div>');
   }
+  if(/mooring|halat|snap-back|snap back|all fast|fore spring|aft spring|breast line/.test(blob)){
+    parts.push('<div class="live-mooring-line"></div><div class="live-snapback-zone">SNAP-BACK</div>');
+  }
   if(/storm|firtina|swell|rain|yagmur|yağmur|salt|spray|sis|fog|mist/.test(blob)){
-    parts.push('<div class="live-rain-glass"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div>');
+    parts.push('<div class="live-rain-glass"></div><div class="live-lightning"></div><div class="live-water-streak s1"></div><div class="live-water-streak s2"></div><div class="live-water-streak s3"></div>');
   }
   if(/sis|fog|mist|restricted visibility|gorus kisitli|görüş kısıtlı/.test(blob)){
     parts.push('<div class="live-fog-bank f1"></div><div class="live-fog-bank f2"></div>');
   }
   if(/engine|makine|generator|compressor|pump|egzoz|exhaust/.test(blob)){
-    parts.push('<div class="live-engine-panel"><span></span><span></span><span></span><b></b></div><div class="live-steam s1"></div><div class="live-steam s2"></div><div class="live-sparks"></div>');
+    parts.push('<div class="live-engine-panel"><span></span><span></span><span></span><b></b></div><div class="live-voltage-panel"><i></i><i></i><strong>Hz</strong></div><div class="live-steam s1"></div><div class="live-steam s2"></div><div class="live-sparks"></div>');
+  }
+  if(/fire|yangin|yangın|smoke|duman|extinguisher|co2|galley girisi|fire alarm/.test(blob)){
+    parts.push('<div class="live-fire-panel"><b>FIRE ZONE</b><span></span><span></span><span></span></div><div class="live-smoke sm1"></div><div class="live-smoke sm2"></div><div class="live-extinguisher-choice">CO2 · FOAM · DCP</div>');
+  }
+  if(/mob|man overboard|adam denize|williamson|anderson|scharnow/.test(blob)){
+    parts.push('<div class="live-mob-button">MOB</div><div class="live-williamson-track"></div><div class="live-lifebuoy"></div>');
+  }
+  if(/pirate|korsan|citadel|bms|security level|hiz tekneleri|hız tekneleri/.test(blob)){
+    parts.push('<div class="live-fastboat b1"></div><div class="live-fastboat b2"></div><div class="live-security-level">SECURITY LEVEL 3</div><div class="live-citadel-lock">CITADEL LOCK</div>');
+  }
+  if(/medical evacuation|medevac|helikopter|helicopter|mrcc|revir|göğüs ağrısı|gogus agrisi/.test(blob)){
+    parts.push('<div class="live-helicopter"></div><div class="live-helo-pad">CLEAR DECK</div><div class="live-mrcc-chain"><span>MRCC</span><span>BRIDGE</span><span>MEDICAL</span></div>');
+  }
+  if(/platform|offshore|dp |dynamic positioning|thruster|500 m|safety zone|anchor handling|psv|ahts/.test(blob)){
+    parts.push('<div class="live-platform-zone"><span></span></div><div class="live-dp-offset"><b>DP OFFSET</b><i></i></div><div class="live-thruster-load"><span></span><span></span><span></span></div>');
+  }
+  if(/rov|ctd|survey|multibeam|tether|umbilical|deniz tabani|seabed/.test(blob)){
+    parts.push('<div class="live-rov-screen"><i></i><b></b><span></span></div><div class="live-tether-bar"><span></span></div>');
+  }
+  if(/ice|buz|icing|icebreaker|konvoy|convoy|polar/.test(blob)){
+    parts.push('<div class="live-ice-field"><span></span><span></span><span></span><b></b></div><div class="live-icebreaker-track"></div><div class="live-icing-warning">ICING</div>');
+  }
+  if(/cable|kablo|plough|lay corridor|subsea cable|tension spike|pipe|boru|stinger|pipe tension/.test(blob)){
+    parts.push('<div class="live-lay-line"></div><div class="live-tension-gauge"><b>TENSION</b><span></span></div><div class="live-xte-line">XTE</div>');
+  }
+  if(/fpso|shuttle|bow loading|offload|hawser|hose status|green line|tandem/.test(blob)){
+    parts.push('<div class="live-fpso"></div><div class="live-approach-zone"><span></span><span></span><span></span></div><div class="live-hawser"></div><div class="live-hose-status">HOSE READY</div>');
   }
   if(/galley|asci|aşçı|cay|çay|coffee|kahve|kamara|cabin|logbook|chart room|harita/.test(blob)){
     parts.push('<div class="live-coffee-cup"></div><div class="live-pencil"></div>');
@@ -11023,12 +11054,12 @@ const REALISTIC_BG = {
 
 function getSceneMotionClass(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  if(sc?.alert || /alarm|yangin|fire|mob|abandon|blackout|pirate|near-miss|ariza|man overboard/.test(hay)) return 'scene-motion-alert';
-  if(/storm|firtina|swell|rough|crosswind|squall/.test(hay)) return 'scene-motion-storm';
-  if(/bogaz|boğaz|canakkale|çanakkale|tss|dar kanal|dar gecit|sahil guvenlik|vhf/.test(hay)) return 'scene-motion-strait';
-  if(/engine|makine|carkci|exhaust|lo pressure|bilge|pump|generator|blackout/.test(hay)) return 'scene-motion-engine';
-  if(/harbor|liman|berth|terminal|rihtim|pilot|tug|all fast|gangway/.test(hay)) return 'scene-motion-harbor';
-  if(/bridge|radar|ecdis|ais|chart room|kopruustu|bogaz|tss|compass/.test(hay)) return 'scene-motion-bridge';
+  if(sc?.alert || /alarm|yangin|yangın|fire|mob|abandon|blackout|pirate|korsan|near-miss|ariza|arıza|man overboard|snap-back|distress|mayday|dp alarm|esd/.test(hay)) return 'scene-motion-alert';
+  if(/storm|firtina|fırtına|swell|rough|crosswind|squall|icing|ice|buz/.test(hay)) return 'scene-motion-storm';
+  if(/bogaz|boğaz|canakkale|çanakkale|tss|dar kanal|dar gecit|sahil guvenlik|vhf|vts|mrcc/.test(hay)) return 'scene-motion-strait';
+  if(/engine|makine|carkci|çarkçı|exhaust|lo pressure|bilge|pump|generator|blackout|compressor|thruster|dp |dynamic positioning/.test(hay)) return 'scene-motion-engine';
+  if(/harbor|liman|berth|terminal|rihtim|rıhtım|pilot|tug|römorkör|romorkor|all fast|gangway|platform|fpso/.test(hay)) return 'scene-motion-harbor';
+  if(/bridge|radar|ecdis|ais|chart room|kopruustu|köprüüstü|bogaz|tss|compass|survey|rov|cable|pipe/.test(hay)) return 'scene-motion-bridge';
   return '';
 }
 
@@ -11043,11 +11074,11 @@ function getSceneAmbientClass(sc){
 
 function getSceneDetailClass(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''}`.toLowerCase();
-  if(/radar|ais|ecdis|arpa/.test(hay)) return 'scene-detail-radar';
-  if(/engine|makine|generator|pump|compressor/.test(hay)) return 'scene-detail-engine';
-  if(/harbor|liman|terminal|tug|pilot|berth/.test(hay)) return 'scene-detail-harbor';
-  if(/güverte|guverte|mooring|halat|deck|lashing/.test(hay)) return 'scene-detail-deck';
-  if(/storm|firtina|squall|swell/.test(hay)) return 'scene-detail-stormglass';
+  if(/radar|ais|ecdis|arpa|rov|survey|dp|cable|pipe/.test(hay)) return 'scene-detail-radar';
+  if(/engine|makine|generator|pump|compressor|thruster|blackout/.test(hay)) return 'scene-detail-engine';
+  if(/harbor|liman|terminal|tug|pilot|berth|platform|fpso|gangway/.test(hay)) return 'scene-detail-harbor';
+  if(/güverte|guverte|mooring|halat|deck|lashing|snap-back|anchor handling|ctd/.test(hay)) return 'scene-detail-deck';
+  if(/storm|firtina|fırtına|squall|swell|ice|buz|icing/.test(hay)) return 'scene-detail-stormglass';
   return '';
 }
 
