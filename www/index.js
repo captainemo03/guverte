@@ -532,6 +532,7 @@ const STYPES=[
   {key:"lng",   ico:"🔵",nm:"LNG",         ds:"Sıvı gaz",    ton:"75.000 m³", spd:"19 kn",kontracts:[{ay:4,izin:1,ucret:"Çok Yüksek"},{ay:6,izin:2,ucret:"Maksimum"}]},
   {key:"proje", ico:"🏗",nm:"Proje Gemisi",ds:"Ağır yük",    ton:"18.500 DWT",spd:"12 kn",premium:true,kontracts:[{ay:4,izin:1,ucret:"Premium"},{ay:6,izin:2,ucret:"Premium+"}]},
   {key:"kruvaziyer",ico:"🛳",nm:"Kruvaziyer",ds:"Yolcu/hotel",ton:"92.000 GT",spd:"21 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
+  {key:"arastirma",ico:"🔬",nm:"Araştırma Gemisi",ds:"Survey/ROV",ton:"6.500 GT",spd:"13 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
 ];
 
 const PREMIUM_KEY = 'guverte-premium-v1';
@@ -543,7 +544,7 @@ function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
 function openPremiumPurchase(){
-  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca proje gemisi ve kruvaziyer burada acilacak.');
+  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca proje gemisi, kruvaziyer ve arastirma gemisi burada acilacak.');
 }
 function grantPremiumPackageFromPurchase(receipt=''){
   if(!receipt){
@@ -552,7 +553,7 @@ function grantPremiumPackageFromPurchase(receipt=''){
   }
   premiumUnlocked = true;
   try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
-  showNotif('🔓','Premium Aktif','Odeme onayi alindi. Proje gemisi ve kruvaziyer paketleri acildi.');
+  showNotif('🔓','Premium Aktif','Odeme onayi alindi. Proje gemisi, kruvaziyer ve arastirma gemisi paketleri acildi.');
   buildIntro();
   return true;
 }
@@ -566,6 +567,7 @@ const SHIP_TON_PROFILES={
   lng:{min:68000,max:174000,step:2000,unit:"m³"},
   proje:{min:12000,max:32000,step:1000,unit:"DWT"},
   kruvaziyer:{min:62000,max:145000,step:3000,unit:"GT"},
+  arastirma:{min:3200,max:11500,step:500,unit:"GT"},
 };
 let CURRENT_SHIP_SPECS={};
 
@@ -599,6 +601,7 @@ const SNAMES={
   lng:["LNG Barbaros","LNG Fatih","LNG Yavuz"],
   proje:["M/V Atlas Heavy Lift","M/V Anatolia Project","M/V Orion Carrier","M/V Marmara Modul","M/V Titan Trader"],
   kruvaziyer:["M/V Ege Dream","M/V Meridian Star","M/V Blue Horizon","M/V Anatolian Pearl","M/V Aegean Palace"],
+  arastirma:["R/V Piri Reis","R/V Horizon Surveyor","R/V Deep Blue Lab","R/V Anatolian Explorer","R/V Oceanus Quest"],
 };
 
 const ERA_TECH={
@@ -1524,6 +1527,52 @@ function buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec){
         {text:"UKC, no-go area, CPA, speed limit ve VTS raporunu manzara baskisinin ustunde tutarim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
         {text:"Foto saati icin rotayi biraz daha kiyıya alirim",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}},
         {text:"Sadece ECDIS alarm verirse geri donerim",tag:"itaatkar",effect:{bilgi:3}}
+      ])}
+    ];
+  }
+  if(stype==='arastirma'){
+    return [
+      {id:"research01",gfx:"compass",alert:false,day:"Premium Gun 1",time:"06:40",loc:"Köprüüstü",sub:"Survey line planlama",who:"z2",
+      text:`${sn} sabah survey sahasına yaklaşıyor. Bilim ekibi grid hatlarını hazırlamış, ama rüzgar ve akıntı hattı gemiyi yanlamasına sürüklüyor.\n\n2. Zabit: "Araştırma gemisinde rota sadece A'dan B'ye gitmek değil. Veri kalitesi de seyir disiplinine bağlı. İlk neyi kontrol edersin?"`,
+      choices:shuffleChoices([
+        {text:"Survey line, XTE limiti, akinti set/drift ve speed over ground hedefini birlikte kontrol ederim",tag:"kritik",effect:{bilgi:17,sayginlik:11}},
+        {text:"Bilim ekibinin çizdiği hatta aynen girerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:-3}},
+        {text:"ETA kacmasin diye survey hizini arttiririm",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}
+      ])},
+      {id:"research02",gfx:"sea",alert:false,day:"Premium Gun 2",time:"10:15",loc:"Arka Güverte",sub:"CTD rosette indirme",who:"lostromo",
+      text:`CTD rosette vinçten suya inecek. Bilim insanları numune saatini kaçırmak istemiyor.\n\nLostromo alçak sesle konuştu: "Deniz sakin gibi ama tel geriliminde hata affetmez. Stajyer, operasyon başlamadan neyi durdurursun?"`,
+      choices:shuffleChoices([
+        {text:"Snap-back alanı, vinç SWL, tag line, PPE ve köprü-güverte haberleşmesini netleştiririm",tag:"kritik",effect:{bilgi:15,sayginlik:12}},
+        {text:"Numune zamanı kaçmasın diye hemen indirtirim",tag:"cesur",effect:{cesaret:4,sayginlik:-8,bilgi:-6}},
+        {text:"Bilim ekibi alışkındır diye sadece uzaktan bakarım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-3}}
+      ])},
+      {id:"research03",gfx:"engine",alert:true,day:"Premium Gun 3",time:"01:20",loc:"DP / Thruster Paneli",sub:"Dynamic positioning kayması",who:"carkci",
+      text:`ROV suyun altında. Bir anda DP alarmı yandı: thruster load yükseliyor, gemi survey noktasından kaymaya başladı.\n\nÇarkçıbaşı telsizden bağırdı: "ROV kablosu geriliyor. Köprü ne yapacak?"`,
+      choices:shuffleChoices([
+        {text:"ROV recovery alarmı, DP limit, thruster durumu ve güvenli heading için zinciri başlatırım",tag:"kritik",effect:{bilgi:17,sayginlik:13,cesaret:4}},
+        {text:"Alarmı susturup DP'nin toparlamasını beklerim",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}},
+        {text:"Manuel dümenle hemen sert dönüş veririm",tag:"cesur",effect:{cesaret:5,sayginlik:-7,bilgi:-5}}
+      ])},
+      {id:"research04",gfx:"sea",alert:false,day:"Premium Gun 4",time:"14:30",loc:"ROV Kontrol Odası",sub:"Subsea hedef tanımlama",who:"z1",
+      text:`ROV ekranda deniz tabanında parlak bir cisim gösterdi. Bilim ekibi "numune alalım" diyor, güvenlik zabiti cismin eski mühimmat olabileceğini düşünüyor.\n\n1. Zabit: "Merak bilimdir, ama emniyet sınırı nerede?"`,
+      choices:shuffleChoices([
+        {text:"Temas etmeden işaretler, emniyet mesafesi koyar, otorite/şirket raporu açarım",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"ROV koluyla küçükçe dokundurup ne olduğuna bakarım",tag:"korkak",effect:{bilgi:-12,sayginlik:-14}},
+        {text:"Bilim ekibi isterse kararı onlara bırakırım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-5}}
+      ])},
+      {id:"research05",gfx:"bridge",alert:false,day:"Premium Gun 5",time:"18:00",loc:"Data Lab",sub:"Veri kalitesi ve log disiplini",who:"z2",
+      text:`Multibeam kayıtlarında bir boşluk var. Bilim ekibi bunu sonra yazılımla doldurabileceğini söylüyor.\n\n2. Zabit sana döndü: "Seyir hatası veri hatasına dönüşürse raporda nasıl durur?"`,
+      choices:shuffleChoices([
+        {text:"Zaman, pozisyon, cihaz durumu, hız ve hava notunu survey log'a net girerim",tag:"kritik",effect:{bilgi:15,sayginlik:10}},
+        {text:"Boşluğu saklarız, raporda belli olmaz",tag:"korkak",effect:{bilgi:-10,sayginlik:-12}},
+        {text:"Sadece ECDIS track'ini kaydederim",tag:"itaatkar",effect:{bilgi:5}}
+      ])},
+      {id:"research06",gfx:"storm",alert:true,day:"Premium Gun 6",time:"23:10",loc:"Açık Deniz",sub:"Weather window / ekipman toplama",who:"suvari",
+      text:`Barometre düşüyor. Deck'te towed sensor hâlâ suda; bilim ekibi son hattı bitirmek istiyor.\n\nKaptan: "Araştırma gemisinde en zor söz bazen 'yeter, ekipmanı topla' demektir. Senin önerin?"`,
+      choices:shuffleChoices([
+        {text:"Weather limit dolmadan recover emri, hız/heading ve güverte emniyetini öneririm",tag:"kritik",effect:{bilgi:16,sayginlik:13,cesaret:3}},
+        {text:"Bir hat daha atalım, sonra toplarız",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}},
+        {text:"Bilim ekibi karar versin, biz bekleyelim",tag:"itaatkar",effect:{sayginlik:-5,bilgi:-4}}
       ])}
     ];
   }
@@ -4281,6 +4330,7 @@ const KONTRAT_DEFS={
   lng:[{ay:4,izin:1,ucret:"Çok Yüksek",bonus:"IGF temel sertifikası"},{ay:6,izin:2,ucret:"Maksimum",bonus:"LNG uzman sertifikası"}],
   proje:[{ay:4,izin:1,ucret:"Premium",bonus:"Heavy lift / sea fastening dosyasi"},{ay:6,izin:2,ucret:"Premium+",bonus:"Project cargo superintendent tecrubesi"}],
   kruvaziyer:[{ay:3,izin:1,ucret:"Premium",bonus:"Passenger ship safety ve crowd management"},{ay:5,izin:1,ucret:"Premium+",bonus:"Cruise bridge / hotel ops tecrubesi"}],
+  arastirma:[{ay:3,izin:1,ucret:"Premium",bonus:"Survey / ROV operasyon dosyasi"},{ay:5,izin:1,ucret:"Premium+",bonus:"Hidrografi ve DP survey tecrubesi"}],
 };
 
 // ===== OYUN DEĞİŞKENLERİ =====
@@ -8872,7 +8922,7 @@ function buildIntro(){
     d.innerHTML=`<span class="sb-ico">${locked?'🔒':t.ico}</span><span class="sb-nm">${t.nm}</span><span class="sb-kont">${spec.tonLabel}<br>${locked?'Premium Paket':kontStr+' ay'}</span>${t.premium?'<span class="premium-chip">PREMIUM</span>':''}`;
     d.onclick=()=>{
       if(locked){
-        showNotif('🔒','Premium Gerekli','Proje gemisi ve kruvaziyer paketleri premium icindedir.');
+        showNotif('🔒','Premium Gerekli','Proje gemisi, kruvaziyer ve arastirma gemisi premium pakete dahildir.');
         return;
       }
       selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();
@@ -8881,7 +8931,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Proje gemisi + kruvaziyer rotalari ve ozel senaryolar</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Proje gemisi + kruvaziyer + arastirma gemisi rotalari ve ozel senaryolar</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
@@ -10705,7 +10755,7 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
     }
   }
 
-  const premiumPrefix = selType==='proje' ? 'proje' : selType==='kruvaziyer' ? 'cruise' : '';
+  const premiumPrefix = selType==='proje' ? 'proje' : selType==='kruvaziyer' ? 'cruise' : selType==='arastirma' ? 'research' : '';
   if(premiumPrefix){
     const premiumScenes = regular.filter(s=>String(s.id||'').startsWith(premiumPrefix) && !selectedRegular.some(x=>x.id===s.id));
     const guaranteed = premiumScenes.sort(()=>Math.random()-0.5).slice(0, Math.min(5, premiumScenes.length));
@@ -11254,7 +11304,8 @@ function buildShipOffers(){
   if(premiumUnlocked){
     offers.push(
       {key:'project', label:'Proje Gemisi Teklifi', type:'proje', ship:'M/V Atlas Heavy Lift', pay:Math.round(basePay*1.34), note:'Heavy lift, sea fastening ve COG disiplini.'},
-      {key:'cruise', label:'Kruvaziyer Teklifi', type:'kruvaziyer', ship:'M/V Ege Dream', pay:Math.round(basePay*1.26), note:'Passenger safety, hotel load ve crowd management.'}
+      {key:'cruise', label:'Kruvaziyer Teklifi', type:'kruvaziyer', ship:'M/V Ege Dream', pay:Math.round(basePay*1.26), note:'Passenger safety, hotel load ve crowd management.'},
+      {key:'research', label:'Araştırma Gemisi Teklifi', type:'arastirma', ship:'R/V Piri Reis', pay:Math.round(basePay*1.30), note:'Survey line, ROV, DP ve bilim ekibi koordinasyonu.'}
     );
   }
   return offers;
@@ -11530,7 +11581,7 @@ function beginGame(){
   const ni=document.getElementById('nameinp').value.trim();
   const si=document.getElementById('shipnameinp').value.trim();
   if(isPremiumShipType(selType) && !premiumUnlocked){
-    showNotif('🔒','Premium Gerekli','Proje gemisi ve kruvaziyer ile baslamak icin premium paket gerekli.');
+    showNotif('🔒','Premium Gerekli','Proje gemisi, kruvaziyer veya arastirma gemisi ile baslamak icin premium paket gerekli.');
     return;
   }
   pn=ni||'Stajyer';
@@ -12449,6 +12500,44 @@ const TRADE_VOYAGE_ROUTES = [
       {name:'Kaohsiung weather gate', x:388, y:108, note:'Typhoon advisory, hotel load and route change', chart:'Kaohsiung', risk:'Weather'},
       {name:'Busan pilot / VTS', x:404, y:76, note:'Coastal traffic, VTS and passenger announcement', chart:'Busan', risk:'Pilotage'},
       {name:'Yokohama arrival', x:414, y:86, note:'All fast, customs, disembarkation and next cruise prep', chart:'Yokohama', risk:'Turnaround'}
+    ]
+  },
+  {
+    key:'research_northsea_survey',
+    name:'Kuzey Denizi Offshore Arastirma Hatti',
+    trade:'Arastirma / hydrographic survey',
+    chart:'Kuzey Denizi Offshore Arastirma Hatti',
+    start:'Rotterdam',
+    end:'Hamburg',
+    distanceNm:720,
+    etaDays:6,
+    charts:['Rotterdam','Dover TSS - English Channel','Kuzey Denizi - Baltik Feeder Hatti','Norvec - Avrupa LNG Hatti','Elbe Nehri','Hamburg'],
+    waypoints:[
+      {name:'Rotterdam survey mobilization', x:25, y:18, note:'Survey equipment check, calibration, pilot out', chart:'Rotterdam', risk:'Mobilization / traffic'},
+      {name:'North Sea grid line 01', x:44, y:18, note:'Multibeam line keeping, current set/drift, CPA watch', chart:'Kuzey Denizi - Baltik Feeder Hatti', risk:'Survey line / traffic'},
+      {name:'Offshore installation exclusion', x:58, y:8, note:'Platform safety zone, guard vessel, VHF coordination', chart:'Norvec - Avrupa LNG Hatti', risk:'Offshore safety zone'},
+      {name:'ROV inspection box', x:62, y:12, note:'DP watch, thruster load, ROV umbilical tension', chart:'Norvec - Avrupa LNG Hatti', risk:'DP / ROV'},
+      {name:'Elbe data handover', x:40, y:12, note:'Survey log, data QA, tide window', chart:'Elbe Nehri', risk:'Data / tide'},
+      {name:'Hamburg demobilization', x:42, y:10, note:'Equipment recovery, port report and science team handover', chart:'Hamburg', risk:'Port / documentation'}
+    ]
+  },
+  {
+    key:'research_east_med_blacksea',
+    name:'Dogu Akdeniz - Karadeniz Bilimsel Arastirma Hatti',
+    trade:'Arastirma / oceanographic mission',
+    chart:'Dogu Akdeniz - Karadeniz Bilimsel Arastirma Hatti',
+    start:'Pire',
+    end:'Samsun',
+    distanceNm:980,
+    etaDays:8,
+    charts:['Pire','Limasol','Çanakkale Bogazi','İstanbul Bogazi','Turkish Straits TSS','Samsun'],
+    waypoints:[
+      {name:'Piraeus CTD calibration', x:120, y:160, note:'Science party briefing, CTD winch and sample plan', chart:'Pire', risk:'Deck science ops'},
+      {name:'East Med sample station', x:176, y:172, note:'CTD cast, metocean log, drifting vessels', chart:'Limasol', risk:'Sample station / traffic'},
+      {name:'Dardanelles transit', x:132, y:98, note:'TSS, current, survey gear secured', chart:'Çanakkale Bogazi', risk:'Current / TSS'},
+      {name:'Bosphorus VTS transit', x:178, y:84, note:'VTS reporting, no science ops, traffic discipline', chart:'İstanbul Bogazi', risk:'VTS / current'},
+      {name:'Black Sea survey box', x:206, y:40, note:'Weather window, towed sensor, line keeping', chart:'Turkish Straits TSS', risk:'Swell / survey gear'},
+      {name:'Samsun research call', x:206, y:40, note:'Data backup, science report, equipment inspection', chart:'Samsun', risk:'Data / port ops'}
     ]
   }
 ];
@@ -16809,6 +16898,7 @@ function selectVoyageRouteForShipType(type=selType){
   else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/roro|feeder|turkey_adriatic|blacksea|eu_far_east/.test(`${r.key} ${r.trade}`));
   else if(/proje|project/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/project|proje|heavy|modul/.test(`${r.key} ${r.trade}`));
   else if(/kruvaziyer|cruise/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/cruise|kruvaziyer|passenger/.test(`${r.key} ${r.trade}`));
+  else if(/arastirma|research|survey/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/research|arastirma|survey|oceanographic|hydrographic/.test(`${r.key} ${r.trade}`));
   return candidates[Math.floor(Math.random()*candidates.length)] || TRADE_VOYAGE_ROUTES[0];
 }
 function findStartPortByName(name){
