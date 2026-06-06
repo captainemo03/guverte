@@ -533,6 +533,11 @@ const STYPES=[
   {key:"proje", ico:"🏗",nm:"Proje Gemisi",ds:"Ağır yük",    ton:"18.500 DWT",spd:"12 kn",premium:true,kontracts:[{ay:4,izin:1,ucret:"Premium"},{ay:6,izin:2,ucret:"Premium+"}]},
   {key:"kruvaziyer",ico:"🛳",nm:"Kruvaziyer",ds:"Yolcu/hotel",ton:"92.000 GT",spd:"21 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
   {key:"arastirma",ico:"🔬",nm:"Araştırma Gemisi",ds:"Survey/ROV",ton:"6.500 GT",spd:"13 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
+  {key:"offshore",ico:"🛟",nm:"Offshore Support",ds:"PSV/AHTS",ton:"5.800 GT",spd:"13 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
+  {key:"buz",ico:"❄️",nm:"Buz Sınıfı",ds:"Ice nav",ton:"18.000 GT",spd:"12 kn",premium:true,kontracts:[{ay:4,izin:1,ucret:"Premium"},{ay:6,izin:2,ucret:"Premium+"}]},
+  {key:"cable",ico:"〰️",nm:"Cable Layer",ds:"Kablo döşeme",ton:"11.000 GT",spd:"12 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
+  {key:"pipe",ico:"🧱",nm:"Pipe Layer",ds:"Boru hattı",ton:"24.000 GT",spd:"10 kn",premium:true,kontracts:[{ay:3,izin:1,ucret:"Premium"},{ay:5,izin:1,ucret:"Premium+"}]},
+  {key:"shuttle",ico:"⛽",nm:"Shuttle Tanker",ds:"FPSO/DP offload",ton:"78.000 DWT",spd:"14 kn",premium:true,kontracts:[{ay:4,izin:1,ucret:"Premium"},{ay:6,izin:2,ucret:"Premium+"}]},
 ];
 
 const PREMIUM_KEY = 'guverte-premium-v1';
@@ -544,7 +549,7 @@ function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
 function openPremiumPurchase(){
-  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca proje gemisi, kruvaziyer ve arastirma gemisi burada acilacak.');
+  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca ozel gemiler, ileri operasyonlar ve pro kriz paketleri burada acilacak.');
 }
 function grantPremiumPackageFromPurchase(receipt=''){
   if(!receipt){
@@ -553,7 +558,7 @@ function grantPremiumPackageFromPurchase(receipt=''){
   }
   premiumUnlocked = true;
   try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
-  showNotif('🔓','Premium Aktif','Odeme onayi alindi. Proje gemisi, kruvaziyer ve arastirma gemisi paketleri acildi.');
+  showNotif('🔓','Premium Aktif','Odeme onayi alindi. Ozel gemiler, ileri operasyonlar ve pro kriz paketleri acildi.');
   buildIntro();
   return true;
 }
@@ -568,6 +573,11 @@ const SHIP_TON_PROFILES={
   proje:{min:12000,max:32000,step:1000,unit:"DWT"},
   kruvaziyer:{min:62000,max:145000,step:3000,unit:"GT"},
   arastirma:{min:3200,max:11500,step:500,unit:"GT"},
+  offshore:{min:3500,max:9500,step:500,unit:"GT"},
+  buz:{min:12000,max:32000,step:1000,unit:"GT"},
+  cable:{min:8000,max:18000,step:1000,unit:"GT"},
+  pipe:{min:18000,max:46000,step:2000,unit:"GT"},
+  shuttle:{min:62000,max:120000,step:2000,unit:"DWT"},
 };
 let CURRENT_SHIP_SPECS={};
 
@@ -602,6 +612,11 @@ const SNAMES={
   proje:["M/V Atlas Heavy Lift","M/V Anatolia Project","M/V Orion Carrier","M/V Marmara Modul","M/V Titan Trader"],
   kruvaziyer:["M/V Ege Dream","M/V Meridian Star","M/V Blue Horizon","M/V Anatolian Pearl","M/V Aegean Palace"],
   arastirma:["R/V Piri Reis","R/V Horizon Surveyor","R/V Deep Blue Lab","R/V Anatolian Explorer","R/V Oceanus Quest"],
+  offshore:["PSV North Runner","AHTS Kaptan Bora","M/V Platform Guardian","M/V Sea Lynx","M/V Bosphorus Supplier"],
+  buz:["M/V Polar Anatolia","M/V Ice Meridian","M/V Baltic Frost","M/V Arctic Compass","M/V Kuzey Yildizi"],
+  cable:["C/S Marmara Link","C/S Ocean Weaver","C/S Anatolia Fiber","C/S Deep Route","C/S Horizon Cable"],
+  pipe:["P/L Blue Stinger","P/L Anatolia Laybarge","P/L Meridian Pipe","P/L Deep Trench","P/L East Med Builder"],
+  shuttle:["ST Black Sea Shuttle","ST North Field","ST FPSO Runner","ST Marmara Offload","ST Atlantic Bow"],
 };
 
 const ERA_TECH={
@@ -1573,6 +1588,128 @@ function buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec){
         {text:"Weather limit dolmadan recover emri, hız/heading ve güverte emniyetini öneririm",tag:"kritik",effect:{bilgi:16,sayginlik:13,cesaret:3}},
         {text:"Bir hat daha atalım, sonra toplarız",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}},
         {text:"Bilim ekibi karar versin, biz bekleyelim",tag:"itaatkar",effect:{sayginlik:-5,bilgi:-4}}
+      ])}
+    ];
+  }
+  if(stype==='offshore'){
+    return [
+      {id:"offshore01",gfx:"harbor",alert:false,day:"Premium Gun 1",time:"05:40",loc:"Platform Yaklaşması",sub:"500 m safety zone",who:"suvari",
+      text:`${sn} sabah platforma supply run yapıyor. Platform standby vessel seni safety zone girişinde çağırdı.\n\nKaptan: "Offshore işinde en pahalı hata aceleyle zone'a girmektir. İlk readback neyi içermeli?"`,
+      choices:shuffleChoices([
+        {text:"Izin, approach heading, drift, 500 m zone ve platform standby talimatini tekrarlarim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Yaklasmayi hizlandirip platform onunde beklerim",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}},
+        {text:"Sadece AIS uzerinden takip ederim",tag:"itaatkar",effect:{bilgi:4}}
+      ])},
+      {id:"offshore02",gfx:"engine",alert:true,day:"Premium Gun 2",time:"11:25",loc:"DP Paneli",sub:"Thruster load / platform lee",who:"carkci",
+      text:`Cargo hose bağlanmadan önce DP alarm verdi. Rüzgar platformdan gemiye dönüyor, thruster load yükseldi.\n\nÇarkçıbaşı: "Platform yanında DP alarmı küçük alarm değildir. Ne yapıyoruz?"`,
+      choices:shuffleChoices([
+        {text:"DP limit, abort point, hose disconnect ve platform/VHF zincirini acik tutarim",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+        {text:"Alarmi susturup hortum baglama isini bitiririm",tag:"korkak",effect:{bilgi:-12,sayginlik:-14}},
+        {text:"Hemen manuel kumandaya gecip sert yaw veririm",tag:"cesur",effect:{cesaret:5,sayginlik:-7,bilgi:-5}}
+      ])},
+      {id:"offshore03",gfx:"cargo",alert:false,day:"Premium Gun 3",time:"16:10",loc:"AHTS Güverte",sub:"Anchor handling / shark jaw",who:"lostromo",
+      text:`Anchor handling başladı. Wire gerildi, shark jaw kilidi ve towing pin çevresi boşaltıldı.\n\nLostromo: "Bu güvertede yanlış ayak, son ayak olur. Stajyer, nereye kesinlikle girmezsin?"`,
+      choices:shuffleChoices([
+        {text:"Snap-back hattina, wire bight icine ve aktif towing pin/shark jaw arasina girmem",tag:"kritik",effect:{bilgi:15,sayginlik:12}},
+        {text:"Daha iyi görmek icin telin yanina yaklaşirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Sadece talimat gelirse hareket ederim",tag:"itaatkar",effect:{bilgi:4,sayginlik:2}}
+      ])}
+    ];
+  }
+  if(stype==='buz'){
+    return [
+      {id:"ice01",gfx:"storm",alert:false,day:"Premium Gun 1",time:"04:30",loc:"Buzlu Deniz",sub:"Ice chart / route selection",who:"z2",
+      text:`ECDIS overlay'e ice chart geldi. Önünde first-year ice, sancakta daha açık ama uzun rota var.\n\n2. Zabit: "Buzda kısa rota çoğu zaman pahalı rotadır. Hangi bilgiye bakarsın?"`,
+      choices:shuffleChoices([
+        {text:"Ice concentration, thickness, pressure ridge, engine margin ve icebreaker tavsiyesini birlikte okurum",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Acilmak yerine buz icinden en kisa yolu denerim",tag:"cesur",effect:{cesaret:5,sayginlik:-10,bilgi:-7}},
+        {text:"Sadece radar ekosuna bakarak devam ederim",tag:"itaatkar",effect:{bilgi:3,sayginlik:-3}}
+      ])},
+      {id:"ice02",gfx:"bridge",alert:true,day:"Premium Gun 2",time:"23:50",loc:"Köprüüstü",sub:"Icing / stabilite riski",who:"suvari",
+      text:`Güverte üstünde buz birikiyor. Freeboard ve ekipman üstü beyazlaştı, GM hesabı masaya geldi.\n\nKaptan: "Icing sadece üşümek değildir. Geminin üstüne ağırlık biner. Ne önerirsin?"`,
+      choices:shuffleChoices([
+        {text:"Icing raporu, rota/hiz azaltma, guverte temizleme planı ve stabilite etkisini kayda alirim",tag:"kritik",effect:{bilgi:16,sayginlik:13}},
+        {text:"Goruntu kotu ama stabiliteye etki etmez derim",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Tayfayi hemen emniyet planı olmadan buz kırmaya yollarim",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-6}}
+      ])},
+      {id:"ice03",gfx:"compass",alert:false,day:"Premium Gun 3",time:"10:20",loc:"Icebreaker Konvoyu",sub:"Convoy station keeping",who:"z1",
+      text:`Icebreaker önde dar kanal açıyor. Konvoyda mesafe çok açılırsa buz kapanıyor, çok yaklaşırsan duruş mesafesi kalmıyor.\n\n1. Zabit: "Station keeping nasıl tutulur?"`,
+      choices:shuffleChoices([
+        {text:"Icebreaker talimati, engine readiness, safe distance ve VHF discipline ile takip ederim",tag:"kritik",effect:{bilgi:15,sayginlik:10}},
+        {text:"Acilan kanali kacirmamak icin cok yaklasirim",tag:"korkak",effect:{bilgi:-9,sayginlik:-10}},
+        {text:"Mesafeyi sadece göz karari tutarim",tag:"itaatkar",effect:{bilgi:3}}
+      ])}
+    ];
+  }
+  if(stype==='cable'){
+    return [
+      {id:"cable01",gfx:"compass",alert:false,day:"Premium Gun 1",time:"08:10",loc:"Cable Route",sub:"Cable lay corridor",who:"z2",
+      text:`${sn} kablo döşeme hattına girdi. Plough arka tarafta hazır, chart'ta no anchoring area ve mevcut kablolar işaretli.\n\n2. Zabit: "Kablo gemisinde rota dışına çıkmak sadece XTE hatası değildir. Ne riske girer?"`,
+      choices:shuffleChoices([
+        {text:"Mevcut kablo/boru crossing, bend radius, seabed clearance ve plough gerilimini kontrol ederim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Biraz XTE sorun olmaz, kablo denizde esner",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Sadece survey ekibi alarm verirse rotayi duzeltirim",tag:"itaatkar",effect:{bilgi:4,sayginlik:-3}}
+      ])},
+      {id:"cable02",gfx:"engine",alert:true,day:"Premium Gun 2",time:"02:05",loc:"Cable Engine Room",sub:"Cable tension spike",who:"carkci",
+      text:`Tension bir anda yükseldi. Plough deniz tabanında sert zemine takılmış olabilir.\n\nÇarkçıbaşı: "Kablo koparsa milyon dolarlık iş ve deniz altı altyapı gider. Köprü ne yapmalı?"`,
+      choices:shuffleChoices([
+        {text:"Hizi düşürür, tension trendini izler, lay supervisor ve köprü-güverte zincirini açarım",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Makine devrini arttirip plough'u kurtarmaya calisiriz",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-7}},
+        {text:"Alarmı data spike sanıp devam ederim",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}}
+      ])}
+    ];
+  }
+  if(stype==='pipe'){
+    return [
+      {id:"pipe01",gfx:"cargo",alert:false,day:"Premium Gun 1",time:"13:00",loc:"Pipe Lay Deck",sub:"Stinger angle / pipe tension",who:"z1",
+      text:`Boru hattı stinger üzerinden denize iniyor. Welding station hız istiyor, ama akıntı pipe tension'ı değiştiriyor.\n\n1. Zabit: "Pipe-lay gemisinde hız kararını kimse tek başına vermez. Hangi değerler birlikte okunur?"`,
+      choices:shuffleChoices([
+        {text:"Tension, stinger angle, current, weld rate ve DP offset birlikte okunur",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Welding hizina uyar, gemiyi biraz hizlandiririm",tag:"cesur",effect:{cesaret:4,sayginlik:-8,bilgi:-7}},
+        {text:"Sadece DP alarm verirse mudahele ederim",tag:"itaatkar",effect:{bilgi:4}}
+      ])},
+      {id:"pipe02",gfx:"storm",alert:true,day:"Premium Gun 2",time:"21:35",loc:"Açık Deniz",sub:"Abandon lay / weather limit",who:"suvari",
+      text:`Hava yükseliyor. Lay superintendent son weld'i bitirmek istiyor, ama roll artıyor.\n\nKaptan: "Bazen en iyi operasyon kararı işi durdurmaktır. Ne dersin?"`,
+      choices:shuffleChoices([
+        {text:"Weather limit, pipe integrity, A&R proseduru ve personel emniyetiyle durdurma öneririm",tag:"kritik",effect:{bilgi:16,sayginlik:13}},
+        {text:"Son weld bitsin diye devam edelim derim",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}},
+        {text:"Kararı tamamen superintendent'a bırakırım",tag:"itaatkar",effect:{sayginlik:-4,bilgi:-3}}
+      ])}
+    ];
+  }
+  if(stype==='shuttle'){
+    return [
+      {id:"shuttle01",gfx:"harbor",alert:false,day:"Premium Gun 1",time:"07:55",loc:"FPSO Yaklaşması",sub:"Bow loading / green line",who:"suvari",
+      text:`${sn} FPSO'ya yaklaşırken bow loading sistemi hazırlandı. Tandem offload mesafesi, hawser ve hose izleniyor.\n\nKaptan: "Shuttle tanker işinde yaklaşma hızlı değil, kontrollü olur. İlk limit ne?"`,
+      choices:shuffleChoices([
+        {text:"Green line, relative position, hawser tension, hose status ve DP/joystick limitini birlikte izlerim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Hose baglanmadan biraz daha hizli yaklasirim",tag:"cesur",effect:{cesaret:4,sayginlik:-9,bilgi:-7}},
+        {text:"FPSO talimat verene kadar sadece beklerim",tag:"itaatkar",effect:{bilgi:4}}
+      ])},
+      {id:"shuttle02",gfx:"engine",alert:true,day:"Premium Gun 2",time:"16:45",loc:"Cargo Control Room",sub:"ESD / offload emergency",who:"carkci",
+      text:`Cargo transfer başladıktan sonra manifold basıncı oynadı. FPSO tarafı ESD readiness soruyor.\n\nÇarkçıbaşı: "Bu tanker değil, FPSO offload zinciri. Yanlış cevap hortumu riske sokar."`,
+      choices:shuffleChoices([
+        {text:"ESD link, manifold pressure, cargo rate, inert gas ve disconnect readiness raporlarim",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+        {text:"Basınç oynasa da rate'i koruruz derim",tag:"korkak",effect:{bilgi:-12,sayginlik:-13}},
+        {text:"Sadece makine tarafina bakar, güverteyi beklerim",tag:"itaatkar",effect:{bilgi:3,sayginlik:-3}}
+      ])}
+    ];
+  }
+  if(premiumUnlocked && /tanker|lng/.test(stype)){
+    return [
+      {id:"premium_tanker01",gfx:"cargo",alert:false,day:"Premium Gun 4",time:"12:10",loc:"Cargo Control Room",sub:"Gas freeing / purging karari",who:"z1",
+      text:`Terminal yarin tank inspection istiyor. Gas freeing planı açıldı; chief officer oxygen, LEL ve toxic reading istiyor.\n\n"Premium operasyon dersi: sadece fan açmak gas freeing değildir. İlk zincir?"`,
+      choices:shuffleChoices([
+        {text:"Purging plan, inert gas status, LEL/O2/toxic reading, permit ve ventilation sequence'i dogrularim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Fanlari acip zaman kazanirim",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Terminal karar verir, biz bekleriz",tag:"itaatkar",effect:{bilgi:4,sayginlik:-3}}
+      ])},
+      {id:"premium_tanker02",gfx:"engine",alert:true,day:"Premium Gun 5",time:"03:05",loc:"Cargo Compressor Room",sub:"Compressor trip / reliquefaction",who:"carkci",
+      text:`Cargo compressor trip verdi. Tank pressure trendi yukari dondu; köprü ETA baskisi hissediyor.\n\nÇarkçıbaşı: "Bu alarm sadece makine alarmı değil, yük emniyeti."`,
+      choices:shuffleChoices([
+        {text:"Pressure trend, compressor status, vent/reliq limit ve terminal/ofis rapor zincirini kurarim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Alarm gecicidir, rate ayni kalsin derim",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}},
+        {text:"Sadece makinenin restart etmesini beklerim",tag:"itaatkar",effect:{bilgi:3}}
       ])}
     ];
   }
@@ -4331,6 +4468,11 @@ const KONTRAT_DEFS={
   proje:[{ay:4,izin:1,ucret:"Premium",bonus:"Heavy lift / sea fastening dosyasi"},{ay:6,izin:2,ucret:"Premium+",bonus:"Project cargo superintendent tecrubesi"}],
   kruvaziyer:[{ay:3,izin:1,ucret:"Premium",bonus:"Passenger ship safety ve crowd management"},{ay:5,izin:1,ucret:"Premium+",bonus:"Cruise bridge / hotel ops tecrubesi"}],
   arastirma:[{ay:3,izin:1,ucret:"Premium",bonus:"Survey / ROV operasyon dosyasi"},{ay:5,izin:1,ucret:"Premium+",bonus:"Hidrografi ve DP survey tecrubesi"}],
+  offshore:[{ay:3,izin:1,ucret:"Premium",bonus:"PSV/AHTS platform support dosyasi"},{ay:5,izin:1,ucret:"Premium+",bonus:"DP ve anchor handling tecrubesi"}],
+  buz:[{ay:4,izin:1,ucret:"Premium",bonus:"Ice navigation ve icing stability"},{ay:6,izin:2,ucret:"Premium+",bonus:"Icebreaker convoy tecrubesi"}],
+  cable:[{ay:3,izin:1,ucret:"Premium",bonus:"Cable lay route ve tension watch"},{ay:5,izin:1,ucret:"Premium+",bonus:"Subsea cable crossing tecrubesi"}],
+  pipe:[{ay:3,izin:1,ucret:"Premium",bonus:"Pipe lay / stinger operasyonu"},{ay:5,izin:1,ucret:"Premium+",bonus:"A&R ve laybarge emniyeti"}],
+  shuttle:[{ay:4,izin:1,ucret:"Premium",bonus:"FPSO tandem offload dosyasi"},{ay:6,izin:2,ucret:"Premium+",bonus:"DP shuttle tanker operasyonu"}],
 };
 
 // ===== OYUN DEĞİŞKENLERİ =====
@@ -8922,7 +9064,7 @@ function buildIntro(){
     d.innerHTML=`<span class="sb-ico">${locked?'🔒':t.ico}</span><span class="sb-nm">${t.nm}</span><span class="sb-kont">${spec.tonLabel}<br>${locked?'Premium Paket':kontStr+' ay'}</span>${t.premium?'<span class="premium-chip">PREMIUM</span>':''}`;
     d.onclick=()=>{
       if(locked){
-        showNotif('🔒','Premium Gerekli','Proje gemisi, kruvaziyer ve arastirma gemisi premium pakete dahildir.');
+        showNotif('🔒','Premium Gerekli','Bu ozel gemi ve pro operasyon paketleri premium pakete dahildir.');
         return;
       }
       selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();
@@ -8931,7 +9073,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Proje gemisi + kruvaziyer + arastirma gemisi rotalari ve ozel senaryolar</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Offshore, buz, proje, cruise, arastirma, cable/pipe ve pro krizler</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
@@ -10755,7 +10897,19 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
     }
   }
 
-  const premiumPrefix = selType==='proje' ? 'proje' : selType==='kruvaziyer' ? 'cruise' : selType==='arastirma' ? 'research' : '';
+  const premiumPrefixes = {
+    proje:'proje',
+    kruvaziyer:'cruise',
+    arastirma:'research',
+    offshore:'offshore',
+    buz:'ice',
+    cable:'cable',
+    pipe:'pipe',
+    shuttle:'shuttle',
+    tanker:'premium_tanker',
+    lng:'premium_tanker'
+  };
+  const premiumPrefix = premiumUnlocked ? (premiumPrefixes[selType] || '') : (isPremiumShipType(selType) ? (premiumPrefixes[selType] || '') : '');
   if(premiumPrefix){
     const premiumScenes = regular.filter(s=>String(s.id||'').startsWith(premiumPrefix) && !selectedRegular.some(x=>x.id===s.id));
     const guaranteed = premiumScenes.sort(()=>Math.random()-0.5).slice(0, Math.min(5, premiumScenes.length));
@@ -11305,7 +11459,12 @@ function buildShipOffers(){
     offers.push(
       {key:'project', label:'Proje Gemisi Teklifi', type:'proje', ship:'M/V Atlas Heavy Lift', pay:Math.round(basePay*1.34), note:'Heavy lift, sea fastening ve COG disiplini.'},
       {key:'cruise', label:'Kruvaziyer Teklifi', type:'kruvaziyer', ship:'M/V Ege Dream', pay:Math.round(basePay*1.26), note:'Passenger safety, hotel load ve crowd management.'},
-      {key:'research', label:'Araştırma Gemisi Teklifi', type:'arastirma', ship:'R/V Piri Reis', pay:Math.round(basePay*1.30), note:'Survey line, ROV, DP ve bilim ekibi koordinasyonu.'}
+      {key:'research', label:'Araştırma Gemisi Teklifi', type:'arastirma', ship:'R/V Piri Reis', pay:Math.round(basePay*1.30), note:'Survey line, ROV, DP ve bilim ekibi koordinasyonu.'},
+      {key:'offshore', label:'Offshore Support Teklifi', type:'offshore', ship:'AHTS Kaptan Bora', pay:Math.round(basePay*1.32), note:'Platform approach, DP ve anchor handling.'},
+      {key:'ice', label:'Buz Sınıfı Teklifi', type:'buz', ship:'M/V Polar Anatolia', pay:Math.round(basePay*1.36), note:'Ice chart, icing ve icebreaker convoy.'},
+      {key:'cable', label:'Cable Layer Teklifi', type:'cable', ship:'C/S Marmara Link', pay:Math.round(basePay*1.31), note:'Cable lay corridor ve subsea crossing.'},
+      {key:'pipe', label:'Pipe Layer Teklifi', type:'pipe', ship:'P/L Blue Stinger', pay:Math.round(basePay*1.33), note:'Pipe tension, stinger angle ve A&R.'},
+      {key:'shuttle', label:'Shuttle Tanker Teklifi', type:'shuttle', ship:'ST Black Sea Shuttle', pay:Math.round(basePay*1.35), note:'FPSO tandem offload ve DP bow loading.'}
     );
   }
   return offers;
@@ -11581,7 +11740,7 @@ function beginGame(){
   const ni=document.getElementById('nameinp').value.trim();
   const si=document.getElementById('shipnameinp').value.trim();
   if(isPremiumShipType(selType) && !premiumUnlocked){
-    showNotif('🔒','Premium Gerekli','Proje gemisi, kruvaziyer veya arastirma gemisi ile baslamak icin premium paket gerekli.');
+    showNotif('🔒','Premium Gerekli','Ozel gemiler ve pro operasyon paketleri ile baslamak icin premium paket gerekli.');
     return;
   }
   pn=ni||'Stajyer';
@@ -12538,6 +12697,98 @@ const TRADE_VOYAGE_ROUTES = [
       {name:'Bosphorus VTS transit', x:178, y:84, note:'VTS reporting, no science ops, traffic discipline', chart:'İstanbul Bogazi', risk:'VTS / current'},
       {name:'Black Sea survey box', x:206, y:40, note:'Weather window, towed sensor, line keeping', chart:'Turkish Straits TSS', risk:'Swell / survey gear'},
       {name:'Samsun research call', x:206, y:40, note:'Data backup, science report, equipment inspection', chart:'Samsun', risk:'Data / port ops'}
+    ]
+  },
+  {
+    key:'offshore_northsea_platform',
+    name:'Kuzey Denizi Platform Support Hatti',
+    trade:'Offshore support / PSV AHTS',
+    chart:'Kuzey Denizi Platform Support Hatti',
+    start:'Rotterdam',
+    end:'Hamburg',
+    distanceNm:680,
+    etaDays:5,
+    charts:['Rotterdam','Kuzey Denizi - Baltik Feeder Hatti','Norvec - Avrupa LNG Hatti','Elbe Nehri','Hamburg'],
+    waypoints:[
+      {name:'Rotterdam supply mobilization', x:25, y:18, note:'Deck cargo, mud/brine manifest, DP checklist', chart:'Rotterdam', risk:'Deck cargo'},
+      {name:'North Sea weather gate', x:44, y:18, note:'Swell, wind farm traffic, standby plan', chart:'Kuzey Denizi - Baltik Feeder Hatti', risk:'Weather / traffic'},
+      {name:'Platform 500 m zone', x:58, y:8, note:'Permission, DP, hose/cargo transfer, abort point', chart:'Norvec - Avrupa LNG Hatti', risk:'Platform safety zone'},
+      {name:'Anchor handling field', x:62, y:12, note:'Wire tension, shark jaw, deck exclusion area', chart:'Norvec - Avrupa LNG Hatti', risk:'Anchor handling'},
+      {name:'Elbe return', x:40, y:12, note:'Post-job report and demobilization', chart:'Elbe Nehri', risk:'Reporting'},
+      {name:'Hamburg offhire', x:42, y:10, note:'Cargo residue, deck inspection, charter closeout', chart:'Hamburg', risk:'Port closeout'}
+    ]
+  },
+  {
+    key:'baltic_ice_convoy',
+    name:'Baltik Buz Konvoyu',
+    trade:'Ice navigation / ice class',
+    chart:'Baltik Buz Konvoyu',
+    start:'Gdansk',
+    end:'Hamburg',
+    distanceNm:760,
+    etaDays:6,
+    charts:['Gdansk','Baltik - Kuzey Denizi Enerji Hatti','Kiel Kanali','Kattegat','Elbe Nehri','Hamburg'],
+    waypoints:[
+      {name:'Gdansk ice departure', x:88, y:6, note:'Ice class readiness, de-icing gear, pilot out', chart:'Gdansk', risk:'Ice departure'},
+      {name:'Baltic ice edge', x:72, y:12, note:'Ice chart, concentration, pressure ridge warning', chart:'Baltik - Kuzey Denizi Enerji Hatti', risk:'Ice concentration'},
+      {name:'Icebreaker convoy station', x:64, y:10, note:'Station keeping, VHF discipline, engine readiness', chart:'Baltik - Kuzey Denizi Enerji Hatti', risk:'Convoy'},
+      {name:'Kattegat open water', x:56, y:8, note:'Icing, current and ferry traffic', chart:'Kattegat', risk:'Icing / traffic'},
+      {name:'Elbe tide window', x:40, y:12, note:'Ice accretion report and river pilot', chart:'Elbe Nehri', risk:'Tide / river'},
+      {name:'Hamburg arrival', x:42, y:10, note:'De-icing, damage inspection and log closeout', chart:'Hamburg', risk:'Port ice ops'}
+    ]
+  },
+  {
+    key:'atlantic_cable_lay',
+    name:'Manş - Kuzey Atlantik Kablo Hatti',
+    trade:'Cable laying / subsea infrastructure',
+    chart:'Manş - Kuzey Atlantik Kablo Hatti',
+    start:'Le Havre',
+    end:'Rotterdam',
+    distanceNm:980,
+    etaDays:8,
+    charts:['Le Havre','Dover TSS - English Channel','Biskay Korfezi','Kuzey Atlantik Ana Hatti','Rotterdam'],
+    waypoints:[
+      {name:'Le Havre cable loadout', x:24, y:36, note:'Cable tank, joint box, route permit', chart:'Le Havre', risk:'Cable loadout'},
+      {name:'Channel crossing corridor', x:34, y:24, note:'Existing cables, TSS traffic, guard vessel', chart:'Dover TSS - English Channel', risk:'Crossing / traffic'},
+      {name:'Biscay cable lay turn', x:10, y:70, note:'Bend radius, tension and weather routing', chart:'Biskay Korfezi', risk:'Weather / tension'},
+      {name:'Atlantic repair box', x:74, y:74, note:'Grapnel, plough, ROV inspection', chart:'Kuzey Atlantik Ana Hatti', risk:'ROV / repair'},
+      {name:'Rotterdam data handover', x:25, y:18, note:'As-laid chart, permit closeout, client report', chart:'Rotterdam', risk:'Documentation'}
+    ]
+  },
+  {
+    key:'east_med_pipe_lay',
+    name:'Dogu Akdeniz Boru Hatti Operasyonu',
+    trade:'Pipe laying / offshore construction',
+    chart:'Dogu Akdeniz Boru Hatti Operasyonu',
+    start:'Pire',
+    end:'Limasol',
+    distanceNm:640,
+    etaDays:7,
+    charts:['Pire','Dogu Akdeniz Enerji Hatti','Limasol'],
+    waypoints:[
+      {name:'Piraeus pipe mobilization', x:120, y:160, note:'Welding crew, stinger inspection, DP trial', chart:'Pire', risk:'Mobilization'},
+      {name:'Lay corridor start', x:144, y:168, note:'DP offset, pipe tension, survey corridor', chart:'Dogu Akdeniz Enerji Hatti', risk:'DP / tension'},
+      {name:'Subsea crossing', x:158, y:170, note:'Cable/pipeline crossing permit, ROV confirmation', chart:'Dogu Akdeniz Enerji Hatti', risk:'Subsea crossing'},
+      {name:'Weather suspend point', x:168, y:172, note:'A&R readiness, roll limit, crew safety', chart:'Dogu Akdeniz Enerji Hatti', risk:'Weather suspend'},
+      {name:'Limassol project port', x:176, y:172, note:'Pipe tally, client report and demobilization', chart:'Limasol', risk:'Port closeout'}
+    ]
+  },
+  {
+    key:'fps_offload_shuttle',
+    name:'FPSO Shuttle Tanker Offload Hatti',
+    trade:'Shuttle tanker / FPSO offload',
+    chart:'FPSO Shuttle Tanker Offload Hatti',
+    start:'Cape Town',
+    end:'Santos',
+    distanceNm:3550,
+    etaDays:12,
+    charts:['Cape Town','Batı Afrika Offshore Supply Hatti','Gine Korfezi','Brezilya - Cin Demir Cevheri Rotasi','Santos'],
+    waypoints:[
+      {name:'Cape Town shuttle prep', x:126, y:246, note:'Bow loading, DP check, cargo docs', chart:'Cape Town', risk:'Prep / weather'},
+      {name:'Offshore FPSO approach', x:96, y:190, note:'Green line, hawser tension, hose status', chart:'Batı Afrika Offshore Supply Hatti', risk:'FPSO approach'},
+      {name:'Tandem offload station', x:88, y:188, note:'ESD link, manifold pressure, relative position', chart:'Gine Korfezi', risk:'Offload / DP'},
+      {name:'Atlantic weather route', x:80, y:212, note:'Swell, cargo condition, fatigue', chart:'Brezilya - Cin Demir Cevheri Rotasi', risk:'Weather routing'},
+      {name:'Santos discharge', x:58, y:236, note:'Terminal docs, cargo figures and demurrage pressure', chart:'Santos', risk:'Terminal'}
     ]
   }
 ];
@@ -16899,6 +17150,11 @@ function selectVoyageRouteForShipType(type=selType){
   else if(/proje|project/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/project|proje|heavy|modul/.test(`${r.key} ${r.trade}`));
   else if(/kruvaziyer|cruise/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/cruise|kruvaziyer|passenger/.test(`${r.key} ${r.trade}`));
   else if(/arastirma|research|survey/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/research|arastirma|survey|oceanographic|hydrographic/.test(`${r.key} ${r.trade}`));
+  else if(/offshore|psv|ahts/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/offshore|platform|psv|ahts/.test(`${r.key} ${r.trade}`));
+  else if(/buz|ice/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/ice|buz|baltic_ice|convoy/.test(`${r.key} ${r.trade}`));
+  else if(/cable/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/cable|kablo|subsea/.test(`${r.key} ${r.trade}`));
+  else if(/pipe/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/pipe|boru|lay/.test(`${r.key} ${r.trade}`));
+  else if(/shuttle|fpso/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/shuttle|fpso|offload/.test(`${r.key} ${r.trade}`));
   return candidates[Math.floor(Math.random()*candidates.length)] || TRADE_VOYAGE_ROUTES[0];
 }
 function findStartPortByName(name){
