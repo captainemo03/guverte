@@ -542,11 +542,19 @@ function isPremiumShipType(typeKey){
 function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
-function unlockPremiumPackage(){
+function openPremiumPurchase(){
+  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca proje gemisi ve kruvaziyer burada acilacak.');
+}
+function grantPremiumPackageFromPurchase(receipt=''){
+  if(!receipt){
+    showNotif('🔒','Odeme Onayi Gerekli','Premium sadece gecerli satin alma onayi ile acilir.');
+    return false;
+  }
   premiumUnlocked = true;
   try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
-  showNotif('🔓','Premium Aktif','Proje gemisi ve kruvaziyer paketleri acildi.');
+  showNotif('🔓','Premium Aktif','Odeme onayi alindi. Proje gemisi ve kruvaziyer paketleri acildi.');
   buildIntro();
+  return true;
 }
 
 const SHIP_TON_PROFILES={
@@ -8873,7 +8881,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Kilitli'}</b><span>Proje gemisi + kruvaziyer rotalari ve ozel senaryolar</span><button type="button" onclick="unlockPremiumPackage()">${premiumUnlocked?'Aktif':'Premiumu Ac'}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Proje gemisi + kruvaziyer rotalari ve ozel senaryolar</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
