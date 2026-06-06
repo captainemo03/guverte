@@ -8132,6 +8132,7 @@ let dialogueHistory=[];
 let livingShipState={thanks:false,note:false,argue:false,complaint:false};
 let sceneChoiceTimer=null;
 let sceneChoiceAutoPick=false;
+let sceneLiveSequenceTimers=[];
 let watchState={code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
 let voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
 let consequenceTrace={office:0, psc:0, trust:0};
@@ -9593,6 +9594,7 @@ function getCalcOutcomeChoice(sc, numericAnswer){
 function handleSceneChoice(sc, c2, ch){
   sfxClick();
   clearSceneChoiceTimer();
+  clearSceneLiveSequence();
   const calcPanel = document.getElementById('calc-panel');
   if(calcPanel) calcPanel.className='';
   if(ch){
@@ -9642,6 +9644,9 @@ function handleSceneChoice(sc, c2, ch){
   if(Object.keys(directPsychDelta).length) applyPsychDelta(directPsychDelta);
   if(directMoodDelta) adjustMood(directMoodDelta);
   const crisis=applyEffect(resolvedEffect);
+  resolveLiveTaskChain(sc,c2);
+  maybeCreateNearMissReplay(sc,c2);
+  maybeCreateMonthlyMemorySummary(sc,c2);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
   const neg=Object.entries(resolvedEffect).filter(([k,v])=>v<0&&k!=='yorgunluk').map(([k,v])=>v+' '+k).join(' ');
@@ -17661,6 +17666,86 @@ function addWatchFeed(text,type=''){
   if(!el) return;
   el.innerHTML = watchFeedItems.map(item=>`<span class="watch-feed-item ${item.type||''}">${item.text}</span>`).join('');
 }
+function clearSceneLiveSequence(){
+  sceneLiveSequenceTimers.forEach(t=>clearTimeout(t));
+  sceneLiveSequenceTimers=[];
+}
+function getSceneLiveBeats(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const beats=[];
+  const add=(delay,text,type='',speaker='',line='')=>beats.push({delay,text,type,speaker,line});
+  if(/vhf|mayday|pan-pan|distress|vts|pilot/.test(blob)){
+    add(450,'VHF: cizirti araya girdi, kanal dinlemede.','warn','VHF','"... tekrar edin, over."');
+    add(1350,'Kopruustu: kanal / cagri tipi teyidi bekleniyor.','warn','2. Zabit','"Once dogru kanali sec, sonra konus."');
+    add(2400,'Gorev zinciri acildi: VHF -> radar/konum -> logbook.','warn');
+  }
+  if(/radar|arpa|cpa|tcpa|ecdis|ais|route monitor/.test(blob)){
+    add(520,'Radar sweep hedefleri yeniliyor.','', '2. Zabit','"CPA dusuyorsa ekrana bakmak yetmez, karar ver."');
+    add(1550,'AIS hedef izi rota ustunde kayiyor.','warn');
+  }
+  if(/mob|man overboard|williamson|anderson|scharnow/.test(blob)){
+    add(280,'MOB alarmi: ilk saniyeler akiyor.','warn','Kaptan','"Tarafi isaretle, gozunu ayirma!"');
+    add(1150,'Williamson track cizildi; MOB mevkii kayda girdi.','warn');
+  }
+  if(/fire|yangin|yangın|smoke|duman|co2|extinguisher/.test(blob)){
+    add(420,'Fire panel pulse verdi; zone secimi bekleniyor.','warn','3. Zabit','"Yanlis medya yangini buyutur."');
+    add(1500,'Duman katmani artiyor, muster ve izolasyon zinciri not edildi.','warn');
+  }
+  if(/engine|makine|blackout|generator|compressor|thruster|pump|alarm/.test(blob)){
+    add(360,'Makine alarm trendi yukseliyor.','warn','Makine','"Kopru, alarmi loglayin ve kaptana aktarın."');
+    add(1400,'Voltaj/frekans dalgalanmasi cihaz paneline dustu.','warn');
+  }
+  if(/harbor|liman|berth|tug|romorkor|römorkör|mooring|halat|all fast/.test(blob)){
+    add(550,'Liman sahasi hareketli: tug isigi yaklasiyor.','good','Lostromo','"Halat sirasi bozulmasin."');
+    add(1700,'Mooring tension ve snap-back alani tekrar isaretlendi.','warn');
+  }
+  if(/pirate|korsan|citadel|security level|bms/.test(blob)){
+    add(350,'Security level yukseldi; fast boat izi radar ustunde.','warn','Kaptan','"Kapi kilitleri ve citadel zinciri baslasin."');
+    add(1500,'BMS odasi icin kilitleme kontrol listesi acildi.','warn');
+  }
+  if(/medical evacuation|medevac|helicopter|helikopter|mrcc|revir/.test(blob)){
+    add(450,'MRCC zinciri basladi; helikopter yaklasma alani hazirlaniyor.','warn','3. Zabit','"Deck clear olmadan kimse kahramanlik yapmayacak."');
+    add(1600,'Medical log ve course/speed bilgisi bekleniyor.','warn');
+  }
+  if(/platform|offshore|dp |dynamic positioning|500 m|safety zone|anchor handling/.test(blob)){
+    add(400,'DP offset canli: platform 500 m safety zone ekranda.','warn','Kaptan','"Abort point kafanda net olsun."');
+    add(1500,'Thruster load barlari oynuyor; hose/anchor handling riskli.','warn');
+  }
+  if(/rov|ctd|survey|multibeam|tether|umbilical|seabed/.test(blob)){
+    add(500,'ROV kamerasi deniz tabanini taramaya basladi.','', '1. Zabit','"Bilim isi de emniyet isiyle beraber gider."');
+    add(1600,'Tether tension ve survey log satiri takipte.','warn');
+  }
+  if(/ice|buz|icing|icebreaker|konvoy|convoy/.test(blob)){
+    add(420,'Ice chart guncellendi; buz parcalari rota ustunde.','warn','2. Zabit','"Buzda acele, rota degil hasardir."');
+    add(1550,'Icebreaker konvoy mesafesi takip ediliyor.','warn');
+  }
+  if(/cable|kablo|pipe|boru|stinger|plough|tension|lay corridor/.test(blob)){
+    add(440,'Lay line aktif; tension gauge oynuyor.','warn','1. Zabit','"XTE burada sadece seyir hatasi degil, altyapi riski."');
+    add(1540,'Stop lay / recover karari icin veri bekleniyor.','warn');
+  }
+  if(/fpso|shuttle|offload|hawser|hose status|bow loading|tandem/.test(blob)){
+    add(420,'FPSO yaklasma zonlari aktif; hawser tension izleniyor.','warn','Kaptan','"Green line disina cikmayacagiz."');
+    add(1480,'ESD link ve hose status kontrol zincirine girdi.','warn');
+  }
+  if(!beats.length && sc && !sc.alert){
+    add(850,'Gemi yasiyor: cihaz fanlari, VHF cizirtisi ve vardiya notlari arka planda akiyor.','');
+  }
+  return beats.slice(0,4);
+}
+function scheduleSceneLiveSequence(sc){
+  clearSceneLiveSequence();
+  getSceneLiveBeats(sc).forEach(beat=>{
+    const timer=setTimeout(()=>{
+      addWatchFeed(beat.text, beat.type);
+      if(beat.speaker && beat.line){
+        const crewKey = Object.keys(CREW_DEFS || {}).find(k=>normalizeTrAscii(CREW_DEFS[k].name||'').includes(normalizeTrAscii(beat.speaker))) || getCrewKeyFromWho(sc?.who);
+        const portrait = crewKey ? makeCrewPortrait(crewKey, CREW_DEFS[crewKey]) : getSceneSpeakerPortrait(sc);
+        pushDialogueEntry('left', portrait, beat.speaker, beat.line);
+      }
+    },beat.delay);
+    sceneLiveSequenceTimers.push(timer);
+  });
+}
 function getCrewMemoryPulse(){
   const entries = Object.entries(crewMemoryNotes || {}).filter(([,v])=>v);
   if(!entries.length) return '';
@@ -18834,10 +18919,182 @@ const INTERACTION_PANEL_CONFIGS = {
   }
 };
 
+function buildHotspotConfig(title, hint, caption, expected, correctTag, midTag, labels){
+  const spots = [
+    {id:labels[0]?.id || 'a', x:82, y:78, r:18, label:labels[0]?.label || 'A'},
+    {id:labels[1]?.id || 'b', x:160, y:52, r:24, label:labels[1]?.label || 'B'},
+    {id:labels[2]?.id || 'c', x:238, y:78, r:18, label:labels[2]?.label || 'C'}
+  ];
+  return {title,hint,caption,expected,correctTag,midTag,hotspots:spots};
+}
+
+function getAutoInteractionConfig(sc){
+  if(!sc || sc.calc || !Array.isArray(sc.choices) || sc.choices.length < 2) return null;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
+  if(/vhf|mayday|pan-pan|distress|vts|pilot exchange|pilot boarding/.test(blob)){
+    return buildHotspotConfig(
+      'VHF KANAL AYARI',
+      'Dogru kanal / cagri tipini sec. Gecikme veya yanlis kanal kayda girer.',
+      'VHF pratiginde once kanal, sonra kisa ve standart ifade.',
+      'vhf16','kritik','akilli',
+      [{id:'vhf13',label:'13'},{id:'vhf16',label:'16'},{id:'vhf70',label:'70'}]
+    );
+  }
+  if(/radar|arpa|cpa|tcpa|ais target|guard zone/.test(blob)){
+    return buildHotspotConfig(
+      'RADAR / CPA TARGET',
+      'CPA daralan hedefi isaretle. AIS etiketi tek basina karar degildir.',
+      'Hedefin vektoru ve CPA halkasi birlikte okunur.',
+      'target2','kritik','akilli',
+      [{id:'target1',label:'T1'},{id:'target2',label:'T2'},{id:'target3',label:'T3'}]
+    );
+  }
+  if(/ecdis|route monitor|safety contour|xtd|no-go|chart/.test(blob)){
+    return buildHotspotConfig(
+      'ECDIS ALARM / SAFETY CONTOUR',
+      'Alarm satiri ve no-go alani uzerinden riskli bolgeyi sec.',
+      'Safety contour, XTD ve sensor status ayni anda okunur.',
+      'zone2','kritik','itaatkar',
+      [{id:'zone1',label:'A'},{id:'zone2',label:'B'},{id:'zone3',label:'C'}]
+    );
+  }
+  if(/mob|man overboard|adam denize|williamson|anderson|scharnow/.test(blob)){
+    return buildHotspotConfig(
+      'MOB BUTONU / TARAF ISARETI',
+      'MOB aninda ilk saniyeyi kaybetme: buton, taraf, goz temasi.',
+      'MOB zinciri butonla baslar; mevki ve donus hemen takip eder.',
+      'mob','kritik','cesur',
+      [{id:'lookout',label:'LOOK'},{id:'mob',label:'MOB'},{id:'log',label:'LOG'}]
+    );
+  }
+  if(/fire|yangin|yangın|smoke|duman|co2|extinguisher|fire panel/.test(blob)){
+    return buildHotspotConfig(
+      'FIRE ZONE SECIMI',
+      'Dogru mahali sec; sonra dogru sondurme ortami gelir.',
+      'Yanginda panel zone ve yangin sinifi birlikte okunur.',
+      'galley','kritik','itaatkar',
+      [{id:'panel',label:'PANEL'},{id:'galley',label:'ZONE'},{id:'store',label:'STORE'}]
+    );
+  }
+  if(/platform|offshore|dp |dynamic positioning|abort point|500 m|safety zone/.test(blob)){
+    return buildHotspotConfig(
+      'DP ABORT POINT',
+      'Platform yaklasmasinda abort noktasini gecmeden karari ver.',
+      'DP offset, thruster load ve 500 m zone birlikte takip edilir.',
+      'abort','kritik','akilli',
+      [{id:'hold',label:'HOLD'},{id:'abort',label:'ABORT'},{id:'close',label:'CLOSE'}]
+    );
+  }
+  if(/mooring|halat|snap-back|tug|römorkör|romorkor|all fast/.test(blob)){
+    return buildHotspotConfig(
+      'MOORING EMNIYET ALANI',
+      'Halat gerilimi artarken guvenli bolgeyi ve sirayi sec.',
+      'Snap-back zone gorunmeden halat operasyonu okunmus sayilmaz.',
+      'safe','kritik','itaatkar',
+      [{id:'line',label:'LINE'},{id:'safe',label:'SAFE'},{id:'bight',label:'BIGHT'}]
+    );
+  }
+  return null;
+}
+
+function getSceneTimerConfig(sc){
+  const base = TIMED_SCENE_CONFIGS[sc?.id];
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  let cfg = base ? {...base} : null;
+  if(!cfg){
+    if(/mob|man overboard|yangin|fire|blackout|engine alarm|makine alarm|mayday|distress|snap-back|dp alarm|pirate|korsan/.test(blob)){
+      cfg = {seconds:12,title:'Olay akiyor',timeoutText:'Gec kalan refleks olayin riskini buyuttu.'};
+    }else if(/pilot|tug|berth|vhf|vts|radar|arpa|ecdis|route monitor/.test(blob)){
+      cfg = {seconds:16,title:'Operasyon bekliyor',timeoutText:'Geciken karar vardiya akisinda bosluk yaratti.'};
+    }
+  }
+  if(!cfg) return null;
+  const weatherCut = (voyagePressure.caution >= 7 ? 4 : voyagePressure.caution >= 5 ? 2 : 0)
+    + (voyagePressure.visibility === 'Zayif' ? 2 : 0)
+    + (voyagePressure.current === 'Kuvvetli' ? 1 : 0);
+  return {...cfg, seconds:Math.max(5, cfg.seconds - weatherCut)};
+}
+
+function resolveLiveTaskChain(sc,c2){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  const chain=[];
+  if(/vhf|mayday|pan-pan|distress|vts/.test(blob)) chain.push('VHF kanali teyit', 'standart phrase', 'karsi istasyon tekrari');
+  if(/radar|arpa|cpa|tcpa/.test(blob)) chain.push('radar target acquire', 'CPA/TCPA oku');
+  if(/ecdis|route monitor|chart|xtd/.test(blob)) chain.push('ECDIS alarm satiri', 'route check');
+  if(/engine|makine|blackout|alarm/.test(blob)) chain.push('makine raporu', 'kaptan bilgilendirme');
+  if(/fire|yangin|mob|pirate|korsan|dp |platform|mooring|halat/.test(blob)) chain.push('ilk emniyet adimi', 'logbook');
+  if(!chain.length) return;
+  chain.push('kaptana net rapor', 'sirket/mail kaydi');
+  addWatchFeed('Canli gorev zinciri: '+chain.slice(0,4).join(' -> '),'warn');
+  addLiveLogbook('CANLI GOREV', chain.join(' -> '), true);
+  if(/vhf|mayday|distress/.test(blob)){
+    pushPhoneMessage('Şirket Mail','VHF distress zinciri kayda dustu. Radar/konum, kaptan bilgilendirme ve logbook satiri takip edilecek.');
+  }
+}
+
+function maybeCreateNearMissReplay(sc,c2){
+  const blob = `${sc?.id||''} ${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  const weak = /near.?miss|cpa|snap-back|sling|collision|grounding|yangin|mob|korsan|pirate/.test(blob) && ['korkak','hileli'].includes(c2?.tag);
+  const strongNear = /near.?miss|cpa dustu|cpa düştü|son anda|ramak kala|snap-back/.test(blob);
+  if(!weak && !strongNear) return;
+  const key = `replay-${sc?.id||currentIdx}`;
+  if(seenPhotoMoments.has(key)) return;
+  seenPhotoMoments.add(key);
+  const outcome = weak ? 'gec kaldin / zayif toparladin' : 'olay buyumeden toparlandi';
+  [350,1050,1750].forEach((delay,i)=>{
+    const lines = [
+      'Replay: hedef/tehlike yaklasti.',
+      'Replay: CPA/tehlike alani kritik seviyeye indi.',
+      `Replay sonucu: ${outcome}.`
+    ];
+    sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(lines[i], weak?'warn':'good'), delay));
+  });
+  addLiveLogbook('NEAR-MISS REPLAY',`Olay tekrar canlandirma: ${outcome}.`,true);
+  addCompanyMailThread('Near-miss replay ozeti', `Olay tekrar canlandirildi. Sonuc: ${outcome}. Corrective action ve logbook satiri takip edilecek.`, weak?'warn':'info');
+  tryAddMomentPhoto(key,'Near-Miss Replay',`Hedef yaklasti, risk buyudu ve karar izi tekrar izlendi: ${outcome}.`, sc?.gfx || 'bridge');
+}
+
+function maybeCreateMonthlyMemorySummary(sc,c2){
+  if(!contractDays || contractDays % CONTRACT_SCENES_PER_MONTH !== 0) return;
+  const month = Math.max(1, Math.floor(contractDays / CONTRACT_SCENES_PER_MONTH));
+  const key = `month-video-summary-${month}`;
+  if(seenPhotoMoments.has(key)) return;
+  seenPhotoMoments.add(key);
+  const best = typeof getTopSpecialtyLabel === 'function' ? getTopSpecialtyLabel() : 'vardiya disiplini';
+  const caption = `Ay ${month}: ${choicesMade.length} karar, ${photos.length} hatira, guclu alan ${best}.`;
+  tryAddMomentPhoto(key,`Ay ${month} Video Ozeti`,caption, sc?.gfx || 'bridge');
+  pushPhoneMessage('Telefon Albümü',`${caption} Bu ayin kartlari albume eklendi.`);
+  pushFamilyGroupMessage('Anne',`Ay ${month} bitti demek... Kendine dikkat et, firsat bulunca bize bir fotograf daha at.`);
+  addWatchFeed(`Ay ${month} hatira ozeti hazirlandi`, 'good');
+}
+
+function maybeTriggerMidScenePhone(sc){
+  if(!sc || sc._midPhoneSent) return;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
+  const highPressure = sc.alert || voyagePressure.caution >= 6 || /mayday|distress|engine|makine|storm|firtina|pilot|tug|berth|fire|yangin|mob/.test(blob);
+  if(!highPressure && Math.random() > .28) return;
+  sc._midPhoneSent = true;
+  const timer=setTimeout(()=>{
+    if(/fire|yangin|mob|mayday|distress/.test(blob)){
+      pushEmergencyPhoneNotification('Sahne Bolundu','Telefon bildirimi geldi; bakarsan bilgi alirsin, bakmazsan odak korunur.','vhf');
+      addWatchFeed('Telefon: acil bildirim ekranin kenarinda belirdi','warn');
+    }else if(/engine|makine|blackout/.test(blob)){
+      pushPhoneMessage('Makine','Kopru, trend ekrana dustu. Kaptana rapor ve logbook satirini unutmayin.');
+    }else if(/pilot|tug|berth|liman|harbor/.test(blob)){
+      pushPhoneMessage('Acenta','Pilot/tug penceresi degisebilir. ETA ve all fast saati icin net donus bekleniyor.');
+    }else{
+      pushFamilyGroupMessage('Kardes','Tam su an yaziyorum ama musait degilsen sonra cevap ver. Deniz nasil?');
+    }
+  }, 2300);
+  sceneLiveSequenceTimers.push(timer);
+}
+
 function startSceneChoiceTimer(sc, ch){
   clearSceneChoiceTimer();
-  if(!sc || !ch || ch.style.display === 'none') return;
-  const cfg = TIMED_SCENE_CONFIGS[sc.id];
+  const panel = document.getElementById('calc-panel');
+  const hasActiveDecisionPanel = !!(panel && panel.classList.contains('show'));
+  if(!sc || !ch || (ch.style.display === 'none' && !hasActiveDecisionPanel)) return;
+  const cfg = getSceneTimerConfig(sc);
   if(!cfg) return;
   const chip = document.getElementById('scene-timer-chip');
   if(!chip) return;
@@ -18878,7 +19135,7 @@ function maybeTriggerLivingShipBeat(sc){
 
 function renderInteractionPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
-  const cfg = INTERACTION_PANEL_CONFIGS[sc?.id];
+  const cfg = INTERACTION_PANEL_CONFIGS[sc?.id] || getAutoInteractionConfig(sc);
   if(!panel || !cfg) return false;
   panel.className='calc-panel show';
   panel.innerHTML = `<div class="decision-box">
@@ -18991,6 +19248,8 @@ function onSceneRender(sc){
       addJournalEntry(`[COLREG] ${hint.body}`, sc.day, sc.time);
     }, 250);
   }
+  scheduleSceneLiveSequence(sc);
+  maybeTriggerMidScenePhone(sc);
   maybeTriggerLivingShipBeat(sc);
   // Rastgele olay
   maybeTrigerEvent();
