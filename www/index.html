@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=63">
+<link rel="stylesheet" href="./index.css?v=64">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -116,6 +116,13 @@
   <div class="life-box">
     <div class="life-title"><span>BASARILAR</span><button onclick="closeLifePanel('achievements-panel')">Kapat</button></div>
     <div id="achievements-body"></div>
+  </div>
+</div>
+
+<div id="sim-panel">
+  <div class="life-box sim-box">
+    <div class="life-title"><span>GERCEKCI SIMULASYON MERKEZI</span><button onclick="closeLifePanel('sim-panel')">Kapat</button></div>
+    <div id="sim-body"></div>
   </div>
 </div>
 
@@ -298,6 +305,7 @@
     <button class="tb-btn" onclick="openNotes()">🧭 NOTLARIM</button>
     <button class="tb-btn" onclick="openMap()">🗺️ HARİTA</button>
     <button class="tb-btn" onclick="openDevices()">📡 CİHAZLAR</button>
+    <button class="tb-btn" onclick="openSimCenter()">SIM</button>
     <button class="tb-btn" onclick="openCareer()">KARİYER</button>
     <button class="tb-btn" onclick="openShipWalk()">GEMI</button>
     <button class="tb-btn" onclick="openCabin()">KAMARA</button>
@@ -415,6 +423,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=69"></script>
+<script src="./index.js?v=70"></script>
 </body>
 </html>

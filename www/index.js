@@ -9645,6 +9645,7 @@ function handleSceneChoice(sc, c2, ch){
   if(directMoodDelta) adjustMood(directMoodDelta);
   const crisis=applyEffect(resolvedEffect);
   resolveLiveTaskChain(sc,c2);
+  applyDecisionMemoryRipple(sc,c2);
   maybeCreateNearMissReplay(sc,c2);
   maybeCreateMonthlyMemorySummary(sc,c2);
 
@@ -11177,6 +11178,11 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   }
 }
 
+function applyLanguageUI(){
+  const lang = localStorage.getItem('guverte-language') || 'tr';
+  document.documentElement.lang = lang;
+}
+
 function getOneShotSceneFx(sc){
   const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(sc?.id === 's124b' || /sling kopuyor|halat\/sling kopuyor|rope|snap-back/.test(blob)) return 'oneshot-rope-snap';
@@ -11324,6 +11330,7 @@ function renderScene(idx){
   document.getElementById('contract-type').textContent=stObj.nm+' '+getContractTotalMonths()+' ay · '+contractTotal+' sahne';
   updateOpsHud(sc);
   updateLivingWatch(sc);
+  if(document.getElementById('sim-panel')?.classList.contains('show')) renderSimCenter();
   renderPhone();
 
   const pct=Math.round((currentIdx/sceneQueue.length)*100);
@@ -18212,6 +18219,172 @@ function renderShipWalk(){
   ];
   body.innerHTML = `<div class="shipwalk-map">${zones.map(z=>`<button class="ship-zone" onclick="visitShipZone('${z[0]}')"><b>${z[1]}</b>${z[2]}</button>`).join('')}</div>
     <div class="life-card"><b>Ekip yorgunluğu</b>Güverte ${Math.round(crewFatigueState.deck)} · Makine ${Math.round(crewFatigueState.engine)} · Köprüüstü ${Math.round(crewFatigueState.bridge)} · Galley ${Math.round(crewFatigueState.galley)}</div>`;
+}
+
+function getSimRouteSvg(){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wps = route?.waypoints || [];
+  const active = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  const points = wps.length
+    ? wps.map(w=>`${Math.round(w.x||40)},${Math.round(w.y||80)}`).join(' ')
+    : '30,130 110,92 190,108 270,62 360,88 420,46';
+  const marks = (wps.length ? wps : [
+    {name:'Pilot Stn',x:30,y:130},{name:'TSS',x:110,y:92},{name:'WP-3',x:190,y:108},{name:'Reporting',x:270,y:62},{name:'Berth',x:360,y:88}
+  ]).map((wp,i)=>{
+    const isActive = active && wp.name === active.name;
+    return `<g class="${isActive?'active':''}"><circle cx="${Math.round(wp.x||40)}" cy="${Math.round(wp.y||80)}" r="${isActive?7:5}" fill="${isActive?'#d4a017':'#2e6bbf'}" stroke="#06324d"/><text x="${Math.round((wp.x||40)+7)}" y="${Math.round((wp.y||80)-6)}" font-size="7" fill="#08304a">${phoneSafe(wp.name||('WP'+(i+1)))}</text></g>`;
+  }).join('');
+  return `<svg class="sim-route-svg" viewBox="0 0 440 180" xmlns="http://www.w3.org/2000/svg" aria-label="Rota">
+    <rect width="440" height="180" fill="#d8eef7"/>
+    <path d="M0 128 C70 116 92 142 150 130 C210 116 235 75 300 88 C358 98 380 54 440 42 L440 180 L0 180Z" fill="#d1be88" opacity=".72"/>
+    <path d="M0 0 H440 V180 H0Z" fill="url(#simgrid)" opacity=".28"/>
+    <defs><pattern id="simgrid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#7aa8bd" stroke-width=".5"/></pattern></defs>
+    <polyline points="${points}" fill="none" stroke="#94333a" stroke-width="2" stroke-dasharray="7 4"/>
+    ${marks}
+    <path d="M218 78 l12 6 l-12 6 z" fill="#0b2540" opacity=".88"><animateTransform attributeName="transform" type="translate" values="0 0;22 -8;0 0" dur="4s" repeatCount="indefinite"/></path>
+    <text x="12" y="18" fill="#08304a" font-size="9" font-family="monospace">ECDIS ROUTE MONITOR · ${phoneSafe(route?.name || 'Training route')}</text>
+  </svg>`;
+}
+
+function getSimOpenTasks(){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  const deviceTasks = Object.keys(devicePracticeProgress || {}).filter(k=>devicePracticeProgress[k]===0).slice(0,3);
+  const tasks = [
+    {title:'Vardiya teslim', desc:`${watchState.code} · ${watchState.handover?'teslim saati':'aktif nobet'} · gece emirleri/logbook kontrol`, action:'openLiveLogbook()'},
+    {title:'Seyir rota gorevi', desc:`${route?.name || 'Aktif rota'} · sonraki: ${wp?.name || 'waypoint'} · CPA/XTD takip`, action:'openMap()'},
+    {title:'Kopruustu cihaz paneli', desc:`Radar/ECDIS/AIS/VHF · pratik skoru ${devicePracticeScore.ok}/${devicePracticeScore.total}`, action:'openDevices()'},
+    {title:'Serbest zaman', desc: stats.dinclik<38 ? 'Dinclik dusuk: uyku veya aile aramasi onerilir' : 'Ders, aile, spor, safety round veya GMDSS test', action:'openCabin()'}
+  ];
+  if(deviceTasks.length){
+    tasks.push({title:'Acil cihaz tekrar gorevi', desc:deviceTasks.map(k=>getDeviceDef(k)?.name || k.toUpperCase()).join(' · '), action:'openDevices()'});
+  }
+  if(consequenceTrace.psc>2 || /psc|survey|class/i.test(`${sceneQueue[currentIdx]?.sub||''} ${sceneQueue[currentIdx]?.text||''}`)){
+    tasks.push({title:'Denetim hazirligi', desc:'PSC/class/surveyor icin belge, ekipman ve deficiency zinciri kontrol', action:'openLiveLogbook()'});
+  }
+  if(contractDays && contractDays % CONTRACT_SCENES_PER_MONTH >= 8){
+    tasks.push({title:'Ay sonu kariyer raporu', desc:'Kaptan yorumu, aile mesaji, album ve uzmanlik ozeti yaklasiyor', action:'openCareer()'});
+  }
+  return tasks.slice(0,7);
+}
+
+function renderSimDeviceCards(){
+  const cards = [
+    ['radar','RADAR/ARPA',`CPA ${voyagePressure.caution>=6?'daraliyor':'normal'} · target acquire`, 'radar'],
+    ['ecdis','ECDIS',`${getVoyageWaypoint()?.chart || selectedPortChart || 'ENC'} · safety contour`, 'ecdis'],
+    ['ais','AIS',`SOG/COG update · ${voyagePressure.current==='Kuvvetli'?'current set var':'sensor normal'}`, 'ais'],
+    ['vhf','VHF/GMDSS',`${voyagePressure.vhf} · Ch16/DSC watch`, 'vhf'],
+    ['bnwas','BNWAS',`${stats.dinclik<35?'yorgunluk riski':'watch alert normal'}`, 'alarm'],
+    ['gyro','GYRO',deviceFaultState.gyro?'source check gerekli':'heading stable', 'gyro'],
+    ['echo','ECHO SOUNDER',voyagePressure.current==='Kuvvetli'?'UKC/squat izle':'depth trend normal', 'echo'],
+    ['navtex','NAVTEX/MSI',voyagePressure.caution>=5?'warning okunmali':'MSI takipte', 'vhf']
+  ];
+  return `<div class="sim-device-grid">${cards.map(([key,title,desc,cls])=>`
+    <button class="sim-device-card ${cls} ${deviceFaultState[key]?'alarm':''}" onclick="activeDeviceKey='${key}'; openDevices();">
+      <b>${title}</b><small>${phoneSafe(desc)}</small>
+    </button>`).join('')}</div>`;
+}
+
+function getCrewMemoryCards(){
+  const keys = ['suvari','z1','z2','carkci','lostromo','asci'].filter(k=>CREW_DEFS[k]);
+  return keys.map(k=>{
+    const mem = crewMemoryNotes[k];
+    const line = mem ? (typeof mem === 'object' ? mem.line : mem) : 'Henuz belirgin hafiza yok.';
+    const trust = crewTrust?.[k] ?? 40;
+    return `<div class="sim-memory"><b>${phoneSafe(CREW_DEFS[k].name)}</b><small>Guven ${Math.round(trust)} · ${phoneSafe(line)}</small></div>`;
+  }).join('');
+}
+
+function openSimCenter(){
+  document.getElementById('sim-panel')?.classList.add('show');
+  renderSimCenter();
+}
+
+function renderSimCenter(){
+  const body=document.getElementById('sim-body'); if(!body) return;
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  const trace = getTraceBand();
+  const fatigue = getFatigueBand();
+  const office = getOfficeBand();
+  const tasks = getSimOpenTasks();
+  body.innerHTML = `<div class="sim-dashboard">
+    <div class="sim-section">
+      <div class="sim-head"><span>VARDIYA / ROTA</span><span>${phoneSafe(watchState.code)}</span></div>
+      ${getSimRouteSvg()}
+      <div class="sim-chiprow">
+        <span class="sim-chip ${watchState.handover?'warn':'good'}">${phoneSafe(watchState.label)}${watchState.handover?' · teslim':''}</span>
+        <span class="sim-chip ${voyagePressure.caution>=6?'warn':''}">Swell ${phoneSafe(voyagePressure.swell)} · gorus ${phoneSafe(voyagePressure.visibility)}</span>
+        <span class="sim-chip ${voyagePressure.current==='Kuvvetli'?'warn':''}">Akinti ${phoneSafe(voyagePressure.current)}</span>
+        <span class="sim-chip">${phoneSafe(route?.name || 'Rota yok')} · ${phoneSafe(wp?.name || 'WP bekleniyor')}</span>
+      </div>
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>DURUM</span><span>${phoneSafe(getRankName())}</span></div>
+      <div class="sim-chiprow">
+        <span class="sim-chip ${fatigue.className}">${phoneSafe(fatigue.label)}</span>
+        <span class="sim-chip ${trace.className}">${phoneSafe(trace.label)}</span>
+        <span class="sim-chip ${office.className}">${phoneSafe(office.label)}</span>
+        <span class="sim-chip">Moral ${Math.round(psyche.moral)} · uyum ${Math.round(psyche.uyum)}</span>
+      </div>
+      <div class="sim-task-list">
+        ${tasks.map(t=>`<div class="sim-task"><div><b>${phoneSafe(t.title)}</b><small>${phoneSafe(t.desc)}</small></div><button onclick="${t.action}">Ac</button></div>`).join('')}
+      </div>
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>KOPRUUSTU CIHAZ PANELI</span><span>${devicePracticeScore.ok}/${devicePracticeScore.total}</span></div>
+      ${renderSimDeviceCards()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>SERBEST ZAMAN / RUTIN</span><span>${Math.round(stats.dinclik)} enerji</span></div>
+      <div class="sim-actions">
+        <button onclick="doFreeTimeAction('sleep'); renderSimCenter()">Uyu</button>
+        <button onclick="doFreeTimeAction('study'); renderSimCenter()">Ders</button>
+        <button onclick="doFreeTimeAction('family'); renderSimCenter()">Aile</button>
+        <button onclick="doFreeTimeAction('sport'); renderSimCenter()">Spor</button>
+        <button onclick="doFreeTimeAction('gmdss'); renderSimCenter()">GMDSS</button>
+        <button onclick="doFreeTimeAction('safety'); renderSimCenter()">Safety</button>
+        <button onclick="doFreeTimeAction('sounding'); renderSimCenter()">Sounding</button>
+        <button onclick="openShipWalk()">Gemi ici</button>
+      </div>
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>DENETIM / KARIYER</span><span>${phoneSafe(getTopSpecialtyLabel())}</span></div>
+      <div class="sim-actions">
+        <button onclick="addLiveLogbook('PSC HAZIRLIK','Belgeler, ekipman ve onceki eksikler denetim icin kontrol edildi.',true); consequenceTrace.psc=Math.max(0,consequenceTrace.psc-1); renderSimCenter()">PSC hazirlik</button>
+        <button onclick="addCompanyMailThread('Aylik performans ozeti','Vardiya, cihaz pratikleri ve crew memory ozeti ofise hazirlandi.','info'); showNotif('MAIL','Ofis','Performans ozeti hazirlandi.')">Ofis mail</button>
+        <button onclick="openCareer()">Kariyer</button>
+        <button onclick="openAchievements()">Basarilar</button>
+      </div>
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>MURETTEBAT HAFIZASI</span><span>kararlarin iz birakir</span></div>
+      <div class="sim-memory-grid">${getCrewMemoryCards()}</div>
+    </div>
+  </div>`;
+}
+
+function applyDecisionMemoryRipple(sc,c2){
+  if(!sc || !c2) return;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
+  const weak = c2.tag === 'korkak' || c2.tag === 'hileli';
+  const strong = c2.tag === 'kritik' || c2.tag === 'akilli';
+  if(weak){
+    if(/psc|survey|class|permit|logbook|evrak|deficiency/.test(blob)) consequenceTrace.psc += 2;
+    if(/office|charter|eta|mail|report|near.?miss/.test(blob)) consequenceTrace.office += 2;
+    if(/crew|kavga|mobbing|itaatsizlik|halat|mooring|engine|makine/.test(blob)) consequenceTrace.trust += 1;
+    queueDelayedConsequence({sayginlik:-3,bilgi:-2},'Kararin Izi','Onceki zayif karar sonraki vardiyada ek soru ve guven baskisi olarak geri geldi.',2,-1);
+    addWatchFeed('Yanlis karar izi: ekip/ofis bunu sonra hatirlayacak','warn');
+  }else if(strong){
+    consequenceTrace.office = Math.max(0, consequenceTrace.office-1);
+    consequenceTrace.psc = Math.max(0, consequenceTrace.psc-1);
+    consequenceTrace.trust = Math.max(0, consequenceTrace.trust-1);
+    addWatchFeed('Temiz karar izi: sonraki kontrol biraz rahatlayacak','good');
+  }
+  if(/radar|ecdis|vhf|ais|gyro|echo/.test(blob) && weak){
+    const key = getRemedialDeviceForScene(sc);
+    if(key) devicePracticeProgress[key] = 0;
+  }
 }
 const ACHIEVEMENTS = [
   {key:'vhf_first',title:'Ilk Duzgun VHF',hint:'VHF/pilot/distress sahnesinde iyi karar ver.'},
