@@ -8091,11 +8091,17 @@ function getLiveSceneOverlay(sc){
   if(/medical evacuation|medevac|helikopter|helicopter|mrcc|revir|göğüs ağrısı|gogus agrisi/.test(blob)){
     parts.push('<div class="live-helicopter"></div><div class="live-helo-pad">CLEAR DECK</div><div class="live-mrcc-chain"><span>MRCC</span><span>BRIDGE</span><span>MEDICAL</span></div>');
   }
+  if(/cruise|kruvaziyer|passenger|yolcu|tender|medical evacuation/.test(blob)){
+    parts.push('<div class="live-cruise-lights"><span></span><span></span><span></span></div><div class="live-tender-boat"></div><div class="live-pa-banner">PA · PASSENGER CONTROL</div>');
+  }
+  if(/project|proje|heavy.?lift|agir yuk|ağır yük|sling|cog|sea fastening|lashing|modul/.test(blob)){
+    parts.push('<div class="live-heavy-hook"></div><div class="live-sling-angle"><span></span><span></span></div><div class="live-exclusion-zone">EXCLUSION ZONE</div>');
+  }
   if(/platform|offshore|dp |dynamic positioning|thruster|500 m|safety zone|anchor handling|psv|ahts/.test(blob)){
     parts.push('<div class="live-platform-zone"><span></span></div><div class="live-dp-offset"><b>DP OFFSET</b><i></i></div><div class="live-thruster-load"><span></span><span></span><span></span></div>');
   }
   if(/rov|ctd|survey|multibeam|tether|umbilical|deniz tabani|seabed/.test(blob)){
-    parts.push('<div class="live-rov-screen"><i></i><b></b><span></span></div><div class="live-tether-bar"><span></span></div>');
+    parts.push('<div class="live-rov-screen"><i></i><b></b><span></span></div><div class="live-tether-bar"><span></span></div><div class="live-survey-grid"><i></i><b></b></div>');
   }
   if(/ice|buz|icing|icebreaker|konvoy|convoy|polar/.test(blob)){
     parts.push('<div class="live-ice-field"><span></span><span></span><span></span><b></b></div><div class="live-icebreaker-track"></div><div class="live-icing-warning">ICING</div>');
@@ -8380,7 +8386,59 @@ function buildTransparentSheet(src){
 
 function getPortraitSheetUrl(src){
   if(!src) return '';
-  return `${src}?v=raw2`;
+  buildTransparentSheet(src);
+  return TRANSPARENT_SHEET_CACHE[src] || `${src}?v=raw2`;
+}
+
+function resolvePortraitIndexFromConfig(cfg={}){
+  const base = cfg.base || 'male';
+  const hair = cfg.hair || 'short';
+  const beard = cfg.beard || 'clean';
+  const face = cfg.face || 'soft';
+  const hairColor = cfg.hairColor || '#1e1612';
+  const age = cfg.age || 'young';
+  if(base === 'female'){
+    if(hair === 'ponytail') return 9;
+    if(hair === 'braid') return 11;
+    if(hair === 'long') return 13;
+    if(hair === 'crop' || hairColor === '#d7d0bd') return 15;
+    if(age === 'mid' || age === 'veteran' || age === 'senior') return (hair === 'bob' || face === 'sharp') ? 7 : 5;
+    return (hair === 'slick' || face === 'sharp') ? 3 : 1;
+  }
+  if(hair === 'fade' || beard === 'stubble') return 8;
+  if(hair === 'buzz' || beard === 'goatee') return 10;
+  if(hair === 'undercut' || beard === 'moustache' || hairColor === '#b48a55') return 12;
+  if(hair === 'long' || face === 'square') return 14;
+  if(age === 'mid' || age === 'veteran' || age === 'senior') return (beard === 'full' || hairColor === '#6a4b35') ? 6 : 4;
+  return (hair === 'slick' || face === 'sharp') ? 2 : 0;
+}
+
+function normalizePortraitConfig(cfg={}){
+  const out = {...cfg};
+  out.base = out.base === 'female' ? 'female' : 'male';
+  if(out.base === 'female') out.beard = 'clean';
+  const isOfficerSheet = /crew-portraits-illustrated|crew-portraits-veteran|crew-portraits\.png/.test(String(out.portraitSheet || ''));
+  if(isOfficerSheet){
+    const age = (out.age === 'mid' || out.age === 'veteran' || out.age === 'senior') ? 'mid' : 'young';
+    const pool = OFFICER_SHEET_POOLS[age]?.[out.base] || OFFICER_SHEET_POOLS.young[out.base] || OFFICER_SHEET_POOLS.young.male;
+    let idx = Number.isInteger(out.sheetIndex) ? out.sheetIndex : (Number.isInteger(out.model) ? out.model : resolvePortraitIndexFromConfig(out));
+    if(!pool.includes(idx)) idx = resolvePortraitIndexFromConfig(out);
+    if(!pool.includes(idx)) idx = pool[0];
+    out.sheetIndex = idx;
+  }
+  if(out.base === 'female' && /male\.png/.test(String(out.portraitSheet || ''))){
+    out.portraitSheet = 'assets/support-style-female.png';
+    out.sheetCols = 3;
+    out.sheetRows = 2;
+    out.sheetIndex = Math.min(5, Math.max(0, Number(out.sheetIndex || 0)));
+  }
+  if(out.base === 'male' && /female\.png/.test(String(out.portraitSheet || ''))){
+    out.portraitSheet = 'assets/support-style-male.png';
+    out.sheetCols = 3;
+    out.sheetRows = 2;
+    out.sheetIndex = Math.min(5, Math.max(0, Number(out.sheetIndex || 0)));
+  }
+  return out;
 }
 
 function getPlayerModelPool(base, age=playerAppearance.age){
@@ -8534,6 +8592,7 @@ function refreshPlayerStyledFacePhoto(onDone){
 }
 
 function renderPortraitSprite(cfg={}, variant='avatar'){
+  cfg = normalizePortraitConfig(cfg);
   const skinIdx = Math.max(0, PLAYER_LOOK.skin.indexOf(cfg.skin));
   const hairIdx = Math.max(0, PLAYER_LOOK.hairColor.indexOf(cfg.hairColor));
   const eyeIdx = Math.max(0, PLAYER_LOOK.eye.indexOf(cfg.eye));
@@ -17786,6 +17845,14 @@ function getSceneLiveBeats(sc){
   if(/medical evacuation|medevac|helicopter|helikopter|mrcc|revir/.test(blob)){
     add(450,'MRCC zinciri basladi; helikopter yaklasma alani hazirlaniyor.','warn','3. Zabit','"Deck clear olmadan kimse kahramanlik yapmayacak."');
     add(1600,'Medical log ve course/speed bilgisi bekleniyor.','warn');
+  }
+  if(/cruise|kruvaziyer|passenger|yolcu|tender|pa announcement/.test(blob)){
+    add(430,'Kruvaziyer PA sistemi ve tender trafigi aktif.','warn','Kaptan','"Yolcu operasyonunda panik degil, akici koordinasyon isterim."');
+    add(1520,'Hotel side / bridge / medical zinciri ayni olay dosyasina baglandi.','warn');
+  }
+  if(/project|proje|heavy.?lift|agir yuk|ağır yük|sling|cog|sea fastening|modul/.test(blob)){
+    add(420,'Heavy-lift sahasi hareketli: hook, sling angle ve exclusion zone canli.','warn','1. Zabit','"COG ve sling angle yanlis okunursa operasyon durur."');
+    add(1500,'Sea fastening ve lashing kontrolu ikinci teyide alindi.','warn');
   }
   if(/platform|offshore|dp |dynamic positioning|500 m|safety zone|anchor handling/.test(blob)){
     add(400,'DP offset canli: platform 500 m safety zone ekranda.','warn','Kaptan','"Abort point kafanda net olsun."');
