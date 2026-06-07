@@ -13148,17 +13148,17 @@ const MAP_TASKS = [
   {
     id:'pilot',
     title:'Pilot Station Sec',
-    desc:'Pilot boarding ground noktasina tikla.'
+    desc:'Pilot boarding ground noktasini haritada bul ve isaretle.'
   },
   {
     id:'anchorage',
     title:'Guvenli Demir Yeri Bul',
-    desc:'Guvenli demirleme icin ayrilan anchorage bolgesini tikla.'
+    desc:'Guvenli demirleme icin ayrilan anchorage bolgesini isaretle.'
   },
   {
     id:'tss',
     title:'TSS\'yi Yanlis Kesme',
-    desc:'Traffic lane / TSS hattini isaretle. Bu gorev trafik yogun chartta calisir.',
+    desc:'Traffic lane / TSS hattini isaretle; trafik akisini dik ve plansiz kesme.',
     preferredPort:'Singapur'
   },
   {
@@ -13223,7 +13223,7 @@ function autoOpenVoyageChart(sc){
 }
 
 function getActivePortChart(){
-  return ROUTE_PORTS.find(p=>p.name===selectedPortChart) || null;
+  return getPortChartByName(selectedPortChart);
 }
 
 function getPortChartEffectiveZoom(){
@@ -13256,22 +13256,44 @@ function getPortChartTaskGeometry(port){
 }
 
 function isMapTaskAllowedForPort(task, port){
-  if(!task || !port) return false;
-  return port.kind === 'port'
-    || (task.chartKind === 'route' && port.kind === 'route')
-    || (task.chartKind === 'transit' && port.kind !== 'port');
+  return isMapTaskKindMatch(task, port);
 }
 
 function getCurrentMapTask(){
   return MAP_TASKS[activeMapTaskIndex % MAP_TASKS.length];
 }
 
+function getMapTaskRequiredKind(task){
+  if(!task) return 'port';
+  if(task.chartKind === 'route') return 'route';
+  if(task.chartKind === 'transit') return 'transit';
+  return 'port';
+}
+
+function isMapTaskKindMatch(task, port){
+  const kind = getMapTaskRequiredKind(task);
+  if(!port) return false;
+  if(kind === 'route') return port.kind === 'route';
+  if(kind === 'transit') return port.kind !== 'port';
+  return port.kind === 'port';
+}
+
 function ensureTaskPort(task){
-  if(!task?.preferredPort) return;
-  const active = ROUTE_PORTS.find(p=>p.name===selectedPortChart);
-  if(!active) return;
-  const geo = getPortChartTaskGeometry(active);
-  if(task.id === 'tss' && !/traffic|canal/.test(geo.profile.template)) selectedPortChart = task.preferredPort;
+  const active = getPortChartByName(selectedPortChart);
+  if(task?.preferredPort){
+    const preferred = getPortChartByName(task.preferredPort);
+    if(preferred && (!active || !isMapTaskKindMatch(task, active))){
+      selectedPortChart = preferred.name;
+      return;
+    }
+  }
+  if(active && isMapTaskKindMatch(task, active)) return;
+  const routeCharts = getActiveVoyageChartSet();
+  const candidates = getPortChartEntries();
+  const voyageMatch = candidates.find(p=>routeCharts.has(p.name) && isMapTaskKindMatch(task, p));
+  const globalMatch = candidates.find(p=>isMapTaskKindMatch(task, p));
+  const next = voyageMatch || globalMatch;
+  if(next) selectedPortChart = next.name;
 }
 
 function nextMapTask(){
@@ -13324,7 +13346,7 @@ function buildMapTaskTargetOverlay(port){
       <circle cx="${tx}" cy="${ty}" r="6" fill="#ffd45a" stroke="#07131f" stroke-width="1.4"/>
       <path d="M${labelX} ${labelY} H${rayEndX}" stroke="#ffd45a" stroke-width="1.3" stroke-dasharray="4,3"/>
       <rect x="${labelX-6}" y="${labelY-15}" width="112" height="17" rx="5" fill="rgba(5,16,28,.92)" stroke="#ffd45a" stroke-width="1"/>
-      <text x="${labelX}" y="${labelY-4}" fill="#ffd45a" font-size="7.2" font-family="monospace">BURAYA TIKLA · ${target.label || task.title}</text>
+      <text x="${labelX}" y="${labelY-4}" fill="#ffd45a" font-size="7.2" font-family="monospace">${target.label || task.title}</text>
     </g>`;
 }
 
@@ -13336,7 +13358,7 @@ function updateMapTaskBox(port){
   const status = document.getElementById('port-chart-taskstatus');
   const btn = document.getElementById('port-task-next');
   if(!title || !desc || !status) return;
-  const effectivePort = ROUTE_PORTS.find(p=>p.name===selectedPortChart) || port;
+  const effectivePort = getPortChartByName(selectedPortChart) || port;
   const taskAllowed = isMapTaskAllowedForPort(task, effectivePort);
   if(!taskAllowed){
     title.textContent = `${effectivePort?.name || 'Chart'} · Stratejik Gecit`;
@@ -13351,7 +13373,8 @@ function updateMapTaskBox(port){
   title.textContent = `${task.title} · ${effectivePort?.name || ''}`;
   desc.textContent = task.desc + (task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${effectivePort.name} charti uzerindesin.` : '');
   status.className = '';
-  status.textContent = completedMapTasks.has(task.id) ? 'Tamamlandi. Istersen sonraki goreve gecebilirsin.' : 'Harita ustunde uygun bolgeye tikla.';
+  const target = getMapTaskTarget(task, effectivePort);
+  status.textContent = completedMapTasks.has(task.id) ? 'Tamamlandi. Istersen sonraki goreve gecebilirsin.' : `${target.label || task.title} halkasini haritada bul ve isaretle.`;
   if(btn) btn.textContent = activeMapTaskIndex === MAP_TASKS.length-1 ? 'Basa Don' : 'Sonraki';
 }
 
@@ -13497,7 +13520,9 @@ function getMapRegionByPosition(pos){
 function getPortChartEntries(){
   const route = getActiveVoyageRoute();
   const activeCharts = new Set([route?.chart, ...(route?.charts || []), ...(route?.waypoints || []).map(w=>w.chart)].filter(Boolean));
-  return ROUTE_PORTS
+  const known = new Set(ROUTE_PORTS.map(p=>p.name));
+  const synthetic = getSyntheticVoyageChartEntries().filter(p=>!known.has(p.name));
+  return ROUTE_PORTS.concat(synthetic)
     .filter(p=>['port','waterway','route'].includes(p.kind))
     .slice()
     .sort((a,b)=>{
@@ -13510,6 +13535,34 @@ function getPortChartEntries(){
       if(ak !== bk) return ak - bk;
       return a.name.localeCompare(b.name,'tr');
     });
+}
+
+function getSyntheticVoyageChartEntries(){
+  const out = new Map();
+  (TRADE_VOYAGE_ROUTES || []).forEach((route, routeIndex)=>{
+    const names = [route.chart, ...(route.charts || []), ...(route.waypoints || []).map(w=>w.chart)].filter(Boolean);
+    names.forEach((name, nameIndex)=>{
+      if(out.has(name) || ROUTE_PORTS.some(p=>p.name===name)) return;
+      const pts = (route.waypoints || []).filter(w=>w.chart === name || name === route.chart || (route.charts || []).includes(name));
+      const sourcePts = pts.length ? pts : (route.waypoints || []);
+      const avg = sourcePts.reduce((acc,p)=>({x:acc.x+(Number(p.x)||220), y:acc.y+(Number(p.y)||130)}), {x:0,y:0});
+      const div = Math.max(1, sourcePts.length);
+      out.set(name, {
+        name,
+        x:+Math.max(8, Math.min(432, avg.x / div + (nameIndex%3-1)*7)).toFixed(1),
+        y:+Math.max(12, Math.min(248, avg.y / div + (routeIndex%4-1.5)*5)).toFixed(1),
+        visited:false,
+        kind:'route',
+        synthetic:true,
+        routeKey:route.key
+      });
+    });
+  });
+  return [...out.values()];
+}
+
+function getPortChartByName(name){
+  return ROUTE_PORTS.find(p=>p.name===name) || getSyntheticVoyageChartEntries().find(p=>p.name===name) || null;
 }
 
 function renderMapRouteDraftOverlay(svg){
@@ -14577,6 +14630,9 @@ function renderMap(){
     if(visited){
       s+=`<circle cx="${px}" cy="${py}" r="9" fill="none" stroke="${color}" stroke-width="1" opacity=".3"/>`;
     }
+    if(labeled || important || p.kind!=='port'){
+      s+=`<circle class="world-click-zone" cx="${px}" cy="${py}" r="${important?14:11}" fill="rgba(255,212,90,.01)" stroke="${color}" stroke-width=".8" opacity=".18"><title>${p.name} chart dosyasini ac</title></circle>`;
+    }
   });
 
   // Ship position
@@ -14595,7 +14651,7 @@ function renderMap(){
 
   svg.innerHTML = s;
   svg.onclick = (ev)=>handleWorldMapClick(svg, ev);
-  legend.textContent = `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
+  legend.textContent = `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · Nokta/liman/gecit uzerine tiklayinca chart acilir · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
 }
 
 // ===== SEYİR GÜNLÜĞİ =====
@@ -16901,6 +16957,7 @@ let devicePracticeScore = {ok:0,total:0};
 let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.';
 let deviceMenuPath = {};
 let devicePracticeProgress = {};
+let devicePracticeVariant = {};
 let phoneOpen = false;
 let phoneTab = 'messages';
 let activePhoneContact = 'Kaptan';
@@ -16986,11 +17043,12 @@ const DEVICE_TRAINER = [
 
 const DEVICE_MENU_TREE = {
   vhf:{
-    root:[mSub('WATCH','watch'),mSub('DSC CALL','dsc'),mSub('DISTRESS','distress'),mSub('SETUP','setup')],
+    root:[mSub('WATCH','watch'),mSub('WORKING CH','working'),mSub('DSC CALL','dsc'),mSub('DISTRESS','distress'),mSub('SETUP','setup')],
     watch:[mAct('CH16 WATCH'),mAct('DUAL WATCH'),mAct('SCAN'),mAct('SQUELCH')],
-    dsc:[mAct('INDIVIDUAL CALL'),mAct('GROUP CALL'),mAct('TEST CALL'),mAct('RECEIVED LOG')],
+    working:[mAct('VTS CH12'),mAct('PILOT CH14'),mAct('PORT OPS CH10'),mAct('BACK TO CH16')],
+    dsc:[mAct('INDIVIDUAL CALL'),mAct('GROUP CALL'),mAct('URGENCY'),mAct('SAFETY'),mAct('TEST CALL'),mAct('RECEIVED LOG')],
     distress:[mAct('DISTRESS MENU'),mAct('NATURE OF DISTRESS'),mAct('POSITION / UTC'),mAct('SEND DISTRESS', true)],
-    setup:[mAct('TX POWER'),mAct('GPS INPUT'),mAct('MMSI CHECK'),mAct('RADIO LOG')]
+    setup:[mAct('TX POWER'),mAct('LOW POWER'),mAct('HIGH POWER'),mAct('GPS INPUT'),mAct('MMSI CHECK'),mAct('RADIO LOG')]
   },
   mfhf:{
     root:[mSub('FREQUENCY','freq'),mSub('DSC','dsc'),mSub('WATCH','watch'),mSub('SETUP','setup')],
@@ -17007,11 +17065,12 @@ const DEVICE_MENU_TREE = {
     data:[mAct('MMSI CHECK'),mAct('HEX ID'),mAct('VESSEL DATA'),mAct('SERVICE DUE')]
   },
   ecdis:{
-    root:[mSub('ROUTE','route'),mSub('CHART','chart'),mSub('ALARMS','alarms'),mSub('SENSORS','sensors')],
-    route:[mAct('ROUTE CHECK'),mAct('XTD LIMIT'),mAct('WHEEL-OVER'),mAct('NEXT WP')],
-    chart:[mAct('SAFETY CONTOUR'),mAct('SAFETY DEPTH'),mAct('NO-GO AREA'),mAct('ENC UPDATE')],
-    alarms:[mAct('ALARM LIST'),mAct('ACKNOWLEDGE'),mAct('LOOK-AHEAD'),mAct('DANGER QUERY')],
-    sensors:[mAct('SENSOR STATUS'),mAct('GPS SOURCE'),mAct('GYRO INPUT'),mAct('RADAR OVERLAY')]
+    root:[mSub('DISPLAY','display'),mSub('ROUTE','route'),mSub('CHART SAFETY','chart'),mSub('ALARMS','alarms'),mSub('SENSORS','sensors')],
+    display:[mAct('NORTH-UP'),mAct('COURSE-UP'),mAct('DAY/NIGHT'),mAct('LAYERS'),mAct('RADAR OVERLAY')],
+    route:[mAct('ROUTE CHECK'),mAct('XTD LIMIT'),mAct('WHEEL-OVER'),mAct('NEXT WP'),mAct('TURN RADIUS')],
+    chart:[mAct('SAFETY CONTOUR'),mAct('SAFETY DEPTH'),mAct('NO-GO AREA'),mAct('ENC UPDATE'),mAct('DANGER QUERY')],
+    alarms:[mAct('ALARM LIST'),mAct('ACKNOWLEDGE'),mAct('LOOK-AHEAD'),mAct('XTD ALARM'),mAct('CPA ALARM')],
+    sensors:[mAct('SENSOR STATUS'),mAct('GPS SOURCE'),mAct('GYRO INPUT'),mAct('SPEED LOG INPUT'),mAct('RADAR OVERLAY')]
   },
   sart:{
     root:[mSub('MODE','mode'),mSub('TEST','test'),mSub('MOUNT','mount'),mSub('INFO','info')],
@@ -17021,11 +17080,12 @@ const DEVICE_MENU_TREE = {
     info:[mAct('BATTERY DATE'),mAct('SERVICE DATE'),mAct('SERIAL NO'),mAct('LOGBOOK')]
   },
   radar:{
-    root:[mSub('DISPLAY','display'),mSub('TUNE','tune'),mSub('ARPA','arpa'),mSub('TOOLS','tools')],
-    display:[mAct('RANGE 6NM'),mAct('HEAD-UP'),mAct('NORTH-UP'),mAct('COURSE-UP')],
-    tune:[mAct('GAIN'),mAct('SEA CLUTTER'),mAct('RAIN CLUTTER'),mAct('TUNE AUTO')],
-    arpa:[mAct('ARPA ACQUIRE'),mAct('LOST TARGET'),mAct('CPA/TCPA'),mAct('TRIAL MANEUVER')],
-    tools:[mAct('EBL/VRM'),mAct('GUARD ZONE'),mAct('PARALLEL INDEX'),mAct('TRAILS')]
+    root:[mSub('RANGE / MODE','display'),mSub('TUNING','tune'),mSub('ARPA','arpa'),mSub('TOOLS','tools'),mSub('ALARMS','alarms')],
+    display:[mAct('RANGE 3NM'),mAct('RANGE 6NM'),mAct('HEAD-UP'),mAct('NORTH-UP'),mAct('COURSE-UP'),mAct('TRUE MOTION')],
+    tune:[mAct('GAIN'),mAct('SEA CLUTTER'),mAct('RAIN CLUTTER'),mAct('TUNE AUTO'),mAct('PULSE LENGTH')],
+    arpa:[mAct('ARPA ACQUIRE'),mAct('VECTOR TRUE'),mAct('VECTOR REL'),mAct('LOST TARGET'),mAct('CPA/TCPA'),mAct('TRIAL MANEUVER')],
+    tools:[mAct('EBL/VRM'),mAct('GUARD ZONE'),mAct('PARALLEL INDEX'),mAct('TRAILS'),mAct('OFFSET EBL')],
+    alarms:[mAct('CPA LIMIT'),mAct('TCPA LIMIT'),mAct('GUARD ZONE'),mAct('ALARM ACK')]
   },
   ais:{
     root:[mSub('TARGETS','targets'),mSub('DATA','data'),mSub('MESSAGES','messages'),mSub('FILTER','filter')],
@@ -17075,6 +17135,13 @@ const DEVICE_PRACTICE = {
   bnwas:{title:'BNWAS Vardiya Baslangic Pratigi', phrase:'Vardiya basinda watch active, timer ve alarm zinciri kontrol edilir.', steps:['ACK / ACTIVE','TIMER SET','STAGE 1','EVENT LOG']}
 };
 
+const VHF_PRACTICE_VARIANTS = [
+  {title:'VHF Mayday Relay Pratigi', phrase:'Distress aldiginda once dinle, sonra DSC/distress bilgisini ve mevkiyi temiz kur.', steps:['CH16 WATCH','DISTRESS MENU','NATURE OF DISTRESS','POSITION / UTC','SEND DISTRESS']},
+  {title:'VTS Working Channel Pratigi', phrase:'VTS seni CH12 calisma kanalina aldi: dogru kanala gec, low power dusun, kisa raporu logla.', steps:['VTS CH12','LOW POWER','SQUELCH','RADIO LOG']},
+  {title:'Pilot Exchange VHF Pratigi', phrase:'Pilot station yaklasiyor: pilot kanalini ac, dual watch ile CH16 nobetini koru, mesaj tekrarini net yap.', steps:['PILOT CH14','DUAL WATCH','TX POWER','RADIO LOG']},
+  {title:'DSC Urgency / PAN-PAN Pratigi', phrase:'Acil ama distress degil: DSC urgency sec, working channel belirle, sonrasinda voice phrase kur.', steps:['DSC CALL','URGENCY','POSITION / UTC','VTS CH12','RADIO LOG']}
+];
+
 function getDeviceDef(key){
   return DEVICE_TRAINER.find(d=>d.key===key) || DEVICE_TRAINER[0];
 }
@@ -17112,6 +17179,10 @@ function getDeviceBreadcrumb(def){
   return `MAIN MENU / ${item ? item.label : menuId.toUpperCase()}`;
 }
 function getDevicePractice(def){
+  if(def.key === 'vhf'){
+    const idx = devicePracticeVariant.vhf || 0;
+    return VHF_PRACTICE_VARIANTS[idx % VHF_PRACTICE_VARIANTS.length];
+  }
   return DEVICE_PRACTICE[def.key] || null;
 }
 function getDevicePracticeIndex(def){
@@ -17127,6 +17198,7 @@ function getDeviceExpectedAction(def){
 }
 function resetDevicePractice(){
   const def = getDeviceDef(activeDeviceKey);
+  if(def.key === 'vhf') devicePracticeVariant.vhf = ((devicePracticeVariant.vhf || 0) + 1) % VHF_PRACTICE_VARIANTS.length;
   devicePracticeProgress[def.key] = 0;
   deviceMenuPath[def.key] = 'root';
   deviceLogLine = `${def.name}: pratik sifirlandi. Ilk adimdan basla.`;
@@ -17151,17 +17223,22 @@ function updateDeviceChartOverlay(def, label, ok=false){
   if(def.key === 'radar'){
     next.radar = true;
     if(/ARPA ACQUIRE/.test(l)) next.arpa = true;
-    if(/CPA|TCPA/.test(l)) next.cpa = true;
+    if(/CPA|TCPA|VECTOR/.test(l)) next.cpa = true;
     if(/GUARD ZONE/.test(l)) next.guard = true;
-    if(/EBL|VRM/.test(l)) next.ebl = true;
+    if(/EBL|VRM|PARALLEL|TRAILS|TRUE MOTION/.test(l)) next.ebl = true;
     if(/TRIAL/.test(l)) next.trial = true;
-    if(/RANGE|GAIN|CLUTTER/.test(l)) next.radar = true;
+    if(/RANGE|GAIN|CLUTTER|PULSE|TUNE/.test(l)) next.radar = true;
   }
   if(def.key === 'ais'){
     next.ais = true;
     if(/CPA SORT|TARGET DETAIL|SENSOR CHECK/.test(l)) next.cpa = true;
   }
   if(def.key === 'ecdis'){
+    if(/ROUTE CHECK|NEXT WP|WHEEL|TURN|XTD/.test(l)) next.ebl = true;
+    if(/SAFETY CONTOUR|SAFETY DEPTH|NO-GO|DANGER|LOOK-AHEAD|ALARM/.test(l)) next.guard = true;
+    if(/RADAR OVERLAY/.test(l)) next.radar = true;
+    if(/SENSOR|GPS|GYRO|SPEED LOG/.test(l)) next.ais = true;
+    if(/CPA ALARM/.test(l)) next.cpa = true;
     if(/ROUTE CHECK|ALARM LIST|SENSOR STATUS/.test(l)) next.radar = next.radar || deviceChartOverlayState.radar;
   }
   deviceChartOverlayState = next;
@@ -17194,6 +17271,8 @@ function useDeviceKey(label, type='action', target=''){
   devicePracticeScore.total++;
   if(label === expected){
     devicePracticeScore.ok++;
+    addWatchFeed(`${def.name}: ${label} dogru uygulandi`, def.key==='vhf' ? 'warn' : 'good');
+    if(def.key === 'vhf') playVhfPracticeBurst();
     updateDeviceChartOverlay(def, label, true);
     if(practice){
       const next = (devicePracticeProgress[def.key] || 0) + 1;
@@ -19179,16 +19258,17 @@ const LIVING_SHIP_BEATS = [
 
 const INTERACTION_PANEL_CONFIGS = {
   s409:{
-    title:'VHF KANAL / CAGRI SECIMI',
-    hint:'Baski altinda dogru kanal ve cagri tipini isaretle.',
-    caption:'Distress/urgency/safety ayrimi, gecikmeden once dogru kanali secmekle baslar.',
-    expected:'vhf16',
+    title:'VHF WORKING CHANNEL',
+    hint:'CH16 nobetini korurken olay icin dogru calisma kanalini sec.',
+    caption:'Her VHF olayi CH16 degildir; pilot/VTS operasyonunda uygun working channel secilir.',
+    expected:'vts12',
     correctTag:'kritik',
     midTag:'akilli',
     hotspots:[
-      {id:'vhf13', x:82, y:78, r:18, label:'13'},
-      {id:'vhf16', x:160, y:52, r:24, label:'16'},
-      {id:'vhf70', x:238, y:78, r:18, label:'70'}
+      {id:'vhf16', x:70, y:78, r:17, label:'16'},
+      {id:'vts12', x:138, y:48, r:23, label:'VTS 12'},
+      {id:'pilot14', x:214, y:48, r:20, label:'PILOT 14'},
+      {id:'dsc70', x:270, y:80, r:17, label:'DSC 70'}
     ]
   },
   s414:{
@@ -19233,25 +19313,57 @@ const INTERACTION_PANEL_CONFIGS = {
 };
 
 function buildHotspotConfig(title, hint, caption, expected, correctTag, midTag, labels){
-  const spots = [
-    {id:labels[0]?.id || 'a', x:82, y:78, r:18, label:labels[0]?.label || 'A'},
-    {id:labels[1]?.id || 'b', x:160, y:52, r:24, label:labels[1]?.label || 'B'},
-    {id:labels[2]?.id || 'c', x:238, y:78, r:18, label:labels[2]?.label || 'C'}
-  ];
+  const slots = labels.length > 3
+    ? [{x:66,y:78,r:17},{x:134,y:48,r:22},{x:208,y:48,r:20},{x:272,y:80,r:17}]
+    : [{x:82,y:78,r:18},{x:160,y:52,r:24},{x:238,y:78,r:18}];
+  const spots = labels.map((item,i)=>({
+    id:item?.id || String.fromCharCode(97+i),
+    x:slots[i]?.x || (70 + i*54),
+    y:slots[i]?.y || 78,
+    r:slots[i]?.r || 18,
+    label:item?.label || String.fromCharCode(65+i)
+  }));
   return {title,hint,caption,expected,correctTag,midTag,hotspots:spots};
+}
+
+function getVhfInteractionConfig(sc, blob){
+  const isDistress = /mayday|distress|mob|adam denize|abandon|fire|yangin|pirate|korsan|medical emergency|medevac/.test(blob);
+  const isDsc = /dsc|gmdss|urgency|pan-pan|safety|securite/.test(blob);
+  const isPilot = /pilot exchange|pilot station|pilot boarding|pilot|tug|römorkör|romorkor|berth|all fast/.test(blob);
+  const isVts = /vts|traffic|strait|bogaz|boğaz|tss|reporting point|report/.test(blob);
+  const expected = isDistress ? 'vhf16' : isDsc ? 'dsc70' : isPilot ? 'pilot14' : isVts ? 'vts12' : 'work';
+  const title = isDistress ? 'VHF DISTRESS WATCH'
+    : isDsc ? 'DSC / URGENCY SECIMI'
+    : isPilot ? 'PILOT WORKING CHANNEL'
+    : isVts ? 'VTS WORKING CHANNEL'
+    : 'VHF KANAL / CAGRI AKISI';
+  const hint = isDistress
+    ? 'Distress aninda CH16 voice watch ve net MAYDAY akisi onceliklidir.'
+    : 'Olay tipine gore CH16, DSC70 veya working channel ayrimini yap.';
+  const caption = isDistress
+    ? 'CH16 acil voice cagri icindir; ardindan mevki, zaman ve tehlike bilgisi gelir.'
+    : 'CH16 cagri/nobet kanali; operasyon ilerleyince VTS/pilot working channel veya DSC70 secilir.';
+  return buildHotspotConfig(
+    title,
+    hint,
+    caption,
+    expected,
+    'kritik',
+    'akilli',
+    [
+      {id:'vhf16',label:'CH16'},
+      {id:'vts12',label:'VTS12'},
+      {id:'pilot14',label:'PILOT14'},
+      {id:'dsc70',label:'DSC70'}
+    ]
+  );
 }
 
 function getAutoInteractionConfig(sc){
   if(!sc || sc.calc || !Array.isArray(sc.choices) || sc.choices.length < 2) return null;
   const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
   if(/vhf|mayday|pan-pan|distress|vts|pilot exchange|pilot boarding/.test(blob)){
-    return buildHotspotConfig(
-      'VHF KANAL AYARI',
-      'Dogru kanal / cagri tipini sec. Gecikme veya yanlis kanal kayda girer.',
-      'VHF pratiginde once kanal, sonra kisa ve standart ifade.',
-      'vhf16','kritik','akilli',
-      [{id:'vhf13',label:'13'},{id:'vhf16',label:'16'},{id:'vhf70',label:'70'}]
-    );
+    return getVhfInteractionConfig(sc, blob);
   }
   if(/radar|arpa|cpa|tcpa|ais target|guard zone/.test(blob)){
     return buildHotspotConfig(
@@ -19460,7 +19572,7 @@ function renderInteractionPanel(sc, ch){
         <circle cx="160" cy="60" r="42" fill="none" stroke="#214a62" stroke-width="1.5"/>
         <circle cx="160" cy="60" r="28" fill="none" stroke="#214a62" stroke-width="1.2"/>
         <path d="M160 60 L212 28" stroke="#81f7b8" stroke-width="2.6" stroke-linecap="round"/>
-        ${cfg.hotspots.map(h=>`<g><circle cx="${h.x}" cy="${h.y}" r="${h.r}" fill="rgba(127,195,255,.08)" stroke="#7fc3ff" stroke-dasharray="5 4"/><text x="${h.x-4}" y="${h.y+3}" fill="#cfeaff" font-size="8" font-family="monospace">${h.label}</text></g>`).join('')}
+        ${cfg.hotspots.map(h=>`<g class="interaction-pulse"><circle cx="${h.x}" cy="${h.y}" r="${h.r}" fill="rgba(127,195,255,.08)" stroke="#7fc3ff" stroke-dasharray="5 4"/><text x="${h.x-11}" y="${h.y+3}" fill="#cfeaff" font-size="7.2" font-family="monospace">${h.label}</text></g>`).join('')}
       </svg>
       <div class="doc-visual-caption">${cfg.caption}</div>
     </div>
