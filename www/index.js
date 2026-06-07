@@ -8164,6 +8164,7 @@ let portOpsChain={pilot:false,tug:false,approach:false,allFast:false,cargoWatch:
 let companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:false};
 let investigationDossier=[];
 let watchCycleLog={handovers:0, logbook:0, portPrep:0};
+let liveVoyageState={progress:0, eta:'--:--', cpa:'--', tcpa:'--', ukc:'--', sog:'--', nextWp:'--', alert:false};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -11181,6 +11182,45 @@ function getSceneMotionClass(sc){
   return '';
 }
 
+function computeLiveVoyageState(sc){
+  const route = getActiveVoyageRoute();
+  const wp = getVoyageWaypoint();
+  const next = getVoyageWaypoint(Math.min((activeVoyageProgress || 0) + 1, (route?.waypoints?.length || 1) - 1));
+  const {hour, minute} = parseSceneClock(sc || {});
+  const sceneNo = Math.max(0, contractDays || currentIdx || 0);
+  const pressure = Math.max(0, Number(voyagePressure?.caution || 0));
+  const progress = getVoyageLegProgress();
+  const etaMin = 35 + ((sceneNo * 11 + pressure * 7) % 220);
+  const etaTotal = (hour * 60 + minute + etaMin) % 1440;
+  const eta = `${String(Math.floor(etaTotal/60)).padStart(2,'0')}:${String(etaTotal%60).padStart(2,'0')}`;
+  const cpaVal = Math.max(0.25, 2.6 - pressure * 0.17 - ((sceneNo % 5) * 0.11));
+  const ukcVal = Math.max(0.7, 5.4 - pressure * 0.28 - (/ukc|squat|shallow|pilot|berth/i.test(`${sc?.sub||''} ${sc?.text||''}`) ? 1.1 : 0));
+  const sogVal = Math.max(3.5, 14.2 - pressure * 0.42 - (voyagePressure.speed === 'Speed azalt' ? 3.0 : voyagePressure.speed === 'Dead slow hazir' ? 8.4 : 0));
+  liveVoyageState = {
+    route:route?.name || 'Rota yok',
+    progress,
+    eta,
+    cpa:cpaVal.toFixed(1),
+    tcpa:String(Math.max(4, Math.round(etaMin / 7))),
+    ukc:ukcVal.toFixed(1),
+    sog:sogVal.toFixed(1),
+    nextWp:next?.name || wp?.name || '--',
+    chart:next?.chart || wp?.chart || selectedPortChart,
+    alert:cpaVal < 1.0 || ukcVal < 1.5 || pressure >= 7
+  };
+  return liveVoyageState;
+}
+
+function updateLiveVoyageState(sc){
+  const st = computeLiveVoyageState(sc);
+  const chip = document.getElementById('route-chip');
+  if(chip){
+    chip.className = `ops-chip ${st.alert ? 'warn' : st.progress >= 60 ? 'hot' : ''}`.trim();
+    chip.textContent = `${st.progress}% · ETA ${st.eta} · CPA ${st.cpa} · UKC ${st.ukc}`;
+  }
+  return st;
+}
+
 function getSceneAmbientClass(sc){
   const profile = getSceneBackdropProfile(sc);
   if(profile === 'storm') return 'scene-ambient-storm';
@@ -11421,6 +11461,7 @@ function renderScene(idx){
   document.getElementById('lbd').textContent=sc.loc;
   updateWatchState(sc);
   updateVoyagePressure(sc);
+  updateLiveVoyageState(sc);
   updatePortOpsChain(sc);
   document.getElementById('scene-sub').textContent=sc.sub||'';
   const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
@@ -13813,6 +13854,26 @@ function buildDeviceChartOverlay(chartName){
   </g>`;
 }
 
+function buildLiveVoyageTelemetryOverlay(chartName){
+  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  if(!st || !st.route) return '';
+  const route = getActiveVoyageRoute();
+  const chartSet = getActiveVoyageChartSet();
+  const showForChart = !chartSet.size || chartSet.has(chartName) || chartName === selectedPortChart || route?.chart === chartName;
+  if(!showForChart) return '';
+  const warn = st.alert;
+  const fill = warn ? 'rgba(70,12,18,.92)' : 'rgba(5,16,28,.92)';
+  const stroke = warn ? '#ff8d8d' : '#7fc3ff';
+  return `<g class="live-voyage-telemetry">
+    <rect x="18" y="16" width="244" height="42" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="1"/>
+    <text x="28" y="30" fill="${warn ? '#ffc0c0' : '#cfeaff'}" font-size="7" font-family="monospace">LIVE ROUTE · ${phoneSafe(st.route).slice(0,34)}</text>
+    <text x="28" y="43" fill="#fff4bf" font-size="7" font-family="monospace">ETA ${st.eta} · SOG ${st.sog}kt · WP ${phoneSafe(st.nextWp).slice(0,18)}</text>
+    <text x="28" y="54" fill="${warn ? '#ffc0c0' : '#8fd8ab'}" font-size="7" font-family="monospace">CPA ${st.cpa}nm / TCPA ${st.tcpa}m · UKC ${st.ukc}m · ${st.progress}%</text>
+    <rect x="278" y="20" width="130" height="10" rx="5" fill="rgba(7,19,36,.88)" stroke="#385f86" stroke-width=".8"/>
+    <rect x="280" y="22" width="${Math.max(3, Math.min(126, st.progress*1.26))}" height="6" rx="3" fill="${warn ? '#ff8d8d' : '#81f7b8'}"/>
+  </g>`;
+}
+
 function getPortChartTypeLabel(kind){
   return kind==='port' ? 'liman chart' : kind==='route' ? 'ticaret rotasi charti' : 'gecit chart';
 }
@@ -14037,6 +14098,7 @@ function buildOceanRouteChartSvg(port, profile){
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
+  ${buildLiveVoyageTelemetryOverlay(port.name)}
   `;
 }
 
@@ -14497,6 +14559,7 @@ function buildPortChartSvg(port){
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
+  ${buildLiveVoyageTelemetryOverlay(port.name)}
   </g>
   `;
 }
@@ -19186,6 +19249,7 @@ function getTraceBand(){
 function updateOpsHud(sc){
   const watchChip = document.getElementById('watch-chip');
   const seaChip = document.getElementById('sea-chip');
+  const routeChip = document.getElementById('route-chip');
   const fatigueChip = document.getElementById('fatigue-chip');
   const traceChip = document.getElementById('trace-chip');
   const officeChip = document.getElementById('office-chip');
@@ -19201,6 +19265,11 @@ function updateOpsHud(sc){
     const seaClass = voyagePressure.caution >= 7 ? ' warn' : voyagePressure.caution >= 5 ? ' hot' : '';
     seaChip.className = `ops-chip${seaClass}`;
     seaChip.textContent = `Swell ${voyagePressure.swell} · Gorus ${voyagePressure.visibility} · VHF ${voyagePressure.vhf}`;
+  }
+  if(routeChip){
+    const st = liveVoyageState || computeLiveVoyageState(sc || {});
+    routeChip.className = `ops-chip ${st.alert ? 'warn' : st.progress >= 60 ? 'hot' : ''}`.trim();
+    routeChip.textContent = `${st.progress}% · ETA ${st.eta} · CPA ${st.cpa} · UKC ${st.ukc}`;
   }
   if(fatigueChip){
     fatigueChip.className = `ops-chip ${fatigue.className}`.trim();
@@ -19703,6 +19772,56 @@ function maybeTriggerMidScenePhone(sc){
   sceneLiveSequenceTimers.push(timer);
 }
 
+function maybeTriggerLiveRoutineFlow(sc){
+  if(!sc || sc._routineFlowSent) return;
+  sc._routineFlowSent = true;
+  const st = liveVoyageState || computeLiveVoyageState(sc);
+  const blob = `${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
+  const messages = [];
+  messages.push(['Kopruustu', `Route live: ETA ${st.eta}, CPA ${st.cpa}nm, UKC ${st.ukc}m, next ${st.nextWp}.`, st.alert ? 'warn' : '']);
+  if(watchState.handover) messages.push(['Kaptan', `Vardiya teslimi yaklasiyor. ${watchState.code} logbook ve standing order bos kalmasin.`, 'warn']);
+  if(watchState.logbook) messages.push(['2. Zabit', `Logbook satiri: weather ${voyagePressure.swell}, visibility ${voyagePressure.visibility}, route ${st.progress}%.`, '']);
+  if(/harbor|liman|berth|tug|mooring/.test(blob)) messages.push(['Crew Chat', 'Lostromo: Forward station ready, heaving line ve spring sirasi bekliyor.', 'good']);
+  else if(/engine|makine|compressor|pump|alarm/.test(blob)) messages.push(['Makine', 'Chief trend paylasti: alarm satiri, pressure ve standby pump takipte.', 'warn']);
+  else if(/galley|asci|yemek|cay/.test(blob)) messages.push(['Aşçı', 'Bugunku menu telefona dustu. Vardiyadan sonra cay hazir.', 'good']);
+  else messages.push(['Crew Chat', 'AB: Deck round tamam, kaporta ve iskele kontrol edildi.', '']);
+  if(st.alert) messages.push(['Şirket Mail', `Route monitor uyarisi: CPA/UKC/weather margin yakindan takip edilecek. Chart: ${st.chart}.`, 'warn']);
+  messages.slice(0,3).forEach((item,i)=>{
+    const timer = setTimeout(()=>{
+      addWatchFeed(`${item[0]}: ${item[1]}`, item[2]);
+      if(i === 1 || item[2] === 'warn') pushPhoneMessage(item[0], item[1], {open:false});
+    }, 900 + i*1400);
+    sceneLiveSequenceTimers.push(timer);
+  });
+}
+
+function scheduleDynamicMiniChain(sc){
+  if(!sc || sc._dynamicMiniChain) return;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
+  let chain = [];
+  if(/vhf|mayday|pan-pan|distress|vts|smcp|pilot exchange/.test(blob)) chain = ['VHF: kanal/DSC teyit bekliyor', 'Radar: cagriya ait hedef kontrol ediliyor', 'ECDIS: mevki ve rota karsilastiriliyor', 'Kaptan: kisa SMCP raporu istiyor'];
+  else if(/radar|arpa|cpa|tcpa|ais target/.test(blob)) chain = ['Radar: hedef acquire edildi', 'ARPA: CPA/TCPA trendi hesaplanıyor', 'ECDIS: rota ve XTD karsilastiriliyor', 'Kaptan: hedef niyeti ve aksiyon istiyor'];
+  else if(/ecdis|chart|route monitor|xtd|safety contour/.test(blob)) chain = ['ECDIS: alarm satiri acildi', 'Sensor: GPS/Gyro source kontrol', 'Route: next WP ve safety contour teyit'];
+  else if(/fire|yangin|smoke|duman/.test(blob)) chain = ['Fire panel: zone yandi', 'Ekip: mahal ve yangin sinifi teyidi aliniyor', 'Izolasyon: fan/damper/ekipman kontrol', 'Logbook: olay satiri acildi'];
+  else if(/mob|man overboard|adam denize|abandon/.test(blob)) chain = ['MOB: mevki mark bekliyor', 'Kopruustu: goz temasi ve donus plani', 'Ekip: kurtarma istasyonu hazirlaniyor', 'Kaptan: zaman ve rapor zinciri istiyor'];
+  else if(/blackout|engine alarm|makine|generator|compressor|pump/.test(blob)) chain = ['Makine alarmi: trend ekrana dustu', 'Kopruustu: hiz ve manevra etkisi okunuyor', 'Bas muhendis: standby/isolasyon bilgisi bekliyor', 'Logbook: engine event satiri acildi'];
+  else if(/pilot|tug|berth|all fast|mooring/.test(blob)) chain = ['Pilot/tug chain basladi', 'Mooring station readiness isteniyor', 'Final approach icin speed/heading takipte', 'All fast/logbook saati hazir tutuluyor'];
+  else if(/survey|psc|class|inspection|deficiency/.test(blob)) chain = ['Denetci belge istiyor', 'Ekipman ve kayit cross-check yapiliyor', 'Deficiency riski isaretleniyor', 'Ofis kapanis notu bekliyor'];
+  else if(/cruise|passenger|kruvaziyer|hotel/.test(blob)) chain = ['Passenger flow artiyor', 'PA / muster route kontrol ediliyor', 'Medical-security standby bildirildi', 'Turnaround kaydi acildi'];
+  else if(/project|heavy|sling|cog|sea fastening|lift plan/.test(blob)) chain = ['Lift plan acildi', 'COG / sling angle kontrol ediliyor', 'Exclusion zone bosaltiliyor', 'Sea fastening kaydi bekliyor'];
+  else if(/rov|survey line|ctd|multibeam|research/.test(blob)) chain = ['Survey line basliyor', 'ROV/CTD deck clear kontrol', 'Tether ve data quality izleniyor', 'Science log kaydi acildi'];
+  else if(/offshore|platform|dp |fpso|cable|pipe/.test(blob)) chain = ['DP / approach monitor aktif', '500m zone ve abort point kontrol', 'Tension / hose / XTE takipte', 'Client log kaydi bekliyor'];
+  if(!chain.length) return;
+  sc._dynamicMiniChain = true;
+  chain.forEach((line,i)=>{
+    const timer = setTimeout(()=>addWatchFeed(`Gorev zinciri ${i+1}/${chain.length}: ${line}`, i === chain.length-1 ? 'warn' : ''), 650 + i*1050);
+    sceneLiveSequenceTimers.push(timer);
+  });
+  if(chain.length >= 3){
+    pushPhoneMessage('Kopruustu', `Canli gorev zinciri: ${chain.slice(0,3).join(' -> ')}`, {open:false});
+  }
+}
+
 function startSceneChoiceTimer(sc, ch){
   clearSceneChoiceTimer();
   const panel = document.getElementById('calc-panel');
@@ -19865,6 +19984,8 @@ function onSceneRender(sc){
   scheduleSceneLiveSequence(sc);
   maybeTriggerMidScenePhone(sc);
   maybeTriggerLivingShipBeat(sc);
+  maybeTriggerLiveRoutineFlow(sc);
+  scheduleDynamicMiniChain(sc);
   // Rastgele olay
   maybeTrigerEvent();
 }
