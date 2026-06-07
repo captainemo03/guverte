@@ -13394,6 +13394,51 @@ function nextMapTask(){
   renderMap();
 }
 
+function selectMapTask(index){
+  activeMapTaskIndex = Math.max(0, Math.min(MAP_TASKS.length-1, Number(index) || 0));
+  mapRouteDraftPoints = [];
+  ensureTaskPort(getCurrentMapTask());
+  if(mapView !== 'library') mapView = 'library';
+  renderMap();
+}
+
+function getMapTaskShortLabel(task){
+  const labels = {
+    pilot:'PILOT',
+    anchorage:'ANCH',
+    tss:'TSS',
+    berth:'BERTH',
+    reporting:'VTS',
+    noanchoring:'NO ANC',
+    alternateroute:'ALT RTE',
+    waypoint:'WP',
+    cpa:'CPA',
+    ukc:'UKC',
+    eca:'ECA',
+    weatheravoid:'WX',
+    cablecrossing:'CABLE',
+    offshorezone:'500M'
+  };
+  return labels[task?.id] || (task?.title || 'TASK').slice(0,8).toUpperCase();
+}
+
+function renderMapTaskChips(activePort){
+  const holder = document.getElementById('port-chart-tasklist');
+  if(!holder) return;
+  const port = activePort || getPortChartByName(selectedPortChart);
+  holder.innerHTML = MAP_TASKS.map((task,i)=>{
+    const allowed = isMapTaskAllowedForPort(task, port);
+    const cls = [
+      'map-task-chip',
+      i === activeMapTaskIndex ? 'active' : '',
+      completedMapTasks.has(task.id) ? 'done' : '',
+      allowed ? '' : 'disabled'
+    ].filter(Boolean).join(' ');
+    const kind = getMapTaskRequiredKind(task);
+    return `<button class="${cls}" onclick="selectMapTask(${i})" title="${task.title}">${getMapTaskShortLabel(task)}<small>${kind}</small></button>`;
+  }).join('');
+}
+
 function getMapTaskTarget(task, port){
   const geo = getPortChartTaskGeometry(port);
   if(task.id === 'reporting') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 36, label:'REPORTING / VTS'};
@@ -13456,6 +13501,7 @@ function updateMapTaskBox(port){
   const btn = document.getElementById('port-task-next');
   if(!title || !desc || !status) return;
   const effectivePort = getPortChartByName(selectedPortChart) || port;
+  renderMapTaskChips(effectivePort);
   const taskAllowed = isMapTaskAllowedForPort(task, effectivePort);
   if(!taskAllowed){
     title.textContent = `${effectivePort?.name || 'Chart'} · Stratejik Gecit`;

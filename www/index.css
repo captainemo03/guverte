@@ -1024,6 +1024,13 @@ animation:straitFlow 2.8s linear infinite;}
 .chart-meta-value{font-size:10px;line-height:1.55;color:var(--text2);font-family:'Share Tech Mono',monospace;}
 #port-chart-taskbox{margin-top:10px;border:1px solid var(--border2);border-radius:8px;background:rgba(8,22,40,.95);padding:9px 10px;}
 #port-chart-taskhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace;}
+#port-chart-tasklist{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 9px;}
+.map-task-chip{border:1px solid rgba(111,168,220,.22);border-radius:999px;background:rgba(7,19,36,.82);color:#9cc8ef;padding:5px 8px;font-size:9px;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:transform .15s ease,border-color .15s ease,background .15s ease,color .15s ease;}
+.map-task-chip:hover{transform:translateY(-1px);border-color:rgba(212,160,23,.36);color:#fff4bf;}
+.map-task-chip.active{border-color:rgba(212,160,23,.58);background:rgba(212,160,23,.13);color:#ffd45a;}
+.map-task-chip.done{border-color:rgba(93,191,138,.38);color:#a8f5c2;}
+.map-task-chip.disabled{opacity:.38;border-style:dashed;cursor:not-allowed;}
+.map-task-chip small{opacity:.72;margin-left:4px;}
 #port-chart-tasktitle{font-size:11px;color:var(--text);font-weight:600;margin-bottom:4px;}
 #port-chart-taskdesc{font-size:10px;color:var(--text3);line-height:1.55;}
 #port-chart-taskstatus{margin-top:7px;font-size:10px;color:#8fd8ab;min-height:16px;font-family:'Share Tech Mono',monospace;}
