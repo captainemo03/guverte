@@ -8082,6 +8082,18 @@ function getLiveSceneOverlay(sc){
   if(/fire|yangin|yangın|smoke|duman|extinguisher|co2|galley girisi|fire alarm/.test(blob)){
     parts.push('<div class="live-fire-panel"><b>FIRE ZONE</b><span></span><span></span><span></span></div><div class="live-smoke sm1"></div><div class="live-smoke sm2"></div><div class="live-extinguisher-choice">CO2 · FOAM · DCP</div>');
   }
+  if(/psc|class|survey|surveyor|deficiency|inspection|sire|cdi|audit/.test(blob)){
+    parts.push('<div class="live-surveyor-clipboard"><b>DEF</b><span></span><span></span><span></span></div><div class="live-checkmark-scan"></div>');
+  }
+  if(/bunker|manifold|sample|sopep|overflow|fuel transfer|topping up/.test(blob)){
+    parts.push('<div class="live-bunker-hose"></div><div class="live-sample-bottle"></div><div class="live-overflow-alarm">OVERFLOW</div>');
+  }
+  if(/imdg|dangerous cargo|placard|un number|segregation|manifest/.test(blob)){
+    parts.push('<div class="live-imdg-placards"><span>3</span><span>8</span><span>UN</span></div><div class="live-segregation-line"></div>');
+  }
+  if(/dry dock|havuz|propeller|rudder|anode|coating|thickness|sea chest/.test(blob)){
+    parts.push('<div class="live-drydock-sparks"></div><div class="live-propeller-spin"></div><div class="live-thickness-scan"></div>');
+  }
   if(/mob|man overboard|adam denize|williamson|anderson|scharnow/.test(blob)){
     parts.push('<div class="live-mob-button">MOB</div><div class="live-williamson-track"></div><div class="live-lifebuoy"></div>');
   }
@@ -8417,6 +8429,36 @@ function normalizePortraitConfig(cfg={}){
   const out = {...cfg};
   out.base = out.base === 'female' ? 'female' : 'male';
   if(out.base === 'female') out.beard = 'clean';
+  const safeSheets = new Set([
+    'assets/crew-portraits.png',
+    'assets/crew-portraits-alt.png',
+    'assets/crew-portraits-illustrated-young.png',
+    'assets/crew-portraits-illustrated-mid.png',
+    'assets/crew-portraits-veteran.png',
+    'assets/support-style-male.png',
+    'assets/support-style-female.png',
+    'assets/support-portraits.png',
+    'assets/support-female.png',
+    'assets/support-bosun-a.png',
+    'assets/support-bosun-b.png',
+    'assets/support-cook-a.png',
+    'assets/support-cook-b.png',
+    'assets/support-engine-a.png',
+    'assets/support-engine-b.png',
+    'assets/support-engine-c.png',
+    'assets/support-female-bosun-a.png',
+    'assets/support-female-bosun-b.png',
+    'assets/support-female-cook-a.png',
+    'assets/support-female-engine-a.png',
+    'assets/support-female-engine-b.png',
+    'assets/support-female-engine-c.png'
+  ]);
+  if(out.portraitSheet && !safeSheets.has(String(out.portraitSheet))){
+    out.portraitSheet = out.base === 'female' ? 'assets/crew-portraits-illustrated-young.png' : 'assets/crew-portraits-illustrated-mid.png';
+    out.sheetCols = 4;
+    out.sheetRows = 2;
+    out.sheetIndex = resolvePortraitIndexFromConfig(out);
+  }
   const isOfficerSheet = /crew-portraits-illustrated|crew-portraits-veteran|crew-portraits\.png/.test(String(out.portraitSheet || ''));
   if(isOfficerSheet){
     const age = (out.age === 'mid' || out.age === 'veteran' || out.age === 'senior') ? 'mid' : 'young';
@@ -8437,6 +8479,12 @@ function normalizePortraitConfig(cfg={}){
     out.sheetCols = 3;
     out.sheetRows = 2;
     out.sheetIndex = Math.min(5, Math.max(0, Number(out.sheetIndex || 0)));
+  }
+  if(out.portraitSheet){
+    out.sheetCols = Math.max(1, Number(out.sheetCols || (/support-style/.test(String(out.portraitSheet)) ? 3 : 4)));
+    out.sheetRows = Math.max(1, Number(out.sheetRows || (/support-style/.test(String(out.portraitSheet)) ? 2 : 2)));
+    const maxIndex = out.sheetCols * out.sheetRows - 1;
+    out.sheetIndex = Math.max(0, Math.min(maxIndex, Number.isInteger(out.sheetIndex) ? out.sheetIndex : 0));
   }
   return out;
 }
@@ -13183,6 +13231,48 @@ const MAP_TASKS = [
     title:'Alternatif Rota Sec',
     desc:'Okyanus rotasinda hava, ECA veya piracy baskisina gore daha emniyetli alternatif hat bolgesini sec.',
     chartKind:'route'
+  },
+  {
+    id:'waypoint',
+    title:'Sonraki Waypoint\'i Isaretle',
+    desc:'Aktif seyir rotasinda siradaki waypoint / wheel-over bolgesini bul.',
+    chartKind:'route'
+  },
+  {
+    id:'cpa',
+    title:'CPA Riski Olan Hedefi Sec',
+    desc:'Rota chartinda gemi izine en yakin trafik / crossing risk bolgesini isaretle.',
+    chartKind:'route'
+  },
+  {
+    id:'ukc',
+    title:'UKC / Squat Kontrol Noktasi',
+    desc:'Kanal, nehir veya liman yaklasmasinda derinlik ve squat kontrol noktasini isaretle.',
+    chartKind:'transit'
+  },
+  {
+    id:'eca',
+    title:'ECA / Emisyon Siniri',
+    desc:'Yaklasilan ECA, yakit change-over veya emisyon kontrol hattini isaretle.',
+    chartKind:'route'
+  },
+  {
+    id:'weatheravoid',
+    title:'Hava Kacis Hatti',
+    desc:'Agir hava, swell veya buz baskisinda daha emniyetli weather routing bolgesini sec.',
+    chartKind:'route'
+  },
+  {
+    id:'cablecrossing',
+    title:'Kablo / Boru Hatti Gecisi',
+    desc:'No anchoring ve kontrollu gecis isteyen subsea cable / pipeline bolgesini isaretle.',
+    chartKind:'transit'
+  },
+  {
+    id:'offshorezone',
+    title:'Offshore 500 m Safety Zone',
+    desc:'Platform veya FPSO yaklasmasinda 500 metre emniyet cemberini sec.',
+    chartKind:'route'
   }
 ];
 
@@ -13309,6 +13399,13 @@ function getMapTaskTarget(task, port){
   if(task.id === 'reporting') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 36, label:'REPORTING / VTS'};
   if(task.id === 'noanchoring') return {x: geo.coastLeft ? 282 : 158, y: geo.southFacing ? 196 : 194, tol: 38, label:'NO ANCHORING'};
   if(task.id === 'alternateroute') return {x: 256, y: 158, tol: 48, label:'ALTERNATE ROUTE'};
+  if(task.id === 'waypoint') return {x: 274, y: 136, tol: 36, label:'NEXT WAYPOINT / WOP'};
+  if(task.id === 'cpa') return {x: 302, y: 104, tol: 34, label:'CPA / CROSSING TARGET'};
+  if(task.id === 'ukc') return {x: geo.coastLeft ? 292 : 148, y: geo.channelY + 34, tol: 34, label:'UKC / SQUAT CHECK'};
+  if(task.id === 'eca') return {x: 226, y: 88, tol: 42, label:'ECA / CHANGE-OVER'};
+  if(task.id === 'weatheravoid') return {x: 224, y: 174, tol: 48, label:'WEATHER AVOIDANCE'};
+  if(task.id === 'cablecrossing') return {x: geo.coastLeft ? 286 : 154, y: 184, tol: 36, label:'CABLE / PIPELINE'};
+  if(task.id === 'offshorezone') return {x: 300, y: 142, tol: 42, label:'500 m SAFETY ZONE'};
   if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 38, label:'PILOT BOARDING'};
   if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 36, label:'ANCHORAGE'};
   if(task.id === 'tss') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 40, label:'TSS / TRAFFIC FLOW'};
@@ -13412,6 +13509,10 @@ function handlePortChartTaskClick(svg, ev, port){
       status.textContent = `${mapRouteDraftPoints.length}. rota noktasi alindi. En az 3 nokta veya uygun alternatif hat bolgesi sec.`;
     }
     return;
+  }
+  if(['waypoint','cpa','eca','weatheravoid','offshorezone'].includes(task.id) && task.chartKind === 'route'){
+    mapRouteDraftPoints.push({x:+x.toFixed(1), y:+y.toFixed(1)});
+    renderMapRouteDraftOverlay(svg);
   }
   const dist = Math.hypot(x-target.x, y-target.y);
   if(dist <= target.tol){
@@ -14710,6 +14811,10 @@ const STUDENT_NOTES = [
   {head:"SURVEY / PSC / CLASS", body:"Surveyor veya PSC memuru geldiginde sadece dosya degil, geminin gunluk karakteri de denetlenir.<br><b>Survey / class</b> tarafinda class item'lar, maintenance evidence, defect follow-up, test ve condition birlikte okunur.<br><b>PSC</b> tarafinda ise belge, emniyet ekipmani, yangin kapilari, escape route, drill records, GMDSS testleri, logbook uyumu ve personelin cevap kalitesi bile tabloya girer.<br><b>Deficiency</b> cogu zaman tek buyuk hatadan degil; kucuk fiziksel eksik + kayit uyumsuzlugu + zayif takip zincirinden dogar.<br><br><b>Hazirlik mantigi:</b> belge tarihi dogru olacak, ekipman calisacak, kisi neyi neden yaptigini bilecek, gorulen eksik de saklanmayip duzeltme zincirine girecek.", tip:"Surveyor kagit kadar tavri, takip disiplinini ve gemi kondisyonunu da okur."},
   {head:"DRY DOCK / UNDERWATER HULL", body:"Dry dock gunu geminin su altinda gizli kalan karakteri acilir.<br><b>Pervane</b> palalari, darbe, erozyon ve cavitation izi acisindan incelenir.<br><b>Rudder / dumen</b> tarafinda clearance, stock, pintle ve hareket yuzeyleri okunur.<br><b>Sea chest</b> ve grating'ler fouling, tikanma ve kaplama durumuyla kontrol edilir.<br><b>Anodik koruma</b> tukenmis mi, dengesiz mi bakilir.<br><b>Coating / boya sistemi</b> ile sac kalinligi birlikte dusunulur; sadece pasin rengi degil, metal kaybi da onemlidir.<br><br><b>Kisa mantik:</b> Havuz, su altinda gormedigimiz riskleri gormek icindir; sadece seyretmek icin degil, sonraki aksiyonu planlamak icin.", tip:"Dry dock gezisi turistik degil, derslik gibidir."},
   {head:"TANKER / LNG DERIN PAKET", body:"Tanker ve LNG tarafinda kelimeler birbirine benzer ama operasyon amaci farklidir.<br><b>Inert gas</b> atmosferi emniyetli aralikta tutmak icin dusunulur.<br><b>Purging</b> ile <b>gas freeing</b> ayni sey degildir; gaz yolu, hedef atmosfer ve sonraki operasyon farklidir.<br><b>COW</b> cargo tank temizligine ve operasyon ekonomisine dokunur ama prosedursuz uygulanmaz.<br><b>Reliquefaction</b>, <b>cargo compressor</b>, pressure ve vapour path birlikte okunur.<br><b>CCR</b> ekranlarinda tek sayi degil; manifold, line-up, vapour return, ESD ve tank trendi bir zincir olarak gorulur.<br><br><b>Kisa not:</b> Tanker/LNG disiplininde yanlis terim bazen yanlis operasyon anlamina gelir; bu yuzden dil ve prosedur birbirinden ayrilmaz.", tip:"Bu alanlarda 'asagi yukari ayni sey' diye bir luks yoktur."},
+  {head:"PROJE GEMISI / HEAVY-LIFT DIKKAT NOTLARI", body:"Proje gemisinde ana risk sadece agirlik degil; <b>COG</b>, sapan acisi, deck strength, sea fastening ve hava penceresidir.<br><b>Lift plan</b> onayli olmadan vinç altina girilmez; tandem liftte iki vinç ayni ritimde calismazsa yuk donmeye baslar.<br><b>Sea fastening</b> tamamlanmadan sefere cikmak, yuk denizde calismaya basladiginda claim ve emniyet riskini buyutur.<br><b>Exclusion zone</b> gercekten bos tutulur; 'iki saniye bakip cikayim' mantigi burada kaza sebebidir.<br><br><b>Kontrol:</b> COG belgesi, sling certificate, padeye/SWL, deck load limit, weather limit, lash/seafastening drawing, toolbox talk.", tip:"Proje yukunde guzel plan, vincin kuvvetinden daha degerlidir."},
+  {head:"KRUVAZIYER / YOLCU GEMISI DIKKAT NOTLARI", body:"Kruvaziyerde gemi sadece seyretmez; ayni anda otel, hastane, guvenlik ve tahliye sistemi gibi calisir.<br><b>Passenger muster</b>, crowd management, PA announcement, tender operation ve medical response zinciri cok hizli akar.<br>Yolcu panigi bazen teknik arizadan daha buyuk operasyon riskidir.<br><b>Turnaround day</b> sirasinda bagaj, shore pass, immigration, bunker, stores ve yolcu akisinin ayni anda yonetilmesi gerekir.<br><br><b>Kontrol:</b> muster station, embarkation count, tender limit, gangway watch, medical isolation, PA dili, crowd route ve acil cikislar.", tip:"Kruvaziyerde iyi denizcilik, insan kalabaligini sakin tutabilme becerisiyle olculur."},
+  {head:"ARASTIRMA / SURVEY GEMISI DIKKAT NOTLARI", body:"Arastirma gemisinde seyir hattinin uzerinde bilimsel veri kalitesi vardir.<br><b>Survey line</b>, DP holding, ROV/CTD deployment, multibeam calibration ve data backup bir operasyon zinciridir.<br>Geminin bir metre sapmasi bazen veri setini bozabilir; bu yuzden XTE, speed, heading ve sea state surekli okunur.<br><b>Science party</b> ile kopruustu arasinda net komut dili gerekir: start line, stop line, recover, abort, deck clear.<br><br><b>Kontrol:</b> ROV tether, A-frame/SWL, winch brake, USBL/GPS quality, survey log, weather limit, deck exclusion zone.", tip:"Arastirma gemisinde rota hatasi bazen kaza degil, tum verinin bozulmasidir."},
+  {head:"OFFSHORE / FPSO / KABLO-BORU DIKKAT NOTLARI", body:"Offshore operasyonlarda gemi bir hedefe gitmekten cok hedefin yakininda emniyetli kalmaya calisir.<br><b>500 m safety zone</b>, DP alert, thruster load, abort point ve escape route surekli zihinde acik olmalidir.<br><b>FPSO shuttle</b> yaklasmasinda hawser tension, hose status, relative heading ve green/yellow/red approach zone birlikte okunur.<br><b>Cable/pipe laying</b> tarafinda tension, XTE, lay corridor, stinger/plough durumu ve weather suspend limiti kritik olur.<br><br><b>Kontrol:</b> DP status, FMEA notlari, ASOG/CAMO, toolbox talk, permit, tension bar, stop-lay kriteri, emergency disconnect.", tip:"Offshore'da en iyi manevra bazen zamaninda abort etmektir."},
   {head:"RASPA - BOYA / GUVERTELIK", body:"Yuzey hazirligi, pas derecesi, tuz kalintisi, astar secimi, katlar arasi bekleme ve PPE kullanimi boya isin temelidir.<br>Chipping hammer, needle gun, wire brush, primer ve top coat ne icin kullanildigi bilinmelidir.", tip:"Pasin ustunu kapatmak pasi bitirmez."},
   {head:"DENIZCILIK SOZLUGU A-F", body:"Abeam: tam yan omuzluk<br>Abaft: kicin gerisi<br>Aft: kic tarafi<br>Alongside: borda bordaya yanaşık<br>Astern: kıç tarafa dogru / geriye<br>All fast: baglama tamam<br>Air draft: su hattindan en yuksek noktaya kadar yukseklik<br>Freeboard: su hattindan guverteye olan yukseklik", tip:"Terimler kulaga oturdukca vardiya dili hizlanir."},
   {head:"DENIZCILIK SOZLUGU G-M", body:"GM: metasantrik yukseklik<br>Heading: geminin pruvasinin baktigi yon<br>COG: yer uzerindeki gercek gidis istikameti<br>SOG: yer uzerindeki hiz<br>Leeway: ruzgarla yan kayma<br>List: yan yatma<br>Trim: bas-kic oturuş farki<br>Mooring: baglama operasyonu", tip:"Ayni sey sanilan bircok kelime aslinda farkli anlama gelir."},
@@ -15500,7 +15605,45 @@ const GLOSSARY_TERMS = [
   {term:"Fatigue Risk", meaning:"Yorgunlugun karar, davranis ve emniyet uzerinde yarattigi risk.", example:"Fatigue risk yuksekse tartisma ve hata ihtimali de artar."},
   {term:"Crew Morale", meaning:"Murettebatin genel ruh hali, motivasyonu ve birlikte calisma istegi.", example:"Uzun seferlerde crew morale dustugunde en kucuk olay daha hizli buyur."},
   {term:"Interpersonal Tension", meaning:"Iki veya daha fazla personel arasinda biriken kisisel gerilim.", example:"Interpersonal tension bazen is dagitiminda bile hissedilir."},
-  {term:"Cooling-Off Period", meaning:"Taraflarin hemen yeniden karsilasmamasi icin bir sure ayri tutuldugu soguma zamani.", example:"Cooling-off period verilince gece vardiyasi daha emniyetli planlandi."}
+  {term:"Cooling-Off Period", meaning:"Taraflarin hemen yeniden karsilasmamasi icin bir sure ayri tutuldugu soguma zamani.", example:"Cooling-off period verilince gece vardiyasi daha emniyetli planlandi."},
+  {term:"Heavy-Lift Vessel", meaning:"Agir, hacimli veya proje yuklerini kendi vinci ya da ozel donanimiyla tasiyabilen gemi tipi.", example:"Heavy-lift vessel operasyonunda COG ve deck load birlikte kontrol edildi."},
+  {term:"Project Cargo", meaning:"Standart konteyner veya bulk akisi disinda, ozel plan ve ellecleme isteyen buyuk/agir yuk.", example:"Project cargo icin lift plan olmadan operasyon baslatilmadi."},
+  {term:"Centre of Gravity", meaning:"Yukun veya sistemin agirlik merkezini anlatan COG bilgisi.", example:"COG beklenenden yuksek cikinca sapan acisi ve stabilite yeniden hesaplandi."},
+  {term:"Sea Fastening", meaning:"Proje yukunun denizde hareket etmemesi icin kaynak, stopper, lashing ve desteklerle sabitlenmesi.", example:"Sea fastening bitmeden heavy weather rotasina girilmez."},
+  {term:"Sling Angle", meaning:"Sapanin yukle yaptigi aci; aci daraldikca sapan kuvveti artar.", example:"Sling angle kritik seviyeye inince lift durduruldu."},
+  {term:"Padeye", meaning:"Sapan, shackle veya securing baglantisi icin kullanilan kaynakli/sertifikali goz baglanti elemani.", example:"Padeye SWL degeri lift planla uyusmaliydi."},
+  {term:"Exclusion Zone", meaning:"Yuk, vinc, halat veya tehlikeli operasyon altinda personelin girmemesi gereken emniyet alani.", example:"Exclusion zone bosaltildiktan sonra hook yuk altina girdi."},
+  {term:"Tandem Lift", meaning:"Bir yukun iki vinc veya iki kaldirma noktasi ile ayni anda kaldirilmasi.", example:"Tandem liftte haberlesme gecikirse yuk donmeye baslayabilir."},
+  {term:"Cruise Ship", meaning:"Yolcu konforu, otel hizmeti ve deniz emniyetini birlikte tasiyan kruvaziyer gemisi.", example:"Cruise ship operasyonunda passenger count kopruustu icin kritik bilgidir."},
+  {term:"Passenger Muster", meaning:"Yolcularin acil durumda belirlenen toplanma yerlerinde sayim ve yonlendirme zinciri.", example:"Passenger muster sirasinda PA duyurusu sade ve sakin olmalidir."},
+  {term:"Crowd Management", meaning:"Yolcu kalabaligini panik, dar gecis ve acil cikis riski olusturmadan yonetme becerisi.", example:"Crowd management zayifsa teknik olarak kucuk olay buyuk krize doner."},
+  {term:"Tender Operation", meaning:"Gemiden sahile veya sahilden gemiye kucuk botlarla yolcu/personel tasima operasyonu.", example:"Tender operation icin sea state ve embarkation platformu kontrol edildi."},
+  {term:"Turnaround Day", meaning:"Kruvaziyerde yolcu indir-bindirme, ikmal, temizlik ve evrak akisinin ayni gune sıkıştığı operasyon.", example:"Turnaround day gecikirse ETD ve sonraki liman programi etkilenir."},
+  {term:"Research Vessel", meaning:"Bilimsel olcum, deniz tabani taramasi, ROV/CTD veya survey isleri icin donatilmis gemi.", example:"Research vessel survey line uzerinde hiz ve heading'i cok stabil tuttu."},
+  {term:"Survey Line", meaning:"Arastirma veya hidrografik olcum icin takip edilen hassas rota hatti.", example:"Survey line disina cikilinca veri kalitesi dustu."},
+  {term:"Multibeam Echo Sounder", meaning:"Deniz tabanini genis bir hat halinde tarayan cok huzmeli iskandil sistemi.", example:"Multibeam echo sounder kalibrasyonu survey oncesi yapildi."},
+  {term:"CTD", meaning:"Conductivity, Temperature, Depth olcen oceanographic cihaz.", example:"CTD indirirken winch, deck clear ve weather limit birlikte izlendi."},
+  {term:"ROV", meaning:"Remotely Operated Vehicle; uzaktan kumandali su alti araci.", example:"ROV tether tension artinca gemi DP offsetini kontrol etti."},
+  {term:"Tether Tension", meaning:"ROV veya benzeri su alti ekipmaninin kablosunda olusan cekme gerilimi.", example:"Tether tension limit ustune yaklasinca recover karari hazirlandi."},
+  {term:"USBL", meaning:"Underwater acoustic positioning sistemi; ROV veya ekipman mevkiini takip etmekte kullanilir.", example:"USBL kaybi survey loguna hemen islendi."},
+  {term:"PSV", meaning:"Platform Supply Vessel; offshore platformlara yuk, sivi, malzeme ve destek tasiyan gemi.", example:"PSV platform 500 m zone'a girmeden DP status teyit etti."},
+  {term:"AHTS", meaning:"Anchor Handling Tug Supply; demir ellecleme, cekme ve offshore destek isleri yapan gemi.", example:"AHTS operasyonunda wire tension ve deck safety en kritik konuydu."},
+  {term:"DP Alert", meaning:"Dynamic positioning sisteminde konum tutma guvenilirliginin zayifladigini bildiren uyari seviyesi.", example:"DP alert gelince platform yaklasmasi durduruldu."},
+  {term:"ASOG", meaning:"Activity Specific Operating Guidelines; DP/offshore operasyon icin yesil-sari-kirmizi operasyon limitleri.", example:"ASOG sari seviyeye gecince kaptan abort point'i hatirlatti."},
+  {term:"CAMO", meaning:"Critical Activity Mode of Operation; kritik DP operasyonlarinda izin verilen sistem konfigurasyonu.", example:"CAMO disina cikmak platform yaninda kabul edilmez."},
+  {term:"FPSO", meaning:"Floating Production Storage and Offloading unit; acik denizde petrol/gaz uretim ve depolama unitesi.", example:"FPSO yaklasmasinda hawser ve hose status birlikte izlendi."},
+  {term:"Hawser Tension", meaning:"FPSO/shuttle veya cekme operasyonunda ana baglama halatindaki gerilim.", example:"Hawser tension artinca approach zone sari seviyeye gecti."},
+  {term:"Emergency Disconnect", meaning:"Hose, loading arm veya offshore transfer hattinin acil durumda kontrollu ayrilmasi.", example:"Emergency disconnect kriterleri toolbox talkta tekrar edildi."},
+  {term:"Cable Laying Vessel", meaning:"Denizalti haberlesme veya enerji kablosu doseyen ozel gemi.", example:"Cable laying vessel XTE ve tension limitlerini birlikte takip etti."},
+  {term:"Pipe Laying Vessel", meaning:"Denizalti boru hatti dosen, stinger veya reel-lay/J-lay donanimli gemi.", example:"Pipe laying vessel stinger acisi ve pipe tension uzerinden karar verdi."},
+  {term:"Lay Corridor", meaning:"Kablo veya borunun harita uzerinde dosenmesi planlanan emniyetli koridor.", example:"Lay corridor disina tasma client tarafindan hemen sorgulandi."},
+  {term:"Stop-Lay Criteria", meaning:"Kablo/boru doseme operasyonunun hava, tension, XTE veya ekipman riski sebebiyle durdurulma kriterleri.", example:"Stop-lay criteria asilirsa operasyonu surdurmek profesyonellik degildir."},
+  {term:"Stinger", meaning:"Pipe laying operasyonunda borunun suya giris acisini destekleyen arka donanim.", example:"Stinger acisi yanlis olursa boru gerilimi kritiklesir."},
+  {term:"Plough", meaning:"Denizalti kablosunu veya boruyu gommek icin kullanilan cekilen su alti ekipmani.", example:"Plough takildiginda tension bar aniden yukseldi."},
+  {term:"Icebreaker", meaning:"Buzlu sularda kanal acabilen veya konvoyu yonlendiren buz kirici gemi.", example:"Icebreaker izi disina cikmak konvoyda ciddi risk yaratir."},
+  {term:"Ice Accretion", meaning:"Dusuk sicaklik ve sprey ile gemi uzerinde buz birikmesi.", example:"Ice accretion stabilite ve guverte emniyetini birlikte bozar."},
+  {term:"Ice Convoy", meaning:"Buzlu sularda buz kirici rehberliginde birden fazla geminin sirali gecisi.", example:"Ice convoy sirasinda mesafe ve hiz talimatlari kesin uygulanir."},
+  {term:"Polar Code", meaning:"Kutup sularinda gemi operasyonu, donanim ve risk yonetimini duzenleyen IMO kodu.", example:"Polar Code gereklilikleri olmadan kutup seferi planlanmaz."}
   ,{term:"Alcohol Suspicion", meaning:"Bir personelin alkol etkisi altinda olabilecegine dair davranis, koku, denge veya konusma bozuklugu gibi emarelerin resmi ve dikkatli sekilde ele alinmasi durumu.", example:"Alcohol suspicion varsa dedikodu degil witness ve chain of command mantigi calisir."}
   ,{term:"Mobbing", meaning:"Tek seferlik sertlikten farkli olarak tekrar eden, kisiyi kucuk dusuren veya sistematik baski kuran davranis oruntusu.", example:"Mobbing supheleri kayitsiz birakilirsa ekip uyumu daha hizli bozulur."}
   ,{term:"Unfit for Duty", meaning:"Personelin yorgunluk, alkol, hastalik veya zihinsel durum sebebiyle gorev icin emniyetli kabul edilememesi.", example:"Kopruustunde unfit for duty riski varsa vardiya plani hemen gozden gecirilir."}
