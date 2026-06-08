@@ -8240,25 +8240,31 @@ async function renderThreeBridgeScene(sc){
   const lip = addThreeBox(THREE, scene, [4.2, .08, .13], [0, -.45, -.02], 0x2b3e52, 0x061018);
   lip.rotation.x = -.22;
 
-  const ecdis = addThreeBox(THREE, scene, [.95, .58, .08], [-1.15, -.31, .02], 0x0b1722, 0x071d2a);
+  const ecdis = addThreeBox(THREE, scene, [.82, .46, .08], [-1.18, -.46, .08], 0x0b1722, 0x071d2a);
   ecdis.rotation.y = .18;
-  const ecdisScreen = addThreeBox(THREE, scene, [.78, .42, .025], [-1.15, -.31, -.035], 0x8ad5e8, 0x246070);
+  ecdis.rotation.x = -.08;
+  const ecdisScreen = addThreeBox(THREE, scene, [.66, .31, .025], [-1.18, -.46, .02], 0x8ad5e8, 0x246070);
   ecdisScreen.rotation.y = .18;
-  const routeLine = addThreeBox(THREE, scene, [.55, .018, .018], [-1.15, -.28, -.07], 0x9b2f3d, 0x5b1018);
-  routeLine.rotation.z = -.28; routeLine.rotation.y = .18;
+  ecdisScreen.rotation.x = -.08;
+  const routeLine = addThreeBox(THREE, scene, [.48, .014, .014], [-1.18, -.44, -.01], 0x9b2f3d, 0x5b1018);
+  routeLine.rotation.z = -.28; routeLine.rotation.y = .18; routeLine.rotation.x = -.08;
 
-  const vhf = addThreeBox(THREE, scene, [.92, .64, .16], [0, -.26, -.05], 0x131e29, hot?0x2a0808:0x051018);
-  const vhfScreen = addThreeBox(THREE, scene, [.48, .24, .035], [-.12, -.25, -.15], hot?0x113423:0x0c3042, hot?0x236b45:0x185a80);
-  const ptt = addThreeBox(THREE, scene, [.18, .18, .045], [.32, -.23, -.16], 0x1e3448, 0x071018);
-  const dist = addThreeBox(THREE, scene, [.18, .13, .045], [.32, -.46, -.14], hot?0x8a1f25:0x4a1a20, hot?0x5a0808:0x1a0305);
+  const vhf = addThreeBox(THREE, scene, [.78, .48, .16], [0, -.43, .0], 0x131e29, hot?0x2a0808:0x051018);
+  vhf.rotation.x = -.06;
+  const vhfScreen = addThreeBox(THREE, scene, [.4, .18, .035], [-.1, -.42, -.1], hot?0x113423:0x0c3042, hot?0x236b45:0x185a80);
+  vhfScreen.rotation.x = -.06;
+  const ptt = addThreeBox(THREE, scene, [.14, .14, .045], [.26, -.41, -.1], 0x1e3448, 0x071018);
+  const dist = addThreeBox(THREE, scene, [.14, .1, .045], [.26, -.56, -.08], hot?0x8a1f25:0x4a1a20, hot?0x5a0808:0x1a0305);
 
-  const radar = addThreeBox(THREE, scene, [.86, .62, .09], [1.1, -.32, .02], 0x0a151e, 0x061018);
+  const radar = addThreeBox(THREE, scene, [.68, .46, .09], [1.12, -.47, .08], 0x0a151e, 0x061018);
   radar.rotation.y = -.18;
-  const radarDisc = new THREE.Mesh(new THREE.CircleGeometry(.24, 48), new THREE.MeshStandardMaterial({color:0x0a2b1a, emissive:0x165b31, roughness:.45}));
-  radarDisc.position.set(1.03, -.31, -.055);
+  radar.rotation.x = -.08;
+  const radarDisc = new THREE.Mesh(new THREE.CircleGeometry(.18, 48), new THREE.MeshStandardMaterial({color:0x0a2b1a, emissive:0x165b31, roughness:.45}));
+  radarDisc.position.set(1.07, -.47, .01);
   radarDisc.rotation.y = -.18;
+  radarDisc.rotation.x = -.08;
   scene.add(radarDisc);
-  const sweep = addThreeBox(THREE, scene, [.34, .012, .012], [1.15, -.31, -.07], 0x81f7b8, 0x3ddf8a);
+  const sweep = addThreeBox(THREE, scene, [.26, .01, .01], [1.15, -.47, -.01], 0x81f7b8, 0x3ddf8a);
   sweep.rotation.y = -.18;
 
   if(harbor){
