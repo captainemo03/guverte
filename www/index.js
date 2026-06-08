@@ -8123,6 +8123,8 @@ function getScene3DBridgeOverlay(sc){
   return `<div class="${cls}">
     <div class="sky"></div>
     <div class="sea"></div>
+    ${isHarbor ? '<div class="bridge3d-tug"><i></i><b></b></div><div class="bridge3d-berth-lights"></div>' : ''}
+    ${isStorm ? '<div class="bridge3d-wave w1"></div><div class="bridge3d-wave w2"></div><div class="bridge3d-lightning"></div>' : ''}
     <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="window w4"></div>
     <div class="console"></div>
     <div class="bridge3d-device bridge3d-ecdis">
@@ -8161,6 +8163,15 @@ async function ensureThreeBridgeModule(){
 function addThreeBox(THREE, scene, size, pos, color, emissive=0x000000, roughness=.55){
   const geo = new THREE.BoxGeometry(size[0], size[1], size[2]);
   const mat = new THREE.MeshStandardMaterial({color, emissive, roughness, metalness:.28});
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(pos[0], pos[1], pos[2]);
+  scene.add(mesh);
+  return mesh;
+}
+
+function addThreeCylinder(THREE, scene, radius, depth, pos, color, emissive=0x000000){
+  const geo = new THREE.CylinderGeometry(radius, radius, depth, 24);
+  const mat = new THREE.MeshStandardMaterial({color, emissive, roughness:.48, metalness:.22});
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(pos[0], pos[1], pos[2]);
   scene.add(mesh);
@@ -8206,6 +8217,9 @@ async function renderThreeBridgeScene(sc){
   const hot = /mayday|distress|alarm|yangin|fire|blackout|korsan|pirate/.test(blob);
   const storm = /storm|firtina|swell|rain|sis|fog|beaufort/.test(blob);
   const harbor = /harbor|liman|terminal|berth|tug|pilot|all fast/.test(blob);
+  const tugOps = /tug|romorkor|römorkör|berth|pilot|all fast|mooring|halat/.test(blob);
+  const stormObjects = [];
+  const harborObjects = [];
 
   const seaGeo = new THREE.PlaneGeometry(9, 4, 18, 5);
   const seaMat = new THREE.MeshStandardMaterial({color:storm?0x102236:harbor?0x173854:0x174a72, roughness:.9, metalness:.02, transparent:true, opacity:.72});
@@ -8251,7 +8265,52 @@ async function renderThreeBridgeScene(sc){
     for(let i=0;i<7;i++){
       const light = addThreeBox(THREE, scene, [.035,.035,.035], [-2.1+i*.7, .04, -1.62], 0xffc458, 0xffa52b);
       light.scale.set(1,1,1);
+      harborObjects.push({mesh:light, baseY:light.position.y, kind:'light', phase:i*.7});
     }
+    const berth = addThreeBox(THREE, scene, [3.7,.08,.18], [0,-.36,-1.78], 0x3a342a, 0x080402);
+    berth.rotation.x = -.08;
+    harborObjects.push({mesh:berth, baseY:berth.position.y, kind:'berth'});
+    for(let i=0;i<5;i++){
+      const bollard = addThreeCylinder(THREE, scene, .035, .12, [-1.5+i*.75,-.27,-1.68], 0x1b2228, 0x020406);
+      bollard.rotation.x = Math.PI/2;
+      harborObjects.push({mesh:bollard, baseY:bollard.position.y, kind:'bollard'});
+    }
+    if(tugOps){
+      const tug = new THREE.Group();
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(.46,.12,.18), new THREE.MeshStandardMaterial({color:0x0f2435, emissive:0x02070a, roughness:.5, metalness:.25}));
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(.18,.16,.14), new THREE.MeshStandardMaterial({color:0xd8e6ee, emissive:0x102036, roughness:.38, metalness:.12}));
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(.035, 16, 10), new THREE.MeshStandardMaterial({color:0xffc458, emissive:0xffa52b, roughness:.2}));
+      hull.position.set(0,0,0);
+      cabin.position.set(.03,.13,0);
+      beacon.position.set(.03,.24,0);
+      tug.add(hull,cabin,beacon);
+      tug.position.set(-2.25,-.32,-1.34);
+      tug.rotation.y = -.28;
+      scene.add(tug);
+      harborObjects.push({mesh:tug, baseX:tug.position.x, baseY:tug.position.y, kind:'tug'});
+      const towLine = addThreeBox(THREE, scene, [1.15,.012,.012], [-1.53,-.32,-1.18], 0xd6c49b, 0x2a1c05);
+      towLine.rotation.z = .08;
+      towLine.rotation.y = -.22;
+      harborObjects.push({mesh:towLine, baseX:towLine.position.x, baseY:towLine.position.y, kind:'towline'});
+    }
+  }
+
+  if(storm){
+    for(let i=0;i<7;i++){
+      const crest = addThreeBox(THREE, scene, [.72,.018,.035], [-3.2+i*1.08,-.44,-1.48-(i%3)*.28], 0xc8e4f2, 0x28485e, .82);
+      crest.rotation.x = -.34;
+      crest.rotation.z = (i%2 ? .08 : -.06);
+      stormObjects.push({mesh:crest, baseX:crest.position.x, baseY:crest.position.y, speed:.45+i*.06, phase:i*.8});
+    }
+    for(let i=0;i<12;i++){
+      const rain = addThreeBox(THREE, scene, [.008,.34,.008], [-2.8+i*.52,.75-(i%4)*.18,-.85-(i%3)*.2], 0xb9d7e8, 0x1d4059, .9);
+      rain.rotation.z = -.32;
+      stormObjects.push({mesh:rain, baseX:rain.position.x, baseY:rain.position.y, speed:1.2+i*.03, phase:i*.35, rain:true});
+    }
+    const flash = addThreeBox(THREE, scene, [5.4,2.4,.015], [0,.28,-1.85], 0xd9efff, 0x709fff, .2);
+    flash.material.transparent = true;
+    flash.material.opacity = 0;
+    stormObjects.push({mesh:flash, kind:'flash'});
   }
 
   const started = performance.now();
@@ -8262,6 +8321,38 @@ async function renderThreeBridgeScene(sc){
     sea.position.x = Math.sin(t*.7) * .05;
     sea.position.y = -.58 + Math.sin(t*1.3) * (storm ? .035 : .012);
     consoleBase.rotation.z = Math.sin(t*.8) * (storm ? .012 : .003);
+    if(storm){
+      camera.rotation.z = Math.sin(t*1.6) * .012;
+      camera.position.y = .92 + Math.sin(t*1.25) * .035;
+    }else{
+      camera.rotation.z = Math.sin(t*.45) * .003;
+      camera.position.y = .92 + Math.sin(t*.65) * .006;
+    }
+    stormObjects.forEach((obj)=>{
+      if(obj.kind === 'flash'){
+        obj.mesh.material.opacity = (Math.sin(t*2.4) > .985) ? .34 : 0;
+        return;
+      }
+      if(obj.rain){
+        obj.mesh.position.y = obj.baseY - ((t*obj.speed + obj.phase) % 1.2);
+        obj.mesh.position.x = obj.baseX + Math.sin(t*1.4+obj.phase)*.05;
+      }else{
+        obj.mesh.position.x = obj.baseX + Math.sin(t*obj.speed+obj.phase)*.22;
+        obj.mesh.position.y = obj.baseY + Math.sin(t*(obj.speed+1)+obj.phase)*.035;
+      }
+    });
+    harborObjects.forEach((obj)=>{
+      if(obj.kind === 'light'){
+        obj.mesh.material.emissiveIntensity = .7 + Math.sin(t*2.4 + obj.phase)*.28;
+      }else if(obj.kind === 'tug'){
+        obj.mesh.position.x = obj.baseX + Math.sin(t*.55)*.38;
+        obj.mesh.position.y = obj.baseY + Math.sin(t*1.6)*.025;
+        obj.mesh.rotation.y = -.28 + Math.sin(t*.7)*.08;
+      }else if(obj.kind === 'towline'){
+        obj.mesh.position.x = obj.baseX + Math.sin(t*.55)*.18;
+        obj.mesh.rotation.z = .08 + Math.sin(t*2.2)*.025;
+      }
+    });
     radarDisc.material.emissiveIntensity = .8 + Math.sin(t*3) * .12;
     vhfScreen.material.emissiveIntensity = hot ? 1.4 + Math.sin(t*7)*.35 : 1.05 + Math.sin(t*2.4)*.12;
     renderer.render(scene, camera);
