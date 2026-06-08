@@ -20,7 +20,8 @@
   "homepage": "https://github.com/captainemo03/guverte#readme",
   "dependencies": {
     "@capacitor/android": "^8.3.4",
-    "@capacitor/core": "^8.3.4"
+    "@capacitor/core": "^8.3.4",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4"

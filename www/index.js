@@ -8103,6 +8103,173 @@ function getSceneVhfConsoleOverlay(sc){
   </div>`;
 }
 
+function getScene3DBridgeOverlay(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const isNav = /bridge|kopruustu|köprüüstü|radar|arpa|ecdis|ais|vhf|dsc|mayday|pan-pan|vts|pilot|route monitor|tss|bogaz|boğaz/.test(blob);
+  const isHarbor = /harbor|liman|terminal|berth|tug|pilot|all fast|mooring|rihtim|rıhtım/.test(blob);
+  const isStorm = /storm|firtina|swell|rain|yagmur|yağmur|sis|fog|beaufort/.test(blob);
+  if(!isNav && !isHarbor && !isStorm) return '';
+  const isDistress = /mayday|distress|sahil guvenlik|sahil güvenlik|korsan|pirate|mob|fire|yangin|blackout/.test(blob);
+  const isVts = /vts|traffic|tss|bogaz|boğaz|strait|reporting point/.test(blob);
+  const isPilot = /pilot|pilot exchange|boarding|berth|tug|romorkor|römorkör|liman|harbor/.test(blob);
+  const isDsc = /dsc|ch70|channel 70/.test(blob);
+  const channel = isDsc ? 'CH70' : isDistress ? 'CH16' : isVts ? 'CH12' : isPilot ? 'CH14' : 'CH13';
+  const mode = isDistress ? 'DISTRESS'
+    : isVts ? 'VTS'
+    : isPilot ? 'PILOT'
+    : isDsc ? 'DSC'
+    : 'WATCH';
+  const cls = ['bridge3d', isHarbor?'bridge3d-harbor':'', isStorm?'bridge3d-storm':''].filter(Boolean).join(' ');
+  return `<div class="${cls}">
+    <div class="sky"></div>
+    <div class="sea"></div>
+    <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="window w4"></div>
+    <div class="console"></div>
+    <div class="bridge3d-device bridge3d-ecdis">
+      <div class="label">ECDIS ROUTE</div>
+      <div class="screen"><span class="route"></span><span class="ship"></span></div>
+    </div>
+    <div class="bridge3d-device bridge3d-vhf">
+      <div class="label">VHF DSC</div>
+      <div class="screen" data-channel="${phoneSafe(channel)}" data-mode="${phoneSafe(mode)}"></div>
+      <div class="ptt">PTT</div><div class="dist">DIST</div><div class="rx"></div>
+    </div>
+    <div class="bridge3d-device bridge3d-radar">
+      <div class="label">RADAR</div>
+      <div class="screen"></div><i class="t1"></i><i class="t2"></i><i class="t3"></i>
+    </div>
+  </div>`;
+}
+
+function stopThreeBridgeScene(){
+  if(threeBridgeRuntime.frame) cancelAnimationFrame(threeBridgeRuntime.frame);
+  threeBridgeRuntime.frame = null;
+  threeBridgeRuntime.token++;
+  if(threeBridgeRuntime.renderer){
+    try{ threeBridgeRuntime.renderer.dispose(); }catch(e){}
+    threeBridgeRuntime.renderer = null;
+  }
+}
+
+async function ensureThreeBridgeModule(){
+  if(threeBridgeRuntime.THREE) return threeBridgeRuntime.THREE;
+  const mod = await import('./vendor/three.module.js');
+  threeBridgeRuntime.THREE = mod;
+  return mod;
+}
+
+function addThreeBox(THREE, scene, size, pos, color, emissive=0x000000, roughness=.55){
+  const geo = new THREE.BoxGeometry(size[0], size[1], size[2]);
+  const mat = new THREE.MeshStandardMaterial({color, emissive, roughness, metalness:.28});
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(pos[0], pos[1], pos[2]);
+  scene.add(mesh);
+  return mesh;
+}
+
+async function renderThreeBridgeScene(sc){
+  const mount = document.getElementById('gfx-3d');
+  const canvas = mount?.querySelector('.three-bridge-canvas');
+  if(!mount || !canvas || !mount.classList.contains('active')) return;
+  const token = ++threeBridgeRuntime.token;
+  let THREE;
+  try{
+    THREE = await ensureThreeBridgeModule();
+  }catch(err){
+    console.warn('Three.js bridge layer unavailable', err);
+    return;
+  }
+  if(token !== threeBridgeRuntime.token) return;
+  if(threeBridgeRuntime.frame) cancelAnimationFrame(threeBridgeRuntime.frame);
+  if(threeBridgeRuntime.renderer){
+    try{ threeBridgeRuntime.renderer.dispose(); }catch(e){}
+  }
+  const rect = mount.getBoundingClientRect();
+  const width = Math.max(320, Math.round(rect.width || 640));
+  const height = Math.max(180, Math.round(rect.height || 260));
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  renderer.setSize(width, height, false);
+  renderer.setClearColor(0x000000, 0);
+  threeBridgeRuntime.renderer = renderer;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, width/height, .1, 100);
+  camera.position.set(0, .92, 4.2);
+  camera.lookAt(0, -.08, .05);
+  scene.add(new THREE.HemisphereLight(0xbddfff, 0x0a1018, 1.8));
+  const key = new THREE.DirectionalLight(0x9fd4ff, 1.2);
+  key.position.set(-2, 3, 4);
+  scene.add(key);
+
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const hot = /mayday|distress|alarm|yangin|fire|blackout|korsan|pirate/.test(blob);
+  const storm = /storm|firtina|swell|rain|sis|fog|beaufort/.test(blob);
+  const harbor = /harbor|liman|terminal|berth|tug|pilot|all fast/.test(blob);
+
+  const seaGeo = new THREE.PlaneGeometry(9, 4, 18, 5);
+  const seaMat = new THREE.MeshStandardMaterial({color:storm?0x102236:harbor?0x173854:0x174a72, roughness:.9, metalness:.02, transparent:true, opacity:.72});
+  const sea = new THREE.Mesh(seaGeo, seaMat);
+  sea.rotation.x = -Math.PI/2.6;
+  sea.position.set(0, -.58, -2.2);
+  scene.add(sea);
+
+  for(let i=-2;i<=2;i++){
+    const frame = addThreeBox(THREE, scene, [.035, 1.55, .035], [i*.72, .28, -1.25], 0x284056);
+    frame.rotation.z = i*.025;
+  }
+  addThreeBox(THREE, scene, [4.8, .08, .08], [0, 1.05, -1.25], 0x2c4358);
+  addThreeBox(THREE, scene, [4.8, .08, .08], [0, -.55, -1.2], 0x111d2a);
+
+  const consoleBase = addThreeBox(THREE, scene, [4.5, .42, 1.52], [0, -.82, .62], 0x142233);
+  consoleBase.rotation.x = -.22;
+  const lip = addThreeBox(THREE, scene, [4.2, .08, .13], [0, -.45, -.02], 0x2b3e52, 0x061018);
+  lip.rotation.x = -.22;
+
+  const ecdis = addThreeBox(THREE, scene, [.95, .58, .08], [-1.15, -.31, .02], 0x0b1722, 0x071d2a);
+  ecdis.rotation.y = .18;
+  const ecdisScreen = addThreeBox(THREE, scene, [.78, .42, .025], [-1.15, -.31, -.035], 0x8ad5e8, 0x246070);
+  ecdisScreen.rotation.y = .18;
+  const routeLine = addThreeBox(THREE, scene, [.55, .018, .018], [-1.15, -.28, -.07], 0x9b2f3d, 0x5b1018);
+  routeLine.rotation.z = -.28; routeLine.rotation.y = .18;
+
+  const vhf = addThreeBox(THREE, scene, [.92, .64, .16], [0, -.26, -.05], 0x131e29, hot?0x2a0808:0x051018);
+  const vhfScreen = addThreeBox(THREE, scene, [.48, .24, .035], [-.12, -.25, -.15], hot?0x113423:0x0c3042, hot?0x236b45:0x185a80);
+  const ptt = addThreeBox(THREE, scene, [.18, .18, .045], [.32, -.23, -.16], 0x1e3448, 0x071018);
+  const dist = addThreeBox(THREE, scene, [.18, .13, .045], [.32, -.46, -.14], hot?0x8a1f25:0x4a1a20, hot?0x5a0808:0x1a0305);
+
+  const radar = addThreeBox(THREE, scene, [.86, .62, .09], [1.1, -.32, .02], 0x0a151e, 0x061018);
+  radar.rotation.y = -.18;
+  const radarDisc = new THREE.Mesh(new THREE.CircleGeometry(.24, 48), new THREE.MeshStandardMaterial({color:0x0a2b1a, emissive:0x165b31, roughness:.45}));
+  radarDisc.position.set(1.03, -.31, -.055);
+  radarDisc.rotation.y = -.18;
+  scene.add(radarDisc);
+  const sweep = addThreeBox(THREE, scene, [.34, .012, .012], [1.15, -.31, -.07], 0x81f7b8, 0x3ddf8a);
+  sweep.rotation.y = -.18;
+
+  if(harbor){
+    for(let i=0;i<7;i++){
+      const light = addThreeBox(THREE, scene, [.035,.035,.035], [-2.1+i*.7, .04, -1.62], 0xffc458, 0xffa52b);
+      light.scale.set(1,1,1);
+    }
+  }
+
+  const started = performance.now();
+  const animate = (now)=>{
+    if(token !== threeBridgeRuntime.token) return;
+    const t = (now - started) / 1000;
+    sweep.rotation.z = t * 2.2;
+    sea.position.x = Math.sin(t*.7) * .05;
+    sea.position.y = -.58 + Math.sin(t*1.3) * (storm ? .035 : .012);
+    consoleBase.rotation.z = Math.sin(t*.8) * (storm ? .012 : .003);
+    radarDisc.material.emissiveIntensity = .8 + Math.sin(t*3) * .12;
+    vhfScreen.material.emissiveIntensity = hot ? 1.4 + Math.sin(t*7)*.35 : 1.05 + Math.sin(t*2.4)*.12;
+    renderer.render(scene, camera);
+    threeBridgeRuntime.frame = requestAnimationFrame(animate);
+  };
+  threeBridgeRuntime.frame = requestAnimationFrame(animate);
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
@@ -8221,6 +8388,7 @@ let companyPressureState={stage:0, mailSeen:false, charterSeen:false, rootSeen:f
 let investigationDossier=[];
 let watchCycleLog={handovers:0, logbook:0, portPrep:0};
 let liveVoyageState={progress:0, eta:'--:--', cpa:'--', tcpa:'--', ukc:'--', sog:'--', nextWp:'--', alert:false};
+let threeBridgeRuntime={THREE:null, renderer:null, frame:null, token:0};
 
 function clampMood(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function clampPsych(v){return Math.max(0,Math.min(100,Math.round(v)));}
@@ -11553,11 +11721,19 @@ function renderScene(idx){
   const svg=document.getElementById('gfx-svg');
   const photo=document.getElementById('gfx-photo');
   const foreground=document.getElementById('gfx-foreground');
+  const bridge3d=document.getElementById('gfx-3d');
   window.__bgBackdropProfile = getSceneBackdropProfile(sc);
   if(photo){
     const profile = window.__bgBackdropProfile || 'opensea';
     photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
+  }
+  if(bridge3d){
+    const bridge3dMarkup = getScene3DBridgeOverlay(sc);
+    bridge3d.innerHTML = bridge3dMarkup ? `<canvas class="three-bridge-canvas"></canvas>${bridge3dMarkup}` : '';
+    bridge3d.classList.toggle('active', !!bridge3dMarkup);
+    if(bridge3dMarkup) renderThreeBridgeScene(sc);
+    else stopThreeBridgeScene();
   }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);

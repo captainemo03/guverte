@@ -36,6 +36,18 @@ CHECKS = {
         "VHF DSC RADIOTELEPHONE",
         "DISTRESS WATCH",
     ],
+    "3d bridge layer": [
+        "gfx-3d",
+        "getScene3DBridgeOverlay",
+        "renderThreeBridgeScene",
+        "three-bridge-canvas",
+        "three.module.js",
+        "WebGLRenderer",
+        "bridge3d-device",
+        "bridge3d-vhf",
+        "bridge3d-radar",
+        "bridge3d-ecdis",
+    ],
     "route tasks": [
         "waypoint",
         "cpa",
@@ -73,14 +85,17 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 77:
+    elif int(js_versions[-1]) < 79:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 71:
+    elif int(css_versions[-1]) < 73:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
+
+    if not (ROOT / "www" / "vendor" / "three.module.js").exists():
+        missing.append("3d bridge layer: vendor/three.module.js is missing")
 
     timer_hooks = js.count("sceneLiveSequenceTimers.push")
     if timer_hooks < 5:
