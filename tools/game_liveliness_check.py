@@ -71,6 +71,16 @@ CHECKS = {
         "Polar Code",
         "DP",
     ],
+    "complexity and save flow": [
+        "PLAY_MODE_DEFS",
+        "renderPlayModeSelector",
+        "getFeatureUnlocks",
+        "updateGuidanceStrip",
+        "guidance-strip",
+        "toggleSavePanel",
+        "save-panel-grid",
+        "gameplayMode",
+    ],
 }
 
 
@@ -94,13 +104,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 81:
+    elif int(js_versions[-1]) < 82:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 75:
+    elif int(css_versions[-1]) < 76:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():

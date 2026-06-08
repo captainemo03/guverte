@@ -9507,6 +9507,7 @@ function renderCharacterCreator(){
 function buildIntro(){
   refreshShipSpecs();
   refreshSaveEntryActions();
+  renderPlayModeSelector();
   document.getElementById('yearsel').innerHTML='';
   document.getElementById('shiptype').innerHTML='';
   // Yıl seçimi
@@ -11803,6 +11804,9 @@ function renderScene(idx){
   document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear+' · '+watchState.code;
   document.getElementById('contract-type').textContent=stObj.nm+' '+getContractTotalMonths()+' ay · '+contractTotal+' sahne';
   updateOpsHud(sc);
+  updateFeatureVisibility(sc);
+  updateGuidanceStrip(sc);
+  renderSavePanel();
   updateLivingWatch(sc);
   if(document.getElementById('sim-panel')?.classList.contains('show')) renderSimCenter();
   renderPhone();
@@ -11997,7 +12001,11 @@ function buildShipOffers(){
 
 function takeShipOffer(key){ continueContractOnShip(key || 'same'); }
 
-function openCareer(){ document.getElementById('career-panel')?.classList.add('show'); renderCareerPanel(); }
+function openCareer(){
+  if(!canUseFeature('career')) return;
+  document.getElementById('career-panel')?.classList.add('show');
+  renderCareerPanel();
+}
 function closeCareer(){ document.getElementById('career-panel')?.classList.remove('show'); }
 
 function doFreeTimeAction(key){
@@ -13318,6 +13326,135 @@ const TRADE_VOYAGE_ROUTES = [
   }
 ];
 const SAVE_KEY = 'guverte-save-v1';
+const PLAY_MODE_DEFS = {
+  simple:{label:'Basit', desc:'Hikaye, temel secimler ve az ekran kalabaligi.', level:0},
+  realistic:{label:'Gercekci', desc:'Cihaz, harita ve logbook yavas yavas acilir.', level:1},
+  expert:{label:'Uzman', desc:'CPA, UKC, PSC, tanker ve premium detaylar acik.', level:2}
+};
+let gameplayMode = 'realistic';
+let savePanelOpen = false;
+
+function getGameplayModeDef(){
+  return PLAY_MODE_DEFS[gameplayMode] || PLAY_MODE_DEFS.realistic;
+}
+
+function setGameplayMode(mode){
+  gameplayMode = PLAY_MODE_DEFS[mode] ? mode : 'realistic';
+  renderPlayModeSelector();
+  updateFeatureVisibility(sceneQueue[currentIdx] || null);
+}
+
+function renderPlayModeSelector(){
+  const box = document.getElementById('play-mode-select');
+  if(!box) return;
+  box.innerHTML = Object.entries(PLAY_MODE_DEFS).map(([key,def])=>`
+    <button type="button" class="mode-card ${gameplayMode===key?'active':''}" onclick="setGameplayMode('${key}')">
+      <b>${def.label}</b><span>${def.desc}</span>
+    </button>`).join('');
+}
+
+function getFeatureUnlocks(sc){
+  const sceneNo = Math.max(1, currentIdx + 1, contractDays || 0);
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const mode = getGameplayModeDef();
+  const doingWell = (stats.bilgi || 0) + (stats.sayginlik || 0) > 145 && (SYSTEM_STATE.totalMistakes || 0) < 3;
+  const assist = (SYSTEM_STATE.consecutiveMistakes || 0) >= 2 || (stats.dinclik || 0) < 24;
+  const bonus = doingWell ? 2 : 0;
+  const forced = {
+    vhf:/vhf|dsc|mayday|pan-pan|distress|vts|pilot/.test(blob),
+    map:/map|chart|ecdis|route|pilot station|waypoint|tss|harita|seyir/.test(blob),
+    devices:/radar|arpa|ecdis|ais|vhf|gmdss|gyro|echo|bnwas|device|cihaz/.test(blob),
+    logbook:/logbook|defter|handover|teslim|all fast|pilot boarding|watch/.test(blob)
+  };
+  const simple = mode.level === 0;
+  return {
+    phone: !simple || sceneNo >= 5,
+    map: !simple && (sceneNo >= 7 - bonus || forced.map),
+    devices: !simple && (sceneNo >= 9 - bonus || forced.devices || forced.vhf),
+    logbook: !simple && (sceneNo >= 10 - bonus || forced.logbook || assist),
+    cabin: !simple && sceneNo >= 12 - bonus,
+    shipwalk: !simple && sceneNo >= 14 - bonus,
+    sim: mode.level >= 1 && sceneNo >= 16 - bonus,
+    career: sceneNo >= 10,
+    album: sceneNo >= 8,
+    assist,
+    advanced: mode.level >= 1,
+    expert: mode.level >= 2
+  };
+}
+
+function featureLockedMessage(feature){
+  const names = {
+    phone:'Telefon', map:'Harita', devices:'Cihaz egitimi', logbook:'Vardiya defteri',
+    cabin:'Kamara', shipwalk:'Gemi ici harita', sim:'Simulasyon merkezi',
+    career:'Kariyer', album:'Album', expert:'Uzman detay'
+  };
+  return `${names[feature] || 'Bu bolum'} henuz acilmadi. Oyuncuyu yormamak icin sistemler kontrat ilerledikce aciliyor.`;
+}
+
+function canUseFeature(feature, sc=sceneQueue[currentIdx] || null, notify=true){
+  const u = getFeatureUnlocks(sc);
+  const ok = !!u[feature];
+  if(!ok && notify) showNotif('KILIT', 'Yavas Aciliyor', featureLockedMessage(feature));
+  return ok;
+}
+
+function getSceneGuidance(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if((SYSTEM_STATE.consecutiveMistakes || 0) >= 2) return 'Destek modu: acele etme, prosedure en yakin ve kanitli karari sec.';
+  if((stats.dinclik || 0) < 24) return 'Dinclik dusuk: riskli kahramanlik yerine sakin ve prosedurel karar ver.';
+  if(/vhf|dsc|mayday|pan-pan|vts|pilot exchange/.test(blob)) return 'VHF kanalini ve cagri tipini netlestir.';
+  if(/radar|arpa|cpa|tcpa|ais/.test(blob)) return 'Hedefi oku: CPA/TCPA, niyet ve rapor.';
+  if(/ecdis|route|waypoint|chart|tss|ukc|squat/.test(blob)) return 'Haritada rota, emniyet konturu ve sonraki noktayi kontrol et.';
+  if(/engine|makine|blackout|alarm|generator|pump/.test(blob)) return 'Makine bilgisini al, kaptana kisa rapor ver.';
+  if(/pilot|tug|berth|mooring|all fast|halat/.test(blob)) return 'Speed-heading, halat sirasi ve snap-back riskini izle.';
+  if(/fire|yangin|mob|abandon|distress/.test(blob)) return 'Once emniyet zinciri: alarm, mevki, ekip, rapor.';
+  if(/psc|survey|class|inspection|deficiency/.test(blob)) return 'Belgeyi, ekipmani ve eksik riskini sakin kontrol et.';
+  return 'Sahneyi oku, kimin ne istedigini anla ve tek net karar ver.';
+}
+
+function updateFeatureVisibility(sc){
+  const game = document.getElementById('game');
+  if(game){
+    game.classList.toggle('simple-mode', gameplayMode === 'simple');
+    game.classList.toggle('realistic-mode', gameplayMode === 'realistic');
+    game.classList.toggle('expert-mode', gameplayMode === 'expert');
+    game.classList.toggle('new-player', Math.max(currentIdx+1, contractDays || 0) < 12);
+  }
+  const map = [
+    ['openMap()','map'], ['openDevices()','devices'], ['openSimCenter()','sim'], ['openCareer()','career'],
+    ['openShipWalk()','shipwalk'], ['openCabin()','cabin'], ['openLiveLogbook()','logbook'],
+    ['togglePhone()','phone'], ['openAlbum()','album']
+  ];
+  const unlocks = getFeatureUnlocks(sc);
+  map.forEach(([onclick,feature])=>{
+    document.querySelectorAll(`#toolbar button[onclick="${onclick}"]`).forEach(btn=>{
+      btn.classList.toggle('locked-tool', !unlocks[feature]);
+      btn.classList.toggle('advanced-tool', ['map','devices','sim','shipwalk','cabin','logbook'].includes(feature));
+      btn.classList.toggle('expert-tool', ['sim'].includes(feature));
+      btn.title = unlocks[feature] ? '' : featureLockedMessage(feature);
+    });
+  });
+}
+
+function updateGuidanceStrip(sc){
+  const modeEl = document.getElementById('guidance-mode');
+  const textEl = document.getElementById('guidance-text');
+  const unlockEl = document.getElementById('guidance-unlocks');
+  if(modeEl) modeEl.textContent = `Mod: ${getGameplayModeDef().label}`;
+  if(textEl) textEl.textContent = getSceneGuidance(sc);
+  if(unlockEl){
+    const u = getFeatureUnlocks(sc);
+    const open = [
+      u.phone?'Telefon':'',
+      u.map?'Harita':'',
+      u.devices?'Cihaz':'',
+      u.logbook?'Defter':'',
+      u.sim?'Sim':''
+    ].filter(Boolean).join(' · ');
+    unlockEl.textContent = u.assist ? 'Destek modu acik: rehber daha ogretici.' : open ? `Acik: ${open}` : 'Sadece hikaye ve temel secimler.';
+  }
+}
 
 function hasSavedGame(){
   try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
@@ -13331,12 +13468,56 @@ function refreshSaveEntryActions(){
   if(deleteBtn) deleteBtn.style.display = exists ? 'block' : 'none';
 }
 
+function getSavedGameMeta(){
+  let raw = null;
+  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+
+function formatSaveTime(iso){
+  if(!iso) return 'Kayit yok';
+  try{
+    return new Date(iso).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'});
+  }catch(e){
+    return iso;
+  }
+}
+
+function toggleSavePanel(force){
+  savePanelOpen = typeof force === 'boolean' ? force : !savePanelOpen;
+  const panel = document.getElementById('save-panel');
+  if(panel) panel.classList.toggle('show', savePanelOpen);
+  renderSavePanel();
+}
+
+function renderSavePanel(){
+  const grid = document.getElementById('save-panel-grid');
+  const summary = document.getElementById('save-panel-summary');
+  if(!grid) return;
+  const meta = getSavedGameMeta();
+  if(summary){
+    summary.textContent = meta
+      ? `Son kayit: ${formatSaveTime(meta.savedAt)} · Sahne ${(meta.currentIdx||0)+1}`
+      : 'Henuz kayit alinmadi';
+  }
+  const currentScene = sceneQueue?.length ? `${currentIdx+1}/${sceneQueue.length}` : 'Baslamadi';
+  const modeLabel = getGameplayModeDef().label;
+  const savedMode = meta?.gameplayMode && PLAY_MODE_DEFS[meta.gameplayMode] ? PLAY_MODE_DEFS[meta.gameplayMode].label : 'Yok';
+  grid.innerHTML = `
+    <div class="save-card"><b>Mevcut Oyun</b><small>${phoneSafe(pn || 'Stajyer')} · ${phoneSafe(sn || 'Gemi')}<br>Sahne ${currentScene}<br>${modeLabel} mod</small></div>
+    <div class="save-card"><b>Kontrat</b><small>${contractDays || 0}/${contractTotal || 0} sahne<br>${phoneSafe(getRankName ? getRankName() : 'Stajyer')}<br>${phoneSafe(selYear)} · ${phoneSafe(selType)}</small></div>
+    <div class="save-card"><b>Son Kayit</b><small>${formatSaveTime(meta?.savedAt)}<br>${meta ? phoneSafe(meta.sn || 'Kayitli gemi') : 'Kayit yok'}<br>Mod: ${savedMode}</small></div>
+    <div class="save-card save-actions"><b>Islemler</b><button class="save-action-btn primary" onclick="saveGameState(true)">Oyunu Kaydet</button><button class="save-action-btn" onclick="loadSavedGame()">Kayittan Devam</button><button class="save-action-btn danger" onclick="deleteSavedGame()">Kaydi Sil</button></div>`;
+}
+
 function buildSavePayload(){
   const crewNames = {};
   Object.keys(CREW_DEFS).forEach(key=>{ crewNames[key] = CREW_DEFS[key].name; });
   return {
     version:1,
     savedAt:new Date().toISOString(),
+    gameplayMode,
     premiumUnlocked,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
@@ -13416,6 +13597,7 @@ function saveGameState(manual=false){
   try{
     localStorage.setItem(SAVE_KEY, JSON.stringify(buildSavePayload()));
     refreshSaveEntryActions();
+    renderSavePanel();
     if(manual) showNotif('💾','Oyun Kaydedildi',`Sahne ${currentIdx+1} icin kayit alindi.`);
     return true;
   }catch(e){
@@ -13427,10 +13609,12 @@ function saveGameState(manual=false){
 function deleteSavedGame(showToast=true){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   refreshSaveEntryActions();
+  renderSavePanel();
   if(showToast) showNotif('🗑️','Kayit Silindi','Kaydedilen ilerleme temizlendi.');
 }
 
 function applyLoadedGameState(data){
+  gameplayMode = PLAY_MODE_DEFS[data.gameplayMode] ? data.gameplayMode : 'realistic';
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
   premiumUnlocked = !!data.premiumUnlocked || premiumUnlocked;
@@ -13544,6 +13728,7 @@ function loadSavedGame(){
     renderCrewCards();
     renderScene(currentIdx);
     refreshSaveEntryActions();
+    renderSavePanel();
     showNotif('↻','Kayittan Devam','Kaydedilen oyuna geri donuldu.');
   }catch(e){
     deleteSavedGame(false);
@@ -13647,6 +13832,7 @@ const MAP_TASKS = [
 ];
 
 function openMap(){
+  if(!canUseFeature('map')) return;
   document.getElementById('map-panel').classList.add('show');
   renderMap();
 }
@@ -13668,6 +13854,7 @@ function adjustPortChartZoom(delta){
 
 function autoOpenVoyageChart(sc){
   if(!sc?.voyageRouteKey) return;
+  if(!canUseFeature('map', sc, false)) return;
   const route = getActiveVoyageRoute();
   const wp = route?.waypoints?.[sc.voyageWpIndex || 0];
   if(!wp) return;
@@ -17728,6 +17915,7 @@ function getDeviceDef(key){
 }
 
 function openDevices(){
+  if(!canUseFeature('devices')) return;
   const p = document.getElementById('devices-panel');
   if(p) p.classList.add('show');
   renderDevices();
@@ -17957,6 +18145,7 @@ function buildGmdssDeviceSvg(def){
 }
 
 function togglePhone(){
+  if(!phoneOpen && !canUseFeature('phone')) return;
   phoneOpen = !phoneOpen;
   renderPhone();
 }
@@ -18954,7 +19143,11 @@ function renderPhoneAppMenu(){
   <div class="phone-menu-hint">Cihaz egitimleri artik telefon uygulamasi gibi durmuyor; sahnelerden ve Cihaz Egitim Merkezi'nden aciliyor.</div>`;
 }
 function closeLifePanel(id){ document.getElementById(id)?.classList.remove('show'); }
-function openLiveLogbook(){ document.getElementById('logbook-panel')?.classList.add('show'); renderLiveLogbook(); }
+function openLiveLogbook(){
+  if(!canUseFeature('logbook')) return;
+  document.getElementById('logbook-panel')?.classList.add('show');
+  renderLiveLogbook();
+}
 function addLiveLogbook(type,text,editable=true){
   liveLogbookEntries.unshift({type,text,editable,ts:Date.now(),scene:currentIdx+1});
   liveLogbookEntries = liveLogbookEntries.slice(0,30);
@@ -18974,7 +19167,11 @@ function renderLiveLogbook(){
   body.innerHTML = `<div class="life-card"><b>Kritik satirlari duzelt</b>Hava, rota, CPA, makine alarmi, pilot boarding ve all fast satirlari burada tutulur. Yanlis/eksik satiri duzeltmek bilgi ve sayginlik kazandirir.</div>
     ${liveLogbookEntries.map((e,i)=>`<div class="log-row"><b>${phoneSafe(e.type)}</b><input value="${phoneSafe(e.text)}" ${e.editable?'':'disabled'} onchange="editLiveLogbook(${i},this.value)"><button onclick="editLiveLogbook(${i},this.previousElementSibling.value); applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true}); showNotif('OK','Logbook','Satir duzeltildi.')">Kaydet</button></div>`).join('')}`;
 }
-function openCabin(){ document.getElementById('cabin-panel')?.classList.add('show'); renderCabin(); }
+function openCabin(){
+  if(!canUseFeature('cabin')) return;
+  document.getElementById('cabin-panel')?.classList.add('show');
+  renderCabin();
+}
 function renderCabin(){
   const body=document.getElementById('cabin-body'); if(!body) return;
   body.innerHTML = `<div class="life-grid">
@@ -18991,7 +19188,11 @@ function renderCabin(){
     <div class="life-card"><b>Tank Sounding</b>Tank ve tuketim takibi.<button onclick="doFreeTimeAction('sounding'); renderCabin()">Sounding al</button></div>
   </div>`;
 }
-function openShipWalk(){ document.getElementById('shipwalk-panel')?.classList.add('show'); renderShipWalk(); }
+function openShipWalk(){
+  if(!canUseFeature('shipwalk')) return;
+  document.getElementById('shipwalk-panel')?.classList.add('show');
+  renderShipWalk();
+}
 function visitShipZone(zone){
   const actions={
     bridge:['Kopruustu','Radar sweep, VHF cizirtisi ve ECDIS rota kontrolu canli.','logbook'],
@@ -19096,6 +19297,7 @@ function getCrewMemoryCards(){
 }
 
 function openSimCenter(){
+  if(!canUseFeature('sim')) return;
   document.getElementById('sim-panel')?.classList.add('show');
   renderSimCenter();
 }
@@ -19693,6 +19895,7 @@ function maybeAddOceanPhoto(sc){
 }
 
 function openAlbum(){
+  if(!canUseFeature('album')) return;
   const p = document.getElementById('album-panel');
   p.classList.add('show');
   // Rebuild album content

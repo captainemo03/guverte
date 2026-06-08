@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=75">
+<link rel="stylesheet" href="./index.css?v=76">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -251,6 +251,12 @@
   </div>
 
   <div class="fcard">
+    <div class="fcard-t">Oynanis Modu</div>
+    <div id="play-mode-select" class="mode-grid"></div>
+    <div class="mode-hint">Basit mod oyunu sade tutar. Gercekci mod cihazlari yavas acar. Uzman mod tum sim detaylarini one cikarir.</div>
+  </div>
+
+  <div class="fcard">
     <div class="fcard-t">⚓ Gemi Adı</div>
     <input id="shipnameinp" type="text" maxlength="24" placeholder="Gemi adını yaz veya seç..."/>
     <div class="ssugs" id="shipsugs"></div>
@@ -273,10 +279,20 @@
       <div id="shipinfo">—</div>
     </div>
     <div id="topright">
-      <button id="save-btn" onclick="saveGameState(true)">💾</button>
+      <button id="save-btn" onclick="toggleSavePanel()">KAYDET</button>
       <button id="sound-btn" onclick="toggleSound()">🔊</button>
       <div id="repwrap"><div id="replbl">İTİBAR</div><div id="repstars">⭐⭐⭐</div></div>
     </div>
+  </div>
+  <div id="save-panel">
+    <div class="save-panel-head">
+      <div>
+        <b>KAYIT MERKEZI</b>
+        <span id="save-panel-summary">Kayit durumu hazirlaniyor</span>
+      </div>
+      <button onclick="toggleSavePanel(false)">Kapat</button>
+    </div>
+    <div id="save-panel-grid"></div>
   </div>
   <div id="clock-wrap">
     <canvas id="clock-canvas" width="72" height="72"></canvas>
@@ -302,6 +318,11 @@
     <span id="office-chip" class="ops-chip">Ofis sakin</span>
   </div>
   <div id="live-watch-feed"></div>
+  <div id="guidance-strip">
+    <span id="guidance-mode">Mod: Gercekci</span>
+    <b id="guidance-text">Sahneyi oku ve karar ver.</b>
+    <small id="guidance-unlocks">Yeni sistemler yavas acilir.</small>
+  </div>
   <div id="toolbar">
     <button class="tb-btn" onclick="openColreg()">COLREG</button>
     <button class="tb-btn" onclick="openNotes()">🧭 NOTLARIM</button>
@@ -426,6 +447,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=81"></script>
+<script src="./index.js?v=82"></script>
 </body>
 </html>
