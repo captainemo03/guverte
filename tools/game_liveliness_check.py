@@ -30,6 +30,12 @@ CHECKS = {
         "Gorev zinciri",
         "Canli gorev zinciri",
     ],
+    "scene vhf console": [
+        "getSceneVhfConsoleOverlay",
+        "live-vhf-console",
+        "VHF DSC RADIOTELEPHONE",
+        "DISTRESS WATCH",
+    ],
     "route tasks": [
         "waypoint",
         "cpa",
@@ -67,8 +73,14 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 76:
+    elif int(js_versions[-1]) < 77:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
+
+    css_versions = re.findall(r"index\.css\?v=(\d+)", html)
+    if not css_versions:
+        missing.append("cache: index.css version query is missing")
+    elif int(css_versions[-1]) < 71:
+        missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     timer_hooks = js.count("sceneLiveSequenceTimers.push")
     if timer_hooks < 5:
@@ -85,6 +97,7 @@ def main() -> int:
     print(f"- checked {INDEX_HTML.relative_to(ROOT)}")
     print(f"- scene timer hooks: {timer_hooks}")
     print(f"- index.js cache version: {js_versions[-1]}")
+    print(f"- index.css cache version: {css_versions[-1]}")
     return 0
 
 

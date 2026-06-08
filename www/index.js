@@ -8047,6 +8047,62 @@ function getSceneOverlay(gfx,sc){
   return extra;
 }
 
+function getSceneVhfConsoleOverlay(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const isDistress = /mayday|distress|sahil guvenlik|sahil güvenlik|korsan|pirate|mob|fire|yangin|blackout/.test(blob);
+  const isPan = /pan-pan|medical|medevac|engine alarm|makine alarm/.test(blob);
+  const isVts = /vts|traffic|tss|bogaz|boğaz|strait|reporting point/.test(blob);
+  const isPilot = /pilot|pilot exchange|boarding|berth|tug|romorkor|römorkör|liman|harbor/.test(blob);
+  const isDsc = /dsc|ch70|channel 70/.test(blob);
+  const channel = isDsc ? '70'
+    : isDistress ? '16'
+    : isVts ? '12'
+    : isPilot ? '14'
+    : isPan ? '16'
+    : '13';
+  const mode = isDsc ? 'DSC WATCH'
+    : isDistress ? 'DISTRESS WATCH'
+    : isPan ? 'URGENCY'
+    : isVts ? 'VTS WORKING'
+    : isPilot ? 'PILOT / TUG'
+    : 'BRIDGE COMMS';
+  const rxLine = isDistress ? 'MAYDAY / SECURITE TRAFFIC'
+    : isPan ? 'PAN-PAN TRAFFIC'
+    : isVts ? 'VTS REPORTING POINT'
+    : isPilot ? 'PILOT EXCHANGE / TUG ORDER'
+    : 'ROUTINE BRIDGE WATCH';
+  const phrase = isDistress ? 'Position, nature of distress, assistance required.'
+    : isPan ? 'Urgency call, vessel status, medical/engine update.'
+    : isVts ? 'Ship name, position, course, speed, intention.'
+    : isPilot ? 'Pilot ladder, ETA, side, speed and tug plan.'
+    : 'Listen first, speak short, log the call.';
+  const hot = isDistress || isPan || sc?.alert;
+  return `<div class="live-vhf-console ${hot?'hot':''}">
+    <div class="vhf-top"><span>VHF DSC RADIOTELEPHONE</span><b>${phoneSafe(mode)}</b></div>
+    <div class="vhf-body">
+      <div class="vhf-lcd">
+        <small>CH</small><strong>${channel}</strong>
+        <em>${phoneSafe(rxLine)}</em>
+        <i>${phoneSafe(phrase)}</i>
+      </div>
+      <div class="vhf-side">
+        <button>PTT</button>
+        <button class="${hot?'danger':''}">DIST</button>
+        <button>SQL</button>
+      </div>
+    </div>
+    <div class="vhf-keypad">
+      <span class="${channel==='16'?'active':''}">16</span>
+      <span class="${channel==='70'?'active':''}">70</span>
+      <span class="${channel==='12'?'active':''}">12</span>
+      <span class="${channel==='14'?'active':''}">14</span>
+      <span>DW</span>
+      <span>SCAN</span>
+    </div>
+    <div class="vhf-rx"><b>RX</b><span></span><span></span><span></span><span></span><span></span></div>
+  </div>`;
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
@@ -8061,7 +8117,7 @@ function getLiveSceneOverlay(sc){
     parts.push('<div class="live-bridge-alarm-row"><i></i><i></i><i></i><i></i></div>');
   }
   if(/vhf|dsc|mayday|pan-pan|securite|sahil guvenlik|pilot exchange|vts/.test(blob)){
-    parts.push('<div class="live-vhf-panel"><span></span><span></span><span></span></div>');
+    parts.push(getSceneVhfConsoleOverlay(sc));
     parts.push('<div class="live-radio-lines"><b>MAYDAY / PAN-PAN</b><span></span><span></span><span></span></div>');
   }
   if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)){
