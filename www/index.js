@@ -13742,6 +13742,7 @@ function buildSavePayload(){
     activePhoneSite,
     watchFeedItems,
     livingPulseState,
+    monthlyCaptainReviewState,
     liveLogbookEntries,
     achievementsUnlocked,
     crewFatigueState,
@@ -13847,6 +13848,7 @@ function applyLoadedGameState(data){
   activePhoneSite = data.activePhoneSite || 'home';
   watchFeedItems = Array.isArray(data.watchFeedItems) ? data.watchFeedItems : [];
   livingPulseState = data.livingPulseState || {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
+  monthlyCaptainReviewState = data.monthlyCaptainReviewState || {lastMonth:0};
   liveLogbookEntries = Array.isArray(data.liveLogbookEntries) ? data.liveLogbookEntries : [];
   achievementsUnlocked = data.achievementsUnlocked || {};
   pendingPhoneCall = null;
@@ -14005,6 +14007,87 @@ const MAP_TASKS = [
     chartKind:'route'
   }
 ];
+
+const MAP_TASK_TRAINING = {
+  pilot:{
+    focus:'Pilot boarding sembolu genelde dis yaklasmada, kanal girisine girmeden once aranir.',
+    correct:'Pilot boarding noktasi dis yaklasmada bulundu; simdi VHF/pilot exchange ve speed planini teyit et.',
+    wrong:'Pilot noktasini berth veya kanal icinde arama. Dis yaklasmada daire/etiket ve VTS bilgisine bak.'
+  },
+  anchorage:{
+    focus:'Demir yeri seciminde derinlik, holding ground, no anchoring ve trafik hatti beraber okunur.',
+    correct:'Anchorage bolgesi secildi; derinlik, dip yapisi ve traffic lane mesafesi birlikte kontrol edildi.',
+    wrong:'Demir alanini channel veya no-go alaniyla karistirma. Yesil/etiketli anchorage notunu ara.'
+  },
+  tss:{
+    focus:'TSS gorevinde akim yon oklarini, ayrim hattini ve crossing mantigini oku.',
+    correct:'TSS/traffic flow dogru okundu; rota ayrim hattini dik ve emniyetli aciyla kesecek.',
+    wrong:'TSS sadece yol cizgisi degil; akim yonu, separation zone ve reporting disiplini birlikte okunur.'
+  },
+  berth:{
+    focus:'Berth yaklasmasinda turning basin, tug plan ve son speed/heading noktasi birlikte okunur.',
+    correct:'Turning/berth approach secildi; tug ve all fast zinciri icin son plan netlesti.',
+    wrong:'Berth yaklasmasinda dogrudan rihitma atlama. Turning basin ve approach channel merkezini ara.'
+  },
+  reporting:{
+    focus:'Reporting point/VTS noktasi chart uzerindeki R sembolu veya raporlama etiketiyle aranir.',
+    correct:'Reporting/VTS noktasi bulundu; standart rapor ve kanal disiplini hazir.',
+    wrong:'Reporting point genelde trafik/vardiya raporu icindir; liman icindeki berth semboluyle karistirma.'
+  },
+  noanchoring:{
+    focus:'No anchoring alanlari kablo, boru hatti, trafik ya da terminal emniyeti yuzunden kapali olabilir.',
+    correct:'No anchoring alani secildi; demir plani kapali bolgeden uzak tutuldu.',
+    wrong:'Demir atilacak yeri degil, demir atilmamasi gereken tarali/uyarili alani secmelisin.'
+  },
+  alternateroute:{
+    focus:'Alternatif rota tek nokta degil; hava, ECA, no-go ve trafik riskinden uzak bir hat cizilir.',
+    correct:'Alternatif rota kabul edildi; risk alani etrafindan kontrollu sapma cizildi.',
+    wrong:'Alternatif rota icin en az uc mantikli nokta sec; sadece mevcut rotanin ustune tiklama.'
+  },
+  waypoint:{
+    focus:'Waypoint gorevinde next WP, wheel-over ve XTD koridoru birlikte takip edilir.',
+    correct:'Next waypoint/WOP secildi; ETA, XTD ve wheel-over kontrolu hazir.',
+    wrong:'Waypoint bir liman etiketi degil; rota uzerindeki donus/izleme noktasini ara.'
+  },
+  cpa:{
+    focus:'CPA hedefinde AIS ismine degil, vektorlerin daralan gecis mesafesine bak.',
+    correct:'Daralan CPA hedefi secildi; radar/ARPA ve AIS cross-check yapildi.',
+    wrong:'En yakin nokta her zaman en tehlikeli hedef degildir. Vektor ve crossing acisini birlikte oku.'
+  },
+  ukc:{
+    focus:'UKC/squat kontrolunde kanal sığlığı, safety depth ve hiz etkisi birlikte dusunulur.',
+    correct:'UKC/squat bolgesi secildi; hiz, draft ve emniyet derinligi kontrol edildi.',
+    wrong:'UKC kontrolu acik deniz derinliginde degil; sığ/kanal bolgesinde safety depth ile okunur.'
+  },
+  eca:{
+    focus:'ECA/change-over alaninda yakit gecisi, emisyon bolgesi ve logbook saati onemlidir.',
+    correct:'ECA/change-over noktasi secildi; yakit gecisi ve logbook zinciri hazir.',
+    wrong:'ECA bir trafik hedefi degil; rota uzerinde bolge giris/cikis veya change-over notunu ara.'
+  },
+  weatheravoid:{
+    focus:'Weather avoidance, rotayi havanin disindan ama emniyetli trafik/derinlik icinden gecirmektir.',
+    correct:'Weather avoidance alani secildi; ETA ve emniyet marji birlikte korunacak.',
+    wrong:'Kotu havadan kacarken karaya, no-go alana veya trafik ayirimina girmemelisin.'
+  },
+  cablecrossing:{
+    focus:'Kablo/boru hatti crossing noktasi demirleme yasagi ve operasyon izinleriyle birlikte okunur.',
+    correct:'Cable/pipeline crossing secildi; demirleme ve calisma izni riski goruldu.',
+    wrong:'Kablo hatti genelde kesik/kirmizi hat veya uyari notuyla gosterilir; berth sembolu degildir.'
+  },
+  offshorezone:{
+    focus:'Offshore 500 m zone, platform/FPSO yaklasmasinda izin ve abort point mantigiyla okunur.',
+    correct:'500 m safety zone secildi; DP/abort point ve izin zinciri hazir.',
+    wrong:'Offshore zone bir rota waypointi degil; platform etrafindaki emniyet halkasini ara.'
+  }
+};
+
+function getMapTaskTraining(taskId){
+  return MAP_TASK_TRAINING[taskId] || {
+    focus:'Chart uzerindeki sembol, etiket, derinlik ve trafik bilgisini birlikte oku.',
+    correct:'Harita gorevi dogru tamamlandi; chart okuma zinciri kayda alindi.',
+    wrong:'Hedefi sadece yazidan degil, sembol ve rota baglamindan bulmaya calis.'
+  };
+}
 
 function openMap(){
   if(!canUseFeature('map')) return;
@@ -14247,7 +14330,8 @@ function updateMapTaskBox(port){
     return;
   }
   title.textContent = `${task.title} · ${effectivePort?.name || ''}`;
-  desc.textContent = task.desc + (task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${effectivePort.name} charti uzerindesin.` : '');
+  const training = getMapTaskTraining(task.id);
+  desc.textContent = `${task.desc} Egitim odagi: ${training.focus}` + (task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${effectivePort.name} charti uzerindesin.` : '');
   status.className = '';
   const target = getMapTaskTarget(task, effectivePort);
   status.textContent = completedMapTasks.has(task.id) ? 'Tamamlandi. Istersen sonraki goreve gecebilirsin.' : `${target.label || task.title} halkasini haritada bul ve isaretle.`;
@@ -14296,20 +14380,26 @@ function handlePortChartTaskClick(svg, ev, port){
   const dist = Math.hypot(x-target.x, y-target.y);
   if(dist <= target.tol){
     completedMapTasks.add(task.id);
+    const training = getMapTaskTraining(task.id);
     if(status){
       status.className = '';
-      status.textContent = `Dogru secim. ${task.title} gorevi tamamlandi.`;
+      status.textContent = `Dogru secim. ${training.correct}`;
     }
     completeMissionStep('map', 'Harita gorevi tamamlandi');
     applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
     addJournalEntry(`[HARITA GOREVI] ${task.title} basariyla tamamlandi (${port.name}).`, 'Harita', '--:--');
+    addLiveLogbook('HARITA EGITIMI', `${task.title}: ${training.correct}`, true);
   }else if(status){
     const near = dist <= target.tol * 1.75;
+    const training = getMapTaskTraining(task.id);
     status.className = near ? 'warn' : 'bad';
     status.textContent = near
-      ? `Yaklastin. ${target.label || task.title} alanini biraz daha merkezden isaretle. Bilgi cezasi yok.`
-      : `Hedef bu degil. ${target.label || task.title} bolgesini yeniden ara; sadece kucuk egitim cezasi uygulandi.`;
-    if(!near) applyEffect({bilgi:-1},{skipContractTick:true});
+      ? `Yaklastin. ${training.focus} Bilgi cezasi yok.`
+      : `Hedef bu degil. ${training.wrong} Sadece kucuk egitim cezasi uygulandi.`;
+    if(!near){
+      applyEffect({bilgi:-1},{skipContractTick:true});
+      addLiveLogbook('HARITA HATASI', `${task.title}: ${training.wrong}`, true);
+    }
   }
 }
 
@@ -18030,6 +18120,7 @@ let phonePhotoShares = [];
 let companyMailState = {stage:0,lastSubject:'',threads:[]};
 let watchFeedItems = [];
 let livingPulseState = {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
+let monthlyCaptainReviewState = {lastMonth:0};
 let liveLogbookEntries = [];
 let achievementsUnlocked = {};
 let pendingPhoneCall = null;
@@ -19181,10 +19272,13 @@ function applyCrewFatigueDrift(sc, blob){
   if((crewFatigueState.engine||0) > 72) addWatchFeed('Crew fatigue: makine vardiyasi yorgun, alarm kacirma riski var','warn');
 }
 function maybeMonthlyCaptainReview(sc){
-  const sceneNo = Math.max(1,currentIdx+1);
-  if(sceneNo % CONTRACT_SCENES_PER_MONTH !== 0) return;
+  const sceneNo = Math.max(0, contractDays || currentIdx + 1);
+  if(!sceneNo || sceneNo % CONTRACT_SCENES_PER_MONTH !== 0) return;
+  const month = Math.max(1, Math.floor(sceneNo / CONTRACT_SCENES_PER_MONTH));
+  if(monthlyCaptainReviewState.lastMonth === month) return;
+  monthlyCaptainReviewState.lastMonth = month;
   triggerPhoneCall('Kaptan','Aylik degerlendirme: iyi yaptigin, hata yaptigin ve gelecek ay hedefin.',{sayginlik:2,bilgi:1},{sayginlik:-2});
-  addLiveLogbook('KAPTAN REVIEW',`Ay ${Math.ceil(sceneNo/CONTRACT_SCENES_PER_MONTH)} degerlendirmesi: iyi/hata/hedef notu bekleniyor.`,true);
+  createCaptainReviewNow();
 }
 function checkSceneAchievements(sc, blob){
   if(/vhf|mayday|pan-pan|pilot/.test(blob)) unlockAchievement('vhf_first');
@@ -19569,6 +19663,71 @@ function getCrewMemoryCards(){
   }).join('');
 }
 
+function getMapTrainingCards(){
+  const active = getPortChartByName(selectedPortChart) || ensureSelectedPortChart?.();
+  const items = MAP_TASKS.filter(task=>!active || isMapTaskAllowedForPort(task, active)).slice(0,6);
+  return `<div class="sim-training-grid">${items.map(task=>{
+    const done = completedMapTasks.has(task.id);
+    const tr = getMapTaskTraining(task.id);
+    return `<button class="sim-training-card ${done?'done':''}" onclick="selectMapTask(${MAP_TASKS.indexOf(task)}); openMap();">
+      <b>${phoneSafe(getMapTaskShortLabel(task))} · ${phoneSafe(task.title)}</b>
+      <small>${phoneSafe(done ? tr.correct : tr.focus)}</small>
+    </button>`;
+  }).join('')}</div>`;
+}
+
+function getDifficultyProfileCard(){
+  const mode = getGameplayModeDef();
+  const unlocks = getFeatureUnlocks(sceneQueue[currentIdx] || null);
+  const unlocked = Object.entries(unlocks).filter(([,v])=>v === true).map(([k])=>k.toUpperCase()).slice(0,8).join(' · ');
+  const assist = unlocks.assist ? 'Destek modu aktif: hatalardan sonra oyun daha ogretici davranir.' : 'Destek modu beklemede: hata artarsa ipuclari belirginlesir.';
+  return `<div class="sim-profile-card">
+    <b>${phoneSafe(mode.label)} mod</b>
+    <small>${phoneSafe(mode.desc)}</small>
+    <span>${phoneSafe(assist)}</span>
+    <em>Acik sistemler: ${phoneSafe(unlocked || 'temel hikaye')}</em>
+  </div>`;
+}
+
+function getCaptainReviewPreview(){
+  const month = Math.max(1, Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const strong = getTopSpecialtyLabel ? getTopSpecialtyLabel() : 'vardiya disiplini';
+  const weak = (stats.bilgi < 45) ? 'teknik bilgi' : (stats.dinclik < 40) ? 'dinclik' : (consequenceTrace.office + consequenceTrace.psc > 3) ? 'rapor dili' : 'dikkat surdurme';
+  const trust = Math.round(Object.values(crewTrust || {}).reduce((a,b)=>a+b,0) / Math.max(1,Object.values(crewTrust || {}).length));
+  return `<div class="sim-profile-card captain">
+    <b>Ay ${month} kaptan review hazirligi</b>
+    <small>Guclu alan: ${phoneSafe(strong)} · Gelisecek alan: ${phoneSafe(weak)}</small>
+    <span>Ekip ortalama guven ${trust}. Review toplantisinda iyi/hata/hedef notu logbook'a duser.</span>
+    <button onclick="createCaptainReviewNow(); renderSimCenter()">Review notu olustur</button>
+  </div>`;
+}
+
+function getErrorChainPreview(){
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  const level = heat >= 8 ? 'Kritik zincir' : heat >= 4 ? 'Iz birakiyor' : 'Kontrol altinda';
+  const next = heat >= 8 ? 'root cause ve corrective action beklenir'
+    : heat >= 4 ? 'kaptan/ofis sonraki sahnede daha cok soru sorar'
+    : 'temiz kararlar sonraki baskiyi azaltir';
+  return `<div class="sim-profile-card trace">
+    <b>Hata zinciri · ${phoneSafe(level)}</b>
+    <small>Office ${consequenceTrace.office} · PSC ${consequenceTrace.psc} · Crew ${consequenceTrace.trust}</small>
+    <span>Sonraki etki: ${phoneSafe(next)}.</span>
+    <button onclick="addLiveLogbook('CORRECTIVE ACTION','Onceki hata zinciri icin root cause ve takip aksiyonu yazildi.',true); consequenceTrace.office=Math.max(0,consequenceTrace.office-1); consequenceTrace.psc=Math.max(0,consequenceTrace.psc-1); renderSimCenter()">Duzeltici aksiyon yaz</button>
+  </div>`;
+}
+
+function createCaptainReviewNow(){
+  const month = Math.max(1, Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const strong = getTopSpecialtyLabel ? getTopSpecialtyLabel() : 'vardiya disiplini';
+  const weak = (stats.bilgi < 45) ? 'teknik bilgi' : (stats.dinclik < 40) ? 'dinclik' : (consequenceTrace.office + consequenceTrace.psc > 3) ? 'rapor dili' : 'prosedur devamlıligi';
+  const note = `Ay ${month}: guclu alan ${strong}; gelisecek alan ${weak}; gelecek ay hedefi harita/cihaz/logbook zincirini temiz kapatmak.`;
+  addLiveLogbook('KAPTAN REVIEW', note, true);
+  addJournalEntry(`[KAPTAN REVIEW] ${note}`, 'Kariyer', '--:--');
+  pushPhoneMessage('Kaptan', note, {open:false});
+  applyEffect({bilgi:1,sayginlik:2},{skipContractTick:true});
+  showNotif('CAPT','Kaptan Review', 'Aylik degerlendirme notu logbook ve telefona dustu.');
+}
+
 function openSimCenter(){
   if(!canUseFeature('sim')) return;
   completeMissionFromFeature('sim');
@@ -19610,6 +19769,26 @@ function renderSimCenter(){
     <div class="sim-section wide">
       <div class="sim-head"><span>KOPRUUSTU CIHAZ PANELI</span><span>${devicePracticeScore.ok}/${devicePracticeScore.total}</span></div>
       ${renderSimDeviceCards()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>HARITA EGITIM MODU</span><span>${getPortChartDetailLabel ? getPortChartDetailLabel() : 'ECDIS Overview'}</span></div>
+      ${getMapTrainingCards()}
+      <div class="sim-chiprow">
+        <span class="sim-chip">Oyuncu rota cizer, pilot station/no anchoring/TSS/CPA/UKC noktalarini chart okuyarak bulur.</span>
+        <span class="sim-chip ${completedMapTasks.size>=4?'good':''}">Tamamlanan harita gorevi: ${completedMapTasks.size}/${MAP_TASKS.length}</span>
+      </div>
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>KADEMELI ZORLUK</span><span>${phoneSafe(gameplayMode)}</span></div>
+      ${getDifficultyProfileCard()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>KAPTAN DEGERLENDIRME</span><span>ay sonu</span></div>
+      ${getCaptainReviewPreview()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>HATA ZINCIRI / GEC ETKI</span><span>kararlar unutulmaz</span></div>
+      ${getErrorChainPreview()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>SERBEST ZAMAN / RUTIN</span><span>${Math.round(stats.dinclik)} enerji</span></div>

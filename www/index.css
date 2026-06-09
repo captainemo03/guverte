@@ -1587,8 +1587,24 @@ animation:straitFlow 2.8s linear infinite;}
 .sim-memory{border:1px solid rgba(111,146,178,.18);border-radius:8px;background:rgba(8,22,40,.74);padding:8px;}
 .sim-memory b{display:block;color:#fff;font-size:11px;margin-bottom:3px;}
 .sim-memory small{display:block;color:#9dbdd5;font-size:9px;line-height:1.35;}
+.sim-training-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.sim-training-card{min-height:82px;border:1px solid rgba(127,195,255,.22);border-radius:9px;background:linear-gradient(180deg,rgba(10,30,50,.86),rgba(5,14,24,.9));padding:9px;text-align:left;color:#dff1ff;cursor:pointer;font-family:'Barlow',sans-serif;position:relative;overflow:hidden;}
+.sim-training-card::after{content:"";position:absolute;left:-42%;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transform:skewX(-14deg);transition:left .35s ease;}
+.sim-training-card:hover{border-color:var(--gold);transform:translateY(-1px);}
+.sim-training-card:hover::after{left:110%;}
+.sim-training-card.done{border-color:rgba(93,191,138,.36);background:linear-gradient(180deg,rgba(10,42,27,.86),rgba(5,20,15,.9));}
+.sim-training-card b{display:block;color:#fff;font:10px 'Share Tech Mono',monospace;margin-bottom:5px;}
+.sim-training-card small{display:block;color:#a9c9de;font-size:9px;line-height:1.35;}
+.sim-profile-card{border:1px solid rgba(111,146,178,.18);border-radius:9px;background:rgba(8,22,40,.76);padding:10px;color:#cfeaff;display:grid;gap:6px;}
+.sim-profile-card b{color:#fff;font-size:12px;}
+.sim-profile-card small,.sim-profile-card span,.sim-profile-card em{font-size:10px;line-height:1.45;color:#9dbdd5;font-style:normal;}
+.sim-profile-card button{justify-self:start;border:1px solid rgba(127,195,255,.28);border-radius:8px;background:#17324e;color:#dff1ff;padding:7px 9px;font-size:10px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
+.sim-profile-card button:hover{border-color:var(--gold);color:#fff;}
+.sim-profile-card.captain{border-color:rgba(212,160,23,.24);background:linear-gradient(180deg,rgba(42,28,8,.62),rgba(8,22,40,.72));}
+.sim-profile-card.trace{border-color:rgba(214,92,92,.18);}
 @keyframes simSweep{0%{transform:translateX(0) rotate(18deg);opacity:.2}50%{opacity:1}100%{transform:translateX(230%) rotate(18deg);opacity:.2}}
-@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.sim-training-grid{grid-template-columns:1fr;}}
 @media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}}
 
 @media (max-width:520px){
