@@ -14300,10 +14300,16 @@ function handlePortChartTaskClick(svg, ev, port){
       status.className = '';
       status.textContent = `Dogru secim. ${task.title} gorevi tamamlandi.`;
     }
+    completeMissionStep('map', 'Harita gorevi tamamlandi');
+    applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
     addJournalEntry(`[HARITA GOREVI] ${task.title} basariyla tamamlandi (${port.name}).`, 'Harita', '--:--');
   }else if(status){
-    status.className = 'bad';
-    status.textContent = `Hedef bu degil. Sari halka icindeki "${target.label || task.title}" isaretine tikla.`;
+    const near = dist <= target.tol * 1.75;
+    status.className = near ? 'warn' : 'bad';
+    status.textContent = near
+      ? `Yaklastin. ${target.label || task.title} alanini biraz daha merkezden isaretle. Bilgi cezasi yok.`
+      : `Hedef bu degil. ${target.label || task.title} bolgesini yeniden ara; sadece kucuk egitim cezasi uygulandi.`;
+    if(!near) applyEffect({bilgi:-1},{skipContractTick:true});
   }
 }
 
@@ -14849,6 +14855,82 @@ function buildStrategicLandOverlay(hay, coastLeft, southFacing){
   return '';
 }
 
+function buildEnhancedEncDetailOverlay(port, profile, geo){
+  const {coastLeft, southFacing, channelY, channelStartX, channelEndX, berthX, shipX, turningBasinX} = geo;
+  const hay = `${port.name} ${profile.region}`.toLowerCase();
+  const portCode = (port.name || 'CHART').replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() || 'CHART';
+  const laneDir = coastLeft ? 1 : -1;
+  const safeWaterX = coastLeft ? channelEndX + 136 : channelEndX - 136;
+  const laneLabelX = coastLeft ? channelStartX - 118 : channelStartX + 34;
+  const laneArrowA = coastLeft
+    ? `M${channelStartX-10} ${channelY-30} C${channelStartX-70} ${channelY-42} ${channelEndX+70} ${channelY-34} ${channelEndX+28} ${channelY-26}`
+    : `M${channelStartX+10} ${channelY-30} C${channelStartX+70} ${channelY-42} ${channelEndX-70} ${channelY-34} ${channelEndX-28} ${channelY-26}`;
+  const laneArrowB = coastLeft
+    ? `M${channelEndX+28} ${channelY+32} C${channelEndX+80} ${channelY+42} ${channelStartX-70} ${channelY+38} ${channelStartX-12} ${channelY+28}`
+    : `M${channelEndX-28} ${channelY+32} C${channelEndX-80} ${channelY+42} ${channelStartX+70} ${channelY+38} ${channelStartX+12} ${channelY+28}`;
+  const nogoX = coastLeft ? 92 : 296;
+  const noGoPath = coastLeft
+    ? `M72 ${channelY+62} L138 ${channelY+50} L158 ${channelY+82} L96 ${channelY+102} Z`
+    : `M368 ${channelY+62} L302 ${channelY+50} L282 ${channelY+82} L344 ${channelY+102} Z`;
+  const noGoLabelY = Math.min(238, channelY + 112);
+  const hatchLines = [0, 12, 24, 36, 48].map((n)=>coastLeft
+    ? `<path class="enc-hatch" d="M${78+n} ${channelY+96} L${112+n} ${channelY+54}"/>`
+    : `<path class="enc-hatch" d="M${362-n} ${channelY+96} L${328-n} ${channelY+54}"/>`
+  ).join('');
+  const extraSoundings = [
+    [shipX - 94*laneDir, channelY - 62, '21.4'],
+    [shipX - 58*laneDir, channelY - 82, '19.7'],
+    [shipX + 42*laneDir, channelY - 62, '16.8'],
+    [shipX + 88*laneDir, channelY - 40, '15.2'],
+    [shipX - 126*laneDir, channelY + 48, '12.4'],
+    [shipX - 54*laneDir, channelY + 64, '13.1'],
+    [shipX + 74*laneDir, channelY + 62, '10.6'],
+    [turningBasinX + 34*laneDir, channelY + 10, '14.0'],
+    [berthX - 30*laneDir, channelY - 44, '11.8'],
+    [berthX - 42*laneDir, channelY + 46, '10.2']
+  ].map(([x,y,t])=>`<text class="enc-sounding" x="${Math.max(24, Math.min(414, x))}" y="${Math.max(24, Math.min(236, y))}">${t}</text>`).join('');
+  const tssOverlay = /strait|canal|traffic/.test(profile.template) || /bogazi|strait|dover|malakka|hurmuz|babulmendep|singapur|rotterdam/.test(hay)
+    ? `
+      <path class="enc-fairway" d="${laneArrowA}"/>
+      <path d="M${coastLeft ? channelEndX+29 : channelEndX-29} ${channelY-26} l${coastLeft ? -8 : 8} -4 v8 z" fill="#214f72" opacity=".8"/>
+      <path class="enc-fairway" d="${laneArrowB}"/>
+      <path d="M${coastLeft ? channelStartX-13 : channelStartX+13} ${channelY+28} l${coastLeft ? 8 : -8} -4 v8 z" fill="#214f72" opacity=".8"/>
+      <text x="${Math.max(34, Math.min(330, laneLabelX))}" y="${channelY-48}" fill="#214f72" font-size="6.4" font-family="monospace">TSS / FAIRWAY DIRECTION</text>`
+    : `
+      <path class="enc-fairway" d="M${channelStartX} ${channelY-26} Q${(channelStartX+channelEndX)/2} ${channelY-48} ${channelEndX} ${channelY-28}"/>
+      <text x="${Math.max(34, Math.min(330, laneLabelX))}" y="${channelY-48}" fill="#214f72" font-size="6.4" font-family="monospace">RECOMMENDED TRACK</text>`;
+  const sector = southFacing
+    ? `<path class="enc-light-sector" d="M${coastLeft ? 178 : 262} 58 Q220 28 ${coastLeft ? 274 : 166} 64" stroke="#5dbf8a"/>
+       <path class="enc-light-sector" d="M${coastLeft ? 178 : 262} 58 Q220 86 ${coastLeft ? 272 : 168} 102" stroke="#d24c4c"/>`
+    : `<path class="enc-light-sector" d="M${coastLeft ? 178 : 262} 206 Q220 176 ${coastLeft ? 274 : 166} 200" stroke="#5dbf8a"/>
+       <path class="enc-light-sector" d="M${coastLeft ? 178 : 262} 206 Q220 232 ${coastLeft ? 272 : 168} 236" stroke="#d24c4c"/>`;
+  const buoyTrain = [0, 1, 2, 3].map((i)=>{
+    const bx = coastLeft ? channelEndX + 28 + i*26 : channelEndX - 28 - i*26;
+    const by = channelY + (i % 2 ? 20 : -20);
+    const fill = i % 2 ? '#d24c4c' : '#44d26f';
+    const label = i % 2 ? `Fl.R.${i+1}` : `Fl.G.${i+1}`;
+    return `<g class="enc-buoy"><circle cx="${bx}" cy="${by}" r="3.1" fill="${fill}" stroke="#07131f" stroke-width=".7"/><text x="${bx + (coastLeft ? 6 : -32)}" y="${by+2}" fill="${fill}" font-size="5.9" font-family="monospace">${label}</text></g>`;
+  }).join('');
+  return `
+    <g class="enc-enhanced-detail">
+      ${tssOverlay}
+      <path class="enc-boundary" d="M${coastLeft ? 136 : 304} 34 C220 66 ${coastLeft ? 348 : 92} 82"/>
+      <path class="enc-boundary" d="M${coastLeft ? 128 : 312} 214 C220 184 ${coastLeft ? 350 : 90} 198"/>
+      ${extraSoundings}
+      <path class="enc-nogo" d="${noGoPath}"/>
+      ${hatchLines}
+      <text x="${nogoX}" y="${noGoLabelY}" fill="#b34242" font-size="6.2" font-family="monospace">NO-GO / SHALLOW WATER</text>
+      ${buoyTrain}
+      <circle cx="${safeWaterX}" cy="${channelY}" r="4.2" fill="#f4e9c6" stroke="#b34242" stroke-width="1"/>
+      <text x="${safeWaterX + (coastLeft ? -32 : 8)}" y="${channelY-8}" fill="#214f72" font-size="6.1" font-family="monospace">SAFE WATER</text>
+      ${sector}
+      <rect class="enc-info-panel" x="${coastLeft ? 22 : 286}" y="56" width="128" height="42" rx="5"/>
+      <text x="${coastLeft ? 30 : 294}" y="69" fill="#214f72" font-size="6.4" font-family="monospace">ENC CELL TR-${portCode}</text>
+      <text x="${coastLeft ? 30 : 294}" y="81" fill="#214f72" font-size="6.1" font-family="monospace">SCAMIN ${profile.scale} / UPDATE OK</text>
+      <text x="${coastLeft ? 30 : 294}" y="93" fill="#214f72" font-size="6.1" font-family="monospace">SAFETY DEPTH ${profile.depthB}m</text>
+    </g>`;
+}
+
 function buildPortChartSvg(port){
   const profile = getPortChartProfile(port);
   if(profile.template === 'oceanroute') return buildOceanRouteChartSvg(port, profile);
@@ -15132,6 +15214,9 @@ function buildPortChartSvg(port){
   const visibleSpecialInset = detailLevel === 'high' ? specialInset : '';
   const visibleBuoyDetailOverlay = detailLevel === 'high' ? buoyDetailOverlay : '';
   const visibleMicroNoteOverlay = detailLevel === 'high' ? microNoteOverlay : '';
+  const visibleEnhancedEncOverlay = detailLevel !== 'low'
+    ? buildEnhancedEncDetailOverlay(port, profile, {coastLeft, southFacing, channelY, channelStartX, channelEndX, berthX, shipX, turningBasinX})
+    : '';
   return `
   <defs>
     <linearGradient id="portSea" x1="0" y1="0" x2="0" y2="1">
@@ -15153,6 +15238,14 @@ function buildPortChartSvg(port){
     .ecdis-chart .contour{stroke:#4d94b8;stroke-width:1;fill:none;opacity:.72;}
     .ecdis-chart .route-line{stroke:#94333a;stroke-width:2.2;fill:none;}
     .ecdis-chart .safety{stroke:#b34242;stroke-width:1.1;stroke-dasharray:5,4;fill:none;}
+    .ecdis-chart .enc-enhanced-detail text{stroke:#eef7fb;stroke-width:.85px;stroke-opacity:.72;}
+    .ecdis-chart .enc-sounding{fill:#214f72;font-size:6.2px;}
+    .ecdis-chart .enc-info-panel{fill:rgba(239,248,252,.88);stroke:#628faa;stroke-width:.8;}
+    .ecdis-chart .enc-nogo{fill:rgba(196,70,80,.10);stroke:#b34242;stroke-width:.9;stroke-dasharray:5,4;}
+    .ecdis-chart .enc-hatch{stroke:#b34242;stroke-width:.65;opacity:.42;}
+    .ecdis-chart .enc-fairway{stroke:#214f72;stroke-width:1.1;stroke-dasharray:8,5;fill:none;opacity:.74;}
+    .ecdis-chart .enc-boundary{stroke:#6d6f82;stroke-width:.85;stroke-dasharray:3,4;fill:none;opacity:.62;}
+    .ecdis-chart .enc-light-sector{stroke-width:1.2;fill:none;opacity:.55;}
   </style>
   <g class="ecdis-chart detail-${detailLevel}">
   <rect width="440" height="260" rx="8" fill="url(#portSea)"/>
@@ -15244,6 +15337,7 @@ function buildPortChartSvg(port){
   <g class="ecdis-close">${visibleTrafficArrowOverlay}</g>
   <g class="ecdis-close">${visibleSectorLightOverlay}</g>
   <g class="ecdis-approach">${visibleSpecialOverlay}</g>
+  <g class="ecdis-approach">${visibleEnhancedEncOverlay}</g>
   <g class="ecdis-approach">${visibleOverviewInset}</g>
   <g class="ecdis-close">${visibleSpecialInset}</g>
   <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
