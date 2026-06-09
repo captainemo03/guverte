@@ -542,6 +542,14 @@ const STYPES=[
 
 const PREMIUM_KEY = 'guverte-premium-v1';
 let premiumUnlocked = (()=>{try{return localStorage.getItem(PREMIUM_KEY)==='1';}catch(e){return false;}})();
+const PREMIUM_PACKAGE_CATALOG = [
+  'Proje yuk ve heavy-lift',
+  'Kruvaziyer / yolcu operasyonu',
+  'Arastirma / ROV survey',
+  'Offshore / DP platform',
+  'Kutup ve buz seyri',
+  'Ileri cihaz simulasyonu'
+];
 function isPremiumShipType(typeKey){
   return !!STYPES.find(x=>x.key===typeKey && x.premium);
 }
@@ -549,7 +557,7 @@ function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
 function openPremiumPurchase(){
-  showNotif('💳','Premium Ucretli Paket','Satin alma sistemi baglaninca ozel gemiler, ileri operasyonlar ve pro kriz paketleri burada acilacak.');
+  showNotif('💳','Premium Ucretli Paket',PREMIUM_PACKAGE_CATALOG.join(' · '));
 }
 function grantPremiumPackageFromPurchase(receipt=''){
   if(!receipt){
@@ -9540,7 +9548,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>Offshore, buz, proje, cruise, arastirma, cable/pipe ve pro krizler</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
@@ -10069,6 +10077,7 @@ function handleSceneChoice(sc, c2, ch){
     addLiveLogbook('CPA / RADAR',`Radar mode: ${RADAR_TRAINING_MODES[c2.radarMode].label}`,true);
   }
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
+  completeMissionFromChoice(sc,c2);
   maybeQueueDevicePracticeFromScene(sc,c2);
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
@@ -11806,6 +11815,7 @@ function renderScene(idx){
   updateOpsHud(sc);
   updateFeatureVisibility(sc);
   updateGuidanceStrip(sc);
+  updateMissionDirector(sc);
   renderSavePanel();
   updateLivingWatch(sc);
   if(document.getElementById('sim-panel')?.classList.contains('show')) renderSimCenter();
@@ -12362,6 +12372,7 @@ function beginGame(){
   deviceChartOverlayState={radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
   devicePracticeProgress={};
   devicePracticeScore={ok:0,total:0};
+  missionDirectorState={sceneId:'', title:'', steps:[], completed:[]};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,paidMonths:0,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
@@ -13333,6 +13344,7 @@ const PLAY_MODE_DEFS = {
 };
 let gameplayMode = 'realistic';
 let savePanelOpen = false;
+let missionDirectorState = {sceneId:'', title:'', steps:[], completed:[]};
 
 function getGameplayModeDef(){
   return PLAY_MODE_DEFS[gameplayMode] || PLAY_MODE_DEFS.realistic;
@@ -13456,6 +13468,165 @@ function updateGuidanceStrip(sc){
   }
 }
 
+function sceneMissionBlob(sc){
+  return `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+}
+
+function makeMissionStep(id, label){
+  return {id, label};
+}
+
+function getMissionDirectorPlan(sc){
+  const blob = sceneMissionBlob(sc);
+  if(/mayday|distress|pan-pan|vhf|vts|pilot exchange|dsc/.test(blob)){
+    return {
+      title:'Haberlesme gorev zinciri',
+      steps:[
+        makeMissionStep('vhf','VHF/DSC kanalini sec'),
+        makeMissionStep('radar','Radar/AIS hedefini kontrol et'),
+        makeMissionStep('report','Kaptana kisa rapor ver'),
+        makeMissionStep('logbook','Logbook/radio log gir'),
+        makeMissionStep('followup','Karsi istasyon cevabini takip et')
+      ]
+    };
+  }
+  if(/radar|arpa|cpa|tcpa|ais target|guard zone/.test(blob)){
+    return {
+      title:'Radar / ARPA karar zinciri',
+      steps:[
+        makeMissionStep('radar','Hedef acquire et'),
+        makeMissionStep('cpa','CPA/TCPA oku'),
+        makeMissionStep('ecdis','ECDIS rota ile karsilastir'),
+        makeMissionStep('report','Kaptana net manevra raporu ver'),
+        makeMissionStep('logbook','Olay satirini kayda al')
+      ]
+    };
+  }
+  if(/ecdis|route monitor|chart|waypoint|tss|ukc|squat|safety contour|xtd/.test(blob)){
+    return {
+      title:'Seyir rota gorev zinciri',
+      steps:[
+        makeMissionStep('map','Uygun charti ac'),
+        makeMissionStep('ecdis','Safety contour / XTD kontrol et'),
+        makeMissionStep('radar','CPA ve trafikle karsilastir'),
+        makeMissionStep('report','Kaptana rota durumunu bildir'),
+        makeMissionStep('logbook','Waypoint/logbook kaydi gir')
+      ]
+    };
+  }
+  if(/pilot|tug|berth|mooring|all fast|halat|snap-back/.test(blob)){
+    return {
+      title:'Liman operasyon zinciri',
+      steps:[
+        makeMissionStep('map','Pilot station / berth bilgisini ac'),
+        makeMissionStep('vhf','Pilot/tug kanalini teyit et'),
+        makeMissionStep('deck','Halat ve snap-back alanini izle'),
+        makeMissionStep('report','Bridge-deck raporunu tamamla'),
+        makeMissionStep('logbook','All fast / operasyon saatini gir')
+      ]
+    };
+  }
+  if(/engine|makine|blackout|alarm|generator|pump|compressor/.test(blob)){
+    return {
+      title:'Makine alarm zinciri',
+      steps:[
+        makeMissionStep('alarm','Alarm mahallini dogrula'),
+        makeMissionStep('engine','Makineden trend bilgisi al'),
+        makeMissionStep('report','Kaptana durum raporu ver'),
+        makeMissionStep('device','Ilgili panel/pratigi ac'),
+        makeMissionStep('logbook','Alarm kaydini tamamla')
+      ]
+    };
+  }
+  if(/fire|yangin|mob|abandon|pirate|korsan|medical|medevac/.test(blob)){
+    return {
+      title:'Acil durum zinciri',
+      steps:[
+        makeMissionStep('alarm','Alarm / muster adimini baslat'),
+        makeMissionStep('device','Dogru cihaz veya paneli kullan'),
+        makeMissionStep('report','Mevki, zaman ve risk raporu ver'),
+        makeMissionStep('crew','Ekibi gorevlendir'),
+        makeMissionStep('logbook','Olay kaydini kapat')
+      ]
+    };
+  }
+  if(/psc|survey|class|inspection|deficiency|sire|cdi|audit/.test(blob)){
+    return {
+      title:'Denetim hazirlik zinciri',
+      steps:[
+        makeMissionStep('document','Belgeyi ac'),
+        makeMissionStep('equipment','Ekipman kanitini hazirla'),
+        makeMissionStep('crew','Sorumlu personeli bilgilendir'),
+        makeMissionStep('report','Denetciye net cevap ver'),
+        makeMissionStep('followup','Deficiency riskini kapat')
+      ]
+    };
+  }
+  return {
+    title:'Vardiya rutin zinciri',
+    steps:[
+      makeMissionStep('handover','Vardiya bilgisini al'),
+      makeMissionStep('weather','Hava/deniz durumunu oku'),
+      makeMissionStep('route','Rota ve trafik durumunu izle'),
+      makeMissionStep('report','Gerekirse kaptana rapor ver'),
+      makeMissionStep('logbook','Logbook satirini temiz tut')
+    ]
+  };
+}
+
+function updateMissionDirector(sc){
+  const box = document.getElementById('mission-director');
+  const titleEl = document.getElementById('mission-title');
+  const stepsEl = document.getElementById('mission-steps');
+  if(!box || !titleEl || !stepsEl) return;
+  const plan = getMissionDirectorPlan(sc);
+  if(missionDirectorState.sceneId !== sc?.id){
+    missionDirectorState = {sceneId:sc?.id || '', title:plan.title, steps:plan.steps, completed:[]};
+  }else{
+    missionDirectorState.title = plan.title;
+    missionDirectorState.steps = plan.steps;
+  }
+  const show = gameplayMode !== 'simple' || (missionDirectorState.completed || []).length > 0 || sc?.alert;
+  box.classList.toggle('show', !!show);
+  titleEl.textContent = missionDirectorState.title;
+  const done = new Set(missionDirectorState.completed || []);
+  const firstOpen = missionDirectorState.steps.find(s=>!done.has(s.id))?.id;
+  stepsEl.innerHTML = missionDirectorState.steps.map(s=>{
+    const cls = done.has(s.id) ? 'done' : s.id === firstOpen ? 'active' : 'locked';
+    return `<div class="mission-step ${cls}">${phoneSafe(s.label)}</div>`;
+  }).join('');
+}
+
+function completeMissionStep(id, note=''){
+  if(!id || !missionDirectorState?.steps?.length) return;
+  if(!missionDirectorState.steps.some(s=>s.id === id)) return;
+  if(!missionDirectorState.completed.includes(id)){
+    missionDirectorState.completed.push(id);
+    if(note) addWatchFeed(note, 'good');
+  }
+  updateMissionDirector(sceneQueue[currentIdx] || null);
+}
+
+function completeMissionFromFeature(feature){
+  const map = {map:'map', devices:'device', logbook:'logbook', phone:'followup', sim:'device', career:'followup'};
+  completeMissionStep(map[feature] || feature, `${feature.toUpperCase()} gorev adimi tamamlandi`);
+}
+
+function completeMissionFromChoice(sc,c2){
+  const blob = `${sceneMissionBlob(sc)} ${c2?.text||''}`.toLowerCase();
+  completeMissionStep('report');
+  if(/vhf|ch16|dsc|vts|pilot channel|kanal/.test(blob)) completeMissionStep('vhf');
+  if(/radar|arpa|cpa|tcpa|ais|target/.test(blob)) completeMissionStep('radar');
+  if(/ecdis|chart|harita|route|waypoint|safety contour|xtd|ukc|tss/.test(blob)) completeMissionStep('ecdis');
+  if(/logbook|radio log|kayit|defter/.test(blob)) completeMissionStep('logbook');
+  if(/weather|hava|swell|barometre|gorus|görüş/.test(blob)) completeMissionStep('weather');
+  if(/handover|teslim|vardiya/.test(blob)) completeMissionStep('handover');
+  if(/halat|snap-back|deck|guverte|mooring/.test(blob)) completeMissionStep('deck');
+  if(/alarm|muster|fire|yangin|mob|abandon/.test(blob)) completeMissionStep('alarm');
+  if(/makine|engine|generator|pump|compressor/.test(blob)) completeMissionStep('engine');
+  if(/belge|document|permit|psc|survey|class/.test(blob)) completeMissionStep('document');
+}
+
 function hasSavedGame(){
   try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
 }
@@ -13518,6 +13689,7 @@ function buildSavePayload(){
     version:1,
     savedAt:new Date().toISOString(),
     gameplayMode,
+    missionDirectorState,
     premiumUnlocked,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
@@ -13615,6 +13787,9 @@ function deleteSavedGame(showToast=true){
 
 function applyLoadedGameState(data){
   gameplayMode = PLAY_MODE_DEFS[data.gameplayMode] ? data.gameplayMode : 'realistic';
+  missionDirectorState = data.missionDirectorState && typeof data.missionDirectorState === 'object'
+    ? {sceneId:'', title:'', steps:[], completed:[], ...data.missionDirectorState}
+    : {sceneId:'', title:'', steps:[], completed:[]};
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
   premiumUnlocked = !!data.premiumUnlocked || premiumUnlocked;
@@ -13833,6 +14008,7 @@ const MAP_TASKS = [
 
 function openMap(){
   if(!canUseFeature('map')) return;
+  completeMissionFromFeature('map');
   document.getElementById('map-panel').classList.add('show');
   renderMap();
 }
@@ -17916,6 +18092,7 @@ function getDeviceDef(key){
 
 function openDevices(){
   if(!canUseFeature('devices')) return;
+  completeMissionFromFeature('devices');
   const p = document.getElementById('devices-panel');
   if(p) p.classList.add('show');
   renderDevices();
@@ -18146,6 +18323,7 @@ function buildGmdssDeviceSvg(def){
 
 function togglePhone(){
   if(!phoneOpen && !canUseFeature('phone')) return;
+  if(!phoneOpen) completeMissionFromFeature('phone');
   phoneOpen = !phoneOpen;
   renderPhone();
 }
@@ -19145,6 +19323,7 @@ function renderPhoneAppMenu(){
 function closeLifePanel(id){ document.getElementById(id)?.classList.remove('show'); }
 function openLiveLogbook(){
   if(!canUseFeature('logbook')) return;
+  completeMissionFromFeature('logbook');
   document.getElementById('logbook-panel')?.classList.add('show');
   renderLiveLogbook();
 }
@@ -19298,6 +19477,7 @@ function getCrewMemoryCards(){
 
 function openSimCenter(){
   if(!canUseFeature('sim')) return;
+  completeMissionFromFeature('sim');
   document.getElementById('sim-panel')?.classList.add('show');
   renderSimCenter();
 }
@@ -20133,7 +20313,7 @@ function getVhfInteractionConfig(sc, blob){
   const caption = isDistress
     ? 'CH16 acil voice cagri icindir; ardindan mevki, zaman ve tehlike bilgisi gelir.'
     : 'CH16 cagri/nobet kanali; operasyon ilerleyince VTS/pilot working channel veya DSC70 secilir.';
-  return buildHotspotConfig(
+  const cfg = buildHotspotConfig(
     title,
     hint,
     caption,
@@ -20147,6 +20327,10 @@ function getVhfInteractionConfig(sc, blob){
       {id:'dsc70',label:'DSC70'}
     ]
   );
+  cfg.kind = 'vhf';
+  cfg.channel = expected === 'vhf16' ? 'CH16' : expected === 'vts12' ? 'CH12' : expected === 'pilot14' ? 'CH14' : expected === 'dsc70' ? 'CH70' : 'WORK';
+  cfg.rx = isDistress ? 'DISTRESS TRAFFIC' : isPilot ? 'PILOT STATION' : isVts ? 'VTS TRAFFIC' : isDsc ? 'DSC ALERT' : 'BRIDGE WATCH';
+  return cfg;
 }
 
 function getAutoInteractionConfig(sc){
@@ -20398,15 +20582,37 @@ function maybeTriggerLivingShipBeat(sc){
   addJournalEntry(`[GEMI YASIYOR] ${beat.text}`, sc.day, sc.time);
 }
 
+function renderVhfInteractionVisual(cfg){
+  return `<div class="vhf-practice-console">
+    <div class="vhf-practice-head"><span>VHF DSC RADIOTELEPHONE</span><b>${phoneSafe(cfg.rx || 'BRIDGE WATCH')}</b></div>
+    <div class="vhf-practice-body">
+      <div class="vhf-practice-lcd">
+        <small>ACTIVE CHANNEL</small>
+        <strong>${phoneSafe(cfg.channel || 'CH16')}</strong>
+        <em>DW ON · SQL 42 · PWR HIGH · GPS OK</em>
+        <i>${phoneSafe(cfg.caption || '')}</i>
+      </div>
+      <div class="vhf-practice-side">
+        <button>PTT</button>
+        <button class="danger">DIST</button>
+        <button>DSC</button>
+      </div>
+    </div>
+    <div class="vhf-practice-wave"><span></span><span></span><span></span><span></span><span></span><em>RX/TX</em></div>
+    <div class="vhf-practice-keys">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot vhf-key" data-hotspot="${h.id}">${phoneSafe(h.label)}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
 function renderInteractionPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
   const cfg = INTERACTION_PANEL_CONFIGS[sc?.id] || getAutoInteractionConfig(sc);
   if(!panel || !cfg) return false;
   panel.className='calc-panel show';
-  panel.innerHTML = `<div class="decision-box">
-    <div class="decision-title">${cfg.title}</div>
-    <div class="decision-hint">${cfg.hint}</div>
-    <div class="doc-visual">
+  const visual = cfg.kind === 'vhf'
+    ? renderVhfInteractionVisual(cfg)
+    : `<div class="doc-visual">
       <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${cfg.title}">
         <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
         <circle cx="160" cy="60" r="42" fill="none" stroke="#214a62" stroke-width="1.5"/>
@@ -20418,7 +20624,11 @@ function renderInteractionPanel(sc, ch){
     </div>
     <div class="interaction-hotspots">
       ${cfg.hotspots.map(h=>`<button class="interaction-hotspot" data-hotspot="${h.id}">${h.label}</button>`).join('')}
-    </div>
+    </div>`;
+  panel.innerHTML = `<div class="decision-box">
+    <div class="decision-title">${cfg.title}</div>
+    <div class="decision-hint">${cfg.hint}</div>
+    ${visual}
     <div id="interaction-feedback" class="decision-feedback"></div>
   </div>`;
   panel.querySelectorAll('[data-hotspot]').forEach(btn=>{
@@ -20429,6 +20639,8 @@ function renderInteractionPanel(sc, ch){
         : (sc.choices.find(c=>c.tag===cfg.midTag) || sc.choices[1] || sc.choices[0]);
       const feedback = document.getElementById('interaction-feedback');
       const good = pickedId === cfg.expected;
+      if(cfg.kind === 'vhf') completeMissionStep('vhf', good ? 'VHF kanali dogru secildi' : 'VHF kanali secildi, teyit gerekli');
+      else completeMissionStep(cfg.title.includes('RADAR') ? 'radar' : cfg.title.includes('ECDIS') ? 'ecdis' : cfg.title.includes('FIRE') || cfg.title.includes('MOB') ? 'alarm' : 'device');
       feedback.className = `decision-feedback ${good?'':'warn'}`.trim();
       feedback.textContent = good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.';
       panel.querySelectorAll('[data-hotspot]').forEach(el=>el.disabled=true);

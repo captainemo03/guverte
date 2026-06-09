@@ -185,12 +185,26 @@ input[type=text]::placeholder{color:var(--text3);}
 #game.simple-mode #toolbar .advanced-tool{display:none;}
 #game.realistic-mode #toolbar .expert-tool{display:none;}
 #game.new-player #toolbar .locked-tool{opacity:.42;filter:saturate(.4);}
+#mission-director{display:none;background:rgba(5,14,25,.92);border-bottom:1px solid rgba(111,146,178,.16);padding:8px 12px 9px;}
+#mission-director.show{display:block;}
+.mission-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-family:'Share Tech Mono',monospace;}
+.mission-head span{color:var(--text3);font-size:8px;letter-spacing:1.2px;}
+.mission-head b{color:#dce8fc;font-size:10px;letter-spacing:.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#mission-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+.mission-step{position:relative;border:1px solid rgba(111,168,220,.2);border-radius:8px;background:rgba(8,22,40,.66);padding:7px 7px 7px 22px;min-height:42px;font:9px/1.25 'Share Tech Mono',monospace;color:#9cc8ef;overflow:hidden;}
+.mission-step::before{content:"";position:absolute;left:8px;top:10px;width:7px;height:7px;border-radius:50%;border:1px solid rgba(127,195,255,.5);background:rgba(7,19,36,.9);}
+.mission-step.done{color:#a8f5c2;border-color:rgba(93,191,138,.34);background:rgba(8,38,26,.55);}
+.mission-step.done::before{background:#5dbf8a;box-shadow:0 0 10px rgba(93,191,138,.28);}
+.mission-step.active{color:#ffe2a2;border-color:rgba(212,160,23,.42);background:rgba(44,29,8,.62);box-shadow:0 0 16px rgba(212,160,23,.08);}
+.mission-step.active::before{background:#d4a017;border-color:#ffd783;animation:softPulse 1.2s ease-in-out infinite;}
+.mission-step.locked{opacity:.46;filter:saturate(.65);}
 
 @media (max-width: 720px){
   .mode-grid{grid-template-columns:1fr;}
   #save-panel-grid{grid-template-columns:1fr 1fr;}
   #guidance-strip{align-items:flex-start;flex-direction:column;}
   #guidance-unlocks{max-width:100%;margin-left:0;}
+  #mission-steps{grid-template-columns:1fr;}
 }
 
 /* === STAT BARLARI === */
@@ -392,6 +406,27 @@ input[type=text]::placeholder{color:var(--text3);}
 .interaction-pulse:nth-child(3) circle{animation-delay:.34s;}
 .interaction-pulse:nth-child(4) circle{animation-delay:.5s;}
 @keyframes interactionPulse{0%,100%{stroke-opacity:.45;fill-opacity:.08;}50%{stroke-opacity:1;fill-opacity:.2;}}
+.vhf-practice-console{position:relative;border:1px solid rgba(126,195,255,.32);border-radius:14px;background:linear-gradient(180deg,rgba(27,37,48,.98),rgba(5,12,20,.97));box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.035);padding:11px;margin:0 0 10px;overflow:hidden;}
+.vhf-practice-console::before{content:"";position:absolute;inset:0;background:linear-gradient(108deg,transparent 0 26%,rgba(255,255,255,.06) 34%,transparent 43%);animation:radioType 3s ease-in-out infinite;pointer-events:none;}
+.vhf-practice-head,.vhf-practice-body,.vhf-practice-wave,.vhf-practice-keys{position:relative;z-index:1;}
+.vhf-practice-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px;color:#bde7ff;font:8px 'Share Tech Mono',monospace;letter-spacing:.8px;}
+.vhf-practice-head b{color:#ffd783;white-space:nowrap;}
+.vhf-practice-body{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:10px;}
+.vhf-practice-lcd{min-height:92px;border:1px solid rgba(95,168,210,.42);border-radius:10px;background:linear-gradient(180deg,#0a263a,#03131f);box-shadow:inset 0 0 22px rgba(129,247,184,.08);padding:10px;color:#8fd8ab;font-family:'Share Tech Mono',monospace;}
+.vhf-practice-lcd small{display:block;color:#7fc3ff;font-size:8px;margin-bottom:5px;}
+.vhf-practice-lcd strong{display:block;color:#ffd783;font-size:34px;line-height:34px;letter-spacing:1px;}
+.vhf-practice-lcd em,.vhf-practice-lcd i{display:block;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vhf-practice-lcd em{margin-top:6px;color:#bde7ff;font-size:8px;}
+.vhf-practice-lcd i{margin-top:5px;color:#8fd8ab;font-size:7.5px;}
+.vhf-practice-side{display:grid;gap:6px;}
+.vhf-practice-side button{border:1px solid rgba(111,168,220,.28);border-radius:7px;background:#101923;color:#cfeaff;font:8px 'Share Tech Mono',monospace;}
+.vhf-practice-side button.danger{background:#5b1218;border-color:#ff8d8d;color:#ffd1d1;animation:alarm-flash .85s ease-in-out infinite;}
+.vhf-practice-wave{display:flex;align-items:end;gap:5px;height:18px;margin:10px 0 9px;color:#ffb0b0;font:7px 'Share Tech Mono',monospace;}
+.vhf-practice-wave span{width:18px;border-radius:999px;background:linear-gradient(180deg,#7fc3ff,#315879);animation:vhfBars 1.05s ease-in-out infinite;}
+.vhf-practice-wave span:nth-child(1){height:5px}.vhf-practice-wave span:nth-child(2){height:9px;animation-delay:.1s}.vhf-practice-wave span:nth-child(3){height:14px;animation-delay:.2s}.vhf-practice-wave span:nth-child(4){height:8px;animation-delay:.3s}.vhf-practice-wave span:nth-child(5){height:12px;animation-delay:.4s}
+.vhf-practice-wave em{font-style:normal;margin-left:auto;color:#ffb0b0;}
+.vhf-practice-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.vhf-practice-keys .vhf-key{border-radius:8px;margin:0;padding:9px 6px;text-align:center;background:linear-gradient(180deg,rgba(15,29,42,.95),rgba(7,16,26,.98));}
 .stowage-box{background:rgba(7,19,36,0.88);border:1px solid var(--border);border-radius:10px;padding:10px 11px;box-shadow:0 6px 18px rgba(0,0,0,.18);}
 .stowage-title{font-size:11px;font-weight:600;color:var(--gold);margin-bottom:6px;letter-spacing:1.5px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
 .stowage-hint{font-size:10px;color:var(--text3);line-height:1.6;margin-bottom:8px;}
@@ -1555,6 +1590,41 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes simSweep{0%{transform:translateX(0) rotate(18deg);opacity:.2}50%{opacity:1}100%{transform:translateX(230%) rotate(18deg);opacity:.2}}
 @media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid{grid-template-columns:1fr 1fr;}}
 @media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}}
+
+@media (max-width:520px){
+  #app{max-width:100vw;}
+  #story{padding:10px 8px 12px;gap:8px;}
+  #speechstage{grid-template-columns:minmax(82px,28vw) minmax(0,1fr) minmax(82px,28vw);gap:8px;align-items:start;}
+  #speechportrait,#playerstand{height:clamp(128px,38vw,156px);border-radius:12px;}
+  #speechchar,#playerstandchar{padding-top:0;overflow:hidden;}
+  #speechchar .portrait-composite.story,
+  #playerstandchar .portrait-composite.story,
+  #speechchar .portrait-photo-sheet.story,
+  #playerstandchar .portrait-photo-sheet.story,
+  #speechchar .portrait-sprite.story,
+  #playerstandchar .portrait-sprite.story,
+  #speechchar .portrait-photo.story,
+  #playerstandchar .portrait-photo.story{
+    height:clamp(128px,38vw,156px) !important;
+    min-height:0 !important;
+    width:100% !important;
+    background-size:360% 190% !important;
+    background-position:var(--px,50%) var(--py,4%) !important;
+    object-fit:contain !important;
+    object-position:center bottom !important;
+    transform:none !important;
+  }
+  #speechchar .portrait-composite.story .portrait-photo-sheet.story,
+  #playerstandchar .portrait-composite.story .portrait-photo-sheet.story{position:absolute;inset:0;}
+  #speechbubble{min-height:clamp(128px,38vw,156px);padding:12px 13px;border-radius:15px 15px 15px 7px;}
+  #speechbubble::before{top:52px;width:18px;height:18px;left:-8px;}
+  #text{font-size:13px;line-height:1.65;}
+  #replystage{padding-left:0;}
+  .vhf-practice-body{grid-template-columns:1fr;}
+  .vhf-practice-side{grid-template-columns:repeat(3,1fr);}
+  .vhf-practice-lcd strong{font-size:28px;}
+  .vhf-practice-keys{grid-template-columns:repeat(2,1fr);}
+}
 
 /* ===== ANİ OLAY KARTI ===== */
 #event-card{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:80;align-items:center;justify-content:center;}
