@@ -10129,6 +10129,9 @@ function handleSceneChoice(sc, c2, ch){
       const moved = advanceVoyageRoute(1,'scene-choice') || wp;
       addJournalEntry(`[SEYIR] ${route?.name || 'Rota'} uzerinde ${moved?.name || wp?.name || 'waypoint'} gecildi.`, sc.day, sc.time);
       pushPhoneMessage('Kopruustu', `Route monitor: ${route?.name || 'aktif rota'} %${getVoyageLegProgress()} tamamlandi. Sonraki chart: ${getVoyageWaypoint()?.chart || 'ECDIS route'}.`, {open:false});
+      if(route && getVoyageLegProgress() >= 95 && passageDebriefState.lastRoute !== route.name){
+        buildPassageDebrief();
+      }
     }else{
       addLiveLogbook('ROUTE RISK', `${route?.name || 'Rota'}: ${wp?.name || 'waypoint'} uzerinde route check zayif kaldi.`, true);
       pushEmergencyPhoneNotification('Route Check Zayif','ECDIS route monitor ve harita gorevi tekrar edilmeli.','ecdis');
@@ -11866,6 +11869,7 @@ function renderScene(idx){
   const hasEmergencyPanel = renderEmergencyPanel(sc, ch);
   getSceneRenderChoices(sc).forEach(c2=>{
     const b=document.createElement('button');b.className='cbtn';
+    if(stats.dinclik <= 35 && !['kritik','akilli'].includes(c2.tag||'')) b.classList.add('fatigue-decoy');
     b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+tagL[c2.tag||'akilli']+'</span>'+c2.text;
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
@@ -13743,6 +13747,8 @@ function buildSavePayload(){
     watchFeedItems,
     livingPulseState,
     monthlyCaptainReviewState,
+    personalNotebookEntries,
+    passageDebriefState,
     liveLogbookEntries,
     achievementsUnlocked,
     crewFatigueState,
@@ -13849,6 +13855,8 @@ function applyLoadedGameState(data){
   watchFeedItems = Array.isArray(data.watchFeedItems) ? data.watchFeedItems : [];
   livingPulseState = data.livingPulseState || {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   monthlyCaptainReviewState = data.monthlyCaptainReviewState || {lastMonth:0};
+  personalNotebookEntries = Array.isArray(data.personalNotebookEntries) ? data.personalNotebookEntries : [];
+  passageDebriefState = data.passageDebriefState && typeof data.passageDebriefState === 'object' ? {lastRoute:'', summaries:[], ...data.passageDebriefState} : {lastRoute:'', summaries:[]};
   liveLogbookEntries = Array.isArray(data.liveLogbookEntries) ? data.liveLogbookEntries : [];
   achievementsUnlocked = data.achievementsUnlocked || {};
   pendingPhoneCall = null;
@@ -18121,6 +18129,8 @@ let companyMailState = {stage:0,lastSubject:'',threads:[]};
 let watchFeedItems = [];
 let livingPulseState = {lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
 let monthlyCaptainReviewState = {lastMonth:0};
+let personalNotebookEntries = [];
+let passageDebriefState = {lastRoute:'', summaries:[]};
 let liveLogbookEntries = [];
 let achievementsUnlocked = {};
 let pendingPhoneCall = null;
@@ -19728,6 +19738,212 @@ function createCaptainReviewNow(){
   showNotif('CAPT','Kaptan Review', 'Aylik degerlendirme notu logbook ve telefona dustu.');
 }
 
+function getPassagePlanCard(){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const waypoints = (route?.waypoints || []).slice(0,6).map((w,i)=>`<li class="${w.name===wp?.name?'active':''}"><b>${i+1}. ${phoneSafe(w.name)}</b><span>${phoneSafe(w.chart || route?.chart || 'ENC')} · ${phoneSafe(w.risk || w.note || 'route check')}</span></li>`).join('');
+  return `<div class="sim-passage-card">
+    <div class="sim-mini-title">PASSAGE PLAN</div>
+    <div class="sim-plan-grid">
+      <div><b>Rota</b><span>${phoneSafe(route?.name || 'Aktif rota yok')}</span></div>
+      <div><b>Next WP</b><span>${phoneSafe(st.nextWp || wp?.name || '--')}</span></div>
+      <div><b>ETA</b><span>${phoneSafe(st.eta)} · SOG ${phoneSafe(st.sog)} kt</span></div>
+      <div><b>Safety</b><span>CPA ${phoneSafe(st.cpa)} nm · UKC ${phoneSafe(st.ukc)} m</span></div>
+      <div><b>Tide / Squat</b><span>${voyagePressure.current==='Kuvvetli'?'Kuvvetli akinti, squat payi artir':'Normal margin'} · ${voyagePressure.speed}</span></div>
+      <div><b>VHF</b><span>${voyagePressure.vhf==='Yogun'?'VTS/Pilot working channel hazir':'CH16 watch + local VTS'}</span></div>
+    </div>
+    <ol class="sim-waypoint-list">${waypoints || '<li><b>WP bekleniyor</b><span>Rota secilince liste dolar.</span></li>'}</ol>
+    <div class="sim-actions compact">
+      <button onclick="openMap()">Chart ac</button>
+      <button onclick="addLiveLogbook('PASSAGE PLAN','Route summary, no-go, UKC, VHF and contingency route checked.',true); showNotif('PLAN','Passage Plan','Plan logbook satirina islendi.')">Planı logla</button>
+      <button onclick="selectMapTask(MAP_TASKS.findIndex(t=>t.id==='alternateroute')); openMap()">Contingency route</button>
+    </div>
+  </div>`;
+}
+
+function getBridgeTeamRolePanel(){
+  const roles = [
+    ['Kaptan','Final karar, risk onayi, pilot ile ortak niyet'],
+    ['OOW','Radar/ECDIS/VHF cross-check ve logbook'],
+    ['Lookout','Gorsel hedef, isik, sis ve guverte bildirimi'],
+    ['Helmsman','Dumen emrini tekrar eder ve steady raporlar'],
+    ['Pilot','Yerel rota, tug ve berth yaklaşma tavsiyesi']
+  ];
+  return `<div class="sim-role-grid">${roles.map(([r,d])=>`<button class="sim-role-card" onclick="issueBridgeTeamOrder('${r.replace(/'/g,"\\'")}')"><b>${r}</b><small>${d}</small></button>`).join('')}</div>`;
+}
+
+function issueBridgeTeamOrder(role){
+  const orders = {
+    Kaptan:'Kaptan bilgilendirildi: CPA/UKC, hava, pilot niyeti ve contingency route net raporlandi.',
+    OOW:'OOW gorevi: radar/ECDIS/AIS/VHF cross-check ve logbook satiri takipte.',
+    Lookout:'Lookout gorevi: gorsel hedef, isik, sis ve iskele/sancak raporu teyit edildi.',
+    Helmsman:'Helmsman emri: dumen emri tekrar edildi, steady raporu beklenecek.',
+    Pilot:'Pilot exchange: draft, engine status, tug plan ve berth niyeti tekrar edildi.'
+  };
+  const msg = orders[role] || `${role} rolu bilgilendirildi.`;
+  addLiveLogbook('BRIDGE TEAM', msg, true);
+  addWatchFeed(msg, 'good');
+  applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true});
+}
+
+function getSmcpPracticePanel(){
+  const cmds = [
+    ['Port 10','Helm order repeat-back: Port 10.'],
+    ['Steady as she goes','Heading steady report beklenir.'],
+    ['Dead slow ahead','Engine order telegraph ve speed kontrol.'],
+    ['Stop engine','Manevra niyeti ve traffic effect teyidi.'],
+    ['Let go forward tug','Tug release sirasi ve mooring safety.'],
+    ['Heave up slack','Halat bosunu alma, snap-back alani bos.']
+  ];
+  return `<div class="sim-command-grid">${cmds.map(([cmd,note])=>`<button onclick="practiceSmcpCommand('${cmd.replace(/'/g,"\\'")}','${note.replace(/'/g,"\\'")}')"><b>${cmd}</b><small>${note}</small></button>`).join('')}</div>`;
+}
+
+function practiceSmcpCommand(cmd,note){
+  addLiveLogbook('SMCP / BRIDGE ORDER', `${cmd}: ${note}`, true);
+  addWatchFeed(`SMCP pratigi: ${cmd}`, 'good');
+  applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true});
+}
+
+function getTugMooringPanel(){
+  const tension = Math.min(100, 28 + (voyagePressure.caution||0)*7 + (portOpsChain.tug?18:0));
+  const lines = [
+    ['Head line', portOpsChain.approach ? 'hazir' : 'bekliyor'],
+    ['Fore spring', tension>60 ? 'gergin' : 'normal'],
+    ['Breast line', 'snap-back kontrol'],
+    ['Aft spring', portOpsChain.allFast ? 'secured' : 'standby'],
+    ['Stern line', portOpsChain.allFast ? 'secured' : 'bekliyor']
+  ];
+  return `<div class="sim-mooring-panel">
+    <div class="sim-gauge"><b>Line tension</b><span style="width:${tension}%"></span><em>${tension}%</em></div>
+    <div class="sim-line-grid">${lines.map(([l,s])=>`<button onclick="markMooringLine('${l.replace(/'/g,"\\'")}')"><b>${l}</b><small>${s}</small></button>`).join('')}</div>
+    <div class="sim-actions compact"><button onclick="markMooringLine('Snap-back zone clear')">Snap-back clear</button><button onclick="markMooringLine('Tug pull direction checked')">Tug pull</button></div>
+  </div>`;
+}
+
+function markMooringLine(line){
+  addLiveLogbook('TUG / MOORING', `${line} checked. Tug direction, line order and snap-back area monitored.`, true);
+  addWatchFeed(`Mooring panel: ${line}`, 'good');
+  applyEffect({bilgi:1,sayginlik:1,dinclik:-1},{skipContractTick:true});
+}
+
+function getEngineControlRoomPanel(){
+  const rows = [
+    ['Alarm panel', deviceFaultState.gyro?'source alarm':'normal'],
+    ['Generator', voyagePressure.caution>=6?'standby online':'stable'],
+    ['Bilge', 'level trend checked'],
+    ['Purifier', 'temp/pressure ok'],
+    ['Fuel transfer', voyagePressure.speed==='Dead slow hazir'?'maneuvering fuel ready':'service tank ok'],
+    ['Cooling water', 'flow and temp watch'],
+    ['Quick closing valve', 'remote station clear']
+  ];
+  return `<div class="sim-control-grid">${rows.map(([a,b])=>`<button onclick="markEngineCheck('${a.replace(/'/g,"\\'")}')"><b>${a}</b><small>${b}</small></button>`).join('')}</div>`;
+}
+
+function markEngineCheck(item){
+  addLiveLogbook('ECR CHECK', `${item}: checked in engine control room panel.`, true);
+  applyEffect({bilgi:2,sayginlik:1,dinclik:-1},{skipContractTick:true});
+  addWatchFeed(`ECR: ${item} kontrol edildi`, 'good');
+}
+
+function getCargoControlPanel(){
+  const type = `${selType || ''} ${selectedStartScenario?.type || ''}`.toLowerCase();
+  const tanker = /tanker|lng|shuttle/.test(type);
+  const bulk = /bulk|kuru/.test(type);
+  const rows = tanker
+    ? [['Manifold pressure','watch'],['Line-up','double check'],['ESD link','ready'],['Inert gas','O2 trend'],['Cargo rate','terminal agreed'],['Ballast','list/trim']]
+    : bulk
+    ? [['Loading sequence','hold order'],['Draft survey','figures'],['Trim','MCTC watch'],['Hold cleanliness','checked'],['Ballast','free surface'],['Conveyor/Grab','rate']]
+    : [['Bay/Row/Tier','sequence'],['Lashing','twist lock'],['Reefer alarms','monitor'],['Stability','loadicator'],['DG segregation','IMDG'],['Crane split','terminal']];
+  return `<div class="sim-control-grid">${rows.map(([a,b])=>`<button onclick="markCargoCheck('${a.replace(/'/g,"\\'")}')"><b>${a}</b><small>${b}</small></button>`).join('')}</div>`;
+}
+
+function markCargoCheck(item){
+  addLiveLogbook('CARGO CONTROL', `${item}: cargo control room check completed.`, true);
+  applyEffect({bilgi:2,sayginlik:1,dinclik:-1},{skipContractTick:true});
+  addWatchFeed(`Cargo control: ${item}`, 'good');
+}
+
+function getAccidentReplayPanel(){
+  const last = (investigationDossier || [])[0];
+  const weak = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust > 4;
+  const steps = last
+    ? ['Olay kaydi acildi','Ifade / witness toplandi','Root cause secilecek','Corrective action yazilacak']
+    : ['CPA dustu','Rapor gec geldi','Manevra gecikti','Sonuc / ders kayda dustu'];
+  return `<div class="sim-replay-line">${steps.map((s,i)=>`<span class="${i===steps.length-1&&weak?'warn':''}">${phoneSafe(s)}</span>`).join('')}</div>
+    <div class="sim-actions compact"><button onclick="runAccidentReplay()">Replay oynat</button><button onclick="addLiveLogbook('NEAR MISS DOSYASI','Replay, root cause ve corrective action icin dosya acildi.',true)">Dosyaya ekle</button></div>`;
+}
+
+function runAccidentReplay(){
+  ['Replay: hedef/tehlike yaklasti','Replay: karar gecikti veya iyi toparlandi','Replay: ders logbook ve ofis mailine dustu'].forEach((line,i)=>{
+    setTimeout(()=>addWatchFeed(line, i===1?'warn':'good'), i*650);
+  });
+  addCompanyMailThread('Kaza replay notu','Near miss timeline tekrar izlendi; root cause ve corrective action bekleniyor.','warn');
+  addLiveLogbook('ACCIDENT REPLAY','CPA/rapor/manevra/sonuc timeline olarak tekrar canlandirildi.',true);
+}
+
+function addPersonalNotebookEntry(){
+  const input = document.getElementById('personal-note-input');
+  const text = (input?.value || '').trim();
+  if(!text){ showNotif('NOT','Kisisel Defter','Once kisa bir not yaz.'); return; }
+  personalNotebookEntries.unshift({text,ts:Date.now(),scene:currentIdx+1});
+  personalNotebookEntries = personalNotebookEntries.slice(0,20);
+  addJournalEntry(`[KISISEL DEFTER] ${text}`, 'Not', '--:--');
+  applyEffect({bilgi:1},{skipContractTick:true});
+  if(input) input.value = '';
+  renderSimCenter();
+}
+
+function getPersonalNotebookPanel(){
+  const items = (personalNotebookEntries || []).slice(0,4).map(n=>`<li>${phoneSafe(n.text)}</li>`).join('');
+  return `<div class="sim-notebook">
+    <textarea id="personal-note-input" placeholder="Kendi notunu yaz: pilot, VHF, UKC, ekip, hata..."></textarea>
+    <button onclick="addPersonalNotebookEntry()">Nota ekle</button>
+    <ul>${items || '<li>Henüz kişisel not yok.</li>'}</ul>
+  </div>`;
+}
+
+function buildPassageDebrief(){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const trust = Math.round(Object.values(crewTrust || {}).reduce((a,b)=>a+b,0) / Math.max(1,Object.values(crewTrust || {}).length));
+  const summary = {
+    route:route?.name || 'Aktif rota',
+    deviation:Math.max(0.1, (voyagePressure.caution||1)*0.18).toFixed(1),
+    minCpa:st.cpa,
+    minUkc:st.ukc,
+    vhfErrors:Math.max(0, Math.round((devicePracticeScore.total || 0) - (devicePracticeScore.ok || 0))),
+    trust,
+    note: trust > 55 && Number(st.cpa) >= 1 ? 'Kaptan: rota ve ekip koordinasyonu kabul edilebilir.' : 'Kaptan: route monitor ve rapor dilini guclendir.'
+  };
+  passageDebriefState.lastRoute = summary.route;
+  passageDebriefState.summaries = [summary, ...(passageDebriefState.summaries || [])].slice(0,6);
+  addLiveLogbook('PASSAGE DEBRIEF', `${summary.route}: XTE ${summary.deviation}nm, min CPA ${summary.minCpa}, min UKC ${summary.minUkc}, VHF hata ${summary.vhfErrors}.`, true);
+  pushPhoneMessage('Kaptan', summary.note, {open:false});
+  showNotif('DEBRIEF','Passage Ozeti','Rota sonu debrief hazirlandi.');
+  return summary;
+}
+
+function getPassageDebriefPanel(){
+  const last = (passageDebriefState.summaries || [])[0];
+  const data = last || {
+    route:getActiveVoyageRoute?.()?.name || 'Aktif rota',
+    deviation:'--', minCpa:liveVoyageState?.cpa || '--', minUkc:liveVoyageState?.ukc || '--',
+    vhfErrors:Math.max(0,(devicePracticeScore.total||0)-(devicePracticeScore.ok||0)),
+    trust:'--', note:'Passage tamamlaninca debrief uret.'
+  };
+  return `<div class="sim-debrief-grid">
+    <div><b>Rota</b><span>${phoneSafe(data.route)}</span></div>
+    <div><b>Rota sapmasi</b><span>${phoneSafe(data.deviation)} nm</span></div>
+    <div><b>Min CPA</b><span>${phoneSafe(data.minCpa)} nm</span></div>
+    <div><b>Min UKC</b><span>${phoneSafe(data.minUkc)} m</span></div>
+    <div><b>VHF hata</b><span>${phoneSafe(String(data.vhfErrors))}</span></div>
+    <div><b>Ekip guveni</b><span>${phoneSafe(String(data.trust))}</span></div>
+    <p>${phoneSafe(data.note)}</p>
+    <button onclick="buildPassageDebrief(); renderSimCenter()">Debrief uret</button>
+  </div>`;
+}
+
 function openSimCenter(){
   if(!canUseFeature('sim')) return;
   completeMissionFromFeature('sim');
@@ -19777,6 +19993,42 @@ function renderSimCenter(){
         <span class="sim-chip">Oyuncu rota cizer, pilot station/no anchoring/TSS/CPA/UKC noktalarini chart okuyarak bulur.</span>
         <span class="sim-chip ${completedMapTasks.size>=4?'good':''}">Tamamlanan harita gorevi: ${completedMapTasks.size}/${MAP_TASKS.length}</span>
       </div>
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>GERCEK PASSAGE PLAN</span><span>route · UKC · VHF · contingency</span></div>
+      ${getPassagePlanCard()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>BRIDGE TEAM ROLLERI</span><span>kime ne soylersin</span></div>
+      ${getBridgeTeamRolePanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>SMCP / KOPRU EMIRLERI</span><span>repeat-back</span></div>
+      ${getSmcpPracticePanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>TUG & MOORING PANELI</span><span>line tension</span></div>
+      ${getTugMooringPanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>MAKINE KONTROL ODASI</span><span>ECR mini sim</span></div>
+      ${getEngineControlRoomPanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>CARGO CONTROL ROOM</span><span>ship type ops</span></div>
+      ${getCargoControlPanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>KAZA / NEAR MISS REPLAY</span><span>timeline</span></div>
+      ${getAccidentReplayPanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>KISISEL DEFTER</span><span>oyuncu notu</span></div>
+      ${getPersonalNotebookPanel()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>PASSAGE SONU DEBRIEF</span><span>CPA · UKC · VHF · ekip</span></div>
+      ${getPassageDebriefPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>KADEMELI ZORLUK</span><span>${phoneSafe(gameplayMode)}</span></div>

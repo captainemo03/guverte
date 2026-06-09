@@ -107,6 +107,19 @@ CHECKS = {
         "sim-training-grid",
         "monthlyCaptainReviewState",
     ],
+    "passage operations pack": [
+        "getPassagePlanCard",
+        "getBridgeTeamRolePanel",
+        "getSmcpPracticePanel",
+        "getTugMooringPanel",
+        "getEngineControlRoomPanel",
+        "getCargoControlPanel",
+        "getAccidentReplayPanel",
+        "getPersonalNotebookPanel",
+        "getPassageDebriefPanel",
+        "personalNotebookEntries",
+        "passageDebriefState",
+    ],
 }
 
 
@@ -130,13 +143,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 85:
+    elif int(js_versions[-1]) < 86:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 79:
+    elif int(css_versions[-1]) < 80:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():
