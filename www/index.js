@@ -8469,6 +8469,108 @@ function getSafeSceneMarkup(sc){
   }
 }
 const tagL={cesur:"Cesur",akilli:"Akıllı",itaatkar:"İtaatkar",korkak:"Korkak",sosyal:"Sosyal",kritik:"KRİTİK"};
+const GAME_LANGUAGES={
+  tr:{label:'Turkce',native:'Turkce',short:'TR'},
+  en:{label:'English',native:'English',short:'EN'},
+  es:{label:'Espanol',native:'Espanol',short:'ES'},
+  de:{label:'Deutsch',native:'Deutsch',short:'DE'}
+};
+let gameLanguage=(()=>{try{return GAME_LANGUAGES[localStorage.getItem('guverte-language')] ? localStorage.getItem('guverte-language') : 'tr';}catch(e){return 'tr';}})();
+const I18N={
+  tr:{},
+  en:{
+    'ui.language':'Language','ui.languageHint':'Choose the language used for menus, guidance, choices and the live translation layer.','ui.save':'SAVE','ui.sound':'Sound','ui.rep':'REPUTATION',
+    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CHART','ui.devices':'DEVICES','ui.sim':'SIM','ui.career':'CAREER','ui.ship':'SHIP','ui.cabin':'CABIN','ui.logbook':'LOGBOOK','ui.phone':'PHONE','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
+    'ui.continue':'Continue Saved Game','ui.deleteSave':'Delete Save','ui.startShip':'Join Ship','ui.mode':'Mode','ui.open':'Open','ui.basicStory':'Only story and basic choices.','ui.unlocked':'Open','ui.assist':'Assist mode is on: guidance is more instructional.','ui.slowUnlock':'New systems unlock gradually.',
+    'mode.simple':'Simple','mode.simpleDesc':'Story, core decisions and a cleaner screen.','mode.realistic':'Realistic','mode.realisticDesc':'Devices, charts and logbook unlock gradually.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker and premium details are active.',
+    'tag.cesur':'Bold','tag.akilli':'Smart','tag.itaatkar':'Procedural','tag.korkak':'Unsafe','tag.sosyal':'Social','tag.kritik':'CRITICAL',
+    'role.cadet':'DECK CADET','save.center':'SAVE CENTER','save.preparing':'Preparing save status','save.current':'Current Game','save.contract':'Contract','save.last':'Last Save','save.actions':'Actions','save.saveGame':'Save Game','save.loadGame':'Continue Save','save.deleteGame':'Delete Save','save.noSave':'No save yet','save.notStarted':'Not started',
+    'guide.default':'Read the scene, understand what is being asked, and make one clear decision.','guide.support':'Assist mode: slow down, choose the decision closest to procedure and evidence.','guide.tired':'Low energy: choose calm procedural action instead of risky heroics.','guide.vhf':'Clarify the VHF channel and call type.','guide.radar':'Read the target: CPA/TCPA, intention and report.','guide.ecdis':'Check route, safety contour and next waypoint on the chart.','guide.engine':'Get engine information and give the master a short report.','guide.port':'Monitor speed-heading, line order and snap-back risk.','guide.emergency':'Safety chain first: alarm, position, team, report.','guide.inspection':'Check documents, equipment and deficiency risk calmly.'
+  },
+  es:{
+    'ui.language':'Idioma','ui.languageHint':'Elige el idioma de menus, guia, opciones y la capa de traduccion en vivo.','ui.save':'GUARDAR','ui.sound':'Sonido','ui.rep':'REPUTACION',
+    'ui.colreg':'COLREG','ui.notes':'NOTAS','ui.map':'CARTA','ui.devices':'EQUIPOS','ui.sim':'SIM','ui.career':'CARRERA','ui.ship':'BUQUE','ui.cabin':'CAMAROTE','ui.logbook':'DIARIO','ui.phone':'TELEFONO','ui.journal':'BITACORA','ui.album':'ALBUM','ui.crew':'TRIPULACION',
+    'ui.continue':'Continuar partida','ui.deleteSave':'Borrar partida','ui.startShip':'Embarcar','ui.mode':'Modo','ui.open':'Abierto','ui.basicStory':'Solo historia y decisiones basicas.','ui.unlocked':'Abierto','ui.assist':'Modo ayuda activo: la guia es mas instructiva.','ui.slowUnlock':'Los sistemas nuevos se abren gradualmente.',
+    'mode.simple':'Simple','mode.simpleDesc':'Historia, decisiones basicas y pantalla mas limpia.','mode.realistic':'Realista','mode.realisticDesc':'Equipos, cartas y diario se abren gradualmente.','mode.expert':'Experto','mode.expertDesc':'CPA, UKC, PSC, tanquero y detalles premium activos.',
+    'tag.cesur':'Valiente','tag.akilli':'Inteligente','tag.itaatkar':'Procedimiento','tag.korkak':'Inseguro','tag.sosyal':'Social','tag.kritik':'CRITICO',
+    'role.cadet':'CADETE DE CUBIERTA','save.center':'CENTRO DE GUARDADO','save.preparing':'Preparando estado','save.current':'Partida actual','save.contract':'Contrato','save.last':'Ultimo guardado','save.actions':'Acciones','save.saveGame':'Guardar','save.loadGame':'Continuar','save.deleteGame':'Borrar','save.noSave':'Sin guardado','save.notStarted':'No iniciado',
+    'guide.default':'Lee la escena, entiende lo que se pide y toma una decision clara.','guide.support':'Modo ayuda: no te apresures, elige la decision mas cercana al procedimiento y a la evidencia.','guide.tired':'Energia baja: evita heroismos y elige una accion tranquila y procedimental.','guide.vhf':'Aclara el canal VHF y el tipo de llamada.','guide.radar':'Lee el blanco: CPA/TCPA, intencion y reporte.','guide.ecdis':'Comprueba ruta, contorno de seguridad y proximo waypoint en la carta.','guide.engine':'Obtén informacion de maquinas y da al capitan un reporte corto.','guide.port':'Vigila velocidad-rumbo, orden de cabos y riesgo snap-back.','guide.emergency':'Primero la cadena de seguridad: alarma, posicion, equipo, reporte.','guide.inspection':'Revisa documentos, equipo y riesgo de deficiencia con calma.'
+  },
+  de:{
+    'ui.language':'Sprache','ui.languageHint':'Wahle die Sprache fur Menus, Hinweise, Optionen und die Live-Ubersetzungsebene.','ui.save':'SPEICHERN','ui.sound':'Ton','ui.rep':'ANSEHEN',
+    'ui.colreg':'KVR','ui.notes':'NOTIZEN','ui.map':'KARTE','ui.devices':'GERATE','ui.sim':'SIM','ui.career':'KARRIERE','ui.ship':'SCHIFF','ui.cabin':'KAMMER','ui.logbook':'LOGBUCH','ui.phone':'TELEFON','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
+    'ui.continue':'Spielstand laden','ui.deleteSave':'Spielstand loschen','ui.startShip':'An Bord gehen','ui.mode':'Modus','ui.open':'Offen','ui.basicStory':'Nur Geschichte und Grundentscheidungen.','ui.unlocked':'Offen','ui.assist':'Hilfsmodus aktiv: die Hinweise sind lehrreicher.','ui.slowUnlock':'Neue Systeme werden schrittweise freigeschaltet.',
+    'mode.simple':'Einfach','mode.simpleDesc':'Geschichte, Kernentscheidungen und weniger Bildschirmfullung.','mode.realistic':'Realistisch','mode.realisticDesc':'Gerate, Karten und Logbuch werden schrittweise freigeschaltet.','mode.expert':'Experte','mode.expertDesc':'CPA, UKC, PSC, Tanker und Premiumdetails sind aktiv.',
+    'tag.cesur':'Mutig','tag.akilli':'Klug','tag.itaatkar':'Prozedural','tag.korkak':'Unsicher','tag.sosyal':'Sozial','tag.kritik':'KRITISCH',
+    'role.cadet':'DECKSKADETT','save.center':'SPEICHERZENTRALE','save.preparing':'Speicherstatus wird vorbereitet','save.current':'Aktuelles Spiel','save.contract':'Vertrag','save.last':'Letzter Speicherstand','save.actions':'Aktionen','save.saveGame':'Speichern','save.loadGame':'Fortsetzen','save.deleteGame':'Loschen','save.noSave':'Noch kein Speicherstand','save.notStarted':'Nicht gestartet',
+    'guide.default':'Lies die Szene, erkenne was verlangt wird und triff eine klare Entscheidung.','guide.support':'Hilfsmodus: langsam bleiben, die Entscheidung nahe an Verfahren und Belegen wahlen.','guide.tired':'Niedrige Energie: ruhige prozedurale Aktion statt riskanter Heldentat.','guide.vhf':'VHF-Kanal und Rufart klaren.','guide.radar':'Ziel lesen: CPA/TCPA, Absicht und Bericht.','guide.ecdis':'Route, Safety Contour und nachsten Wegpunkt in der Karte prufen.','guide.engine':'Maschineninfo einholen und dem Kapitan kurz melden.','guide.port':'Speed-Heading, Leinenreihenfolge und Snap-back-Risiko uberwachen.','guide.emergency':'Zuerst Sicherheitskette: Alarm, Position, Team, Meldung.','guide.inspection':'Dokumente, Ausrustung und Mangelrisiko ruhig prufen.'
+  }
+};
+const DYNAMIC_TRANSLATIONS={
+  en:[
+    ['Sahneyi oku ve karar ver.','Read the scene and decide.'],['Kaptan','Master'],['Süvari','Master'],['Stajyer','Cadet'],['Zabit','Officer'],['Baş Mühendis','Chief Engineer'],['Çarkçıbaşı','Chief Engineer'],['Lostromo','Bosun'],['Aşçı','Cook'],['Tayfa','Rating'],
+    ['Gece','Night'],['Gün','Day'],['Vardiya','Watch'],['Teslim','Handover'],['Köprüüstü','Bridge'],['Makine','Engine room'],['Güverte','Deck'],['Liman','Port'],['Açık Deniz','Open Sea'],['Harita','Chart'],['Rota','Route'],['Demir','Anchorage'],
+    ['yangın','fire'],['alarm','alarm'],['acil durum','emergency'],['rapor','report'],['kayıt','record'],['logbook','logbook'],['kanal','channel'],['hedef','target'],['emniyet','safety'],['tehlike','danger'],['görüş','visibility'],
+    ['halat','mooring line'],['pilot','pilot'],['römorkör','tug'],['yanaşma','berthing'],['ayrılma','departure'],['yükleme','loading'],['tahliye','discharge'],['balast','ballast'],['swell','swell'],['akıntı','current'],['sis','fog'],
+    ['Ne yapabilirim?','What can I do?'],['Kaptana haber ver','Inform the master'],['kontrol et','check'],['teyit et','confirm'],['bekle','stand by'],['yardım et','assist'],['sakin','calm'],['prosedür','procedure'],['belge','document'],['cihaz','device'],
+    ['Mesaj','Messages'],['Rehber','Contacts'],['Uygulama','Apps'],['Son kayit','Last save'],['Sahne','Scene'],['SAHNE','SCENE'],['sahne','scene'],['ay','month'],['mod','mode'],['Yok','None'],['Gemi','Ship'],['Kayitli gemi','Saved ship']
+  ],
+  es:[
+    ['Sahneyi oku ve karar ver.','Lee la escena y decide.'],['Kaptan','Capitan'],['Süvari','Capitan'],['Stajyer','Cadete'],['Zabit','Oficial'],['Baş Mühendis','Jefe de maquinas'],['Çarkçıbaşı','Jefe de maquinas'],['Lostromo','Contramaestre'],['Aşçı','Cocinero'],['Tayfa','Marinero'],
+    ['Gece','Noche'],['Gün','Dia'],['Vardiya','Guardia'],['Teslim','Entrega de guardia'],['Köprüüstü','Puente'],['Makine','Sala de maquinas'],['Güverte','Cubierta'],['Liman','Puerto'],['Açık Deniz','Alta mar'],['Harita','Carta'],['Rota','Ruta'],['Demir','Fondeo'],
+    ['yangın','incendio'],['alarm','alarma'],['acil durum','emergencia'],['rapor','reporte'],['kayıt','registro'],['kanal','canal'],['hedef','blanco'],['emniyet','seguridad'],['tehlike','peligro'],['görüş','visibilidad'],
+    ['halat','cabo'],['pilot','practico'],['römorkör','remolcador'],['yanaşma','atraque'],['ayrılma','salida'],['yükleme','carga'],['tahliye','descarga'],['balast','lastre'],['akıntı','corriente'],['sis','niebla'],
+    ['Ne yapabilirim?','Que puedo hacer?'],['Kaptana haber ver','Avisar al capitan'],['kontrol et','comprobar'],['teyit et','confirmar'],['bekle','en espera'],['yardım et','ayudar'],['sakin','calma'],['prosedür','procedimiento'],['belge','documento'],['cihaz','equipo'],
+    ['Mesaj','Mensajes'],['Rehber','Contactos'],['Uygulama','Apps'],['Son kayit','Ultimo guardado'],['Sahne','Escena'],['SAHNE','ESCENA'],['sahne','escena'],['ay','mes'],['mod','modo'],['Yok','Ninguno'],['Gemi','Buque'],['Kayitli gemi','Buque guardado']
+  ],
+  de:[
+    ['Sahneyi oku ve karar ver.','Lies die Szene und entscheide.'],['Kaptan','Kapitan'],['Süvari','Kapitan'],['Stajyer','Kadett'],['Zabit','Offizier'],['Baş Mühendis','Leitender Ingenieur'],['Çarkçıbaşı','Leitender Ingenieur'],['Lostromo','Bootsmann'],['Aşçı','Koch'],['Tayfa','Matrose'],
+    ['Gece','Nacht'],['Gün','Tag'],['Vardiya','Wache'],['Teslim','Wachubergabe'],['Köprüüstü','Brucke'],['Makine','Maschinenraum'],['Güverte','Deck'],['Liman','Hafen'],['Açık Deniz','Offene See'],['Harita','Karte'],['Rota','Route'],['Demir','Ankerplatz'],
+    ['yangın','Feuer'],['alarm','Alarm'],['acil durum','Notfall'],['rapor','Meldung'],['kayıt','Eintrag'],['kanal','Kanal'],['hedef','Ziel'],['emniyet','Sicherheit'],['tehlike','Gefahr'],['görüş','Sicht'],
+    ['halat','Leine'],['pilot','Lotse'],['römorkör','Schlepper'],['yanaşma','Anlegen'],['ayrılma','Ablegen'],['yükleme','Laden'],['tahliye','Loschen'],['balast','Ballast'],['akıntı','Strom'],['sis','Nebel'],
+    ['Ne yapabilirim?','Was kann ich tun?'],['Kaptana haber ver','Dem Kapitan melden'],['kontrol et','prufen'],['teyit et','bestatigen'],['bekle','warten'],['yardım et','helfen'],['sakin','ruhig'],['prosedür','Verfahren'],['belge','Dokument'],['cihaz','Gerat'],
+    ['Mesaj','Nachrichten'],['Rehber','Kontakte'],['Uygulama','Apps'],['Son kayit','Letzter Speicherstand'],['Sahne','Szene'],['SAHNE','SZENE'],['sahne','Szene'],['ay','Monat'],['mod','Modus'],['Yok','Keiner'],['Gemi','Schiff'],['Kayitli gemi','Gespeichertes Schiff']
+  ]
+};
+function t(key,fallback=''){
+  if(gameLanguage==='tr') return fallback || key;
+  return I18N[gameLanguage]?.[key] || I18N.en?.[key] || fallback || key;
+}
+function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function translateGameText(value){
+  const text=String(value ?? '');
+  if(gameLanguage==='tr' || !text) return text;
+  let out=text;
+  (DYNAMIC_TRANSLATIONS[gameLanguage] || []).forEach(([from,to])=>{
+    out=out.replace(new RegExp(escapeRegExp(from),'gi'), to);
+  });
+  return out;
+}
+function getChoiceTagLabel(tag){
+  const key=tag || 'akilli';
+  return t(`tag.${key}`, tagL[key] || tagL.akilli);
+}
+function getModeLabel(key){
+  return t(`mode.${key}`, PLAY_MODE_DEFS?.[key]?.label || key);
+}
+function getModeDesc(key){
+  return t(`mode.${key}Desc`, PLAY_MODE_DEFS?.[key]?.desc || '');
+}
+function localizeAndSetText(id,key,fallback){
+  const el=document.getElementById(id);
+  if(el) el.textContent=t(key,fallback);
+}
+function setGameLanguage(lang){
+  gameLanguage=GAME_LANGUAGES[lang] ? lang : 'tr';
+  try{localStorage.setItem('guverte-language',gameLanguage);}catch(e){}
+  applyLanguageUI();
+  renderPlayModeSelector();
+  if(sceneQueue && sceneQueue.length && document.getElementById('game')?.style.display!=='none'){
+    renderScene(currentIdx);
+  }else{
+    refreshSaveEntryActions();
+  }
+}
 let mood=58;
 let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
 let delayedConsequences=[];
@@ -9247,8 +9349,8 @@ function renderDialogueLog(){
     <div class="dialogue-entry ${entry.side}">
       <div class="dialogue-avatar">${renderPortraitSprite(entry.portrait, 'avatar')}</div>
       <div class="dialogue-card">
-        <div class="dialogue-name">${entry.name}</div>
-        <div class="dialogue-body">${summarizeDialogueText(entry.text)}</div>
+        <div class="dialogue-name">${phoneSafe(translateGameText(entry.name))}</div>
+        <div class="dialogue-body">${phoneSafe(translateGameText(summarizeDialogueText(entry.text)))}</div>
       </div>
     </div>
   `).join('');
@@ -9335,8 +9437,8 @@ function showReplyBubble(text){
   const body = document.getElementById('replytext');
   const name = document.getElementById('replyname');
   const avatar = document.getElementById('replyavatar');
-  if(name) name.textContent = pn || 'Stajyer';
-  if(body) body.textContent = String(text || '');
+  if(name) name.textContent = pn || t('role.cadet','Stajyer');
+  if(body) body.textContent = translateGameText(text || '');
   if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'avatar');
   if(stage){
     stage.style.display = 'flex';
@@ -9355,7 +9457,7 @@ function runSpeechTyping(text){
     clearInterval(speechTypingTimer);
     speechTypingTimer = null;
   }
-  const full = String(text || '');
+  const full = translateGameText(text || '');
   el.textContent = '';
   el.classList.add('typing');
   let i = 0;
@@ -9553,6 +9655,7 @@ function buildIntro(){
   updateKontrat();
   updateSugs();
   renderCharacterCreator();
+  applyLanguageUI();
 }
 
 function updateKontrat(){
@@ -11665,8 +11768,51 @@ function triggerLiveScenePresentation(sc, choicesWrap){
 }
 
 function applyLanguageUI(){
-  const lang = localStorage.getItem('guverte-language') || 'tr';
+  const lang = GAME_LANGUAGES[gameLanguage] ? gameLanguage : 'tr';
+  gameLanguage = lang;
   document.documentElement.lang = lang;
+  document.querySelectorAll('#language-select,#intro-language-select').forEach(sel=>{
+    if(sel) sel.value = lang;
+  });
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(key) el.textContent = t(key, el.getAttribute('data-i18n-fallback') || el.textContent || '');
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-title');
+    if(key) el.title = t(key, el.title || '');
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    if(key) el.setAttribute('placeholder', t(key, el.getAttribute('placeholder') || ''));
+  });
+  localizeAndSetText('save-btn','ui.save','KAYDET');
+  localizeAndSetText('replbl','ui.rep','ITIBAR');
+  localizeAndSetText('continue-btn','ui.continue','Kayittan Devam Et');
+  localizeAndSetText('delete-save-btn','ui.deleteSave','Kaydi Sil');
+  localizeAndSetText('go-btn','ui.startShip','Gemiye Bin');
+  localizeAndSetText('phone-fab','ui.phone','TEL');
+  [
+    ['openNotes()','ui.notes','NOTLARIM'],['openMap()','ui.map','HARITA'],['openDevices()','ui.devices','CIHAZLAR'],
+    ['openCareer()','ui.career','KARIYER'],['openShipWalk()','ui.ship','GEMI'],['openCabin()','ui.cabin','KAMARA'],
+    ['openLiveLogbook()','ui.logbook','DEFTER'],['togglePhone()','ui.phone','TEL'],['openJournal()','ui.journal','GUNLUK'],
+    ['toggleCrew()','ui.crew','EKIP']
+  ].forEach(([onclick,key,fallback])=>{
+    document.querySelectorAll(`#toolbar button[onclick="${onclick}"]`).forEach(btn=>{btn.textContent=t(key,fallback);});
+  });
+  document.querySelectorAll('#toolbar button[onclick="openAlbum()"]').forEach(btn=>{
+    const count = document.getElementById('tb-photos-count')?.textContent || '0';
+    btn.innerHTML = `${t('ui.album','ALBUM')}<span id="tb-photos-count">${phoneSafe(count)}</span>`;
+  });
+  document.querySelectorAll(".phone-tab[onclick=\"setPhoneTab('messages')\"]").forEach(btn=>{btn.textContent=translateGameText('Mesaj');});
+  document.querySelectorAll(".phone-tab[onclick=\"setPhoneTab('contacts')\"]").forEach(btn=>{btn.textContent=translateGameText('Rehber');});
+  document.querySelectorAll(".phone-tab[onclick=\"setPhoneTab('web')\"]").forEach(btn=>{btn.textContent='Net';});
+  document.querySelectorAll(".phone-tab[onclick=\"setPhoneTab('apps')\"]").forEach(btn=>{btn.textContent=translateGameText('Uygulama');});
+  const role = document.getElementById('charrole');
+  if(role && sceneQueue?.length){
+    const sc = sceneQueue[currentIdx];
+    role.textContent = `${t('role.cadet','GUV. STAJYERI')} · ${translateGameText(sc?.day || '').toUpperCase()}`;
+  }
 }
 
 function getOneShotSceneFx(sc){
@@ -11790,31 +11936,31 @@ function renderScene(idx){
   }
 
   const c=getCrewDisplay(sc.who);
-  document.getElementById('dbd').textContent=sc.day;
+  document.getElementById('dbd').textContent=translateGameText(sc.day);
   document.getElementById('tbd').textContent=sc.time;
-  document.getElementById('lbd').textContent=sc.loc;
+  document.getElementById('lbd').textContent=translateGameText(sc.loc);
   updateWatchState(sc);
   updateVoyagePressure(sc);
   updateLiveVoyageState(sc);
   updatePortOpsChain(sc);
-  document.getElementById('scene-sub').textContent=sc.sub||'';
+  document.getElementById('scene-sub').textContent=translateGameText(sc.sub||'');
   const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
-  document.getElementById('spknm').textContent=c.name;
+  document.getElementById('spknm').textContent=translateGameText(c.name);
   const memoryLine = getCrewMemoryLine(sc);
-  document.getElementById('spktl').textContent = [c.title, memoryLine].filter(Boolean).join(' · ');
+  document.getElementById('spktl').textContent = [translateGameText(c.title), translateGameText(memoryLine)].filter(Boolean).join(' · ');
   hideReplyBubble();
   runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   renderDialogueLog();
   applySceneEmotions(sc);
   document.getElementById('charname').textContent=pn;
-  document.getElementById('charrole').textContent='GÜV. STAJYERİ · '+sc.day.toUpperCase();
+  document.getElementById('charrole').textContent=t('role.cadet','GÜV. STAJYERİ')+' · '+translateGameText(sc.day).toUpperCase();
   renderPortraitTargets();
   const stObj=STYPES.find(x=>x.key===selType);
   const shipSpec=getShipSpec(selType);
   document.getElementById('shipinfo').textContent=sn+' · '+(shipSpec.tonLabel||stObj.ton)+' · '+stObj.nm+' · '+selYear+' · '+watchState.code;
-  document.getElementById('contract-type').textContent=stObj.nm+' '+getContractTotalMonths()+' ay · '+contractTotal+' sahne';
+  document.getElementById('contract-type').textContent=translateGameText(stObj.nm)+' '+getContractTotalMonths()+' ay · '+contractTotal+' '+translateGameText('sahne');
   updateOpsHud(sc);
   updateFeatureVisibility(sc);
   updateGuidanceStrip(sc);
@@ -11826,10 +11972,10 @@ function renderScene(idx){
 
   const pct=Math.round((currentIdx/sceneQueue.length)*100);
   document.getElementById('progbar').style.width=pct+'%';
-  document.getElementById('chaplbl').textContent='SAHNE '+(currentIdx+1)+'/'+sceneQueue.length;
+  document.getElementById('chaplbl').textContent=translateGameText('SAHNE')+' '+(currentIdx+1)+'/'+sceneQueue.length;
 
   const ab=document.getElementById('alert-banner');
-  if(sc.alert){ab.style.display='block';ab.textContent='⚠ ACİL DURUM — '+sc.sub;ab.style.color='#ffcccc';}
+  if(sc.alert){ab.style.display='block';ab.textContent='⚠ '+translateGameText('ACİL DURUM')+' — '+translateGameText(sc.sub);ab.style.color='#ffcccc';}
   else ab.style.display='none';
 
   const svg=document.getElementById('gfx-svg');
@@ -11870,7 +12016,7 @@ function renderScene(idx){
   getSceneRenderChoices(sc).forEach(c2=>{
     const b=document.createElement('button');b.className='cbtn';
     if(stats.dinclik <= 35 && !['kritik','akilli'].includes(c2.tag||'')) b.classList.add('fatigue-decoy');
-    b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+tagL[c2.tag||'akilli']+'</span>'+c2.text;
+    b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+phoneSafe(getChoiceTagLabel(c2.tag||'akilli'))+'</span>'+phoneSafe(translateGameText(c2.text));
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
@@ -13365,7 +13511,7 @@ function renderPlayModeSelector(){
   if(!box) return;
   box.innerHTML = Object.entries(PLAY_MODE_DEFS).map(([key,def])=>`
     <button type="button" class="mode-card ${gameplayMode===key?'active':''}" onclick="setGameplayMode('${key}')">
-      <b>${def.label}</b><span>${def.desc}</span>
+      <b>${phoneSafe(getModeLabel(key))}</b><span>${phoneSafe(getModeDesc(key))}</span>
     </button>`).join('');
 }
 
@@ -13417,16 +13563,16 @@ function canUseFeature(feature, sc=sceneQueue[currentIdx] || null, notify=true){
 
 function getSceneGuidance(sc){
   const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  if((SYSTEM_STATE.consecutiveMistakes || 0) >= 2) return 'Destek modu: acele etme, prosedure en yakin ve kanitli karari sec.';
-  if((stats.dinclik || 0) < 24) return 'Dinclik dusuk: riskli kahramanlik yerine sakin ve prosedurel karar ver.';
-  if(/vhf|dsc|mayday|pan-pan|vts|pilot exchange/.test(blob)) return 'VHF kanalini ve cagri tipini netlestir.';
-  if(/radar|arpa|cpa|tcpa|ais/.test(blob)) return 'Hedefi oku: CPA/TCPA, niyet ve rapor.';
-  if(/ecdis|route|waypoint|chart|tss|ukc|squat/.test(blob)) return 'Haritada rota, emniyet konturu ve sonraki noktayi kontrol et.';
-  if(/engine|makine|blackout|alarm|generator|pump/.test(blob)) return 'Makine bilgisini al, kaptana kisa rapor ver.';
-  if(/pilot|tug|berth|mooring|all fast|halat/.test(blob)) return 'Speed-heading, halat sirasi ve snap-back riskini izle.';
-  if(/fire|yangin|mob|abandon|distress/.test(blob)) return 'Once emniyet zinciri: alarm, mevki, ekip, rapor.';
-  if(/psc|survey|class|inspection|deficiency/.test(blob)) return 'Belgeyi, ekipmani ve eksik riskini sakin kontrol et.';
-  return 'Sahneyi oku, kimin ne istedigini anla ve tek net karar ver.';
+  if((SYSTEM_STATE.consecutiveMistakes || 0) >= 2) return t('guide.support','Destek modu: acele etme, prosedure en yakin ve kanitli karari sec.');
+  if((stats.dinclik || 0) < 24) return t('guide.tired','Dinclik dusuk: riskli kahramanlik yerine sakin ve prosedurel karar ver.');
+  if(/vhf|dsc|mayday|pan-pan|vts|pilot exchange/.test(blob)) return t('guide.vhf','VHF kanalini ve cagri tipini netlestir.');
+  if(/radar|arpa|cpa|tcpa|ais/.test(blob)) return t('guide.radar','Hedefi oku: CPA/TCPA, niyet ve rapor.');
+  if(/ecdis|route|waypoint|chart|tss|ukc|squat/.test(blob)) return t('guide.ecdis','Haritada rota, emniyet konturu ve sonraki noktayi kontrol et.');
+  if(/engine|makine|blackout|alarm|generator|pump/.test(blob)) return t('guide.engine','Makine bilgisini al, kaptana kisa rapor ver.');
+  if(/pilot|tug|berth|mooring|all fast|halat/.test(blob)) return t('guide.port','Speed-heading, halat sirasi ve snap-back riskini izle.');
+  if(/fire|yangin|mob|abandon|distress/.test(blob)) return t('guide.emergency','Once emniyet zinciri: alarm, mevki, ekip, rapor.');
+  if(/psc|survey|class|inspection|deficiency/.test(blob)) return t('guide.inspection','Belgeyi, ekipmani ve eksik riskini sakin kontrol et.');
+  return t('guide.default','Sahneyi oku, kimin ne istedigini anla ve tek net karar ver.');
 }
 
 function updateFeatureVisibility(sc){
@@ -13457,7 +13603,7 @@ function updateGuidanceStrip(sc){
   const modeEl = document.getElementById('guidance-mode');
   const textEl = document.getElementById('guidance-text');
   const unlockEl = document.getElementById('guidance-unlocks');
-  if(modeEl) modeEl.textContent = `Mod: ${getGameplayModeDef().label}`;
+  if(modeEl) modeEl.textContent = `${t('ui.mode','Mod')}: ${getModeLabel(gameplayMode)}`;
   if(textEl) textEl.textContent = getSceneGuidance(sc);
   if(unlockEl){
     const u = getFeatureUnlocks(sc);
@@ -13468,7 +13614,7 @@ function updateGuidanceStrip(sc){
       u.logbook?'Defter':'',
       u.sim?'Sim':''
     ].filter(Boolean).join(' · ');
-    unlockEl.textContent = u.assist ? 'Destek modu acik: rehber daha ogretici.' : open ? `Acik: ${open}` : 'Sadece hikaye ve temel secimler.';
+    unlockEl.textContent = u.assist ? t('ui.assist','Destek modu acik: rehber daha ogretici.') : open ? `${t('ui.unlocked','Acik')}: ${translateGameText(open)}` : t('ui.basicStory','Sadece hikaye ve temel secimler.');
   }
 }
 
@@ -13592,12 +13738,12 @@ function updateMissionDirector(sc){
   }
   const show = gameplayMode !== 'simple' || (missionDirectorState.completed || []).length > 0 || sc?.alert;
   box.classList.toggle('show', !!show);
-  titleEl.textContent = missionDirectorState.title;
+  titleEl.textContent = translateGameText(missionDirectorState.title);
   const done = new Set(missionDirectorState.completed || []);
   const firstOpen = missionDirectorState.steps.find(s=>!done.has(s.id))?.id;
   stepsEl.innerHTML = missionDirectorState.steps.map(s=>{
     const cls = done.has(s.id) ? 'done' : s.id === firstOpen ? 'active' : 'locked';
-    return `<div class="mission-step ${cls}">${phoneSafe(s.label)}</div>`;
+    return `<div class="mission-step ${cls}">${phoneSafe(translateGameText(s.label))}</div>`;
   }).join('');
 }
 
@@ -13651,9 +13797,10 @@ function getSavedGameMeta(){
 }
 
 function formatSaveTime(iso){
-  if(!iso) return 'Kayit yok';
+  if(!iso) return t('save.noSave','Kayit yok');
   try{
-    return new Date(iso).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'});
+    const locales={tr:'tr-TR',en:'en-US',es:'es-ES',de:'de-DE'};
+    return new Date(iso).toLocaleString(locales[gameLanguage] || 'tr-TR', {dateStyle:'short', timeStyle:'short'});
   }catch(e){
     return iso;
   }
@@ -13673,17 +13820,17 @@ function renderSavePanel(){
   const meta = getSavedGameMeta();
   if(summary){
     summary.textContent = meta
-      ? `Son kayit: ${formatSaveTime(meta.savedAt)} · Sahne ${(meta.currentIdx||0)+1}`
-      : 'Henuz kayit alinmadi';
+      ? `${translateGameText('Son kayit')}: ${formatSaveTime(meta.savedAt)} · ${translateGameText('Sahne')} ${(meta.currentIdx||0)+1}`
+      : t('save.noSave','Henuz kayit alinmadi');
   }
-  const currentScene = sceneQueue?.length ? `${currentIdx+1}/${sceneQueue.length}` : 'Baslamadi';
-  const modeLabel = getGameplayModeDef().label;
-  const savedMode = meta?.gameplayMode && PLAY_MODE_DEFS[meta.gameplayMode] ? PLAY_MODE_DEFS[meta.gameplayMode].label : 'Yok';
+  const currentScene = sceneQueue?.length ? `${currentIdx+1}/${sceneQueue.length}` : t('save.notStarted','Baslamadi');
+  const modeLabel = getModeLabel(gameplayMode);
+  const savedMode = meta?.gameplayMode && PLAY_MODE_DEFS[meta.gameplayMode] ? getModeLabel(meta.gameplayMode) : translateGameText('Yok');
   grid.innerHTML = `
-    <div class="save-card"><b>Mevcut Oyun</b><small>${phoneSafe(pn || 'Stajyer')} · ${phoneSafe(sn || 'Gemi')}<br>Sahne ${currentScene}<br>${modeLabel} mod</small></div>
-    <div class="save-card"><b>Kontrat</b><small>${contractDays || 0}/${contractTotal || 0} sahne<br>${phoneSafe(getRankName ? getRankName() : 'Stajyer')}<br>${phoneSafe(selYear)} · ${phoneSafe(selType)}</small></div>
-    <div class="save-card"><b>Son Kayit</b><small>${formatSaveTime(meta?.savedAt)}<br>${meta ? phoneSafe(meta.sn || 'Kayitli gemi') : 'Kayit yok'}<br>Mod: ${savedMode}</small></div>
-    <div class="save-card save-actions"><b>Islemler</b><button class="save-action-btn primary" onclick="saveGameState(true)">Oyunu Kaydet</button><button class="save-action-btn" onclick="loadSavedGame()">Kayittan Devam</button><button class="save-action-btn danger" onclick="deleteSavedGame()">Kaydi Sil</button></div>`;
+    <div class="save-card"><b>${t('save.current','Mevcut Oyun')}</b><small>${phoneSafe(pn || t('role.cadet','Stajyer'))} · ${phoneSafe(sn || translateGameText('Gemi'))}<br>${translateGameText('Sahne')} ${currentScene}<br>${phoneSafe(modeLabel)} ${translateGameText('mod')}</small></div>
+    <div class="save-card"><b>${t('save.contract','Kontrat')}</b><small>${contractDays || 0}/${contractTotal || 0} ${translateGameText('sahne')}<br>${phoneSafe(translateGameText(getRankName ? getRankName() : 'Stajyer'))}<br>${phoneSafe(selYear)} · ${phoneSafe(selType)}</small></div>
+    <div class="save-card"><b>${t('save.last','Son Kayit')}</b><small>${formatSaveTime(meta?.savedAt)}<br>${meta ? phoneSafe(meta.sn || translateGameText('Kayitli gemi')) : translateGameText('Kayit yok')}<br>${t('ui.mode','Mod')}: ${phoneSafe(savedMode)}</small></div>
+    <div class="save-card save-actions"><b>${t('save.actions','Islemler')}</b><button class="save-action-btn primary" onclick="saveGameState(true)">${t('save.saveGame','Oyunu Kaydet')}</button><button class="save-action-btn" onclick="loadSavedGame()">${t('save.loadGame','Kayittan Devam')}</button><button class="save-action-btn danger" onclick="deleteSavedGame()">${t('save.deleteGame','Kaydi Sil')}</button></div>`;
 }
 
 function buildSavePayload(){
@@ -13692,6 +13839,7 @@ function buildSavePayload(){
   return {
     version:1,
     savedAt:new Date().toISOString(),
+    gameLanguage,
     gameplayMode,
     missionDirectorState,
     premiumUnlocked,
@@ -13793,6 +13941,8 @@ function deleteSavedGame(showToast=true){
 }
 
 function applyLoadedGameState(data){
+  gameLanguage = GAME_LANGUAGES[data.gameLanguage] ? data.gameLanguage : gameLanguage;
+  try{localStorage.setItem('guverte-language',gameLanguage);}catch(e){}
   gameplayMode = PLAY_MODE_DEFS[data.gameplayMode] ? data.gameplayMode : 'realistic';
   missionDirectorState = data.missionDirectorState && typeof data.missionDirectorState === 'object'
     ? {sceneId:'', title:'', steps:[], completed:[], ...data.missionDirectorState}
