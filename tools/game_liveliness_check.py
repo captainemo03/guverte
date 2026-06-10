@@ -57,6 +57,17 @@ CHECKS = {
         "stormObjects",
         "tugOps",
     ],
+    "3d training scene modules": [
+        "getScene3DFeatureFlags",
+        "bridge3d-ecr",
+        "bridge3d-mooring-deck",
+        "bridge3d-survival-station",
+        "bridge3d-fire-room",
+        "bridge3d-route-table",
+        "bridge3d-manifold-panel",
+        "bridge3d-premium-ops",
+        "trainingObjects",
+    ],
     "route tasks": [
         "waypoint",
         "cpa",
@@ -163,13 +174,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 90:
+    elif int(js_versions[-1]) < 91:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 81:
+    elif int(css_versions[-1]) < 82:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():

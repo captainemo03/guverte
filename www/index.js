@@ -8111,12 +8111,29 @@ function getSceneVhfConsoleOverlay(sc){
   </div>`;
 }
 
+function getScene3DFeatureFlags(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const flags = {
+    bridgeConsole: /bridge|kopruustu|köprüüstü|radar|arpa|ecdis|ais|vhf|dsc|mayday|pan-pan|vts|pilot|route monitor|tss|bogaz|boğaz|gmdss|bnwas|gyro|telegraph/.test(blob),
+    harborApproach: /harbor|liman|terminal|berth|tug|pilot|all fast|mooring|rihtim|rıhtım|yanaşma|yanasma/.test(blob),
+    mooring: /mooring|halat|snap-back|snap back|head line|stern line|fore spring|aft spring|breast line|all fast|bollard/.test(blob),
+    engineRoom: /engine|makine|ecr|generator|jenerator|pompa|pump|purifier|bilge|fuel transfer|cooling water|quick closing|blackout|egzoz|exhaust|alarm panel/.test(blob),
+    shipWalk: /shipwalk|gemi ici|gemi içi|güverte turu|guverte turu|kamara|cabin|messroom|galley|aşçı|asci|makine girişi|makine girisi/.test(blob),
+    survival: /lifeboat|filika|liferaft|can sali|can salı|davit|matafora|rescue boat|life raft|abandon ship/.test(blob),
+    fire: /fire|yangin|yangın|smoke|duman|extinguisher|co2|foam|dcp|fire zone|fire alarm/.test(blob),
+    routeTable: /route|waypoint|chart|ecdis|tss|cpa|tcpa|ukc|squat|passage plan|pilot station|no anchoring|rota/.test(blob),
+    manifold: /tanker|manifold|loading arm|esd|drip tray|sample|sopep|bunker|hose|overflow|line-up|line up/.test(blob),
+    premiumOps: /offshore|platform|dp|rov|research|survey vessel|araştırma|arastirma|cruise|kruvaziyer|medevac|helicopter|helikopter|project cargo|proje yuk|proje yük|heavy-lift|cable|pipe|ice|buz|fpso|shuttle/.test(blob),
+    storm: /storm|firtina|swell|rain|yagmur|yağmur|sis|fog|beaufort|spray|icing/.test(blob),
+  };
+  flags.any = Object.values(flags).some(Boolean);
+  return flags;
+}
+
 function getScene3DBridgeOverlay(sc){
   const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  const isNav = /bridge|kopruustu|köprüüstü|radar|arpa|ecdis|ais|vhf|dsc|mayday|pan-pan|vts|pilot|route monitor|tss|bogaz|boğaz/.test(blob);
-  const isHarbor = /harbor|liman|terminal|berth|tug|pilot|all fast|mooring|rihtim|rıhtım/.test(blob);
-  const isStorm = /storm|firtina|swell|rain|yagmur|yağmur|sis|fog|beaufort/.test(blob);
-  if(!isNav && !isHarbor && !isStorm) return '';
+  const flags = getScene3DFeatureFlags(sc);
+  if(!flags.any) return '';
   const isDistress = /mayday|distress|sahil guvenlik|sahil güvenlik|korsan|pirate|mob|fire|yangin|blackout/.test(blob);
   const isVts = /vts|traffic|tss|bogaz|boğaz|strait|reporting point/.test(blob);
   const isPilot = /pilot|pilot exchange|boarding|berth|tug|romorkor|römorkör|liman|harbor/.test(blob);
@@ -8127,12 +8144,22 @@ function getScene3DBridgeOverlay(sc){
     : isPilot ? 'PILOT'
     : isDsc ? 'DSC'
     : 'WATCH';
-  const cls = ['bridge3d', isHarbor?'bridge3d-harbor':'', isStorm?'bridge3d-storm':''].filter(Boolean).join(' ');
+  const cls = ['bridge3d',
+    flags.harborApproach?'bridge3d-harbor':'',
+    flags.storm?'bridge3d-storm':'',
+    flags.engineRoom?'bridge3d-engine':'',
+    flags.mooring?'bridge3d-mooring':'',
+    flags.survival?'bridge3d-survival':'',
+    flags.fire?'bridge3d-fire':'',
+    flags.routeTable?'bridge3d-route':'',
+    flags.manifold?'bridge3d-manifold':'',
+    flags.premiumOps?'bridge3d-premium':'',
+  ].filter(Boolean).join(' ');
   return `<div class="${cls}">
     <div class="sky"></div>
     <div class="sea"></div>
-    ${isHarbor ? '<div class="bridge3d-tug"><i></i><b></b></div><div class="bridge3d-berth-lights"></div>' : ''}
-    ${isStorm ? '<div class="bridge3d-wave w1"></div><div class="bridge3d-wave w2"></div><div class="bridge3d-lightning"></div>' : ''}
+    ${flags.harborApproach ? '<div class="bridge3d-tug"><i></i><b></b></div><div class="bridge3d-berth-lights"></div>' : ''}
+    ${flags.storm ? '<div class="bridge3d-wave w1"></div><div class="bridge3d-wave w2"></div><div class="bridge3d-lightning"></div>' : ''}
     <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="window w4"></div>
     <div class="console"></div>
     <div class="bridge3d-device bridge3d-ecdis">
@@ -8148,6 +8175,13 @@ function getScene3DBridgeOverlay(sc){
       <div class="label">RADAR</div>
       <div class="screen"></div><i class="t1"></i><i class="t2"></i><i class="t3"></i>
     </div>
+    ${flags.engineRoom ? '<div class="bridge3d-ecr"><b>ECR</b><span></span><span></span><span></span><i></i></div>' : ''}
+    ${flags.mooring ? '<div class="bridge3d-mooring-deck"><span class="head"></span><span class="stern"></span><span class="spring"></span><span class="breast"></span><b>SNAP-BACK</b></div>' : ''}
+    ${flags.survival ? '<div class="bridge3d-survival-station"><span class="lifeboat"></span><span class="raft"></span><i></i><b>LSA</b></div>' : ''}
+    ${flags.fire ? '<div class="bridge3d-fire-room"><span></span><span></span><span></span><b>FIRE ZONE</b></div>' : ''}
+    ${flags.routeTable ? '<div class="bridge3d-route-table"><span class="track"></span><i class="wp1"></i><i class="wp2"></i><i class="wp3"></i><b>CPA / UKC</b></div>' : ''}
+    ${flags.manifold ? '<div class="bridge3d-manifold-panel"><span class="arm"></span><i></i><i></i><b>ESD</b></div>' : ''}
+    ${flags.premiumOps ? '<div class="bridge3d-premium-ops"><span class="platform"></span><span class="rov"></span><span class="ice"></span><b>DP</b></div>' : ''}
   </div>`;
 }
 
@@ -8222,12 +8256,14 @@ async function renderThreeBridgeScene(sc){
   scene.add(key);
 
   const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const flags = getScene3DFeatureFlags(sc);
   const hot = /mayday|distress|alarm|yangin|fire|blackout|korsan|pirate/.test(blob);
-  const storm = /storm|firtina|swell|rain|sis|fog|beaufort/.test(blob);
-  const harbor = /harbor|liman|terminal|berth|tug|pilot|all fast/.test(blob);
-  const tugOps = /tug|romorkor|römorkör|berth|pilot|all fast|mooring|halat/.test(blob);
+  const storm = flags.storm;
+  const harbor = flags.harborApproach;
+  const tugOps = flags.harborApproach || flags.mooring;
   const stormObjects = [];
   const harborObjects = [];
+  const trainingObjects = [];
 
   const seaGeo = new THREE.PlaneGeometry(9, 4, 18, 5);
   const seaMat = new THREE.MeshStandardMaterial({color:storm?0x102236:harbor?0x173854:0x174a72, roughness:.9, metalness:.02, transparent:true, opacity:.72});
@@ -8327,6 +8363,115 @@ async function renderThreeBridgeScene(sc){
     stormObjects.push({mesh:flash, kind:'flash'});
   }
 
+  if(flags.engineRoom){
+    const panel = addThreeBox(THREE, scene, [1.08,.64,.08], [-1.78,.04,-.74], 0x101923, 0x071018);
+    panel.rotation.y = .42;
+    trainingObjects.push({mesh:panel, kind:'panel', phase:.1});
+    for(let i=0;i<4;i++){
+      const gauge = addThreeCylinder(THREE, scene, .055, .018, [-2.06+i*.18,.08,-.78], i===3?0xff5858:0x7fc3ff, i===3?0x7b1515:0x0d3850);
+      gauge.rotation.x = Math.PI/2; gauge.rotation.y = .42;
+      trainingObjects.push({mesh:gauge, kind:i===3?'alarm':'gauge', phase:i*.45});
+    }
+    for(let i=0;i<3;i++){
+      const bar = addThreeBox(THREE, scene, [.08,.2+i*.07,.035], [-2.02+i*.22,-.22+i*.025,-.79], i===1?0xffc458:0x5dbf8a, i===1?0x4a2b08:0x0a3420);
+      bar.rotation.y = .42;
+      trainingObjects.push({mesh:bar, kind:'meter', phase:i*.5});
+    }
+  }
+
+  if(flags.mooring){
+    const deck = addThreeBox(THREE, scene, [2.6,.06,.92], [0,-.36,-1.08], 0x26313b, 0x05080a);
+    deck.rotation.x = -.08;
+    trainingObjects.push({mesh:deck, kind:'deck', phase:0});
+    const zone = addThreeBox(THREE, scene, [1.05,.012,.48], [.2,-.27,-.98], 0xff4040, 0x7b1010);
+    zone.material.transparent = true; zone.material.opacity = .22;
+    trainingObjects.push({mesh:zone, kind:'zone', phase:.2});
+    [-.76,-.25,.3,.82].forEach((x,i)=>{
+      const line = addThreeBox(THREE, scene, [1.12,.018,.018], [x,-.23,-.72-i*.08], i===2?0xffcc80:0xd6c49b, 0x1a1204);
+      line.rotation.z = i%2 ? -.16 : .16;
+      trainingObjects.push({mesh:line, kind:'line', phase:i*.4, baseZ:line.rotation.z});
+    });
+  }
+
+  if(flags.survival){
+    const boat = addThreeBox(THREE, scene, [.86,.18,.28], [1.72,.04,-.82], 0xff7a28, 0x5a2000);
+    boat.rotation.y = -.34;
+    const canopy = addThreeBox(THREE, scene, [.58,.16,.2], [1.72,.22,-.82], 0xf1d7a2, 0x2a1600);
+    canopy.rotation.y = -.34;
+    trainingObjects.push({mesh:boat, kind:'lifeboat', phase:0}, {mesh:canopy, kind:'lifeboat', phase:.2});
+    const raft = addThreeCylinder(THREE, scene, .095, .5, [2.38,-.12,-.72], 0xf5f1df, 0x302a16);
+    raft.rotation.z = Math.PI/2;
+    trainingObjects.push({mesh:raft, kind:'raft', phase:.4});
+    const davit = addThreeBox(THREE, scene, [.035,.72,.035], [1.28,.2,-.8], 0x596b76, 0x071018);
+    davit.rotation.z = -.35;
+    trainingObjects.push({mesh:davit, kind:'davit', phase:.5});
+  }
+
+  if(flags.fire){
+    const bulkhead = addThreeBox(THREE, scene, [1.3,.72,.08], [.05,.08,-.88], 0x2c1b18, 0x180303);
+    trainingObjects.push({mesh:bulkhead, kind:'panel', phase:.3});
+    for(let i=0;i<5;i++){
+      const smoke = new THREE.Mesh(new THREE.SphereGeometry(.12+i*.012, 16, 10), new THREE.MeshStandardMaterial({color:0x9ba3a8, transparent:true, opacity:.18, roughness:1}));
+      smoke.position.set(-.42+i*.21, -.05+(i%2)*.12, -.7-i*.02);
+      scene.add(smoke);
+      trainingObjects.push({mesh:smoke, kind:'smoke', phase:i*.5});
+    }
+    const extinguisher = addThreeCylinder(THREE, scene, .055, .34, [.72,-.18,-.62], 0xe23b35, 0x5a0808);
+    extinguisher.rotation.x = Math.PI/2;
+    trainingObjects.push({mesh:extinguisher, kind:'alarm', phase:.1});
+  }
+
+  if(flags.routeTable){
+    const table = addThreeBox(THREE, scene, [1.45,.08,.82], [0,-.3,.05], 0x122438, 0x061322);
+    table.rotation.x = -.34;
+    trainingObjects.push({mesh:table, kind:'table', phase:0});
+    const route = addThreeBox(THREE, scene, [1.02,.014,.014], [0,-.22,-.28], 0xff5c63, 0x7b1018);
+    route.rotation.z = -.22; route.rotation.x = -.34;
+    trainingObjects.push({mesh:route, kind:'route', phase:.2});
+    for(let i=0;i<4;i++){
+      const wp = new THREE.Mesh(new THREE.SphereGeometry(.035, 14, 10), new THREE.MeshStandardMaterial({color:0xffd783, emissive:0xffa52b, roughness:.28}));
+      wp.position.set(-.45+i*.3,-.2+i*.015,-.3+i*.035);
+      scene.add(wp);
+      trainingObjects.push({mesh:wp, kind:'wp', phase:i*.35});
+    }
+  }
+
+  if(flags.manifold){
+    const pipe = addThreeCylinder(THREE, scene, .045, 1.52, [1.58,-.3,-.5], 0x596b76, 0x071018);
+    pipe.rotation.z = Math.PI/2; pipe.rotation.y = -.28;
+    trainingObjects.push({mesh:pipe, kind:'pipe', phase:0});
+    for(let i=0;i<3;i++){
+      const valve = addThreeCylinder(THREE, scene, .07, .04, [1.1+i*.33,-.22,-.5], i===1?0xffc458:0x7fc3ff, i===1?0x4a2b08:0x0d3850);
+      valve.rotation.x = Math.PI/2;
+      trainingObjects.push({mesh:valve, kind:'valve', phase:i*.45});
+    }
+    const esd = addThreeCylinder(THREE, scene, .075, .035, [2.32,-.2,-.48], 0xe23b35, 0x8a1010);
+    esd.rotation.x = Math.PI/2;
+    trainingObjects.push({mesh:esd, kind:'alarm', phase:.6});
+  }
+
+  if(flags.premiumOps){
+    const platform = addThreeBox(THREE, scene, [.62,.34,.52], [-2.2,.0,-1.42], 0x3b4650, 0x111820);
+    trainingObjects.push({mesh:platform, kind:'platform', phase:0});
+    for(let i=0;i<4;i++){
+      const leg = addThreeBox(THREE, scene, [.04,.62,.04], [-2.44+(i%2)*.48,-.38,-1.62+Math.floor(i/2)*.38], 0x61727e, 0x071018);
+      trainingObjects.push({mesh:leg, kind:'platform', phase:i*.2});
+    }
+    const dpRing = new THREE.Mesh(new THREE.TorusGeometry(.42,.01,8,48), new THREE.MeshStandardMaterial({color:0x5dbf8a, emissive:0x123d26, transparent:true, opacity:.72}));
+    dpRing.position.set(-2.2,-.02,-1.42);
+    dpRing.rotation.x = Math.PI/2;
+    scene.add(dpRing);
+    trainingObjects.push({mesh:dpRing, kind:'ring', phase:.3});
+    const rov = addThreeBox(THREE, scene, [.18,.12,.14], [-1.58,-.48,-1.12], 0xffc458, 0x4a2b08);
+    trainingObjects.push({mesh:rov, kind:'rov', phase:.6});
+    for(let i=0;i<4;i++){
+      const ice = addThreeBox(THREE, scene, [.34,.025,.18], [.8+i*.38,-.48,-1.55+(i%2)*.22], 0xd9f3ff, 0x244050);
+      ice.rotation.z = i*.27;
+      ice.material.transparent = true; ice.material.opacity = .72;
+      trainingObjects.push({mesh:ice, kind:'ice', phase:i*.4});
+    }
+  }
+
   const started = performance.now();
   const animate = (now)=>{
     if(token !== threeBridgeRuntime.token) return;
@@ -8365,6 +8510,34 @@ async function renderThreeBridgeScene(sc){
       }else if(obj.kind === 'towline'){
         obj.mesh.position.x = obj.baseX + Math.sin(t*.55)*.18;
         obj.mesh.rotation.z = .08 + Math.sin(t*2.2)*.025;
+      }
+    });
+    trainingObjects.forEach((obj)=>{
+      if(obj.kind === 'alarm'){
+        obj.mesh.material.emissiveIntensity = 1 + Math.max(0, Math.sin(t*6 + obj.phase))*.75;
+      }else if(obj.kind === 'gauge' || obj.kind === 'meter' || obj.kind === 'valve' || obj.kind === 'wp'){
+        obj.mesh.scale.y = 1 + Math.sin(t*2.3 + obj.phase)*.08;
+        obj.mesh.material.emissiveIntensity = .75 + Math.sin(t*2 + obj.phase)*.16;
+      }else if(obj.kind === 'line'){
+        obj.mesh.rotation.z = obj.baseZ + Math.sin(t*8 + obj.phase)*.025;
+        obj.mesh.scale.x = 1 + Math.sin(t*5 + obj.phase)*.025;
+      }else if(obj.kind === 'zone'){
+        obj.mesh.material.opacity = .14 + Math.abs(Math.sin(t*2.8 + obj.phase))*.18;
+      }else if(obj.kind === 'smoke'){
+        obj.mesh.position.y += Math.sin(t*.9 + obj.phase)*.0009;
+        obj.mesh.material.opacity = .12 + Math.abs(Math.sin(t*1.4 + obj.phase))*.08;
+      }else if(obj.kind === 'lifeboat' || obj.kind === 'raft'){
+        obj.mesh.position.y += Math.sin(t*1.2 + obj.phase)*.0008;
+      }else if(obj.kind === 'route'){
+        obj.mesh.material.emissiveIntensity = .85 + Math.sin(t*2.8)*.2;
+      }else if(obj.kind === 'ring'){
+        obj.mesh.rotation.z = t*.5;
+        obj.mesh.material.opacity = .52 + Math.sin(t*1.8)*.12;
+      }else if(obj.kind === 'rov'){
+        obj.mesh.position.y = -.48 + Math.sin(t*1.7 + obj.phase)*.04;
+        obj.mesh.position.x = -1.58 + Math.sin(t*.7)*.08;
+      }else if(obj.kind === 'ice'){
+        obj.mesh.position.x += Math.sin(t*.5 + obj.phase)*.0008;
       }
     });
     radarDisc.material.emissiveIntensity = .8 + Math.sin(t*3) * .12;
