@@ -8485,7 +8485,16 @@ const I18N={
     'mode.simple':'Simple','mode.simpleDesc':'Story, core decisions and a cleaner screen.','mode.realistic':'Realistic','mode.realisticDesc':'Devices, charts and logbook unlock gradually.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker and premium details are active.',
     'tag.cesur':'Bold','tag.akilli':'Smart','tag.itaatkar':'Procedural','tag.korkak':'Unsafe','tag.sosyal':'Social','tag.kritik':'CRITICAL',
     'role.cadet':'DECK CADET','save.center':'SAVE CENTER','save.preparing':'Preparing save status','save.current':'Current Game','save.contract':'Contract','save.last':'Last Save','save.actions':'Actions','save.saveGame':'Save Game','save.loadGame':'Continue Save','save.deleteGame':'Delete Save','save.noSave':'No save yet','save.notStarted':'Not started',
-    'guide.default':'Read the scene, understand what is being asked, and make one clear decision.','guide.support':'Assist mode: slow down, choose the decision closest to procedure and evidence.','guide.tired':'Low energy: choose calm procedural action instead of risky heroics.','guide.vhf':'Clarify the VHF channel and call type.','guide.radar':'Read the target: CPA/TCPA, intention and report.','guide.ecdis':'Check route, safety contour and next waypoint on the chart.','guide.engine':'Get engine information and give the master a short report.','guide.port':'Monitor speed-heading, line order and snap-back risk.','guide.emergency':'Safety chain first: alarm, position, team, report.','guide.inspection':'Check documents, equipment and deficiency risk calmly.'
+    'guide.default':'Read the scene, understand what is being asked, and make one clear decision.','guide.support':'Assist mode: slow down, choose the decision closest to procedure and evidence.','guide.tired':'Low energy: choose calm procedural action instead of risky heroics.','guide.vhf':'Clarify the VHF channel and call type.','guide.radar':'Read the target: CPA/TCPA, intention and report.','guide.ecdis':'Check route, safety contour and next waypoint on the chart.','guide.engine':'Get engine information and give the master a short report.','guide.port':'Monitor speed-heading, line order and snap-back risk.','guide.emergency':'Safety chain first: alarm, position, team, report.','guide.inspection':'Check documents, equipment and deficiency risk calmly.',
+    'scene.brief':'SCENE BRIEFING','scene.location':'Location','scene.speaker':'Speaker','scene.situation':'Situation','scene.task':'Your task','scene.original':'Source note','scene.defaultSituation':'A watchkeeping situation is developing on board. Read the risk, keep communication clear, and avoid guessing.','scene.defaultTask':'Choose the safest professional response and keep the bridge team informed.',
+    'scene.vhfSituation':'A radio communication event is active. Channel, call type and message order matter.','scene.vhfTask':'Select the response that uses clear SMCP language, confirms the channel and reports to the master if needed.',
+    'scene.radarSituation':'A navigation target or sensor picture needs assessment. CPA, TCPA and intention must be checked before acting.','scene.radarTask':'Use radar/ARPA/AIS/ECDIS together, confirm the risk and give a short bridge report.',
+    'scene.portSituation':'The vessel is in a port, pilotage, tug or mooring phase where timing and line safety are critical.','scene.portTask':'Control speed, heading, tug/line order and snap-back risk before committing.',
+    'scene.engineSituation':'An engine-room or technical alarm is affecting the operation.','scene.engineTask':'Get the engineering facts, avoid assumptions and report the impact clearly.',
+    'scene.fireSituation':'An emergency condition is present. The first seconds must follow the safety chain.','scene.fireTask':'Raise/confirm alarm, locate the danger, assign the team and report position/status.',
+    'scene.peopleSituation':'A crew-management problem is creating tension or discipline risk.','scene.peopleTask':'De-escalate, keep witnesses/facts, protect safety and use the chain of command.',
+    'scene.cargoSituation':'Cargo, ballast, bunker or stowage decisions can affect stability, trim, pollution or commercial risk.','scene.cargoTask':'Check the plan, numbers, valves/lines and documentation before approving the action.',
+    'scene.inspectSituation':'An inspection, audit or document-control moment is active.','scene.inspectTask':'Show the correct record, equipment evidence and corrective action without improvising.'
   },
   es:{
     'ui.language':'Idioma','ui.languageHint':'Elige el idioma de menus, guia, opciones y la capa de traduccion en vivo.','ui.save':'GUARDAR','ui.sound':'Sonido','ui.rep':'REPUTACION',
@@ -8494,7 +8503,16 @@ const I18N={
     'mode.simple':'Simple','mode.simpleDesc':'Historia, decisiones basicas y pantalla mas limpia.','mode.realistic':'Realista','mode.realisticDesc':'Equipos, cartas y diario se abren gradualmente.','mode.expert':'Experto','mode.expertDesc':'CPA, UKC, PSC, tanquero y detalles premium activos.',
     'tag.cesur':'Valiente','tag.akilli':'Inteligente','tag.itaatkar':'Procedimiento','tag.korkak':'Inseguro','tag.sosyal':'Social','tag.kritik':'CRITICO',
     'role.cadet':'CADETE DE CUBIERTA','save.center':'CENTRO DE GUARDADO','save.preparing':'Preparando estado','save.current':'Partida actual','save.contract':'Contrato','save.last':'Ultimo guardado','save.actions':'Acciones','save.saveGame':'Guardar','save.loadGame':'Continuar','save.deleteGame':'Borrar','save.noSave':'Sin guardado','save.notStarted':'No iniciado',
-    'guide.default':'Lee la escena, entiende lo que se pide y toma una decision clara.','guide.support':'Modo ayuda: no te apresures, elige la decision mas cercana al procedimiento y a la evidencia.','guide.tired':'Energia baja: evita heroismos y elige una accion tranquila y procedimental.','guide.vhf':'Aclara el canal VHF y el tipo de llamada.','guide.radar':'Lee el blanco: CPA/TCPA, intencion y reporte.','guide.ecdis':'Comprueba ruta, contorno de seguridad y proximo waypoint en la carta.','guide.engine':'Obtén informacion de maquinas y da al capitan un reporte corto.','guide.port':'Vigila velocidad-rumbo, orden de cabos y riesgo snap-back.','guide.emergency':'Primero la cadena de seguridad: alarma, posicion, equipo, reporte.','guide.inspection':'Revisa documentos, equipo y riesgo de deficiencia con calma.'
+    'guide.default':'Lee la escena, entiende lo que se pide y toma una decision clara.','guide.support':'Modo ayuda: no te apresures, elige la decision mas cercana al procedimiento y a la evidencia.','guide.tired':'Energia baja: evita heroismos y elige una accion tranquila y procedimental.','guide.vhf':'Aclara el canal VHF y el tipo de llamada.','guide.radar':'Lee el blanco: CPA/TCPA, intencion y reporte.','guide.ecdis':'Comprueba ruta, contorno de seguridad y proximo waypoint en la carta.','guide.engine':'Obtén informacion de maquinas y da al capitan un reporte corto.','guide.port':'Vigila velocidad-rumbo, orden de cabos y riesgo snap-back.','guide.emergency':'Primero la cadena de seguridad: alarma, posicion, equipo, reporte.','guide.inspection':'Revisa documentos, equipo y riesgo de deficiencia con calma.',
+    'scene.brief':'RESUMEN DE ESCENA','scene.location':'Lugar','scene.speaker':'Interlocutor','scene.situation':'Situacion','scene.task':'Tu tarea','scene.original':'Nota fuente','scene.defaultSituation':'Se desarrolla una situacion de guardia a bordo. Lee el riesgo, comunica claro y evita adivinar.','scene.defaultTask':'Elige la respuesta profesional mas segura y mantén informado al equipo del puente.',
+    'scene.vhfSituation':'Hay un evento de comunicacion por radio. Importan canal, tipo de llamada y orden del mensaje.','scene.vhfTask':'Elige la respuesta con SMCP claro, confirma el canal y avisa al capitan si hace falta.',
+    'scene.radarSituation':'Un blanco de navegacion o imagen de sensores requiere evaluacion. CPA, TCPA e intencion deben comprobarse.','scene.radarTask':'Usa radar/ARPA/AIS/ECDIS juntos, confirma el riesgo y da un reporte corto al puente.',
+    'scene.portSituation':'El buque esta en fase de puerto, practicaje, remolcador o amarre, donde tiempo y seguridad de cabos son criticos.','scene.portTask':'Controla velocidad, rumbo, orden de remolcador/cabos y riesgo snap-back antes de decidir.',
+    'scene.engineSituation':'Una alarma tecnica o de maquinas afecta la operacion.','scene.engineTask':'Obtén datos de maquinas, evita suposiciones y reporta claramente el impacto.',
+    'scene.fireSituation':'Hay una condicion de emergencia. Los primeros segundos deben seguir la cadena de seguridad.','scene.fireTask':'Activa/confirma alarma, localiza el peligro, asigna equipo y reporta posicion/estado.',
+    'scene.peopleSituation':'Un problema de gestion de tripulacion crea tension o riesgo disciplinario.','scene.peopleTask':'Desescala, conserva hechos/testigos, protege la seguridad y usa la cadena de mando.',
+    'scene.cargoSituation':'Carga, lastre, bunker o estiba pueden afectar estabilidad, trim, contaminacion o riesgo comercial.','scene.cargoTask':'Comprueba plan, numeros, valvulas/lineas y documentos antes de aprobar.',
+    'scene.inspectSituation':'Hay inspeccion, auditoria o control documental.','scene.inspectTask':'Muestra el registro correcto, evidencia del equipo y accion correctiva sin improvisar.'
   },
   de:{
     'ui.language':'Sprache','ui.languageHint':'Wahle die Sprache fur Menus, Hinweise, Optionen und die Live-Ubersetzungsebene.','ui.save':'SPEICHERN','ui.sound':'Ton','ui.rep':'ANSEHEN',
@@ -8503,7 +8521,16 @@ const I18N={
     'mode.simple':'Einfach','mode.simpleDesc':'Geschichte, Kernentscheidungen und weniger Bildschirmfullung.','mode.realistic':'Realistisch','mode.realisticDesc':'Gerate, Karten und Logbuch werden schrittweise freigeschaltet.','mode.expert':'Experte','mode.expertDesc':'CPA, UKC, PSC, Tanker und Premiumdetails sind aktiv.',
     'tag.cesur':'Mutig','tag.akilli':'Klug','tag.itaatkar':'Prozedural','tag.korkak':'Unsicher','tag.sosyal':'Sozial','tag.kritik':'KRITISCH',
     'role.cadet':'DECKSKADETT','save.center':'SPEICHERZENTRALE','save.preparing':'Speicherstatus wird vorbereitet','save.current':'Aktuelles Spiel','save.contract':'Vertrag','save.last':'Letzter Speicherstand','save.actions':'Aktionen','save.saveGame':'Speichern','save.loadGame':'Fortsetzen','save.deleteGame':'Loschen','save.noSave':'Noch kein Speicherstand','save.notStarted':'Nicht gestartet',
-    'guide.default':'Lies die Szene, erkenne was verlangt wird und triff eine klare Entscheidung.','guide.support':'Hilfsmodus: langsam bleiben, die Entscheidung nahe an Verfahren und Belegen wahlen.','guide.tired':'Niedrige Energie: ruhige prozedurale Aktion statt riskanter Heldentat.','guide.vhf':'VHF-Kanal und Rufart klaren.','guide.radar':'Ziel lesen: CPA/TCPA, Absicht und Bericht.','guide.ecdis':'Route, Safety Contour und nachsten Wegpunkt in der Karte prufen.','guide.engine':'Maschineninfo einholen und dem Kapitan kurz melden.','guide.port':'Speed-Heading, Leinenreihenfolge und Snap-back-Risiko uberwachen.','guide.emergency':'Zuerst Sicherheitskette: Alarm, Position, Team, Meldung.','guide.inspection':'Dokumente, Ausrustung und Mangelrisiko ruhig prufen.'
+    'guide.default':'Lies die Szene, erkenne was verlangt wird und triff eine klare Entscheidung.','guide.support':'Hilfsmodus: langsam bleiben, die Entscheidung nahe an Verfahren und Belegen wahlen.','guide.tired':'Niedrige Energie: ruhige prozedurale Aktion statt riskanter Heldentat.','guide.vhf':'VHF-Kanal und Rufart klaren.','guide.radar':'Ziel lesen: CPA/TCPA, Absicht und Bericht.','guide.ecdis':'Route, Safety Contour und nachsten Wegpunkt in der Karte prufen.','guide.engine':'Maschineninfo einholen und dem Kapitan kurz melden.','guide.port':'Speed-Heading, Leinenreihenfolge und Snap-back-Risiko uberwachen.','guide.emergency':'Zuerst Sicherheitskette: Alarm, Position, Team, Meldung.','guide.inspection':'Dokumente, Ausrustung und Mangelrisiko ruhig prufen.',
+    'scene.brief':'SZENENBRIEFING','scene.location':'Ort','scene.speaker':'Sprecher','scene.situation':'Situation','scene.task':'Deine Aufgabe','scene.original':'Quellnotiz','scene.defaultSituation':'An Bord entwickelt sich eine Wach-Situation. Risiko lesen, klar kommunizieren und nicht raten.','scene.defaultTask':'Wahle die sicherste professionelle Antwort und halte das Bruckenteam informiert.',
+    'scene.vhfSituation':'Ein Funkereignis ist aktiv. Kanal, Rufart und Reihenfolge der Meldung sind wichtig.','scene.vhfTask':'Wahle eine Antwort mit klarer SMCP-Sprache, bestatige den Kanal und melde bei Bedarf dem Kapitan.',
+    'scene.radarSituation':'Ein Navigationsziel oder Sensorbild muss bewertet werden. CPA, TCPA und Absicht sind zu prufen.','scene.radarTask':'Nutze Radar/ARPA/AIS/ECDIS zusammen, bestatige das Risiko und gib eine kurze Bruckmeldung.',
+    'scene.portSituation':'Das Schiff ist in Hafen-, Lotsen-, Schlepper- oder Festmachphase; Timing und Leinensicherheit sind kritisch.','scene.portTask':'Kontrolliere Fahrt, Kurs, Schlepper-/Leinenreihenfolge und Snap-back-Risiko vor der Entscheidung.',
+    'scene.engineSituation':'Ein Maschinen- oder technischer Alarm beeinflusst den Betrieb.','scene.engineTask':'Hole technische Fakten ein, vermeide Annahmen und melde die Auswirkung klar.',
+    'scene.fireSituation':'Eine Notfallsituation liegt vor. Die ersten Sekunden mussen der Sicherheitskette folgen.','scene.fireTask':'Alarm auslosen/bestatigen, Gefahr orten, Team einteilen und Position/Status melden.',
+    'scene.peopleSituation':'Ein Crew-Management-Problem erzeugt Spannung oder Disziplinrisiko.','scene.peopleTask':'Deeskalieren, Fakten/Zeugen sichern, Sicherheit schutzen und Befehlskette nutzen.',
+    'scene.cargoSituation':'Ladung, Ballast, Bunker oder Stauung konnen Stabilitat, Trimm, Umwelt oder kommerzielles Risiko beeinflussen.','scene.cargoTask':'Plan, Zahlen, Ventile/Leitungen und Dokumente prufen, bevor du zustimmst.',
+    'scene.inspectSituation':'Inspektion, Audit oder Dokumentenkontrolle ist aktiv.','scene.inspectTask':'Richtigen Nachweis, Ausrustungsbeleg und Korrekturmassnahme zeigen, ohne zu improvisieren.'
   }
 };
 const DYNAMIC_TRANSLATIONS={
@@ -8546,6 +8573,81 @@ function translateGameText(value){
   });
   return out;
 }
+function getSceneLanguageKind(sc, text=''){
+  const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${text||sc?.text||''}`.toLowerCase();
+  if(/vhf|dsc|mayday|pan-pan|vts|radio|pilot exchange|securite/.test(blob)) return 'vhf';
+  if(/radar|arpa|cpa|tcpa|ais|ecdis|waypoint|chart|tss|ukc|squat|route/.test(blob)) return 'radar';
+  if(/pilot|tug|berth|mooring|all fast|halat|snap-back|liman|port|yana/.test(blob)) return 'port';
+  if(/engine|makine|blackout|generator|pump|compressor|alarm|egzoz|bilge/.test(blob)) return 'engine';
+  if(/fire|yangin|mob|abandon|distress|pirate|korsan|medical|medevac/.test(blob)) return 'fire';
+  if(/kavga|mobbing|complaint|itaatsizlik|alkol|crew|aile|yalnizlik|moral/.test(blob)) return 'people';
+  if(/cargo|yük|yuk|ballast|balast|bunker|stowage|trim|manifold|loading|discharge|reefer|lashing/.test(blob)) return 'cargo';
+  if(/psc|survey|class|inspection|deficiency|audit|sire|cdi|permit|document|belge/.test(blob)) return 'inspect';
+  return 'default';
+}
+function getLocalizedSceneNarrative(text, sc){
+  const raw=String(text || '');
+  if(gameLanguage==='tr') return raw;
+  const kind=getSceneLanguageKind(sc, raw);
+  const loc=translateGameText(sc?.loc || '--');
+  const speaker=getCrewDisplay ? getCrewDisplay(sc?.who || '') : null;
+  const speakerLine=translateGameText([speaker?.name, speaker?.title].filter(Boolean).join(' - ') || '--');
+  const situation=t(`scene.${kind}Situation`, t('scene.defaultSituation','A watchkeeping situation is developing on board.'));
+  const task=t(`scene.${kind}Task`, t('scene.defaultTask','Choose the safest professional response.'));
+  const source=translateGameText(raw).replace(/\s+/g,' ').trim();
+  const clipped=source.length>260 ? source.slice(0,257)+'...' : source;
+  return `${t('scene.brief','SCENE BRIEFING')}
+
+${t('scene.location','Location')}: ${loc}
+${t('scene.speaker','Speaker')}: ${speakerLine}
+
+${t('scene.situation','Situation')}: ${situation}
+
+${t('scene.task','Your task')}: ${task}
+
+${t('scene.original','Source note')}: ${clipped}`;
+}
+function localizeChoiceText(choice){
+  if(gameLanguage==='tr') return String(choice?.text ?? choice ?? '');
+  const text=String(choice?.text ?? choice ?? '');
+  const tag=choice?.tag || '';
+  const kind=getSceneLanguageKind(sceneQueue?.[currentIdx] || null, text);
+  const choiceText={
+    en:{
+      kritik:'Follow the full procedure, verify facts, report clearly and log the action.',
+      akilli:'Check the information first, confirm with the right source, then act.',
+      itaatkar:'Follow the standing order and report the result without delay.',
+      cesur:'Take immediate controlled action and keep the bridge team informed.',
+      sosyal:'Calm the person, keep communication respectful and protect safety.',
+      korkak:'Delay the decision or ignore a key procedure.',
+      hileli:'Choose the shortcut even though it creates risk.'
+    },
+    es:{
+      kritik:'Sigue el procedimiento completo, verifica datos, informa claro y registra la accion.',
+      akilli:'Comprueba primero la informacion, confirma con la fuente correcta y actua.',
+      itaatkar:'Sigue la orden permanente e informa el resultado sin demora.',
+      cesur:'Toma accion inmediata y controlada, manteniendo informado al puente.',
+      sosyal:'Calma a la persona, comunica con respeto y protege la seguridad.',
+      korkak:'Retrasa la decision o ignora un procedimiento clave.',
+      hileli:'Elige el atajo aunque crea riesgo.'
+    },
+    de:{
+      kritik:'Vollstandiges Verfahren befolgen, Fakten prufen, klar melden und eintragen.',
+      akilli:'Information zuerst prufen, mit der richtigen Quelle bestatigen, dann handeln.',
+      itaatkar:'Stehende Anweisung befolgen und Ergebnis ohne Verzogerung melden.',
+      cesur:'Sofort kontrolliert handeln und das Bruckenteam informieren.',
+      sosyal:'Person beruhigen, respektvoll kommunizieren und Sicherheit schutzen.',
+      korkak:'Entscheidung verzogern oder ein wichtiges Verfahren ignorieren.',
+      hileli:'Abkurzung wahlen, obwohl dadurch Risiko entsteht.'
+    }
+  };
+  const append={
+    en:{vhf:' Radio discipline is the focus.',radar:' Sensor cross-check is the focus.',port:' Port-operation safety is the focus.',engine:' Engineering impact is the focus.',fire:' Emergency response order is the focus.',people:' Crew management is the focus.',cargo:' Cargo/stability control is the focus.',inspect:' Evidence and documentation are the focus.',default:''},
+    es:{vhf:' El foco es la disciplina de radio.',radar:' El foco es cruzar sensores.',port:' El foco es la seguridad de operacion portuaria.',engine:' El foco es el impacto de maquinas.',fire:' El foco es el orden de emergencia.',people:' El foco es gestion de tripulacion.',cargo:' El foco es control de carga/estabilidad.',inspect:' El foco es evidencia y documentos.',default:''},
+    de:{vhf:' Schwerpunkt ist Funkdisziplin.',radar:' Schwerpunkt ist Sensorabgleich.',port:' Schwerpunkt ist Hafensicherheit.',engine:' Schwerpunkt ist Maschinenauswirkung.',fire:' Schwerpunkt ist Notfallreihenfolge.',people:' Schwerpunkt ist Crewfuhrung.',cargo:' Schwerpunkt ist Ladung/Stabilitat.',inspect:' Schwerpunkt sind Nachweise und Dokumente.',default:''}
+  };
+  return (choiceText[gameLanguage]?.[tag] || translateGameText(text)) + (append[gameLanguage]?.[kind] || '');
+}
 function getChoiceTagLabel(tag){
   const key=tag || 'akilli';
   return t(`tag.${key}`, tagL[key] || tagL.akilli);
@@ -8565,6 +8667,11 @@ function setGameLanguage(lang){
   try{localStorage.setItem('guverte-language',gameLanguage);}catch(e){}
   applyLanguageUI();
   renderPlayModeSelector();
+  renderSavePanel();
+  renderPhone();
+  if(document.getElementById('notes-panel')?.classList.contains('show')) renderNotes();
+  if(document.getElementById('devices-panel')?.classList.contains('show')) renderDevices();
+  if(document.getElementById('sim-panel')?.classList.contains('show')) renderSimCenter();
   if(sceneQueue && sceneQueue.length && document.getElementById('game')?.style.display!=='none'){
     renderScene(currentIdx);
   }else{
@@ -9438,7 +9545,7 @@ function showReplyBubble(text){
   const name = document.getElementById('replyname');
   const avatar = document.getElementById('replyavatar');
   if(name) name.textContent = pn || t('role.cadet','Stajyer');
-  if(body) body.textContent = translateGameText(text || '');
+  if(body) body.textContent = typeof text === 'object' ? localizeChoiceText(text) : translateGameText(text || '');
   if(avatar) avatar.innerHTML = renderPortraitSprite(getPlayerPortraitConfig(), 'avatar');
   if(stage){
     stage.style.display = 'flex';
@@ -9450,14 +9557,14 @@ function showReplyBubble(text){
 }
 
 let speechTypingTimer = null;
-function runSpeechTyping(text){
+function runSpeechTyping(text, sc=null){
   const el = document.getElementById('text');
   if(!el) return;
   if(speechTypingTimer){
     clearInterval(speechTypingTimer);
     speechTypingTimer = null;
   }
-  const full = translateGameText(text || '');
+  const full = getLocalizedSceneNarrative(text || '', sc || sceneQueue?.[currentIdx] || null);
   el.textContent = '';
   el.classList.add('typing');
   let i = 0;
@@ -10150,7 +10257,7 @@ function handleSceneChoice(sc, c2, ch){
   pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, typeof sc.text==='function'?sc.text(pn,sn):sc.text);
   pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', c2.text);
   maybePushDialogueInterjection(sc,c2);
-  showReplyBubble(c2.text);
+  showReplyBubble(c2);
   const pressure=evaluateDecisionPressure(sc,c2);
   const resolvedEffect={...(c2.effect||{})};
   const envPressure = evaluateEnvironmentPressure(sc,c2);
@@ -11951,7 +12058,7 @@ function renderScene(idx){
   const memoryLine = getCrewMemoryLine(sc);
   document.getElementById('spktl').textContent = [translateGameText(c.title), translateGameText(memoryLine)].filter(Boolean).join(' · ');
   hideReplyBubble();
-  runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text);
+  runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text, sc);
   renderDialogueLog();
   applySceneEmotions(sc);
   document.getElementById('charname').textContent=pn;
@@ -12016,7 +12123,7 @@ function renderScene(idx){
   getSceneRenderChoices(sc).forEach(c2=>{
     const b=document.createElement('button');b.className='cbtn';
     if(stats.dinclik <= 35 && !['kritik','akilli'].includes(c2.tag||'')) b.classList.add('fatigue-decoy');
-    b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+phoneSafe(getChoiceTagLabel(c2.tag||'akilli'))+'</span>'+phoneSafe(translateGameText(c2.text));
+    b.innerHTML='<span class="ctag tag-'+(c2.tag||'akilli')+'">'+phoneSafe(getChoiceTagLabel(c2.tag||'akilli'))+'</span>'+phoneSafe(localizeChoiceText(c2));
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
