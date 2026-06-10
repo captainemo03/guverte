@@ -8473,7 +8473,9 @@ const GAME_LANGUAGES={
   tr:{label:'Turkce',native:'Turkce',short:'TR'},
   en:{label:'English',native:'English',short:'EN'},
   es:{label:'Espanol',native:'Espanol',short:'ES'},
-  de:{label:'Deutsch',native:'Deutsch',short:'DE'}
+  de:{label:'Deutsch',native:'Deutsch',short:'DE'},
+  fr:{label:'Francais',native:'Francais',short:'FR'},
+  zh:{label:'Chinese',native:'中文',short:'ZH'}
 };
 let gameLanguage=(()=>{try{return GAME_LANGUAGES[localStorage.getItem('guverte-language')] ? localStorage.getItem('guverte-language') : 'tr';}catch(e){return 'tr';}})();
 const I18N={
@@ -8531,6 +8533,42 @@ const I18N={
     'scene.peopleSituation':'Ein Crew-Management-Problem erzeugt Spannung oder Disziplinrisiko.','scene.peopleTask':'Deeskalieren, Fakten/Zeugen sichern, Sicherheit schutzen und Befehlskette nutzen.',
     'scene.cargoSituation':'Ladung, Ballast, Bunker oder Stauung konnen Stabilitat, Trimm, Umwelt oder kommerzielles Risiko beeinflussen.','scene.cargoTask':'Plan, Zahlen, Ventile/Leitungen und Dokumente prufen, bevor du zustimmst.',
     'scene.inspectSituation':'Inspektion, Audit oder Dokumentenkontrolle ist aktiv.','scene.inspectTask':'Richtigen Nachweis, Ausrustungsbeleg und Korrekturmassnahme zeigen, ohne zu improvisieren.'
+  },
+  fr:{
+    'ui.language':'Langue','ui.languageHint':'Choisis la langue des menus, consignes, choix et de la couche de traduction en direct.','ui.save':'SAUVER','ui.sound':'Son','ui.rep':'REPUTATION',
+    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CARTE','ui.devices':'APPAREILS','ui.sim':'SIM','ui.career':'CARRIERE','ui.ship':'NAVIRE','ui.cabin':'CABINE','ui.logbook':'JOURNAL','ui.phone':'TELEPHONE','ui.journal':'CARNET','ui.album':'ALBUM','ui.crew':'EQUIPAGE',
+    'ui.continue':'Continuer la sauvegarde','ui.deleteSave':'Supprimer la sauvegarde','ui.startShip':'Monter a bord','ui.mode':'Mode','ui.open':'Ouvert','ui.basicStory':'Seulement histoire et choix de base.','ui.unlocked':'Ouvert','ui.assist':'Mode assistance actif : les consignes sont plus pedagogiques.','ui.slowUnlock':'Les nouveaux systemes se debloquent progressivement.',
+    'mode.simple':'Simple','mode.simpleDesc':'Histoire, decisions principales et ecran plus clair.','mode.realistic':'Realiste','mode.realisticDesc':'Appareils, cartes et journal se debloquent progressivement.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker et details premium actifs.',
+    'tag.cesur':'Courageux','tag.akilli':'Prudent','tag.itaatkar':'Procedural','tag.korkak':'Risque','tag.sosyal':'Social','tag.kritik':'CRITIQUE',
+    'role.cadet':'ELEVE OFFICIER PONT','save.center':'CENTRE DE SAUVEGARDE','save.preparing':'Preparation de la sauvegarde','save.current':'Partie actuelle','save.contract':'Contrat','save.last':'Derniere sauvegarde','save.actions':'Actions','save.saveGame':'Sauvegarder','save.loadGame':'Continuer','save.deleteGame':'Supprimer','save.noSave':'Aucune sauvegarde','save.notStarted':'Non commence',
+    'guide.default':'Lis la scene, comprends ce qui est demande et prends une decision claire.','guide.support':'Mode assistance : ralentis, choisis la decision la plus proche de la procedure et des preuves.','guide.tired':'Energie faible : choisis une action calme et procedurale plutot qu un heroisme risque.','guide.vhf':'Clarifie le canal VHF et le type d appel.','guide.radar':'Lis la cible : CPA/TCPA, intention et rapport.','guide.ecdis':'Controle la route, le contour de securite et le prochain waypoint sur la carte.','guide.engine':'Obtiens les informations machine et fais un court rapport au capitaine.','guide.port':'Surveille vitesse-cap, ordre des aussières et risque snap-back.','guide.emergency':'Chaine de securite d abord : alarme, position, equipe, rapport.','guide.inspection':'Controle calmement documents, equipement et risque de deficiency.',
+    'scene.brief':'BRIEFING DE SCENE','scene.location':'Lieu','scene.speaker':'Interlocuteur','scene.situation':'Situation','scene.task':'Ta mission','scene.original':'Note source','scene.defaultSituation':'Une situation de quart se developpe a bord. Lis le risque, communique clairement et evite les suppositions.','scene.defaultTask':'Choisis la reponse professionnelle la plus sure et tiens l equipe passerelle informee.',
+    'scene.vhfSituation':'Un evenement radio est en cours. Le canal, le type d appel et l ordre du message comptent.','scene.vhfTask':'Choisis une reponse avec un SMCP clair, confirme le canal et informe le capitaine si necessaire.',
+    'scene.radarSituation':'Une cible de navigation ou une image capteurs doit etre evaluee. CPA, TCPA et intention doivent etre controles.','scene.radarTask':'Utilise radar/ARPA/AIS/ECDIS ensemble, confirme le risque et fais un court rapport passerelle.',
+    'scene.portSituation':'Le navire est en phase portuaire, pilotage, remorqueur ou amarrage, ou le timing et la securite des lignes sont critiques.','scene.portTask':'Controle vitesse, cap, ordre remorqueur/aussières et zone snap-back avant de decider.',
+    'scene.engineSituation':'Une alarme machine ou technique affecte l operation.','scene.engineTask':'Obtiens les faits machine, evite les suppositions et rapporte clairement l impact.',
+    'scene.fireSituation':'Une situation d urgence est presente. Les premieres secondes doivent suivre la chaine de securite.','scene.fireTask':'Declenche/confirme l alarme, localise le danger, assigne l equipe et rapporte position/statut.',
+    'scene.peopleSituation':'Un probleme de gestion d equipage cree une tension ou un risque disciplinaire.','scene.peopleTask':'Desescalade, garde faits/temoins, protege la securite et utilise la chaine de commandement.',
+    'scene.cargoSituation':'Cargaison, ballast, soute ou arrimage peuvent affecter stabilite, assiette, pollution ou risque commercial.','scene.cargoTask':'Controle plan, chiffres, vannes/lignes et documents avant d approuver.',
+    'scene.inspectSituation':'Inspection, audit ou controle documentaire actif.','scene.inspectTask':'Montre le bon registre, les preuves d equipement et l action corrective sans improviser.'
+  },
+  zh:{
+    'ui.language':'语言','ui.languageHint':'选择菜单、提示、选项和实时翻译层使用的语言。','ui.save':'保存','ui.sound':'声音','ui.rep':'声望',
+    'ui.colreg':'避碰规则','ui.notes':'笔记','ui.map':'海图','ui.devices':'设备','ui.sim':'模拟','ui.career':'职业','ui.ship':'船舶','ui.cabin':'舱室','ui.logbook':'日志','ui.phone':'电话','ui.journal':'航海日志','ui.album':'相册','ui.crew':'船员',
+    'ui.continue':'继续存档','ui.deleteSave':'删除存档','ui.startShip':'登船','ui.mode':'模式','ui.open':'已开放','ui.basicStory':'仅故事和基础选择。','ui.unlocked':'已开放','ui.assist':'辅助模式已开启：提示会更教学化。','ui.slowUnlock':'新系统会逐步解锁。',
+    'mode.simple':'简单','mode.simpleDesc':'故事、核心决策和更清爽的界面。','mode.realistic':'真实','mode.realisticDesc':'设备、海图和日志逐步解锁。','mode.expert':'专家','mode.expertDesc':'CPA、UKC、PSC、油轮和高级细节开启。',
+    'tag.cesur':'果断','tag.akilli':'明智','tag.itaatkar':'程序化','tag.korkak':'不安全','tag.sosyal':'沟通','tag.kritik':'关键',
+    'role.cadet':'甲板实习生','save.center':'存档中心','save.preparing':'正在准备存档状态','save.current':'当前游戏','save.contract':'合同','save.last':'最近存档','save.actions':'操作','save.saveGame':'保存游戏','save.loadGame':'继续存档','save.deleteGame':'删除存档','save.noSave':'暂无存档','save.notStarted':'未开始',
+    'guide.default':'阅读场景，理解要求，然后做出一个清晰决定。','guide.support':'辅助模式：放慢节奏，选择最符合程序和证据的决定。','guide.tired':'精力较低：避免冒险，选择冷静、程序化的行动。','guide.vhf':'确认VHF频道和呼叫类型。','guide.radar':'读取目标：CPA/TCPA、意图和报告。','guide.ecdis':'在海图上检查航线、安全等深线和下一个航点。','guide.engine':'取得机舱信息，并向船长做简短报告。','guide.port':'监控速度航向、缆绳顺序和反弹区风险。','guide.emergency':'先执行安全链：警报、位置、人员、报告。','guide.inspection':'冷静检查文件、设备和缺陷风险。',
+    'scene.brief':'场景简报','scene.location':'地点','scene.speaker':'发言人','scene.situation':'情况','scene.task':'你的任务','scene.original':'原始提示','scene.defaultSituation':'船上正在发生值班情况。判断风险，保持清晰沟通，不要猜测。','scene.defaultTask':'选择最安全、最专业的回应，并让驾驶台团队知情。',
+    'scene.vhfSituation':'无线电通信事件正在进行。频道、呼叫类型和信息顺序都很重要。','scene.vhfTask':'选择使用清晰SMCP的回应，确认频道，必要时报告船长。',
+    'scene.radarSituation':'需要评估导航目标或传感器画面。行动前必须检查CPA、TCPA和意图。','scene.radarTask':'结合雷达/ARPA/AIS/ECDIS，确认风险并做简短驾驶台报告。',
+    'scene.portSituation':'船舶处于港口、引航、拖轮或系泊阶段，时机和缆绳安全很关键。','scene.portTask':'决定前控制速度、航向、拖轮/缆绳顺序和反弹区风险。',
+    'scene.engineSituation':'机舱或技术报警正在影响操作。','scene.engineTask':'获取机舱事实，避免假设，并清楚报告影响。',
+    'scene.fireSituation':'存在紧急情况。最初几秒必须按安全链处理。','scene.fireTask':'发出/确认警报，定位危险，分配人员并报告位置/状态。',
+    'scene.peopleSituation':'船员管理问题正在造成紧张或纪律风险。','scene.peopleTask':'降温处理，保留事实/证人，保护安全并使用指挥链。',
+    'scene.cargoSituation':'货物、压载、加油或配载可能影响稳性、纵倾、污染或商业风险。','scene.cargoTask':'批准前检查计划、数据、阀门/管线和文件。',
+    'scene.inspectSituation':'检查、审核或文件控制正在进行。','scene.inspectTask':'出示正确记录、设备证据和纠正措施，不要临场编造。'
   }
 };
 const DYNAMIC_TRANSLATIONS={
@@ -8557,6 +8595,22 @@ const DYNAMIC_TRANSLATIONS={
     ['halat','Leine'],['pilot','Lotse'],['römorkör','Schlepper'],['yanaşma','Anlegen'],['ayrılma','Ablegen'],['yükleme','Laden'],['tahliye','Loschen'],['balast','Ballast'],['akıntı','Strom'],['sis','Nebel'],
     ['Ne yapabilirim?','Was kann ich tun?'],['Kaptana haber ver','Dem Kapitan melden'],['kontrol et','prufen'],['teyit et','bestatigen'],['bekle','warten'],['yardım et','helfen'],['sakin','ruhig'],['prosedür','Verfahren'],['belge','Dokument'],['cihaz','Gerat'],
     ['Mesaj','Nachrichten'],['Rehber','Kontakte'],['Uygulama','Apps'],['Son kayit','Letzter Speicherstand'],['Sahne','Szene'],['SAHNE','SZENE'],['sahne','Szene'],['ay','Monat'],['mod','Modus'],['Yok','Keiner'],['Gemi','Schiff'],['Kayitli gemi','Gespeichertes Schiff']
+  ],
+  fr:[
+    ['Sahneyi oku ve karar ver.','Lis la scene et decide.'],['Kaptan','Capitaine'],['Süvari','Capitaine'],['Stajyer','Eleve officier'],['Zabit','Officier'],['Baş Mühendis','Chef mecanicien'],['Çarkçıbaşı','Chef mecanicien'],['Lostromo','Bosco'],['Aşçı','Cuisinier'],['Tayfa','Matelot'],
+    ['Gece','Nuit'],['Gün','Jour'],['Vardiya','Quart'],['Teslim','Releve de quart'],['Köprüüstü','Passerelle'],['Makine','Machine'],['Güverte','Pont'],['Liman','Port'],['Açık Deniz','Haute mer'],['Harita','Carte'],['Rota','Route'],['Demir','Mouillage'],
+    ['yangın','incendie'],['alarm','alarme'],['acil durum','urgence'],['rapor','rapport'],['kayıt','enregistrement'],['kanal','canal'],['hedef','cible'],['emniyet','securite'],['tehlike','danger'],['görüş','visibilite'],
+    ['halat','aussiere'],['pilot','pilote'],['römorkör','remorqueur'],['yanaşma','accostage'],['ayrılma','depart'],['yükleme','chargement'],['tahliye','dechargement'],['balast','ballast'],['akıntı','courant'],['sis','brouillard'],
+    ['Ne yapabilirim?','Que puis-je faire ?'],['Kaptana haber ver','Informer le capitaine'],['kontrol et','controler'],['teyit et','confirmer'],['bekle','attendre'],['yardım et','assister'],['sakin','calme'],['prosedür','procedure'],['belge','document'],['cihaz','appareil'],
+    ['Mesaj','Messages'],['Rehber','Contacts'],['Uygulama','Apps'],['Son kayit','Derniere sauvegarde'],['Sahne','Scene'],['SAHNE','SCENE'],['sahne','scene'],['ay','mois'],['mod','mode'],['Yok','Aucun'],['Gemi','Navire'],['Kayitli gemi','Navire sauvegarde']
+  ],
+  zh:[
+    ['Sahneyi oku ve karar ver.','阅读场景并做出决定。'],['Kaptan','船长'],['Süvari','船长'],['Stajyer','实习生'],['Zabit','驾驶员'],['Baş Mühendis','轮机长'],['Çarkçıbaşı','轮机长'],['Lostromo','水手长'],['Aşçı','厨师'],['Tayfa','船员'],
+    ['Gece','夜间'],['Gün','日'],['Vardiya','值班'],['Teslim','交班'],['Köprüüstü','驾驶台'],['Makine','机舱'],['Güverte','甲板'],['Liman','港口'],['Açık Deniz','外海'],['Harita','海图'],['Rota','航线'],['Demir','锚地'],
+    ['yangın','火灾'],['alarm','报警'],['acil durum','紧急情况'],['rapor','报告'],['kayıt','记录'],['kanal','频道'],['hedef','目标'],['emniyet','安全'],['tehlike','危险'],['görüş','能见度'],
+    ['halat','缆绳'],['pilot','引航员'],['römorkör','拖轮'],['yanaşma','靠泊'],['ayrılma','离泊'],['yükleme','装货'],['tahliye','卸货'],['balast','压载'],['akıntı','流'],['sis','雾'],
+    ['Ne yapabilirim?','我该怎么做？'],['Kaptana haber ver','通知船长'],['kontrol et','检查'],['teyit et','确认'],['bekle','待命'],['yardım et','协助'],['sakin','冷静'],['prosedür','程序'],['belge','文件'],['cihaz','设备'],
+    ['Mesaj','消息'],['Rehber','联系人'],['Uygulama','应用'],['Son kayit','最近存档'],['Sahne','场景'],['SAHNE','场景'],['sahne','场景'],['ay','月'],['mod','模式'],['Yok','无'],['Gemi','船舶'],['Kayitli gemi','已保存船舶']
   ]
 };
 function t(key,fallback=''){
@@ -8639,12 +8693,32 @@ function localizeChoiceText(choice){
       sosyal:'Person beruhigen, respektvoll kommunizieren und Sicherheit schutzen.',
       korkak:'Entscheidung verzogern oder ein wichtiges Verfahren ignorieren.',
       hileli:'Abkurzung wahlen, obwohl dadurch Risiko entsteht.'
+    },
+    fr:{
+      kritik:'Suis toute la procedure, verifie les faits, rapporte clairement et inscris l action au journal.',
+      akilli:'Controle d abord les informations, confirme avec la bonne source, puis agis.',
+      itaatkar:'Suis l ordre permanent et rapporte le resultat sans delai.',
+      cesur:'Prends une action immediate et controlee, en tenant la passerelle informee.',
+      sosyal:'Calme la personne, communique avec respect et protege la securite.',
+      korkak:'Retarde la decision ou ignore une procedure essentielle.',
+      hileli:'Choisis le raccourci meme s il cree un risque.'
+    },
+    zh:{
+      kritik:'执行完整程序，核实事实，清楚报告并记录行动。',
+      akilli:'先检查信息，与正确来源确认，然后行动。',
+      itaatkar:'按常规命令执行，并及时报告结果。',
+      cesur:'立即采取受控行动，并保持驾驶台团队知情。',
+      sosyal:'安抚对方，保持尊重沟通并保护安全。',
+      korkak:'拖延决定或忽视关键程序。',
+      hileli:'选择捷径，即使会造成风险。'
     }
   };
   const append={
     en:{vhf:' Radio discipline is the focus.',radar:' Sensor cross-check is the focus.',port:' Port-operation safety is the focus.',engine:' Engineering impact is the focus.',fire:' Emergency response order is the focus.',people:' Crew management is the focus.',cargo:' Cargo/stability control is the focus.',inspect:' Evidence and documentation are the focus.',default:''},
     es:{vhf:' El foco es la disciplina de radio.',radar:' El foco es cruzar sensores.',port:' El foco es la seguridad de operacion portuaria.',engine:' El foco es el impacto de maquinas.',fire:' El foco es el orden de emergencia.',people:' El foco es gestion de tripulacion.',cargo:' El foco es control de carga/estabilidad.',inspect:' El foco es evidencia y documentos.',default:''},
     de:{vhf:' Schwerpunkt ist Funkdisziplin.',radar:' Schwerpunkt ist Sensorabgleich.',port:' Schwerpunkt ist Hafensicherheit.',engine:' Schwerpunkt ist Maschinenauswirkung.',fire:' Schwerpunkt ist Notfallreihenfolge.',people:' Schwerpunkt ist Crewfuhrung.',cargo:' Schwerpunkt ist Ladung/Stabilitat.',inspect:' Schwerpunkt sind Nachweise und Dokumente.',default:''}
+    ,fr:{vhf:' La discipline radio est le point central.',radar:' Le recoupement des capteurs est le point central.',port:' La securite portuaire est le point central.',engine:' L impact machine est le point central.',fire:' L ordre d urgence est le point central.',people:' La gestion d equipage est le point central.',cargo:' Le controle cargaison/stabilite est le point central.',inspect:' Les preuves et documents sont le point central.',default:''}
+    ,zh:{vhf:' 重点是无线电纪律。',radar:' 重点是传感器交叉核对。',port:' 重点是港口作业安全。',engine:' 重点是机舱影响。',fire:' 重点是紧急响应顺序。',people:' 重点是船员管理。',cargo:' 重点是货物/稳性控制。',inspect:' 重点是证据和文件。',default:''}
   };
   return (choiceText[gameLanguage]?.[tag] || translateGameText(text)) + (append[gameLanguage]?.[kind] || '');
 }
@@ -8695,6 +8769,28 @@ const LOCALIZE_EXACTS={
     'KAYIT MERKEZI':'SPEICHERZENTRALE','Kayit durumu hazirlaniyor':'Speicherstatus wird vorbereitet','Sahne':'Szene','Ay':'Monat','Hafif rüzgar':'Leichte Brise','Gece Seyri':'Nachtwache','Rota bekleniyor':'Route ausstehend','Dinçlik normal':'Energie normal','İz temiz':'Spur sauber','Ofis sakin':'Buro ruhig','AKTIF GOREV AKISI':'AKTIVER MISSIONSABLAUF',
     'CESARET':'MUT','BİLGİ':'WISSEN','SAYGINLIK':'RESPEKT','DİNÇLİK':'ENERGIE','YALNIZLIK':'EINSAMKEIT','ÖFKE':'WUT','TÜKENME':'ERSCHOPFUNG','EKİP UYUMU':'TEAMHARMONIE','Anlatıcı':'Erzahler','Yükleniyor...':'Laden...','GELEN ARAMA':'EINGEHENDER ANRUF','Kisa gorusme':'Kurzes Gesprach','Yeni bildirim':'Neue Nachricht',
     'KARİYER / PARA / EĞİTİM':'KARRIERE / GELD / AUSBILDUNG','Yeniden Başla':'Neustart','Gemide Kal ve Devam Et':'An Bord bleiben','Ayril / Yeni Oyun':'Verlassen / Neues Spiel','Yeniden Oyna':'Erneut spielen'
+  },
+  fr:{
+    'MÜRETTEBAT':'EQUIPAGE','ROTA HARİTASI':'CARTE DE ROUTE','Rota Haritasi':'Carte de route','Haritalarim':'Mes cartes','Liman Haritasi':'Carte du port','Harita Gorevi':'Tache carte','Sonraki':'Suivant','SEYİR GÜNLÜĞİ':'JOURNAL DE MER',
+    'CIHAZ EGITIM MERKEZI':'CENTRE APPAREILS','Gercekci menu ve uygulama alani':'Menu realiste et zone de pratique','CANLI VARDIYA DEFTERI':'JOURNAL DE QUART','KAMARAM':'MA CABINE','GEMI ICI MINI HARITA':'PLAN DU NAVIRE','BASARILAR':'SUCCES','GERCEKCI SIMULASYON MERKEZI':'CENTRE DE SIMULATION',
+    'NOTLARIM':'NOTES','Kurallar':'Regles','Formuller':'Formules','Sozluk':'Glossaire','COLREG HIZLI REHBER':'GUIDE RAPIDE COLREG','Kapat':'Fermer','X Kapat':'Fermer','✕ Kapat':'Fermer','Kaydet':'Sauver','Gonder':'Envoyer','Gönder':'Envoyer','Ac':'Repondre','Aç':'Repondre','Mesgul':'Occupe',
+    'Adın':'Nom','Staj Dönemi':'Periode de stage','Stajyer Bilgileri':'Infos eleve officier','Karakter Oluştur':'Creer personnage','Referans Foto':'Photo reference','Fotoğraf Yükle':'Importer photo','Kamera Aç':'Ouvrir camera','Otomatik Öner':'Suggestion auto','Temizle':'Effacer','Çek':'Capturer',
+    'Cilt Tonu':'Teint','Karakter Tabanı':'Base personnage','Yaş Grubu':'Age','Poz':'Pose','Boy / Kilo':'Taille / Poids','Arka Plan Mekanı':'Arriere-plan','Portre Modeli':'Modele portrait','Yüz Tipi':'Type de visage','Saç Modeli':'Coiffure','Sakal':'Barbe','Saç Rengi':'Couleur cheveux','Göz Rengi':'Couleur yeux','Üniforma':'Uniforme',
+    'Gemi Türü Seç':'Choisir navire','Kontrat Seç':'Choisir contrat','Oynanis Modu':'Mode de jeu','Gemi Adı':'Nom du navire','Gemiye Bin':'Monter a bord','Kayittan Devam Et':'Continuer','Kaydi Sil':'Supprimer',
+    'KAYIT MERKEZI':'CENTRE DE SAUVEGARDE','Kayit durumu hazirlaniyor':'Preparation sauvegarde','Sahne':'Scene','Ay':'Mois','Hafif rüzgar':'Brise legere','Gece Seyri':'Quart de nuit','Rota bekleniyor':'Route en attente','Dinçlik normal':'Energie normale','İz temiz':'Trace propre','Ofis sakin':'Bureau calme','AKTIF GOREV AKISI':'FLUX DE MISSION',
+    'CESARET':'COURAGE','BİLGİ':'SAVOIR','SAYGINLIK':'RESPECT','DİNÇLİK':'ENERGIE','YALNIZLIK':'SOLITUDE','ÖFKE':'COLERE','TÜKENME':'EPUISEMENT','EKİP UYUMU':'COHESION','Anlatıcı':'Narrateur','Yükleniyor...':'Chargement...','GELEN ARAMA':'APPEL ENTRANT','Kisa gorusme':'Appel court','Yeni bildirim':'Nouvelle notification',
+    'KARİYER / PARA / EĞİTİM':'CARRIERE / ARGENT / FORMATION','Yeniden Başla':'Recommencer','Gemide Kal ve Devam Et':'Rester a bord','Ayril / Yeni Oyun':'Quitter / Nouveau jeu','Yeniden Oyna':'Rejouer'
+  },
+  zh:{
+    'MÜRETTEBAT':'船员','ROTA HARİTASI':'航线海图','Rota Haritasi':'航线海图','Haritalarim':'我的海图','Liman Haritasi':'港口海图','Harita Gorevi':'海图任务','Sonraki':'下一个','SEYİR GÜNLÜĞİ':'航海日志',
+    'CIHAZ EGITIM MERKEZI':'设备训练中心','Gercekci menu ve uygulama alani':'真实菜单与练习区','CANLI VARDIYA DEFTERI':'实时值班日志','KAMARAM':'我的舱室','GEMI ICI MINI HARITA':'船内地图','BASARILAR':'成就','GERCEKCI SIMULASYON MERKEZI':'真实模拟中心',
+    'NOTLARIM':'我的笔记','Kurallar':'规则','Formuller':'公式','Sozluk':'词典','COLREG HIZLI REHBER':'避碰规则速查','Kapat':'关闭','X Kapat':'关闭','✕ Kapat':'关闭','Kaydet':'保存','Gonder':'发送','Gönder':'发送','Ac':'接听','Aç':'接听','Mesgul':'忙碌',
+    'Adın':'姓名','Staj Dönemi':'实习时期','Stajyer Bilgileri':'实习生信息','Karakter Oluştur':'创建角色','Referans Foto':'参考照片','Fotoğraf Yükle':'上传照片','Kamera Aç':'打开相机','Otomatik Öner':'自动建议','Temizle':'清除','Çek':'拍摄',
+    'Cilt Tonu':'肤色','Karakter Tabanı':'角色基础','Yaş Grubu':'年龄组','Poz':'姿势','Boy / Kilo':'身高 / 体重','Arka Plan Mekanı':'背景地点','Portre Modeli':'肖像模型','Yüz Tipi':'脸型','Saç Modeli':'发型','Sakal':'胡须','Saç Rengi':'发色','Göz Rengi':'眼睛颜色','Üniforma':'制服',
+    'Gemi Türü Seç':'选择船型','Kontrat Seç':'选择合同','Oynanis Modu':'游戏模式','Gemi Adı':'船名','Gemiye Bin':'登船','Kayittan Devam Et':'继续存档','Kaydi Sil':'删除存档',
+    'KAYIT MERKEZI':'存档中心','Kayit durumu hazirlaniyor':'正在准备存档状态','Sahne':'场景','Ay':'月','Hafif rüzgar':'微风','Gece Seyri':'夜航值班','Rota bekleniyor':'等待航线','Dinçlik normal':'精力正常','İz temiz':'记录清晰','Ofis sakin':'公司平静','AKTIF GOREV AKISI':'当前任务流程',
+    'CESARET':'勇气','BİLGİ':'知识','SAYGINLIK':'尊重','DİNÇLİK':'精力','YALNIZLIK':'孤独','ÖFKE':'愤怒','TÜKENME':'疲惫','EKİP UYUMU':'团队协作','Anlatıcı':'旁白','Yükleniyor...':'加载中...','GELEN ARAMA':'来电','Kisa gorusme':'短通话','Yeni bildirim':'新通知',
+    'KARİYER / PARA / EĞİTİM':'职业 / 金钱 / 培训','Yeniden Başla':'重新开始','Gemide Kal ve Devam Et':'留在船上继续','Ayril / Yeni Oyun':'离开 / 新游戏','Yeniden Oyna':'再玩一次'
   }
 };
 const staticTextSource = new WeakMap();
