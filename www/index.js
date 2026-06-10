@@ -8662,6 +8662,77 @@ function localizeAndSetText(id,key,fallback){
   const el=document.getElementById(id);
   if(el) el.textContent=t(key,fallback);
 }
+const LOCALIZE_EXACTS={
+  en:{
+    'MÜRETTEBAT':'CREW','ROTA HARİTASI':'ROUTE CHART','Rota Haritasi':'Route Chart','Haritalarim':'My Charts','Liman Haritasi':'Port Chart','Harita Gorevi':'Chart Task','Sonraki':'Next','SEYİR GÜNLÜĞİ':'VOYAGE JOURNAL',
+    'CIHAZ EGITIM MERKEZI':'DEVICE TRAINING CENTER','Gercekci menu ve uygulama alani':'Realistic menu and practice area','CANLI VARDIYA DEFTERI':'LIVE WATCH LOG','KAMARAM':'MY CABIN','GEMI ICI MINI HARITA':'SHIP MAP','BASARILAR':'ACHIEVEMENTS','GERCEKCI SIMULASYON MERKEZI':'REALISTIC SIMULATION CENTER',
+    'NOTLARIM':'NOTES','Kurallar':'Rules','Formuller':'Formulas','Sozluk':'Glossary','COLREG HIZLI REHBER':'COLREG QUICK GUIDE','Kapat':'Close','X Kapat':'Close','✕ Kapat':'Close','Kaydet':'Save','Gonder':'Send','Gönder':'Send','Ac':'Answer','Aç':'Answer','Mesgul':'Busy',
+    'Adın':'Name','Staj Dönemi':'Cadet Period','Stajyer Bilgileri':'Cadet Information','Karakter Oluştur':'Create Character','Referans Foto':'Reference Photo','Fotoğraf Yükle':'Upload Photo','Kamera Aç':'Open Camera','Otomatik Öner':'Auto Suggest','Temizle':'Clear','Çek':'Capture',
+    'Cilt Tonu':'Skin Tone','Karakter Tabanı':'Character Base','Yaş Grubu':'Age Group','Poz':'Pose','Boy / Kilo':'Height / Weight','Arka Plan Mekanı':'Background','Portre Modeli':'Portrait Model','Yüz Tipi':'Face Type','Saç Modeli':'Hair Style','Sakal':'Beard','Saç Rengi':'Hair Color','Göz Rengi':'Eye Color','Üniforma':'Uniform',
+    'Gemi Türü Seç':'Choose Ship Type','Kontrat Seç':'Choose Contract','Oynanis Modu':'Gameplay Mode','Gemi Adı':'Ship Name','Gemiye Bin':'Join Ship','Kayittan Devam Et':'Continue Save','Kaydi Sil':'Delete Save',
+    'KAYIT MERKEZI':'SAVE CENTER','Kayit durumu hazirlaniyor':'Preparing save status','Sahne':'Scene','Ay':'Month','Hafif rüzgar':'Light breeze','Gece Seyri':'Night Watch','Rota bekleniyor':'Route pending','Dinçlik normal':'Energy normal','İz temiz':'Clean trace','Ofis sakin':'Office calm','AKTIF GOREV AKISI':'ACTIVE MISSION FLOW',
+    'CESARET':'COURAGE','BİLGİ':'KNOWLEDGE','SAYGINLIK':'RESPECT','DİNÇLİK':'ENERGY','YALNIZLIK':'LONELINESS','ÖFKE':'ANGER','TÜKENME':'BURNOUT','EKİP UYUMU':'TEAM HARMONY','Anlatıcı':'Narrator','Yükleniyor...':'Loading...','GELEN ARAMA':'INCOMING CALL','Kisa gorusme':'Short call','Yeni bildirim':'New notification',
+    'KARİYER / PARA / EĞİTİM':'CAREER / MONEY / TRAINING','Yeniden Başla':'Restart','Gemide Kal ve Devam Et':'Stay On Board','Ayril / Yeni Oyun':'Leave / New Game','Yeniden Oyna':'Play Again'
+  },
+  es:{
+    'MÜRETTEBAT':'TRIPULACION','ROTA HARİTASI':'CARTA DE RUTA','Rota Haritasi':'Carta de ruta','Haritalarim':'Mis cartas','Liman Haritasi':'Carta de puerto','Harita Gorevi':'Tarea de carta','Sonraki':'Siguiente','SEYİR GÜNLÜĞİ':'DIARIO DE NAVEGACION',
+    'CIHAZ EGITIM MERKEZI':'CENTRO DE EQUIPOS','Gercekci menu ve uygulama alani':'Menu realista y zona de practica','CANLI VARDIYA DEFTERI':'DIARIO DE GUARDIA','KAMARAM':'MI CAMAROTE','GEMI ICI MINI HARITA':'MAPA DEL BUQUE','BASARILAR':'LOGROS','GERCEKCI SIMULASYON MERKEZI':'CENTRO DE SIMULACION',
+    'NOTLARIM':'NOTAS','Kurallar':'Reglas','Formuller':'Formulas','Sozluk':'Glosario','COLREG HIZLI REHBER':'GUIA RAPIDA COLREG','Kapat':'Cerrar','X Kapat':'Cerrar','✕ Kapat':'Cerrar','Kaydet':'Guardar','Gonder':'Enviar','Gönder':'Enviar','Ac':'Contestar','Aç':'Contestar','Mesgul':'Ocupado',
+    'Adın':'Nombre','Staj Dönemi':'Periodo de cadete','Stajyer Bilgileri':'Datos del cadete','Karakter Oluştur':'Crear personaje','Referans Foto':'Foto de referencia','Fotoğraf Yükle':'Subir foto','Kamera Aç':'Abrir camara','Otomatik Öner':'Sugerir','Temizle':'Limpiar','Çek':'Capturar',
+    'Cilt Tonu':'Tono de piel','Karakter Tabanı':'Base del personaje','Yaş Grubu':'Edad','Poz':'Pose','Boy / Kilo':'Altura / Peso','Arka Plan Mekanı':'Fondo','Portre Modeli':'Modelo de retrato','Yüz Tipi':'Tipo de cara','Saç Modeli':'Peinado','Sakal':'Barba','Saç Rengi':'Color de pelo','Göz Rengi':'Color de ojos','Üniforma':'Uniforme',
+    'Gemi Türü Seç':'Elegir buque','Kontrat Seç':'Elegir contrato','Oynanis Modu':'Modo de juego','Gemi Adı':'Nombre del buque','Gemiye Bin':'Embarcar','Kayittan Devam Et':'Continuar','Kaydi Sil':'Borrar',
+    'KAYIT MERKEZI':'CENTRO DE GUARDADO','Kayit durumu hazirlaniyor':'Preparando guardado','Sahne':'Escena','Ay':'Mes','Hafif rüzgar':'Brisa ligera','Gece Seyri':'Guardia nocturna','Rota bekleniyor':'Ruta pendiente','Dinçlik normal':'Energia normal','İz temiz':'Rastro limpio','Ofis sakin':'Oficina tranquila','AKTIF GOREV AKISI':'FLUJO DE MISION',
+    'CESARET':'VALOR','BİLGİ':'CONOCIMIENTO','SAYGINLIK':'RESPETO','DİNÇLİK':'ENERGIA','YALNIZLIK':'SOLEDAD','ÖFKE':'IRA','TÜKENME':'AGOTAMIENTO','EKİP UYUMU':'ARMONIA DEL EQUIPO','Anlatıcı':'Narrador','Yükleniyor...':'Cargando...','GELEN ARAMA':'LLAMADA ENTRANTE','Kisa gorusme':'Llamada corta','Yeni bildirim':'Nueva notificacion',
+    'KARİYER / PARA / EĞİTİM':'CARRERA / DINERO / FORMACION','Yeniden Başla':'Reiniciar','Gemide Kal ve Devam Et':'Quedarse a bordo','Ayril / Yeni Oyun':'Salir / Nuevo juego','Yeniden Oyna':'Jugar de nuevo'
+  },
+  de:{
+    'MÜRETTEBAT':'CREW','ROTA HARİTASI':'ROUTENKARTE','Rota Haritasi':'Routenkarte','Haritalarim':'Meine Karten','Liman Haritasi':'Hafenkarte','Harita Gorevi':'Kartenaufgabe','Sonraki':'Weiter','SEYİR GÜNLÜĞİ':'REISEJOURNAL',
+    'CIHAZ EGITIM MERKEZI':'GERATE-TRAINING','Gercekci menu ve uygulama alani':'Realistisches Menu und Ubungsbereich','CANLI VARDIYA DEFTERI':'LIVE WACHLOGBUCH','KAMARAM':'MEINE KAMMER','GEMI ICI MINI HARITA':'SCHIFFSKARTE','BASARILAR':'ERFOLGE','GERCEKCI SIMULASYON MERKEZI':'SIMULATIONSZENTRUM',
+    'NOTLARIM':'NOTIZEN','Kurallar':'Regeln','Formuller':'Formeln','Sozluk':'Glossar','COLREG HIZLI REHBER':'KVR KURZANLEITUNG','Kapat':'Schliessen','X Kapat':'Schliessen','✕ Kapat':'Schliessen','Kaydet':'Speichern','Gonder':'Senden','Gönder':'Senden','Ac':'Annehmen','Aç':'Annehmen','Mesgul':'Besetzt',
+    'Adın':'Name','Staj Dönemi':'Kadettenzeit','Stajyer Bilgileri':'Kadettendaten','Karakter Oluştur':'Charakter erstellen','Referans Foto':'Referenzfoto','Fotoğraf Yükle':'Foto laden','Kamera Aç':'Kamera offnen','Otomatik Öner':'Auto-Vorschlag','Temizle':'Loschen','Çek':'Aufnehmen',
+    'Cilt Tonu':'Hautton','Karakter Tabanı':'Charakterbasis','Yaş Grubu':'Altersgruppe','Poz':'Pose','Boy / Kilo':'Grosse / Gewicht','Arka Plan Mekanı':'Hintergrund','Portre Modeli':'Portratmodell','Yüz Tipi':'Gesichtstyp','Saç Modeli':'Frisur','Sakal':'Bart','Saç Rengi':'Haarfarbe','Göz Rengi':'Augenfarbe','Üniforma':'Uniform',
+    'Gemi Türü Seç':'Schiffstyp wahlen','Kontrat Seç':'Vertrag wahlen','Oynanis Modu':'Spielmodus','Gemi Adı':'Schiffsname','Gemiye Bin':'An Bord gehen','Kayittan Devam Et':'Fortsetzen','Kaydi Sil':'Loschen',
+    'KAYIT MERKEZI':'SPEICHERZENTRALE','Kayit durumu hazirlaniyor':'Speicherstatus wird vorbereitet','Sahne':'Szene','Ay':'Monat','Hafif rüzgar':'Leichte Brise','Gece Seyri':'Nachtwache','Rota bekleniyor':'Route ausstehend','Dinçlik normal':'Energie normal','İz temiz':'Spur sauber','Ofis sakin':'Buro ruhig','AKTIF GOREV AKISI':'AKTIVER MISSIONSABLAUF',
+    'CESARET':'MUT','BİLGİ':'WISSEN','SAYGINLIK':'RESPEKT','DİNÇLİK':'ENERGIE','YALNIZLIK':'EINSAMKEIT','ÖFKE':'WUT','TÜKENME':'ERSCHOPFUNG','EKİP UYUMU':'TEAMHARMONIE','Anlatıcı':'Erzahler','Yükleniyor...':'Laden...','GELEN ARAMA':'EINGEHENDER ANRUF','Kisa gorusme':'Kurzes Gesprach','Yeni bildirim':'Neue Nachricht',
+    'KARİYER / PARA / EĞİTİM':'KARRIERE / GELD / AUSBILDUNG','Yeniden Başla':'Neustart','Gemide Kal ve Devam Et':'An Bord bleiben','Ayril / Yeni Oyun':'Verlassen / Neues Spiel','Yeniden Oyna':'Erneut spielen'
+  }
+};
+const staticTextSource = new WeakMap();
+function localizeStaticText(value){
+  const text=String(value ?? '');
+  if(gameLanguage==='tr') return text;
+  const trimmed=text.trim();
+  if(!trimmed) return text;
+  const exact=LOCALIZE_EXACTS[gameLanguage]?.[trimmed];
+  const translated=exact || translateGameText(trimmed);
+  if(translated===trimmed) return text;
+  return text.replace(trimmed, translated);
+}
+function shouldSkipLocalizationNode(node){
+  const p=node?.parentElement;
+  if(!p) return true;
+  return !!p.closest('script,style,svg,canvas,#gfx-svg,#port-chart-svg,#map-svg,#clock-canvas');
+}
+function localizeStaticDom(root=document){
+  const walker=document.createTreeWalker(root.body || root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      if(shouldSkipLocalizationNode(node)) return NodeFilter.FILTER_REJECT;
+      const txt=node.nodeValue || '';
+      if(!txt.trim() || txt.trim().length>90) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!staticTextSource.has(node)) staticTextSource.set(node, node.nodeValue);
+    node.nodeValue=gameLanguage==='tr' ? staticTextSource.get(node) : localizeStaticText(staticTextSource.get(node));
+  });
+  document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+    if(!el.dataset.sourcePlaceholder) el.dataset.sourcePlaceholder=el.getAttribute('placeholder') || '';
+    el.setAttribute('placeholder', gameLanguage==='tr' ? el.dataset.sourcePlaceholder : localizeStaticText(el.dataset.sourcePlaceholder));
+  });
+}
 function setGameLanguage(lang){
   gameLanguage=GAME_LANGUAGES[lang] ? lang : 'tr';
   try{localStorage.setItem('guverte-language',gameLanguage);}catch(e){}
@@ -10196,6 +10267,7 @@ function updateStats(old,opts={}){
   if(!opts.skipContractTick) contractDays = Math.min(contractTotal, contractDays + 1);
   updateContractProgress();
   updateOpsHud(sceneQueue[currentIdx] || null);
+  localizeStaticDom(document);
 }
 
 function getContractTotalMonths(){
@@ -10205,7 +10277,7 @@ function getContractTotalMonths(){
 function updateContractProgress(){
   const pct = contractTotal ? Math.round((contractDays / contractTotal) * 100) : 0;
   const monthNow = Math.min(getContractTotalMonths(), Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
-  const label = `Sahne ${contractDays} / ${contractTotal} · Ay ${monthNow} / ${getContractTotalMonths()}`;
+  const label = `${translateGameText('Sahne')} ${contractDays} / ${contractTotal} · ${translateGameText('Ay')} ${monthNow} / ${getContractTotalMonths()}`;
   const daysEl = document.getElementById('contract-days');
   const fillEl = document.getElementById('contract-fill');
   if(daysEl) daysEl.textContent = label;
@@ -10223,8 +10295,8 @@ function checkCrisis(){
 
 function showNotif(icon,title,body){
   document.getElementById('notifico').textContent=icon;
-  document.getElementById('notiftt').textContent=title;
-  document.getElementById('notifbd').textContent=body;
+  document.getElementById('notiftt').textContent=localizeStaticText(title);
+  document.getElementById('notifbd').textContent=translateGameText(body);
   const o=document.getElementById('notifover');
   o.classList.add('show');
   setTimeout(()=>o.classList.remove('show'),2200);
@@ -11920,6 +11992,7 @@ function applyLanguageUI(){
     const sc = sceneQueue[currentIdx];
     role.textContent = `${t('role.cadet','GUV. STAJYERI')} · ${translateGameText(sc?.day || '').toUpperCase()}`;
   }
+  localizeStaticDom(document);
 }
 
 function getOneShotSceneFx(sc){

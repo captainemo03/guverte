@@ -126,6 +126,9 @@ CHECKS = {
         "translateGameText",
         "getLocalizedSceneNarrative",
         "localizeChoiceText",
+        "LOCALIZE_EXACTS",
+        "localizeStaticDom",
+        "staticTextSource",
         "scene.brief",
         "getChoiceTagLabel",
         "intro-language-select",
@@ -158,7 +161,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 87:
+    elif int(js_versions[-1]) < 88:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
