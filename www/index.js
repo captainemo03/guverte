@@ -541,6 +541,8 @@ const STYPES=[
 ];
 
 const PREMIUM_KEY = 'guverte-premium-v1';
+const PREMIUM_PRODUCT_ID = 'premium_full_pack';
+const PREMIUM_PRICE_LABEL = '75 TL';
 let premiumUnlocked = (()=>{try{return localStorage.getItem(PREMIUM_KEY)==='1';}catch(e){return false;}})();
 const PREMIUM_PACKAGE_CATALOG = [
   'Proje yuk ve heavy-lift',
@@ -556,11 +558,31 @@ function isPremiumShipType(typeKey){
 function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
-function openPremiumPurchase(){
-  showNotif('💳','Premium Ucretli Paket',PREMIUM_PACKAGE_CATALOG.join(' · '));
+async function openPremiumPurchase(){
+  if(premiumUnlocked){
+    showNotif('🔓','Premium Aktif',`Premium paket zaten acik. Paket: ${PREMIUM_PACKAGE_CATALOG.join(' · ')}`);
+    return;
+  }
+  const billing = window.GuverteBilling;
+  if(billing && typeof billing.purchasePremium === 'function'){
+    try{
+      showNotif('💳','Premium Satin Alma',`${PREMIUM_PRICE_LABEL} · Google Play odeme ekrani aciliyor.`);
+      const result = await billing.purchasePremium(PREMIUM_PRODUCT_ID);
+      const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
+      if(result?.ok && receipt){
+        grantPremiumPackageFromPurchase(`GP-${receipt}`);
+      }else{
+        showNotif('🔒','Odeme Tamamlanmadi','Satin alma onayi gelmedi. Karttan cekim yapildiysa Play Store satin alma gecmisinden geri yukleme deneyebilirsin.');
+      }
+    }catch(err){
+      showNotif('⚠️','Odeme Baslatilamadi',String(err?.message || err || 'Google Play Billing baglantisi kurulamadi.'));
+    }
+    return;
+  }
+  showNotif('💳','Premium Ucretli Paket',`${PREMIUM_PRICE_LABEL} · Google Play Billing baglaninca bu buton odeme ekranini acar. Paket: ${PREMIUM_PACKAGE_CATALOG.join(' · ')}`);
 }
 function grantPremiumPackageFromPurchase(receipt=''){
-  if(!receipt){
+  if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
     showNotif('🔒','Odeme Onayi Gerekli','Premium sadece gecerli satin alma onayi ile acilir.');
     return false;
   }
@@ -10104,7 +10126,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':'Premium Paket Ucretli'}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':'Satin Al'}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();

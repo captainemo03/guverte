@@ -76,6 +76,10 @@ CHECKS = {
         "offshorezone",
     ],
     "premium ship vocabulary": [
+        "PREMIUM_PRODUCT_ID",
+        "premium_full_pack",
+        "PREMIUM_PRICE_LABEL",
+        "75 TL",
         "Heavy-Lift Vessel",
         "Research Vessel",
         "Cable Laying Vessel",
