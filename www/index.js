@@ -558,12 +558,58 @@ function isPremiumShipType(typeKey){
 function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
 }
+function getPremiumBillingBridge(){
+  if(window.GuverteBilling && typeof window.GuverteBilling.purchasePremium === 'function') return window.GuverteBilling;
+  if(window.GuverteBillingNative && typeof window.GuverteBillingNative.purchasePremium === 'function'){
+    let pendingResolve = null;
+    let pendingReject = null;
+    window.__guverteBillingNativeResult = (result) => {
+      const resolve = pendingResolve;
+      const reject = pendingReject;
+      pendingResolve = null;
+      pendingReject = null;
+      if(!resolve) return;
+      if(result?.ok) resolve(result);
+      else reject(new Error(result?.message || 'Satin alma tamamlanmadi.'));
+    };
+    window.GuverteBilling = {
+      purchasePremium(productId){
+        return new Promise((resolve, reject)=>{
+          pendingResolve = resolve;
+          pendingReject = reject;
+          try{
+            window.GuverteBillingNative.purchasePremium(productId);
+          }catch(err){
+            pendingResolve = null;
+            pendingReject = null;
+            reject(err);
+          }
+        });
+      },
+      restorePremium(){
+        return new Promise((resolve, reject)=>{
+          pendingResolve = resolve;
+          pendingReject = reject;
+          try{
+            window.GuverteBillingNative.restorePremium();
+          }catch(err){
+            pendingResolve = null;
+            pendingReject = null;
+            reject(err);
+          }
+        });
+      }
+    };
+    return window.GuverteBilling;
+  }
+  return null;
+}
 async function openPremiumPurchase(){
   if(premiumUnlocked){
     showNotif('🔓','Premium Aktif',`Premium paket zaten acik. Paket: ${PREMIUM_PACKAGE_CATALOG.join(' · ')}`);
     return;
   }
-  const billing = window.GuverteBilling;
+  const billing = getPremiumBillingBridge();
   if(billing && typeof billing.purchasePremium === 'function'){
     try{
       showNotif('💳','Premium Satin Alma',`${PREMIUM_PRICE_LABEL} · Google Play odeme ekrani aciliyor.`);
@@ -580,6 +626,25 @@ async function openPremiumPurchase(){
     return;
   }
   showNotif('💳','Premium Ucretli Paket',`${PREMIUM_PRICE_LABEL} · Google Play Billing baglaninca bu buton odeme ekranini acar. Paket: ${PREMIUM_PACKAGE_CATALOG.join(' · ')}`);
+}
+async function restorePremiumPurchase(){
+  const billing = getPremiumBillingBridge();
+  if(!billing || typeof billing.restorePremium !== 'function'){
+    showNotif('🔁','Geri Yukleme Hazir Degil','Google Play Billing baglaninca daha once alinmis premium paket buradan geri yuklenir.');
+    return;
+  }
+  try{
+    showNotif('🔁','Premium Geri Yukleniyor','Google Play satin alma gecmisi kontrol ediliyor.');
+    const result = await billing.restorePremium();
+    const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
+    if(result?.ok && receipt){
+      grantPremiumPackageFromPurchase(`GP-${receipt}`);
+    }else{
+      showNotif('🔒','Premium Bulunamadi','Bu Google Play hesabinda premium satin alma bulunamadi.');
+    }
+  }catch(err){
+    showNotif('⚠️','Geri Yukleme Basarisiz',String(err?.message || err || 'Satin alma gecmisi okunamadi.'));
+  }
 }
 function grantPremiumPackageFromPurchase(receipt=''){
   if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
@@ -10126,7 +10191,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button><button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();

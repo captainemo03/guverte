@@ -15,6 +15,9 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_JS = ROOT / "www" / "index.js"
 INDEX_HTML = ROOT / "www" / "index.html"
+ANDROID_BILLING = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteBillingBridge.java"
+ANDROID_MAIN = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "MainActivity.java"
+ANDROID_GRADLE = ROOT / "android" / "app" / "build.gradle"
 
 
 CHECKS = {
@@ -80,11 +83,19 @@ CHECKS = {
         "premium_full_pack",
         "PREMIUM_PRICE_LABEL",
         "75 TL",
+        "getPremiumBillingBridge",
+        "restorePremiumPurchase",
         "Heavy-Lift Vessel",
         "Research Vessel",
         "Cable Laying Vessel",
         "Polar Code",
         "DP",
+    ],
+    "android premium billing bridge": [
+        "GuverteBillingNative",
+        "purchasePremium",
+        "restorePremium",
+        "premium_full_pack",
     ],
     "complexity and save flow": [
         "PLAY_MODE_DEFS",
@@ -178,11 +189,15 @@ def read_text(path: Path) -> str:
 def main() -> int:
     js = read_text(INDEX_JS)
     html = read_text(INDEX_HTML)
+    android_billing = read_text(ANDROID_BILLING) if ANDROID_BILLING.exists() else ""
+    android_main = read_text(ANDROID_MAIN) if ANDROID_MAIN.exists() else ""
+    android_gradle = read_text(ANDROID_GRADLE) if ANDROID_GRADLE.exists() else ""
+    all_text = "\n".join([js, html, android_billing, android_main, android_gradle])
     missing: list[str] = []
 
     for group, needles in CHECKS.items():
         for needle in needles:
-            if needle not in js and needle not in html:
+            if needle not in all_text:
                 missing.append(f"{group}: {needle}")
 
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)

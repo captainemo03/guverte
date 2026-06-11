@@ -41,6 +41,24 @@ Android tarafinda Google Play Billing baglaninca `window.GuverteBilling.purchase
 
 Bu sonuc gelince oyun `grantPremiumPackageFromPurchase("GP-" + purchaseToken)` ile premiumu acar.
 
+Bu repo icinde Android koprusu hazirlandi:
+
+- `android/app/src/main/java/com/captainemo/guverte/GuverteBillingBridge.java`
+- `android/app/src/main/java/com/captainemo/guverte/MainActivity.java`
+- Gradle dependency: `com.android.billingclient:billing`
+
+Oyunda ayrica `Geri Yukle` butonu vardir. Bu buton Google Play satin alma gecmisini kontrol edip premiumu yeniden acar.
+
+## Derleme Notu
+
+Bu proje Capacitor 8 kullandigi icin Android derlemede JDK 21 gerekir. JDK 17 ile Gradle su hatayi verir:
+
+```text
+invalid source release: 21
+```
+
+Android Studio'da Gradle JDK ayarini JDK 21 yap veya sistemde `JAVA_HOME` degerini JDK 21'e goster.
+
 ## Onemli
 
 Google Play'de oyun ici dijital icerik aciyorsan iyzico/PayTR gibi dis odeme kullanma. Google Play Billing kullan.
