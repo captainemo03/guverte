@@ -8881,6 +8881,11 @@ function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function translateGameText(value){
   const text=String(value ?? '');
   if(gameLanguage==='tr' || !text) return text;
+  const trimmed=text.trim();
+  if(trimmed && typeof LOCALIZE_EXACTS !== 'undefined'){
+    const exact=LOCALIZE_EXACTS[gameLanguage]?.[trimmed];
+    if(exact) return text.replace(trimmed, exact);
+  }
   let out=text;
   (DYNAMIC_TRANSLATIONS[gameLanguage] || []).forEach(([from,to])=>{
     out=out.replace(new RegExp(escapeRegExp(from),'gi'), to);
@@ -9053,7 +9058,57 @@ const LOCALIZE_EXACTS={
     'KARİYER / PARA / EĞİTİM':'职业 / 金钱 / 培训','Yeniden Başla':'重新开始','Gemide Kal ve Devam Et':'留在船上继续','Ayril / Yeni Oyun':'离开 / 新游戏','Yeniden Oyna':'再玩一次'
   }
 };
+const LOCALIZE_COMMON_EXACTS={
+  en:{
+    'Premium Paket':'Premium Pack','Premium Paket Aktif':'Premium Pack Active','Premium Gerekli':'Premium Required','Premium Paket Ucretli':'Paid Premium Pack','Premium Ucretli Paket':'Paid Premium Pack','Premium Bulunamadi':'Premium Not Found','Premium Aktif':'Premium Active','Premium Geri Yukleniyor':'Restoring Premium','Geri Yukleme Hazir Degil':'Restore Not Ready','Geri Yukleme Basarisiz':'Restore Failed','Odeme Onayi Gerekli':'Payment Approval Required','Odeme Tamamlanmadi':'Payment Not Completed','Odeme Baslatilamadi':'Payment Could Not Start','Google Play satin alma gecmisi kontrol ediliyor.':'Checking Google Play purchase history.','Geri Yukle':'Restore','Satin Al':'Buy','Satin alma':'Purchase','Aktif':'Active','Acik':'Open','Kapali':'Closed',
+    'Oyunu Kaydet':'Save Game','Kayittan Devam':'Continue Save','Kayittan Devam Et':'Continue Save','Kaydi Sil':'Delete Save','Kayit Yok':'No Save','Devam edilecek bir kayit bulunamadi.':'No save found to continue.','Kaydedilen oyuna geri donuldu.':'Returned to saved game.','Islemler':'Actions','Mevcut Oyun':'Current Game','Son Kayit':'Last Save','Kayit yok':'No save','Baslamadi':'Not started','Kontrat':'Contract','Sahne':'Scene','Ay':'Month','mod':'mode','sahne':'scene','ay':'month',
+    'Telefon':'Phone','Mesaj':'Message','Rehber':'Contacts','Uygulama':'Apps','Ayarlar':'Settings','Fotoğraflar':'Photos','Fotograflar':'Photos','Mail':'Mail','Banka':'Bank','Hava Durumu':'Weather','Notlar':'Notes','Geri':'Back','Album bos':'Album empty','AILE grubuna gonder':'Send to FAMILY group','Tekrar gonder':'Send again','Telefonu ac':'Open phone','Kurs portali':'Course portal','Kurs portalı':'Course portal',
+    'Harita arsivi hazir degil.':'Chart archive is not ready.','Ticaret Rotasi Haritasi':'Trade Route Chart','Transit Haritasi':'Transit Chart','Turkiye Liman Yaklasma Haritasi':'Turkey Port Approach Chart','Harita gorevi dogru tamamlandi; chart okuma zinciri kayda alindi.':'Chart task completed correctly; chart-reading chain logged.','Harita gorevi tamamlandi':'Chart task completed','Alternatif rota cizildi':'Alternative route plotted',
+    'Cihaz egitimi':'Device training','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'Select a device and use the soft-key menus correctly.','Cihaz pratikleri ve acilan tekrar gorevleri.':'Device practice and unlocked review tasks.','Cihaz Egitim Merkezi':'Device Training Center','Cihazlar normal':'Devices normal','Pratik acildi':'Practice opened',
+    'Kritik satirlari duzelt':'Correct critical lines','Hava, rota, CPA, makine alarmi, pilot boarding ve all fast satirlari burada tutulur. Yanlis/eksik satiri duzeltmek bilgi ve sayginlik kazandirir.':'Weather, route, CPA, engine alarm, pilot boarding and all-fast lines are kept here. Correcting a wrong or missing line improves knowledge and respect.','Satir duzeltildi.':'Line corrected.','HAVA':'WEATHER','ROTA':'ROUTE',
+    'Yatak':'Bunk','Masa / Kitap':'Desk / Book','Takvim':'Calendar','Aile Fotografı':'Family Photo','Aile Fotografi':'Family Photo','Canta':'Bag','Spor Lastigi':'Exercise Band','Hava Panosu':'Weather Board','GMDSS Rutini':'GMDSS Routine','Safety Round':'Safety Round','Tank Sounding':'Tank Sounding','Kisa uyu':'Short sleep','Ders calis':'Study','Aileyi ara':'Call family','Spor yap':'Exercise','Hava raporu al':'Get weather report','GMDSS test':'GMDSS test','Sounding al':'Take sounding',
+    'Kopruustu':'Bridge','Makine':'Engine','Guvartede':'On deck','Güverte':'Deck','Kamara':'Cabin','Messroom':'Messroom','Asci':'Cook','Lostromo':'Bosun','Kaptan':'Master','Bas Muhendis':'Chief Engineer','Şirket':'Company','Sirket':'Company','Anne':'Mother','Baba':'Father','Kardes':'Sibling',
+    'Para Yetmedi':'Not Enough Money','Kurs Tamamlandi':'Course Completed','Yeniden Başla':'Restart','Gemide Kal ve Devam Et':'Stay On Board','Ayril / Yeni Oyun':'Leave / New Game','Yeniden Oyna':'Play Again','Ozel gemiler, ileri operasyonlar ve pro kriz paketleri acildi.':'Special ships, advanced operations and pro crisis packs unlocked.'
+  },
+  es:{
+    'Premium Paket':'Paquete premium','Premium Paket Aktif':'Premium activo','Premium Gerekli':'Premium requerido','Premium Paket Ucretli':'Paquete premium de pago','Premium Ucretli Paket':'Paquete premium de pago','Premium Bulunamadi':'Premium no encontrado','Premium Aktif':'Premium activo','Premium Geri Yukleniyor':'Restaurando premium','Geri Yukleme Hazir Degil':'Restauracion no lista','Geri Yukleme Basarisiz':'Restauracion fallida','Odeme Onayi Gerekli':'Aprobacion de pago requerida','Odeme Tamamlanmadi':'Pago no completado','Odeme Baslatilamadi':'No se pudo iniciar el pago','Google Play satin alma gecmisi kontrol ediliyor.':'Comprobando historial de compras de Google Play.','Geri Yukle':'Restaurar','Satin Al':'Comprar','Aktif':'Activo','Acik':'Abierto','Kapali':'Cerrado',
+    'Oyunu Kaydet':'Guardar partida','Kayittan Devam':'Continuar','Kayittan Devam Et':'Continuar','Kaydi Sil':'Borrar guardado','Kayit Yok':'Sin guardado','Devam edilecek bir kayit bulunamadi.':'No hay guardado para continuar.','Islemler':'Acciones','Mevcut Oyun':'Partida actual','Son Kayit':'Ultimo guardado','Kayit yok':'Sin guardado','Baslamadi':'No iniciado','Kontrat':'Contrato','Sahne':'Escena','Ay':'Mes','mod':'modo','sahne':'escena','ay':'mes',
+    'Telefon':'Telefono','Mesaj':'Mensaje','Rehber':'Contactos','Uygulama':'Apps','Ayarlar':'Ajustes','Fotograflar':'Fotos','Mail':'Correo','Banka':'Banco','Hava Durumu':'Tiempo','Notlar':'Notas','Geri':'Atras','Album bos':'Album vacio','AILE grubuna gonder':'Enviar al grupo FAMILIA','Tekrar gonder':'Enviar otra vez','Telefonu ac':'Abrir telefono',
+    'Harita arsivi hazir degil.':'El archivo de cartas no esta listo.','Ticaret Rotasi Haritasi':'Carta de ruta comercial','Transit Haritasi':'Carta de transito','Turkiye Liman Yaklasma Haritasi':'Carta de aproximacion a puerto de Turquia','Harita gorevi tamamlandi':'Tarea de carta completada',
+    'Cihaz egitimi':'Entrenamiento de equipos','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'Selecciona un equipo y usa correctamente los menus soft-key.','Cihaz Egitim Merkezi':'Centro de entrenamiento de equipos','Cihazlar normal':'Equipos normales',
+    'Kritik satirlari duzelt':'Corrige lineas criticas','Satir duzeltildi.':'Linea corregida.','HAVA':'TIEMPO','ROTA':'RUTA','Yatak':'Cama','Masa / Kitap':'Mesa / Libro','Takvim':'Calendario','Aile Fotografi':'Foto familiar','Canta':'Bolsa','Kisa uyu':'Dormir un poco','Ders calis':'Estudiar','Aileyi ara':'Llamar a familia','Spor yap':'Hacer ejercicio','Hava raporu al':'Tomar informe meteo','Kopruustu':'Puente','Makine':'Maquinas','Güverte':'Cubierta','Kamara':'Camarote','Asci':'Cocinero','Lostromo':'Contramaestre','Kaptan':'Capitan','Bas Muhendis':'Jefe de maquinas','Şirket':'Compania','Anne':'Madre','Baba':'Padre','Kardes':'Hermano/a','Para Yetmedi':'Dinero insuficiente','Kurs Tamamlandi':'Curso completado'
+  },
+  de:{
+    'Premium Paket':'Premium-Paket','Premium Paket Aktif':'Premium aktiv','Premium Gerekli':'Premium erforderlich','Premium Paket Ucretli':'Bezahltes Premium-Paket','Premium Ucretli Paket':'Bezahltes Premium-Paket','Premium Bulunamadi':'Premium nicht gefunden','Premium Aktif':'Premium aktiv','Premium Geri Yukleniyor':'Premium wird wiederhergestellt','Geri Yukleme Hazir Degil':'Wiederherstellung nicht bereit','Geri Yukleme Basarisiz':'Wiederherstellung fehlgeschlagen','Odeme Onayi Gerekli':'Zahlungsbestatigung erforderlich','Odeme Tamamlanmadi':'Zahlung nicht abgeschlossen','Odeme Baslatilamadi':'Zahlung konnte nicht gestartet werden','Google Play satin alma gecmisi kontrol ediliyor.':'Google Play Kaufverlauf wird gepruft.','Geri Yukle':'Wiederherstellen','Satin Al':'Kaufen','Aktif':'Aktiv','Acik':'Offen','Kapali':'Geschlossen',
+    'Oyunu Kaydet':'Spiel speichern','Kayittan Devam':'Fortsetzen','Kayittan Devam Et':'Fortsetzen','Kaydi Sil':'Speicherstand loschen','Kayit Yok':'Kein Speicherstand','Devam edilecek bir kayit bulunamadi.':'Kein Speicherstand zum Fortsetzen gefunden.','Islemler':'Aktionen','Mevcut Oyun':'Aktuelles Spiel','Son Kayit':'Letzter Speicherstand','Kayit yok':'Kein Speicherstand','Baslamadi':'Nicht gestartet','Kontrat':'Vertrag','Sahne':'Szene','Ay':'Monat','mod':'Modus','sahne':'Szene','ay':'Monat',
+    'Telefon':'Telefon','Mesaj':'Nachricht','Rehber':'Kontakte','Uygulama':'Apps','Ayarlar':'Einstellungen','Fotograflar':'Fotos','Mail':'Mail','Banka':'Bank','Hava Durumu':'Wetter','Notlar':'Notizen','Geri':'Zuruck','Album bos':'Album leer','AILE grubuna gonder':'An FAMILIE senden','Tekrar gonder':'Erneut senden','Telefonu ac':'Telefon offnen',
+    'Harita arsivi hazir degil.':'Kartenarchiv ist nicht bereit.','Ticaret Rotasi Haritasi':'Handelsroutenkarte','Transit Haritasi':'Transitkarte','Turkiye Liman Yaklasma Haritasi':'Turkei Hafenansteuerungskarte','Harita gorevi tamamlandi':'Kartenaufgabe abgeschlossen',
+    'Cihaz egitimi':'Geratetraining','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'Wahle ein Gerat und nutze die Softkey-Menus korrekt.','Cihaz Egitim Merkezi':'Gerate-Trainingszentrum','Cihazlar normal':'Gerate normal',
+    'Kritik satirlari duzelt':'Kritische Zeilen korrigieren','Satir duzeltildi.':'Zeile korrigiert.','HAVA':'WETTER','ROTA':'ROUTE','Yatak':'Koje','Masa / Kitap':'Tisch / Buch','Takvim':'Kalender','Aile Fotografi':'Familienfoto','Canta':'Tasche','Kisa uyu':'Kurz schlafen','Ders calis':'Lernen','Aileyi ara':'Familie anrufen','Spor yap':'Trainieren','Hava raporu al':'Wetterbericht holen','Kopruustu':'Brucke','Makine':'Maschine','Güverte':'Deck','Kamara':'Kammer','Asci':'Koch','Lostromo':'Bootsmann','Kaptan':'Kapitan','Bas Muhendis':'Leitender Ingenieur','Şirket':'Reederei','Anne':'Mutter','Baba':'Vater','Kardes':'Geschwister','Para Yetmedi':'Nicht genug Geld','Kurs Tamamlandi':'Kurs abgeschlossen'
+  },
+  fr:{
+    'Premium Paket':'Pack premium','Premium Paket Aktif':'Premium actif','Premium Gerekli':'Premium requis','Premium Paket Ucretli':'Pack premium payant','Premium Ucretli Paket':'Pack premium payant','Premium Bulunamadi':'Premium introuvable','Premium Aktif':'Premium actif','Premium Geri Yukleniyor':'Restauration premium','Geri Yukleme Hazir Degil':'Restauration pas prete','Geri Yukleme Basarisiz':'Restauration echouee','Odeme Onayi Gerekli':'Validation paiement requise','Odeme Tamamlanmadi':'Paiement non termine','Odeme Baslatilamadi':'Paiement impossible a lancer','Google Play satin alma gecmisi kontrol ediliyor.':'Verification de l historique Google Play.','Geri Yukle':'Restaurer','Satin Al':'Acheter','Aktif':'Actif','Acik':'Ouvert','Kapali':'Ferme',
+    'Oyunu Kaydet':'Sauvegarder','Kayittan Devam':'Continuer','Kayittan Devam Et':'Continuer','Kaydi Sil':'Supprimer sauvegarde','Kayit Yok':'Aucune sauvegarde','Devam edilecek bir kayit bulunamadi.':'Aucune sauvegarde a continuer.','Islemler':'Actions','Mevcut Oyun':'Partie actuelle','Son Kayit':'Derniere sauvegarde','Kayit yok':'Aucune sauvegarde','Baslamadi':'Non commence','Kontrat':'Contrat','Sahne':'Scene','Ay':'Mois','mod':'mode','sahne':'scene','ay':'mois',
+    'Telefon':'Telephone','Mesaj':'Message','Rehber':'Contacts','Uygulama':'Apps','Ayarlar':'Reglages','Fotograflar':'Photos','Mail':'Mail','Banka':'Banque','Hava Durumu':'Meteo','Notlar':'Notes','Geri':'Retour','Album bos':'Album vide','AILE grubuna gonder':'Envoyer au groupe FAMILLE','Tekrar gonder':'Renvoyer','Telefonu ac':'Ouvrir telephone',
+    'Harita arsivi hazir degil.':'Archive des cartes pas prete.','Ticaret Rotasi Haritasi':'Carte de route commerciale','Transit Haritasi':'Carte de transit','Turkiye Liman Yaklasma Haritasi':'Carte d approche port Turquie','Harita gorevi tamamlandi':'Tache carte terminee',
+    'Cihaz egitimi':'Entrainement appareils','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'Choisis un appareil et utilise correctement les menus soft-key.','Cihaz Egitim Merkezi':'Centre entrainement appareils','Cihazlar normal':'Appareils normaux',
+    'Kritik satirlari duzelt':'Corriger lignes critiques','Satir duzeltildi.':'Ligne corrigee.','HAVA':'METEO','ROTA':'ROUTE','Yatak':'Couchette','Masa / Kitap':'Bureau / Livre','Takvim':'Calendrier','Aile Fotografi':'Photo famille','Canta':'Sac','Kisa uyu':'Dormir un peu','Ders calis':'Etudier','Aileyi ara':'Appeler famille','Spor yap':'Faire sport','Hava raporu al':'Prendre meteo','Kopruustu':'Passerelle','Makine':'Machine','Güverte':'Pont','Kamara':'Cabine','Asci':'Cuisinier','Lostromo':'Bosco','Kaptan':'Capitaine','Bas Muhendis':'Chef mecanicien','Şirket':'Compagnie','Anne':'Mere','Baba':'Pere','Kardes':'Frere/soeur','Para Yetmedi':'Argent insuffisant','Kurs Tamamlandi':'Cours termine'
+  },
+  zh:{
+    'Premium Paket':'高级包','Premium Paket Aktif':'高级包已激活','Premium Gerekli':'需要高级包','Premium Paket Ucretli':'付费高级包','Premium Ucretli Paket':'付费高级包','Premium Bulunamadi':'未找到高级包','Premium Aktif':'高级已激活','Premium Geri Yukleniyor':'正在恢复高级包','Geri Yukleme Hazir Degil':'恢复未就绪','Geri Yukleme Basarisiz':'恢复失败','Odeme Onayi Gerekli':'需要付款确认','Odeme Tamamlanmadi':'付款未完成','Odeme Baslatilamadi':'无法启动付款','Google Play satin alma gecmisi kontrol ediliyor.':'正在检查 Google Play 购买记录。','Geri Yukle':'恢复购买','Satin Al':'购买','Aktif':'激活','Acik':'开启','Kapali':'关闭',
+    'Oyunu Kaydet':'保存游戏','Kayittan Devam':'继续存档','Kayittan Devam Et':'继续存档','Kaydi Sil':'删除存档','Kayit Yok':'无存档','Devam edilecek bir kayit bulunamadi.':'没有可继续的存档。','Islemler':'操作','Mevcut Oyun':'当前游戏','Son Kayit':'最近存档','Kayit yok':'无存档','Baslamadi':'未开始','Kontrat':'合同','Sahne':'场景','Ay':'月','mod':'模式','sahne':'场景','ay':'月',
+    'Telefon':'手机','Mesaj':'消息','Rehber':'联系人','Uygulama':'应用','Ayarlar':'设置','Fotograflar':'照片','Mail':'邮件','Banka':'银行','Hava Durumu':'天气','Notlar':'笔记','Geri':'返回','Album bos':'相册为空','AILE grubuna gonder':'发送到家庭群','Tekrar gonder':'再次发送','Telefonu ac':'打开手机',
+    'Harita arsivi hazir degil.':'海图库尚未准备好。','Ticaret Rotasi Haritasi':'贸易航线海图','Transit Haritasi':'过境海图','Turkiye Liman Yaklasma Haritasi':'土耳其港口进港海图','Harita gorevi tamamlandi':'海图任务完成',
+    'Cihaz egitimi':'设备训练','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'选择设备并正确使用软键菜单。','Cihaz Egitim Merkezi':'设备训练中心','Cihazlar normal':'设备正常',
+    'Kritik satirlari duzelt':'修正关键日志行','Satir duzeltildi.':'日志行已修正。','HAVA':'天气','ROTA':'航线','Yatak':'床铺','Masa / Kitap':'桌子 / 书','Takvim':'日历','Aile Fotografi':'家庭照片','Canta':'包','Kisa uyu':'小睡','Ders calis':'学习','Aileyi ara':'给家人打电话','Spor yap':'锻炼','Hava raporu al':'获取天气报告','Kopruustu':'驾驶台','Makine':'机舱','Güverte':'甲板','Kamara':'舱室','Asci':'厨师','Lostromo':'水手长','Kaptan':'船长','Bas Muhendis':'轮机长','Şirket':'公司','Anne':'母亲','Baba':'父亲','Kardes':'兄弟姐妹','Para Yetmedi':'余额不足','Kurs Tamamlandi':'课程完成'
+  }
+};
+Object.keys(LOCALIZE_COMMON_EXACTS).forEach(lang=>{
+  LOCALIZE_EXACTS[lang]=Object.assign({}, LOCALIZE_COMMON_EXACTS[lang], LOCALIZE_EXACTS[lang] || {});
+});
 const staticTextSource = new WeakMap();
+let languageObserver=null;
+let languageObserverPaused=false;
 function localizeStaticText(value){
   const text=String(value ?? '');
   if(gameLanguage==='tr') return text;
@@ -9070,6 +9125,7 @@ function shouldSkipLocalizationNode(node){
   return !!p.closest('script,style,svg,canvas,#gfx-svg,#port-chart-svg,#map-svg,#clock-canvas');
 }
 function localizeStaticDom(root=document){
+  languageObserverPaused=true;
   const walker=document.createTreeWalker(root.body || root, NodeFilter.SHOW_TEXT, {
     acceptNode(node){
       if(shouldSkipLocalizationNode(node)) return NodeFilter.FILTER_REJECT;
@@ -9088,6 +9144,47 @@ function localizeStaticDom(root=document){
     if(!el.dataset.sourcePlaceholder) el.dataset.sourcePlaceholder=el.getAttribute('placeholder') || '';
     el.setAttribute('placeholder', gameLanguage==='tr' ? el.dataset.sourcePlaceholder : localizeStaticText(el.dataset.sourcePlaceholder));
   });
+  setTimeout(()=>{ languageObserverPaused=false; },0);
+}
+function initLanguageMutationObserver(){
+  if(languageObserver || typeof MutationObserver === 'undefined') return;
+  languageObserver=new MutationObserver(mutations=>{
+    if(languageObserverPaused || gameLanguage==='tr') return;
+    const roots=[];
+    mutations.forEach(m=>{
+      m.addedNodes?.forEach(node=>{
+        if(node.nodeType===Node.ELEMENT_NODE) roots.push(node);
+        else if(node.nodeType===Node.TEXT_NODE && node.parentElement) roots.push(node.parentElement);
+      });
+    });
+    if(!roots.length) return;
+    languageObserverPaused=true;
+    requestAnimationFrame(()=>{
+      roots.forEach(root=>localizeStaticDom(root));
+      languageObserverPaused=false;
+    });
+  });
+  languageObserver.observe(document.body,{childList:true,subtree:true});
+}
+function panelIsOpen(id){
+  return !!document.getElementById(id)?.classList.contains('show');
+}
+function rerenderLanguageSensitivePanels(){
+  if(panelIsOpen('map-panel')) renderMap();
+  if(panelIsOpen('devices-panel')) renderDevices();
+  if(panelIsOpen('sim-panel')) renderSimCenter();
+  if(panelIsOpen('notes-panel')) renderNotes();
+  if(panelIsOpen('journal-panel')) renderJournal();
+  if(panelIsOpen('career-panel')) renderCareerPanel();
+  if(panelIsOpen('logbook-panel')) renderLiveLogbook();
+  if(panelIsOpen('cabin-panel')) renderCabin();
+  if(panelIsOpen('shipwalk-panel')) renderShipWalk();
+  if(panelIsOpen('album-panel')) renderAlbum();
+  if(document.getElementById('crew')?.classList.contains('open')) renderCrewCards();
+  if(phoneOpen) renderPhone();
+  renderCharacterCreator();
+  updateGuidanceStrip(sceneQueue?.[currentIdx]);
+  updateMissionDirector(sceneQueue?.[currentIdx]);
 }
 function setGameLanguage(lang){
   gameLanguage=GAME_LANGUAGES[lang] ? lang : 'tr';
@@ -9095,15 +9192,13 @@ function setGameLanguage(lang){
   applyLanguageUI();
   renderPlayModeSelector();
   renderSavePanel();
-  renderPhone();
-  if(document.getElementById('notes-panel')?.classList.contains('show')) renderNotes();
-  if(document.getElementById('devices-panel')?.classList.contains('show')) renderDevices();
-  if(document.getElementById('sim-panel')?.classList.contains('show')) renderSimCenter();
+  rerenderLanguageSensitivePanels();
   if(sceneQueue && sceneQueue.length && document.getElementById('game')?.style.display!=='none'){
     renderScene(currentIdx);
   }else{
     refreshSaveEntryActions();
   }
+  localizeStaticDom(document);
 }
 let mood=58;
 let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
@@ -12310,6 +12405,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
 }
 
 function applyLanguageUI(){
+  initLanguageMutationObserver();
   const lang = GAME_LANGUAGES[gameLanguage] ? gameLanguage : 'tr';
   gameLanguage = lang;
   document.documentElement.lang = lang;
@@ -21308,15 +21404,17 @@ function openAlbum(){
   if(!canUseFeature('album')) return;
   const p = document.getElementById('album-panel');
   p.classList.add('show');
-  // Rebuild album content
-  // Remove old photo cards
-  const oldCards = p.querySelectorAll('.album-photo');
-  oldCards.forEach(c => c.remove());
-  
+  renderAlbum();
+}
+function renderAlbum(){
+  const p = document.getElementById('album-panel');
+  if(!p) return;
+  p.querySelectorAll('.album-photo,.album-empty').forEach(c => c.remove());
   if(photos.length === 0){
     const empty = document.createElement('div');
+    empty.className = 'album-empty';
     empty.style.cssText = 'color:var(--text3);font-size:13px;padding:20px;text-align:center;width:100%;';
-    empty.textContent = 'Henüz fotoğraf yok. Önemli anlarda otomatik çekilecek.';
+    empty.textContent = translateGameText('Henüz fotoğraf yok. Önemli anlarda otomatik çekilecek.');
     p.appendChild(empty);
     return;
   }
@@ -21325,11 +21423,12 @@ function openAlbum(){
     div.className = 'album-photo';
     const mini = GFX[ph.svgKey] || GFX.sea;
     div.innerHTML = `<svg class="photo-img" viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${mini}</svg>
-      <div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:2px;">${ph.title}</div>
-      <div class="photo-cap">${ph.caption}</div>
-      <div style="font-size:8px;color:var(--text3);margin-top:2px;">Gün ${ph.day}</div>`;
+      <div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:2px;">${translateGameText(ph.title)}</div>
+      <div class="photo-cap">${translateGameText(ph.caption)}</div>
+      <div style="font-size:8px;color:var(--text3);margin-top:2px;">${translateGameText('Gün')} ${ph.day}</div>`;
     p.appendChild(div);
   });
+  localizeStaticDom(p);
 }
 function closeAlbum(){ document.getElementById('album-panel').classList.remove('show'); }
 
