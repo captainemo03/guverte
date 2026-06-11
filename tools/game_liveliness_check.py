@@ -18,6 +18,7 @@ INDEX_HTML = ROOT / "www" / "index.html"
 ANDROID_BILLING = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteBillingBridge.java"
 ANDROID_MAIN = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "MainActivity.java"
 ANDROID_GRADLE = ROOT / "android" / "app" / "build.gradle"
+ANDROID_MANIFEST = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
 
 
 CHECKS = {
@@ -96,6 +97,7 @@ CHECKS = {
         "purchasePremium",
         "restorePremium",
         "premium_full_pack",
+        "com.android.vending.BILLING",
     ],
     "complexity and save flow": [
         "PLAY_MODE_DEFS",
@@ -192,7 +194,8 @@ def main() -> int:
     android_billing = read_text(ANDROID_BILLING) if ANDROID_BILLING.exists() else ""
     android_main = read_text(ANDROID_MAIN) if ANDROID_MAIN.exists() else ""
     android_gradle = read_text(ANDROID_GRADLE) if ANDROID_GRADLE.exists() else ""
-    all_text = "\n".join([js, html, android_billing, android_main, android_gradle])
+    android_manifest = read_text(ANDROID_MANIFEST) if ANDROID_MANIFEST.exists() else ""
+    all_text = "\n".join([js, html, android_billing, android_main, android_gradle, android_manifest])
     missing: list[str] = []
 
     for group, needles in CHECKS.items():
