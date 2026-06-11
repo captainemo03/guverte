@@ -9172,7 +9172,7 @@ function getPlayerPortraitConfig(){
     portraitSheet,
     sheetCols:4,
     sheetRows:2,
-    sheetIndex:modelMeta.sheetIndex,
+    sheetIndex:Number.isInteger(modelMeta.sheetIndex) ? modelMeta.sheetIndex : resolvePortraitIndexFromConfig(playerAppearance),
     bg:'bridge'
   };
 }
@@ -9383,6 +9383,13 @@ function syncPlayerAppearanceFromModel(){
   playerAppearance.hairColor = preset.hairColor;
 }
 
+function syncPlayerModelFromTraits(){
+  const pool = getPlayerModelPool(playerAppearance.base, playerAppearance.age);
+  const resolved = resolvePlayerModelFromTraits();
+  playerAppearance.model = pool.includes(resolved) ? resolved : pool[0];
+  if(playerAppearance.base === 'female') playerAppearance.beard = 'clean';
+}
+
 function resolvePlayerModelFromTraits(){
   if(playerAppearance.base==='female'){
     if(playerAppearance.hair==='ponytail') return 9;
@@ -9418,7 +9425,6 @@ function resolvePlayerModelFromTraits(){
 
 function setPlayerBase(base){
   playerAppearance.base = base;
-  playerAppearance.model = getPlayerModelPool(base, playerAppearance.age)[0];
   if(base === 'female'){
     playerAppearance.beard = 'clean';
     if(!['bun','slick','waves','bob','crop','curly','long','ponytail','braid'].includes(playerAppearance.hair)) playerAppearance.hair = 'waves';
@@ -9426,6 +9432,7 @@ function setPlayerBase(base){
     if(!['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'].includes(playerAppearance.hair)) playerAppearance.hair = 'quiff';
     if(!playerAppearance.beard || playerAppearance.beard === 'clean') playerAppearance.beard = 'trim';
   }
+  syncPlayerModelFromTraits();
 }
 
 function getPortraitSpriteIndex(cfg={}){
@@ -9994,14 +10001,14 @@ function renderCreatorRow(elId, values, selected, kind){
     b.onclick=()=>{
       if(elId==='creator-skin') playerAppearance.skin=v;
       else if(elId==='creator-base') setPlayerBase(v);
-      else if(elId==='creator-age'){ playerAppearance.age=v; if(!getPlayerModelPool(playerAppearance.base, playerAppearance.age).includes(playerAppearance.model)) playerAppearance.model = getPlayerModelPool(playerAppearance.base, playerAppearance.age)[0]; }
+      else if(elId==='creator-age'){ playerAppearance.age=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-pose') playerAppearance.pose=v;
       else if(elId==='creator-scene') playerAppearance.scene=v;
       else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
-      else if(elId==='creator-face') playerAppearance.face=v;
-      else if(elId==='creator-hair') playerAppearance.hair=v;
-      else if(elId==='creator-beard') playerAppearance.beard=v;
-      else if(elId==='creator-haircolor') playerAppearance.hairColor=v;
+      else if(elId==='creator-face'){ playerAppearance.face=v; syncPlayerModelFromTraits(); }
+      else if(elId==='creator-hair'){ playerAppearance.hair=v; syncPlayerModelFromTraits(); }
+      else if(elId==='creator-beard'){ playerAppearance.beard=v; syncPlayerModelFromTraits(); }
+      else if(elId==='creator-haircolor'){ playerAppearance.hairColor=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-eye') playerAppearance.eye=v;
       else if(elId==='creator-uniform') playerAppearance.uniform=v;
       renderCharacterCreator();
@@ -14529,6 +14536,7 @@ let portChartDidPan = false;
 let activeMapTaskIndex = 0;
 const completedMapTasks = new Set();
 let mapRouteDraftPoints = [];
+const mapTaskWrongAttempts = {};
 let lastAutoVoyageChartScene = '';
 
 const MAP_TASKS = [
@@ -14825,6 +14833,10 @@ function selectMapTask(index){
   renderMap();
 }
 
+function getMapTaskAttemptKey(task, port){
+  return `${task?.id || 'task'}::${port?.name || selectedPortChart || 'chart'}`;
+}
+
 function getMapTaskShortLabel(task){
   const labels = {
     pilot:'PILOT',
@@ -14987,6 +14999,7 @@ function handlePortChartTaskClick(svg, ev, port){
   const dist = Math.hypot(x-target.x, y-target.y);
   if(dist <= target.tol){
     completedMapTasks.add(task.id);
+    mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
     const training = getMapTaskTraining(task.id);
     if(status){
       status.className = '';
@@ -14999,11 +15012,17 @@ function handlePortChartTaskClick(svg, ev, port){
   }else if(status){
     const near = dist <= target.tol * 1.75;
     const training = getMapTaskTraining(task.id);
+    const attemptKey = getMapTaskAttemptKey(task, port);
+    const wrongCount = near ? 0 : ((mapTaskWrongAttempts[attemptKey] || 0) + 1);
+    mapTaskWrongAttempts[attemptKey] = wrongCount;
+    const penaltyNow = !near && wrongCount >= 3 && wrongCount % 3 === 0;
     status.className = near ? 'warn' : 'bad';
     status.textContent = near
-      ? `Yaklastin. ${training.focus} Bilgi cezasi yok.`
-      : `Hedef bu degil. ${training.wrong} Sadece kucuk egitim cezasi uygulandi.`;
-    if(!near){
+      ? `Yaklastin. ${training.focus} Bilgi cezasi yok; sembol/derinlik/rota iliskisini tekrar kontrol et.`
+      : penaltyNow
+        ? `Hedef bu degil. ${training.wrong} Uc uzak denemeden sonra sadece -1 bilgi egitim cezasi uygulandi.`
+        : `Hedef bu degil. ${training.wrong} Ceza yok; ${Math.max(0, 3-wrongCount)} uzak deneme sonra kucuk egitim cezasi gelir.`;
+    if(penaltyNow){
       applyEffect({bilgi:-1},{skipContractTick:true});
       addLiveLogbook('HARITA HATASI', `${task.title}: ${training.wrong}`, true);
     }

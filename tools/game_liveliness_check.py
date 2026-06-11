@@ -106,7 +106,17 @@ CHECKS = {
         "NO-GO / SHALLOW WATER",
         "SAFETY DEPTH",
         "Yaklastin",
+        "mapTaskWrongAttempts",
+        "Uc uzak denemeden sonra",
         "applyEffect({bilgi:-1}",
+    ],
+    "character creator reliability": [
+        "syncPlayerModelFromTraits",
+        "resolvePlayerModelFromTraits",
+        "creator-hair",
+        "creator-beard",
+        "creator-face",
+        "renderPortraitTargets",
     ],
     "simulation flow pack": [
         "MAP_TASK_TRAINING",
@@ -174,7 +184,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 91:
+    elif int(js_versions[-1]) < 92:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
