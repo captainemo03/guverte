@@ -22,6 +22,47 @@ Premium paket tek seferlik satin alma olarak tasarlanmistir.
 9. Urunu aktif hale getir.
 10. Test icin Play Console lisans test kullanicisi ekle.
 
+## Play Console'da Takilirsan
+
+Premium urun olusturamiyorsan genelde sebep su dort seyden biridir:
+
+1. Odeme profili yoktur.
+   - Play Console'da `Setup > Payments profile` veya `Monetize with Play` tarafinda odeme profili kurulmalidir.
+   - Google senden sirket/kisi bilgisi, adres, vergi ve banka bilgisi isteyebilir.
+
+2. Uygulama henuz Play Console'a AAB olarak yuklenmemistir.
+   - Once `Release > Testing > Internal testing` bolumune gir.
+   - Yeni release olustur.
+   - `android/app/release/app-release.aab` veya yeni uretilen AAB dosyasini yukle.
+   - Release'i internal testing'e gonder.
+
+3. Urun aktif degildir.
+   - `Monetize with Play > Products > In-app products` icinde `premium_full_pack` urunune gir.
+   - Sag ustte veya sayfa sonunda `Activate` / `Etkinlestir` butonu varsa bas.
+   - Sadece kaydetmek yetmez; aktif olmasi gerekir.
+
+4. Ulke / fiyat eksiktir.
+   - Fiyat alaninda Turkiye icin `75 TL` gir.
+   - Uygulama ulke dagitiminda Turkiye acik olsun.
+
+## En Kolay Test Sirasi
+
+1. Play Console'da internal testing'e AAB yukle.
+2. Test kullanicisi olarak kendi Gmail adresini ekle.
+3. `premium_full_pack` urununu olustur.
+4. Fiyat: `75 TL`
+5. Urunu `Activate` et.
+6. Telefonda oyunu Play Store internal test linkinden yukle.
+7. Oyunda `75 TL Satin Al` butonuna bas.
+
+Eger odeme ekraninda urun bulunamiyorsa once su ucunu kontrol et:
+
+```text
+Product ID ayni mi? premium_full_pack
+Urun aktif mi?
+Oyunu Play Store internal test surumunden mi yukledin?
+```
+
 ## Kod Tarafi
 
 Web tarafinda satin alma butonu hazir:
