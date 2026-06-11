@@ -58,6 +58,19 @@ invalid source release: 21
 ```
 
 Android Studio'da Gradle JDK ayarini JDK 21 yap veya sistemde `JAVA_HOME` degerini JDK 21'e goster.
+Bu makinede Android Studio JBR su yolda bulundu:
+
+```text
+C:\Program Files\Android\Android Studio\jbr
+```
+
+Komut satirindan derlerken gerekirse:
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+.\gradlew.bat :app:compileDebugJavaWithJavac
+```
 
 ## Onemli
 
