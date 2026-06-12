@@ -2645,6 +2645,44 @@ choices:[
 {text:"Süvariyi kaptana bağla, o konuşsun",tag:"itaatkar",effect:{sayginlik:5,bilgi:5}},
 {text:"Sahil güvenlik zaten duymuştur diye devam et",tag:"korkak",effect:{sayginlik:-15,cesaret:-10}}]},
 
+{id:"s_starlink01",gfx:"bridge",alert:false,day:"Gun 8",time:"21:15",loc:"Kopruustu - Starlink Status",sub:"Uydu internet var ama GMDSS yerine gecmez",who:"z2",
+text:`Gece vardiyasinda SeaPhone bildirim verdi: Starlink latency bir anda 118 ms oldu, obstruction haritasi kirmiziya dondu.
+
+2. Zabiti ekrana bakip seni cagirdi:
+"Aile gorusmesi donsun diye antene rastgele reset atmayacagiz. Operasyon maili, hava datasi ve crew Wi-Fi ayni hattan geciyor. Once network health ve obstruction map okunur. Distress haberlesmesi icin de GMDSS zinciri ayridir."
+
+Ne yaparsin?`,
+choices:[
+{text:"Cihazlar > Starlink'te network health, obstruction map, data priority ve VSAT failover sirayla kontrol ederim",tag:"kritik",effect:{bilgi:15,sayginlik:10,dinclik:-2}},
+{text:"Crew Wi-Fi'yi kisip operasyon VLAN'ina oncelik verir, sonucu logbook'a yazarim",tag:"akilli",effect:{bilgi:12,sayginlik:8}},
+{text:"Internet gidince VHF yerine WhatsApp'tan bilgi toplamaya calisirim",tag:"hileli",effect:{bilgi:-11,sayginlik:-9}},
+{text:"Anten reset tusuna basarim, detaylara sonra bakarim",tag:"korkak",effect:{bilgi:-9,sayginlik:-7}}]},
+
+{id:"s_starlink02",gfx:"storm",alert:true,day:"Gun 9",time:"03:40",loc:"Açık Deniz - Fırtına / Uydu Anteni",sub:"Swell anten gorusunu bozuyor",who:"suvari",
+text:`Firtina buyudu. Camdan su akiyor, gemi bas-kic vuruyor. Şirket maili bekleniyor ama Starlink kisa kisa kopuyor.
+
+Süvari sakin ama net:
+"Raporu geciktirmeyecegiz ama interneti de emniyet sistemlerinin yerine koymayacagiz. Bana alternatif haberlesme planini, log kaydini ve operasyon onceligini soyle."
+
+Köprüüstünde herkes sana bakti.`,
+choices:[
+{text:"Starlink health logunu alir, gerekiyorsa Inmarsat/telefon/VHF zinciriyle alternatif rapor planini kurarim",tag:"kritik",effect:{bilgi:16,sayginlik:12,cesaret:4}},
+{text:"Ofise kisa gecikme notu atar, rapor eklerini baglanti normale donunce gonderirim",tag:"akilli",effect:{bilgi:11,sayginlik:8}},
+{text:"Internet yoksa rapor da yok der, vardiya sonuna birakirim",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}},
+{text:"Aile gorusmeleri kesilmesin diye operasyon verisini bekletirim",tag:"hileli",effect:{bilgi:-12,sayginlik:-11,dinclik:-3}}]},
+
+{id:"s_starlink03",gfx:"cabin",alert:false,day:"Gun 10",time:"19:20",loc:"Kamara - Aile Goruntulu Arama",sub:"Moral ile vardiya disiplini dengesi",who:"anlatici",
+text:`Vardiyadan ciktin. Telefonun titredi: AILE grubunda herkes online. Starlink bu kez iyi cekiyor.
+
+Ama 20 dakika sonra GMDSS test tekrar gorevin var. Kardesin "Hadi uzun konusalim, senin gemiyi gorelim" diye yazdi.
+
+Bu baglanti moral icin iyi; ama zaman yonetimi yine senin sorumlulugun.`,
+choices:[
+{text:"Aileyle kisa ve temiz gorusur, sonra GMDSS/Starlink notlarini tamamlarim",tag:"kritik",effect:{dinclik:8,bilgi:8,sayginlik:5}},
+{text:"Aileye biraz zaman ayirir, alarm kurup teste gec kalmam",tag:"sosyal",effect:{dinclik:10,sayginlik:4,bilgi:3}},
+{text:"Uzun konusur, cihaz tekrarini yarina birakirim",tag:"korkak",effect:{dinclik:4,bilgi:-8,sayginlik:-5}},
+{text:"Baglanti iyi diye vardiya dinlenmesini tamamen telefonda harcarim",tag:"hileli",effect:{dinclik:-10,bilgi:-4,sayginlik:-4}}]},
+
 ...createStabilityScenes(n,sn),
 
 {id:"s103",gfx:"bridge",alert:false,day:"Gun 8",time:"10:40",loc:"Suvari Kamarasi - Evrak Masasi",sub:"Notice of Readiness nedir?",who:"suvari",
@@ -13317,6 +13355,7 @@ function beginGame(){
   deviceChartOverlayState={radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
   devicePracticeProgress={};
   devicePracticeScore={ok:0,total:0};
+  starlinkStatus={online:true, latency:42, obstruction:3, plan:'Crew + operational data', lastCheck:'--:--'};
   missionDirectorState={sceneId:'', title:'', steps:[], completed:[]};
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
@@ -14792,6 +14831,7 @@ function buildSavePayload(){
     deviceFaultState,
     devicePracticeProgress,
     devicePracticeScore,
+    starlinkStatus,
     watchCycleLog,
     scenesSinceEvent,
     nextEventAt,
@@ -14912,6 +14952,7 @@ function applyLoadedGameState(data){
   deviceFaultState = data.deviceFaultState || {radar:false,ecdis:false,gyro:false,ais:false};
   devicePracticeProgress = data.devicePracticeProgress || {};
   devicePracticeScore = data.devicePracticeScore || {ok:0,total:0};
+  starlinkStatus = data.starlinkStatus && typeof data.starlinkStatus === 'object' ? {...starlinkStatus, ...data.starlinkStatus} : starlinkStatus;
   phoneOpen = false;
   watchCycleLog = data.watchCycleLog || {handovers:0, logbook:0, portPrep:0};
   scenesSinceEvent = data.scenesSinceEvent || 0;
@@ -16994,6 +17035,7 @@ const STUDENT_NOTES = [
   {head:"ILK YARDIMDA ILK ADIMLAR", body:"<b>1. Sahayi emniyete al</b>: once kendini ve ortamı koru; elektrik, duman, gaz, dusme riski varsa kontrolsuz yaklasma.<br><b>2. Bilinc kontrolu</b>: sesli ve hafif dokunsal uyariyla tepki var mi bak.<br><b>3. Solunum ve hava yolu</b>: hava yolunu ac, normal solunum var mi degerlendir.<br><b>4. Yardim cagir</b>: amire, bridge'e veya medical support zincirine net bilgi ver.<br><b>5. Kanama kontrolu</b>: dogrudan basiyla durdurmaya calis; buyuk kanamada zaman kaybetme.<br><b>6. Yanikta</b>: uygun sogutma yap, yag/kimyasal/elektrik ayrimini dusun, rastgele krem-surme hatasina dusme.<br><b>7. Dumandan etkilenmede</b>: temiz hava, bilinç-solunum takibi ve ileri yardim zinciri onceliklidir.<br><b>8. Supheli kirik / dusme</b>: gereksiz oynatma; omurga veya boyun riski varsa sabitleyerek bekle.<br><b>9. Kayit</b>: saat, belirti ve yapilan ilk mudahale not edilir; gemide bilgi kaybolmasin.", tip:"Ilk yardim kahramanlik degil; sirayi bozmadan hayat fonksiyonlarini koruma isidir."},
   {head:"DEMIR ZINCIRI / KILIT MARKALARI", body:"Bir kilit / shackle genelde <b>15 fathom</b> yani yaklasik <b>27.5 metre</b> kabul edilir.<br>Zincir marking sisteminde joining shackle cevresindeki boyali baklalar ve tel sargilari hangi kilidin suda oldugunu hizlica anlamak icin kullanilir.<br>Gemiden gemiye renk ve tel duzeni degisebilir; esas olan geminin kendi <b>chain marking plan</b>ini bilmektir.<br>Pruva ustunde rapor verirken 'birinci kilit suya girdi', 'ucuncu kilit suya girdi' gibi net ve yuksek sesli ifade kullanilir.<br>Kaloma verirken sadece sayi degil; zincirin hizi, fren durumu ve davranisi da izlenir.", tip:"Ezber renk degil, gemide uygulanan marking sistemi esastir."},
   {head:"ACIL HABERLESME", body:"MAYDAY distress, PAN-PAN urgency, SECURITE emniyet yayini icindir.<br>Mesajda gemi adi, callsign, pozisyon, tehlikenin cinsi, yardim ihtiyaci ve kisi sayisi acik verilir.<br>GMDSS, EPIRB, SART, NAVTEX, DSC, handheld VHF ve emergency battery kayitlari bilinir.", tip:"Netlik hiz kadar onemlidir."},
+  {head:"STARLINK / UYDU INTERNET", body:"<b>Starlink Maritime</b> gemide LEO uydu interneti saglar; aile mesajlari, kurs portali, sirket maili, hava dosyalari ve operasyon verisi icin faydalidir.<br><b>LEO</b> dusuk yorungeli uydu mantigidir; gecikme klasik GEO/VSAT sistemlerine gore daha dusuk olabilir ama anten gorusu, obstruction, hava ve plan onceligi yine izlenir.<br><b>Obstruction map</b> antenin gokyuzunu ne kadar temiz gordugunu anlatir; vinç, baca, mast, konteyner veya ust yapi sinyal kalitesini bozabilir.<br><b>Latency / jitter</b> goruntulu arama, mail eki ve uzaktan destek kalitesini etkiler.<br><b>Crew Wi-Fi</b> ile <b>ops network</b> ayrimi onemlidir; operasyon maili, hava verisi ve cihaz raporu aile internetiyle ayni oncelikte dusunulmez.<br><b>Failover</b> baglanti bozulunca VSAT/Inmarsat-C/liman 4G gibi yedek haberlesme planina gecme mantigidir.<br><br><b>Kritik ayrim:</b> Starlink konfor ve operasyon internetidir; VHF DSC, MF/HF, Inmarsat-C distress, EPIRB ve SART gibi GMDSS emniyet zincirinin yerine gecmez.", tip:"Internet iyi olabilir; ama distress zinciri ayri ve prosedurludur."},
   {head:"GMDSS / HABERLESME CIHAZLARI", body:"<b>VHF DSC</b> kisa mesafe distress / urgency / safety ve CH16 nobet disiplininin temelidir.<br><b>MF/HF DSC</b> daha uzak mesafe haberlesme ve uygun frekans secimiyle dusunulur.<br><b>NAVTEX</b> navigational ve meteorological warning alir; baski / printer / mesaj secimi onemlidir.<br><b>EGC / SafetyNET</b> genelde Inmarsat-C uzerinden MSI ve safety message alir.<br><b>Inmarsat-C</b> text tabanli haberlesme, distress, reporting ve mesajlasmada kullanilir.<br><b>EPIRB</b> acil durumda COSPAS-SARSAT uydu sistemine distress beacon gonderir.<br><b>SART</b> arama-kurtarmada radar cevaplayici olarak hedef bulunurlugunu artirir.<br><b>AIS</b> trafik farkindaligi ve hedef tanimlamada yardimcidir; radar ve gorsel teyidin yerine gecmez.<br><br><b>GMDSS Sea Areas</b>:<br><b>A1</b> VHF DSC kapsamasinda yakin denizler<br><b>A2</b> MF DSC kapsamasina kadar uzayan bolgeler<br><b>A3</b> Inmarsat kapsamasindaki acik denizler<br><b>A4</b> kutup / Inmarsat disi yuksek enlem alanlari; HF dusuncesi agir basar.<br><br><b>RCC/MRCC</b> distress sonrasinda arama-kurtarma koordinasyon zincirini yurutur.<br><b>Pratik mantik:</b> Hangi cihazin ne zaman, hangi menzilde ve hangi maksatla kullanilacagini bilmek gerekir.", tip:"Cihazi tanimak yetmez; hangi acilde hangisine uzanacagini da bil."},
   {head:"METEOROLOJI / BULUTLAR", body:"<b>Cumulus</b> gun icinde dikey gelisebilen pamuksu buluttur; hava iyi de olabilir ama buyurse shower'a gider.<br><b>Cirrus</b> ince ve tuy gibi ust seviye buz bulutudur; yaklasan front'un habercisi olabilir.<br><b>Stratus</b> alcak, yaygin ve tek katman gibi gorunur; gorus ve drizzle etkisi yaratabilir.<br><b>Nimbostratus</b> uzun sureli ve yaygin yagisin bulutudur.<br><b>Cumulonimbus (CB)</b> dikey gelisimi cok guclu firtina bulutudur; saganak, yildirim, squall ve ani ruzgar bekletir.<br><b>Altocumulus</b> orta seviyede parcali-kumeli gorunum. Hava degisimi ve dengesizlik ipucu verebilir.<br><b>Altostratus</b> gunesi solduran gri tabaka gibidir; front yaklasmasinda sik gorulur.<br><b>Fog / mist</b> sadece yatay gorusu degil, ses ve radar yorumunu da etkiler.<br><b>Barometer trendi</b>, ruzgar donusu, swell ve bulut tipi birlikte okunur; tek bir buluta bakip kesin hukum verilmez.<br><br>"+buildCloudGallery()+buildSeaStateGallery()+buildFogGallery()+buildFrontGallery(), tip:"Bulut gormek yetmez; hangi seviyede oldugunu ve neye donusebilecegini de dusun."},
   {head:"RUZGAR YONLERI / DERECELER", body:"Ruzgar denizde <b>nereye gittigine gore degil</b>, <b>nereden geldigine gore</b> adlandirilir.<br><b>Pruvadan</b> gelen ruzgar 000°/360°, <b>pupadan</b> gelen ruzgar 180° kabul edilir.<br><b>Kemere</b> tam bordadan gelen ruzgardir; sancak kemere 090°, iskele kemere 270° diye okunur.<br><b>Bas omuzluk</b> 45°'lik on ceyrek, <b>kic omuzluk</b> ise 135° / 225° taraflaridir.<br><b>Geleneksel adlar</b>: 000° Yildiz, 045° Poyraz, 090° Gundogusu, 135° Kesishleme, 180° Kible, 225° Lodos, 270° Gunbatisi, 315° Karayel.<br>Brifinglerde 'ruzgar sancak bas omuzluktan 4 bofor' gibi kisa ve net ifade kullanilir.<br><br>"+buildWindRoseDiagram(), tip:"Ruzgar yonu rapor ederken once gemi referansini dusun: pruva, pupa, iskele, sancak."},
@@ -17957,6 +17999,14 @@ const GLOSSARY_TERMS = [
   ,{term:"Fail-Safe", meaning:"Ariza halinde sistemi daha emniyetli duruma gecirecek tasarim mantigi.", example:"Fail-safe vana enerjisi kesilince kapandi."}
   ,{term:"Blackout Recovery", meaning:"Gemide elektrik kaybi sonrasi jeneratör, switchboard ve kritik sistemleri geri alma sureci.", example:"Blackout recovery sirasi ezbere degil prosedurle yapilir."}
   ,{term:"Dead Ship", meaning:"Geminin kendi gucuyle sevk ve elektrik uretemedigi ciddi durum.", example:"Dead ship condition icin acil cekme ve haberlesme planlandi."}
+  ,{term:"Starlink Maritime", meaning:"Gemilerde dusuk yorungeli uydu interneti saglayan sistem; operasyon verisi, mail, hava dosyasi ve crew interneti icin kullanilir ama GMDSS yerine gecmez.", example:"Starlink Maritime kopunca zabit once network health ve failover planini kontrol etti."}
+  ,{term:"LEO Satellite", meaning:"Low Earth Orbit; dusuk yorungede calisan uydu tipi. Gecikme dusuk olabilir ama anten gorusu ve kapsama takip ister.", example:"LEO satellite baglantisinda latency iyiydi ama obstruction artinca goruntulu arama dondu."}
+  ,{term:"Obstruction Map", meaning:"Uydu anteninin gokyuzu gorusunu neyin kapattigini gosteren harita/ekran.", example:"Baca ve vinç obstruction map uzerinde kirmizi alan yaratti."}
+  ,{term:"Latency", meaning:"Verinin gidip gelme gecikmesi; internet aramasi, mail eki ve uzaktan destek kalitesini etkiler.", example:"Latency 120 ms olunca video dondu ama mail yine gidebildi."}
+  ,{term:"Jitter", meaning:"Gecikmenin duzensiz dalgalanmasi; sesli/goruntulu gorusmede kesilme hissi yaratir.", example:"Jitter artinca aile aramasinda ses parca parca geldi."}
+  ,{term:"Crew Wi-Fi", meaning:"Murettebatin kisisel internet kullanim agi; operasyon agindan ayrilmasi gerekir.", example:"Crew Wi-Fi yogunlasinca ops network icin data priority verildi."}
+  ,{term:"Ops VLAN", meaning:"Operasyonel veri trafigini crew internetinden ayiran sanal ag mantigi.", example:"Hava dosyasi ve sirket maili Ops VLAN uzerinden onceliklendirildi."}
+  ,{term:"Failover VSAT", meaning:"Ana internet bozuldugunda VSAT veya baska yedek haberlesmeye gecme planı.", example:"Starlink kopunca failover VSAT ile ofise kisa rapor gecildi."}
 ];
 let notesTab = 'kurallar';
 let notesSearch = '';
@@ -19316,6 +19366,7 @@ let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap
 let deviceMenuPath = {};
 let devicePracticeProgress = {};
 let devicePracticeVariant = {};
+let starlinkStatus = {online:true, latency:42, obstruction:3, plan:'Crew + operational data', lastCheck:'--:--'};
 let phoneOpen = false;
 let phoneTab = 'messages';
 let activePhoneContact = 'Kaptan';
@@ -19360,7 +19411,8 @@ let crewFatigueState = {deck:22,engine:18,bridge:20,galley:12};
 let deviceFaultState = {radar:false,ecdis:false,gyro:false,ais:false};
 
 const PHONE_SITES = [
-  {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
+  {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Starlink/VSAT uzerinden gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
+  {key:'starlink', title:'Starlink Maritime', url:'starlink.ship/status', desc:'Uydu internet durumu, anten gorusu, latency ve operasyonel veri kullanimi.'},
   {key:'weather', title:'OceanWX', url:'wx.met/route', desc:'Ruzgar, swell, gorus ve barometre ozeti.'},
   {key:'company', title:'Company Mail', url:'mail.company/fleet', desc:'Ofis mesajlari, charter baskisi ve operasyon notlari.'},
   {key:'crew', title:'Crew Portal', url:'crew.portal/ship', desc:'Murettebat duyurulari, menu, izin ve moral notlari.'},
@@ -19400,6 +19452,8 @@ const DEVICE_TRAINER = [
     keys:['AUTO HDG','TRACK MODE','STANDBY','RUDDER LIMIT','OFF COURSE','RATE LIMIT','TURN RADIUS','NFU READY']},
   {key:'bnwas', ico:'BNW', name:'BNWAS', sub:'bridge navigational watch alarm system, stage timers, acknowledgement', task:'Vardiya basinda BNWAS aktif mi ve stage timer dogru mu kontrol et.', correct:'ACK / ACTIVE',
     keys:['ACK / ACTIVE','TIMER SET','STAGE 1','STAGE 2','CABIN ALARM','TEST','BYPASS LOG','RESET']}
+  ,{key:'starlink', ico:'SAT', name:'Starlink Maritime Terminal', sub:'LEO satellite internet, flat-panel antenna, obstruction, QoS, crew/ops network', task:'Operasyon maili ve aile gorusmesi icin baglanti zayifladi; once anten gorusu ve network health kontrolu yap.', correct:'NETWORK HEALTH',
+    keys:['NETWORK HEALTH','OBSTRUCTION MAP','ALIGNMENT','HEATER STATUS','CREW WIFI','OPS VLAN','DATA PRIORITY','FAILOVER VSAT']}
 ];
 
 const DEVICE_MENU_TREE = {
@@ -19473,7 +19527,8 @@ const DEVICE_MENU_TREE = {
   echo:{root:[mSub('DEPTH','depth'),mSub('ALARM','alarm'),mSub('DISPLAY','display'),mSub('LOG','log')],depth:[mAct('DBK/DBT'),mAct('OFFSET'),mAct('RANGE'),mAct('GAIN')],alarm:[mAct('SHALLOW ALARM'),mAct('DEEP ALARM'),mAct('RESET MIN'),mAct('ACK')],display:[mAct('TREND'),mAct('ZOOM'),mAct('DAY/NIGHT'),mAct('UNITS')],log:[mAct('PRINT'),mAct('HISTORY'),mAct('MARK'),mAct('CLEAR OLD')]},
   speedlog:{root:[mSub('SPEED','speed'),mSub('MODE','mode'),mSub('CAL','cal'),mSub('LOG','log')],speed:[mAct('STW/SOG'),mAct('TRIP RESET'),mAct('AVERAGE'),mAct('CURRENT CLUE')],mode:[mAct('WATER TRACK'),mAct('BOTTOM TRACK'),mAct('AUTO MODE'),mAct('MANUAL MODE')],cal:[mAct('CALIBRATION'),mAct('SENSOR CLEAN'),mAct('OFFSET'),mAct('TEST')],log:[mAct('HISTORY'),mAct('OUTPUT'),mAct('ALARM'),mAct('NMEA')]},
   autopilot:{root:[mSub('MODE','mode'),mSub('LIMITS','limits'),mSub('TRACK','track'),mSub('MANUAL','manual')],mode:[mAct('AUTO HDG'),mAct('TRACK MODE'),mAct('STANDBY'),mAct('NFU READY')],limits:[mAct('RUDDER LIMIT'),mAct('RATE LIMIT'),mAct('OFF COURSE'),mAct('ALARM ACK')],track:[mAct('TURN RADIUS'),mAct('WHEEL-OVER'),mAct('XTD SOURCE'),mAct('ECDIS LINK')],manual:[mAct('HAND STEER'),mAct('FOLLOW UP'),mAct('NON FOLLOW UP'),mAct('PILOT MODE')]},
-  bnwas:{root:[mSub('WATCH','watch'),mSub('TIMERS','timers'),mSub('ALARMS','alarms'),mSub('LOG','log')],watch:[mAct('ACK / ACTIVE'),mAct('RESET'),mAct('TEST'),mAct('WATCH ON')],timers:[mAct('TIMER SET'),mAct('STAGE 1'),mAct('STAGE 2'),mAct('STAGE 3')],alarms:[mAct('CABIN ALARM'),mAct('BRIDGE ALARM'),mAct('SOUND TEST'),mAct('LAMP TEST')],log:[mAct('BYPASS LOG'),mAct('EVENT LOG'),mAct('DUTY OFFICER'),mAct('PRINT')]}
+  bnwas:{root:[mSub('WATCH','watch'),mSub('TIMERS','timers'),mSub('ALARMS','alarms'),mSub('LOG','log')],watch:[mAct('ACK / ACTIVE'),mAct('RESET'),mAct('TEST'),mAct('WATCH ON')],timers:[mAct('TIMER SET'),mAct('STAGE 1'),mAct('STAGE 2'),mAct('STAGE 3')],alarms:[mAct('CABIN ALARM'),mAct('BRIDGE ALARM'),mAct('SOUND TEST'),mAct('LAMP TEST')],log:[mAct('BYPASS LOG'),mAct('EVENT LOG'),mAct('DUTY OFFICER'),mAct('PRINT')]},
+  starlink:{root:[mSub('STATUS','status'),mSub('ANTENNA','antenna'),mSub('NETWORK','network'),mSub('FAILOVER','failover')],status:[mAct('NETWORK HEALTH'),mAct('LATENCY / JITTER'),mAct('UPTIME'),mAct('DATA USAGE')],antenna:[mAct('OBSTRUCTION MAP'),mAct('ALIGNMENT'),mAct('HEATER STATUS'),mAct('MOUNT CHECK')],network:[mAct('CREW WIFI'),mAct('OPS VLAN'),mAct('DATA PRIORITY'),mAct('FIREWALL LOG')],failover:[mAct('FAILOVER VSAT'),mAct('4G PORT BACKUP'),mAct('GMDSS SEPARATION'),mAct('INCIDENT LOG')]}
 };
 
 function mSub(label,target){ return {label,type:'submenu',target}; }
@@ -19493,7 +19548,8 @@ const DEVICE_PRACTICE = {
   echo:{title:'Echo Sounder Dar Su Pratigi', phrase:'Dar suya girmeden offset ve shallow alarm dogru okunmali.', steps:['OFFSET','SHALLOW ALARM','DBK/DBT','TREND']},
   speedlog:{title:'Speed Log Akinti Pratigi', phrase:'Akinti supheli: STW/SOG farki ve track mode bilgisi birlikte okunur.', steps:['STW/SOG','WATER TRACK','BOTTOM TRACK','HISTORY']},
   autopilot:{title:'Pilotaj Oncesi Otopilot Pratigi', phrase:'Pilotajda takip modu kapatilir, standby/manuel hazirlik ve limitler kontrol edilir.', steps:['TRACK MODE','STANDBY','RUDDER LIMIT','NFU READY']},
-  bnwas:{title:'BNWAS Vardiya Baslangic Pratigi', phrase:'Vardiya basinda watch active, timer ve alarm zinciri kontrol edilir.', steps:['ACK / ACTIVE','TIMER SET','STAGE 1','EVENT LOG']}
+  bnwas:{title:'BNWAS Vardiya Baslangic Pratigi', phrase:'Vardiya basinda watch active, timer ve alarm zinciri kontrol edilir.', steps:['ACK / ACTIVE','TIMER SET','STAGE 1','EVENT LOG']},
+  starlink:{title:'Starlink Maritime Baglanti Pratigi', phrase:'Internet konfor cihazidir ama operasyon maili, hava verisi ve aile moralini etkiler; GMDSS yerine gecmez.', steps:['NETWORK HEALTH','OBSTRUCTION MAP','DATA PRIORITY','FAILOVER VSAT','INCIDENT LOG']}
 };
 
 const VHF_PRACTICE_VARIANTS = [
@@ -19636,6 +19692,7 @@ function useDeviceKey(label, type='action', target=''){
     devicePracticeScore.ok++;
     addWatchFeed(`${def.name}: ${label} dogru uygulandi`, def.key==='vhf' ? 'warn' : 'good');
     if(def.key === 'vhf') playVhfPracticeBurst();
+    if(def.key === 'starlink') updateStarlinkFromDeviceStep(label, true);
     updateDeviceChartOverlay(def, label, true);
     if(practice){
       const next = (devicePracticeProgress[def.key] || 0) + 1;
@@ -19651,10 +19708,26 @@ function useDeviceKey(label, type='action', target=''){
       addJournalEntry(`[CIHAZ] ${def.name}: ${getDeviceBreadcrumb(def)} > ${label} dogru uygulandi.`, 'Egitim', 'Simulator');
     }
   }else{
+    if(def.key === 'starlink') updateStarlinkFromDeviceStep(label, false);
     updateDeviceChartOverlay(def, label, false);
     deviceLogLine = `YANLIS SIRA / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Beklenen adim: ${expected}.`;
   }
   renderDevices();
+}
+function updateStarlinkFromDeviceStep(label, ok){
+  const l=String(label || '').toUpperCase();
+  starlinkStatus.lastCheck = document.getElementById('tbd')?.textContent || '--:--';
+  if(ok){
+    starlinkStatus.online = true;
+    if(/NETWORK HEALTH|FAILOVER/.test(l)) starlinkStatus.latency = Math.max(28, starlinkStatus.latency - 6);
+    if(/OBSTRUCTION|ALIGNMENT/.test(l)) starlinkStatus.obstruction = Math.max(0, starlinkStatus.obstruction - 2);
+    if(/DATA PRIORITY|OPS VLAN/.test(l)) starlinkStatus.plan = 'Ops priority active';
+    addLiveLogbook('STARLINK', `${label} kontrolu tamamlandi. Latency ${starlinkStatus.latency} ms, obstruction ${starlinkStatus.obstruction}%.`, true);
+  }else{
+    starlinkStatus.latency = Math.min(140, starlinkStatus.latency + 9);
+    starlinkStatus.obstruction = Math.min(28, starlinkStatus.obstruction + 3);
+    if(starlinkStatus.latency > 95) starlinkStatus.online = false;
+  }
 }
 function renderDevices(){
   const list = document.getElementById('devices-list');
@@ -19735,6 +19808,19 @@ function buildGmdssDeviceSvg(def){
   <rect x="154" y="28" width="270" height="84" rx="8" fill="#06121c" stroke="#1d4059"/><text x="172" y="48" fill="#bde7ff" font-size="8" font-family="monospace">SART RADAR RETURN</text><path d="M178 86 H394" stroke="#2c7a58"/><circle cx="206" cy="70" r="2" fill="#8fd8ab"/><circle cx="222" cy="68" r="2" fill="#8fd8ab"/><circle cx="238" cy="66" r="2" fill="#8fd8ab"/><circle cx="254" cy="64" r="2" fill="#8fd8ab"/><circle cx="270" cy="62" r="2" fill="#8fd8ab"/><text x="172" y="104" fill="#ffd783" font-size="7" font-family="monospace">12 DOT PATTERN WHEN INTERROGATED</text>`;
   if(def.key === 'navtex') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/><rect x="38" y="28" width="404" height="84" rx="7" fill="#e6edf0" stroke="#8fbfed"/><text x="54" y="48" fill="#172d42" font-size="8" font-family="monospace">NAVTEX 518 KHZ - MSI</text><text x="54" y="66" fill="#172d42" font-size="7" font-family="monospace">ZCZC KA52 GALE WARNING - MARMARA SEA</text><text x="54" y="82" fill="#94333a" font-size="7" font-family="monospace">NAV WARNING: LIGHT BUOY UNLIT</text><text x="54" y="98" fill="#172d42" font-size="7" font-family="monospace">FILTER: NAV / MET / SAR / PILOT</text>`;
   if(def.key === 'inmc') return `<rect width="480" height="145" fill="#071018"/><rect x="18" y="14" width="444" height="116" rx="10" fill="#151e27" stroke="#354550" stroke-width="1.8"/><rect x="44" y="30" width="392" height="78" rx="7" fill="#06121c" stroke="#1d4059"/><text x="60" y="50" fill="#bde7ff" font-size="8" font-family="monospace">INMARSAT-C / EGC TERMINAL</text><text x="60" y="68" fill="#8fd8ab" font-size="7" font-family="monospace">LOGGED IN: IOR   POSITION REPORT READY</text><text x="60" y="84" fill="#ffd783" font-size="7" font-family="monospace">EGC SAFETYNET MESSAGE INBOX: 03</text><text x="60" y="100" fill="#ffb0b0" font-size="7" font-family="monospace">DISTRESS BUTTON COVER CLOSED</text>`;
+  if(def.key === 'starlink') return `<rect width="480" height="145" fill="#061018"/>
+  <rect x="18" y="14" width="444" height="116" rx="10" fill="#111a22" stroke="#31465a" stroke-width="1.8"/>
+  <rect x="38" y="30" width="156" height="82" rx="10" fill="#07121b" stroke="#24465e"/>
+  <ellipse cx="116" cy="72" rx="54" ry="18" fill="#dce6ef" stroke="#8fbfed" stroke-width="2"/>
+  <path d="M116 53 C146 34 181 31 218 42" fill="none" stroke="#58d6ff" stroke-width="2" opacity=".78"/>
+  <path d="M116 53 C151 18 206 18 256 38" fill="none" stroke="#58d6ff" stroke-width="1.2" opacity=".38"/>
+  <text x="55" y="107" fill="#bde7ff" font-size="7" font-family="monospace">FLAT PANEL ANTENNA</text>
+  <rect x="220" y="30" width="222" height="82" rx="8" fill="#06121c" stroke="#1d4059"/>
+  <text x="238" y="48" fill="#bde7ff" font-size="8" font-family="monospace">STARLINK MARITIME</text>
+  <text x="238" y="66" fill="${starlinkStatus.online?'#8fd8ab':'#ffb0b0'}" font-size="7" font-family="monospace">LINK: ${starlinkStatus.online?'ONLINE':'DEGRADED'}  PING ${starlinkStatus.latency} ms</text>
+  <text x="238" y="82" fill="#ffd783" font-size="7" font-family="monospace">OBSTRUCTION ${starlinkStatus.obstruction}%  PLAN ${starlinkStatus.plan}</text>
+  <text x="238" y="98" fill="#bde7ff" font-size="7" font-family="monospace">OPS VLAN / CREW WIFI / VSAT FAILOVER</text>
+  <text x="34" y="128" fill="#bde7ff" font-size="6.5" font-family="monospace">NOT GMDSS - DO NOT USE AS DISTRESS PRIMARY LINK</text>`;
   return GFX.gmdss_panel;
 }
 
@@ -20682,7 +20768,7 @@ function renderPhoneBankApp(){
     <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>Banka / Maas</span></div>
     <div class="phone-setting-row"><b>Bakiye</b><small>$${careerState.money || 0} · Aylik maas $${careerState.salary || 1200}</small></div>
     <button class="phone-wide-btn" onclick="spendMoney('home'); renderPhone()">Eve $150 gonder</button>
-    <button class="phone-wide-btn" onclick="spendMoney('internet'); renderPhone()">Internet paketi $40</button>
+    <button class="phone-wide-btn" onclick="spendMoney('internet'); renderPhone()">Starlink crew paketi $40</button>
     <button class="phone-wide-btn" onclick="spendMoney('gear'); renderPhone()">Kisisel ekipman $90</button>
   </div>`;
 }
@@ -21314,6 +21400,21 @@ function applyDecisionMemoryRipple(sc,c2){
     const key = getRemedialDeviceForScene(sc);
     if(key) devicePracticeProgress[key] = 0;
   }
+  if(/starlink|internet|crew wifi|satellite|uydu|seanet/.test(blob)){
+    if(strong){
+      starlinkStatus.online = true;
+      starlinkStatus.latency = Math.max(30, starlinkStatus.latency - 8);
+      starlinkStatus.obstruction = Math.max(0, starlinkStatus.obstruction - 2);
+      starlinkStatus.plan = 'Ops priority active';
+      addLiveLogbook('STARLINK', 'Sahne karariyla Starlink operasyon onceligi ve anten kontrolu toparlandi.', true);
+    }else if(weak){
+      starlinkStatus.latency = Math.min(150, starlinkStatus.latency + 18);
+      starlinkStatus.obstruction = Math.min(35, starlinkStatus.obstruction + 5);
+      if(starlinkStatus.latency > 100) starlinkStatus.online = false;
+      devicePracticeProgress.starlink = 0;
+      addWatchFeed('Starlink tekrar gorevi acildi: baglanti/oncelik kontrolu gerekli','warn');
+    }
+  }
 }
 const ACHIEVEMENTS = [
   {key:'vhf_first',title:'Ilk Duzgun VHF',hint:'VHF/pilot/distress sahnesinde iyi karar ver.'},
@@ -21338,7 +21439,7 @@ function renderAchievements(){
 function spendMoney(kind){
   const ops={
     home:{cost:150,msg:'Eve para gonderdin. Aile grubunda hava hemen yumusadi.',effect:{mood:4}},
-    internet:{cost:40,msg:'Internet paketi aldin. Aile ve kurs portalina erisim daha rahat.',effect:{dinclik:1}},
+    internet:{cost:40,msg:'Starlink crew internet paketi yenilendi. Aile, kurs portali ve mail erisimi daha rahat.',effect:{dinclik:1}},
     gear:{cost:90,msg:'Kisisel ekipman ve not defteri aldin. Rutinlerde daha duzenlisin.',effect:{bilgi:2,sayginlik:1}}
   };
   const o=ops[kind]; if(!o) return;
@@ -21346,6 +21447,12 @@ function spendMoney(kind){
   careerState.money -= o.cost;
   applyEffect(o.effect,{skipContractTick:true});
   if(kind==='home') pushFamilyGroupMessage('Baba','Para geldi, sag ol. Ama once kendini de dusun.');
+  if(kind==='internet'){
+    starlinkStatus.online=true;
+    starlinkStatus.latency=Math.max(28, starlinkStatus.latency-12);
+    starlinkStatus.plan='Crew package renewed';
+    pushFamilyGroupMessage('Kardes','Goruntu net geldi! Bu Starlink isi baya iyiymis, ama vardiyani da kacirma :)');
+  }
   showNotif('$','Banka Islemi',o.msg);
 }
 function getRemedialDeviceForScene(sc){
@@ -21357,6 +21464,7 @@ function getRemedialDeviceForScene(sc){
   if(/epirb|abandon|terk|can sal/.test(blob)) return 'epirb';
   if(/sart|rescue|arama kurtarma/.test(blob)) return 'sart';
   if(/navtex|msi|warning/.test(blob)) return 'navtex';
+  if(/starlink|internet|crew wifi|satellite|uydu|mail|seanet/.test(blob)) return 'starlink';
   if(/gyro|heading|pusula/.test(blob)) return 'gyro';
   if(/echo|sounder|ukc|draft|shallow|squat/.test(blob)) return 'echo';
   if(/speed log|stw|sog|akinti|akıntı/.test(blob)) return 'speedlog';
@@ -21444,8 +21552,15 @@ function phoneSiteCards(key){
   const cards = {
     home:[
       `Saat ${document.getElementById('tbd')?.textContent || '--:--'} · ${watchState.code} vardiyasi`,
+      `Starlink: ${starlinkStatus.online?'online':'degraded'} · ping ${starlinkStatus.latency} ms · obstruction ${starlinkStatus.obstruction}%`,
       `Son gemi ici not: ${watchFeedItems[0]?.text || 'Cihazlar normal'}`,
       `AILE grubu okunmamis: ${familyUnread}`
+    ],
+    starlink:[
+      `Baglanti: ${starlinkStatus.online?'ONLINE':'DEGRADED'} · latency ${starlinkStatus.latency} ms · son kontrol ${starlinkStatus.lastCheck}`,
+      `Anten gorusu: obstruction ${starlinkStatus.obstruction}% · plan: ${starlinkStatus.plan}`,
+      starlinkStatus.obstruction > 12 ? 'UYARI: anten gorusu bozuk; alignment ve obstruction map kontrolu gerekli.' : 'Anten gorusu temiz; operasyon verisi ve crew Wi-Fi dengeli.',
+      'Not: Starlink internet saglar; GMDSS distress zincirinin yerine gecmez.'
     ],
     weather:[
       `Swell: ${voyagePressure.swell} · Gorus: ${voyagePressure.visibility}`,
@@ -21486,7 +21601,7 @@ function phoneSiteCards(key){
     training:[
       `Acik cihaz pratikleri: ${trainingCount}`,
       `Skor: ${devicePracticeScore.ok}/${devicePracticeScore.total}`,
-      `Oneri: sahnede zorlandiysan VHF, Radar, ECDIS veya AIS uygulamasindan tekrar et.`,
+      `Oneri: sahnede zorlandiysan VHF, Radar, ECDIS, AIS veya Starlink uygulamasindan tekrar et.`,
       `Aktif ariza: ${Object.entries(deviceFaultState).filter(([,v])=>v).map(([k])=>k.toUpperCase()).join(', ') || 'yok'}`
     ]
   };
@@ -21506,7 +21621,7 @@ function renderPhoneWeb(){
   const webActions = activePhoneSite === 'bank'
     ? `<div class="phone-app-panel">
         <button class="phone-wide-btn" onclick="spendMoney('home')">Eve $150 gonder</button>
-        <button class="phone-wide-btn" onclick="spendMoney('internet')">Internet paketi $40</button>
+        <button class="phone-wide-btn" onclick="spendMoney('internet')">Starlink crew paketi $40</button>
         <button class="phone-wide-btn" onclick="spendMoney('gear')">Kisisel ekipman $90</button>
       </div>`
     : activePhoneSite === 'courses'

@@ -220,6 +220,18 @@ CHECKS = {
         "DYNAMIC_TRANSLATIONS",
         "中文",
     ],
+    "starlink maritime pack": [
+        "Starlink Maritime Terminal",
+        "starlinkStatus",
+        "Starlink Maritime Baglanti Pratigi",
+        "OBSTRUCTION MAP",
+        "FAILOVER VSAT",
+        "starlink.ship/status",
+        "STARLINK / UYDU INTERNET",
+        "Starlink Maritime",
+        "Crew Wi-Fi",
+        "Ops VLAN",
+    ],
 }
 
 
@@ -286,7 +298,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 96:
+    elif int(js_versions[-1]) < 97:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
