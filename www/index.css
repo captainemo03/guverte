@@ -1681,10 +1681,29 @@ animation:straitFlow 2.8s linear infinite;}
 @media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}}
 
 @media (max-width:520px){
-  #app{max-width:100vw;}
-  #story{padding:10px 8px 12px;gap:8px;}
-  #speechstage{grid-template-columns:minmax(82px,28vw) minmax(0,1fr) minmax(82px,28vw);gap:8px;align-items:start;}
-  #speechportrait,#playerstand{height:clamp(128px,38vw,156px);border-radius:12px;}
+  html,body{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto;}
+  #app{max-width:100vw;min-height:100dvh;overflow:visible;}
+  #game{min-height:100dvh;height:auto;overflow:visible;}
+  #topbar{position:relative;top:auto;flex-wrap:wrap;padding:7px 8px;gap:6px;}
+  #avatar{width:34px;height:34px;}
+  #charinfo{flex:1 1 calc(100% - 96px);}
+  #topright{margin-left:auto;flex-wrap:wrap;justify-content:flex-end;}
+  #save-btn{padding:6px 8px;font-size:9px;}
+  .language-select.compact{height:27px;min-width:52px;font-size:9px;}
+  #contract-bar,#weather-bar,#guidance-strip,#mission-director,#opsbar,#live-watch-feed{position:relative;z-index:1;}
+  #statrow,#psychrow{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #guidance-strip{padding:6px 8px;gap:6px;}
+  #guidance-text{white-space:normal;line-height:1.35;}
+  #opsbar{flex-wrap:wrap;gap:4px;padding:5px 8px;}
+  #scene-graphic{min-height:clamp(148px,42vw,210px);}
+  #scene-sub{font-size:9px;line-height:1.35;padding:5px 9px;white-space:normal;}
+  #story{padding:9px 8px 11px;gap:8px;min-height:auto;overflow:visible;}
+  #spkrow{gap:7px;}
+  #speechstage{grid-template-columns:1fr 1fr;grid-template-areas:"speaker player" "bubble bubble";gap:8px;align-items:end;}
+  #speechportrait{grid-area:speaker;}
+  #playerstand{grid-area:player;}
+  #speechbubble{grid-area:bubble;}
+  #speechportrait,#playerstand{height:clamp(118px,36vw,148px);border-radius:12px;}
   #speechchar,#playerstandchar{padding-top:0;overflow:hidden;}
   #speechchar .portrait-composite.story,
   #playerstandchar .portrait-composite.story,
@@ -1694,7 +1713,7 @@ animation:straitFlow 2.8s linear infinite;}
   #playerstandchar .portrait-sprite.story,
   #speechchar .portrait-photo.story,
   #playerstandchar .portrait-photo.story{
-    height:clamp(128px,38vw,156px) !important;
+    height:clamp(118px,36vw,148px) !important;
     min-height:0 !important;
     width:100% !important;
     background-size:360% 190% !important;
@@ -1705,10 +1724,19 @@ animation:straitFlow 2.8s linear infinite;}
   }
   #speechchar .portrait-composite.story .portrait-photo-sheet.story,
   #playerstandchar .portrait-composite.story .portrait-photo-sheet.story{position:absolute;inset:0;}
-  #speechbubble{min-height:clamp(128px,38vw,156px);padding:12px 13px;border-radius:15px 15px 15px 7px;}
-  #speechbubble::before{top:52px;width:18px;height:18px;left:-8px;}
-  #text{font-size:13px;line-height:1.65;}
+  #speechbubble{min-height:auto;padding:12px 13px;border-radius:15px;overflow:visible;}
+  #speechbubble::before{display:none;}
+  #text{font-size:13px;line-height:1.62;}
+  #dialogue-log{max-height:none;overflow:visible;}
   #replystage{padding-left:0;}
+  #choices{display:grid;grid-template-columns:1fr;gap:7px;padding:8px;max-height:none;overflow:visible;}
+  .cbtn{margin:0;padding:10px 11px;font-size:12px;line-height:1.4;}
+  #toolbar{position:relative;overflow-x:auto;scrollbar-width:none;}
+  #toolbar::-webkit-scrollbar{display:none;}
+  #botbar{position:relative;}
+  #phone-fab{right:10px;bottom:12px;}
+  #ship-phone{right:8px;bottom:8px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);}
+  #phone-frame{width:min(238px,calc(100vw - 16px));height:min(404px,calc(100dvh - 18px));}
   .vhf-practice-body{grid-template-columns:1fr;}
   .vhf-practice-side{grid-template-columns:repeat(3,1fr);}
   .vhf-practice-lcd strong{font-size:28px;}
@@ -1742,8 +1770,8 @@ animation:straitFlow 2.8s linear infinite;}
 
 /* ===== MOBIL / TABLET YATAY OYUN MODU ===== */
 @media (orientation: landscape) and (max-height: 620px) and (max-width: 1180px){
-  html,body{height:100%;overflow:hidden;}
-  #app{max-width:100vw;min-height:100svh;height:100svh;overflow:hidden;}
+  html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto;}
+  #app{max-width:100vw;min-height:100svh;height:auto;overflow:visible;}
   #intro{height:100svh;overflow:auto;padding:10px 12px 24px;align-items:stretch;}
   #intro-ship{display:none;}
   #intro-title{font-size:24px;margin-bottom:0;text-align:center;}
@@ -1764,7 +1792,7 @@ animation:straitFlow 2.8s linear infinite;}
   .stgrid,.kont-grid,.mode-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
   #go-btn{position:sticky;bottom:8px;z-index:4;}
 
-  #game{height:100svh;min-height:100svh;display:flex;overflow:hidden;}
+  #game{height:auto;min-height:100svh;display:flex;overflow:visible;}
   #topbar{position:relative;padding:5px 8px;gap:6px;flex:0 0 auto;}
   #avatar{width:30px;height:30px;border-width:1px;}
   #charname{font-size:11px;}
@@ -1797,7 +1825,7 @@ animation:straitFlow 2.8s linear infinite;}
   #scene-sub{padding:3px 10px 4px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bdg{font-size:7px;padding:2px 6px;}
   #lbd{bottom:18px;}
-  #story{flex:1 1 auto;min-height:0;padding:7px 10px 8px;gap:6px;overflow:auto;}
+  #story{flex:1 1 auto;min-height:0;padding:7px 10px 8px;gap:6px;overflow:visible;}
   #spkrow{margin-bottom:0;}
   #spkico{width:28px;height:28px;}
   #spknm{font-size:10px;}
@@ -1830,7 +1858,7 @@ animation:straitFlow 2.8s linear infinite;}
   #replystage{padding-left:0;max-height:26svh;}
   #replybubble{max-width:86%;padding:8px 10px;}
   #replytext{font-size:12px;line-height:1.45;}
-  #choices{flex:0 0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:6px 8px;max-height:24svh;overflow:auto;}
+  #choices{flex:0 0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:6px 8px;max-height:none;overflow:visible;}
   .cbtn{margin:0;padding:7px 9px;font-size:10px;line-height:1.32;border-radius:7px;}
   #botbar{display:none;}
   #phone-fab{right:8px;bottom:44px;}
@@ -1852,7 +1880,7 @@ animation:straitFlow 2.8s linear infinite;}
   #playerstandchar .portrait-sprite.story,
   #speechchar .portrait-photo.story,
   #playerstandchar .portrait-photo.story{height:112px !important;}
-  #choices{max-height:26svh;}
+  #choices{max-height:none;}
   .cbtn{font-size:9px;padding:6px 8px;}
 }
 
