@@ -8754,9 +8754,9 @@ const I18N={
     'ui.continue':'Continue Saved Game','ui.deleteSave':'Delete Save','ui.startShip':'Join Ship','ui.mode':'Mode','ui.open':'Open','ui.basicStory':'Only story and basic choices.','ui.unlocked':'Open','ui.assist':'Assist mode is on: guidance is more instructional.','ui.slowUnlock':'New systems unlock gradually.',
     'mode.simple':'Simple','mode.simpleDesc':'Story, core decisions and a cleaner screen.','mode.realistic':'Realistic','mode.realisticDesc':'Devices, charts and logbook unlock gradually.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker and premium details are active.',
     'tag.cesur':'Bold','tag.akilli':'Smart','tag.itaatkar':'Procedural','tag.korkak':'Unsafe','tag.sosyal':'Social','tag.kritik':'CRITICAL',
-    'role.cadet':'DECK CADET','save.center':'SAVE CENTER','save.preparing':'Preparing save status','save.current':'Current Game','save.contract':'Contract','save.last':'Last Save','save.actions':'Actions','save.saveGame':'Save Game','save.loadGame':'Continue Save','save.deleteGame':'Delete Save','save.noSave':'No save yet','save.notStarted':'Not started',
+    'role.cadet':'DECK CADET','role.master':'Master','role.officer1':'Chief Officer','role.officer2':'Second Officer','role.officer3':'Third Officer','role.chiefEngineer':'Chief Engineer','role.bosun':'Bosun','role.cook':'Cook','role.rating':'Rating','save.center':'SAVE CENTER','save.preparing':'Preparing save status','save.current':'Current Game','save.contract':'Contract','save.last':'Last Save','save.actions':'Actions','save.saveGame':'Save Game','save.loadGame':'Continue Save','save.deleteGame':'Delete Save','save.noSave':'No save yet','save.notStarted':'Not started',
     'guide.default':'Read the scene, understand what is being asked, and make one clear decision.','guide.support':'Assist mode: slow down, choose the decision closest to procedure and evidence.','guide.tired':'Low energy: choose calm procedural action instead of risky heroics.','guide.vhf':'Clarify the VHF channel and call type.','guide.radar':'Read the target: CPA/TCPA, intention and report.','guide.ecdis':'Check route, safety contour and next waypoint on the chart.','guide.engine':'Get engine information and give the master a short report.','guide.port':'Monitor speed-heading, line order and snap-back risk.','guide.emergency':'Safety chain first: alarm, position, team, report.','guide.inspection':'Check documents, equipment and deficiency risk calmly.',
-    'scene.brief':'SCENE BRIEFING','scene.location':'Location','scene.speaker':'Speaker','scene.situation':'Situation','scene.task':'Your task','scene.original':'Source note','scene.defaultSituation':'A watchkeeping situation is developing on board. Read the risk, keep communication clear, and avoid guessing.','scene.defaultTask':'Choose the safest professional response and keep the bridge team informed.',
+    'scene.brief':'SCENE BRIEFING','scene.location':'Location','scene.speaker':'Speaker','scene.situation':'Situation','scene.task':'Your task','scene.context':'Operational context','scene.cue':'Scenario cue','scene.defaultSituation':'A watchkeeping situation is developing on board. Read the risk, keep communication clear, and avoid guessing.','scene.defaultTask':'Choose the safest professional response and keep the bridge team informed.',
     'scene.vhfSituation':'A radio communication event is active. Channel, call type and message order matter.','scene.vhfTask':'Select the response that uses clear SMCP language, confirms the channel and reports to the master if needed.',
     'scene.radarSituation':'A navigation target or sensor picture needs assessment. CPA, TCPA and intention must be checked before acting.','scene.radarTask':'Use radar/ARPA/AIS/ECDIS together, confirm the risk and give a short bridge report.',
     'scene.portSituation':'The vessel is in a port, pilotage, tug or mooring phase where timing and line safety are critical.','scene.portTask':'Control speed, heading, tug/line order and snap-back risk before committing.',
@@ -8772,9 +8772,9 @@ const I18N={
     'ui.continue':'Continuar partida','ui.deleteSave':'Borrar partida','ui.startShip':'Embarcar','ui.mode':'Modo','ui.open':'Abierto','ui.basicStory':'Solo historia y decisiones basicas.','ui.unlocked':'Abierto','ui.assist':'Modo ayuda activo: la guia es mas instructiva.','ui.slowUnlock':'Los sistemas nuevos se abren gradualmente.',
     'mode.simple':'Simple','mode.simpleDesc':'Historia, decisiones basicas y pantalla mas limpia.','mode.realistic':'Realista','mode.realisticDesc':'Equipos, cartas y diario se abren gradualmente.','mode.expert':'Experto','mode.expertDesc':'CPA, UKC, PSC, tanquero y detalles premium activos.',
     'tag.cesur':'Valiente','tag.akilli':'Inteligente','tag.itaatkar':'Procedimiento','tag.korkak':'Inseguro','tag.sosyal':'Social','tag.kritik':'CRITICO',
-    'role.cadet':'CADETE DE CUBIERTA','save.center':'CENTRO DE GUARDADO','save.preparing':'Preparando estado','save.current':'Partida actual','save.contract':'Contrato','save.last':'Ultimo guardado','save.actions':'Acciones','save.saveGame':'Guardar','save.loadGame':'Continuar','save.deleteGame':'Borrar','save.noSave':'Sin guardado','save.notStarted':'No iniciado',
+    'role.cadet':'CADETE DE CUBIERTA','role.master':'Capitan','role.officer1':'Primer oficial','role.officer2':'Segundo oficial','role.officer3':'Tercer oficial','role.chiefEngineer':'Jefe de maquinas','role.bosun':'Contramaestre','role.cook':'Cocinero','role.rating':'Marinero','save.center':'CENTRO DE GUARDADO','save.preparing':'Preparando estado','save.current':'Partida actual','save.contract':'Contrato','save.last':'Ultimo guardado','save.actions':'Acciones','save.saveGame':'Guardar','save.loadGame':'Continuar','save.deleteGame':'Borrar','save.noSave':'Sin guardado','save.notStarted':'No iniciado',
     'guide.default':'Lee la escena, entiende lo que se pide y toma una decision clara.','guide.support':'Modo ayuda: no te apresures, elige la decision mas cercana al procedimiento y a la evidencia.','guide.tired':'Energia baja: evita heroismos y elige una accion tranquila y procedimental.','guide.vhf':'Aclara el canal VHF y el tipo de llamada.','guide.radar':'Lee el blanco: CPA/TCPA, intencion y reporte.','guide.ecdis':'Comprueba ruta, contorno de seguridad y proximo waypoint en la carta.','guide.engine':'Obtén informacion de maquinas y da al capitan un reporte corto.','guide.port':'Vigila velocidad-rumbo, orden de cabos y riesgo snap-back.','guide.emergency':'Primero la cadena de seguridad: alarma, posicion, equipo, reporte.','guide.inspection':'Revisa documentos, equipo y riesgo de deficiencia con calma.',
-    'scene.brief':'RESUMEN DE ESCENA','scene.location':'Lugar','scene.speaker':'Interlocutor','scene.situation':'Situacion','scene.task':'Tu tarea','scene.original':'Nota fuente','scene.defaultSituation':'Se desarrolla una situacion de guardia a bordo. Lee el riesgo, comunica claro y evita adivinar.','scene.defaultTask':'Elige la respuesta profesional mas segura y mantén informado al equipo del puente.',
+    'scene.brief':'RESUMEN DE ESCENA','scene.location':'Lugar','scene.speaker':'Interlocutor','scene.situation':'Situacion','scene.task':'Tu tarea','scene.context':'Contexto operativo','scene.cue':'Pista de escenario','scene.defaultSituation':'Se desarrolla una situacion de guardia a bordo. Lee el riesgo, comunica claro y evita adivinar.','scene.defaultTask':'Elige la respuesta profesional mas segura y mantén informado al equipo del puente.',
     'scene.vhfSituation':'Hay un evento de comunicacion por radio. Importan canal, tipo de llamada y orden del mensaje.','scene.vhfTask':'Elige la respuesta con SMCP claro, confirma el canal y avisa al capitan si hace falta.',
     'scene.radarSituation':'Un blanco de navegacion o imagen de sensores requiere evaluacion. CPA, TCPA e intencion deben comprobarse.','scene.radarTask':'Usa radar/ARPA/AIS/ECDIS juntos, confirma el riesgo y da un reporte corto al puente.',
     'scene.portSituation':'El buque esta en fase de puerto, practicaje, remolcador o amarre, donde tiempo y seguridad de cabos son criticos.','scene.portTask':'Controla velocidad, rumbo, orden de remolcador/cabos y riesgo snap-back antes de decidir.',
@@ -8790,9 +8790,9 @@ const I18N={
     'ui.continue':'Spielstand laden','ui.deleteSave':'Spielstand loschen','ui.startShip':'An Bord gehen','ui.mode':'Modus','ui.open':'Offen','ui.basicStory':'Nur Geschichte und Grundentscheidungen.','ui.unlocked':'Offen','ui.assist':'Hilfsmodus aktiv: die Hinweise sind lehrreicher.','ui.slowUnlock':'Neue Systeme werden schrittweise freigeschaltet.',
     'mode.simple':'Einfach','mode.simpleDesc':'Geschichte, Kernentscheidungen und weniger Bildschirmfullung.','mode.realistic':'Realistisch','mode.realisticDesc':'Gerate, Karten und Logbuch werden schrittweise freigeschaltet.','mode.expert':'Experte','mode.expertDesc':'CPA, UKC, PSC, Tanker und Premiumdetails sind aktiv.',
     'tag.cesur':'Mutig','tag.akilli':'Klug','tag.itaatkar':'Prozedural','tag.korkak':'Unsicher','tag.sosyal':'Sozial','tag.kritik':'KRITISCH',
-    'role.cadet':'DECKSKADETT','save.center':'SPEICHERZENTRALE','save.preparing':'Speicherstatus wird vorbereitet','save.current':'Aktuelles Spiel','save.contract':'Vertrag','save.last':'Letzter Speicherstand','save.actions':'Aktionen','save.saveGame':'Speichern','save.loadGame':'Fortsetzen','save.deleteGame':'Loschen','save.noSave':'Noch kein Speicherstand','save.notStarted':'Nicht gestartet',
+    'role.cadet':'DECKSKADETT','role.master':'Kapitan','role.officer1':'Erster Offizier','role.officer2':'Zweiter Offizier','role.officer3':'Dritter Offizier','role.chiefEngineer':'Leitender Ingenieur','role.bosun':'Bootsmann','role.cook':'Koch','role.rating':'Matrose','save.center':'SPEICHERZENTRALE','save.preparing':'Speicherstatus wird vorbereitet','save.current':'Aktuelles Spiel','save.contract':'Vertrag','save.last':'Letzter Speicherstand','save.actions':'Aktionen','save.saveGame':'Speichern','save.loadGame':'Fortsetzen','save.deleteGame':'Loschen','save.noSave':'Noch kein Speicherstand','save.notStarted':'Nicht gestartet',
     'guide.default':'Lies die Szene, erkenne was verlangt wird und triff eine klare Entscheidung.','guide.support':'Hilfsmodus: langsam bleiben, die Entscheidung nahe an Verfahren und Belegen wahlen.','guide.tired':'Niedrige Energie: ruhige prozedurale Aktion statt riskanter Heldentat.','guide.vhf':'VHF-Kanal und Rufart klaren.','guide.radar':'Ziel lesen: CPA/TCPA, Absicht und Bericht.','guide.ecdis':'Route, Safety Contour und nachsten Wegpunkt in der Karte prufen.','guide.engine':'Maschineninfo einholen und dem Kapitan kurz melden.','guide.port':'Speed-Heading, Leinenreihenfolge und Snap-back-Risiko uberwachen.','guide.emergency':'Zuerst Sicherheitskette: Alarm, Position, Team, Meldung.','guide.inspection':'Dokumente, Ausrustung und Mangelrisiko ruhig prufen.',
-    'scene.brief':'SZENENBRIEFING','scene.location':'Ort','scene.speaker':'Sprecher','scene.situation':'Situation','scene.task':'Deine Aufgabe','scene.original':'Quellnotiz','scene.defaultSituation':'An Bord entwickelt sich eine Wach-Situation. Risiko lesen, klar kommunizieren und nicht raten.','scene.defaultTask':'Wahle die sicherste professionelle Antwort und halte das Bruckenteam informiert.',
+    'scene.brief':'SZENENBRIEFING','scene.location':'Ort','scene.speaker':'Sprecher','scene.situation':'Situation','scene.task':'Deine Aufgabe','scene.context':'Betrieblicher Kontext','scene.cue':'Szenenhinweis','scene.defaultSituation':'An Bord entwickelt sich eine Wach-Situation. Risiko lesen, klar kommunizieren und nicht raten.','scene.defaultTask':'Wahle die sicherste professionelle Antwort und halte das Bruckenteam informiert.',
     'scene.vhfSituation':'Ein Funkereignis ist aktiv. Kanal, Rufart und Reihenfolge der Meldung sind wichtig.','scene.vhfTask':'Wahle eine Antwort mit klarer SMCP-Sprache, bestatige den Kanal und melde bei Bedarf dem Kapitan.',
     'scene.radarSituation':'Ein Navigationsziel oder Sensorbild muss bewertet werden. CPA, TCPA und Absicht sind zu prufen.','scene.radarTask':'Nutze Radar/ARPA/AIS/ECDIS zusammen, bestatige das Risiko und gib eine kurze Bruckmeldung.',
     'scene.portSituation':'Das Schiff ist in Hafen-, Lotsen-, Schlepper- oder Festmachphase; Timing und Leinensicherheit sind kritisch.','scene.portTask':'Kontrolliere Fahrt, Kurs, Schlepper-/Leinenreihenfolge und Snap-back-Risiko vor der Entscheidung.',
@@ -8808,9 +8808,9 @@ const I18N={
     'ui.continue':'Continuer la sauvegarde','ui.deleteSave':'Supprimer la sauvegarde','ui.startShip':'Monter a bord','ui.mode':'Mode','ui.open':'Ouvert','ui.basicStory':'Seulement histoire et choix de base.','ui.unlocked':'Ouvert','ui.assist':'Mode assistance actif : les consignes sont plus pedagogiques.','ui.slowUnlock':'Les nouveaux systemes se debloquent progressivement.',
     'mode.simple':'Simple','mode.simpleDesc':'Histoire, decisions principales et ecran plus clair.','mode.realistic':'Realiste','mode.realisticDesc':'Appareils, cartes et journal se debloquent progressivement.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker et details premium actifs.',
     'tag.cesur':'Courageux','tag.akilli':'Prudent','tag.itaatkar':'Procedural','tag.korkak':'Risque','tag.sosyal':'Social','tag.kritik':'CRITIQUE',
-    'role.cadet':'ELEVE OFFICIER PONT','save.center':'CENTRE DE SAUVEGARDE','save.preparing':'Preparation de la sauvegarde','save.current':'Partie actuelle','save.contract':'Contrat','save.last':'Derniere sauvegarde','save.actions':'Actions','save.saveGame':'Sauvegarder','save.loadGame':'Continuer','save.deleteGame':'Supprimer','save.noSave':'Aucune sauvegarde','save.notStarted':'Non commence',
+    'role.cadet':'ELEVE OFFICIER PONT','role.master':'Capitaine','role.officer1':'Second capitaine','role.officer2':'Deuxieme officier','role.officer3':'Troisieme officier','role.chiefEngineer':'Chef mecanicien','role.bosun':'Bosco','role.cook':'Cuisinier','role.rating':'Matelot','save.center':'CENTRE DE SAUVEGARDE','save.preparing':'Preparation de la sauvegarde','save.current':'Partie actuelle','save.contract':'Contrat','save.last':'Derniere sauvegarde','save.actions':'Actions','save.saveGame':'Sauvegarder','save.loadGame':'Continuer','save.deleteGame':'Supprimer','save.noSave':'Aucune sauvegarde','save.notStarted':'Non commence',
     'guide.default':'Lis la scene, comprends ce qui est demande et prends une decision claire.','guide.support':'Mode assistance : ralentis, choisis la decision la plus proche de la procedure et des preuves.','guide.tired':'Energie faible : choisis une action calme et procedurale plutot qu un heroisme risque.','guide.vhf':'Clarifie le canal VHF et le type d appel.','guide.radar':'Lis la cible : CPA/TCPA, intention et rapport.','guide.ecdis':'Controle la route, le contour de securite et le prochain waypoint sur la carte.','guide.engine':'Obtiens les informations machine et fais un court rapport au capitaine.','guide.port':'Surveille vitesse-cap, ordre des aussières et risque snap-back.','guide.emergency':'Chaine de securite d abord : alarme, position, equipe, rapport.','guide.inspection':'Controle calmement documents, equipement et risque de deficiency.',
-    'scene.brief':'BRIEFING DE SCENE','scene.location':'Lieu','scene.speaker':'Interlocuteur','scene.situation':'Situation','scene.task':'Ta mission','scene.original':'Note source','scene.defaultSituation':'Une situation de quart se developpe a bord. Lis le risque, communique clairement et evite les suppositions.','scene.defaultTask':'Choisis la reponse professionnelle la plus sure et tiens l equipe passerelle informee.',
+    'scene.brief':'BRIEFING DE SCENE','scene.location':'Lieu','scene.speaker':'Interlocuteur','scene.situation':'Situation','scene.task':'Ta mission','scene.context':'Contexte operationnel','scene.cue':'Indice de scenario','scene.defaultSituation':'Une situation de quart se developpe a bord. Lis le risque, communique clairement et evite les suppositions.','scene.defaultTask':'Choisis la reponse professionnelle la plus sure et tiens l equipe passerelle informee.',
     'scene.vhfSituation':'Un evenement radio est en cours. Le canal, le type d appel et l ordre du message comptent.','scene.vhfTask':'Choisis une reponse avec un SMCP clair, confirme le canal et informe le capitaine si necessaire.',
     'scene.radarSituation':'Une cible de navigation ou une image capteurs doit etre evaluee. CPA, TCPA et intention doivent etre controles.','scene.radarTask':'Utilise radar/ARPA/AIS/ECDIS ensemble, confirme le risque et fais un court rapport passerelle.',
     'scene.portSituation':'Le navire est en phase portuaire, pilotage, remorqueur ou amarrage, ou le timing et la securite des lignes sont critiques.','scene.portTask':'Controle vitesse, cap, ordre remorqueur/aussières et zone snap-back avant de decider.',
@@ -8826,9 +8826,9 @@ const I18N={
     'ui.continue':'继续存档','ui.deleteSave':'删除存档','ui.startShip':'登船','ui.mode':'模式','ui.open':'已开放','ui.basicStory':'仅故事和基础选择。','ui.unlocked':'已开放','ui.assist':'辅助模式已开启：提示会更教学化。','ui.slowUnlock':'新系统会逐步解锁。',
     'mode.simple':'简单','mode.simpleDesc':'故事、核心决策和更清爽的界面。','mode.realistic':'真实','mode.realisticDesc':'设备、海图和日志逐步解锁。','mode.expert':'专家','mode.expertDesc':'CPA、UKC、PSC、油轮和高级细节开启。',
     'tag.cesur':'果断','tag.akilli':'明智','tag.itaatkar':'程序化','tag.korkak':'不安全','tag.sosyal':'沟通','tag.kritik':'关键',
-    'role.cadet':'甲板实习生','save.center':'存档中心','save.preparing':'正在准备存档状态','save.current':'当前游戏','save.contract':'合同','save.last':'最近存档','save.actions':'操作','save.saveGame':'保存游戏','save.loadGame':'继续存档','save.deleteGame':'删除存档','save.noSave':'暂无存档','save.notStarted':'未开始',
+    'role.cadet':'甲板实习生','role.master':'船长','role.officer1':'大副','role.officer2':'二副','role.officer3':'三副','role.chiefEngineer':'轮机长','role.bosun':'水手长','role.cook':'厨师','role.rating':'船员','save.center':'存档中心','save.preparing':'正在准备存档状态','save.current':'当前游戏','save.contract':'合同','save.last':'最近存档','save.actions':'操作','save.saveGame':'保存游戏','save.loadGame':'继续存档','save.deleteGame':'删除存档','save.noSave':'暂无存档','save.notStarted':'未开始',
     'guide.default':'阅读场景，理解要求，然后做出一个清晰决定。','guide.support':'辅助模式：放慢节奏，选择最符合程序和证据的决定。','guide.tired':'精力较低：避免冒险，选择冷静、程序化的行动。','guide.vhf':'确认VHF频道和呼叫类型。','guide.radar':'读取目标：CPA/TCPA、意图和报告。','guide.ecdis':'在海图上检查航线、安全等深线和下一个航点。','guide.engine':'取得机舱信息，并向船长做简短报告。','guide.port':'监控速度航向、缆绳顺序和反弹区风险。','guide.emergency':'先执行安全链：警报、位置、人员、报告。','guide.inspection':'冷静检查文件、设备和缺陷风险。',
-    'scene.brief':'场景简报','scene.location':'地点','scene.speaker':'发言人','scene.situation':'情况','scene.task':'你的任务','scene.original':'原始提示','scene.defaultSituation':'船上正在发生值班情况。判断风险，保持清晰沟通，不要猜测。','scene.defaultTask':'选择最安全、最专业的回应，并让驾驶台团队知情。',
+    'scene.brief':'场景简报','scene.location':'地点','scene.speaker':'发言人','scene.situation':'情况','scene.task':'你的任务','scene.context':'操作背景','scene.cue':'场景提示','scene.defaultSituation':'船上正在发生值班情况。判断风险，保持清晰沟通，不要猜测。','scene.defaultTask':'选择最安全、最专业的回应，并让驾驶台团队知情。',
     'scene.vhfSituation':'无线电通信事件正在进行。频道、呼叫类型和信息顺序都很重要。','scene.vhfTask':'选择使用清晰SMCP的回应，确认频道，必要时报告船长。',
     'scene.radarSituation':'需要评估导航目标或传感器画面。行动前必须检查CPA、TCPA和意图。','scene.radarTask':'结合雷达/ARPA/AIS/ECDIS，确认风险并做简短驾驶台报告。',
     'scene.portSituation':'船舶处于港口、引航、拖轮或系泊阶段，时机和缆绳安全很关键。','scene.portTask':'决定前控制速度、航向、拖轮/缆绳顺序和反弹区风险。',
@@ -8912,17 +8912,72 @@ function getSceneLanguageKind(sc, text=''){
   if(/psc|survey|class|inspection|deficiency|audit|sire|cdi|permit|document|belge/.test(blob)) return 'inspect';
   return 'default';
 }
+
+function getLocalizedSpeakerLine(speaker){
+  const rawName = String(speaker?.name || '').trim();
+  const title = translateGameText(speaker?.title || '');
+  if(gameLanguage === 'tr') return [rawName, speaker?.title].filter(Boolean).join(' - ') || '--';
+  const rolePrefix = [
+    ['Kaptan', t('role.master','Master')],
+    ['Süvari', t('role.master','Master')],
+    ['1. Zabit', t('role.officer1','Chief Officer')],
+    ['2. Zabit', t('role.officer2','Second Officer')],
+    ['3. Zabit', t('role.officer3','Third Officer')],
+    ['Baş Mühendis', t('role.chiefEngineer','Chief Engineer')],
+    ['Çarkçıbaşı', t('role.chiefEngineer','Chief Engineer')],
+    ['Lostromo', t('role.bosun','Bosun')],
+    ['Aşçı', t('role.cook','Cook')],
+    ['Tayfa', t('role.rating','Rating')]
+  ].find(([prefix])=>rawName.toLowerCase().startsWith(prefix.toLowerCase()));
+  let displayName = rawName;
+  if(rolePrefix){
+    const person = rawName.slice(rolePrefix[0].length).trim();
+    displayName = [rolePrefix[1], person].filter(Boolean).join(' ');
+  }
+  return [displayName || '--', title].filter(Boolean).join(' - ');
+}
+
+function getLocalizedSpeakerName(speaker){
+  return getLocalizedSpeakerLine(speaker).split(' - ')[0] || '--';
+}
+
+function getLocalizedSceneLocation(sc){
+  const raw = String(sc?.loc || '').trim();
+  if(gameLanguage === 'tr') return raw || '--';
+  const proper = (raw.match(/Houston|Rotterdam|Singapore|Singapur|Suez|Suveys|Panama|Malakka|Malacca|Hurmuz|Hormuz|Aden|Dover|Istanbul|İstanbul|Izmir|İzmir|Samsun|Pire|Yokohama|Shanghai|Şanghay|Colombo|Fujairah|Ras Tanura/i) || [raw.split(/[—-]/)[0]?.trim() || 'Vessel'])[0];
+  const kind = getSceneLanguageKind(sc, raw);
+  const templates = {
+    en:{port:`${proper} port approach / berth area`, radar:`${proper} navigation watch`, vhf:`${proper} radio watch area`, engine:`${proper} operation area`, fire:`${proper} emergency station`, cargo:`${proper} cargo operation area`, inspect:`${proper} inspection area`, people:`${proper} crew area`, default:`${proper} vessel area`},
+    es:{port:`aproximacion al puerto de ${proper} / zona de atraque`, radar:`guardia de navegacion en ${proper}`, vhf:`zona de guardia radio de ${proper}`, engine:`zona operacional de ${proper}`, fire:`estacion de emergencia de ${proper}`, cargo:`zona de operacion de carga de ${proper}`, inspect:`zona de inspeccion de ${proper}`, people:`zona de tripulacion de ${proper}`, default:`zona del buque en ${proper}`},
+    de:{port:`${proper} Hafenansteuerung / Liegeplatzbereich`, radar:`Navigationswache bei ${proper}`, vhf:`Funkwache im Bereich ${proper}`, engine:`Betriebsbereich ${proper}`, fire:`Notfallstation ${proper}`, cargo:`Ladungsbetrieb ${proper}`, inspect:`Inspektionsbereich ${proper}`, people:`Crewbereich ${proper}`, default:`Schiffsbereich ${proper}`},
+    fr:{port:`approche portuaire de ${proper} / zone d accostage`, radar:`quart de navigation a ${proper}`, vhf:`zone de veille radio a ${proper}`, engine:`zone operationnelle de ${proper}`, fire:`poste d urgence de ${proper}`, cargo:`zone operation cargaison de ${proper}`, inspect:`zone d inspection de ${proper}`, people:`zone equipage de ${proper}`, default:`zone navire de ${proper}`},
+    zh:{port:`${proper}港口进港/靠泊区域`, radar:`${proper}导航值班区域`, vhf:`${proper}无线电值班区域`, engine:`${proper}操作区域`, fire:`${proper}应急集合区域`, cargo:`${proper}货物作业区域`, inspect:`${proper}检查区域`, people:`${proper}船员区域`, default:`${proper}船舶区域`}
+  };
+  return templates[gameLanguage]?.[kind] || templates[gameLanguage]?.default || proper || '--';
+}
+
+function getLocalizedScenarioCue(sc, kind){
+  const sub = String(sc?.sub || '').trim();
+  const cue = {
+    en:{default:'Use the current watch information, confirm before acting, and keep the report short.', port:'Pilotage, tug use, line order, speed and snap-back zones are the main risks.', radar:'Compare radar, ARPA, AIS and ECDIS before deciding whether risk of collision exists.', vhf:'Listen first, select the correct channel/call type, then transmit a short standard message.', engine:'Ask for the exact alarm, operational impact and expected recovery time before reporting.', fire:'Confirm alarm, location, team assignment and communication chain before moving.', people:'Lower the tension, protect witnesses and facts, and avoid public humiliation.', cargo:'Check numbers, valve/line-up, stability and documents before approving.', inspect:'Show records and equipment evidence calmly; do not invent missing information.'},
+    es:{default:'Usa la informacion de guardia, confirma antes de actuar y mantén el reporte corto.', port:'Practicaje, remolcador, orden de cabos, velocidad y zonas snap-back son los riesgos principales.', radar:'Compara radar, ARPA, AIS y ECDIS antes de decidir si hay riesgo de colision.', vhf:'Escucha primero, selecciona canal/tipo de llamada correcto y transmite un mensaje estandar corto.', engine:'Pide alarma exacta, impacto operativo y tiempo estimado de recuperacion antes de informar.', fire:'Confirma alarma, lugar, equipo y cadena de comunicacion antes de moverte.', people:'Reduce la tension, protege testigos y hechos, y evita humillar en publico.', cargo:'Comprueba numeros, valvulas/line-up, estabilidad y documentos antes de aprobar.', inspect:'Muestra registros y evidencia de equipo con calma; no inventes informacion faltante.'},
+    de:{default:'Nutze die aktuellen Wachinformationen, bestatige vor dem Handeln und halte die Meldung kurz.', port:'Lotsung, Schlepper, Leinenreihenfolge, Fahrt und Snap-back-Zonen sind die Hauptrisiken.', radar:'Vergleiche Radar, ARPA, AIS und ECDIS, bevor du Kollisionsgefahr bewertest.', vhf:'Erst horen, richtigen Kanal/Rufart wahlen, dann kurze Standardmeldung senden.', engine:'Frage nach genauem Alarm, betrieblicher Auswirkung und Erholungszeit, bevor du meldest.', fire:'Alarm, Ort, Teameinteilung und Kommunikationskette bestatigen, bevor du vorgehst.', people:'Spannung senken, Zeugen und Fakten sichern und offentliche Blamage vermeiden.', cargo:'Zahlen, Ventile/Line-up, Stabilitat und Dokumente prufen, bevor du zustimmst.', inspect:'Nachweise und Ausrustungsbelege ruhig zeigen; fehlende Angaben nicht erfinden.'},
+    fr:{default:'Utilise les informations de quart, confirme avant d agir et garde le rapport court.', port:'Pilotage, remorqueur, ordre des aussières, vitesse et zones snap-back sont les risques principaux.', radar:'Compare radar, ARPA, AIS et ECDIS avant de juger le risque de collision.', vhf:'Ecoute d abord, choisis le bon canal/type d appel, puis transmets un court message standard.', engine:'Demande l alarme exacte, l impact operationnel et le delai de retour avant de rapporter.', fire:'Confirme alarme, lieu, equipe et chaine de communication avant de te deplacer.', people:'Fais baisser la tension, protege temoins et faits, evite l humiliation publique.', cargo:'Controle chiffres, vannes/line-up, stabilite et documents avant d approuver.', inspect:'Montre calmement registres et preuves equipement; n invente pas les infos manquantes.'},
+    zh:{default:'使用当前值班信息，行动前先确认，并保持报告简短清楚。', port:'主要风险是引航、拖轮、缆绳顺序、速度和反弹区。', radar:'先对比雷达、ARPA、AIS和ECDIS，再判断是否存在碰撞危险。', vhf:'先监听，选择正确频道和呼叫类型，然后发送简短标准信息。', engine:'报告前先问清具体报警、操作影响和预计恢复时间。', fire:'行动前确认警报、位置、人员分配和通信链。', people:'降低紧张，保留事实和证人，避免公开羞辱。', cargo:'批准前检查数据、阀门/管线、稳性和文件。', inspect:'冷静出示记录和设备证据，不要编造缺失信息。'}
+  };
+  return cue[gameLanguage]?.[kind] || cue[gameLanguage]?.default || cue.en.default;
+}
+
 function getLocalizedSceneNarrative(text, sc){
   const raw=String(text || '');
   if(gameLanguage==='tr') return raw;
   const kind=getSceneLanguageKind(sc, raw);
-  const loc=translateGameText(sc?.loc || '--');
+  const loc=getLocalizedSceneLocation(sc);
   const speaker=getCrewDisplay ? getCrewDisplay(sc?.who || '') : null;
-  const speakerLine=translateGameText([speaker?.name, speaker?.title].filter(Boolean).join(' - ') || '--');
+  const speakerLine=getLocalizedSpeakerLine(speaker);
   const situation=t(`scene.${kind}Situation`, t('scene.defaultSituation','A watchkeeping situation is developing on board.'));
   const task=t(`scene.${kind}Task`, t('scene.defaultTask','Choose the safest professional response.'));
-  const source=translateGameText(raw).replace(/\s+/g,' ').trim();
-  const clipped=source.length>260 ? source.slice(0,257)+'...' : source;
+  const cue=getLocalizedScenarioCue(sc, kind);
   return `${t('scene.brief','SCENE BRIEFING')}
 
 ${t('scene.location','Location')}: ${loc}
@@ -8932,7 +8987,7 @@ ${t('scene.situation','Situation')}: ${situation}
 
 ${t('scene.task','Your task')}: ${task}
 
-${t('scene.original','Source note')}: ${clipped}`;
+${t('scene.cue','Scenario cue')}: ${cue}`;
 }
 function localizeChoiceText(choice){
   if(gameLanguage==='tr') return String(choice?.text ?? choice ?? '');
@@ -12596,18 +12651,18 @@ function renderScene(idx){
   const c=getCrewDisplay(sc.who);
   document.getElementById('dbd').textContent=translateGameText(sc.day);
   document.getElementById('tbd').textContent=sc.time;
-  document.getElementById('lbd').textContent=translateGameText(sc.loc);
+  document.getElementById('lbd').textContent=getLocalizedSceneLocation(sc);
   updateWatchState(sc);
   updateVoyagePressure(sc);
   updateLiveVoyageState(sc);
   updatePortOpsChain(sc);
-  document.getElementById('scene-sub').textContent=translateGameText(sc.sub||'');
+  document.getElementById('scene-sub').textContent=gameLanguage==='tr' ? (sc.sub || '') : getLocalizedScenarioCue(sc, getSceneLanguageKind(sc, sc.text || ''));
   const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
-  document.getElementById('spknm').textContent=translateGameText(c.name);
+  document.getElementById('spknm').textContent=getLocalizedSpeakerName(c);
   const memoryLine = getCrewMemoryLine(sc);
-  document.getElementById('spktl').textContent = [translateGameText(c.title), translateGameText(memoryLine)].filter(Boolean).join(' · ');
+  document.getElementById('spktl').textContent = [translateGameText(c.title), gameLanguage==='tr' ? translateGameText(memoryLine) : ''].filter(Boolean).join(' · ');
   hideReplyBubble();
   runSpeechTyping(typeof sc.text==='function'?sc.text(pn,sn):sc.text, sc);
   renderDialogueLog();
@@ -13675,6 +13730,92 @@ let visitedPorts = new Set(["İzmir"]);
 let activeVoyageRoute = null;
 let activeVoyageProgress = 0;
 let deviceChartOverlayState = {radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
+let worldMapZoom = 1;
+let worldMapPanX = 0;
+let worldMapPanY = 0;
+let worldMapDragState = null;
+let worldMapDidPan = false;
+const WORLD_MAP_FEATURES = [
+  {name:'North Atlantic Ocean', kind:'ocean', x:86, y:78, min:1},
+  {name:'South Atlantic Ocean', kind:'ocean', x:96, y:202, min:1},
+  {name:'Pacific Ocean', kind:'ocean', x:394, y:128, min:1},
+  {name:'Indian Ocean', kind:'ocean', x:286, y:202, min:1},
+  {name:'Arctic Ocean', kind:'ocean', x:220, y:20, min:1.15},
+  {name:'Southern Ocean', kind:'ocean', x:230, y:246, min:1.35},
+  {name:'Mediterranean Sea', kind:'sea', x:206, y:119, min:1},
+  {name:'Black Sea', kind:'sea', x:235, y:91, min:1.2},
+  {name:'Aegean Sea', kind:'sea', x:203, y:107, min:1.55},
+  {name:'Marmara Sea', kind:'sea', x:216, y:96, min:1.75},
+  {name:'Adriatic Sea', kind:'sea', x:184, y:98, min:1.65},
+  {name:'Red Sea', kind:'sea', x:254, y:148, min:1.2},
+  {name:'Arabian Sea', kind:'sea', x:302, y:166, min:1.1},
+  {name:'Persian Gulf', kind:'sea', x:330, y:139, min:1.15},
+  {name:'Gulf of Oman', kind:'sea', x:342, y:153, min:1.55},
+  {name:'Gulf of Aden', kind:'sea', x:279, y:168, min:1.35},
+  {name:'Bay of Bengal', kind:'sea', x:330, y:178, min:1.25},
+  {name:'Andaman Sea', kind:'sea', x:355, y:169, min:1.45},
+  {name:'South China Sea', kind:'sea', x:382, y:143, min:1.1},
+  {name:'East China Sea', kind:'sea', x:401, y:103, min:1.35},
+  {name:'Sea of Japan', kind:'sea', x:414, y:82, min:1.45},
+  {name:'Bering Sea', kind:'sea', x:424, y:40, min:1.45},
+  {name:'North Sea', kind:'sea', x:194, y:72, min:1.25},
+  {name:'Baltic Sea', kind:'sea', x:212, y:62, min:1.45},
+  {name:'Caribbean Sea', kind:'sea', x:83, y:142, min:1.25},
+  {name:'Gulf of Mexico', kind:'sea', x:66, y:128, min:1.25},
+  {name:'Gulf of Guinea', kind:'sea', x:180, y:178, min:1.45},
+  {name:'Mozambique Channel', kind:'sea', x:270, y:214, min:1.65},
+  {name:'Gibraltar Strait', kind:'chokepoint', x:174, y:120, min:1},
+  {name:'Bosporus', kind:'chokepoint', x:220, y:96, min:1},
+  {name:'Dardanelles', kind:'chokepoint', x:212, y:101, min:1.2},
+  {name:'Suez Canal', kind:'canal', x:252, y:132, min:1},
+  {name:'Panama Canal', kind:'canal', x:69, y:150, min:1},
+  {name:'Malacca Strait', kind:'chokepoint', x:361, y:166, min:1},
+  {name:'Singapore Strait', kind:'chokepoint', x:371, y:167, min:1.35},
+  {name:'Hormuz Strait', kind:'chokepoint', x:342, y:145, min:1},
+  {name:'Bab el-Mandeb', kind:'chokepoint', x:270, y:166, min:1},
+  {name:'Dover Strait', kind:'chokepoint', x:187, y:82, min:1.25},
+  {name:'Danish Straits', kind:'chokepoint', x:205, y:68, min:1.55},
+  {name:'Kiel Canal', kind:'canal', x:201, y:70, min:1.65},
+  {name:'Sunda Strait', kind:'chokepoint', x:369, y:181, min:1.55},
+  {name:'Lombok Strait', kind:'chokepoint', x:382, y:188, min:1.55},
+  {name:'Taiwan Strait', kind:'chokepoint', x:394, y:119, min:1.4},
+  {name:'Korea Strait', kind:'chokepoint', x:407, y:91, min:1.55},
+  {name:'Bering Strait', kind:'chokepoint', x:428, y:24, min:1.65},
+  {name:'Magellan Strait', kind:'chokepoint', x:111, y:245, min:1.75},
+  {name:'Cape of Good Hope', kind:'chokepoint', x:232, y:237, min:1.25},
+  {name:'Cape Horn', kind:'chokepoint', x:108, y:252, min:1.65},
+];
+const WORLD_MAP_POINT_LOOKUP = {
+  'rotterdam':[188,76], 'felixstowe':[186,80], 'dover':[187,82], 'dover tss - english channel':[187,82],
+  'hamburg':[201,69], 'gdansk':[213,62], 'le havre':[182,84], 'antwerp':[188,77], 'anvers':[188,77],
+  'gibraltar':[174,120], 'cebelitarik':[174,120], 'cebelitarık':[174,120], 'algeciras':[174,121], 'tanger med':[172,121],
+  'suez':[252,132], 'suveys':[252,132], 'suveys kanali':[252,132], 'port said':[251,128], 'iskenderiye':[241,126], 'alexandria':[241,126],
+  'bab el-mandeb':[270,166], 'babulmendep':[270,166], 'aden':[277,168], 'aden korfezi':[279,168],
+  'hormuz':[342,145], 'hurmuz bogazi':[342,145], 'ras tanura':[331,138], 'fujairah':[344,151], 'basra korfezi':[330,139], 'dubai':[340,148],
+  'colombo':[326,177], 'mumbai':[312,158], 'salalah':[289,164],
+  'malacca':[361,166], 'malakka bogazi':[361,166], 'singapore':[371,167], 'singapur':[371,167], 'singapore strait tss':[371,167],
+  'hong kong':[392,132], 'shanghai':[400,102], 'şanghay':[400,102], 'yokohama':[414,86], 'busan':[407,91], 'kaohsiung':[394,120],
+  'panama':[69,150], 'panama kanali':[69,150], 'new orleans':[66,128], 'houston':[61,130], 'los angeles':[50,106], 'vancouver':[43,61],
+  'santos':[121,208], 'rio de la plata':[112,228], 'parana':[112,226], 'amazon':[105,176], 'cape town':[232,237], 'durban':[263,225],
+  'cape of good hope':[232,237], 'macellan':[111,245], 'magellan':[111,245], 'bering':[428,24],
+  'izmir':[207,111], 'aliağa':[206,109], 'aliaga':[206,109], 'pire':[201,117], 'istanbul':[220,96], 'istanbul bogazi':[220,96],
+  'canakkale':[212,101], 'çanakkale':[212,101], 'canakkale bogazi':[212,101], 'çanakkale bogazi':[212,101],
+  'ambarli':[219,97], 'ambarlı':[219,97], 'tekirdag':[216,98], 'gemlik':[220,99], 'derince':[220,98],
+  'mersin':[228,120], 'iskenderun':[230,122], 'samsun':[231,90], 'trabzon':[242,88], 'kibris':[228,120],
+  'barselona':[186,104], 'valensiya':[180,108], 'marsilya':[190,101], 'cenova':[196,96], 'napoli':[202,109], 'trieste':[203,93],
+  'malta':[206,121], 'haifa':[238,124], 'cidde':[258,151], 'jebel ali':[340,148], 'fujairah bunker anchorage':[344,151],
+  'yokohama pilot out':[414,86], 'north pacific great circle':[250,64], 'date line watch':[205,70], 'us west coast landfall':[54,101],
+  'santos / atlantic departure':[121,208], 'south atlantic weather route':[160,218], 'indian ocean leg':[285,202],
+  'malacca / singapore traffic':[366,166], 'shanghai approach':[400,102], 'ras tanura sea berth':[331,138],
+  'hormuz outbound lane':[342,145], 'arabian sea monsoon leg':[304,166], 'malacca tss':[361,166],
+  'south china sea lane':[382,143], 'japan approach':[414,86], 'rotterdam / maas approach':[188,76],
+  'gibraltar landfall':[174,120], 'suez northbound/southbound convoy':[252,132], 'bab el-mandeb transit':[270,166],
+  'colombo waypoint':[326,177], 'malacca west entrance':[361,166], 'singapore pilot station':[371,167],
+  'samsun departure':[231,90], 'bosphorus north entrance':[220,96], 'dardanelles southbound':[212,101],
+  'aegean open leg':[202,114], 'alexandria approach':[241,126], 'felixstowe departure':[186,80],
+  'english channel westbound':[187,82], 'biscay weather gate':[175,96], 'north atlantic great circle':[128,78],
+  'us gulf approach':[66,128], 'new orleans river pilot':[66,128]
+};
 const TRADE_VOYAGE_ROUTES = [
   {
     key:'eu_far_east',
@@ -15348,7 +15489,8 @@ function getPortChartEntries(){
   const activeCharts = new Set([route?.chart, ...(route?.charts || []), ...(route?.waypoints || []).map(w=>w.chart)].filter(Boolean));
   const known = new Set(ROUTE_PORTS.map(p=>p.name));
   const synthetic = getSyntheticVoyageChartEntries().filter(p=>!known.has(p.name));
-  return ROUTE_PORTS.concat(synthetic)
+  const atlas = getWorldAtlasChartEntries().filter(p=>!known.has(p.name) && !synthetic.some(s=>s.name===p.name));
+  return ROUTE_PORTS.concat(synthetic, atlas)
     .filter(p=>['port','waterway','route'].includes(p.kind))
     .slice()
     .sort((a,b)=>{
@@ -15387,8 +15529,21 @@ function getSyntheticVoyageChartEntries(){
   return [...out.values()];
 }
 
+function getWorldAtlasChartEntries(){
+  return WORLD_MAP_FEATURES.map((feature)=>({
+    name:feature.name,
+    x:feature.x,
+    y:feature.y,
+    visited:false,
+    kind:feature.kind === 'ocean' ? 'route' : 'waterway',
+    synthetic:true,
+    atlas:true,
+    routeKey:'world-atlas'
+  }));
+}
+
 function getPortChartByName(name){
-  return ROUTE_PORTS.find(p=>p.name===name) || getSyntheticVoyageChartEntries().find(p=>p.name===name) || null;
+  return ROUTE_PORTS.find(p=>p.name===name) || getSyntheticVoyageChartEntries().find(p=>p.name===name) || getWorldAtlasChartEntries().find(p=>p.name===name) || null;
 }
 
 function renderMapRouteDraftOverlay(svg){
@@ -16360,6 +16515,8 @@ function renderMapLibrary(){
 }
 
 function getWorldMapPoint(p, i=0, total=1){
+  const atlas = getWorldAtlasCoordinate(p);
+  if(atlas) return atlas;
   const x = Math.max(8, Math.min(432, Number(p?.x || 0)));
   const rawY = Math.max(10, Math.min(250, Number(p?.y || 0)));
   const t = total > 1 ? i / (total - 1) : .5;
@@ -16369,10 +16526,168 @@ function getWorldMapPoint(p, i=0, total=1){
   return {x:+x.toFixed(1), y:+y.toFixed(1)};
 }
 
+function normalizeAtlasKey(value){
+  return String(value || '')
+    .toLowerCase()
+    .replace(/ı/g,'i')
+    .replace(/ğ/g,'g')
+    .replace(/ü/g,'u')
+    .replace(/ş/g,'s')
+    .replace(/ö/g,'o')
+    .replace(/ç/g,'c')
+    .replace(/[^\w\s/-]/g,'')
+    .trim();
+}
+
+function getWorldAtlasCoordinate(p){
+  const candidates = [p?.name, p?.chart, p?.start, p?.end].filter(Boolean);
+  for(const raw of candidates){
+    const key = normalizeAtlasKey(raw);
+    if(WORLD_MAP_POINT_LOOKUP[key]){
+      const [x,y] = WORLD_MAP_POINT_LOOKUP[key];
+      return {x, y};
+    }
+    const partial = Object.keys(WORLD_MAP_POINT_LOOKUP).find(k=>key.includes(k) || k.includes(key));
+    if(partial && key.length > 5){
+      const [x,y] = WORLD_MAP_POINT_LOOKUP[partial];
+      return {x, y};
+    }
+  }
+  return null;
+}
+
+function clampWorldMapPan(){
+  const w = 440 / worldMapZoom;
+  const h = 260 / worldMapZoom;
+  worldMapPanX = Math.max(0, Math.min(440 - w, worldMapPanX));
+  worldMapPanY = Math.max(0, Math.min(260 - h, worldMapPanY));
+}
+
+function getWorldMapViewBox(){
+  clampWorldMapPan();
+  const w = 440 / worldMapZoom;
+  const h = 260 / worldMapZoom;
+  return `${worldMapPanX.toFixed(1)} ${worldMapPanY.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
+}
+
+function updateWorldMapZoomLabel(){
+  const label = document.getElementById('world-map-scale-label');
+  if(!label) return;
+  const detail = worldMapZoom >= 2.2 ? 'Close Detail' : worldMapZoom >= 1.45 ? 'Approach' : 'Overview';
+  label.textContent = `Dunya Atlasi · ${Math.round(worldMapZoom * 100)}% · ${detail}`;
+}
+
+function adjustWorldMapZoom(delta){
+  const prev = worldMapZoom;
+  worldMapZoom = Math.max(1, Math.min(3.2, +(worldMapZoom + delta).toFixed(2)));
+  if(worldMapZoom !== prev){
+    const centerX = worldMapPanX + (440 / prev) / 2;
+    const centerY = worldMapPanY + (260 / prev) / 2;
+    worldMapPanX = centerX - (440 / worldMapZoom) / 2;
+    worldMapPanY = centerY - (260 / worldMapZoom) / 2;
+  }
+  renderMap();
+}
+
+function resetWorldMapView(){
+  worldMapZoom = 1;
+  worldMapPanX = 0;
+  worldMapPanY = 0;
+  renderMap();
+}
+
+function initWorldMapInteractions(svg){
+  if(!svg || svg.dataset.worldMapBound === '1') return;
+  svg.dataset.worldMapBound = '1';
+  svg.addEventListener('pointerdown', (ev)=>{
+    if(mapView !== 'world') return;
+    svg.setPointerCapture?.(ev.pointerId);
+    worldMapDragState = {id:ev.pointerId, x:ev.clientX, y:ev.clientY, panX:worldMapPanX, panY:worldMapPanY};
+    worldMapDidPan = false;
+    svg.classList.add('world-dragging');
+  });
+  svg.addEventListener('pointermove', (ev)=>{
+    if(!worldMapDragState || worldMapDragState.id !== ev.pointerId || worldMapZoom <= 1) return;
+    const rect = svg.getBoundingClientRect();
+    const scaleX = (440 / worldMapZoom) / Math.max(1, rect.width);
+    const scaleY = (260 / worldMapZoom) / Math.max(1, rect.height);
+    const dx = (ev.clientX - worldMapDragState.x) * scaleX;
+    const dy = (ev.clientY - worldMapDragState.y) * scaleY;
+    if(Math.abs(dx) + Math.abs(dy) > .8) worldMapDidPan = true;
+    worldMapPanX = worldMapDragState.panX - dx;
+    worldMapPanY = worldMapDragState.panY - dy;
+    svg.setAttribute('viewBox', getWorldMapViewBox());
+  });
+  svg.addEventListener('pointerup', (ev)=>{
+    if(worldMapDragState?.id === ev.pointerId){
+      worldMapDragState = null;
+      svg.classList.remove('world-dragging');
+    }
+  });
+  svg.addEventListener('pointercancel', ()=>{
+    worldMapDragState = null;
+    svg.classList.remove('world-dragging');
+  });
+  svg.addEventListener('wheel', (ev)=>{
+    if(mapView !== 'world') return;
+    ev.preventDefault();
+    adjustWorldMapZoom(ev.deltaY > 0 ? -0.25 : 0.25);
+  }, {passive:false});
+}
+
+function buildWorldAtlasBaseLayer(regionTint){
+  let s = `<rect width="440" height="260" fill="${regionTint}" rx="6"/>`;
+  s+=`<style>
+    .world-chart text{font-family:'Share Tech Mono',monospace;letter-spacing:0}
+    .world-land{fill:#ead7a6;stroke:#8a744c;stroke-width:.55}
+    .world-coast{fill:#f1dfad;stroke:#8a744c;stroke-width:.55}
+    .world-lane{fill:none;stroke:#9b3151;stroke-width:1.25;stroke-dasharray:7 5;opacity:.48}
+    .world-lane.secondary{stroke:#245f9a;stroke-width:1;opacity:.36}
+    .world-grid{stroke:#7fb2c4;stroke-width:.45;opacity:.2}
+  </style><g class="world-chart">`;
+  for(let x=40;x<440;x+=40) s+=`<path class="world-grid" d="M${x} 14 V248"/>`;
+  for(let y=40;y<260;y+=40) s+=`<path class="world-grid" d="M8 ${y} H432"/>`;
+  s+=`<path class="world-land" d="M20 30 Q48 15 78 27 Q101 40 92 75 Q83 104 69 123 Q52 140 62 168 Q74 197 96 228 Q80 235 60 212 Q40 186 34 160 Q23 130 33 103 Q45 72 20 30 Z"/>`;
+  s+=`<path class="world-land" d="M100 150 Q124 138 145 154 Q164 172 155 204 Q146 235 118 252 Q97 232 92 203 Q88 173 100 150 Z"/>`;
+  s+=`<path class="world-land" d="M166 48 Q201 34 244 45 Q282 58 304 84 Q328 112 316 140 Q292 137 268 124 Q244 112 221 111 Q198 109 178 96 Q160 78 166 48 Z"/>`;
+  s+=`<path class="world-land" d="M210 96 Q238 100 257 124 Q268 146 257 177 Q246 207 232 236 Q210 224 202 190 Q194 158 199 128 Q202 112 210 96 Z"/>`;
+  s+=`<path class="world-land" d="M286 72 Q330 42 379 58 Q420 72 430 101 Q415 124 382 119 Q356 116 337 137 Q318 155 290 145 Q306 119 286 72 Z"/>`;
+  s+=`<path class="world-land" d="M333 143 Q356 146 376 166 Q389 188 382 209 Q361 199 345 179 Q333 162 333 143 Z"/>`;
+  s+=`<path class="world-land" d="M384 199 Q410 204 426 229 Q418 248 392 242 Q374 231 384 199 Z"/>`;
+  s+=`<path class="world-coast" d="M188 82 Q204 76 218 84 Q224 93 218 101 Q202 99 190 94 Z"/>`;
+  s+=`<path class="world-coast" d="M221 99 Q231 99 238 106 Q234 112 222 109 Z"/>`;
+  s+=`<path class="world-lane" d="M190 82 Q176 103 174 120 Q207 122 252 132 Q270 166 300 166 Q338 166 371 167 Q398 142 420 104"/>`;
+  s+=`<path class="world-lane" d="M69 150 Q118 133 174 120 Q218 116 252 132"/>`;
+  s+=`<path class="world-lane secondary" d="M232 237 Q276 204 330 178 Q360 166 382 143"/>`;
+  s+=`<path class="world-lane secondary" d="M86 78 Q132 70 187 82 Q230 88 286 72 Q350 60 414 82"/>`;
+  return s;
+}
+
+function buildWorldMapFeatureLayer(){
+  const detailLimit = worldMapZoom >= 2.15 ? 99 : worldMapZoom >= 1.45 ? 1.45 : 1.05;
+  return WORLD_MAP_FEATURES
+    .filter(f=>f.min <= detailLimit)
+    .map((f)=>{
+      const cls = f.kind === 'ocean' ? 'ocean' : f.kind === 'sea' ? 'sea' : f.kind === 'canal' ? 'canal' : 'chokepoint';
+      const size = f.kind === 'ocean' ? 7.4 : f.kind === 'sea' ? 6.4 : 6.2;
+      const mark = f.kind === 'canal'
+        ? `<rect x="${f.x-2.8}" y="${f.y-2.8}" width="5.6" height="5.6" rx="1" fill="#d4a017" opacity=".9"/>`
+        : f.kind === 'chokepoint'
+          ? `<path d="M${f.x} ${f.y-4} L${f.x+4} ${f.y} L${f.x} ${f.y+4} L${f.x-4} ${f.y} Z" fill="#9b3151" opacity=".86"/>`
+          : '';
+      const zone = `<circle class="world-click-zone" cx="${f.x}" cy="${f.y}" r="${f.kind === 'ocean' ? 20 : 13}" fill="rgba(255,212,90,.01)" stroke="#7b3550" stroke-width=".6" opacity=".12"><title>${f.name} chart dosyasini ac</title></circle>`;
+      return `${zone}${mark}<text class="world-atlas-label ${cls}" x="${f.x+5}" y="${f.y+3}" font-size="${size}">${f.name}</text>`;
+    }).join('');
+}
+
 function handleWorldMapClick(svg, ev){
+  if(worldMapDidPan){
+    worldMapDidPan = false;
+    return;
+  }
   const pos = getSvgClickPoint(svg, ev);
   let best = null;
-  ROUTE_PORTS.forEach((p)=>{
+  getPortChartEntries().forEach((p)=>{
     const wp = getWorldMapPoint(p);
     const d = Math.hypot(pos.x - wp.x, pos.y - wp.y);
     if(!best || d < best.d) best = {port:p, d};
@@ -16450,6 +16765,9 @@ function renderMap(){
   }
   const svg = document.getElementById('map-svg');
   const legend = document.getElementById('map-legend');
+  initWorldMapInteractions(svg);
+  updateWorldMapZoomLabel();
+  if(svg) svg.setAttribute('viewBox', getWorldMapViewBox());
   const region = getMapRegionByPosition(shipPosition);
   const regionTint =
     region==='ORTA AKDENIZ' ? '#cfeaf3' :
@@ -16465,32 +16783,12 @@ function renderMap(){
     region==='DOGU ASYA' ? '#c1e4ee' :
     region==='KUZEY PASIFIK / JAPONYA' ? '#bedfea' :
     '#d8eef7';
-  let s = `<rect width="440" height="260" fill="${regionTint}" rx="6"/>`;
-  s+=`<style>
-    .world-chart text{font-family:'Share Tech Mono',monospace;letter-spacing:0}
-    .world-land{fill:#f0dfab;stroke:#9b8356;stroke-width:.8}
-    .world-coast{fill:#ead6a0;stroke:#8a744c;stroke-width:.55}
-    .world-lane{fill:none;stroke:#9b3151;stroke-width:1.35;stroke-dasharray:6 5;opacity:.46}
-    .world-lane.secondary{stroke:#245f9a;stroke-width:1;opacity:.34}
-    .world-grid{stroke:#7fb2c4;stroke-width:.45;opacity:.22}
-  </style><g class="world-chart">`;
-  for(let x=40;x<440;x+=40) s+=`<path class="world-grid" d="M${x} 16 V248"/>`;
-  for(let y=40;y<260;y+=40) s+=`<path class="world-grid" d="M10 ${y} H430"/>`;
+  let s = buildWorldAtlasBaseLayer(regionTint);
+  s+=buildWorldMapFeatureLayer();
   // Sea texture
   for(let i=0;i<8;i++){
     s+=`<path d="M${i*60} ${80+i*20} Q${i*60+30} ${75+i*20} ${i*60+60} ${80+i*20}" fill="none" stroke="#8cbfd0" stroke-width="1" opacity=".35"/>`;
   }
-  // Land masses (simplified Mediterranean)
-  s+=`<path class="world-land" d="M0 60 Q50 40 100 50 Q150 45 200 60 Q250 55 300 70 Q350 65 400 80 L440 85 L440 0 L0 0 Z"/>`;
-  s+=`<path class="world-land" d="M0 260 Q60 240 120 250 Q180 245 240 255 Q300 248 360 258 L440 255 L440 160 Q400 170 350 165 Q300 160 250 170 Q200 175 150 168 Q100 162 50 170 Q20 175 0 168 Z" opacity=".82"/>`;
-  // Italy/Greece simplified
-  s+=`<path class="world-coast" d="M120 90 Q130 100 125 115 Q120 125 115 120 Q110 110 115 95 Z"/>`;
-  s+=`<path class="world-coast" d="M80 70 Q95 65 100 75 Q98 85 90 82 Q82 78 80 70 Z"/>`;
-  s+=`<path class="world-lane" d="M18 118 Q68 98 132 110 Q210 126 272 120 Q346 112 420 124"/>`;
-  s+=`<path class="world-lane secondary" d="M152 82 Q194 70 236 76 Q286 83 348 78"/>`;
-  s+=`<circle cx="120" cy="160" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".22"/>`;
-  s+=`<circle cx="200" cy="210" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
-  s+=`<circle cx="95" cy="175" r="11" fill="none" stroke="#9b3151" stroke-width="1" opacity=".18"/>`;
 
   const activeRoute = getActiveVoyageRoute();
   if(activeRoute?.waypoints?.length){
@@ -16572,7 +16870,7 @@ function renderMap(){
   });
 
   // Ship position
-  const shipMapPoint = getWorldMapPoint(shipPosition);
+  const shipMapPoint = getWorldMapPoint(getVoyageWaypoint() || shipPosition);
   const sx = shipMapPoint.x, sy = shipMapPoint.y;
   s+=`<circle cx="${sx}" cy="${sy}" r="5" fill="#d4a017"/>`;
   s+=`<path d="M${sx-4} ${sy} L${sx} ${sy-8} L${sx+4} ${sy} Z" fill="#d4a017"/>`;

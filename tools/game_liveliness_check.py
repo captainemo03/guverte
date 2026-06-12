@@ -130,6 +130,21 @@ CHECKS = {
         "completedMapTasks:Array.from",
         "selectedPortChart = data.selectedPortChart",
     ],
+    "world atlas zoom map": [
+        "WORLD_MAP_FEATURES",
+        "WORLD_MAP_POINT_LOOKUP",
+        "buildWorldAtlasBaseLayer",
+        "buildWorldMapFeatureLayer",
+        "adjustWorldMapZoom",
+        "resetWorldMapView",
+        "initWorldMapInteractions",
+        "world-map-controls",
+        "Bosporus",
+        "Suez Canal",
+        "Panama Canal",
+        "Malacca Strait",
+        "North Atlantic Ocean",
+    ],
     "character creator reliability": [
         "syncPlayerModelFromTraits",
         "resolvePlayerModelFromTraits",
@@ -185,6 +200,10 @@ CHECKS = {
         "LOCALIZE_COMMON_EXACTS",
         "staticTextSource",
         "scene.brief",
+        "scene.cue",
+        "getLocalizedSpeakerLine",
+        "getLocalizedSceneLocation",
+        "getLocalizedScenarioCue",
         "getChoiceTagLabel",
         "intro-language-select",
         "language-select",
@@ -261,13 +280,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 93:
+    elif int(js_versions[-1]) < 95:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 84:
+    elif int(css_versions[-1]) < 85:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():
