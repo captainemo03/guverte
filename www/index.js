@@ -8743,6 +8743,7 @@ const GAME_LANGUAGES={
   es:{label:'Espanol',native:'Espanol',short:'ES'},
   de:{label:'Deutsch',native:'Deutsch',short:'DE'},
   fr:{label:'Francais',native:'Francais',short:'FR'},
+  ru:{label:'Russian',native:'Русский',short:'RU'},
   zh:{label:'Chinese',native:'中文',short:'ZH'}
 };
 let gameLanguage=(()=>{try{return GAME_LANGUAGES[localStorage.getItem('guverte-language')] ? localStorage.getItem('guverte-language') : 'tr';}catch(e){return 'tr';}})();
@@ -8839,6 +8840,25 @@ const I18N={
     'scene.inspectSituation':'检查、审核或文件控制正在进行。','scene.inspectTask':'出示正确记录、设备证据和纠正措施，不要临场编造。'
   }
 };
+I18N.ru={
+  'ui.language':'Язык','ui.languageHint':'Выберите язык меню, подсказок, вариантов ответа и живого перевода.','ui.save':'СОХРАНИТЬ','ui.sound':'Звук','ui.rep':'РЕПУТАЦИЯ',
+  'ui.colreg':'МППСС','ui.notes':'ЗАМЕТКИ','ui.map':'КАРТА','ui.devices':'ПРИБОРЫ','ui.sim':'ТРЕНАЖЕР','ui.career':'КАРЬЕРА','ui.ship':'СУДНО','ui.cabin':'КАЮТА','ui.logbook':'ЖУРНАЛ','ui.phone':'ТЕЛЕФОН','ui.journal':'ДНЕВНИК','ui.album':'АЛЬБОМ','ui.crew':'ЭКИПАЖ',
+  'ui.continue':'Продолжить сохранение','ui.deleteSave':'Удалить сохранение','ui.startShip':'Войти на судно','ui.mode':'Режим','ui.open':'Открыто','ui.basicStory':'Только история и базовые решения.','ui.unlocked':'Открыто','ui.assist':'Режим помощи включен: подсказки подробнее.','ui.slowUnlock':'Новые системы открываются постепенно.',
+  'mode.simple':'Простой','mode.simpleDesc':'История, основные решения и более чистый экран.','mode.realistic':'Реалистичный','mode.realisticDesc':'Приборы, карты и журнал открываются постепенно.','mode.expert':'Эксперт','mode.expertDesc':'CPA, UKC, PSC, танкер и премиум-детали активны.',
+  'tag.cesur':'Решительно','tag.akilli':'Разумно','tag.itaatkar':'По процедуре','tag.korkak':'Небезопасно','tag.sosyal':'Коммуникация','tag.kritik':'КРИТИЧНО',
+  'role.cadet':'ПАЛУБНЫЙ КАДЕТ','role.master':'Капитан','role.officer1':'Старший помощник','role.officer2':'Второй помощник','role.officer3':'Третий помощник','role.chiefEngineer':'Старший механик','role.bosun':'Боцман','role.cook':'Повар','role.rating':'Матрос',
+  'save.center':'ЦЕНТР СОХРАНЕНИЙ','save.preparing':'Подготовка состояния сохранения','save.current':'Текущая игра','save.contract':'Контракт','save.last':'Последнее сохранение','save.actions':'Действия','save.saveGame':'Сохранить игру','save.loadGame':'Продолжить','save.deleteGame':'Удалить','save.noSave':'Сохранения нет','save.notStarted':'Не начато',
+  'guide.default':'Прочитайте сцену, поймите задачу и примите одно четкое решение.','guide.support':'Режим помощи: не спешите, выбирайте решение ближе к процедуре и фактам.','guide.tired':'Низкая энергия: избегайте риска, выбирайте спокойное процедурное действие.','guide.vhf':'Уточните канал VHF и тип вызова.','guide.radar':'Оцените цель: CPA/TCPA, намерение и доклад.','guide.ecdis':'Проверьте маршрут, безопасную изобату и следующий waypoint на карте.','guide.engine':'Получите данные из машинного отделения и кратко доложите капитану.','guide.port':'Контролируйте скорость, курс, порядок швартовов и snap-back риск.','guide.emergency':'Сначала цепочка безопасности: тревога, место, команда, доклад.','guide.inspection':'Спокойно проверьте документы, оборудование и риск замечаний.',
+  'scene.brief':'БРИФИНГ СЦЕНЫ','scene.location':'Место','scene.speaker':'Говорит','scene.situation':'Обстановка','scene.task':'Ваша задача','scene.context':'Операционный контекст','scene.cue':'Подсказка сцены','scene.defaultSituation':'На судне развивается вахтенная ситуация. Оцените риск, говорите ясно и не гадайте.','scene.defaultTask':'Выберите самый безопасный профессиональный ответ и держите мостик в курсе.',
+  'scene.vhfSituation':'Идет событие радиосвязи. Важны канал, тип вызова и порядок сообщения.','scene.vhfTask':'Выберите ответ с ясной фразеологией SMCP, подтвердите канал и при необходимости доложите капитану.',
+  'scene.radarSituation':'Нужно оценить навигационную цель или картину датчиков. CPA, TCPA и намерение проверяются до действия.','scene.radarTask':'Используйте radar/ARPA/AIS/ECDIS вместе, подтвердите риск и дайте короткий доклад на мостик.',
+  'scene.portSituation':'Судно находится в портовой, лоцманской, буксирной или швартовной фазе; время и безопасность швартовов критичны.','scene.portTask':'Перед решением контролируйте скорость, курс, порядок буксиров/швартовов и snap-back зону.',
+  'scene.engineSituation':'Машинная или техническая тревога влияет на операцию.','scene.engineTask':'Получите факты от механиков, избегайте предположений и ясно доложите влияние.',
+  'scene.fireSituation':'Есть аварийная ситуация. Первые секунды должны идти по цепочке безопасности.','scene.fireTask':'Подтвердите тревогу, место, назначение команды и доложите статус.',
+  'scene.peopleSituation':'Проблема управления экипажем создает напряжение или дисциплинарный риск.','scene.peopleTask':'Снизьте напряжение, сохраните факты/свидетелей, защитите безопасность и используйте командную цепочку.',
+  'scene.cargoSituation':'Груз, балласт, бункеровка или размещение могут повлиять на остойчивость, дифферент, загрязнение или коммерческий риск.','scene.cargoTask':'До согласования проверьте план, цифры, клапаны/линии и документы.',
+  'scene.inspectSituation':'Идет инспекция, аудит или контроль документов.','scene.inspectTask':'Покажите правильную запись, подтверждение оборудования и корректирующее действие без импровизации.'
+};
 const DYNAMIC_TRANSLATIONS={
   en:[
     ['Sahneyi oku ve karar ver.','Read the scene and decide.'],['Kaptan','Master'],['Süvari','Master'],['Stajyer','Cadet'],['Zabit','Officer'],['Baş Mühendis','Chief Engineer'],['Çarkçıbaşı','Chief Engineer'],['Lostromo','Bosun'],['Aşçı','Cook'],['Tayfa','Rating'],
@@ -8872,6 +8892,14 @@ const DYNAMIC_TRANSLATIONS={
     ['Ne yapabilirim?','Que puis-je faire ?'],['Kaptana haber ver','Informer le capitaine'],['kontrol et','controler'],['teyit et','confirmer'],['bekle','attendre'],['yardım et','assister'],['sakin','calme'],['prosedür','procedure'],['belge','document'],['cihaz','appareil'],
     ['Mesaj','Messages'],['Rehber','Contacts'],['Uygulama','Apps'],['Son kayit','Derniere sauvegarde'],['Sahne','Scene'],['SAHNE','SCENE'],['sahne','scene'],['ay','mois'],['mod','mode'],['Yok','Aucun'],['Gemi','Navire'],['Kayitli gemi','Navire sauvegarde']
   ],
+  ru:[
+    ['Sahneyi oku ve karar ver.','Прочитайте сцену и примите решение.'],['Kaptan','Капитан'],['Süvari','Капитан'],['Stajyer','Кадет'],['Zabit','Помощник'],['Baş Mühendis','Старший механик'],['Çarkçıbaşı','Старший механик'],['Lostromo','Боцман'],['Aşçı','Повар'],['Tayfa','Матрос'],
+    ['Gece','Ночь'],['Gün','День'],['Vardiya','Вахта'],['Teslim','Передача вахты'],['Köprüüstü','Мостик'],['Makine','Машина'],['Güverte','Палуба'],['Liman','Порт'],['Açık Deniz','Открытое море'],['Harita','Карта'],['Rota','Маршрут'],['Demir','Якорная стоянка'],
+    ['yangın','пожар'],['alarm','тревога'],['acil durum','аварийная ситуация'],['rapor','доклад'],['kayıt','запись'],['kanal','канал'],['hedef','цель'],['emniyet','безопасность'],['tehlike','опасность'],['görüş','видимость'],
+    ['halat','швартов'],['pilot','лоцман'],['römorkör','буксир'],['yanaşma','швартовка'],['ayrılma','отход'],['yükleme','погрузка'],['tahliye','выгрузка'],['balast','балласт'],['akıntı','течение'],['sis','туман'],
+    ['Ne yapabilirim?','Что я могу сделать?'],['Kaptana haber ver','Сообщить капитану'],['kontrol et','проверить'],['teyit et','подтвердить'],['bekle','ожидать'],['yardım et','помочь'],['sakin','спокойно'],['prosedür','процедура'],['belge','документ'],['cihaz','прибор'],
+    ['Mesaj','Сообщения'],['Rehber','Контакты'],['Uygulama','Приложения'],['Son kayit','Последнее сохранение'],['Sahne','Сцена'],['SAHNE','СЦЕНА'],['sahne','сцена'],['ay','месяц'],['mod','режим'],['Yok','Нет'],['Gemi','Судно'],['Kayitli gemi','Сохраненное судно']
+  ],
   zh:[
     ['Sahneyi oku ve karar ver.','阅读场景并做出决定。'],['Kaptan','船长'],['Süvari','船长'],['Stajyer','实习生'],['Zabit','驾驶员'],['Baş Mühendis','轮机长'],['Çarkçıbaşı','轮机长'],['Lostromo','水手长'],['Aşçı','厨师'],['Tayfa','船员'],
     ['Gece','夜间'],['Gün','日'],['Vardiya','值班'],['Teslim','交班'],['Köprüüstü','驾驶台'],['Makine','机舱'],['Güverte','甲板'],['Liman','港口'],['Açık Deniz','外海'],['Harita','海图'],['Rota','航线'],['Demir','锚地'],
@@ -8899,6 +8927,28 @@ function translateGameText(value){
     out=out.replace(new RegExp(escapeRegExp(from),'gi'), to);
   });
   return out;
+}
+function getLocalizedLongTextFallback(text){
+  if(gameLanguage==='tr') return text;
+  const blob=String(text || '').toLowerCase();
+  const kind = /vhf|dsc|mayday|radio|kanal/.test(blob) ? 'vhf'
+    : /radar|arpa|ais|ecdis|chart|harita|rota|cpa|tcpa/.test(blob) ? 'radar'
+    : /pilot|tug|romorkor|römorkör|halat|mooring|liman|port|berth/.test(blob) ? 'port'
+    : /makine|engine|alarm|generator|pump|bilge/.test(blob) ? 'engine'
+    : /fire|yangin|yangın|mob|abandon|acil/.test(blob) ? 'fire'
+    : /cargo|yuk|yük|ballast|balast|bunker|stowage|manifold/.test(blob) ? 'cargo'
+    : /psc|survey|class|inspection|audit|belge|document/.test(blob) ? 'inspect'
+    : /crew|murettebat|mürettebat|aile|moral|kavga|complaint/.test(blob) ? 'people'
+    : 'default';
+  const fallback = {
+    en:{default:'Operational note: review the situation, verify the facts and choose the safest professional action.', vhf:'Radio practice: confirm the channel, call type and message order before transmitting.', radar:'Navigation practice: compare radar, ARPA, AIS and ECDIS before judging the risk.', port:'Port operation: check pilotage, tug order, mooring lines and snap-back zones.', engine:'Technical event: get the exact alarm, impact and recovery estimate before reporting.', fire:'Emergency event: confirm alarm, location, team assignment and status report.', cargo:'Cargo operation: check the plan, numbers, valves, stability and documentation.', inspect:'Inspection item: show the correct record, evidence and corrective action.', people:'Crew management: reduce tension, keep facts and protect safety.'},
+    es:{default:'Nota operativa: revisa la situacion, verifica los hechos y elige la accion profesional mas segura.', vhf:'Practica radio: confirma canal, tipo de llamada y orden del mensaje antes de transmitir.', radar:'Practica de navegacion: compara radar, ARPA, AIS y ECDIS antes de evaluar el riesgo.', port:'Operacion portuaria: revisa practicaje, remolcador, cabos y zonas snap-back.', engine:'Evento tecnico: pide alarma exacta, impacto y tiempo estimado antes de informar.', fire:'Emergencia: confirma alarma, lugar, equipo y reporte de estado.', cargo:'Operacion de carga: revisa plan, datos, valvulas, estabilidad y documentos.', inspect:'Inspeccion: muestra registro correcto, evidencia y accion correctiva.', people:'Gestion de tripulacion: reduce tension, conserva hechos y protege la seguridad.'},
+    de:{default:'Betriebsnotiz: Situation prufen, Fakten bestatigen und die sicherste professionelle Aktion wahlen.', vhf:'Funkubung: Kanal, Rufart und Meldereihenfolge vor dem Senden bestatigen.', radar:'Navigationsubung: Radar, ARPA, AIS und ECDIS vergleichen, bevor Risiko bewertet wird.', port:'Hafenbetrieb: Lotsung, Schlepper, Leinen und Snap-back-Zonen prufen.', engine:'Technisches Ereignis: genauen Alarm, Auswirkung und Erholungszeit erfragen.', fire:'Notfall: Alarm, Ort, Team und Statusmeldung bestatigen.', cargo:'Ladungsbetrieb: Plan, Zahlen, Ventile, Stabilitat und Dokumente prufen.', inspect:'Inspektion: richtigen Nachweis, Belege und Korrekturmassnahme zeigen.', people:'Crewfuhrung: Spannung senken, Fakten sichern und Sicherheit schutzen.'},
+    fr:{default:'Note operationnelle : examine la situation, verifie les faits et choisis l action professionnelle la plus sure.', vhf:'Pratique radio : confirme canal, type d appel et ordre du message avant emission.', radar:'Pratique navigation : compare radar, ARPA, AIS et ECDIS avant de juger le risque.', port:'Operation portuaire : verifie pilotage, remorqueur, aussières et zones snap-back.', engine:'Evenement technique : demande l alarme exacte, l impact et le delai de retour.', fire:'Urgence : confirme alarme, lieu, equipe et rapport de statut.', cargo:'Operation cargaison : controle plan, chiffres, vannes, stabilite et documents.', inspect:'Inspection : montre le bon registre, les preuves et l action corrective.', people:'Gestion equipage : fais baisser la tension, garde les faits et protege la securite.'},
+    ru:{default:'Операционная заметка: оцените ситуацию, подтвердите факты и выберите самое безопасное профессиональное действие.', vhf:'Радиотренировка: подтвердите канал, тип вызова и порядок сообщения до передачи.', radar:'Навигационная тренировка: сравните radar, ARPA, AIS и ECDIS перед оценкой риска.', port:'Портовая операция: проверьте лоцмана, буксиры, швартовы и snap-back зоны.', engine:'Техническое событие: уточните тревогу, влияние и время восстановления перед докладом.', fire:'Авария: подтвердите тревогу, место, команду и доклад о статусе.', cargo:'Грузовая операция: проверьте план, цифры, клапаны, остойчивость и документы.', inspect:'Инспекция: покажите правильную запись, доказательства и корректирующее действие.', people:'Управление экипажем: снизьте напряжение, сохраните факты и защитите безопасность.'},
+    zh:{default:'操作提示：评估情况，确认事实，并选择最安全的专业行动。', vhf:'无线电练习：发话前确认频道、呼叫类型和信息顺序。', radar:'导航练习：判断风险前对比雷达、ARPA、AIS和ECDIS。', port:'港口作业：检查引航、拖轮、缆绳和反弹区。', engine:'技术事件：报告前确认具体报警、影响和恢复时间。', fire:'紧急情况：确认警报、位置、人员和状态报告。', cargo:'货物作业：检查计划、数据、阀门、稳性和文件。', inspect:'检查项目：出示正确记录、证据和纠正措施。', people:'船员管理：降低紧张，保留事实，保护安全。'}
+  };
+  return fallback[gameLanguage]?.[kind] || fallback[gameLanguage]?.default || fallback.en.default;
 }
 function getSceneLanguageKind(sc, text=''){
   const blob=`${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${text||sc?.text||''}`.toLowerCase();
@@ -8951,6 +9001,7 @@ function getLocalizedSceneLocation(sc){
     es:{port:`aproximacion al puerto de ${proper} / zona de atraque`, radar:`guardia de navegacion en ${proper}`, vhf:`zona de guardia radio de ${proper}`, engine:`zona operacional de ${proper}`, fire:`estacion de emergencia de ${proper}`, cargo:`zona de operacion de carga de ${proper}`, inspect:`zona de inspeccion de ${proper}`, people:`zona de tripulacion de ${proper}`, default:`zona del buque en ${proper}`},
     de:{port:`${proper} Hafenansteuerung / Liegeplatzbereich`, radar:`Navigationswache bei ${proper}`, vhf:`Funkwache im Bereich ${proper}`, engine:`Betriebsbereich ${proper}`, fire:`Notfallstation ${proper}`, cargo:`Ladungsbetrieb ${proper}`, inspect:`Inspektionsbereich ${proper}`, people:`Crewbereich ${proper}`, default:`Schiffsbereich ${proper}`},
     fr:{port:`approche portuaire de ${proper} / zone d accostage`, radar:`quart de navigation a ${proper}`, vhf:`zone de veille radio a ${proper}`, engine:`zone operationnelle de ${proper}`, fire:`poste d urgence de ${proper}`, cargo:`zone operation cargaison de ${proper}`, inspect:`zone d inspection de ${proper}`, people:`zone equipage de ${proper}`, default:`zone navire de ${proper}`},
+    ru:{port:`${proper}: портовый подход / район причала`, radar:`${proper}: навигационная вахта`, vhf:`${proper}: район радиовахты`, engine:`${proper}: операционный район`, fire:`${proper}: аварийный пост`, cargo:`${proper}: район грузовой операции`, inspect:`${proper}: район инспекции`, people:`${proper}: район экипажа`, default:`${proper}: район судна`},
     zh:{port:`${proper}港口进港/靠泊区域`, radar:`${proper}导航值班区域`, vhf:`${proper}无线电值班区域`, engine:`${proper}操作区域`, fire:`${proper}应急集合区域`, cargo:`${proper}货物作业区域`, inspect:`${proper}检查区域`, people:`${proper}船员区域`, default:`${proper}船舶区域`}
   };
   return templates[gameLanguage]?.[kind] || templates[gameLanguage]?.default || proper || '--';
@@ -8963,6 +9014,7 @@ function getLocalizedScenarioCue(sc, kind){
     es:{default:'Usa la informacion de guardia, confirma antes de actuar y mantén el reporte corto.', port:'Practicaje, remolcador, orden de cabos, velocidad y zonas snap-back son los riesgos principales.', radar:'Compara radar, ARPA, AIS y ECDIS antes de decidir si hay riesgo de colision.', vhf:'Escucha primero, selecciona canal/tipo de llamada correcto y transmite un mensaje estandar corto.', engine:'Pide alarma exacta, impacto operativo y tiempo estimado de recuperacion antes de informar.', fire:'Confirma alarma, lugar, equipo y cadena de comunicacion antes de moverte.', people:'Reduce la tension, protege testigos y hechos, y evita humillar en publico.', cargo:'Comprueba numeros, valvulas/line-up, estabilidad y documentos antes de aprobar.', inspect:'Muestra registros y evidencia de equipo con calma; no inventes informacion faltante.'},
     de:{default:'Nutze die aktuellen Wachinformationen, bestatige vor dem Handeln und halte die Meldung kurz.', port:'Lotsung, Schlepper, Leinenreihenfolge, Fahrt und Snap-back-Zonen sind die Hauptrisiken.', radar:'Vergleiche Radar, ARPA, AIS und ECDIS, bevor du Kollisionsgefahr bewertest.', vhf:'Erst horen, richtigen Kanal/Rufart wahlen, dann kurze Standardmeldung senden.', engine:'Frage nach genauem Alarm, betrieblicher Auswirkung und Erholungszeit, bevor du meldest.', fire:'Alarm, Ort, Teameinteilung und Kommunikationskette bestatigen, bevor du vorgehst.', people:'Spannung senken, Zeugen und Fakten sichern und offentliche Blamage vermeiden.', cargo:'Zahlen, Ventile/Line-up, Stabilitat und Dokumente prufen, bevor du zustimmst.', inspect:'Nachweise und Ausrustungsbelege ruhig zeigen; fehlende Angaben nicht erfinden.'},
     fr:{default:'Utilise les informations de quart, confirme avant d agir et garde le rapport court.', port:'Pilotage, remorqueur, ordre des aussières, vitesse et zones snap-back sont les risques principaux.', radar:'Compare radar, ARPA, AIS et ECDIS avant de juger le risque de collision.', vhf:'Ecoute d abord, choisis le bon canal/type d appel, puis transmets un court message standard.', engine:'Demande l alarme exacte, l impact operationnel et le delai de retour avant de rapporter.', fire:'Confirme alarme, lieu, equipe et chaine de communication avant de te deplacer.', people:'Fais baisser la tension, protege temoins et faits, evite l humiliation publique.', cargo:'Controle chiffres, vannes/line-up, stabilite et documents avant d approuver.', inspect:'Montre calmement registres et preuves equipement; n invente pas les infos manquantes.'},
+    ru:{default:'Используйте текущую вахтенную информацию, подтверждайте перед действием и докладывайте кратко.', port:'Главные риски: лоцман, буксиры, порядок швартовов, скорость и snap-back зоны.', radar:'Сравните radar, ARPA, AIS и ECDIS перед оценкой риска столкновения.', vhf:'Сначала слушайте, выберите правильный канал и тип вызова, затем передайте короткое стандартное сообщение.', engine:'Перед докладом уточните точную тревогу, влияние на операцию и время восстановления.', fire:'Подтвердите тревогу, место, назначение команды и цепочку связи до движения.', people:'Снизьте напряжение, сохраните свидетелей и факты, избегайте публичного унижения.', cargo:'Проверьте цифры, клапаны/линии, остойчивость и документы до согласования.', inspect:'Спокойно покажите записи и доказательства; недостающую информацию не придумывайте.'},
     zh:{default:'使用当前值班信息，行动前先确认，并保持报告简短清楚。', port:'主要风险是引航、拖轮、缆绳顺序、速度和反弹区。', radar:'先对比雷达、ARPA、AIS和ECDIS，再判断是否存在碰撞危险。', vhf:'先监听，选择正确频道和呼叫类型，然后发送简短标准信息。', engine:'报告前先问清具体报警、操作影响和预计恢复时间。', fire:'行动前确认警报、位置、人员分配和通信链。', people:'降低紧张，保留事实和证人，避免公开羞辱。', cargo:'批准前检查数据、阀门/管线、稳性和文件。', inspect:'冷静出示记录和设备证据，不要编造缺失信息。'}
   };
   return cue[gameLanguage]?.[kind] || cue[gameLanguage]?.default || cue.en.default;
@@ -9031,6 +9083,15 @@ function localizeChoiceText(choice){
       korkak:'Retarde la decision ou ignore une procedure essentielle.',
       hileli:'Choisis le raccourci meme s il cree un risque.'
     },
+    ru:{
+      kritik:'Выполнить всю процедуру, проверить факты, ясно доложить и записать действие.',
+      akilli:'Сначала проверить информацию, подтвердить у правильного источника, затем действовать.',
+      itaatkar:'Следовать постоянному приказу и без задержки доложить результат.',
+      cesur:'Немедленно действовать контролируемо и держать мостик в курсе.',
+      sosyal:'Успокоить человека, говорить уважительно и защитить безопасность.',
+      korkak:'Затянуть решение или проигнорировать важную процедуру.',
+      hileli:'Выбрать короткий путь, хотя он создает риск.'
+    },
     zh:{
       kritik:'执行完整程序，核实事实，清楚报告并记录行动。',
       akilli:'先检查信息，与正确来源确认，然后行动。',
@@ -9046,6 +9107,7 @@ function localizeChoiceText(choice){
     es:{vhf:' El foco es la disciplina de radio.',radar:' El foco es cruzar sensores.',port:' El foco es la seguridad de operacion portuaria.',engine:' El foco es el impacto de maquinas.',fire:' El foco es el orden de emergencia.',people:' El foco es gestion de tripulacion.',cargo:' El foco es control de carga/estabilidad.',inspect:' El foco es evidencia y documentos.',default:''},
     de:{vhf:' Schwerpunkt ist Funkdisziplin.',radar:' Schwerpunkt ist Sensorabgleich.',port:' Schwerpunkt ist Hafensicherheit.',engine:' Schwerpunkt ist Maschinenauswirkung.',fire:' Schwerpunkt ist Notfallreihenfolge.',people:' Schwerpunkt ist Crewfuhrung.',cargo:' Schwerpunkt ist Ladung/Stabilitat.',inspect:' Schwerpunkt sind Nachweise und Dokumente.',default:''}
     ,fr:{vhf:' La discipline radio est le point central.',radar:' Le recoupement des capteurs est le point central.',port:' La securite portuaire est le point central.',engine:' L impact machine est le point central.',fire:' L ordre d urgence est le point central.',people:' La gestion d equipage est le point central.',cargo:' Le controle cargaison/stabilite est le point central.',inspect:' Les preuves et documents sont le point central.',default:''}
+    ,ru:{vhf:' В фокусе дисциплина радиосвязи.',radar:' В фокусе сверка датчиков.',port:' В фокусе безопасность портовой операции.',engine:' В фокусе влияние на машинную установку.',fire:' В фокусе порядок аварийного реагирования.',people:' В фокусе управление экипажем.',cargo:' В фокусе контроль груза и остойчивости.',inspect:' В фокусе доказательства и документы.',default:''}
     ,zh:{vhf:' 重点是无线电纪律。',radar:' 重点是传感器交叉核对。',port:' 重点是港口作业安全。',engine:' 重点是机舱影响。',fire:' 重点是紧急响应顺序。',people:' 重点是船员管理。',cargo:' 重点是货物/稳性控制。',inspect:' 重点是证据和文件。',default:''}
   };
   return (choiceText[gameLanguage]?.[tag] || translateGameText(text)) + (append[gameLanguage]?.[kind] || '');
@@ -9166,6 +9228,25 @@ const LOCALIZE_COMMON_EXACTS={
     'Kritik satirlari duzelt':'修正关键日志行','Satir duzeltildi.':'日志行已修正。','HAVA':'天气','ROTA':'航线','Yatak':'床铺','Masa / Kitap':'桌子 / 书','Takvim':'日历','Aile Fotografi':'家庭照片','Canta':'包','Kisa uyu':'小睡','Ders calis':'学习','Aileyi ara':'给家人打电话','Spor yap':'锻炼','Hava raporu al':'获取天气报告','Kopruustu':'驾驶台','Makine':'机舱','Güverte':'甲板','Kamara':'舱室','Asci':'厨师','Lostromo':'水手长','Kaptan':'船长','Bas Muhendis':'轮机长','Şirket':'公司','Anne':'母亲','Baba':'父亲','Kardes':'兄弟姐妹','Para Yetmedi':'余额不足','Kurs Tamamlandi':'课程完成'
   }
 };
+LOCALIZE_EXACTS.ru = Object.assign({
+  'MÜRETTEBAT':'ЭКИПАЖ','ROTA HARİTASI':'МАРШРУТНАЯ КАРТА','Rota Haritasi':'Маршрутная карта','Haritalarim':'Мои карты','Liman Haritasi':'Портовая карта','Harita Gorevi':'Задание по карте','Sonraki':'Далее','SEYİR GÜNLÜĞİ':'СУДОВОЙ ДНЕВНИК',
+  'CIHAZ EGITIM MERKEZI':'ЦЕНТР ТРЕНАЖЕРОВ','Gercekci menu ve uygulama alani':'Реалистичное меню и зона практики','CANLI VARDIYA DEFTERI':'ЖИВОЙ ВАХТЕННЫЙ ЖУРНАЛ','KAMARAM':'МОЯ КАЮТА','GEMI ICI MINI HARITA':'КАРТА СУДНА','BASARILAR':'ДОСТИЖЕНИЯ','GERCEKCI SIMULASYON MERKEZI':'ЦЕНТР СИМУЛЯЦИИ',
+  'NOTLARIM':'ЗАМЕТКИ','Kurallar':'Правила','Formuller':'Формулы','Sozluk':'Словарь','COLREG HIZLI REHBER':'БЫСТРЫЙ СПРАВОЧНИК МППСС','Kapat':'Закрыть','X Kapat':'Закрыть','✕ Kapat':'Закрыть','Kaydet':'Сохранить','Gonder':'Отправить','Gönder':'Отправить','Ac':'Ответить','Aç':'Ответить','Mesgul':'Занято',
+  'Adın':'Имя','Staj Dönemi':'Период практики','Stajyer Bilgileri':'Данные кадета','Karakter Oluştur':'Создать персонажа','Referans Foto':'Фото-референс','Fotoğraf Yükle':'Загрузить фото','Kamera Aç':'Открыть камеру','Otomatik Öner':'Автоподбор','Temizle':'Очистить','Çek':'Снять',
+  'Cilt Tonu':'Тон кожи','Karakter Tabanı':'Основа персонажа','Yaş Grubu':'Возраст','Poz':'Поза','Boy / Kilo':'Рост / вес','Arka Plan Mekanı':'Фон','Portre Modeli':'Модель портрета','Yüz Tipi':'Тип лица','Saç Modeli':'Прическа','Sakal':'Борода','Saç Rengi':'Цвет волос','Göz Rengi':'Цвет глаз','Üniforma':'Форма',
+  'Gemi Türü Seç':'Выбрать тип судна','Kontrat Seç':'Выбрать контракт','Oynanis Modu':'Режим игры','Gemi Adı':'Название судна','Gemiye Bin':'Войти на судно','Kayittan Devam Et':'Продолжить','Kaydi Sil':'Удалить сохранение',
+  'KAYIT MERKEZI':'ЦЕНТР СОХРАНЕНИЙ','Kayit durumu hazirlaniyor':'Подготовка сохранения','Sahne':'Сцена','Ay':'Месяц','Hafif rüzgar':'Легкий ветер','Gece Seyri':'Ночная вахта','Rota bekleniyor':'Маршрут ожидается','Dinçlik normal':'Энергия нормальная','İz temiz':'След чистый','Ofis sakin':'Офис спокоен','AKTIF GOREV AKISI':'АКТИВНЫЙ ПОТОК ЗАДАЧ',
+  'CESARET':'СМЕЛОСТЬ','BİLGİ':'ЗНАНИЕ','SAYGINLIK':'УВАЖЕНИЕ','DİNÇLİK':'ЭНЕРГИЯ','YALNIZLIK':'ОДИНОЧЕСТВО','ÖFKE':'ГНЕВ','TÜKENME':'ВЫГОРАНИЕ','EKİP UYUMU':'СЛАЖЕННОСТЬ','Anlatıcı':'Рассказчик','Yükleniyor...':'Загрузка...','GELEN ARAMA':'ВХОДЯЩИЙ ЗВОНОК','Kisa gorusme':'Короткий разговор','Yeni bildirim':'Новое уведомление',
+  'KARİYER / PARA / EĞİTİM':'КАРЬЕРА / ДЕНЬГИ / ОБУЧЕНИЕ','Yeniden Başla':'Начать заново','Gemide Kal ve Devam Et':'Остаться на судне','Ayril / Yeni Oyun':'Уйти / новая игра','Yeniden Oyna':'Играть снова'
+}, LOCALIZE_EXACTS.ru || {});
+LOCALIZE_COMMON_EXACTS.ru = Object.assign({
+  'Premium Paket':'Премиум-пакет','Premium Paket Aktif':'Премиум активен','Premium Gerekli':'Нужен премиум','Premium Paket Ucretli':'Платный премиум-пакет','Premium Ucretli Paket':'Платный премиум-пакет','Premium Bulunamadi':'Премиум не найден','Premium Aktif':'Премиум активен','Premium Geri Yukleniyor':'Восстановление премиума','Geri Yukleme Hazir Degil':'Восстановление не готово','Geri Yukleme Basarisiz':'Восстановление не удалось','Odeme Onayi Gerekli':'Нужно подтверждение оплаты','Odeme Tamamlanmadi':'Оплата не завершена','Odeme Baslatilamadi':'Не удалось начать оплату','Google Play satin alma gecmisi kontrol ediliyor.':'Проверяется история покупок Google Play.','Geri Yukle':'Восстановить','Satin Al':'Купить','Aktif':'Активно','Acik':'Открыто','Kapali':'Закрыто',
+  'Oyunu Kaydet':'Сохранить игру','Kayittan Devam':'Продолжить','Kayittan Devam Et':'Продолжить','Kaydi Sil':'Удалить сохранение','Kayit Yok':'Нет сохранения','Devam edilecek bir kayit bulunamadi.':'Нет сохранения для продолжения.','Islemler':'Действия','Mevcut Oyun':'Текущая игра','Son Kayit':'Последнее сохранение','Kayit yok':'Нет сохранения','Baslamadi':'Не начато','Kontrat':'Контракт','Sahne':'Сцена','Ay':'Месяц','mod':'режим','sahne':'сцена','ay':'месяц',
+  'Telefon':'Телефон','Mesaj':'Сообщение','Rehber':'Контакты','Uygulama':'Приложения','Ayarlar':'Настройки','Fotograflar':'Фото','Fotoğraflar':'Фото','Mail':'Почта','Banka':'Банк','Hava Durumu':'Погода','Notlar':'Заметки','Geri':'Назад','Album bos':'Альбом пуст','AILE grubuna gonder':'Отправить в группу СЕМЬЯ','Tekrar gonder':'Отправить снова','Telefonu ac':'Открыть телефон',
+  'Harita arsivi hazir degil.':'Архив карт не готов.','Ticaret Rotasi Haritasi':'Карта торгового маршрута','Transit Haritasi':'Транзитная карта','Turkiye Liman Yaklasma Haritasi':'Карта подхода к порту Турции','Harita gorevi tamamlandi':'Задание по карте выполнено',
+  'Cihaz egitimi':'Тренировка приборов','Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.':'Выберите прибор и правильно используйте soft-key меню.','Cihaz Egitim Merkezi':'Центр тренировки приборов','Cihazlar normal':'Приборы в норме',
+  'Kritik satirlari duzelt':'Исправить критические строки','Satir duzeltildi.':'Строка исправлена.','HAVA':'ПОГОДА','ROTA':'МАРШРУТ','Yatak':'Койка','Masa / Kitap':'Стол / книга','Takvim':'Календарь','Aile Fotografi':'Семейное фото','Canta':'Сумка','Kisa uyu':'Коротко поспать','Ders calis':'Учиться','Aileyi ara':'Позвонить семье','Spor yap':'Тренироваться','Hava raporu al':'Получить прогноз','Kopruustu':'Мостик','Makine':'Машина','Güverte':'Палуба','Kamara':'Каюта','Asci':'Повар','Lostromo':'Боцман','Kaptan':'Капитан','Bas Muhendis':'Старший механик','Şirket':'Компания','Anne':'Мать','Baba':'Отец','Kardes':'Брат/сестра','Para Yetmedi':'Недостаточно денег','Kurs Tamamlandi':'Курс завершен'
+}, LOCALIZE_COMMON_EXACTS.ru || {});
 Object.keys(LOCALIZE_COMMON_EXACTS).forEach(lang=>{
   LOCALIZE_EXACTS[lang]=Object.assign({}, LOCALIZE_COMMON_EXACTS[lang], LOCALIZE_EXACTS[lang] || {});
 });
@@ -9179,6 +9260,7 @@ function localizeStaticText(value){
   if(!trimmed) return text;
   const exact=LOCALIZE_EXACTS[gameLanguage]?.[trimmed];
   const translated=exact || translateGameText(trimmed);
+  if(translated===trimmed && trimmed.length>90) return getLocalizedLongTextFallback(trimmed);
   if(translated===trimmed) return text;
   return text.replace(trimmed, translated);
 }
@@ -9193,7 +9275,7 @@ function localizeStaticDom(root=document){
     acceptNode(node){
       if(shouldSkipLocalizationNode(node)) return NodeFilter.FILTER_REJECT;
       const txt=node.nodeValue || '';
-      if(!txt.trim() || txt.trim().length>90) return NodeFilter.FILTER_REJECT;
+      if(!txt.trim() || txt.trim().length>260) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     }
   });

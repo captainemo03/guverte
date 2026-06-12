@@ -205,6 +205,7 @@ CHECKS = {
         "getLocalizedSceneLocation",
         "getLocalizedScenarioCue",
         "getChoiceTagLabel",
+        "getLocalizedLongTextFallback",
         "intro-language-select",
         "language-select",
         "gameLanguage",
@@ -212,6 +213,11 @@ CHECKS = {
         "Espanol",
         "Deutsch",
         "Francais",
+        "Русский",
+        "I18N.ru",
+        "LOCALIZE_EXACTS.ru",
+        "LOCALIZE_COMMON_EXACTS.ru",
+        "DYNAMIC_TRANSLATIONS",
         "中文",
     ],
 }
@@ -280,7 +286,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 95:
+    elif int(js_versions[-1]) < 96:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
