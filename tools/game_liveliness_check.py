@@ -15,6 +15,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_JS = ROOT / "www" / "index.js"
 INDEX_HTML = ROOT / "www" / "index.html"
+INDEX_CSS = ROOT / "www" / "index.css"
 ANDROID_BILLING = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteBillingBridge.java"
 ANDROID_MAIN = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "MainActivity.java"
 ANDROID_GRADLE = ROOT / "android" / "app" / "build.gradle"
@@ -135,6 +136,13 @@ CHECKS = {
         "creator-face",
         "renderPortraitTargets",
     ],
+    "mobile landscape support": [
+        "MOBIL / TABLET YATAY OYUN MODU",
+        "@media (orientation: landscape)",
+        "height:100svh",
+        "#choices{flex:0 0 auto;display:grid",
+        "#creator-wrap{grid-template-columns:minmax(150px,31vw)",
+    ],
     "simulation flow pack": [
         "MAP_TASK_TRAINING",
         "getMapTrainingCards",
@@ -194,11 +202,12 @@ def read_text(path: Path) -> str:
 def main() -> int:
     js = read_text(INDEX_JS)
     html = read_text(INDEX_HTML)
+    css = read_text(INDEX_CSS)
     android_billing = read_text(ANDROID_BILLING) if ANDROID_BILLING.exists() else ""
     android_main = read_text(ANDROID_MAIN) if ANDROID_MAIN.exists() else ""
     android_gradle = read_text(ANDROID_GRADLE) if ANDROID_GRADLE.exists() else ""
     android_manifest = read_text(ANDROID_MANIFEST) if ANDROID_MANIFEST.exists() else ""
-    all_text = "\n".join([js, html, android_billing, android_main, android_gradle, android_manifest])
+    all_text = "\n".join([js, html, css, android_billing, android_main, android_gradle, android_manifest])
     missing: list[str] = []
 
     for group, needles in CHECKS.items():
@@ -215,7 +224,7 @@ def main() -> int:
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 82:
+    elif int(css_versions[-1]) < 83:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():
