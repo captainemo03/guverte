@@ -237,6 +237,20 @@ CHECKS = {
         "Crew Wi-Fi",
         "Ops VLAN",
     ],
+    "charter laytime notes": [
+        "CHARTER / LAYTIME / NOR",
+        "Laycan",
+        "NOR Tendered",
+        "NOR Accepted",
+        "Laytime Statement",
+        "Demurrage",
+        "Despatch",
+        "Notice Time",
+        "WIBON",
+        "WIPON",
+        "WCCON",
+        "Weather Working Day",
+    ],
 }
 
 
@@ -303,7 +317,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 98:
+    elif int(js_versions[-1]) < 99:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
