@@ -137,6 +137,10 @@ CHECKS = {
         "creator-beard",
         "creator-face",
         "renderPortraitTargets",
+        "PORTRAIT_SHEET_ASSETS",
+        "support-style-female-cutout.png",
+        "__portraitVersion:2",
+        "sheetUpgradeMap",
     ],
     "mobile landscape support": [
         "MOBIL / TABLET YATAY OYUN MODU",
@@ -257,7 +261,7 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 92:
+    elif int(js_versions[-1]) < 93:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)

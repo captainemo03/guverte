@@ -4660,6 +4660,14 @@ const OFFICER_SHEET_POOLS = {
     female:[1,3,5,7,9,11,13,15]
   }
 };
+const PORTRAIT_SHEET_ASSETS = {
+  officerYoung:'assets/crew-portraits-illustrated-young-cutout.png',
+  officerMid:'assets/crew-portraits-illustrated-mid-cutout.png',
+  officerVeteran:'assets/crew-portraits-veteran-cutout.png',
+  crew:'assets/crew-portraits-cutout.png',
+  supportMale:'assets/support-style-male-cutout.png',
+  supportFemale:'assets/support-style-female-cutout.png'
+};
 const CREATOR_SCENE_LABELS = {
   opensea:'Acik Deniz',
   harbor:'Liman',
@@ -9328,8 +9336,8 @@ function getPlayerPortraitConfig(){
   const uniform = uniformMap[playerAppearance.uniform] || uniformMap.classic;
   const modelMeta = (PLAYER_PHOTO_MODELS[playerAppearance.base] || {})[playerAppearance.model] || {};
   const portraitSheet = playerAppearance.age === 'young'
-    ? 'assets/crew-portraits-illustrated-young.png'
-    : 'assets/crew-portraits-illustrated-mid.png';
+    ? PORTRAIT_SHEET_ASSETS.officerYoung
+    : PORTRAIT_SHEET_ASSETS.officerMid;
   return {
     skin:playerAppearance.skin,
     base:playerAppearance.base,
@@ -9490,14 +9498,25 @@ function normalizePortraitConfig(cfg={}){
   const out = {...cfg};
   out.base = out.base === 'female' ? 'female' : 'male';
   if(out.base === 'female') out.beard = 'clean';
+  const sheetUpgradeMap = {
+    'assets/crew-portraits.png':PORTRAIT_SHEET_ASSETS.crew,
+    'assets/crew-portraits-illustrated-young.png':PORTRAIT_SHEET_ASSETS.officerYoung,
+    'assets/crew-portraits-illustrated-mid.png':PORTRAIT_SHEET_ASSETS.officerMid,
+    'assets/crew-portraits-veteran.png':PORTRAIT_SHEET_ASSETS.officerVeteran,
+    'assets/support-style-male.png':PORTRAIT_SHEET_ASSETS.supportMale,
+    'assets/support-style-female.png':PORTRAIT_SHEET_ASSETS.supportFemale
+  };
+  if(out.portraitSheet && sheetUpgradeMap[String(out.portraitSheet)]){
+    out.portraitSheet = sheetUpgradeMap[String(out.portraitSheet)];
+  }
   const safeSheets = new Set([
-    'assets/crew-portraits.png',
+    'assets/crew-portraits-cutout.png',
     'assets/crew-portraits-alt.png',
-    'assets/crew-portraits-illustrated-young.png',
-    'assets/crew-portraits-illustrated-mid.png',
-    'assets/crew-portraits-veteran.png',
-    'assets/support-style-male.png',
-    'assets/support-style-female.png',
+    'assets/crew-portraits-illustrated-young-cutout.png',
+    'assets/crew-portraits-illustrated-mid-cutout.png',
+    'assets/crew-portraits-veteran-cutout.png',
+    'assets/support-style-male-cutout.png',
+    'assets/support-style-female-cutout.png',
     'assets/support-portraits.png',
     'assets/support-female.png',
     'assets/support-bosun-a.png',
@@ -9515,7 +9534,7 @@ function normalizePortraitConfig(cfg={}){
     'assets/support-female-engine-c.png'
   ]);
   if(out.portraitSheet && !safeSheets.has(String(out.portraitSheet))){
-    out.portraitSheet = out.base === 'female' ? 'assets/crew-portraits-illustrated-young.png' : 'assets/crew-portraits-illustrated-mid.png';
+    out.portraitSheet = out.base === 'female' ? PORTRAIT_SHEET_ASSETS.officerYoung : PORTRAIT_SHEET_ASSETS.officerMid;
     out.sheetCols = 4;
     out.sheetRows = 2;
     out.sheetIndex = resolvePortraitIndexFromConfig(out);
@@ -9530,13 +9549,13 @@ function normalizePortraitConfig(cfg={}){
     out.sheetIndex = idx;
   }
   if(out.base === 'female' && /male\.png/.test(String(out.portraitSheet || ''))){
-    out.portraitSheet = 'assets/support-style-female.png';
+    out.portraitSheet = PORTRAIT_SHEET_ASSETS.supportFemale;
     out.sheetCols = 3;
     out.sheetRows = 2;
     out.sheetIndex = Math.min(5, Math.max(0, Number(out.sheetIndex || 0)));
   }
   if(out.base === 'male' && /female\.png/.test(String(out.portraitSheet || ''))){
-    out.portraitSheet = 'assets/support-style-male.png';
+    out.portraitSheet = PORTRAIT_SHEET_ASSETS.supportMale;
     out.sheetCols = 3;
     out.sheetRows = 2;
     out.sheetIndex = Math.min(5, Math.max(0, Number(out.sheetIndex || 0)));
@@ -9760,7 +9779,7 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const row = Math.floor(idx / 4);
   const x = [0,33.333,66.666,100][col] ?? 0;
   const y = row===0 ? 0 : 100;
-  return `<span class="portrait-sprite ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('assets/crew-portraits.png?v=3');${visualStyle}"></span>`;
+  return `<span class="portrait-sprite ${variant}" style="--px:${x}%;--py:${y}%;background-image:url('${PORTRAIT_SHEET_ASSETS.crew}?v=2');${visualStyle}"></span>`;
 }
 
 function renderPortraitTargets(){
@@ -13305,7 +13324,7 @@ function makeCrewPortrait(key, def){
   const stripeBias = portraitStripeCount(def.title);
   const roleBlob = normalizeTrAscii(`${key} ${def.title||''} ${def.name||''}`);
   const base = inferPortraitBase(def);
-  const supportSheet = base==='female' ? 'assets/support-style-female.png' : 'assets/support-style-male.png';
+  const supportSheet = base==='female' ? PORTRAIT_SHEET_ASSETS.supportFemale : PORTRAIT_SHEET_ASSETS.supportMale;
   const supportPool = {
     engine:[0,1,2],
     deck:[3,4],
@@ -13317,6 +13336,7 @@ function makeCrewPortrait(key, def){
   else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
   if(supportIdx!==null){
     return {
+      __portraitVersion:2,
       __roleKey:key,
       __base:base,
       __name:def.name || '',
@@ -13331,9 +13351,10 @@ function makeCrewPortrait(key, def){
     ? ['bob','bun','waves','parted','curly','slick']
     : ['short','swept','crop','parted','slick','quiff','waves','curly'];
   const age = pickRandom(['young','mid']);
-  const officerSheet = age==='young' ? 'assets/crew-portraits-illustrated-young.png' : 'assets/crew-portraits-illustrated-mid.png';
+  const officerSheet = age==='young' ? PORTRAIT_SHEET_ASSETS.officerYoung : PORTRAIT_SHEET_ASSETS.officerMid;
   const officerIndexPool = OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
   return {
+    __portraitVersion:2,
     __roleKey:key,
     __base:base,
     __name:def.name || '',
@@ -13365,6 +13386,7 @@ function getCrewPortraitForKey(key){
   const nextBase = inferPortraitBase(def);
   if(
     !current ||
+    current.__portraitVersion !== 2 ||
     current.__roleKey !== key ||
     current.__base !== nextBase ||
     current.__name !== (def.name || '')
@@ -19928,7 +19950,7 @@ function scheduleSceneLiveSequence(sc){
       addWatchFeed(beat.text, beat.type);
       if(beat.speaker && beat.line){
         const crewKey = Object.keys(CREW_DEFS || {}).find(k=>normalizeTrAscii(CREW_DEFS[k].name||'').includes(normalizeTrAscii(beat.speaker))) || getCrewKeyFromWho(sc?.who);
-        const portrait = crewKey ? makeCrewPortrait(crewKey, CREW_DEFS[crewKey]) : getSceneSpeakerPortrait(sc);
+        const portrait = crewKey ? getCrewPortraitForKey(crewKey) : getSceneSpeakerPortrait(sc);
         pushDialogueEntry('left', portrait, beat.speaker, beat.line);
       }
     },beat.delay);
