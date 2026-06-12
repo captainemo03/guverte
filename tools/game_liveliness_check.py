@@ -71,6 +71,11 @@ CHECKS = {
         "bridge3d-route-table",
         "bridge3d-manifold-panel",
         "bridge3d-premium-ops",
+        "bridge3d-starlink",
+        "bridge3d-helicopter",
+        "bridge3d-cargo-lift",
+        "satBeam",
+        "live-starlink-dish",
         "trainingObjects",
     ],
     "route tasks": [
@@ -298,13 +303,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 97:
+    elif int(js_versions[-1]) < 98:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 86:
+    elif int(css_versions[-1]) < 87:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():

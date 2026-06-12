@@ -8257,6 +8257,9 @@ function getScene3DFeatureFlags(sc){
     routeTable: /route|waypoint|chart|ecdis|tss|cpa|tcpa|ukc|squat|passage plan|pilot station|no anchoring|rota/.test(blob),
     manifold: /tanker|manifold|loading arm|esd|drip tray|sample|sopep|bunker|hose|overflow|line-up|line up/.test(blob),
     premiumOps: /offshore|platform|dp|rov|research|survey vessel|araştırma|arastirma|cruise|kruvaziyer|medevac|helicopter|helikopter|project cargo|proje yuk|proje yük|heavy-lift|cable|pipe|ice|buz|fpso|shuttle/.test(blob),
+    starlink: /starlink|satellite|uydu|seanet|crew wifi|ops vlan|obstruction|latency|jitter|failover|vsat/.test(blob),
+    helicopter: /helicopter|helikopter|medevac|medical evacuation|mrcc|clear deck|winchman|winching/.test(blob),
+    cargoLift: /project cargo|proje yuk|proje yük|heavy-lift|agir yuk|ağır yük|lifting|sling|cog|sea fastening|crane|vinc|vinç|hook load/.test(blob),
     storm: /storm|firtina|swell|rain|yagmur|yağmur|sis|fog|beaufort|spray|icing/.test(blob),
   };
   flags.any = Object.values(flags).some(Boolean);
@@ -8287,6 +8290,9 @@ function getScene3DBridgeOverlay(sc){
     flags.routeTable?'bridge3d-route':'',
     flags.manifold?'bridge3d-manifold':'',
     flags.premiumOps?'bridge3d-premium':'',
+    flags.starlink?'bridge3d-sat':'',
+    flags.helicopter?'bridge3d-heli':'',
+    flags.cargoLift?'bridge3d-lift':'',
   ].filter(Boolean).join(' ');
   return `<div class="${cls}">
     <div class="sky"></div>
@@ -8315,6 +8321,9 @@ function getScene3DBridgeOverlay(sc){
     ${flags.routeTable ? '<div class="bridge3d-route-table"><span class="track"></span><i class="wp1"></i><i class="wp2"></i><i class="wp3"></i><b>CPA / UKC</b></div>' : ''}
     ${flags.manifold ? '<div class="bridge3d-manifold-panel"><span class="arm"></span><i></i><i></i><b>ESD</b></div>' : ''}
     ${flags.premiumOps ? '<div class="bridge3d-premium-ops"><span class="platform"></span><span class="rov"></span><span class="ice"></span><b>DP</b></div>' : ''}
+    ${flags.starlink ? `<div class="bridge3d-starlink"><span class="dish"></span><span class="beam b1"></span><span class="beam b2"></span><b>${starlinkStatus.online?'LINK OK':'LINK DEG'}</b><i>${Number(starlinkStatus.latency||0)} ms</i></div>` : ''}
+    ${flags.helicopter ? '<div class="bridge3d-helicopter"><span></span><i></i><b>MED</b></div><div class="bridge3d-helipad">CLEAR DECK</div>' : ''}
+    ${flags.cargoLift ? '<div class="bridge3d-cargo-lift"><span class="hook"></span><span class="load"></span><i></i><b>COG</b></div>' : ''}
   </div>`;
 }
 
@@ -8605,6 +8614,63 @@ async function renderThreeBridgeScene(sc){
     }
   }
 
+  if(flags.starlink){
+    const mast = addThreeCylinder(THREE, scene, .018, .52, [2.08,-.05,-.72], 0x9fb4c0, 0x101820);
+    mast.rotation.x = 0;
+    trainingObjects.push({mesh:mast, kind:'mast', phase:0});
+    const dish = addThreeBox(THREE, scene, [.42,.035,.18], [2.08,.22,-.72], 0xdde7f0, 0x24384a);
+    dish.rotation.z = -.18;
+    dish.rotation.y = -.32;
+    trainingObjects.push({mesh:dish, kind:'satDish', phase:.2});
+    const beam = new THREE.Mesh(
+      new THREE.TorusGeometry(.34,.008,8,46,Math.PI*1.35),
+      new THREE.MeshBasicMaterial({color:0x58d6ff, transparent:true, opacity:.34})
+    );
+    beam.position.set(2.0,.47,-.78);
+    beam.rotation.x = Math.PI/2;
+    beam.rotation.z = -.55;
+    scene.add(beam);
+    trainingObjects.push({mesh:beam, kind:'satBeam', phase:.4});
+    const linkLed = addThreeCylinder(THREE, scene, .035, .018, [2.36,.15,-.66], starlinkStatus.online?0x5df58a:0xffc458, starlinkStatus.online?0x1a7b35:0x7b4a08);
+    linkLed.rotation.x = Math.PI/2;
+    trainingObjects.push({mesh:linkLed, kind:'alarm', phase:.8});
+  }
+
+  if(flags.helicopter){
+    const heli = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(.34,.13,.13), new THREE.MeshStandardMaterial({color:0x24384a, emissive:0x071018, roughness:.45, metalness:.28}));
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(.34,.035,.035), new THREE.MeshStandardMaterial({color:0x24384a, emissive:0x071018, roughness:.45, metalness:.28}));
+    const rotor = new THREE.Mesh(new THREE.BoxGeometry(.64,.012,.012), new THREE.MeshStandardMaterial({color:0xdde7f0, emissive:0x24384a, roughness:.3, metalness:.18}));
+    const light = new THREE.Mesh(new THREE.SphereGeometry(.026, 12, 8), new THREE.MeshStandardMaterial({color:0xff5858, emissive:0xff2020, roughness:.18}));
+    body.position.set(0,0,0);
+    tail.position.set(.34,.02,0);
+    rotor.position.set(0,.12,0);
+    light.position.set(-.16,.03,.07);
+    heli.add(body, tail, rotor, light);
+    heli.position.set(-1.95,.72,-1.35);
+    heli.rotation.y = .28;
+    scene.add(heli);
+    trainingObjects.push({mesh:heli, kind:'helicopter', phase:0, baseX:heli.position.x, baseY:heli.position.y});
+    trainingObjects.push({mesh:rotor, kind:'rotor', phase:0});
+    const helipad = addThreeCylinder(THREE, scene, .26, .014, [-1.34,-.36,-1.58], 0x273746, 0x071018);
+    helipad.rotation.x = Math.PI/2;
+    trainingObjects.push({mesh:helipad, kind:'ring', phase:.6});
+  }
+
+  if(flags.cargoLift){
+    const boom = addThreeBox(THREE, scene, [1.06,.035,.035], [.88,.45,-1.05], 0xb9c7d1, 0x182837);
+    boom.rotation.z = -.38;
+    boom.rotation.y = -.28;
+    trainingObjects.push({mesh:boom, kind:'boom', phase:0});
+    const cable = addThreeCylinder(THREE, scene, .007, .72, [1.25,.08,-1.05], 0xd6c49b, 0x2a1c05);
+    cable.rotation.x = 0;
+    trainingObjects.push({mesh:cable, kind:'hook', phase:.2, baseY:cable.position.y});
+    const hook = addThreeBox(THREE, scene, [.1,.08,.045], [1.25,-.27,-1.05], 0xffc458, 0x5a3300);
+    trainingObjects.push({mesh:hook, kind:'hook', phase:.3, baseY:hook.position.y});
+    const load = addThreeBox(THREE, scene, [.42,.2,.28], [1.25,-.48,-1.05], 0x41505a, 0x071018);
+    trainingObjects.push({mesh:load, kind:'load', phase:.4, baseY:load.position.y});
+  }
+
   const started = performance.now();
   const animate = (now)=>{
     if(token !== threeBridgeRuntime.token) return;
@@ -8671,6 +8737,22 @@ async function renderThreeBridgeScene(sc){
         obj.mesh.position.x = -1.58 + Math.sin(t*.7)*.08;
       }else if(obj.kind === 'ice'){
         obj.mesh.position.x += Math.sin(t*.5 + obj.phase)*.0008;
+      }else if(obj.kind === 'satDish'){
+        obj.mesh.rotation.z = -.18 + Math.sin(t*1.6 + obj.phase)*.035;
+        obj.mesh.material.emissiveIntensity = .45 + Math.sin(t*2.1 + obj.phase)*.1;
+      }else if(obj.kind === 'satBeam'){
+        obj.mesh.rotation.z = -.55 + Math.sin(t*.8 + obj.phase)*.1;
+        obj.mesh.material.opacity = .18 + Math.abs(Math.sin(t*1.6 + obj.phase))*.24;
+      }else if(obj.kind === 'helicopter'){
+        obj.mesh.position.x = obj.baseX + Math.sin(t*.7 + obj.phase)*.18;
+        obj.mesh.position.y = obj.baseY + Math.sin(t*1.4 + obj.phase)*.04;
+        obj.mesh.rotation.z = Math.sin(t*1.2)*.035;
+      }else if(obj.kind === 'rotor'){
+        obj.mesh.rotation.y = t*12;
+        obj.mesh.rotation.z = t*18;
+      }else if(obj.kind === 'hook' || obj.kind === 'load'){
+        obj.mesh.position.y = obj.baseY + Math.sin(t*1.5 + obj.phase)*.035;
+        obj.mesh.rotation.z = Math.sin(t*1.15 + obj.phase)*.035;
       }
     });
     radarDisc.material.emissiveIntensity = .8 + Math.sin(t*3) * .12;
@@ -8721,6 +8803,9 @@ function getLiveSceneOverlay(sc){
   }
   if(/bunker|manifold|sample|sopep|overflow|fuel transfer|topping up/.test(blob)){
     parts.push('<div class="live-bunker-hose"></div><div class="live-sample-bottle"></div><div class="live-overflow-alarm">OVERFLOW</div>');
+  }
+  if(/starlink|satellite|uydu|seanet|crew wifi|ops vlan|obstruction|latency|jitter|failover|vsat/.test(blob)){
+    parts.push('<div class="live-starlink-dish"><span></span><i></i><b>STARLINK</b></div><div class="live-sat-beam b1"></div><div class="live-sat-beam b2"></div><div class="live-latency-card"><b>LINK</b><span></span><em></em></div>');
   }
   if(/imdg|dangerous cargo|placard|un number|segregation|manifest/.test(blob)){
     parts.push('<div class="live-imdg-placards"><span>3</span><span>8</span><span>UN</span></div><div class="live-segregation-line"></div>');
