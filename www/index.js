@@ -550,7 +550,8 @@ const PREMIUM_PACKAGE_CATALOG = [
   'Arastirma / ROV survey',
   'Offshore / DP platform',
   'Kutup ve buz seyri',
-  'Ileri cihaz simulasyonu'
+  'Ileri cihaz simulasyonu',
+  'Premium hareketli 3D operasyonlar'
 ];
 function isPremiumShipType(typeKey){
   return !!STYPES.find(x=>x.key===typeKey && x.premium);
@@ -13433,6 +13434,7 @@ function beginGame(){
   watchFeedItems=[];
   livingPulseState={lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   liveLogbookEntries=[];
+  charterTradeState={caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
   achievementsUnlocked={};
   pendingPhoneCall=null;
   crewFatigueState={deck:22,engine:18,bridge:20,galley:12};
@@ -14910,6 +14912,7 @@ function buildSavePayload(){
     monthlyCaptainReviewState,
     personalNotebookEntries,
     passageDebriefState,
+    charterTradeState,
     liveLogbookEntries,
     achievementsUnlocked,
     crewFatigueState,
@@ -15030,6 +15033,7 @@ function applyLoadedGameState(data){
   monthlyCaptainReviewState = data.monthlyCaptainReviewState || {lastMonth:0};
   personalNotebookEntries = Array.isArray(data.personalNotebookEntries) ? data.personalNotebookEntries : [];
   passageDebriefState = data.passageDebriefState && typeof data.passageDebriefState === 'object' ? {lastRoute:'', summaries:[], ...data.passageDebriefState} : {lastRoute:'', summaries:[]};
+  charterTradeState = data.charterTradeState && typeof data.charterTradeState === 'object' ? {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:'', ...data.charterTradeState} : {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
   liveLogbookEntries = Array.isArray(data.liveLogbookEntries) ? data.liveLogbookEntries : [];
   achievementsUnlocked = data.achievementsUnlocked || {};
   pendingPhoneCall = null;
@@ -21269,6 +21273,172 @@ function markCargoCheck(item){
   addWatchFeed(`Cargo control: ${item}`, 'good');
 }
 
+const CHARTER_CASES = [
+  {
+    id:'grain_izmir',
+    title:'Izmir grain loading',
+    laycan:'12 Jun 00:00 - 16 Jun 23:59',
+    arrival:'15 Jun 07:40',
+    norTendered:'15 Jun 08:10',
+    norAccepted:'15 Jun 10:00',
+    noticeHours:6,
+    laytimeHours:30,
+    completion:'16 Jun 22:00',
+    answer:'dispatch',
+    startLabel:'15 Jun 16:00',
+    resultLabel:'Despatch/dispatch var',
+    sofs:['07:40 Arrived roads','08:10 NOR tendered','10:00 NOR accepted','16:00 Laytime starts after notice time','16 Jun 22:00 Loading completed'],
+    hint:'NOR accepted + notice time hesabi kullanilir; completion laytime bitisinden once.'
+  },
+  {
+    id:'coal_samsun',
+    title:'Samsun coal discharge',
+    laycan:'04 Sep 00:00 - 08 Sep 23:59',
+    arrival:'08 Sep 20:30',
+    norTendered:'08 Sep 21:10',
+    norAccepted:'09 Sep 06:00',
+    noticeHours:6,
+    laytimeHours:36,
+    completion:'11 Sep 03:00',
+    answer:'demurrage',
+    startLabel:'09 Sep 12:00',
+    resultLabel:'Demurrage var',
+    sofs:['08 Sep 20:30 Arrived anchorage','08 Sep 21:10 NOR tendered','09 Sep 06:00 NOR accepted','09 Sep 12:00 Laytime starts','11 Sep 03:00 Discharge completed'],
+    hint:'Laytime 36 saat; completion 39 saat sonra oldugu icin gecikme dogar.'
+  },
+  {
+    id:'tanker_houston',
+    title:'Houston products terminal',
+    laycan:'21 Oct 06:00 - 24 Oct 18:00',
+    arrival:'21 Oct 05:20',
+    norTendered:'21 Oct 06:00',
+    norAccepted:'21 Oct 06:30',
+    noticeHours:6,
+    laytimeHours:24,
+    completion:'22 Oct 06:15',
+    answer:'dispatch',
+    startLabel:'21 Oct 12:30',
+    resultLabel:'Despatch/dispatch var',
+    sofs:['05:20 Arrived before laycan opening','06:00 NOR tendered at laycan opening','06:30 NOR accepted','12:30 Laytime starts','22 Oct 06:15 Loading completed'],
+    hint:'Erken varis tek basina laytime baslatmaz; laycan acilisi ve accepted NOR birlikte okunur.'
+  }
+];
+let charterTradeState = {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
+
+function getActiveCharterCase(){
+  return CHARTER_CASES[Math.max(0, Math.min(CHARTER_CASES.length-1, charterTradeState.caseIndex || 0))] || CHARTER_CASES[0];
+}
+
+function getCharterStartOptions(c){
+  const opts = [c.norTendered, c.norAccepted, c.startLabel, c.arrival];
+  return [...new Set(opts)];
+}
+
+function renderCharterMiniMode(){
+  const c = getActiveCharterCase();
+  const startOpts = getCharterStartOptions(c);
+  const resultOpts = [
+    ['demurrage','Demurrage var'],
+    ['dispatch','Despatch / dispatch var'],
+    ['neutral','Laytime icinde, ek ticari sonuc yok']
+  ];
+  return `<div class="sim-charter-panel">
+    <div class="sim-mini-title">CHARTER / LIMAN TICARET MINI MODU</div>
+    <div class="charter-case-head">
+      <b>${phoneSafe(c.title)}</b>
+      <span>Laycan: ${phoneSafe(c.laycan)} · Laytime ${c.laytimeHours} saat · Notice ${c.noticeHours} saat</span>
+    </div>
+    <div class="charter-sof">
+      ${c.sofs.map((s,i)=>`<span><b>${i+1}</b>${phoneSafe(s)}</span>`).join('')}
+    </div>
+    <div class="charter-form-grid">
+      <div>
+        <b>Laytime baslangicini sec</b>
+        <div class="charter-options">${startOpts.map(opt=>`<button class="${charterTradeState.selectedStart===opt?'active':''}" onclick="selectCharterStart('${opt.replace(/'/g,"\\'")}')">${phoneSafe(opt)}</button>`).join('')}</div>
+      </div>
+      <div>
+        <b>Ticari sonucu sec</b>
+        <div class="charter-options">${resultOpts.map(([key,label])=>`<button class="${charterTradeState.selectedResult===key?'active':''}" onclick="selectCharterResult('${key}')">${label}</button>`).join('')}</div>
+      </div>
+    </div>
+    <div class="charter-feedback ${/dogru/i.test(charterTradeState.lastFeedback)?'good':charterTradeState.lastFeedback?'warn':''}">
+      ${phoneSafe(charterTradeState.lastFeedback || 'SOF saatlerini oku, NOR accepted + notice time ile laytime baslangicini bul.')}
+    </div>
+    <div class="sim-actions compact">
+      <button onclick="submitCharterMiniMode()">Hesabi kontrol et</button>
+      <button onclick="nextCharterCase()">Yeni SOF dosyasi</button>
+      <button onclick="openNotes(); notesSearch='laytime'; renderNotes()">Notlari ac</button>
+    </div>
+    <div class="sim-chiprow">
+      <span class="sim-chip ${charterTradeState.score>=2?'good':''}">Charter skoru ${charterTradeState.score}</span>
+      <span class="sim-chip ${charterTradeState.attempts>1?'warn':''}">Deneme ${charterTradeState.attempts}</span>
+      <span class="sim-chip">Yanlis cevap ofis/charter baskisini artirir.</span>
+    </div>
+  </div>`;
+}
+
+function selectCharterStart(value){
+  charterTradeState.selectedStart = value;
+  renderSimCenter();
+}
+
+function selectCharterResult(value){
+  charterTradeState.selectedResult = value;
+  renderSimCenter();
+}
+
+function submitCharterMiniMode(){
+  const c = getActiveCharterCase();
+  charterTradeState.attempts += 1;
+  const okStart = charterTradeState.selectedStart === c.startLabel;
+  const okResult = charterTradeState.selectedResult === c.answer;
+  if(okStart && okResult){
+    charterTradeState.score += 1;
+    charterTradeState.lastFeedback = `Dogru: laytime ${c.startLabel} baslar; sonuc ${c.resultLabel}.`;
+    applyEffect({bilgi:5,sayginlik:3},{skipContractTick:true});
+    addLiveLogbook('CHARTER / LAYTIME', `${c.title}: ${charterTradeState.lastFeedback}`, true);
+    addCompanyMailThread('Laytime hesabı temiz', `${c.title} SOF/NOR kontrolu dogru yapildi. Charter baskisi azaldi.`, 'info');
+    consequenceTrace.office = Math.max(0, consequenceTrace.office - 1);
+    showNotif('LAYTIME','Dogru Hesap', 'SOF saatleri ve ticari sonuc dogru yorumlandi.');
+  }else{
+    charterTradeState.lastFeedback = `Dikkat: ${c.hint}`;
+    applyEffect({bilgi:-1,sayginlik:-1},{skipContractTick:true});
+    consequenceTrace.office += 1;
+    addLiveLogbook('CHARTER / LAYTIME', `${c.title}: hatali/eksik laytime yorumu. ${c.hint}`, true);
+    addCompanyMailThread('Charter baskisi', `${c.title} laytime/NOR yorumu yeniden kontrol istiyor. SOF, NOR accepted ve notice time saatlerini karsilastir.`, 'warn');
+    showNotif('CHARTER','Tekrar Kontrol', 'Yanlis saat veya sonuc secildi; ofis baskisi artti.');
+  }
+  renderSimCenter();
+}
+
+function nextCharterCase(){
+  charterTradeState.caseIndex = ((charterTradeState.caseIndex || 0) + 1) % CHARTER_CASES.length;
+  charterTradeState.selectedStart = '';
+  charterTradeState.selectedResult = '';
+  charterTradeState.lastFeedback = '';
+  renderSimCenter();
+}
+
+function renderPremiumPackagePanel(){
+  const packs = [
+    ['Proje gemisi','Heavy-lift, COG, sling angle, sea fastening ve hareketli crane/lift sahneleri'],
+    ['Kruvaziyer','Passenger flow, PA, medevac, kalabalik yonetimi ve turnaround operasyonu'],
+    ['Araştırma gemisi','ROV, CTD, survey line, tether tension ve bilim ekibi koordinasyonu'],
+    ['Offshore / DP','Platform 500 m zone, DP offset, thruster load, FPSO/cable/pipe operasyonlari'],
+    ['Buz seyri','Ice chart, convoy, icing warning ve polar route karar zinciri'],
+    ['Ileri cihaz sim','Radar/ECDIS/GMDSS/NAVTEX/Starlink pratikleri ve cihaz ariza zinciri']
+  ];
+  return `<div class="premium-sim-panel ${premiumUnlocked?'active':''}">
+    <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Oyuncu ne aldigini tek bakista gorsun.</span></div>
+    <div class="premium-sim-grid">${packs.map(([a,b])=>`<div><b>${a}</b><small>${b}</small></div>`).join('')}</div>
+    <div class="sim-actions compact">
+      <button onclick="openPremiumPurchase()">${premiumUnlocked?'Premium aktif':'75 TL satin al'}</button>
+      <button onclick="restorePremiumPurchase()">Geri yukle</button>
+      <button onclick="openCareer()">Gemi teklifleri</button>
+    </div>
+  </div>`;
+}
+
 function getAccidentReplayPanel(){
   const last = (investigationDossier || [])[0];
   const weak = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust > 4;
@@ -21402,6 +21572,14 @@ function renderSimCenter(){
     <div class="sim-section wide">
       <div class="sim-head"><span>GERCEK PASSAGE PLAN</span><span>route · UKC · VHF · contingency</span></div>
       ${getPassagePlanCard()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>CHARTER / LIMAN TICARET</span><span>Laycan · NOR · SOF · laytime</span></div>
+      ${renderCharterMiniMode()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>PREMIUM PAKET EKRANI</span><span>${premiumUnlocked?'aktif':PREMIUM_PRICE_LABEL}</span></div>
+      ${renderPremiumPackagePanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>BRIDGE TEAM ROLLERI</span><span>kime ne soylersin</span></div>
