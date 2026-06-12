@@ -1108,7 +1108,7 @@ animation:straitFlow 2.8s linear infinite;}
 .portrait-photo-sheet.preview.pose-angled,.portrait-composite.preview .portrait-photo-sheet.pose-angled{transform:translateX(-18px) translateY(4px) scale(1.06) rotate(-1.5deg);}
 .portrait-photo-sheet.preview.pose-command,.portrait-composite.preview .portrait-photo-sheet.pose-command{transform:translateY(8px) translateX(14px) scale(1.1);}
 .creator-preview-stage .portrait-photo-sheet.preview,
-.creator-preview-stage .portrait-composite.preview .portrait-photo-sheet.preview{mix-blend-mode:screen;opacity:.98;}
+.creator-preview-stage .portrait-composite.preview .portrait-photo-sheet.preview{mix-blend-mode:normal;opacity:1;}
 .creator-preview-stage.pose-front .portrait-photo-sheet.preview{filter:drop-shadow(0 12px 26px rgba(0,0,0,.28));}
 .creator-preview-stage.pose-angled .portrait-photo-sheet.preview{filter:drop-shadow(0 14px 28px rgba(0,0,0,.32));}
 .creator-preview-stage.pose-command .portrait-photo-sheet.preview{filter:drop-shadow(0 16px 30px rgba(0,0,0,.34));}
@@ -1137,8 +1137,8 @@ animation:straitFlow 2.8s linear infinite;}
 #gfx-actor .portrait-sprite.actor,
 #gfx-actor .portrait-photo.actor{position:relative;z-index:1;clip-path:polygon(28% 0,70% 0,79% 8%,83% 24%,92% 52%,100% 100%,6% 100%,13% 52%,18% 24%);}
 #gfx-actor .portrait-photo-sheet.actor,
-#gfx-actor .portrait-sprite.actor{mix-blend-mode:screen;filter:brightness(1.02) saturate(1.08) contrast(1.06) drop-shadow(0 10px 20px rgba(0,0,0,.26));}
-#gfx-actor .portrait-composite.actor .portrait-photo-sheet.actor{mix-blend-mode:screen;}
+#gfx-actor .portrait-sprite.actor{mix-blend-mode:normal;filter:brightness(1.02) saturate(1.08) contrast(1.06) drop-shadow(0 10px 20px rgba(0,0,0,.26));}
+#gfx-actor .portrait-composite.actor .portrait-photo-sheet.actor{mix-blend-mode:normal;}
 #gfx-actor .portrait-composite.actor .portrait-face-overlay{z-index:3;filter:saturate(.96) contrast(.98) brightness(1.04);}
 .scene-ambient-storm #gfx-actor .portrait-photo-sheet.actor,
 .scene-ambient-storm #gfx-actor .portrait-sprite.actor{opacity:.86;filter:brightness(.94) saturate(.92) contrast(1.08) drop-shadow(0 12px 22px rgba(0,0,0,.24));}

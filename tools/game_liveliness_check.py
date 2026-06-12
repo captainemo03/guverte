@@ -127,6 +127,8 @@ CHECKS = {
         "mapTaskWrongAttempts",
         "Uc uzak denemeden sonra",
         "applyEffect({bilgi:-1}",
+        "completedMapTasks:Array.from",
+        "selectedPortChart = data.selectedPortChart",
     ],
     "character creator reliability": [
         "syncPlayerModelFromTraits",
@@ -215,6 +217,43 @@ def main() -> int:
             if needle not in all_text:
                 missing.append(f"{group}: {needle}")
 
+    handler_sources = re.findall(r'on\w+="([^"]+)"', html)
+    handler_calls: set[str] = set()
+    ignored_handler_names = {
+        "if",
+        "for",
+        "while",
+        "switch",
+        "return",
+        "Math",
+        "Number",
+        "String",
+        "Array",
+    }
+    for source in handler_sources:
+        for name in re.findall(r"\b([A-Za-z_$][\w$]*)\s*\(", source):
+            if name not in ignored_handler_names:
+                handler_calls.add(name)
+
+    for name in sorted(handler_calls):
+        defined = re.search(
+            rf"(?:function\s+{re.escape(name)}\s*\(|(?:const|let|var)\s+{re.escape(name)}\s*=|window\.{re.escape(name)}\s*=)",
+            js,
+        )
+        if not defined:
+            missing.append(f"html handler: {name} is not defined in index.js")
+
+    asset_refs = set()
+    for match in re.findall(r"(?:src|href)=[\"']\.\/([^\"'#?]+)", html):
+        asset_refs.add(match)
+    for match in re.findall(r"['\"]((?:assets|vendor|bg)/[^'\"?#)]+)['\"]", all_text):
+        asset_refs.add(match)
+    for ref in sorted(asset_refs):
+        if ref.startswith(("index.", "#")):
+            continue
+        if not (ROOT / "www" / ref).exists():
+            missing.append(f"asset: missing www/{ref}")
+
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
@@ -224,7 +263,7 @@ def main() -> int:
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 83:
+    elif int(css_versions[-1]) < 84:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():

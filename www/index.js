@@ -14509,6 +14509,11 @@ function buildSavePayload(){
     visitedPorts:Array.from(visitedPorts||[]),
     activeVoyageRoute,
     activeVoyageProgress,
+    selectedPortChart,
+    activeMapTaskIndex,
+    completedMapTasks:Array.from(completedMapTasks||[]),
+    mapTaskWrongAttempts:{...mapTaskWrongAttempts},
+    mapRouteDraftPoints,
     deviceChartOverlayState,
     journalEntries,
     photos,
@@ -14619,6 +14624,15 @@ function applyLoadedGameState(data){
   visitedPorts = new Set(Array.isArray(data.visitedPorts) ? data.visitedPorts : [selectedStartPort.name]);
   activeVoyageRoute = data.activeVoyageRoute || activeVoyageRoute;
   activeVoyageProgress = Number.isFinite(data.activeVoyageProgress) ? data.activeVoyageProgress : activeVoyageProgress;
+  selectedPortChart = data.selectedPortChart || selectedPortChart;
+  activeMapTaskIndex = Number.isFinite(data.activeMapTaskIndex) ? Math.max(0, data.activeMapTaskIndex) : activeMapTaskIndex;
+  completedMapTasks.clear();
+  (Array.isArray(data.completedMapTasks) ? data.completedMapTasks : []).forEach(id=>completedMapTasks.add(id));
+  Object.keys(mapTaskWrongAttempts).forEach(key=>delete mapTaskWrongAttempts[key]);
+  if(data.mapTaskWrongAttempts && typeof data.mapTaskWrongAttempts === 'object'){
+    Object.assign(mapTaskWrongAttempts, data.mapTaskWrongAttempts);
+  }
+  mapRouteDraftPoints = Array.isArray(data.mapRouteDraftPoints) ? data.mapRouteDraftPoints : [];
   deviceChartOverlayState = data.deviceChartOverlayState && typeof data.deviceChartOverlayState === 'object' ? {...deviceChartOverlayState, ...data.deviceChartOverlayState} : deviceChartOverlayState;
   journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
   photos = Array.isArray(data.photos) ? data.photos : [];
@@ -15127,7 +15141,7 @@ function updateMapTaskBox(port){
       ? 'Bu gorev transit veya okyanus rota charti ister. Liman gorevleri icin pilot, anchorage veya berth gorevini sec.'
       : 'Bu gorev liman plani ister. Stratejik chartlarda reporting point, no anchoring veya alternatif rota gorevlerini kullan.';
     status.className = 'warn';
-    status.textContent = 'Chart tipi bu gorev icin uygun degil. Sonraki goreve gecebilir veya uygun chart secebilirsin.';
+    status.textContent = 'Bu gorev farkli chart ister. Oyun uygun haritayi otomatik acmaya calisir; gerekirse soldaki chart listesinden ayni tip bir harita sec.';
     if(btn) btn.textContent = activeMapTaskIndex === MAP_TASKS.length-1 ? 'Basa Don' : 'Sonraki';
     return;
   }
@@ -15146,10 +15160,15 @@ function handlePortChartTaskClick(svg, ev, port){
   const allowed = isMapTaskAllowedForPort(task, port);
   if(!allowed){
     const status = document.getElementById('port-chart-taskstatus');
+    const before = selectedPortChart;
+    ensureTaskPort(task);
     if(status){
       status.className = 'warn';
-      status.textContent = 'Bu chart tipi aktif gorev icin uygun degil.';
+      status.textContent = before !== selectedPortChart
+        ? `${task.title} icin uygun chart aciliyor: ${selectedPortChart}.`
+        : 'Bu gorev farkli chart ister. Soldaki listeden gorev tipine uygun chart sec veya Sonraki goreve gec.';
     }
+    if(before !== selectedPortChart) renderMap();
     return;
   }
   if(portChartDidPan){
