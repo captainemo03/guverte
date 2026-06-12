@@ -13275,6 +13275,7 @@ function showEnd(){
   verdict+=` <br><strong>Gemi Tipi Uzmanlığı:</strong> ${getTopSpecialtyLabel()}.`;
   verdict+=` <br><strong>Terfi Mülakati:</strong> "Neden ${calculatePromotionReport().nextRank} icin hazirsin?", "Son near miss sana ne ogretti?", "Radar ve AIS celisirse hangisini nasil teyit edersin?"`;
   verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
+  verdict+=renderContractCinematicReport();
   verdict+=` <br><br><strong>Karar:</strong> Gemide kalirsan ayni ekip hafizasi, statlar, telefon mesajlari ve kayitlarla yeni senaryo paketine devam edersin. Ayrilirsan bu kontrat kariyer raporu olarak kapanir.`;
   document.getElementById('ende').textContent=emoji;
   document.getElementById('endt').textContent=title;
@@ -13435,6 +13436,7 @@ function beginGame(){
   livingPulseState={lastRoutineMonth:0,lastShiftScene:0,lastSocialScene:0,lastBridgePulse:0};
   liveLogbookEntries=[];
   charterTradeState={caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
+  documentTrainingState={active:'nor', completed:{}, drafts:{}, lastFeedback:''};
   achievementsUnlocked={};
   pendingPhoneCall=null;
   crewFatigueState={deck:22,engine:18,bridge:20,galley:12};
@@ -14913,6 +14915,7 @@ function buildSavePayload(){
     personalNotebookEntries,
     passageDebriefState,
     charterTradeState,
+    documentTrainingState,
     liveLogbookEntries,
     achievementsUnlocked,
     crewFatigueState,
@@ -15034,6 +15037,7 @@ function applyLoadedGameState(data){
   personalNotebookEntries = Array.isArray(data.personalNotebookEntries) ? data.personalNotebookEntries : [];
   passageDebriefState = data.passageDebriefState && typeof data.passageDebriefState === 'object' ? {lastRoute:'', summaries:[], ...data.passageDebriefState} : {lastRoute:'', summaries:[]};
   charterTradeState = data.charterTradeState && typeof data.charterTradeState === 'object' ? {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:'', ...data.charterTradeState} : {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
+  documentTrainingState = data.documentTrainingState && typeof data.documentTrainingState === 'object' ? {active:'nor', completed:{}, drafts:{}, lastFeedback:'', ...data.documentTrainingState} : {active:'nor', completed:{}, drafts:{}, lastFeedback:''};
   liveLogbookEntries = Array.isArray(data.liveLogbookEntries) ? data.liveLogbookEntries : [];
   achievementsUnlocked = data.achievementsUnlocked || {};
   pendingPhoneCall = null;
@@ -15739,6 +15743,26 @@ function getSyntheticVoyageChartEntries(){
     });
   });
   return [...out.values()];
+}
+
+function renderContractCinematicReport(){
+  const best = getTopSpecialtyLabel ? getTopSpecialtyLabel() : 'vardiya disiplini';
+  const weakest = stats.dinclik < 40 ? 'dinçlik / uyku baskısı' : stats.bilgi < 45 ? 'cihaz ve teknik bilgi' : consequenceTrace.office > 2 ? 'ofis ve belge disiplini' : 'stres altında süre yönetimi';
+  const album = photos.slice(-4).map(p=>p.title || 'hatıra').join(', ') || 'henüz büyük fotoğraf anı yok';
+  const captain = avgCrewTrustForReport() >= 60 ? 'Kaptan referans verir: kritik anlarda büyüdün.' : 'Kaptan şartlı referans verir: bir sonraki kontratta daha net disiplin bekler.';
+  const company = careerState.companyOpinion >= 60 ? 'Şirket yeni kontrat/terfi görüşmesine açık.' : 'Şirket önce performans ve belge disiplininde toparlanma ister.';
+  const family = familyConversationMemory.lastUserMessage ? 'Aile son mesajını hatırlıyor ve dönüş tarihini soruyor.' : 'Aileden kontrat sonu mesajı bekleniyor.';
+  return `<br><br><strong>Kontrat Sonu Sinematik Akis:</strong>
+    <br>• Album: ${phoneSafe(album)}
+    <br>• Kaptan yorumu: ${phoneSafe(captain)}
+    <br>• Ekip vedasi: en guclu alan ${phoneSafe(best)}, zayif alan ${phoneSafe(weakest)}
+    <br>• Sirket teklifi: ${phoneSafe(company)}
+    <br>• Aile mesaji: ${phoneSafe(family)}`;
+}
+
+function avgCrewTrustForReport(){
+  const vals = Object.values(crewTrust || {});
+  return vals.length ? vals.reduce((a,b)=>a+b,0) / vals.length : 40;
 }
 
 function getWorldAtlasChartEntries(){
@@ -20238,6 +20262,9 @@ function inferFamilyTopic(text=''){
   if(/yorgun|uyku|bitkin|dinclik/.test(t)) return 'yorgunluk';
   if(/firtina|swell|ruzgar|deniz|dalga|sis|fog|hava/.test(t)) return 'hava';
   if(/liman|pilot|rihtim|yana|all fast|demir|tug|halat/.test(t)) return 'liman';
+  if(/rota|eta|vts|cpa|ecdis|radar|harita|seyir/.test(t)) return 'seyir';
+  if(/laycan|laytime|demurrage|dispatch|nor|sof|charter/.test(t)) return 'charter';
+  if(/kontrat|ay sonu|terfi|kaptan|rapor|degerlendirme/.test(t)) return 'kontrat';
   if(/para|maas|kurs|izin|ev|gonder/.test(t)) return 'para';
   if(/ozledim|yalniz|moral|kotu|canim/.test(t)) return 'ozlem';
   if(/kavga|kaza|alarm|hata|azarl|kork|stres|sikinti|zor/.test(t)) return 'sorun';
@@ -20253,6 +20280,9 @@ function getFamilyMemoryLine(){
   if(last === 'yorgunluk') return 'Gecen mesajinda yorgun gibiydin, biraz toparlayabildin mi?';
   if(last === 'hava') return 'Bir onceki hava mesajindan beri merak ettik, deniz biraz sakinledi mi?';
   if(last === 'liman') return 'Liman isleri bitince mutlaka yaz, orada yogunluk insanin aklini dagitir.';
+  if(last === 'seyir') return 'Rota ve ETA demistin, gemi hâlâ ayni hatta mi gidiyor?';
+  if(last === 'charter') return 'Su liman evragi ve saat hesaplari kafami karistirdi ama sen duzenli yazinca icim rahatliyor.';
+  if(last === 'kontrat') return 'Ay sonu degerlendirmeyi merak ediyoruz, kaptan ne diyecek acaba?';
   if(last === 'sorun') return 'Az once anlattigin sorun kafama takildi, simdi durum daha iyi mi?';
   if(last === 'ozlem') return 'Ozledim demistin ya, evde de herkes ayni halde.';
   return '';
@@ -20264,6 +20294,9 @@ function fallbackFamilyReply(name,text=''){
     yorgunluk:'Uykusuzsan kendini zorlama. Kisa da olsa dinlenmeye calis.',
     hava:'Hava tarafini okuyunca insan geriliyor. Tedbiri birakma, haber ver.',
     liman:'Liman isleri yogundur, sen sakin kal. Bitince yazarsin.',
+    seyir:'Rota, ETA ve VTS isleri ciddi geliyor. Musait olunca nerede oldugunu yaz.',
+    charter:'Bu evrak ve saat hesaplari yorucu belli. Notlarini temiz tut, sonra basini agritmasin.',
+    kontrat:'Ay sonu yaklasinca insanin ici karisir. Kaptanla konusunca bize de anlat.',
     para:'Para isini sonra da konusuruz. Once sen iyi ol.',
     ozlem:'Biz de seni ozledik. Yazman bile iyi geldi.',
     sorun:'Bunu yasamana uzuldum. Sakin kalip dogru insana dogru raporu ver.',
@@ -20277,6 +20310,8 @@ function chooseFamilyResponders(text){
   const t = normalizeTrAscii(text);
   let preferred = [];
   if(/para|maas|kurs|izin|ev|gonder/.test(t)) preferred = ['Baba','Anne'];
+  else if(/kontrat|terfi|kaptan|rapor|degerlendirme/.test(t)) preferred = ['Baba','Dede','Anne'];
+  else if(/rota|eta|seyir|vts|radar|ecdis|charter|laytime/.test(t)) preferred = ['Baba','Arkadas'];
   else if(/yorgun|uyku|bitkin|moral|ozledim|yalniz|canim/.test(t)) preferred = ['Anne','Abla','Kardes'];
   else if(/firtina|swell|alarm|kaza|kork|zor|stres/.test(t)) preferred = ['Baba','Anne','Dede'];
   else if(/foto|komik|internet|oyun|video/.test(t)) preferred = ['Kardes','Arkadas'];
@@ -21046,6 +21081,12 @@ function getSimOpenTasks(){
   if(deviceTasks.length){
     tasks.push({title:'Acil cihaz tekrar gorevi', desc:deviceTasks.map(k=>getDeviceDef(k)?.name || k.toUpperCase()).join(' · '), action:'openDevices()'});
   }
+  if(charterTradeState.lastFeedback){
+    tasks.push({title:'SOF / Laytime dosyasi', desc:'Charter sahnesi Simulasyon Merkezi’nde laycan, NOR, SOF ve demurrage/despatch kontrolu istiyor', action:'openSimCenter()'});
+  }
+  if(documentTrainingState.lastFeedback || Object.keys(documentTrainingState.completed || {}).length < 2){
+    tasks.push({title:'Belge pratigi', desc:`Aktif form: ${getActiveDocumentTrainingForm().title}. Zorunlu alanlari doldur ve logbook'a bagla`, action:'openSimCenter()'});
+  }
   if(consequenceTrace.psc>2 || /psc|survey|class/i.test(`${sceneQueue[currentIdx]?.sub||''} ${sceneQueue[currentIdx]?.text||''}`)){
     tasks.push({title:'Denetim hazirligi', desc:'PSC/class/surveyor icin belge, ekipman ve deficiency zinciri kontrol', action:'openLiveLogbook()'});
   }
@@ -21080,6 +21121,90 @@ function getCrewMemoryCards(){
     const trust = crewTrust?.[k] ?? 40;
     return `<div class="sim-memory"><b>${phoneSafe(CREW_DEFS[k].name)}</b><small>Guven ${Math.round(trust)} · ${phoneSafe(line)}</small></div>`;
   }).join('');
+}
+
+function getSceneCrewMemoryKey(sc){
+  const blob = `${sc?.speaker||''} ${sc?.sub||''} ${sc?.text||''} ${sc?.loc||''}`.toLowerCase();
+  if(/carkci|çarkçi|engine|makine|bas muhendis|baş mühendis/.test(blob)) return 'carkci';
+  if(/lostromo|bosun|halat|mooring|guverte|deck/.test(blob)) return 'lostromo';
+  if(/asci|aşçı|galley|yemek|mess/.test(blob)) return 'asci';
+  if(/1\. zabit|chief officer|cargo|ballast/.test(blob)) return 'z1';
+  if(/2\. zabit|oow|chart|ecdis|radar|vhf|seyir/.test(blob)) return 'z2';
+  return 'suvari';
+}
+
+function applyStrictCrewMemory(sc,c2,weak,strong){
+  const key = getSceneCrewMemoryKey(sc);
+  const def = CREW_DEFS[key];
+  if(!def) return;
+  const trust = crewTrust[key] ?? def.trust ?? 40;
+  if(weak){
+    crewTrust[key] = clamp(trust - 4, 0, 100);
+    crewMemoryNotes[key] = {line:`${def.name} onceki zayif karari hatirliyor; guven dusukse kritik anda daha az ipucu verir.`, tone:'warn'};
+    if(crewTrust[key] < 35){
+      addWatchFeed(`${def.name}: "Bunu gecen sefer de kacirdin, bu kez notunu temiz tut."`, 'warn');
+      queueDelayedConsequence({sayginlik:-2},'Murettebat Hafizasi',`${def.name} onceki hatayi ekip icinde hatirlatti.`,1,-1);
+    }
+  }else if(strong){
+    crewTrust[key] = clamp(trust + 3, 0, 100);
+    crewMemoryNotes[key] = {line:`${def.name} bu temiz karari not etti; guven yuksekse sonraki kritik anda ipucu verebilir.`, tone:'good'};
+    if(crewTrust[key] > 68){
+      addWatchFeed(`${def.name}: "Bu sefer temiz toparladin, gerekirse arkandayim."`, 'good');
+    }
+  }
+}
+
+function queueCharterOrDocumentFollowup(sc,c2,weak,strong){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  const charterish = /charter|laycan|laytime|demurrage|dispatch|despatch|nor|sof|notice of readiness/.test(blob);
+  const docish = /permit|evrak|document|pilot card|near.?miss|hot work|enclosed|kapali mahal|logbook|psc|survey|class/.test(blob);
+  if(!charterish && !docish) return;
+  if(charterish){
+    charterTradeState.lastFeedback = weak
+      ? 'Sahnedeki karar SOF/NOR dosyasina baglandi: laytime hesabini Simulasyon Merkezi’nde tekrar kontrol et.'
+      : 'Sahnedeki charter karari temiz: SOF/NOR disiplinin ofis baskisini azaltti.';
+    if(weak) consequenceTrace.office += 1;
+    else consequenceTrace.office = Math.max(0, consequenceTrace.office - 1);
+    addCompanyMailThread(weak?'SOF dosyasi tekrar acilsin':'Charter dosyasi temiz', charterTradeState.lastFeedback, weak?'warn':'info');
+    addWatchFeed(`Charter takip gorevi: ${weak?'SOF dosyasini ac':'SOF dosyasi temiz'}`, weak?'warn':'good');
+  }
+  if(docish){
+    const lower = blob;
+    if(/pilot card|pilot/.test(lower)) documentTrainingState.active = 'pilot';
+    else if(/hot work|kaynak|kesme/.test(lower)) documentTrainingState.active = 'hotwork';
+    else if(/enclosed|kapali mahal|tank entry/.test(lower)) documentTrainingState.active = 'enclosed';
+    else if(/near.?miss|kaza|incident/.test(lower)) documentTrainingState.active = 'nearmiss';
+    else if(/sof/.test(lower)) documentTrainingState.active = 'sof';
+    else if(/nor|notice/.test(lower)) documentTrainingState.active = 'nor';
+    documentTrainingState.lastFeedback = weak
+      ? 'Sahnedeki eksik karar belge pratigi acti: zorunlu alanlari doldurup kontrol et.'
+      : 'Belge zinciri dogru kuruldu; logbook ve form ekrani temiz kaldi.';
+    addWatchFeed(`Belge takip gorevi: ${getActiveDocumentTrainingForm().title}`, weak?'warn':'good');
+  }
+}
+
+function maybeTriggerVoyageInterrupt(sc){
+  if(!sc || sc._voyageInterruptSent) return;
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  if(!route && Math.random() > .35) return;
+  sc._voyageInterruptSent = true;
+  const st = liveVoyageState || computeLiveVoyageState(sc);
+  const pool = [
+    ['VTS',`VTS call: ${st.nextWp} oncesi traffic separation ve reporting point teyidi istendi.`, 'vhf'],
+    ['RADAR',`CPA alarm: ${st.cpa} NM. Target acquire ve trial manoeuvre kontrolu acildi.`, 'radar'],
+    ['ECDIS',`Route monitor: ${st.chart} uzerinde XTD/safety contour kontrolu gerekiyor.`, 'ecdis'],
+    ['HAVA',`NAVTEX/MSI: swell ${voyagePressure.swell}, visibility ${voyagePressure.visibility}. Passage plan remark guncelle.`, 'navtex'],
+    ['AILE',`Aile grubu: "${st.eta} ETA yazmissin, limana varinca haber ver olur mu?"`, 'phone'],
+    ['OFIS',`Company mail: ETA, bunker, charter/NOR ve gecikme riski icin kisa update bekleniyor.`, 'charter']
+  ];
+  const selected = pool[(contractDays + Math.floor(Math.random()*pool.length)) % pool.length];
+  const timer = setTimeout(()=>{
+    addWatchFeed(`Canli seyir olayi · ${selected[0]}: ${selected[1]}`, selected[2]==='phone'?'good':'warn');
+    if(selected[2] === 'phone') pushFamilyGroupMessage('Anne', selected[1].replace(/^Aile grubu: /,''));
+    else if(selected[2] === 'charter') queueCharterOrDocumentFollowup(sc,{text:selected[1], tag:'itaatkar'},true,false);
+    else devicePracticeProgress[selected[2]] = 0;
+  }, 3100);
+  sceneLiveSequenceTimers.push(timer);
 }
 
 function getMapTrainingCards(){
@@ -21324,6 +21449,51 @@ const CHARTER_CASES = [
   }
 ];
 let charterTradeState = {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
+const DOCUMENT_TRAINING_FORMS = [
+  {
+    key:'nor',
+    title:'Notice of Readiness (NOR)',
+    scenario:'Geminin liman/anchorage varisi sonrasi charter tarafina hazirlik bildirimi.',
+    checks:['vessel','port','arrival','ready','master'],
+    fields:[['vessel','Vessel / IMO'],['port','Port / berth / anchorage'],['arrival','Arrival time'],['ready','Ready in all respects'],['master','Master signature']]
+  },
+  {
+    key:'sof',
+    title:'Statement of Facts (SOF)',
+    scenario:'Liman operasyonundaki her kritik saati tek resmi zaman cizgisine toplarsin.',
+    checks:['nor','accepted','commenced','completed','stoppage'],
+    fields:[['nor','NOR tendered'],['accepted','NOR accepted'],['commenced','Cargo commenced'],['completed','Cargo completed'],['stoppage','Weather / stoppage remarks']]
+  },
+  {
+    key:'pilot',
+    title:'Pilot Card',
+    scenario:'Pilot boarding oncesi geminin manevra ve teknik bilgisini tek sayfada verirsin.',
+    checks:['draft','loa','bow','engine','thruster'],
+    fields:[['draft','Fwd/Aft draft'],['loa','LOA / beam'],['engine','Main engine status'],['bow','Bow thruster'],['thruster','Steering / thruster limitation']]
+  },
+  {
+    key:'hotwork',
+    title:'Hot Work Permit',
+    scenario:'Kaynak/kesme isinde gaz testi, izolasyon, fire watch ve ekipman kontrolu olmadan izin kapanmaz.',
+    checks:['location','gas','isolation','fire','time'],
+    fields:[['location','Work location'],['gas','Gas test result'],['isolation','Isolation / LOTO'],['fire','Fire watch / extinguisher'],['time','Valid from/to']]
+  },
+  {
+    key:'enclosed',
+    title:'Enclosed Space Entry Permit',
+    scenario:'Kapali mahal girisinde atmosfer, havalandirma, standby person ve kurtarma ekipmani yazilir.',
+    checks:['space','oxygen','ventilation','standby','rescue'],
+    fields:[['space','Space / tank'],['oxygen','O2 / LEL / toxic gas'],['ventilation','Ventilation status'],['standby','Standby person'],['rescue','Rescue equipment']]
+  },
+  {
+    key:'nearmiss',
+    title:'Near Miss Report',
+    scenario:'Olayin kok nedenini, duzeltici aksiyonu ve takip sorumlusunu net yazarsin.',
+    checks:['event','cause','action','owner','deadline'],
+    fields:[['event','Event description'],['cause','Root cause'],['action','Corrective action'],['owner','Responsible person'],['deadline','Target date']]
+  }
+];
+let documentTrainingState = {active:'nor', completed:{}, lastFeedback:''};
 
 function getActiveCharterCase(){
   return CHARTER_CASES[Math.max(0, Math.min(CHARTER_CASES.length-1, charterTradeState.caseIndex || 0))] || CHARTER_CASES[0];
@@ -21419,6 +21589,100 @@ function nextCharterCase(){
   renderSimCenter();
 }
 
+function getActiveDocumentTrainingForm(){
+  return DOCUMENT_TRAINING_FORMS.find(f=>f.key === documentTrainingState.active) || DOCUMENT_TRAINING_FORMS[0];
+}
+
+function renderDocumentPracticePanel(){
+  const f = getActiveDocumentTrainingForm();
+  const completed = !!documentTrainingState.completed?.[f.key];
+  return `<div class="document-practice-panel">
+    <div class="document-practice-tabs">
+      ${DOCUMENT_TRAINING_FORMS.map(form=>`<button class="${form.key===f.key?'active':''} ${documentTrainingState.completed?.[form.key]?'done':''}" onclick="documentTrainingState.active='${form.key}'; renderSimCenter()">${phoneSafe(form.title.split(' ')[0])}</button>`).join('')}
+    </div>
+    <div class="document-form-sheet ${completed?'done':''}">
+      <div class="document-form-head">
+        <b>${phoneSafe(f.title)}</b>
+        <span>${completed?'tamamlandi':'bos alan doldurma'}</span>
+      </div>
+      <p>${phoneSafe(f.scenario)}</p>
+      <div class="document-form-grid">
+        ${f.fields.map(([key,label])=>`<label><span>${phoneSafe(label)}</span><input id="doc-${f.key}-${key}" value="${phoneSafe(getDocumentDraftValue(f.key,key))}" placeholder="${phoneSafe(label)}"></label>`).join('')}
+      </div>
+      <div class="charter-feedback ${documentTrainingState.lastFeedback?'warn':''}">${phoneSafe(documentTrainingState.lastFeedback || 'Gercek form mantigi: saat, yer, imza, sorumlu ve remark alanlari bos kalmamali.')}</div>
+      <div class="sim-actions compact">
+        <button onclick="autofillDocumentPracticeForm('${f.key}')">Ornekle doldur</button>
+        <button onclick="submitDocumentPracticeForm('${f.key}')">Formu kontrol et</button>
+        <button onclick="openLiveLogbook()">Logbook ac</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getDocumentDraftValue(formKey, fieldKey){
+  const form = documentTrainingState.drafts?.[formKey] || {};
+  return form[fieldKey] || '';
+}
+
+function setDocumentDraftValue(formKey, fieldKey, value){
+  documentTrainingState.drafts = documentTrainingState.drafts || {};
+  documentTrainingState.drafts[formKey] = documentTrainingState.drafts[formKey] || {};
+  documentTrainingState.drafts[formKey][fieldKey] = value;
+}
+
+function autofillDocumentPracticeForm(formKey){
+  const f = DOCUMENT_TRAINING_FORMS.find(x=>x.key===formKey) || getActiveDocumentTrainingForm();
+  const samples = {
+    vessel: sn || 'M/V Ege Meltem', port: selectedStartPort?.name || 'Pilot station / berth', arrival:'12 Jun 0740 LT', ready:'Vessel ready in all respects', master:'Master / OOW',
+    nor:'15 Jun 0810', accepted:'15 Jun 1000', commenced:'15 Jun 1600', completed:'16 Jun 2200', stoppage:'No weather stoppage / remarks entered',
+    draft:'F 7.20m / A 7.60m', loa:'LOA 186m / Beam 30m', engine:'ME ready, dead slow available', bow:'Bow thruster available', thruster:'Steering gear normal',
+    location:'Engine workshop / deck area', gas:'O2 20.9%, LEL 0%', isolation:'LOTO applied, area isolated', fire:'Fire watch posted, CO2/foam ready', time:'1200-1600 LT',
+    space:'No.2 DB tank', oxygen:'O2 20.9%, H2S 0 ppm, LEL 0%', ventilation:'Mechanical ventilation running', standby:'Standby person at entrance', rescue:'Tripod, EEBD, radio ready',
+    event:'CPA dropped below limit during watch', cause:'Late target assessment / weak communication', action:'Radar acquire and call master earlier', owner:'OOW / Master', deadline:'Before next watch'
+  };
+  f.fields.forEach(([key])=>setDocumentDraftValue(f.key,key,samples[key] || 'Checked'));
+  documentTrainingState.lastFeedback = `${f.title} ornek degerlerle dolduruldu; simdi kontrol edebilirsin.`;
+  renderSimCenter();
+}
+
+function submitDocumentPracticeForm(formKey){
+  const f = DOCUMENT_TRAINING_FORMS.find(x=>x.key===formKey) || getActiveDocumentTrainingForm();
+  f.fields.forEach(([key])=>{
+    const el = document.getElementById(`doc-${f.key}-${key}`);
+    if(el) setDocumentDraftValue(f.key,key,el.value.trim());
+  });
+  const missing = f.fields.filter(([key])=>!getDocumentDraftValue(f.key,key)).map(([,label])=>label);
+  if(missing.length){
+    documentTrainingState.lastFeedback = `Eksik alan: ${missing.slice(0,3).join(', ')}. Gercek formda bos birakma.`;
+    consequenceTrace.psc += 1;
+    applyEffect({bilgi:-1},{skipContractTick:true});
+    showNotif('FORM','Eksik Alan',documentTrainingState.lastFeedback);
+  }else{
+    documentTrainingState.completed = documentTrainingState.completed || {};
+    documentTrainingState.completed[f.key] = true;
+    documentTrainingState.lastFeedback = `${f.title} tamam: zorunlu alanlar dolu, logbook/ofis zincirine islenebilir.`;
+    addLiveLogbook('BELGE PRAKTIGI', `${f.title}: oyuncu form alanlarini doldurdu ve kontrol etti.`, true);
+    applyEffect({bilgi:3,sayginlik:2},{skipContractTick:true});
+    consequenceTrace.psc = Math.max(0, consequenceTrace.psc - 1);
+    showNotif('FORM','Kontrol Tamam',`${f.title} temiz.`);
+  }
+  renderSimCenter();
+}
+
+function renderTrainingRoadmapPanel(){
+  const month = Math.max(1, Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const steps = [
+    ['1. Ay','Temel vardiya, karakter, konuşma ve güvenli karar', true],
+    ['2. Ay','VHF / SMCP, Ch16, pilot exchange ve DSC farkındalık', contractDays >= 8],
+    ['3. Ay','Harita, rota, pilot station, TSS ve no anchoring görevleri', contractDays >= 16],
+    ['4. Ay','Radar/ECDIS/AIS, CPA/TCPA ve route check pratikleri', contractDays >= 24],
+    ['5. Ay','Charter, NOR, SOF, laytime, PSC ve belge disiplini', contractDays >= 32],
+    ['6. Ay+','Premium gemi tipleri, 3D operasyonlar ve uzman mod', premiumUnlocked || contractDays >= 40]
+  ];
+  return `<div class="training-roadmap">${steps.map(([label,desc,open])=>`
+    <div class="${open?'open':'locked'}"><b>${phoneSafe(label)}</b><span>${phoneSafe(desc)}</span><em>${open?'acik':'sirayla acilir'}</em></div>`).join('')}</div>`;
+}
+
 function renderPremiumPackagePanel(){
   const packs = [
     ['Proje gemisi','Heavy-lift, COG, sling angle, sea fastening ve hareketli crane/lift sahneleri'],
@@ -21429,8 +21693,11 @@ function renderPremiumPackagePanel(){
     ['Ileri cihaz sim','Radar/ECDIS/GMDSS/NAVTEX/Starlink pratikleri ve cihaz ariza zinciri']
   ];
   return `<div class="premium-sim-panel ${premiumUnlocked?'active':''}">
-    <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Oyuncu ne aldigini tek bakista gorsun.</span></div>
-    <div class="premium-sim-grid">${packs.map(([a,b])=>`<div><b>${a}</b><small>${b}</small></div>`).join('')}</div>
+    <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Kilitli gorev onizlemesi, dahil gemiler ve 3D operasyonlar.</span></div>
+    <div class="premium-preview-strip">
+      <span>🔒 Proje lift preview</span><span>🔒 Cruise medevac</span><span>🔒 ROV survey</span><span>🔒 Offshore DP</span><span>🔒 Ice convoy</span>
+    </div>
+    <div class="premium-sim-grid">${packs.map(([a,b])=>`<div class="${premiumUnlocked?'':'locked'}"><b>${a}</b><small>${b}</small></div>`).join('')}</div>
     <div class="sim-actions compact">
       <button onclick="openPremiumPurchase()">${premiumUnlocked?'Premium aktif':'75 TL satin al'}</button>
       <button onclick="restorePremiumPurchase()">Geri yukle</button>
@@ -21578,6 +21845,14 @@ function renderSimCenter(){
       ${renderCharterMiniMode()}
     </div>
     <div class="sim-section wide">
+      <div class="sim-head"><span>GERCEK BELGE EKRANLARI</span><span>NOR · SOF · permits · near miss</span></div>
+      ${renderDocumentPracticePanel()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>OYUN ICI EGITIM YOLU</span><span>ilk ay sade, sonra katmanli</span></div>
+      ${renderTrainingRoadmapPanel()}
+    </div>
+    <div class="sim-section wide">
       <div class="sim-head"><span>PREMIUM PAKET EKRANI</span><span>${premiumUnlocked?'aktif':PREMIUM_PRICE_LABEL}</span></div>
       ${renderPremiumPackagePanel()}
     </div>
@@ -21659,6 +21934,8 @@ function applyDecisionMemoryRipple(sc,c2){
   const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
   const weak = c2.tag === 'korkak' || c2.tag === 'hileli';
   const strong = c2.tag === 'kritik' || c2.tag === 'akilli';
+  applyStrictCrewMemory(sc,c2,weak,strong);
+  queueCharterOrDocumentFollowup(sc,c2,weak,strong);
   if(weak){
     if(/psc|survey|class|permit|logbook|evrak|deficiency/.test(blob)) consequenceTrace.psc += 2;
     if(/office|charter|eta|mail|report|near.?miss/.test(blob)) consequenceTrace.office += 2;
@@ -22649,6 +22926,7 @@ function maybeTriggerLiveRoutineFlow(sc){
     }, 900 + i*1400);
     sceneLiveSequenceTimers.push(timer);
   });
+  maybeTriggerVoyageInterrupt(sc);
 }
 
 function scheduleDynamicMiniChain(sc){

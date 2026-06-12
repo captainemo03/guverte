@@ -202,6 +202,20 @@ CHECKS = {
         "sim-charter-panel",
         "premium-sim-panel",
     ],
+    "document and career integration": [
+        "DOCUMENT_TRAINING_FORMS",
+        "documentTrainingState",
+        "renderDocumentPracticePanel",
+        "submitDocumentPracticeForm",
+        "renderTrainingRoadmapPanel",
+        "queueCharterOrDocumentFollowup",
+        "maybeTriggerVoyageInterrupt",
+        "applyStrictCrewMemory",
+        "renderContractCinematicReport",
+        "document-practice-panel",
+        "training-roadmap",
+        "premium-preview-strip",
+    ],
     "multi language support": [
         "GAME_LANGUAGES",
         "setGameLanguage",
@@ -327,13 +341,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 100:
+    elif int(js_versions[-1]) < 101:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 88:
+    elif int(css_versions[-1]) < 89:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():
