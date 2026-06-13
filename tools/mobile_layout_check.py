@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=106",
-        "index.css?v=95",
+        "index.js?v=107",
+        "index.css?v=96",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -70,6 +70,13 @@ REQUIRED = {
         "chart-index-sheet-layer",
         "shodb-style",
         "MARMARA DENIZI",
+    ],
+    "advanced map chain ui": [
+        "map-chain-panel",
+        "ecdis-control-overlay",
+        "buildEcdisChartControlOverlay",
+        "runMapTaskReplay",
+        "getClickedWorldChartIndexSheet",
     ],
 }
 

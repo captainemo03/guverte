@@ -1337,6 +1337,13 @@ animation:straitFlow 2.8s linear infinite;}
 .map-task-chip small{opacity:.72;margin-left:4px;}
 #port-chart-tasktitle{font-size:11px;color:var(--text);font-weight:600;margin-bottom:4px;}
 #port-chart-taskdesc{font-size:10px;color:var(--text3);line-height:1.55;}
+.map-chain-panel{border:1px solid rgba(212,160,23,.22);border-radius:8px;background:rgba(35,25,8,.55);padding:7px 8px;margin:0 0 7px 0;}
+.map-chain-head{font:10px 'Share Tech Mono',monospace;color:#ffd98a;margin-bottom:6px;letter-spacing:.6px;}
+.map-chain-steps{display:flex;gap:5px;flex-wrap:wrap;}
+.map-chain-steps span{border:1px solid rgba(111,146,178,.2);border-radius:999px;background:rgba(8,22,40,.78);padding:4px 7px;color:#9cc8ef;font:8.5px 'Share Tech Mono',monospace;}
+.map-chain-steps span.done{border-color:rgba(93,191,138,.38);color:#a8f5c2;background:rgba(14,40,27,.68);}
+.map-chain-steps span.active{border-color:rgba(212,160,23,.58);color:#fff2bd;background:rgba(66,44,8,.78);box-shadow:0 0 0 1px rgba(212,160,23,.16) inset;}
+.map-chain-note{margin-top:6px;color:#8ab0c8;font:8.5px/1.45 'Share Tech Mono',monospace;}
 #port-chart-taskstatus{margin-top:7px;font-size:10px;color:#8fd8ab;min-height:16px;font-family:'Share Tech Mono',monospace;}
 #port-chart-taskstatus.warn{color:#ffd78a;}
 #port-chart-taskstatus.bad{color:#ffb0b0;}
@@ -1345,7 +1352,9 @@ animation:straitFlow 2.8s linear infinite;}
 #port-chart-svg .map-task-target text,#map-svg .map-task-target text{paint-order:stroke;stroke:#06111c;stroke-width:2px;stroke-opacity:.9;}
 .live-route-motion path{filter:drop-shadow(0 0 4px rgba(129,247,184,.32));}
 .live-route-motion circle{animation:routeOwnshipPulse 1.4s ease-in-out infinite;}
-.enc-enhanced-detail,.live-route-motion{filter:drop-shadow(0 0 5px rgba(46,107,191,.18));}
+.enc-enhanced-detail,.live-route-motion,.ecdis-control-overlay{filter:drop-shadow(0 0 5px rgba(46,107,191,.18));}
+.ecdis-control-overlay text{paint-order:stroke;stroke:#f7f2d4;stroke-width:1.2px;stroke-opacity:.75;}
+.ecdis-control-overlay circle{animation:routeOwnshipPulse 1.6s ease-in-out infinite;}
 .enc-enhanced-detail text{paint-order:stroke;stroke:#e8f6fb;stroke-width:2px;}
 @keyframes mapTargetPulse{0%,100%{opacity:.7;stroke-width:1.6px;}50%{opacity:1;stroke-width:3px;filter:drop-shadow(0 0 5px rgba(255,212,90,.55));}}
 @keyframes routeOwnshipPulse{0%,100%{opacity:.72}50%{opacity:1;filter:drop-shadow(0 0 6px rgba(255,212,90,.45));}}

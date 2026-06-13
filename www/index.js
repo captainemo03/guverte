@@ -563,7 +563,8 @@ const PREMIUM_PACKAGE_CATALOG = [
   'Offshore / DP platform',
   'Kutup ve buz seyri',
   'Ileri cihaz simulasyonu',
-  'Premium hareketli 3D operasyonlar'
+  'Premium hareketli 3D operasyonlar',
+  'Premium chart paketleri: offshore DP, arastirma ROV, kruvaziyer medevac, proje yuk lift, buz seyri'
 ];
 function isPremiumShipType(typeKey){
   return !!STYPES.find(x=>x.key===typeKey && x.premium);
@@ -14971,6 +14972,7 @@ function buildSavePayload(){
     activeVoyageProgress,
     selectedPortChart,
     activeMapTaskIndex,
+    mapMissionChainState:{...mapMissionChainState},
     completedMapTasks:Array.from(completedMapTasks||[]),
     mapTaskWrongAttempts:{...mapTaskWrongAttempts},
     mapRouteDraftPoints,
@@ -15089,6 +15091,9 @@ function applyLoadedGameState(data){
   activeVoyageProgress = Number.isFinite(data.activeVoyageProgress) ? data.activeVoyageProgress : activeVoyageProgress;
   selectedPortChart = data.selectedPortChart || selectedPortChart;
   activeMapTaskIndex = Number.isFinite(data.activeMapTaskIndex) ? Math.max(0, data.activeMapTaskIndex) : activeMapTaskIndex;
+  mapMissionChainState = data.mapMissionChainState && typeof data.mapMissionChainState === 'object'
+    ? {...mapMissionChainState, ...data.mapMissionChainState}
+    : mapMissionChainState;
   completedMapTasks.clear();
   (Array.isArray(data.completedMapTasks) ? data.completedMapTasks : []).forEach(id=>completedMapTasks.add(id));
   Object.keys(mapTaskWrongAttempts).forEach(key=>delete mapTaskWrongAttempts[key]);
@@ -15201,6 +15206,32 @@ const completedMapTasks = new Set();
 let mapRouteDraftPoints = [];
 const mapTaskWrongAttempts = {};
 let lastAutoVoyageChartScene = '';
+let mapMissionChainState = {name:'pilotArrival', step:0, last:''};
+
+const MAP_MISSION_CHAINS = {
+  pilotArrival:{
+    title:'Pilot / Tug / Berth Zinciri',
+    steps:[
+      {task:'waypoint', label:'Rota ve next WP kontrol'},
+      {task:'pilot', label:'Pilot station sec'},
+      {task:'reporting', label:'VHF / VTS temas noktasi'},
+      {task:'ukc', label:'Speed, draft ve UKC kontrol'},
+      {task:'berth', label:'MPX / tug / berth approach'},
+      {task:'tss', label:'TSS ve trafik akis teyidi'}
+    ]
+  },
+  ecdisWatch:{
+    title:'Canli Seyir / ECDIS Watch',
+    steps:[
+      {task:'waypoint', label:'Waypoint ve XTD'},
+      {task:'cpa', label:'CPA/TCPA hedefi'},
+      {task:'ukc', label:'Safety contour / UKC'},
+      {task:'eca', label:'ECA / change-over'},
+      {task:'weatheravoid', label:'Weather routing'},
+      {task:'alternateroute', label:'Contingency route'}
+    ]
+  }
+};
 
 const MAP_TASKS = [
   {
@@ -15447,6 +15478,54 @@ function getCurrentMapTask(){
   return MAP_TASKS[activeMapTaskIndex % MAP_TASKS.length];
 }
 
+function getMapMissionChain(){
+  return MAP_MISSION_CHAINS[mapMissionChainState?.name] || MAP_MISSION_CHAINS.pilotArrival;
+}
+
+function syncMapTaskToMissionChain(){
+  const chain = getMapMissionChain();
+  const step = chain.steps[Math.max(0, Math.min(chain.steps.length-1, mapMissionChainState.step || 0))];
+  const idx = MAP_TASKS.findIndex(task=>task.id === step?.task);
+  if(idx >= 0) activeMapTaskIndex = idx;
+}
+
+function progressMapMissionChain(task, ok){
+  const chain = getMapMissionChain();
+  const currentStep = chain.steps[Math.max(0, Math.min(chain.steps.length-1, mapMissionChainState.step || 0))];
+  if(ok && currentStep?.task === task?.id){
+    mapMissionChainState.step = Math.min(chain.steps.length-1, (mapMissionChainState.step || 0) + 1);
+    mapMissionChainState.last = `${task.title}: tamam`;
+    syncMapTaskToMissionChain();
+    addWatchFeed(`Harita zinciri: ${currentStep.label} tamamlandi. Siradaki adim: ${chain.steps[mapMissionChainState.step]?.label || 'debrief'}.`, 'good');
+  }else if(!ok){
+    mapMissionChainState.last = `${task?.title || 'Harita'}: tekrar`;
+  }
+}
+
+function runMapTaskReplay(task, training, opts={}){
+  const lines = [
+    `Harita replay: ${task?.title || 'gorev'} hedefi tekrar okunuyor.`,
+    opts.near ? 'Replay: hedefe yaklastin; sembol/etiket ve rota baglamina tekrar bak.' : 'Replay: yanlis bolge secildi; chart sembolu ve gorev tipi ayrildi.',
+    opts.penaltyNow ? 'Replay: uc uzak deneme sonrasi kucuk egitim cezasi uygulandi.' : `Replay: ${training?.wrong || 'Neden yanlis oldugunu not et ve yeniden dene.'}`
+  ];
+  lines.forEach((line,i)=>sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(line, i===2?'warn':''), 250+i*520)));
+  addLiveLogbook('HARITA REPLAY', `${task?.title || 'Harita'}: ${training?.wrong || 'tekrar egitim replayi'}`, true);
+}
+
+function renderMapMissionChainPanel(){
+  const chain = getMapMissionChain();
+  const stepIndex = Math.max(0, Math.min(chain.steps.length-1, mapMissionChainState.step || 0));
+  const steps = chain.steps.map((step,i)=>{
+    const cls = i < stepIndex ? 'done' : i === stepIndex ? 'active' : '';
+    return `<span class="${cls}">${i+1}. ${phoneSafe(step.label)}</span>`;
+  }).join('');
+  return `<div class="map-chain-panel">
+    <div class="map-chain-head">${phoneSafe(chain.title)} · ${stepIndex+1}/${chain.steps.length}</div>
+    <div class="map-chain-steps">${steps}</div>
+    <div class="map-chain-note">Gorevler artik tek tik degil: rota kontrolu, VHF/pilot, hiz, UKC, tug ve berth zinciri olarak ilerler.</div>
+  </div>`;
+}
+
 function getMapTaskRequiredKind(task){
   if(!task) return 'port';
   if(task.chartKind === 'route') return 'route';
@@ -15460,6 +15539,46 @@ function isMapTaskKindMatch(task, port){
   if(kind === 'route') return port.kind === 'route';
   if(kind === 'transit') return port.kind !== 'port';
   return port.kind === 'port';
+}
+
+function getSheetDrilldownChartName(sheetNo, port){
+  const hay = `${sheetNo || ''} ${port?.name || ''}`.toLowerCase();
+  if(/293/.test(hay)) return 'Dardanel - Marmara - Bosphorus Zinciri';
+  if(/294|295|canakkale|çanakkale/.test(hay)) return 'Çanakkale Bogazi';
+  if(/296|adalar|gemlik/.test(hay)) return 'Gemlik';
+  if(/292|291|istanbul|izmit/.test(hay)) return 'İstanbul Bogazi';
+  if(/suez|sc1|sc2|sc3|rs1/.test(hay)) return 'Suveys';
+  if(/pan|pc1|pc2|pc3/.test(hay)) return 'Panama Kanali';
+  if(/mal|ms1|ms2|ms3|ms4|singapur|singapore/.test(hay)) return 'Singapore Strait TSS';
+  if(/hom|hurmuz|hormuz/.test(hay)) return 'Hurmuz Bogazi';
+  if(/dov|dover/.test(hay)) return 'Dover Bogazi';
+  if(/atl/.test(hay)) return 'Kuzey Atlantik Ana Hatti';
+  if(/fe/.test(hay)) return 'Malakka - Guney Cin Denizi - Japonya Hatti';
+  return port?.name || selectedPortChart;
+}
+
+function getClickedChartIndexSheet(port, x, y){
+  const profile = getPortChartProfile(port);
+  const data = getShodbChartIndexData(port, profile);
+  return (data.sheets || []).find(sheet=>{
+    const inside = x >= sheet.x && x <= sheet.x + sheet.w && y >= sheet.y && y <= sheet.y + sheet.h;
+    if(!inside) return false;
+    const edge = Math.min(Math.abs(x-sheet.x), Math.abs(x-(sheet.x+sheet.w)), Math.abs(y-sheet.y), Math.abs(y-(sheet.y+sheet.h)));
+    const nearNumber = x <= sheet.x + 30 && y <= sheet.y + 18;
+    return edge <= 7 || nearNumber;
+  }) || null;
+}
+
+function openChartIndexSheet(sheet, sourcePort){
+  const targetName = getSheetDrilldownChartName(sheet.no, sourcePort);
+  const target = getPortChartByName(targetName) || sourcePort;
+  selectedPortChart = target.name;
+  mapView = 'library';
+  visitedPorts.add(target.name);
+  portChartZoom = Math.max(portChartZoom || 1, 1.45);
+  showNotif('CHART FOLIO', `${sheet.no} paftasi acildi`, `${target.name} detay chart yuklendi.`);
+  addLiveLogbook('CHART FOLIO', `${sourcePort?.name || 'Atlas'} ${sheet.no} paftasindan ${target.name} chartina gecildi.`, true);
+  renderMap();
 }
 
 function ensureTaskPort(task){
@@ -15652,7 +15771,7 @@ function updateMapTaskBox(port){
   }
   title.textContent = `${task.title} · ${effectivePort?.name || ''}`;
   const training = getMapTaskTraining(task.id);
-  desc.textContent = `${task.desc} Egitim odagi: ${training.focus}` + (task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${effectivePort.name} charti uzerindesin.` : '');
+  desc.innerHTML = `${renderMapMissionChainPanel()}<div>${phoneSafe(task.desc)} Egitim odagi: ${phoneSafe(training.focus)}${task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${phoneSafe(effectivePort.name)} charti uzerindesin.` : ''}</div>`;
   status.className = '';
   const target = getMapTaskTarget(task, effectivePort);
   status.textContent = completedMapTasks.has(task.id) ? 'Tamamlandi. Istersen sonraki goreve gecebilirsin.' : `${target.label || task.title} halkasini haritada bul ve isaretle.`;
@@ -15662,6 +15781,16 @@ function updateMapTaskBox(port){
 function handlePortChartTaskClick(svg, ev, port){
   const task = getCurrentMapTask();
   if(!task || !port) return;
+  if(portChartDidPan){
+    portChartDidPan = false;
+    return;
+  }
+  const {x, y} = getSvgClickPoint(svg, ev);
+  const sheet = getClickedChartIndexSheet(port, x, y);
+  if(sheet){
+    openChartIndexSheet(sheet, port);
+    return;
+  }
   const allowed = isMapTaskAllowedForPort(task, port);
   if(!allowed){
     const status = document.getElementById('port-chart-taskstatus');
@@ -15676,11 +15805,6 @@ function handlePortChartTaskClick(svg, ev, port){
     if(before !== selectedPortChart) renderMap();
     return;
   }
-  if(portChartDidPan){
-    portChartDidPan = false;
-    return;
-  }
-  const {x, y} = getSvgClickPoint(svg, ev);
   const target = getMapTaskTarget(task, port);
   const status = document.getElementById('port-chart-taskstatus');
   if(task.id === 'alternateroute'){
@@ -15688,6 +15812,7 @@ function handlePortChartTaskClick(svg, ev, port){
     renderMapRouteDraftOverlay(svg);
     if(mapRouteDraftPoints.length >= 3 || Math.hypot(x-target.x, y-target.y) <= target.tol){
       completedMapTasks.add(task.id);
+      progressMapMissionChain(task, true);
       if(status){
         status.className = '';
         status.textContent = 'Alternatif rota cizildi. Hava routing / ECA / risk alanini dikkate alan hat kabul edildi.';
@@ -15709,6 +15834,7 @@ function handlePortChartTaskClick(svg, ev, port){
   if(dist <= target.tol || labelHit || visibleHit){
     completedMapTasks.add(task.id);
     mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
+    progressMapMissionChain(task, true);
     const training = getMapTaskTraining(task.id);
     if(status){
       status.className = '';
@@ -15735,6 +15861,8 @@ function handlePortChartTaskClick(svg, ev, port){
       applyEffect({bilgi:-1},{skipContractTick:true});
       addLiveLogbook('HARITA HATASI', `${task.title}: ${training.wrong}`, true);
     }
+    progressMapMissionChain(task, false);
+    runMapTaskReplay(task, training, {near, penaltyNow});
   }
 }
 
@@ -16059,6 +16187,29 @@ function buildLiveVoyageTelemetryOverlay(chartName){
   </g>`;
 }
 
+function buildEcdisChartControlOverlay(chartName){
+  const route = getActiveVoyageRoute();
+  const wp = getVoyageWaypoint();
+  const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const chartSet = getActiveVoyageChartSet();
+  const showForChart = !chartSet.size || chartSet.has(chartName) || chartName === selectedPortChart || route?.chart === chartName;
+  if(!showForChart && chartName !== selectedPortChart) return '';
+  const alert = st?.alert || (Number(st?.cpa || 2) < 1.1);
+  const contour = chartName && /kanal|bogazi|strait|suez|panama|malakka|hurmuz|dover/i.test(chartName) ? '10m' : '20m';
+  const wpName = phoneSafe(wp?.name || chartName || 'ACTIVE WP').slice(0,24);
+  return `<g class="ecdis-control-overlay">
+    <rect x="274" y="58" width="144" height="74" rx="6" fill="rgba(245,248,232,.92)" stroke="#1b3550" stroke-width=".9"/>
+    <text x="282" y="71" fill="#17324c" font-size="6.4" font-family="monospace">ECDIS ROUTE CHECK</text>
+    <text x="282" y="84" fill="#7b3550" font-size="6.2" font-family="monospace">SAFETY CONTOUR ${contour} · NO-GO ON</text>
+    <text x="282" y="96" fill="${alert?'#b34242':'#287b57'}" font-size="6.2" font-family="monospace">ALARM ACK ${alert?'REQ':'OK'} · SENSOR OK</text>
+    <text x="282" y="108" fill="#17324c" font-size="6.2" font-family="monospace">AIS TARGET / RADAR OVERLAY ${deviceChartOverlayState?.radar || deviceChartOverlayState?.ais ? 'ON':'STBY'}</text>
+    <text x="282" y="120" fill="#17324c" font-size="6.1" font-family="monospace">NEXT WP ${wpName}</text>
+    <path d="M294 126 H390" stroke="#94333a" stroke-width="1.4" stroke-dasharray="7,4"/>
+    <circle cx="326" cy="126" r="3.2" fill="#ffd45a" stroke="#17324c" stroke-width=".8"/>
+    <circle cx="374" cy="118" r="4.2" fill="none" stroke="${alert?'#b34242':'#287b57'}" stroke-width="1.2"/>
+  </g>`;
+}
+
 function buildLiveVoyageRouteMotionOverlay(chartName){
   const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
   if(!st || !st.route) return '';
@@ -16355,7 +16506,18 @@ function buildShodbChartIndexOverlay(port, mode='port'){
 }
 
 function buildWorldShodbChartIndexOverlay(){
-  const sheets = [
+  const sheets = getWorldChartIndexSheets();
+  return `
+    <g class="chart-index-sheet-layer world" pointer-events="none" aria-label="4K world chart folio overlay">
+      <rect class="chart-index-paper-frame" x="6" y="6" width="428" height="248" rx="2"/>
+      ${sheets.map(s=>`<g class="chart-index-sheet world-sheet chart-${s.no.toLowerCase()}"><rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}"/><text class="chart-index-number" x="${s.x+3}" y="${s.y+9}">${s.no}</text><text class="chart-index-sheet-label" x="${s.x+4}" y="${s.y+s.h-5}">${s.label}</text></g>`).join('')}
+      <text class="chart-index-title" x="18" y="28">WORLD TRADE ROUTE CHART FOLIO</text>
+      <text class="chart-index-sea main" x="178" y="132">MAJOR SEA LANES</text>
+    </g>`;
+}
+
+function getWorldChartIndexSheets(){
+  return [
     {no:'293', x:200, y:86, w:44, h:24, label:'Marmara'},
     {no:'SUEZ', x:246, y:122, w:38, h:38, label:'Suez'},
     {no:'PAN', x:58, y:138, w:38, h:30, label:'Panama'},
@@ -16365,13 +16527,10 @@ function buildWorldShodbChartIndexOverlay(){
     {no:'ATL', x:72, y:58, w:92, h:54, label:'N. Atlantic'},
     {no:'FE', x:362, y:82, w:62, h:48, label:'Far East'}
   ];
-  return `
-    <g class="chart-index-sheet-layer world" pointer-events="none" aria-label="4K world chart folio overlay">
-      <rect class="chart-index-paper-frame" x="6" y="6" width="428" height="248" rx="2"/>
-      ${sheets.map(s=>`<g class="chart-index-sheet world-sheet chart-${s.no.toLowerCase()}"><rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}"/><text class="chart-index-number" x="${s.x+3}" y="${s.y+9}">${s.no}</text><text class="chart-index-sheet-label" x="${s.x+4}" y="${s.y+s.h-5}">${s.label}</text></g>`).join('')}
-      <text class="chart-index-title" x="18" y="28">WORLD TRADE ROUTE CHART FOLIO</text>
-      <text class="chart-index-sea main" x="178" y="132">MAJOR SEA LANES</text>
-    </g>`;
+}
+
+function getClickedWorldChartIndexSheet(x, y){
+  return getWorldChartIndexSheets().find(sheet=>x >= sheet.x && x <= sheet.x + sheet.w && y >= sheet.y && y <= sheet.y + sheet.h) || null;
 }
 
 function buildOceanRouteChartSvg(port, profile){
@@ -16472,6 +16631,7 @@ function buildOceanRouteChartSvg(port, profile){
   ${buildShodbChartIndexOverlay(port, 'route')}
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
+  ${buildEcdisChartControlOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
   ${buildLiveVoyageRouteMotionOverlay(port.name)}
   ${buildLiveVoyageTelemetryOverlay(port.name)}
@@ -17023,6 +17183,7 @@ function buildPortChartSvg(port){
   ${buildShodbChartIndexOverlay(port, 'port')}
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
+  ${buildEcdisChartControlOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
   ${buildLiveVoyageRouteMotionOverlay(port.name)}
   ${buildLiveVoyageTelemetryOverlay(port.name)}
@@ -17273,6 +17434,21 @@ function handleWorldMapClick(svg, ev){
     return;
   }
   const pos = getSvgClickPoint(svg, ev);
+  const folioSheet = getClickedWorldChartIndexSheet(pos.x, pos.y);
+  if(folioSheet){
+    const targetName = getSheetDrilldownChartName(folioSheet.no, null);
+    const target = getPortChartByName(targetName);
+    if(target){
+      selectedPortChart = target.name;
+      visitedPorts.add(target.name);
+      mapView = 'library';
+      portChartZoom = Math.max(portChartZoom || 1, 1.35);
+      showNotif('DUNYA ATLASI', `${folioSheet.no} paftasi`, `${target.name} chart dosyasi acildi.`);
+      addLiveLogbook('DUNYA ATLASI', `${folioSheet.no} paftasi uzerinden ${target.name} chartina gecildi.`, true);
+      renderMap();
+      return;
+    }
+  }
   let best = null;
   getPortChartEntries().forEach((p)=>{
     const wp = getWorldMapPoint(p);
@@ -21816,6 +21992,7 @@ const CHARTER_CASES = [
     hint:'Erken varis tek basina laytime baslatmaz; laycan acilisi ve accepted NOR birlikte okunur.'
   }
 ];
+
 let charterTradeState = {caseIndex:0, selectedStart:'', selectedResult:'', score:0, attempts:0, lastFeedback:''};
 const DOCUMENT_TRAINING_FORMS = [
   {
