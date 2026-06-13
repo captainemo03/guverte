@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=110",
-        "index.css?v=99",
+        "index.js?v=112",
+        "index.css?v=101",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -89,11 +89,26 @@ REQUIRED = {
         "intro-audio-card",
         "sound-option-btn",
     ],
+    "intro route selector": [
+        "route-select-grid",
+        "route-card",
+        "renderVoyageRouteSelector",
+        "setSelectedVoyageRoute",
+        "MAJOR_TRADE_ROUTE_KEYS",
+    ],
     "mobile creator portrait fit": [
         "creator-mobile-portrait-fit",
         ".creator-preview-stage .portrait-composite.preview",
         "width:min(62vw,230px)",
         "scale(.86)",
+    ],
+    "ultra 4k expansion": [
+        "ULTRA_4K_ROUTE_EXPANSION",
+        "live-4k-bridge-reflection",
+        "live-4k-port-haze",
+        "live-4k-wave-burst",
+        "traffic-research",
+        "traffic-roro",
     ],
 }
 

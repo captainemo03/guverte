@@ -8786,16 +8786,16 @@ function getScene4KOverlay(sc, blob){
   if(/cruise|kruvaziyer|project|proje|heavy.?lift|research|survey|rov|offshore|platform|dp |ice|buz|cable|pipe|fpso|shuttle/.test(blob)) tags.push('premium');
   const layers = ['<div class="live-4k-noise"></div><div class="live-4k-depth"></div>'];
   if(tags.includes('nav')){
-    layers.push('<div class="live-4k-glass"></div><div class="live-4k-ecdis-grid"></div><div class="live-4k-device-scan"></div>');
+    layers.push('<div class="live-4k-glass"></div><div class="live-4k-ecdis-grid"></div><div class="live-4k-device-scan"></div><div class="live-4k-bridge-reflection"></div>');
   }
   if(tags.includes('port')){
-    layers.push('<div class="live-4k-terminal-depth"><i></i><i></i><i></i></div><div class="live-4k-harbor-glow"></div>');
+    layers.push('<div class="live-4k-terminal-depth"><i></i><i></i><i></i></div><div class="live-4k-harbor-glow"></div><div class="live-4k-port-haze"></div>');
   }
   if(tags.includes('storm')){
-    layers.push('<div class="live-4k-stormglass"></div><div class="live-4k-salt-map"></div>');
+    layers.push('<div class="live-4k-stormglass"></div><div class="live-4k-salt-map"></div><div class="live-4k-wave-burst"></div>');
   }
   if(tags.includes('premium')){
-    layers.push('<div class="live-4k-premium-beam"></div><div class="live-4k-operation-sparks"></div>');
+    layers.push('<div class="live-4k-premium-beam"></div><div class="live-4k-operation-sparks"></div><div class="live-4k-specialist-grid"></div>');
   }
   return `<div class="${tags.join(' ')}" aria-hidden="true">${layers.join('')}</div>`;
 }
@@ -10598,7 +10598,7 @@ function buildIntro(){
         showNotif('🔒','Premium Gerekli','Bu ozel gemi ve pro operasyon paketleri premium pakete dahildir.');
         return;
       }
-      selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();
+      selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();selectedVoyageRouteKey='';renderVoyageRouteSelector();
     };
     st.appendChild(d);
   });
@@ -10608,6 +10608,7 @@ function buildIntro(){
   st.appendChild(p);
   updateKontrat();
   updateSugs();
+  renderVoyageRouteSelector();
   renderCharacterCreator();
   applyLanguageUI();
   setIntroMenuPage(introMenuPage);
@@ -12584,6 +12585,7 @@ function getDynamicSceneTrafficOverlay(sc){
     addShip('tug', 48, 72, .46, 12, -2, 'right');
     addShip('pilot', 67, 64, .34, 10, -7, 'left');
     addShip('tanker', 78, 69, .58, 31, -16, 'left');
+    if(/roro|ro-ro|ferry|yolcu|cruise|kruvaziyer/.test(hay)) addShip('roro', 30, 65, .54, 19, -9, 'right');
   }else if(strait){
     addShip('ferry', 10, 64, .5, 15, -4, 'right');
     addShip('tanker', 34, 61, .56, 26, -10, 'left');
@@ -12597,6 +12599,12 @@ function getDynamicSceneTrafficOverlay(sc){
   }
   if(/offshore|platform|dp|research|survey|rov|cable|pipe|premium/.test(hay)){
     addShip('support', 57, 70, .42, 16, -5, 'right');
+  }
+  if(/research|survey|rov|hydrographic|arastirma|araştırma/.test(hay)){
+    addShip('research', 43, 62, .46, 21, -11, 'left');
+  }
+  if(/roro|ro-ro|vehicle carrier|car carrier|arac tasiyici|araç taşıyıcı/.test(hay)){
+    addShip('roro', 72, 64, .54, 24, -13, 'right');
   }
   const lights = Array.from({length: harbor ? 11 : strait ? 7 : 4}, (_,i)=>{
     const x = 7 + i * (harbor ? 8 : 12);
@@ -13454,7 +13462,7 @@ function beginGame(){
   contractDays=0;
 
   // Kontrat uzunluğuna göre sahne pool'u oluştur
-  const nextRoute = selectVoyageRouteForShipType(selType);
+  const nextRoute = getSelectedVoyageRoute();
   selectedStartPort=findStartPortByName(nextRoute.start);
   selectedStartScenario=START_SCENARIOS[Math.floor(Math.random()*START_SCENARIOS.length)];
   activateVoyageRoute(nextRoute);
@@ -14028,6 +14036,7 @@ let shipPosition = {x:85, y:130};
 let routeHistory = [{x:85,y:130}];
 let visitedPorts = new Set(["İzmir"]);
 let activeVoyageRoute = null;
+let selectedVoyageRouteKey = '';
 let activeVoyageProgress = 0;
 let deviceChartOverlayState = {radar:false, arpa:false, cpa:false, guard:false, ais:false, ebl:false, trial:false, updatedAt:0, source:''};
 let worldMapZoom = 1;
@@ -14588,6 +14597,137 @@ const TRADE_VOYAGE_ROUTES = [
     ]
   }
 ];
+
+const ULTRA_4K_ROUTE_EXPANSION = [
+  {
+    key:'suez_redsea_resilience',
+    name:'Suveys - Kizildeniz Kriz ve Reroute Hatti',
+    trade:'Konteyner / kriz rotasi',
+    chart:'Suveys - Kizildeniz Kriz ve Reroute Hatti',
+    start:'Port Said',
+    end:'Salalah',
+    distanceNm:2200,
+    etaDays:7,
+    charts:['Port Said','Suveys','Suez South Anchorage','Babulmendep','Aden Korfezi','Salalah','Cape of Good Hope Alternatif Rotasi'],
+    waypoints:[
+      {name:'Port Said convoy assembly', x:251, y:128, note:'Convoy window, pilot card, canal dues and ETA pressure', chart:'Port Said', risk:'Convoy / delay'},
+      {name:'Suez South Anchorage', x:246, y:212, note:'Anchorage density, engine standby and VHF watch', chart:'Suez South Anchorage', risk:'Anchorage / traffic'},
+      {name:'Red Sea security corridor', x:262, y:154, note:'Security level, citadel readiness, NAVTEX warnings', chart:'Suveys - Kizildeniz Kriz ve Reroute Hatti', risk:'Security'},
+      {name:'Bab el-Mandeb risk gate', x:270, y:166, note:'Traffic lane, small craft watch and MRCC reporting', chart:'Babulmendep', risk:'Chokepoint'},
+      {name:'Salalah contingency call', x:289, y:164, note:'Bunker, stores and reroute via Cape decision', chart:'Salalah', risk:'Contingency'}
+    ]
+  },
+  {
+    key:'malacca_lombok_deepdraft',
+    name:'Malakka - Lombok Deep Draft Alternatif Hatti',
+    trade:'VLCC / deep draft alternatif',
+    chart:'Malakka - Lombok Deep Draft Alternatif Hatti',
+    start:'Fujairah',
+    end:'Yokohama',
+    distanceNm:7200,
+    etaDays:20,
+    charts:['Fujairah','Arap Denizi - Malakka Ham Petrol Hatti','Malakka Bogazi','Sunda Bogazi','Lombok Bogazi','Guney Cin Denizi Ana Konteyner Hatti','Yokohama'],
+    waypoints:[
+      {name:'Fujairah deep draft departure', x:344, y:151, note:'UKC, bunker ROB, traffic in Gulf of Oman', chart:'Fujairah', risk:'UKC / traffic'},
+      {name:'Malacca draft decision point', x:361, y:166, note:'Malaccamax limit, under-keel margin and traffic density', chart:'Malakka Bogazi', risk:'Draft / congestion'},
+      {name:'Sunda weather alternate', x:369, y:181, note:'Current and shallow-water warning', chart:'Sunda Bogazi', risk:'Current / depth'},
+      {name:'Lombok deep-water route', x:382, y:188, note:'Deep draft option, swell and speed loss', chart:'Lombok Bogazi', risk:'Swell / reroute'},
+      {name:'South China Sea return lane', x:382, y:143, note:'Route monitor, CPA clutter and weather cell', chart:'Guney Cin Denizi Ana Konteyner Hatti', risk:'Traffic / weather'},
+      {name:'Yokohama energy terminal approach', x:414, y:86, note:'Pilot, terminal readiness, cargo documents', chart:'Yokohama', risk:'Pilotage'}
+    ]
+  },
+  {
+    key:'panama_neo_panamax_chain',
+    name:'Panama Neo-Panamax Kilit Zinciri',
+    trade:'Neo-Panamax konteyner',
+    chart:'Panama Neo-Panamax Kilit Zinciri',
+    start:'Houston',
+    end:'Kaohsiung',
+    distanceNm:9400,
+    etaDays:26,
+    charts:['Houston','Panama','Panama Kanali','Panama - Uzak Dogu Konteyner Hatti','Transpasifik Dogu Hatti','Kaohsiung'],
+    waypoints:[
+      {name:'Houston export departure', x:61, y:130, note:'Bay plan, draft, pilot and channel traffic', chart:'Houston', risk:'Channel / draft'},
+      {name:'Cristobal arrival queue', x:69, y:150, note:'Canal slot, freshwater restriction and tug plan', chart:'Panama', risk:'Canal queue'},
+      {name:'Neo-Panamax lock transit', x:69, y:150, note:'Lock wall clearance, line handlers, pilot orders', chart:'Panama Kanali', risk:'Lock clearance'},
+      {name:'Pacific great circle', x:178, y:148, note:'ETA, weather routing and fuel reserve', chart:'Panama - Uzak Dogu Konteyner Hatti', risk:'Ocean passage'},
+      {name:'Taiwan Strait traffic merge', x:394, y:119, note:'Fishing traffic, VTS, squall watch', chart:'Tayvan Bogazi', risk:'Traffic'},
+      {name:'Kaohsiung terminal approach', x:394, y:120, note:'Pilot station, berth pressure and container ops', chart:'Kaohsiung', risk:'Port congestion'}
+    ]
+  },
+  {
+    key:'premium_cruise_med_loop',
+    name:'Premium Kruvaziyer Akdeniz Loop',
+    trade:'Premium cruise / passenger operations',
+    chart:'Premium Kruvaziyer Akdeniz Loop',
+    start:'Civitavecchia',
+    end:'Barselona',
+    distanceNm:1650,
+    etaDays:7,
+    charts:['Civitavecchia','Napoli','Malta','Pire','Kusadasi','Barselona'],
+    waypoints:[
+      {name:'Civitavecchia passenger turnaround', x:198, y:106, note:'Gangway, hotel load, luggage flow and PA test', chart:'Civitavecchia', risk:'Passenger flow'},
+      {name:'Naples berth crowd control', x:202, y:109, note:'Shore excursion timing and medical readiness', chart:'Napoli', risk:'Crowd / schedule'},
+      {name:'Malta medevac standby', x:206, y:121, note:'MRCC, helideck prep and passenger privacy', chart:'Malta', risk:'Medevac'},
+      {name:'Aegean night passage', x:202, y:114, note:'Traffic, stabilizers and passenger comfort', chart:'Pire', risk:'Night traffic'},
+      {name:'Kusadasi tender operation', x:207, y:111, note:'Tender route, swell limit and guest transfer', chart:'Kusadasi', risk:'Tender ops'},
+      {name:'Barcelona arrival pressure', x:186, y:104, note:'Pilot, turnaround, bunkers and port state readiness', chart:'Barselona', risk:'Turnaround'}
+    ]
+  },
+  {
+    key:'premium_research_atlantic_survey',
+    name:'Premium Atlantik Arastirma Survey Hatti',
+    trade:'Premium research / hydrographic survey',
+    chart:'Premium Atlantik Arastirma Survey Hatti',
+    start:'Le Havre',
+    end:'Reykjavik',
+    distanceNm:1900,
+    etaDays:12,
+    charts:['Le Havre','Dover TSS - English Channel','Kuzey Atlantik Ana Hatti','Iceland Approach','Reykjavik'],
+    waypoints:[
+      {name:'Le Havre science mobilization', x:182, y:84, note:'Science party, CTD, ROV and permit briefing', chart:'Le Havre', risk:'Mobilization'},
+      {name:'Channel guard vessel crossing', x:187, y:82, note:'Traffic lane crossing and survey gear secured', chart:'Dover TSS - English Channel', risk:'TSS'},
+      {name:'North Atlantic CTD station', x:132, y:70, note:'Station keeping, weather window and sample log', chart:'Kuzey Atlantik Ana Hatti', risk:'Weather / station'},
+      {name:'ROV seabed inspection box', x:118, y:60, note:'Tether tension, DP offset and seabed target', chart:'Premium Atlantik Arastirma Survey Hatti', risk:'ROV / DP'},
+      {name:'Iceland approach survey closeout', x:104, y:48, note:'Data backup, chart correction and port call', chart:'Iceland Approach', risk:'Data / pilotage'}
+    ]
+  },
+  {
+    key:'premium_arctic_northern_sea',
+    name:'Premium Arktik Kuzey Deniz Rotasi',
+    trade:'Premium ice navigation',
+    chart:'Premium Arktik Kuzey Deniz Rotasi',
+    start:'Gdansk',
+    end:'Busan',
+    distanceNm:7300,
+    etaDays:22,
+    charts:['Gdansk','Baltik Buz Konvoyu','Bering Bogazi','Premium Arktik Kuzey Deniz Rotasi','Busan'],
+    waypoints:[
+      {name:'Baltic ice readiness', x:213, y:62, note:'Ice class, de-icing, cold weather PPE', chart:'Baltik Buz Konvoyu', risk:'Ice readiness'},
+      {name:'Arctic ice chart gate', x:260, y:28, note:'Ice concentration, satellite chart and convoy plan', chart:'Premium Arktik Kuzey Deniz Rotasi', risk:'Ice chart'},
+      {name:'Low temperature machinery watch', x:318, y:24, note:'Fuel heating, seawater intake and deck icing', chart:'Premium Arktik Kuzey Deniz Rotasi', risk:'Machinery / icing'},
+      {name:'Bering Strait pilotage watch', x:428, y:24, note:'Restricted water, fog and traffic reporting', chart:'Bering Bogazi', risk:'Fog / chokepoint'},
+      {name:'Busan post-ice inspection', x:407, y:91, note:'Hull, ballast vents and cargo condition', chart:'Busan', risk:'Damage inspection'}
+    ]
+  }
+];
+TRADE_VOYAGE_ROUTES.push(...ULTRA_4K_ROUTE_EXPANSION);
+Object.assign(WORLD_MAP_POINT_LOOKUP, {
+  'port said':[251,128],
+  'cristobal arrival queue':[69,150],
+  'neo-panamax lock transit':[69,150],
+  'taiwan strait traffic merge':[394,119],
+  'civitavecchia passenger turnaround':[198,106],
+  'naples berth crowd control':[202,109],
+  'kusadasi tender operation':[207,111],
+  'reykjavik':[104,48],
+  'iceland approach':[104,48],
+  'rov seabed inspection box':[118,60],
+  'arctic ice chart gate':[260,28],
+  'low temperature machinery watch':[318,24],
+  'bering strait pilotage watch':[428,24],
+  'busan post-ice inspection':[407,91]
+});
 const SAVE_KEY = 'guverte-save-v1';
 const PLAY_MODE_DEFS = {
   simple:{label:'Basit', desc:'Hikaye, temel secimler ve az ekran kalabaligi.', level:0},
@@ -20540,6 +20680,58 @@ function setPhoneContact(name){
 function getVoyageRouteByKey(key){
   return TRADE_VOYAGE_ROUTES.find(r=>r.key === key) || TRADE_VOYAGE_ROUTES[0];
 }
+
+const MAJOR_TRADE_ROUTE_KEYS = [
+  'eu_far_east',
+  'transpacific',
+  'north_atlantic',
+  'gulf_asia_energy',
+  'panama_neo_panamax_chain',
+  'suez_redsea_resilience',
+  'brazil_china_bulk',
+  'australia_china_iron',
+  'indonesia_china_coal',
+  'west_africa_europe_tanker',
+  'blacksea_grain_med',
+  'turkey_adriatic_roro'
+];
+
+function getMajorTradeRouteChoices(type=selType){
+  const preferred = new Set(MAJOR_TRADE_ROUTE_KEYS);
+  const typePick = selectVoyageRouteForShipType(type);
+  const routes = TRADE_VOYAGE_ROUTES
+    .filter(r=>preferred.has(r.key))
+    .concat(typePick ? [typePick] : [])
+    .filter((r, idx, arr)=>r && arr.findIndex(x=>x.key===r.key)===idx);
+  return routes;
+}
+
+function setSelectedVoyageRoute(key){
+  selectedVoyageRouteKey = TRADE_VOYAGE_ROUTES.some(r=>r.key===key) ? key : '';
+  renderVoyageRouteSelector();
+}
+
+function getSelectedVoyageRoute(){
+  return selectedVoyageRouteKey ? getVoyageRouteByKey(selectedVoyageRouteKey) : selectVoyageRouteForShipType(selType);
+}
+
+function renderVoyageRouteSelector(){
+  const box = document.getElementById('route-select-grid');
+  if(!box) return;
+  if(!Array.isArray(TRADE_VOYAGE_ROUTES) || !TRADE_VOYAGE_ROUTES.length) return;
+  const choices = getMajorTradeRouteChoices(selType);
+  if(!selectedVoyageRouteKey && choices[0]) selectedVoyageRouteKey = choices[0].key;
+  box.innerHTML = choices.map(route=>{
+    const active = route.key === selectedVoyageRouteKey;
+    const wpCount = route.waypoints?.length || 0;
+    return `<button type="button" class="route-card ${active?'active':''}" onclick="setSelectedVoyageRoute('${route.key}')">
+      <b>${phoneSafe(route.name)}</b>
+      <span>${phoneSafe(route.trade)} · ${route.distanceNm} NM · ${route.etaDays} gun</span>
+      <small>${phoneSafe(route.start)} → ${phoneSafe(route.end)} · ${wpCount} waypoint</small>
+    </button>`;
+  }).join('');
+}
+
 function selectVoyageRouteForShipType(type=selType){
   const typeKey = String(type || '').toLowerCase();
   let candidates = TRADE_VOYAGE_ROUTES;
