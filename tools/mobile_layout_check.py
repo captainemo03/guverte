@@ -44,8 +44,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=104",
-        "index.css?v=92",
+        "index.js?v=105",
+        "index.css?v=93",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -54,6 +54,14 @@ REQUIRED = {
         "getDynamicSceneTrafficOverlay",
         "scene-parallax-layer",
         "traffic-ship",
+    ],
+    "4k visual polish": [
+        "getScene4KOverlay",
+        "live-4k-grade",
+        "live-4k-ecdis-grid",
+        "live-4k-stormglass",
+        "phoneGlass4K",
+        "premiumCard4K",
     ],
 }
 

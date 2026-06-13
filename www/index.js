@@ -8776,9 +8776,33 @@ async function renderThreeBridgeScene(sc){
   threeBridgeRuntime.frame = requestAnimationFrame(animate);
 }
 
+function getScene4KOverlay(sc, blob){
+  const profile = getSceneBackdropProfile(sc);
+  const tags = ['live-4k-grade', `profile-${profile}`];
+  if(/radar|bridge|kopruustu|köprüüstü|ecdis|ais|arpa|chart|harita|route/.test(blob)) tags.push('nav');
+  if(/harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|all fast|cargo watch/.test(blob)) tags.push('port');
+  if(/storm|firtina|swell|rain|yagmur|yağmur|salt|spray|sis|fog|mist/.test(blob)) tags.push('storm');
+  if(/cruise|kruvaziyer|project|proje|heavy.?lift|research|survey|rov|offshore|platform|dp |ice|buz|cable|pipe|fpso|shuttle/.test(blob)) tags.push('premium');
+  const layers = ['<div class="live-4k-noise"></div><div class="live-4k-depth"></div>'];
+  if(tags.includes('nav')){
+    layers.push('<div class="live-4k-glass"></div><div class="live-4k-ecdis-grid"></div><div class="live-4k-device-scan"></div>');
+  }
+  if(tags.includes('port')){
+    layers.push('<div class="live-4k-terminal-depth"><i></i><i></i><i></i></div><div class="live-4k-harbor-glow"></div>');
+  }
+  if(tags.includes('storm')){
+    layers.push('<div class="live-4k-stormglass"></div><div class="live-4k-salt-map"></div>');
+  }
+  if(tags.includes('premium')){
+    layers.push('<div class="live-4k-premium-beam"></div><div class="live-4k-operation-sparks"></div>');
+  }
+  return `<div class="${tags.join(' ')}" aria-hidden="true">${layers.join('')}</div>`;
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
+  parts.push(getScene4KOverlay(sc, blob));
   parts.push('<div class="live-watch-silhouette"></div><div class="live-status-strip"><span></span><span></span><span></span></div>');
   if(!/engine|makine|galley|asci|aşçı|kamara|cabin/.test(blob)){
     parts.push('<div class="live-passing-light l1"></div><div class="live-passing-light l2"></div>');
