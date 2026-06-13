@@ -1249,7 +1249,7 @@ animation:straitFlow 2.8s linear infinite;}
 #port-chart-taskstatus{margin-top:7px;font-size:10px;color:#8fd8ab;min-height:16px;font-family:'Share Tech Mono',monospace;}
 #port-chart-taskstatus.warn{color:#ffd78a;}
 #port-chart-taskstatus.bad{color:#ffb0b0;}
-#port-chart-svg .map-task-target,#map-svg .map-task-target{pointer-events:none;}
+#port-chart-svg .map-task-target,#map-svg .map-task-target{pointer-events:auto;cursor:pointer;}
 #port-chart-svg .map-task-target circle:first-child,#map-svg .map-task-target circle:first-child{animation:mapTargetPulse 1.2s ease-in-out infinite;transform-origin:center;}
 #port-chart-svg .map-task-target text,#map-svg .map-task-target text{paint-order:stroke;stroke:#06111c;stroke-width:2px;stroke-opacity:.9;}
 @keyframes mapTargetPulse{0%,100%{opacity:.7;stroke-width:1.6px;}50%{opacity:1;stroke-width:3px;filter:drop-shadow(0 0 5px rgba(255,212,90,.55));}}

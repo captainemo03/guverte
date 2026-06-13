@@ -15503,6 +15503,24 @@ function buildMapTaskTargetOverlay(port){
     </g>`;
 }
 
+function getMapTaskTargetLabelBox(target){
+  const tx = Math.max(34, Math.min(406, target.x));
+  const ty = Math.max(34, Math.min(226, target.y));
+  const labelX = tx > 260 ? tx - 118 : tx + 18;
+  const labelY = ty < 52 ? ty + 32 : ty - 20;
+  return {
+    x: labelX - 10,
+    y: labelY - 19,
+    w: 122,
+    h: 25
+  };
+}
+
+function isInsideMapTaskTargetLabel(x, y, target){
+  const box = getMapTaskTargetLabelBox(target);
+  return x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h;
+}
+
 function updateMapTaskBox(port){
   const task = getCurrentMapTask();
   ensureTaskPort(task);
@@ -15578,7 +15596,8 @@ function handlePortChartTaskClick(svg, ev, port){
     renderMapRouteDraftOverlay(svg);
   }
   const dist = Math.hypot(x-target.x, y-target.y);
-  if(dist <= target.tol){
+  const labelHit = isInsideMapTaskTargetLabel(x, y, target);
+  if(dist <= target.tol || labelHit){
     completedMapTasks.add(task.id);
     mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
     const training = getMapTaskTraining(task.id);
