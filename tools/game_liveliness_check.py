@@ -274,6 +274,7 @@ CHECKS = {
         "Espanol",
         "Deutsch",
         "Francais",
+        'option value="ru"',
         "Русский",
         "I18N.ru",
         "LOCALIZE_EXACTS.ru",
