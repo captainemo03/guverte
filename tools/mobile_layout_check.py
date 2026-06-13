@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=112",
-        "index.css?v=101",
+        "index.js?v=113",
+        "index.css?v=102",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -79,6 +79,13 @@ REQUIRED = {
         "getClickedWorldChartIndexSheet",
     ],
     "intro menu pages": [
+        "home-screen",
+        "home-page-play",
+        "home-page-options",
+        "home-page-premium",
+        "setAppScreen",
+        "openSetupScreen",
+        "openGameScreen",
         "intro-menu-shell",
         "intro-menu-tabs",
         "intro-page-play",

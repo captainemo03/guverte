@@ -118,6 +118,16 @@ CHECKS = {
         "Panama Neo-Panamax Kilit Zinciri",
         "Hurmuz - Uzak Dogu LNG / Ham Petrol Hatti",
     ],
+    "separate app screens": [
+        "home-screen",
+        "screen-home",
+        "screen-setup",
+        "screen-game",
+        "openHomeScreen",
+        "openSetupScreen",
+        "openGameScreen",
+        "home-page-options",
+    ],
     "premium ship vocabulary": [
         "PREMIUM_PRODUCT_ID",
         "premium_full_pack",

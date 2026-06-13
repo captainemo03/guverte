@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=101">
+<link rel="stylesheet" href="./index.css?v=102">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -180,12 +180,76 @@
 </div>
 
 
+<!-- ANA MENÜ -->
+<div id="home-screen" class="app-screen active">
+  <div class="home-hero">
+    <div class="home-ship">🚢</div>
+    <div class="home-title">Güverte</div>
+    <div class="home-sub">Bir Stajyerin Hikayesi</div>
+    <div class="home-copy">Ana menü ayrı, sefer hazırlığı ayrı, oyun ekranı ayrı akar. Ekrana sadece o anda gereken şey gelir.</div>
+  </div>
+
+  <div class="home-menu-shell">
+    <div class="home-menu-tabs" role="tablist" aria-label="Ana menu">
+      <button type="button" class="home-menu-tab active" data-home-tab="play" onclick="setHomeMenuPage('play')">PLAY</button>
+      <button type="button" class="home-menu-tab" data-home-tab="options" onclick="setHomeMenuPage('options')">OPTIONS</button>
+      <button type="button" class="home-menu-tab premium" data-home-tab="premium" onclick="setHomeMenuPage('premium')">PREMIUM</button>
+    </div>
+
+    <div id="home-page-play" class="home-page active" data-home-page="play">
+      <div class="home-panel-title">Yeni sefer</div>
+      <p>Karakter, gemi, kontrat ve rota seçimini ayrı hazırlık sayfasında yap.</p>
+      <button type="button" class="home-primary" onclick="openSetupScreen()">Yeni Oyuna Başla</button>
+      <div id="home-save-actions">
+        <button id="home-continue-btn" type="button" onclick="loadSavedGame()" style="display:none;">Kayittan Devam Et</button>
+        <button id="home-delete-save-btn" type="button" onclick="deleteSavedGame()" style="display:none;">Kaydi Sil</button>
+      </div>
+    </div>
+
+    <div id="home-page-options" class="home-page" data-home-page="options">
+      <div class="home-panel-title">Options</div>
+      <p>Ses, dil ve oynanış derinliği oyuna girmeden buradan ayarlanır.</p>
+      <div class="home-option-block">
+        <span>Oynanış modu</span>
+        <div id="home-play-mode-select" class="mode-grid compact-home"></div>
+      </div>
+      <div class="home-option-block">
+        <span>Oyun dili</span>
+        <select id="home-language-select" class="language-select wide" onchange="setGameLanguage(this.value)" aria-label="Oyun dili">
+          <option value="tr">TR - Turkce</option>
+          <option value="en">EN - English</option>
+          <option value="es">ES - Espanol</option>
+          <option value="de">DE - Deutsch</option>
+          <option value="fr">FR - Francais</option>
+          <option value="ru">RU - Русский</option>
+          <option value="zh">ZH - 中文</option>
+        </select>
+      </div>
+      <button id="home-sound-btn" class="sound-option-btn" onclick="toggleSound()">🔊 Ses Acik</button>
+    </div>
+
+    <div id="home-page-premium" class="home-page" data-home-page="premium">
+      <div class="home-panel-title">Premium</div>
+      <p>75 TL ile proje gemisi, kruvaziyer, araştırma, offshore, buz seyri ve ileri cihaz paketleri açılır.</p>
+      <div class="home-premium-grid">
+        <span>Proje yük</span><span>Kruvaziyer</span><span>Araştırma</span>
+        <span>Offshore / DP</span><span>Buz seyri</span><span>Pro cihaz</span>
+      </div>
+      <div class="intro-premium-actions">
+        <button type="button" onclick="openPremiumPurchase()">75 TL ile Ac</button>
+        <button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- GİRİŞ -->
-<div id="intro">
+<div id="intro" class="app-screen">
   <div id="intro-ship">🚢</div>
   <div id="intro-title">Güverte</div>
-  <div id="intro-sub">Bir Stajyerin Hikayesi</div>
-  <div id="intro-warn">Denizcilik okulu bitti. Belgeler hazır.<br>İlk gemiye adım atacaksın.<br><em style="color:var(--text3);font-size:11px;">Her oynayışta farklı senaryolar seni bekliyor.</em></div>
+  <div id="intro-sub">Sefer Hazırlığı</div>
+  <div id="intro-warn">Karakterini, gemini, kontratını ve rotanı burada seç.<br><em style="color:var(--text3);font-size:11px;">Oyun ekranı başladıktan sonra bu sayfa tamamen kapanır.</em></div>
+  <button type="button" class="setup-back-btn" onclick="openHomeScreen()">← Ana Menü</button>
 
   <div id="intro-menu-shell">
     <div class="intro-menu-head">
@@ -532,6 +596,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=112"></script>
+<script src="./index.js?v=113"></script>
 </body>
 </html>

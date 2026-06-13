@@ -9499,12 +9499,13 @@ function setGameLanguage(lang){
   renderPlayModeSelector();
   renderSavePanel();
   rerenderLanguageSensitivePanels();
-  if(sceneQueue && sceneQueue.length && document.getElementById('game')?.style.display!=='none'){
+  if(sceneQueue && sceneQueue.length && document.body.classList.contains('screen-game')){
     renderScene(currentIdx);
   }else{
     refreshSaveEntryActions();
   }
   setIntroMenuPage(introMenuPage);
+  setHomeMenuPage(homeMenuPage);
   localizeStaticDom(document);
 }
 let mood=58;
@@ -12781,7 +12782,7 @@ function applyLanguageUI(){
   const lang = GAME_LANGUAGES[gameLanguage] ? gameLanguage : 'tr';
   gameLanguage = lang;
   document.documentElement.lang = lang;
-  document.querySelectorAll('#language-select,#intro-language-select').forEach(sel=>{
+  document.querySelectorAll('#language-select,#intro-language-select,#home-language-select').forEach(sel=>{
     if(sel) sel.value = lang;
   });
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -12800,6 +12801,8 @@ function applyLanguageUI(){
   localizeAndSetText('replbl','ui.rep','ITIBAR');
   localizeAndSetText('continue-btn','ui.continue','Kayittan Devam Et');
   localizeAndSetText('delete-save-btn','ui.deleteSave','Kaydi Sil');
+  localizeAndSetText('home-continue-btn','ui.continue','Kayittan Devam Et');
+  localizeAndSetText('home-delete-save-btn','ui.deleteSave','Kaydi Sil');
   localizeAndSetText('go-btn','ui.startShip','Gemiye Bin');
   localizeAndSetText('phone-fab','ui.phone','TEL');
   [
@@ -13437,9 +13440,7 @@ function continueContractOnShip(offerKey='same'){
   addJournalEntry(`[KONTRAT UZATMA] ${pn}, ${stObj?.nm || 'gemi'} uzerinde kalmayi secti. Yeni senaryo paketi acildi.`, 'Yeni Kontrat', '00:00');
   pushPhoneMessage('Kaptan','Gemide kalma kararini aldim. Yeni kontrat uzatmasinda ayni disiplinle devam edecegiz.', {open:false});
   document.getElementById('endscr').style.display='none';
-  const g=document.getElementById('game');
-  g.style.display='flex';
-  g.style.flexDirection='column';
+  openGameScreen();
   updateContractProgress();
   renderScene(currentIdx);
   saveGameState(false);
@@ -13561,8 +13562,7 @@ function beginGame(){
     addLiveLogbook('SEFER EMRI', `${routeInfo.name}: ${routeInfo.start} -> ${routeInfo.end} · ${routeInfo.distanceNm} NM`, true);
   }
 
-  document.getElementById('intro').style.display='none';
-  const g=document.getElementById('game');g.style.display='flex';g.style.flexDirection='column';
+  openGameScreen();
   setTimeout(()=>{if(window._drawClock)window._drawClock();},50);
   setTimeout(()=>{if(window._drawClock)window._drawClock();},300);
   setTimeout(()=>{if(window._drawClock)window._drawClock();},600);
@@ -13580,8 +13580,7 @@ function restartGame(){
   stopAllMusic();
   document.getElementById('crisis').style.display='none';
   document.getElementById('endscr').style.display='none';
-  document.getElementById('game').style.display='none';
-  document.getElementById('intro').style.display='flex';
+  openHomeScreen();
   refreshSaveEntryActions();
   renderCharacterCreator();
 }
@@ -14736,6 +14735,7 @@ const PLAY_MODE_DEFS = {
 };
 let gameplayMode = 'realistic';
 let introMenuPage = 'play';
+let homeMenuPage = 'play';
 let savePanelOpen = false;
 let missionDirectorState = {sceneId:'', title:'', steps:[], completed:[]};
 
@@ -14747,6 +14747,61 @@ function setGameplayMode(mode){
   gameplayMode = PLAY_MODE_DEFS[mode] ? mode : 'realistic';
   renderPlayModeSelector();
   updateFeatureVisibility(sceneQueue[currentIdx] || null);
+}
+
+function setAppScreen(screen='home'){
+  const normalized = ['home','setup','game'].includes(screen) ? screen : 'home';
+  document.body.classList.remove('screen-home','screen-setup','screen-game');
+  document.body.classList.add(`screen-${normalized}`);
+  document.querySelectorAll('.app-screen').forEach(el=>el.classList.remove('active'));
+  const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : 'game';
+  const active = document.getElementById(activeId);
+  if(active) active.classList.add('active');
+  if(normalized !== 'game'){
+    ['map-panel','devices-panel','journal-panel','notes-panel','colreg-panel','album-panel','sim-panel','logbook-panel','cabin-panel','shipwalk-panel','achievements-panel','crew-panel'].forEach(id=>{
+      document.getElementById(id)?.classList.remove('show');
+    });
+    if(typeof phoneOpen !== 'undefined'){
+      phoneOpen = false;
+      document.getElementById('phone')?.classList.remove('show');
+    }
+  }
+}
+
+function openHomeScreen(){
+  setAppScreen('home');
+  setHomeMenuPage(homeMenuPage || 'play');
+  refreshSaveEntryActions();
+  window.scrollTo?.(0,0);
+}
+
+function openSetupScreen(){
+  setIntroMenuPage('play');
+  setAppScreen('setup');
+  refreshSaveEntryActions();
+  window.scrollTo?.(0,0);
+}
+
+function openGameScreen(){
+  setAppScreen('game');
+  const g=document.getElementById('game');
+  if(g){
+    g.style.display='flex';
+    g.style.flexDirection='column';
+  }
+  window.scrollTo?.(0,0);
+}
+
+function setHomeMenuPage(page='play'){
+  homeMenuPage = ['play','options','premium'].includes(page) ? page : 'play';
+  document.querySelectorAll('.home-menu-tab').forEach(btn=>{
+    const active = btn.dataset.homeTab === homeMenuPage;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  document.querySelectorAll('.home-page').forEach(panel=>{
+    panel.classList.toggle('active', panel.dataset.homePage === homeMenuPage);
+  });
 }
 
 function setIntroMenuPage(page='play'){
@@ -14773,12 +14828,13 @@ function setIntroMenuPage(page='play'){
 }
 
 function renderPlayModeSelector(){
-  const box = document.getElementById('play-mode-select');
-  if(!box) return;
-  box.innerHTML = Object.entries(PLAY_MODE_DEFS).map(([key,def])=>`
+  const html = Object.entries(PLAY_MODE_DEFS).map(([key,def])=>`
     <button type="button" class="mode-card ${gameplayMode===key?'active':''}" onclick="setGameplayMode('${key}')">
       <b>${phoneSafe(getModeLabel(key))}</b><span>${phoneSafe(getModeDesc(key))}</span>
     </button>`).join('');
+  document.querySelectorAll('#play-mode-select,#home-play-mode-select').forEach(box=>{
+    if(box) box.innerHTML = html;
+  });
 }
 
 function getFeatureUnlocks(sc){
@@ -15050,9 +15106,13 @@ function hasSavedGame(){
 function refreshSaveEntryActions(){
   const continueBtn = document.getElementById('continue-btn');
   const deleteBtn = document.getElementById('delete-save-btn');
+  const homeContinueBtn = document.getElementById('home-continue-btn');
+  const homeDeleteBtn = document.getElementById('home-delete-save-btn');
   const exists = hasSavedGame();
   if(continueBtn) continueBtn.style.display = exists ? 'block' : 'none';
   if(deleteBtn) deleteBtn.style.display = exists ? 'block' : 'none';
+  if(homeContinueBtn) homeContinueBtn.style.display = exists ? 'block' : 'none';
+  if(homeDeleteBtn) homeDeleteBtn.style.display = exists ? 'block' : 'none';
 }
 
 function getSavedGameMeta(){
@@ -15343,12 +15403,9 @@ function loadSavedGame(){
   try{
     const data = JSON.parse(raw);
     applyLoadedGameState(data);
-    document.getElementById('intro').style.display='none';
     document.getElementById('crisis').style.display='none';
     document.getElementById('endscr').style.display='none';
-    const g=document.getElementById('game');
-    g.style.display='flex';
-    g.style.flexDirection='column';
+    openGameScreen();
     updateStats({},{skipContractTick:true});
     renderCrewCards();
     renderScene(currentIdx);
@@ -23957,8 +24014,9 @@ let sceneAudioLoopTimers = [];
 let soundEnabled = true;
 function toggleSound(){
   soundEnabled = !soundEnabled;
-  const btn = document.getElementById('sound-btn');
-  if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
+  document.querySelectorAll('#sound-btn,#home-sound-btn').forEach(btn=>{
+    if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
+  });
   if(!soundEnabled) stopAllMusic();
 }
 
@@ -24510,6 +24568,7 @@ function playSceneAudio(sc){
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
 buildIntro();
+openHomeScreen();
 
 
 

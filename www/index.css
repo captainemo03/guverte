@@ -13,9 +13,45 @@ body{font-family:'Barlow',sans-serif;background:var(--navy);min-height:100vh;ove
 /* === CANLI ARKA PLAN === */
 #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;touch-action:none;}
 #app{width:100%;max-width:900px;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;margin:0 auto;}
+.app-screen{display:none;width:100%;}
+.app-screen.active{display:flex;}
+body:not(.screen-game) .crew-btn,body:not(.screen-game) #phone-fab{display:none!important;}
+body.screen-home #game,body.screen-home #intro,body.screen-setup #home-screen,body.screen-setup #game,body.screen-game #home-screen,body.screen-game #intro{display:none!important;}
+
+/* === ANA MENÜ === */
+#home-screen{flex-direction:column;align-items:center;justify-content:center;min-height:100svh;padding:28px 14px 44px;}
+.home-hero{text-align:center;margin-bottom:18px;max-width:520px;}
+.home-ship{font-size:64px;margin-bottom:9px;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(46,134,191,.5));}
+.home-title{font-family:'Crimson Pro',serif;font-size:42px;font-weight:600;letter-spacing:1px;text-shadow:0 0 30px rgba(46,134,191,.55);}
+.home-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:15px;color:var(--text2);margin-top:2px;}
+.home-copy{font-size:12px;line-height:1.55;color:var(--text3);margin-top:12px;}
+.home-menu-shell{width:min(100%,560px);border:1px solid rgba(111,168,220,.28);border-radius:10px;background:linear-gradient(145deg,rgba(8,24,42,.97),rgba(4,13,25,.95));box-shadow:0 22px 54px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.035);padding:13px;position:relative;overflow:hidden;}
+.home-menu-shell::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 0 34%,rgba(127,195,255,.08) 48%,transparent 62%),radial-gradient(circle at 92% 12%,rgba(212,160,23,.16),transparent 24%);animation:introMenuSheen 7s ease-in-out infinite;pointer-events:none;}
+.home-menu-tabs,.home-page{position:relative;z-index:1;}
+.home-menu-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.home-menu-tab{min-height:52px;border:1px solid rgba(111,146,178,.24);border-radius:8px;background:rgba(4,17,31,.78);color:#bcd5ee;font:12px 'Share Tech Mono',monospace;letter-spacing:1px;cursor:pointer;transition:transform .15s,border-color .15s,background .15s,box-shadow .15s;}
+.home-menu-tab:hover{transform:translateY(-1px);border-color:rgba(127,195,255,.5);}
+.home-menu-tab.active{border-color:rgba(212,160,23,.72);background:linear-gradient(180deg,rgba(49,39,17,.92),rgba(6,19,34,.9));color:#ffe2a2;box-shadow:0 0 18px rgba(212,160,23,.14);}
+.home-menu-tab.premium{color:#ffe2a2;}
+.home-page{display:none;border:1px solid rgba(111,146,178,.16);border-radius:8px;background:rgba(5,16,29,.7);padding:14px;min-height:190px;}
+.home-page.active{display:block;animation:introPageIn .18s ease-out;}
+.home-panel-title{font-size:16px;color:#eef6ff;font-weight:700;margin-bottom:6px;}
+.home-page p{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:12px;}
+.home-primary{width:100%;min-height:54px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:15px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;box-shadow:0 8px 26px rgba(46,134,191,.36);}
+#home-save-actions{display:flex;gap:8px;margin-top:9px;}
+#home-save-actions button{flex:1;border:1px solid rgba(111,168,220,.26);border-radius:9px;background:rgba(9,24,40,.92);color:#cfeaff;font-size:12px;padding:11px 10px;cursor:pointer;}
+#home-delete-save-btn{border-color:rgba(170,92,92,.42)!important;background:rgba(48,18,18,.92)!important;color:#f3d3d3!important;}
+.home-option-block{margin-bottom:10px;}
+.home-option-block>span{display:block;color:var(--text3);font-size:10px;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:6px;}
+.compact-home{grid-template-columns:repeat(3,minmax(0,1fr));}
+.home-premium-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px;}
+.home-premium-grid span{border:1px solid rgba(232,184,75,.18);border-radius:8px;background:rgba(5,14,24,.62);padding:9px 7px;color:#d8c390;font-size:10px;text-align:center;}
 
 /* === GİRİŞ === */
-#intro{display:flex;flex-direction:column;align-items:center;width:100%;padding:22px 14px 60px;}
+#intro{flex-direction:column;align-items:center;width:100%;padding:22px 14px 60px;}
+#intro #intro-menu-shell{display:none;}
+.setup-back-btn{align-self:flex-start;margin:0 0 10px;border:1px solid rgba(111,168,220,.28);border-radius:999px;background:rgba(7,19,36,.84);color:#cfeaff;padding:8px 11px;font-size:11px;font-weight:700;cursor:pointer;}
+.setup-back-btn:hover{border-color:var(--gold);color:#fff;}
 #intro-ship{font-size:60px;margin-bottom:10px;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(46,134,191,0.5));}
 @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);};}
 #intro-title{font-family:'Crimson Pro',serif;font-size:34px;font-weight:600;letter-spacing:1px;margin-bottom:3px;text-shadow:0 0 30px rgba(46,134,191,0.6);}
@@ -1952,6 +1988,13 @@ animation:straitFlow 2.8s linear infinite;}
 @media (max-width:820px){.charter-sof,.premium-sim-grid,.training-roadmap,.premium-preview-strip{grid-template-columns:1fr 1fr;}.charter-form-grid,.document-form-grid{grid-template-columns:1fr;}}
 @media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-sim-grid,.training-roadmap,.premium-preview-strip{grid-template-columns:1fr;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}}
 @media (max-width:560px){
+  #home-screen{justify-content:flex-start;padding:18px 12px 28px;}
+  .home-ship{font-size:48px;}
+  .home-title{font-size:34px;}
+  .home-copy{font-size:11px;}
+  .home-menu-tabs{gap:5px;}
+  .home-menu-tab{min-height:44px;font-size:10px;}
+  .compact-home,.home-premium-grid{grid-template-columns:1fr;}
   #intro-menu-shell{padding:10px;margin-bottom:10px;}
   .intro-menu-head b{font-size:15px;}
   .intro-menu-tabs{gap:5px;}
