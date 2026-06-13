@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=107",
-        "index.css?v=96",
+        "index.js?v=109",
+        "index.css?v=98",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -77,6 +77,17 @@ REQUIRED = {
         "buildEcdisChartControlOverlay",
         "runMapTaskReplay",
         "getClickedWorldChartIndexSheet",
+    ],
+    "intro menu pages": [
+        "intro-menu-shell",
+        "intro-menu-tabs",
+        "intro-page-play",
+        "intro-page-options",
+        "intro-page-premium",
+        "setIntroMenuPage",
+        "intro-premium-card",
+        "intro-audio-card",
+        "sound-option-btn",
     ],
 }
 

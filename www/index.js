@@ -9504,6 +9504,7 @@ function setGameLanguage(lang){
   }else{
     refreshSaveEntryActions();
   }
+  setIntroMenuPage(introMenuPage);
   localizeStaticDom(document);
 }
 let mood=58;
@@ -10609,6 +10610,7 @@ function buildIntro(){
   updateSugs();
   renderCharacterCreator();
   applyLanguageUI();
+  setIntroMenuPage(introMenuPage);
 }
 
 function updateKontrat(){
@@ -14593,6 +14595,7 @@ const PLAY_MODE_DEFS = {
   expert:{label:'Uzman', desc:'CPA, UKC, PSC, tanker ve premium detaylar acik.', level:2}
 };
 let gameplayMode = 'realistic';
+let introMenuPage = 'play';
 let savePanelOpen = false;
 let missionDirectorState = {sceneId:'', title:'', steps:[], completed:[]};
 
@@ -14604,6 +14607,29 @@ function setGameplayMode(mode){
   gameplayMode = PLAY_MODE_DEFS[mode] ? mode : 'realistic';
   renderPlayModeSelector();
   updateFeatureVisibility(sceneQueue[currentIdx] || null);
+}
+
+function setIntroMenuPage(page='play'){
+  introMenuPage = ['play','options','premium'].includes(page) ? page : 'play';
+  document.querySelectorAll('.intro-menu-tab').forEach(btn=>{
+    const active = btn.dataset.introTab === introMenuPage;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  document.querySelectorAll('.intro-page').forEach(panel=>{
+    panel.classList.toggle('active', panel.dataset.introPage === introMenuPage);
+  });
+  const cards = Array.from(document.querySelectorAll('#intro > .fcard'));
+  cards.forEach(card=>{
+    const isPremium = card.classList.contains('intro-premium-card');
+    const isOptions = !!card.querySelector('#play-mode-select,#intro-language-select,#sound-btn');
+    const show = introMenuPage === 'premium' ? isPremium : introMenuPage === 'options' ? isOptions : (!isOptions && !isPremium);
+    card.hidden = !show;
+  });
+  const launch = document.getElementById('go-btn');
+  const saveActions = document.getElementById('save-entry-actions');
+  if(launch) launch.style.display = introMenuPage === 'play' ? 'block' : 'none';
+  if(saveActions) saveActions.style.display = introMenuPage === 'play' ? 'flex' : 'none';
 }
 
 function renderPlayModeSelector(){
@@ -23739,7 +23765,8 @@ let sceneAudioLoopTimers = [];
 let soundEnabled = true;
 function toggleSound(){
   soundEnabled = !soundEnabled;
-  document.getElementById('sound-btn').textContent = soundEnabled ? '🔊' : '🔇';
+  const btn = document.getElementById('sound-btn');
+  if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
   if(!soundEnabled) stopAllMusic();
 }
 
