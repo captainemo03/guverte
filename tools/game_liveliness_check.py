@@ -174,6 +174,18 @@ CHECKS = {
         "Malacca Strait",
         "North Atlantic Ocean",
     ],
+    "4k shodb chart style": [
+        "normalizeChartNameKey",
+        "getAllChartEntriesForLookup",
+        "buildShodbChartIndexOverlay",
+        "buildWorldShodbChartIndexOverlay",
+        "chart-index-sheet-layer",
+        "shodb-style",
+        "SHODB PAFTA INDEKSI",
+        "chart-293",
+        "MARMARA DENIZI",
+        "WORLD TRADE ROUTE CHART FOLIO",
+    ],
     "character creator reliability": [
         "syncPlayerModelFromTraits",
         "resolvePlayerModelFromTraits",

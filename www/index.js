@@ -15906,8 +15906,36 @@ function getWorldAtlasChartEntries(){
   }));
 }
 
+function normalizeChartNameKey(name){
+  return String(name || '')
+    .toLocaleLowerCase('tr')
+    .replace(/[ıİ]/g,'i')
+    .replace(/[ğĞ]/g,'g')
+    .replace(/[üÜ]/g,'u')
+    .replace(/[şŞ]/g,'s')
+    .replace(/[öÖ]/g,'o')
+    .replace(/[çÇ]/g,'c')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
+
+function getAllChartEntriesForLookup(){
+  return ROUTE_PORTS.concat(getSyntheticVoyageChartEntries(), getWorldAtlasChartEntries());
+}
+
 function getPortChartByName(name){
-  return ROUTE_PORTS.find(p=>p.name===name) || getSyntheticVoyageChartEntries().find(p=>p.name===name) || getWorldAtlasChartEntries().find(p=>p.name===name) || null;
+  if(!name) return null;
+  const entries = getAllChartEntriesForLookup();
+  const exact = entries.find(p=>p.name===name);
+  if(exact) return exact;
+  const key = normalizeChartNameKey(name);
+  if(!key) return null;
+  return entries.find(p=>normalizeChartNameKey(p.name)===key)
+    || entries.find(p=>{
+      const itemKey = normalizeChartNameKey(p.name);
+      return itemKey && (itemKey.includes(key) || key.includes(itemKey));
+    })
+    || null;
 }
 
 function renderMapRouteDraftOverlay(svg){
@@ -16067,8 +16095,13 @@ function getPortChartTitleLabel(kind){
 function ensureSelectedPortChart(){
   const entries = getPortChartEntries();
   if(!entries.length) return null;
-  const current = entries.find(p=>p.name===selectedPortChart);
-  if(current) return current;
+  const current = entries.find(p=>p.name===selectedPortChart)
+    || entries.find(p=>normalizeChartNameKey(p.name)===normalizeChartNameKey(selectedPortChart))
+    || getPortChartByName(selectedPortChart);
+  if(current){
+    selectedPortChart = current.name;
+    return current;
+  }
   const visited = entries.find(p=>visitedPorts.has(p.name));
   selectedPortChart = (visited || entries[0]).name;
   return visited || entries[0];
@@ -16182,6 +16215,165 @@ function getPortChartProfile(port){
   return profile;
 }
 
+function getShodbChartIndexData(port, profile){
+  const hay = `${port?.name || ''} ${profile?.region || ''}`.toLowerCase();
+  const isMarmara = /istanbul|çanakkale|canakkale|ambarli|ambarlı|gemlik|derince|tekirdag|marmara|turkish straits|dardanel|bogazi|boğazi/.test(hay);
+  const isSuez = /suveys|suez|port said|kizildeniz|red sea/.test(hay);
+  const isPanama = /panama/.test(hay);
+  const isMalacca = /malakka|malacca|singapur|singapore/.test(hay);
+  if(isMarmara){
+    return {
+      sea:'MARMARA DENIZI',
+      upperSea:'KARADENIZ',
+      lowerSea:'EGE DENIZI',
+      coastA:'TRAKYA / AVRUPA KIYISI',
+      coastB:'ANADOLU KIYISI',
+      chartFamily:'SHODB PAFTA INDEKSI',
+      sheets:[
+        {no:'293', x:132, y:56, w:194, h:86, label:'MARMARA GENEL'},
+        {no:'294', x:112, y:92, w:136, h:68, label:'CANAKKALE - MARMARA'},
+        {no:'295', x:26, y:92, w:116, h:80, label:'EGE GIRIS'},
+        {no:'296', x:182, y:134, w:112, h:70, label:'ADALAR / GEMLIK'},
+        {no:'292', x:304, y:118, w:100, h:74, label:'ISTANBUL - IZMIT'},
+        {no:'291', x:312, y:38, w:98, h:70, label:'KARADENIZ GIRIS'}
+      ],
+      coastLines:[
+        'M18 72 C70 48 116 52 154 72 C194 94 242 82 282 70 C330 54 382 62 420 82',
+        'M28 176 C72 162 116 168 154 186 C206 214 270 204 324 182 C362 168 390 170 420 184'
+      ],
+      islands:[[210,142,'MARMARA ADASI'],[244,156,'ADALAR'],[170,156,'IMRALI']]
+    };
+  }
+  if(isSuez){
+    return {
+      sea:'SUEZ / KIZILDENIZ',
+      upperSea:'AKDENIZ',
+      lowerSea:'RED SEA',
+      coastA:'SINAI',
+      coastB:'EGYPT',
+      chartFamily:'CANAL CHART INDEX',
+      sheets:[
+        {no:'SC1', x:198, y:30, w:94, h:62, label:'PORT SAID'},
+        {no:'SC2', x:210, y:88, w:82, h:72, label:'CANAL'},
+        {no:'SC3', x:204, y:154, w:98, h:72, label:'SUEZ ANCH.'},
+        {no:'RS1', x:250, y:178, w:112, h:54, label:'RED SEA'}
+      ],
+      coastLines:['M174 18 C194 74 186 132 170 240','M302 20 C286 78 296 144 318 240'],
+      islands:[[242,118,'GREAT BITTER LAKE']]
+    };
+  }
+  if(isPanama){
+    return {
+      sea:'PANAMA CANAL',
+      upperSea:'CARIBBEAN SEA',
+      lowerSea:'PACIFIC OCEAN',
+      coastA:'COLON',
+      coastB:'BALBOA',
+      chartFamily:'CANAL / LOCK INDEX',
+      sheets:[
+        {no:'PC1', x:52, y:42, w:112, h:62, label:'COLON'},
+        {no:'PC2', x:154, y:86, w:112, h:66, label:'GATUN / CUT'},
+        {no:'PC3', x:250, y:140, w:118, h:64, label:'BALBOA'}
+      ],
+      coastLines:['M24 76 C118 44 172 82 224 124 C270 160 330 168 416 138','M34 192 C122 166 170 184 226 202 C286 224 342 212 414 180'],
+      islands:[[218,132,'GATUN LAKE']]
+    };
+  }
+  if(isMalacca){
+    return {
+      sea:'MALAKKA / SINGAPUR',
+      upperSea:'MALAYSIA',
+      lowerSea:'SUMATRA',
+      coastA:'MALAY PENINSULA',
+      coastB:'INDONESIA',
+      chartFamily:'STRAIT TSS INDEX',
+      sheets:[
+        {no:'MS1', x:58, y:72, w:128, h:62, label:'PORT KLANG'},
+        {no:'MS2', x:176, y:104, w:132, h:62, label:'TSS'},
+        {no:'MS3', x:286, y:132, w:116, h:58, label:'SINGAPORE'},
+        {no:'MS4', x:318, y:186, w:86, h:44, label:'BUNKER'}
+      ],
+      coastLines:['M28 88 C98 54 172 74 238 100 C308 128 364 128 418 110','M18 202 C100 176 168 184 244 198 C312 214 370 210 420 188'],
+      islands:[[342,154,'SINGAPORE'],[370,178,'BATAM']]
+    };
+  }
+  return {
+    sea: port?.kind === 'route' ? 'OCEAN PASSAGE' : profile?.template === 'strait' ? 'TRANSIT WATERS' : 'APPROACH WATERS',
+    upperSea: profile?.region || 'REGION',
+    lowerSea: profile?.approach || 'APPROACH',
+    coastA: port?.kind === 'route' ? 'WESTERN LANDMASS' : 'NORTH / WEST COAST',
+    coastB: port?.kind === 'route' ? 'EASTERN LANDMASS' : 'SOUTH / EAST COAST',
+    chartFamily: port?.kind === 'route' ? 'TRADE ROUTE INDEX' : port?.kind === 'waterway' ? 'TRANSIT CHART INDEX' : 'PORT APPROACH INDEX',
+    sheets:[
+      {no:profile?.chartNo || 'GEN', x:48, y:48, w:150, h:78, label:'OUTER APPROACH'},
+      {no:'A1', x:172, y:86, w:132, h:72, label:'TRAFFIC / PILOT'},
+      {no:'B2', x:270, y:128, w:116, h:68, label:'BERTH / TRANSIT'},
+      {no:'C3', x:104, y:154, w:132, h:60, label:'ANCH / ALT ROUTE'}
+    ],
+    coastLines:[
+      'M20 78 C84 40 152 58 214 82 C282 108 338 90 420 74',
+      'M20 190 C92 168 152 180 210 202 C282 230 346 212 420 184'
+    ],
+    islands:[[220,142,'ISLETS'],[310,166,'ROCKS']]
+  };
+}
+
+function buildShodbChartIndexOverlay(port, mode='port'){
+  const profile = getPortChartProfile(port);
+  const data = getShodbChartIndexData(port, profile);
+  const sheets = data.sheets.map(s=>`
+    <g class="chart-index-sheet chart-${s.no.toLowerCase().replace(/[^a-z0-9]/g,'')}" data-chart="${s.no}">
+      <rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="0"/>
+      <text class="chart-index-number" x="${s.x+4}" y="${s.y+10}">${s.no}</text>
+      <text class="chart-index-sheet-label" x="${s.x+8}" y="${s.y+s.h-7}">${s.label}</text>
+    </g>`).join('');
+  const coastLines = data.coastLines.map(d=>`<path class="chart-index-coastline" d="${d}"/>`).join('');
+  const islands = (data.islands || []).map(([x,y,label])=>`
+    <g class="chart-index-island">
+      <ellipse cx="${x}" cy="${y}" rx="14" ry="7"/>
+      <text x="${x-20}" y="${y+16}">${label}</text>
+    </g>`).join('');
+  const edgeTicks = [24,74,124,174,224,274,324,374,424].map((x,i)=>`
+    <text class="chart-index-tick" x="${x}" y="12">${24+i}°</text>
+    <text class="chart-index-tick" x="${x}" y="256">${24+i}°</text>`).join('');
+  return `
+    <g class="chart-index-sheet-layer ${mode}" pointer-events="none" aria-label="4K SHODB chart index overlay">
+      <rect class="chart-index-paper-frame" x="6" y="6" width="428" height="248" rx="2"/>
+      <path class="chart-index-landwash north" d="M6 6 H434 V58 C382 38 322 40 282 58 C238 78 190 74 154 58 C110 38 62 42 6 70 Z"/>
+      <path class="chart-index-landwash south" d="M6 254 H434 V194 C382 176 338 182 300 198 C244 222 184 218 134 194 C92 174 48 178 6 202 Z"/>
+      ${coastLines}
+      <text class="chart-index-title" x="18" y="28">${data.chartFamily}</text>
+      <text class="chart-index-sea main" x="186" y="118">${data.sea}</text>
+      <text class="chart-index-sea upper" x="318" y="42">${data.upperSea}</text>
+      <text class="chart-index-sea lower" x="52" y="224">${data.lowerSea}</text>
+      <text class="chart-index-coast-label" x="30" y="54">${data.coastA}</text>
+      <text class="chart-index-coast-label" x="286" y="232">${data.coastB}</text>
+      ${sheets}
+      ${islands}
+      ${edgeTicks}
+    </g>`;
+}
+
+function buildWorldShodbChartIndexOverlay(){
+  const sheets = [
+    {no:'293', x:200, y:86, w:44, h:24, label:'Marmara'},
+    {no:'SUEZ', x:246, y:122, w:38, h:38, label:'Suez'},
+    {no:'PAN', x:58, y:138, w:38, h:30, label:'Panama'},
+    {no:'MAL', x:346, y:154, w:40, h:28, label:'Malakka'},
+    {no:'HOM', x:326, y:132, w:36, h:28, label:'Hurmuz'},
+    {no:'DOV', x:176, y:74, w:32, h:22, label:'Dover'},
+    {no:'ATL', x:72, y:58, w:92, h:54, label:'N. Atlantic'},
+    {no:'FE', x:362, y:82, w:62, h:48, label:'Far East'}
+  ];
+  return `
+    <g class="chart-index-sheet-layer world" pointer-events="none" aria-label="4K world chart folio overlay">
+      <rect class="chart-index-paper-frame" x="6" y="6" width="428" height="248" rx="2"/>
+      ${sheets.map(s=>`<g class="chart-index-sheet world-sheet chart-${s.no.toLowerCase()}"><rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}"/><text class="chart-index-number" x="${s.x+3}" y="${s.y+9}">${s.no}</text><text class="chart-index-sheet-label" x="${s.x+4}" y="${s.y+s.h-5}">${s.label}</text></g>`).join('')}
+      <text class="chart-index-title" x="18" y="28">WORLD TRADE ROUTE CHART FOLIO</text>
+      <text class="chart-index-sea main" x="178" y="132">MAJOR SEA LANES</text>
+    </g>`;
+}
+
 function buildOceanRouteChartSvg(port, profile){
   const hay = `${port.name} ${profile.region}`.toLowerCase();
   const routeColor = /enerji|tanker|basra|kizildeniz|afrika/.test(hay) ? '#f0a63a' : /bulk|demir cevheri|avustralya|brezilya/.test(hay) ? '#7ad0c8' : '#71b8ff';
@@ -16277,6 +16469,7 @@ function buildOceanRouteChartSvg(port, profile){
   <text x="252" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">0</text>
   <text x="308" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">50</text>
   <text x="364" y="229" fill="#7ea0bd" font-size="7" font-family="monospace">100 NM</text>
+  ${buildShodbChartIndexOverlay(port, 'route')}
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
@@ -16827,6 +17020,7 @@ function buildPortChartSvg(port){
   <g class="ecdis-close">${visibleSpecialInset}</g>
   <g class="ecdis-close">${visibleBuoyDetailOverlay}</g>
   <g class="ecdis-close ecdis-minor">${visibleMicroNoteOverlay}</g>
+  ${buildShodbChartIndexOverlay(port, 'port')}
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
@@ -16869,6 +17063,7 @@ function renderMapLibrary(){
   }
   const profile = getPortChartProfile(active);
   const region = profile.region;
+  chartSvg.classList.add('shodb-style');
   chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
   chartSvg.innerHTML = buildPortChartSvg(active);
   initPortChartInteractions(chartSvg);
@@ -17157,6 +17352,7 @@ function renderMap(){
   }
   const svg = document.getElementById('map-svg');
   const legend = document.getElementById('map-legend');
+  svg?.classList.add('shodb-style');
   initWorldMapInteractions(svg);
   updateWorldMapZoomLabel();
   if(svg) svg.setAttribute('viewBox', getWorldMapViewBox());
@@ -17176,6 +17372,7 @@ function renderMap(){
     region==='KUZEY PASIFIK / JAPONYA' ? '#bedfea' :
     '#d8eef7';
   let s = buildWorldAtlasBaseLayer(regionTint);
+  s+=buildWorldShodbChartIndexOverlay();
   s+=buildWorldMapFeatureLayer();
   // Sea texture
   for(let i=0;i<8;i++){

@@ -24,6 +24,7 @@ REQUIRED = {
         "isInsideVisibleHitbox",
         "getMapTaskVisibleHitboxes",
         "button.hitbox-standard::after",
+        "pointer-events:none",
     ],
     "mobile landscape scroll": [
         "@media (orientation: landscape)",
@@ -44,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=105",
-        "index.css?v=93",
+        "index.js?v=106",
+        "index.css?v=95",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -62,6 +63,13 @@ REQUIRED = {
         "live-4k-stormglass",
         "phoneGlass4K",
         "premiumCard4K",
+    ],
+    "4k shodb chart maps": [
+        "buildShodbChartIndexOverlay",
+        "buildWorldShodbChartIndexOverlay",
+        "chart-index-sheet-layer",
+        "shodb-style",
+        "MARMARA DENIZI",
     ],
 }
 
