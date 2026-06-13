@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=109",
-        "index.css?v=98",
+        "index.js?v=110",
+        "index.css?v=99",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -88,6 +88,12 @@ REQUIRED = {
         "intro-premium-card",
         "intro-audio-card",
         "sound-option-btn",
+    ],
+    "mobile creator portrait fit": [
+        "creator-mobile-portrait-fit",
+        ".creator-preview-stage .portrait-composite.preview",
+        "width:min(62vw,230px)",
+        "scale(.86)",
     ],
 }
 
