@@ -11111,6 +11111,7 @@ function handleSceneChoice(sc, c2, ch){
   resolveLiveTaskChain(sc,c2);
   applyDecisionMemoryRipple(sc,c2);
   maybeCreateNearMissReplay(sc,c2);
+  triggerDecisionReplayAndOfficerFeedback(sc,c2);
   maybeCreateMonthlyMemorySummary(sc,c2);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
@@ -12945,6 +12946,7 @@ function renderScene(idx){
     ch.style.display='';
   }
   triggerLiveScenePresentation(sc, ch);
+  normalizeClickableSurface('#choices button,#toolbar button,#guidance-strip button');
   const sceneArea=document.getElementById('scene-area');
   if(sceneArea){
     const transitionClass = getSceneTransitionClass(prevSc, sc);
@@ -15521,6 +15523,27 @@ function isInsideMapTaskTargetLabel(x, y, target){
   return x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h;
 }
 
+function isInsideVisibleHitbox(x, y, boxes){
+  return (boxes || []).some(box => x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h);
+}
+
+function getMapTaskVisibleHitboxes(target){
+  const tx = Math.max(34, Math.min(406, target.x));
+  const ty = Math.max(34, Math.min(226, target.y));
+  const r = Math.max(34, Number(target.tol || 34));
+  return [
+    {x:tx-r, y:ty-r, w:r*2, h:r*2, type:'target-ring'},
+    {...getMapTaskTargetLabelBox(target), type:'target-label'}
+  ];
+}
+
+function normalizeClickableSurface(selector='button,[role="button"],.interaction-hotspot,.map-task-target,.device-key,.device-tab,.document-practice-tabs button,.charter-options button'){
+  document.querySelectorAll(selector).forEach(el=>{
+    el.classList.add('hitbox-standard');
+    if(!el.getAttribute('aria-label') && el.textContent?.trim()) el.setAttribute('aria-label', el.textContent.trim().replace(/\s+/g,' '));
+  });
+}
+
 function updateMapTaskBox(port){
   const task = getCurrentMapTask();
   ensureTaskPort(task);
@@ -15597,7 +15620,8 @@ function handlePortChartTaskClick(svg, ev, port){
   }
   const dist = Math.hypot(x-target.x, y-target.y);
   const labelHit = isInsideMapTaskTargetLabel(x, y, target);
-  if(dist <= target.tol || labelHit){
+  const visibleHit = isInsideVisibleHitbox(x, y, getMapTaskVisibleHitboxes(target));
+  if(dist <= target.tol || labelHit || visibleHit){
     completedMapTasks.add(task.id);
     mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
     const training = getMapTaskTraining(task.id);
@@ -15903,7 +15927,7 @@ function buildDeviceChartOverlay(chartName){
 }
 
 function buildLiveVoyageTelemetryOverlay(chartName){
-  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
   if(!st || !st.route) return '';
   const route = getActiveVoyageRoute();
   const chartSet = getActiveVoyageChartSet();
@@ -15919,6 +15943,31 @@ function buildLiveVoyageTelemetryOverlay(chartName){
     <text x="28" y="54" fill="${warn ? '#ffc0c0' : '#8fd8ab'}" font-size="7" font-family="monospace">CPA ${st.cpa}nm / TCPA ${st.tcpa}m · UKC ${st.ukc}m · ${st.progress}%</text>
     <rect x="278" y="20" width="130" height="10" rx="5" fill="rgba(7,19,36,.88)" stroke="#385f86" stroke-width=".8"/>
     <rect x="280" y="22" width="${Math.max(3, Math.min(126, st.progress*1.26))}" height="6" rx="3" fill="${warn ? '#ff8d8d' : '#81f7b8'}"/>
+  </g>`;
+}
+
+function buildLiveVoyageRouteMotionOverlay(chartName){
+  const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  if(!st || !st.route) return '';
+  const route = getActiveVoyageRoute();
+  const chartSet = getActiveVoyageChartSet();
+  const showForChart = !chartSet.size || chartSet.has(chartName) || chartName === selectedPortChart || route?.chart === chartName;
+  if(!showForChart) return '';
+  const pct = Math.max(0, Math.min(100, Number(st.progress || 0))) / 100;
+  const sx = 62, sy = 168, ex = 376, ey = 86;
+  const cx = 220, cy = 118;
+  const x = (1-pct)*(1-pct)*sx + 2*(1-pct)*pct*cx + pct*pct*ex;
+  const y = (1-pct)*(1-pct)*sy + 2*(1-pct)*pct*cy + pct*pct*ey;
+  const warn = st.alert;
+  return `<g class="live-route-motion">
+    <path d="M${sx} ${sy} Q${cx} ${cy} ${ex} ${ey}" fill="none" stroke="${warn?'#ff8d8d':'#81f7b8'}" stroke-width="2.2" stroke-dasharray="7,5" opacity=".92"/>
+    <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="${warn?'rgba(255,80,80,.22)':'rgba(129,247,184,.18)'}" stroke="${warn?'#ff8d8d':'#81f7b8'}" stroke-width="1.2"/>
+    <path d="M${(x-6).toFixed(1)} ${(y+4).toFixed(1)} L${x.toFixed(1)} ${(y-8).toFixed(1)} L${(x+6).toFixed(1)} ${(y+4).toFixed(1)} Z" fill="#fff4bf" stroke="#07131f" stroke-width=".8">
+      <animateTransform attributeName="transform" type="translate" values="0 0; 2 -1; 0 0" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+    <rect x="${Math.min(326, x+12).toFixed(1)}" y="${Math.max(72, y-30).toFixed(1)}" width="92" height="30" rx="5" fill="rgba(5,16,28,.92)" stroke="${warn?'#ff8d8d':'#7fc3ff'}" stroke-width=".8"/>
+    <text x="${Math.min(334, x+18).toFixed(1)}" y="${Math.max(84, y-17).toFixed(1)}" fill="#cfeaff" font-size="6.4" font-family="monospace">SOG ${st.sog} COG ${Math.round(58+pct*38)}°</text>
+    <text x="${Math.min(334, x+18).toFixed(1)}" y="${Math.max(96, y-5).toFixed(1)}" fill="${warn?'#ffc0c0':'#a8f5c2'}" font-size="6.4" font-family="monospace">CPA ${st.cpa} TCPA ${st.tcpa} UKC ${st.ukc}</text>
   </g>`;
 }
 
@@ -16146,6 +16195,7 @@ function buildOceanRouteChartSvg(port, profile){
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
+  ${buildLiveVoyageRouteMotionOverlay(port.name)}
   ${buildLiveVoyageTelemetryOverlay(port.name)}
   `;
 }
@@ -16695,6 +16745,7 @@ function buildPortChartSvg(port){
   ${buildMapTaskTargetOverlay(port)}
   ${buildActiveVoyageChartOverlay(port.name)}
   ${buildDeviceChartOverlay(port.name)}
+  ${buildLiveVoyageRouteMotionOverlay(port.name)}
   ${buildLiveVoyageTelemetryOverlay(port.name)}
   </g>
   `;
@@ -16767,6 +16818,7 @@ function renderMapLibrary(){
       <div class="chart-meta-value">${profile.notes}<br>${activeCharts.has(active.name)?`AKTIF SEFER DOSYASI: ${activeRoute.name} icin gerekli chart.`:'Arsiv chart; sefer rota dosyasina dahil degil.'}</div>
     </div>`;
   updateMapTaskBox(active);
+  normalizeClickableSurface('#map-panel button,.map-task-target,.world-click-zone');
 }
 
 function getWorldMapPoint(p, i=0, total=1){
@@ -19508,6 +19560,7 @@ let activeDeviceKey = 'vhf';
 let devicePracticeScore = {ok:0,total:0};
 let deviceLogLine = 'Bir cihaz sec ve soft-key menulerinden dogru uygulamayi yap.';
 let deviceMenuPath = {};
+let deviceScreenZoomed = false;
 let devicePracticeProgress = {};
 let devicePracticeVariant = {};
 let starlinkStatus = {online:true, latency:42, obstruction:3, plan:'Crew + operational data', lastCheck:'--:--'};
@@ -19717,6 +19770,11 @@ function openDevices(){
 function closeDevices(){
   const p = document.getElementById('devices-panel');
   if(p) p.classList.remove('show');
+  deviceScreenZoomed = false;
+}
+function toggleDeviceScreenZoom(force){
+  deviceScreenZoomed = typeof force === 'boolean' ? force : !deviceScreenZoomed;
+  renderDevices();
 }
 function selectDevice(key){
   activeDeviceKey = key;
@@ -19884,6 +19942,8 @@ function renderDevices(){
   const log = document.getElementById('device-log');
   if(!list || !screen || !keys) return;
   const def = getDeviceDef(activeDeviceKey);
+  const box = document.getElementById('devices-box');
+  if(box) box.classList.toggle('device-zoomed', !!deviceScreenZoomed);
   list.innerHTML = DEVICE_TRAINER.map(d=>`
     <button class="device-tab ${d.key===activeDeviceKey?'active':''}" onclick="selectDevice('${d.key}')">
       <span class="device-tab-ico">${d.ico}</span><span>${d.name}<small>${d.sub}</small></span>
@@ -19892,6 +19952,11 @@ function renderDevices(){
   if(sub) sub.textContent = def.sub;
   if(score) score.textContent = `${devicePracticeScore.ok}/${devicePracticeScore.total}`;
   screen.innerHTML = buildDeviceScreen(def);
+  screen.onclick = (ev)=>{
+    if(ev.target.closest?.('button')) return;
+    toggleDeviceScreenZoom();
+  };
+  screen.setAttribute('title', deviceScreenZoomed ? 'Cihaz ekranini normal boya dondur' : 'Cihaz ekranini buyut');
   const menuId = getDeviceMenuId(def.key);
   const entries = getDeviceMenuEntries(def);
   const expected = getDeviceExpectedAction(def);
@@ -19902,6 +19967,7 @@ function renderDevices(){
   }).join('');
   if(task) task.innerHTML = `<div class="device-task-head">SIMULASYON PRATIGI · ${getDeviceBreadcrumb(def)}</div>${renderDevicePracticeTask(def)}`;
   if(log) log.textContent = deviceLogLine;
+  normalizeClickableSurface('#devices-panel button,#device-screen');
 }
 
 function buildDeviceScreen(def){
@@ -19915,8 +19981,9 @@ function buildDeviceScreen(def){
     autopilot:GFX.autopilot_panel,
     bnwas:GFX.bnwas_panel
   }[def.key];
-  if(panel) return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${panel}</svg>${buildDeviceMenuOverlay(def)}`;
-  return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${buildGmdssDeviceSvg(def)}</svg>${buildDeviceMenuOverlay(def)}`;
+  const hint = `<button class="device-zoom-toggle" onclick="event.stopPropagation(); toggleDeviceScreenZoom()">${deviceScreenZoomed?'Kucult':'Buyut'}</button>`;
+  if(panel) return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${panel}</svg>${buildDeviceMenuOverlay(def)}${hint}`;
+  return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${buildGmdssDeviceSvg(def)}</svg>${buildDeviceMenuOverlay(def)}${hint}`;
 }
 
 function buildDeviceMenuOverlay(def){
@@ -21711,11 +21778,19 @@ function renderPremiumPackagePanel(){
     ['Buz seyri','Ice chart, convoy, icing warning ve polar route karar zinciri'],
     ['Ileri cihaz sim','Radar/ECDIS/GMDSS/NAVTEX/Starlink pratikleri ve cihaz ariza zinciri']
   ];
+  const previews = [
+    ['lift','Proje lift','COG / sling / crane'],
+    ['medevac','Cruise medevac','helideck / MRCC'],
+    ['rov','ROV survey','tether / seabed'],
+    ['dp','Offshore DP','offset / thruster'],
+    ['ice','Ice convoy','lead / icing']
+  ];
   return `<div class="premium-sim-panel ${premiumUnlocked?'active':''}">
     <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Kilitli gorev onizlemesi, dahil gemiler ve 3D operasyonlar.</span></div>
-    <div class="premium-preview-strip">
-      <span>🔒 Proje lift preview</span><span>🔒 Cruise medevac</span><span>🔒 ROV survey</span><span>🔒 Offshore DP</span><span>🔒 Ice convoy</span>
-    </div>
+    <div class="premium-preview-strip">${previews.map(([cls,title,sub])=>`
+      <button class="premium-preview-card ${cls} ${premiumUnlocked?'':'locked'}" onclick="${premiumUnlocked?'openCareer()':'openPremiumPurchase()'}">
+        <i></i><b>${title}</b><small>${sub}</small><em>${premiumUnlocked?'acik':'kilitli demo'}</em>
+      </button>`).join('')}</div>
     <div class="premium-sim-grid">${packs.map(([a,b])=>`<div class="${premiumUnlocked?'':'locked'}"><b>${a}</b><small>${b}</small></div>`).join('')}</div>
     <div class="sim-actions compact">
       <button onclick="openPremiumPurchase()">${premiumUnlocked?'Premium aktif':'75 TL satin al'}</button>
@@ -21741,6 +21816,26 @@ function runAccidentReplay(){
   });
   addCompanyMailThread('Kaza replay notu','Near miss timeline tekrar izlendi; root cause ve corrective action bekleniyor.','warn');
   addLiveLogbook('ACCIDENT REPLAY','CPA/rapor/manevra/sonuc timeline olarak tekrar canlandirildi.',true);
+}
+
+function triggerDecisionReplayAndOfficerFeedback(sc,c2){
+  const tag = c2?.tag || '';
+  const weak = tag === 'korkak' || tag === 'hileli';
+  const strong = tag === 'kritik' || tag === 'akilli';
+  const blob = `${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  if(!weak && !strong) return;
+  const officerKey = getSceneCrewMemoryKey(sc);
+  const officer = CREW_DEFS[officerKey]?.name || 'Zabit';
+  if(weak){
+    const replay = /radar|cpa|tcpa|ais|ecdis|harita|chart|vhf|pilot|fire|yangin|mob|makine|engine/.test(blob)
+      ? ['Replay: ilk sinyal geldi ama karar gecikti.', 'Replay: risk alani buyudu / CPA veya emniyet marji daraldi.', `${officer}: "Bu karari neden verdigini acikla; bir sonraki adimda daha net zincir kuracaksin."`]
+      : ['Replay: ekip soru bekledi.', 'Replay: rapor/iletisim eksik kaldi.', `${officer}: "Karar sadece secim degil, gerekcesiyle de savunulur."`];
+    replay.forEach((line,i)=>sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(line, i===2?'warn':''), 450+i*650)));
+    pushPhoneMessage('Kaptan', `"${c2.text}" kararini not ettim. Sonraki review'da nedenini soracagim.`, {open:false});
+    addLiveLogbook('KARAR REPLAY', `${sc?.sub||'Sahne'}: zayif karar sonrasi replay ve zabit geri bildirimi acildi.`, true);
+  }else if(strong){
+    sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(`${officer}: "Gerekce temiz. Bu karari ekip hafizasina olumlu yaziyorum."`, 'good'), 700));
+  }
 }
 
 function addPersonalNotebookEntry(){
@@ -22952,7 +23047,8 @@ function scheduleDynamicMiniChain(sc){
   if(!sc || sc._dynamicMiniChain) return;
   const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
   let chain = [];
-  if(/vhf|mayday|pan-pan|distress|vts|smcp|pilot exchange/.test(blob)) chain = ['VHF: kanal/DSC teyit bekliyor', 'Radar: cagriya ait hedef kontrol ediliyor', 'ECDIS: mevki ve rota karsilastiriliyor', 'Kaptan: kisa SMCP raporu istiyor'];
+  if(/pilot boarding|pilot ladder/.test(blob)) chain = ['VHF call: pilot station ETA ve boarding side teyit', 'Pilot ladder ready: lee side, light, lifebuoy ve deck party kontrol', 'Speed reduce: pilot boat icin safe speed / heading tutuluyor', 'Pilot onboard: master-pilot exchange basliyor', 'MPX: draft, engine, thruster, tug ve berth plan paylasiliyor', 'Tug order: forward/aft tug ve mooring station zinciri aciliyor'];
+  else if(/vhf|mayday|pan-pan|distress|vts|smcp|pilot exchange/.test(blob)) chain = ['VHF: kanal/DSC teyit bekliyor', 'Radar: cagriya ait hedef kontrol ediliyor', 'ECDIS: mevki ve rota karsilastiriliyor', 'Kaptan: kisa SMCP raporu istiyor'];
   else if(/radar|arpa|cpa|tcpa|ais target/.test(blob)) chain = ['Radar: hedef acquire edildi', 'ARPA: CPA/TCPA trendi hesaplanıyor', 'ECDIS: rota ve XTD karsilastiriliyor', 'Kaptan: hedef niyeti ve aksiyon istiyor'];
   else if(/ecdis|chart|route monitor|xtd|safety contour/.test(blob)) chain = ['ECDIS: alarm satiri acildi', 'Sensor: GPS/Gyro source kontrol', 'Route: next WP ve safety contour teyit'];
   else if(/fire|yangin|smoke|duman/.test(blob)) chain = ['Fire panel: zone yandi', 'Ekip: mahal ve yangin sinifi teyidi aliniyor', 'Izolasyon: fan/damper/ekipman kontrol', 'Logbook: olay satiri acildi'];
@@ -23069,8 +23165,9 @@ function renderInteractionPanel(sc, ch){
     <div id="interaction-feedback" class="decision-feedback"></div>
   </div>`;
   panel.querySelectorAll('[data-hotspot]').forEach(btn=>{
-    btn.onclick=()=>{
-      const pickedId = btn.dataset.hotspot;
+    btn.onclick=(ev)=>{
+      const hit = ev.target.closest('[data-hotspot]') || btn;
+      const pickedId = hit.dataset.hotspot;
       const picked = pickedId === cfg.expected
         ? (sc.choices.find(c=>c.tag===cfg.correctTag) || sc.choices[0])
         : (sc.choices.find(c=>c.tag===cfg.midTag) || sc.choices[1] || sc.choices[0]);
@@ -23084,6 +23181,7 @@ function renderInteractionPanel(sc, ch){
       setTimeout(()=>handleSceneChoice(sc,picked,ch),850);
     };
   });
+  normalizeClickableSurface('#calc-panel button,#calc-panel [data-hotspot]');
   return true;
 }
 

@@ -129,6 +129,9 @@ CHECKS = {
         "NO-GO / SHALLOW WATER",
         "SAFETY DEPTH",
         "getMapTaskTargetLabelBox",
+        "getMapTaskVisibleHitboxes",
+        "isInsideVisibleHitbox",
+        "normalizeClickableSurface",
         "isInsideMapTaskTargetLabel",
         "labelHit",
         "Yaklastin",
@@ -218,6 +221,20 @@ CHECKS = {
         "document-practice-panel",
         "training-roadmap",
         "premium-preview-strip",
+    ],
+    "interactive simulator polish": [
+        "deviceScreenZoomed",
+        "toggleDeviceScreenZoom",
+        "device-zoomed",
+        "device-zoom-toggle",
+        "buildLiveVoyageRouteMotionOverlay",
+        "live-route-motion",
+        "triggerDecisionReplayAndOfficerFeedback",
+        "VHF call: pilot station ETA",
+        "Pilot ladder ready",
+        "MPX: draft",
+        "premium-preview-card",
+        "premiumPreviewMove",
     ],
     "multi language support": [
         "GAME_LANGUAGES",
@@ -344,13 +361,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 102:
+    elif int(js_versions[-1]) < 103:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 90:
+    elif int(css_versions[-1]) < 91:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():
