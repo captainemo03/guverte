@@ -44,8 +44,16 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=103",
-        "index.css?v=91",
+        "index.js?v=104",
+        "index.css?v=92",
+    ],
+    "4k dynamic background": [
+        "__bgRenderScale",
+        "__bgCanvasQuality",
+        "4k-dpr",
+        "getDynamicSceneTrafficOverlay",
+        "scene-parallax-layer",
+        "traffic-ship",
     ],
 }
 

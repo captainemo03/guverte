@@ -4,10 +4,22 @@
   const cv=document.getElementById('bg-canvas');
   if(!cv)return;
   const cx=cv.getContext('2d');
-  let W,H,t=0;
+  let W,H,t=0,DPR=1;
   const getBackdropProfile=()=>window.__bgBackdropProfile||'opensea';
-  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  function resize(){
+    W=window.innerWidth;
+    H=window.innerHeight;
+    DPR=Math.min(window.devicePixelRatio || 1, W < 900 ? 1.5 : 2);
+    cv.width=Math.max(1,Math.round(W*DPR));
+    cv.height=Math.max(1,Math.round(H*DPR));
+    cv.style.width=W+'px';
+    cv.style.height=H+'px';
+    cx.setTransform(DPR,0,0,DPR,0,0);
+    window.__bgRenderScale = DPR;
+    window.__bgCanvasQuality = DPR >= 1.9 ? '4k-dpr' : 'hires-dpr';
+  }
   function draw(){
+    cx.setTransform(DPR,0,0,DPR,0,0);
     cx.clearRect(0,0,W,H);
     const profile=getBackdropProfile();
     const isHarbor=profile==='harbor';
@@ -12526,6 +12538,50 @@ const REALISTIC_BG = {
   storm:'assets/bg/storm.png?v=1'
 };
 
+function getDynamicSceneTrafficOverlay(sc){
+  const profile = getSceneBackdropProfile(sc);
+  const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const storm = profile === 'storm';
+  const harbor = profile === 'harbor';
+  const strait = profile === 'strait';
+  const night = profile === 'night';
+  const ships = [];
+  const addShip = (type, x, y, s, dur, delay, dir='right') => {
+    ships.push(`<span class="traffic-ship traffic-${type} ${dir}" style="--x:${x}%;--y:${y}%;--s:${s};--dur:${dur}s;--delay:${delay}s"><i></i><b></b><em></em></span>`);
+  };
+  if(storm){
+    addShip('tanker', 13, 66, .52, 23, -6, 'right');
+    addShip('bulk', 74, 61, .42, 29, -14, 'left');
+  }else if(harbor){
+    addShip('container', 14, 67, .72, 26, -4, 'right');
+    addShip('tug', 48, 72, .46, 12, -2, 'right');
+    addShip('pilot', 67, 64, .34, 10, -7, 'left');
+    addShip('tanker', 78, 69, .58, 31, -16, 'left');
+  }else if(strait){
+    addShip('ferry', 10, 64, .5, 15, -4, 'right');
+    addShip('tanker', 34, 61, .56, 26, -10, 'left');
+    addShip('container', 65, 66, .58, 25, -16, 'right');
+    addShip('pilot', 84, 71, .3, 9, -1, 'left');
+  }else{
+    addShip('lng', 12, 63, .52, 28, -9, 'right');
+    addShip('container', 38, 69, .66, 31, -19, 'left');
+    addShip('bulk', 68, 61, .48, 34, -13, 'right');
+    if(night) addShip('cruise', 82, 67, .52, 25, -3, 'left');
+  }
+  if(/offshore|platform|dp|research|survey|rov|cable|pipe|premium/.test(hay)){
+    addShip('support', 57, 70, .42, 16, -5, 'right');
+  }
+  const lights = Array.from({length: harbor ? 11 : strait ? 7 : 4}, (_,i)=>{
+    const x = 7 + i * (harbor ? 8 : 12);
+    const y = harbor ? 54 + (i % 3) * 4 : 50 + (i % 2) * 5;
+    return `<span class="traffic-light" style="--x:${x}%;--y:${y}%;--delay:${-i*.35}s"></span>`;
+  }).join('');
+  const rain = storm ? Array.from({length:18}, (_,i)=>`<span class="traffic-rain" style="--x:${(i*7)%100}%;--delay:${-i*.08}s"></span>`).join('') : '';
+  const cranes = harbor ? Array.from({length:5}, (_,i)=>`<span class="traffic-crane" style="--x:${12+i*17}%;--h:${34+(i%2)*10}px;--delay:${-i*.5}s"><i></i></span>`).join('') : '';
+  const lane = strait ? `<span class="traffic-lane lane-a"></span><span class="traffic-lane lane-b"></span>` : '';
+  return `<div class="scene-parallax-layer profile-${profile}" aria-hidden="true">${lights}${cranes}${lane}${rain}${ships.join('')}</div>`;
+}
+
 function getSceneMotionClass(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   if(sc?.alert || /alarm|yangin|yangın|fire|mob|abandon|blackout|pirate|korsan|near-miss|ariza|arıza|man overboard|snap-back|distress|mayday|dp alarm|esd/.test(hay)) return 'scene-motion-alert';
@@ -12900,13 +12956,18 @@ function renderScene(idx){
 
   const svg=document.getElementById('gfx-svg');
   const photo=document.getElementById('gfx-photo');
+  const parallax=document.getElementById('gfx-parallax');
   const foreground=document.getElementById('gfx-foreground');
   const bridge3d=document.getElementById('gfx-3d');
   window.__bgBackdropProfile = getSceneBackdropProfile(sc);
+  window.__bgSceneId = sc?.id || String(currentIdx);
   if(photo){
     const profile = window.__bgBackdropProfile || 'opensea';
     photo.style.backgroundImage = `url('${REALISTIC_BG[profile] || REALISTIC_BG.opensea}')`;
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
+  }
+  if(parallax){
+    parallax.innerHTML = getDynamicSceneTrafficOverlay(sc);
   }
   if(bridge3d){
     const bridge3dMarkup = getScene3DBridgeOverlay(sc);

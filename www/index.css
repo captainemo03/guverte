@@ -244,7 +244,45 @@ input[type=text]::placeholder{color:var(--text3);}
 #scene-graphic{width:100%;background:var(--navy);min-height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transform-origin:50% 50%;}
 #scene-graphic::before,#scene-graphic::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5;}
 #gfx-photo{position:absolute;inset:-2%;background-size:cover;background-position:center center;background-repeat:no-repeat;opacity:.42;filter:saturate(1.05) contrast(1.02) brightness(.9);transform:scale(1.04);}
-#gfx-parallax{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.34;}
+#gfx-parallax{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.5;overflow:hidden;}
+.scene-parallax-layer{position:absolute;inset:0;overflow:hidden;contain:paint;filter:saturate(1.08) contrast(1.04);}
+.scene-parallax-layer::before{content:"";position:absolute;left:-8%;right:-8%;bottom:-4%;height:42%;background:linear-gradient(180deg,transparent,rgba(5,18,34,.42) 28%,rgba(6,22,43,.74));animation:trafficSeaBreath 7s ease-in-out infinite;}
+.scene-parallax-layer::after{content:"";position:absolute;left:-20%;right:-20%;bottom:11%;height:22%;background:repeating-linear-gradient(168deg,rgba(182,220,255,.08) 0 2px,transparent 2px 42px);opacity:.42;animation:trafficWakeSlide 11s linear infinite;}
+.traffic-ship{position:absolute;left:var(--x);top:var(--y);width:118px;height:34px;transform:translate3d(-50%,-50%,0) scale(var(--s));transform-origin:50% 100%;animation:trafficDrift var(--dur) linear infinite, trafficBob 3.8s ease-in-out infinite;animation-delay:var(--delay),calc(var(--delay) * .6);opacity:.9;filter:drop-shadow(0 8px 8px rgba(0,0,0,.32));}
+.traffic-ship.left{animation-name:trafficDriftLeft,trafficBob;}
+.traffic-ship i{position:absolute;left:6px;right:2px;bottom:4px;height:13px;background:linear-gradient(180deg,#162c42,#071320);clip-path:polygon(0 28%,77% 28%,92% 0,100% 46%,92% 100%,8% 100%);border-bottom:2px solid rgba(185,84,66,.4);}
+.traffic-ship b{position:absolute;right:19px;bottom:17px;width:23px;height:18px;background:linear-gradient(180deg,#d8e7f0,#7f94a8);clip-path:polygon(0 25%,75% 0,100% 28%,100% 100%,0 100%);}
+.traffic-ship em{position:absolute;right:19px;bottom:25px;width:5px;height:5px;border-radius:50%;background:rgba(255,221,145,.9);box-shadow:0 0 10px rgba(255,221,145,.5);font-style:normal;animation:trafficLightPulse 1.9s ease-in-out infinite;}
+.traffic-container::before,.traffic-ferry::before,.traffic-cruise::before,.traffic-lng::before,.traffic-support::before{content:"";position:absolute;left:24px;bottom:17px;width:50px;height:18px;background:linear-gradient(90deg,#9b3b34 0 24%,#2d5f96 24% 48%,#c78331 48% 72%,#335c45 72%);box-shadow:0 -9px 0 rgba(45,95,150,.86);z-index:1;}
+.traffic-tanker::before{content:"";position:absolute;left:24px;bottom:17px;width:62px;height:3px;background:#8ea0b3;box-shadow:0 -5px 0 #62778e;z-index:1;}
+.traffic-lng::before{width:58px;height:18px;background:radial-gradient(ellipse at 20% 70%,#b8e3f6 0 30%,transparent 32%),radial-gradient(ellipse at 50% 70%,#b8e3f6 0 30%,transparent 32%),radial-gradient(ellipse at 80% 70%,#b8e3f6 0 30%,transparent 32%);box-shadow:none;}
+.traffic-bulk::before{content:"";position:absolute;left:25px;bottom:17px;width:54px;height:10px;background:repeating-linear-gradient(90deg,#43586f 0 14px,#263d54 14px 17px);clip-path:polygon(0 100%,9% 0,91% 0,100% 100%);z-index:1;}
+.traffic-ferry::before{width:60px;height:18px;background:linear-gradient(180deg,#e8eef4 0 42%,#447299 43% 100%);box-shadow:none;}
+.traffic-cruise::before{width:68px;height:22px;background:linear-gradient(180deg,#edf4f7 0 30%,#b8cbd8 31% 58%,#406886 59%);box-shadow:0 -5px 0 rgba(240,248,255,.9);}
+.traffic-tug{width:74px;height:28px;}
+.traffic-tug i{height:12px;clip-path:polygon(0 40%,78% 40%,100% 0,96% 100%,6% 100%);background:linear-gradient(180deg,#214b68,#071320);}
+.traffic-tug b{right:22px;bottom:16px;width:17px;height:15px;background:#d5e0e8;}
+.traffic-pilot{width:58px;height:22px;}
+.traffic-pilot i{height:10px;background:linear-gradient(90deg,#f1f5f8 0 56%,#d68b25 56%);clip-path:polygon(0 35%,82% 35%,100% 0,94% 100%,8% 100%);}
+.traffic-pilot b{right:16px;bottom:14px;width:12px;height:10px;background:#244967;}
+.traffic-support::before{width:48px;height:14px;background:linear-gradient(90deg,#f0f3f5 0 34%,#f39a28 34% 68%,#1f5d85 68%);box-shadow:none;}
+.traffic-light{position:absolute;left:var(--x);top:var(--y);width:4px;height:4px;border-radius:50%;background:rgba(255,211,134,.95);box-shadow:0 0 12px rgba(255,211,134,.5),0 18px 18px rgba(255,211,134,.16);animation:trafficLightPulse 2.2s ease-in-out infinite;animation-delay:var(--delay);}
+.traffic-crane{position:absolute;left:var(--x);bottom:32%;width:34px;height:var(--h);border-left:3px solid rgba(255,197,95,.44);border-top:2px solid rgba(255,197,95,.46);opacity:.72;animation:trafficCraneSwing 5s ease-in-out infinite;animation-delay:var(--delay);transform-origin:0 100%;}
+.traffic-crane i{position:absolute;right:-4px;top:0;width:2px;height:18px;background:rgba(255,197,95,.35);}
+.traffic-rain{position:absolute;top:-20%;left:var(--x);width:1px;height:78px;background:linear-gradient(180deg,transparent,rgba(224,238,255,.45),transparent);transform:rotate(17deg);animation:trafficRain .72s linear infinite;animation-delay:var(--delay);}
+.traffic-lane{position:absolute;left:-8%;right:-8%;height:1px;background:linear-gradient(90deg,transparent,rgba(125,194,255,.52),transparent);opacity:.36;animation:trafficLaneMove 5s linear infinite;}
+.traffic-lane.lane-a{bottom:31%;}.traffic-lane.lane-b{bottom:24%;animation-delay:-2s;}
+.profile-storm .traffic-ship{opacity:.62;filter:blur(.3px) drop-shadow(0 12px 10px rgba(0,0,0,.36));}
+.profile-night .traffic-ship em,.profile-strait .traffic-ship em{background:rgba(135,220,255,.95);box-shadow:0 0 12px rgba(135,220,255,.6);}
+@keyframes trafficDrift{from{margin-left:-24px;}to{margin-left:34px;}}
+@keyframes trafficDriftLeft{from{margin-left:34px;}to{margin-left:-24px;}}
+@keyframes trafficBob{0%,100%{margin-top:0;}50%{margin-top:-5px;}}
+@keyframes trafficLightPulse{0%,100%{opacity:.45;}50%{opacity:1;}}
+@keyframes trafficSeaBreath{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+@keyframes trafficWakeSlide{from{transform:translateX(0);}to{transform:translateX(90px);}}
+@keyframes trafficCraneSwing{0%,100%{transform:skewX(-4deg);}50%{transform:skewX(5deg);}}
+@keyframes trafficRain{from{transform:translateY(-18%) rotate(17deg);}to{transform:translateY(140%) rotate(17deg);}}
+@keyframes trafficLaneMove{from{transform:translateX(-20%);}to{transform:translateX(20%);}}
 #gfx-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;}
 #gfx-actor{display:none !important;position:absolute;right:-2px;bottom:0;width:170px;height:190px;align-items:flex-end;justify-content:flex-end;z-index:3;pointer-events:none;opacity:.92;mix-blend-mode:normal;isolation:isolate;}
 #gfx-actor:not(.empty){display:flex;}

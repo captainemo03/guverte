@@ -35,6 +35,18 @@ CHECKS = {
         "Gorev zinciri",
         "Canli gorev zinciri",
     ],
+    "4k dynamic scene background": [
+        "__bgRenderScale",
+        "__bgCanvasQuality",
+        "4k-dpr",
+        "getDynamicSceneTrafficOverlay",
+        "scene-parallax-layer",
+        "traffic-container",
+        "traffic-tanker",
+        "traffic-lng",
+        "traffic-tug",
+        "traffic-crane",
+    ],
     "scene vhf console": [
         "getSceneVhfConsoleOverlay",
         "live-vhf-console",
