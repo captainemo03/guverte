@@ -11141,6 +11141,7 @@ function handleSceneChoice(sc, c2, ch){
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
   completeMissionFromChoice(sc,c2);
   awardSpecialtyXpFromChoice(sc,c2);
+  createTeacherFeedbackForChoice(sc,c2);
   maybeQueueDevicePracticeFromScene(sc,c2);
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
@@ -13299,6 +13300,27 @@ function awardSpecialtyXpFromChoice(sc,c2){
   if(/roro|ramp|vehicle deck|car carrier/.test(blob)) add('roro',1);
 }
 
+function createTeacherFeedbackForChoice(sc,c2){
+  if(!sc || !c2) return;
+  const weak = c2.tag === 'korkak' || c2.tag === 'hileli' || c2.tag === 'itaatkar';
+  if(!weak) return;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
+  let tip = 'Bu secimde eksik kalan nokta prosedur zinciriydi: once riski oku, sonra veriyi teyit et, sonra kisa rapor ve logbook.';
+  if(/pilot|pilot station|boarding|ladder|berth/.test(blob)) tip = 'Pilot gorevinde berth ile pilot boarding point karistirma. Once dis yaklasmadaki pilot station, sonra VHF/pilot ladder/speed zinciri gelir.';
+  else if(/radar|arpa|cpa|tcpa|ais/.test(blob)) tip = 'Radar kararinda AIS etiketi tek basina yetmez. Raw echo, ARPA CPA/TCPA, EBL/VRM ve ECDIS rota beraber okunur.';
+  else if(/ecdis|chart|route|waypoint|tss|ukc|squat/.test(blob)) tip = 'ECDIS kararinda sadece rota cizgisine bakma. Safety contour, XTD, no-go area, UKC ve next waypoint birlikte kontrol edilir.';
+  else if(/vhf|dsc|mayday|pan-pan|vts|smcp/.test(blob)) tip = 'VHF kararinda kanal, cagrinin turu ve mesaj sirasi kritik. CH16 nobet, working channel, DSC ve radio log ayrimini koru.';
+  else if(/fire|yangin|mob|abandon|emergency/.test(blob)) tip = 'Acil durumda kahramanlik degil zincir onemli: alarm, mevki/mahal, ekip gorevi, cihaz/panel, rapor ve logbook.';
+  else if(/crew|kavga|complaint|mobbing|itaatsizlik/.test(blob)) tip = 'Insan yonetiminde taraf tutmadan guvenli alan kur, tanik/olay kaydi al ve gerekiyorsa kaptana resmi kanaldan bildir.';
+  else if(/charter|laycan|nor|sof|laytime|demurrage|despatch/.test(blob)) tip = 'Charter saatlerinde tahminle gitme. NOR tender/accepted, notice time, SOF ve laytime baslangicini ayrica ayir.';
+  addWatchFeed(`Ogretmen notu: ${tip}`, 'warn');
+  pushPhoneMessage('AI Mate', `Ogretmen notu: ${tip}`, {open:false});
+  if(phoneAiState?.messages){
+    phoneAiState.messages.push({from:'AI Mate', text:`Ogretmen notu: ${tip}`, me:false});
+    phoneAiState.messages = phoneAiState.messages.slice(-30);
+  }
+}
+
 function renderCareerPanel(){
   const body=document.getElementById('career-body'); if(!body) return;
   const promo=calculatePromotionReport();
@@ -15288,6 +15310,7 @@ function buildSavePayload(){
     phoneGroups,
     familyConversationMemory,
     phonePhotoShares,
+    phoneAiState,
     companyMailState,
     activePhoneContact,
     phoneTab,
@@ -15413,6 +15436,9 @@ function applyLoadedGameState(data){
   phoneGroups = data.phoneGroups && typeof data.phoneGroups === 'object' ? data.phoneGroups : phoneGroups;
   familyConversationMemory = data.familyConversationMemory && typeof data.familyConversationMemory === 'object' ? {...familyConversationMemory, ...data.familyConversationMemory} : familyConversationMemory;
   phonePhotoShares = Array.isArray(data.phonePhotoShares) ? data.phonePhotoShares : phonePhotoShares;
+  phoneAiState = data.phoneAiState && typeof data.phoneAiState === 'object'
+    ? {mode:'watch', messages:[], ...data.phoneAiState, messages:Array.isArray(data.phoneAiState.messages) ? data.phoneAiState.messages : []}
+    : phoneAiState;
   companyMailState = data.companyMailState && typeof data.companyMailState === 'object' ? {...companyMailState, ...data.companyMailState} : companyMailState;
   activePhoneContact = data.activePhoneContact || activePhoneContact;
   phoneTab = data.phoneTab || 'messages';
@@ -20318,6 +20344,12 @@ let phoneTab = 'messages';
 let activePhoneContact = 'Kaptan';
 let activePhoneSite = 'home';
 let phoneAppView = 'home';
+let phoneAiState = {
+  mode:'watch',
+  messages:[
+    {from:'AI Mate', text:'Ben AI Mate. Sahne, rota, cihaz pratikleri, UKC/CPA, crew hafizasi ve kontrat durumunu okuyup sana kisa profesyonel tavsiye veririm.', me:false}
+  ]
+};
 let phoneContacts = [
   {name:'Kaptan', number:'100', role:'Master / night orders'},
   {name:'Kopruustu', number:'101', role:'Bridge watch'},
@@ -21822,6 +21854,122 @@ function renderPhoneSettings(){
     <button class="phone-wide-btn" onclick="saveGameState(true)">Oyunu kaydet</button>
   </div>`;
 }
+function openPhoneAi(){
+  phoneAppView = 'ai';
+  phoneTab = 'apps';
+  phoneOpen = true;
+  renderPhone();
+}
+function getPhoneAiContext(){
+  const sc = sceneQueue[currentIdx] || {};
+  const st = liveVoyageState || computeLiveVoyageState(sc);
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const openDevices = Object.entries(devicePracticeProgress || {}).filter(([,v])=>v===0).map(([k])=>getDeviceDef(k)?.name || k.toUpperCase());
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  const steps = getMissionDirector2Steps ? getMissionDirector2Steps() : [];
+  const nextStep = steps.find(s=>s.status==='active') || steps.find(s=>s.status!=='done') || steps[0];
+  return {
+    scene:`${sc.loc || 'Gemi'} · ${sc.sub || sc.gfx || 'vardiya'}`,
+    route:route?.name || st.route || 'rota yok',
+    nextWp:st.nextWp || '--',
+    eta:st.eta || '--',
+    cpa:st.cpa || '--',
+    tcpa:st.tcpa || '--',
+    ukc:st.ukc || '--',
+    sog:st.sog || '--',
+    nextStep:nextStep?.label || 'durumu oku',
+    devices:openDevices,
+    risk:heat,
+    fatigue:Math.round(stats.dinclik || 0),
+    knowledge:Math.round(stats.bilgi || 0),
+    respect:Math.round(stats.sayginlik || 0),
+    specialty:getTopSpecialtyLabel ? getTopSpecialtyLabel() : 'seyir',
+    mode:gameplayMode || 'realistic'
+  };
+}
+function getPhoneAiQuickPrompt(kind){
+  const prompts = {
+    scene:'Bu sahnede once ne yapmaliyim?',
+    route:'Rota/CPA/UKC durumunu yorumla.',
+    device:'Hangi cihaz pratigi oncelikli?',
+    report:'Kaptana nasil kisa rapor veririm?',
+    weak:'Hata yaparsam nasil toparlarim?',
+    career:'Uzmanlik ve kariyer icin neye calisayim?'
+  };
+  return prompts[kind] || prompts.scene;
+}
+function askPhoneAiQuick(kind){
+  const input = document.getElementById('phone-ai-input');
+  if(input) input.value = getPhoneAiQuickPrompt(kind);
+  sendPhoneAiMessage();
+}
+function buildPhoneAiAnswer(text=''){
+  const t = normalizeTrAscii(text);
+  const ctx = getPhoneAiContext();
+  const parts = [];
+  if(/rota|route|seyir|cpa|tcpa|ukc|waypoint|eta|harita|ecdis/.test(t)){
+    parts.push(`Rota resmi: ${ctx.route}, next WP ${ctx.nextWp}, ETA ${ctx.eta}. CPA ${ctx.cpa} nm, TCPA ${ctx.tcpa} dk, UKC ${ctx.ukc} m.`);
+    parts.push(Number(ctx.cpa) < 1.0 || Number(ctx.ukc) < 1.5 ? 'Oncelik: hiz/rota emniyeti, ECDIS route check, radar target ve kaptana erken rapor.' : 'Oncelik: route monitor, next waypoint, VTS/reporting point ve logbook satirini temiz tut.');
+  }else if(/cihaz|radar|vhf|gmdss|ais|dsc|arpa|ecdis|sart|epirb/.test(t)){
+    parts.push(ctx.devices.length ? `Acik tekrar gorevleri: ${ctx.devices.slice(0,4).join(', ')}.` : 'Acil cihaz tekrar gorevi yok; yine de Radar/ECDIS/VHF cross-check en iyi rutin.');
+    parts.push('Pratik sirasi: once dogru cihaz, sonra menu, sonra alarm/target/kanal, en sonda logbook veya radio log.');
+  }else if(/rapor|kaptan|ne diyeyim|smcp|ingilizce|vhf/.test(t)){
+    parts.push(`Kisa rapor formatin: "Master, current situation ${ctx.scene}. Next ${ctx.nextStep}. CPA ${ctx.cpa}, UKC ${ctx.ukc}, ETA ${ctx.eta}. My recommendation: verify and log."`);
+    parts.push('Turkce mantik: mevki + risk + yaptigin kontrol + istedigin karar. Uzatma, belirsiz konusma.');
+  }else if(/hata|yanlis|toparla|near|miss|kaza|dusuyor|dustu/.test(t)){
+    parts.push(ctx.risk >= 5 ? 'Hata zinciri sicak: ofis/PSC/crew guveni etkilenebilir. Once olay kaydi, sonra root cause, sonra corrective action yaz.' : 'Hata zinciri kontrol altında. Yine de neyi gordun, neyi gec fark ettin, nasil kapattin diye logbook notu dus.');
+    parts.push('Toparlama sirasi: emniyet -> kaptan bilgilendirme -> cihaz/veri teyidi -> logbook -> gerekiyorsa sirket maili.');
+  }else if(/kariyer|uzman|terfi|kontrat|hangi alan|calisayim/.test(t)){
+    parts.push(`Su an en belirgin hat: ${ctx.specialty}. Bilgi ${ctx.knowledge}, sayginlik ${ctx.respect}, dinclik ${ctx.fatigue}.`);
+    parts.push(ctx.knowledge < 55 ? 'Bugun ECDIS/Radar/GMDSS pratigi iyi yatirim olur.' : ctx.fatigue < 35 ? 'Bugun kariyer icin en iyi hamle uyku; yorgunluk karar kalitesini bozuyor.' : 'Bir sonraki hedef: kaptan review icin bir temiz passage plan veya cihaz pratigi kapat.');
+  }else{
+    parts.push(`Sahne: ${ctx.scene}. Mission Director sonraki adim: ${ctx.nextStep}.`);
+    parts.push(`Kisa tavsiye: once durumu oku, sonra cihaz/veri teyidi yap, kaptana net rapor ver, logbook'u bos birakma.`);
+    if(ctx.fatigue < 35) parts.push('Ek not: dinclik dusuk. Riskli kahramanlik yerine prosedurlu ve sakin secenekleri tercih et.');
+  }
+  if(voyagePressure.caution >= 7) parts.push('Hava/deniz baskisi yuksek: radar, VHF ve route monitor zorunlu gibi dusun.');
+  return parts.join(' ');
+}
+function sendPhoneAiMessage(){
+  const inp = document.getElementById('phone-ai-input');
+  const text = (inp?.value || '').trim();
+  if(!text) return;
+  if(inp) inp.value = '';
+  phoneAiState.messages.push({from:'Sen', text, me:true});
+  const answer = buildPhoneAiAnswer(text);
+  phoneAiState.messages.push({from:'AI Mate', text:answer, me:false});
+  phoneAiState.messages = phoneAiState.messages.slice(-30);
+  addLiveLogbook('AI MATE', `Soru: ${text} / Oneri: ${answer.slice(0,120)}...`, true);
+  renderPhone();
+}
+function renderPhoneAiApp(){
+  const ctx = getPhoneAiContext();
+  const msgs = (phoneAiState.messages || []).slice(-18).map(m=>`
+    <div class="phone-msg ${m.me?'me':''} ai">
+      <div class="phone-msg-name">${phoneSafe(m.me?'Sen':m.from)}</div>
+      <div class="phone-bubble">${phoneSafe(m.text)}</div>
+    </div>`).join('');
+  return `<div class="phone-app-panel phone-ai-panel">
+    <div class="phone-app-head"><button class="phone-small-btn" onclick="setPhoneAppView('home')">Geri</button><span>AI Mate</span></div>
+    <div class="phone-ai-status">
+      <b>Canli baglam</b>
+      <small>${phoneSafe(ctx.route)} · WP ${phoneSafe(ctx.nextWp)} · CPA ${phoneSafe(ctx.cpa)} · UKC ${phoneSafe(ctx.ukc)} · ${phoneSafe(ctx.specialty)}</small>
+    </div>
+    <div class="phone-ai-quick">
+      <button onclick="askPhoneAiQuick('scene')">Sahne</button>
+      <button onclick="askPhoneAiQuick('route')">Rota</button>
+      <button onclick="askPhoneAiQuick('device')">Cihaz</button>
+      <button onclick="askPhoneAiQuick('report')">Rapor</button>
+      <button onclick="askPhoneAiQuick('weak')">Hata</button>
+      <button onclick="askPhoneAiQuick('career')">Kariyer</button>
+    </div>
+    <div class="phone-ai-chat">${msgs}</div>
+    <div class="phone-ai-compose">
+      <input id="phone-ai-input" placeholder="AI Mate'e sor..." onkeydown="if(event.key==='Enter') sendPhoneAiMessage()">
+      <button onclick="sendPhoneAiMessage()">Sor</button>
+    </div>
+  </div>`;
+}
 function renderPhoneAppMenu(){
   if(phoneAppView === 'settings') return renderPhoneSettings();
   if(phoneAppView === 'photos') return renderPhonePhotosApp();
@@ -21829,8 +21977,10 @@ function renderPhoneAppMenu(){
   if(phoneAppView === 'bank') return renderPhoneBankApp();
   if(phoneAppView === 'weather') return renderPhoneWeatherApp();
   if(phoneAppView === 'notes') return renderPhoneNotesApp();
+  if(phoneAppView === 'ai') return renderPhoneAiApp();
   return `<div class="phone-app-grid phone-menu-grid">
     <button class="phone-app menu" onclick="setPhoneTab('messages')"><b>MSG</b>Mesajlar</button>
+    <button class="phone-app menu ai" onclick="setPhoneAppView('ai')"><b>AI</b>AI Mate</button>
     <button class="phone-app menu mail" onclick="setPhoneAppView('mail')"><b>@</b>Mail</button>
     <button class="phone-app menu web" onclick="setPhoneSite('home')"><b>NET</b>Internet</button>
     <button class="phone-app menu camera" onclick="phoneTakePhoto()"><b>CAM</b>Fotograf</button>
@@ -22782,6 +22932,40 @@ function buildSpecialtyTreePanel(){
   </div>`;
 }
 
+function buildStoryDirectorPanel(){
+  const sc = sceneQueue[currentIdx] || {};
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const rank = getRankName ? getRankName() : 'Stajyer';
+  const shipTypeLabel = (typeof SHIP_TYPES !== 'undefined' && SHIP_TYPES?.[selType]?.nm) ? SHIP_TYPES[selType].nm : '';
+  const ship = selectedStartScenario?.title || shipTypeLabel || selType || 'gemi';
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  const domain = getSceneDomain ? getSceneDomain(sc) : 'bridge';
+  const flow = ['Vardiya al','Hava / rota oku'];
+  if(/bridge|radar|ecdis|seyir|comms/.test(domain)) flow.push('CPA/UKC izle','VHF/VTS dinle');
+  else if(/deck|cargo/.test(domain)) flow.push('Guvartede emniyet','Yuk/halat sirasi');
+  else if(/engine/.test(domain)) flow.push('Alarm trendi al','Kopruye teknik rapor');
+  else if(/crew/.test(domain)) flow.push('Gerilimi dusur','Kaptana resmi not');
+  else flow.push('Cihaz/veri teyit','Kisa rapor');
+  flow.push(heat>=5?'Duzeltici aksiyon':'Logbook gir','Teslim / follow-up');
+  const nextSceneBias = heat>=6 ? 'Sonraki sahnelerde kaptan/ofis daha cok soru sorar.'
+    : stats.dinclik < 35 ? 'Yorgunluk sahnelerinde sure kisalir ve aldatıcı secenek artar.'
+    : route ? 'Seyir rotasi ilerledikce harita, VTS ve cihaz gorevleri acilir.'
+    : 'Rota secimi gelirse seyir omurgasi daha net akar.';
+  return `<div class="story-director-panel">
+    <div class="story-director-head">
+      <div><b>Ana Hikaye Yonetmeni</b><small>Rota + gemi tipi + rutbe + onceki hata izine gore sahne akisi</small></div>
+      <span>${phoneSafe(rank)} · ${phoneSafe(ship)}</span>
+    </div>
+    <div class="story-director-flow">${flow.map((f,i)=>`<em class="${i===2?'active':''}">${phoneSafe(f)}</em>`).join('')}</div>
+    <div class="story-director-note">${phoneSafe(nextSceneBias)}</div>
+    <div class="sim-actions compact">
+      <button onclick="openMap()">Seyir ekranı</button>
+      <button onclick="openDevices()">Cihaz zoom</button>
+      <button onclick="openPhoneAi()">AI Mate'e sor</button>
+    </div>
+  </div>`;
+}
+
 function renderSimCenter(){
   const body=document.getElementById('sim-body'); if(!body) return;
   const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
@@ -22793,6 +22977,9 @@ function renderSimCenter(){
   body.innerHTML = `<div class="sim-dashboard">
     <div class="sim-section wide">
       ${buildMissionDirector2Panel()}
+    </div>
+    <div class="sim-section wide">
+      ${buildStoryDirectorPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>VARDIYA / ROTA</span><span>${phoneSafe(watchState.code)}</span></div>

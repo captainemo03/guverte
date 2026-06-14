@@ -1777,6 +1777,7 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-app.menu.weather{background:linear-gradient(180deg,#3388b8,#16445e);}
 .phone-app.menu.crew{background:linear-gradient(180deg,#b05a82,#613047);}
 .phone-app.menu.course{background:linear-gradient(180deg,#7280c8,#323d78);}
+.phone-app.menu.ai{background:linear-gradient(180deg,#23a7c7,#134b6b);}
 .phone-app.menu{position:relative;overflow:hidden;}
 .phone-app.menu::after{content:"";position:absolute;inset:-40% -20%;background:linear-gradient(120deg,transparent 0 38%,rgba(255,255,255,.18) 48%,transparent 58%);transform:translateX(-80%);animation:phoneIconSweep 5.4s ease-in-out infinite;}
 .phone-menu-hint{margin-top:10px;border:1px solid rgba(111,146,178,.16);border-radius:10px;background:rgba(5,14,24,.62);padding:8px;color:#9dbdd5;font-size:9px;line-height:1.45;font-family:'Share Tech Mono',monospace;}
@@ -1798,6 +1799,18 @@ animation:straitFlow 2.8s linear infinite;}
 .phone-page-content{padding:9px;color:#dcefff;font-size:11px;line-height:1.45;}
 .phone-page-card{border:1px solid rgba(111,146,178,.14);border-radius:8px;background:rgba(255,255,255,.04);padding:7px;margin-top:7px;}
 .phone-page-card.warn{border-color:rgba(214,92,92,.34);color:#ffcccc;}
+.phone-ai-panel{height:100%;grid-template-rows:auto auto 1fr auto;}
+.phone-ai-status{border:1px solid rgba(127,195,255,.22);border-radius:12px;background:linear-gradient(180deg,rgba(13,48,73,.82),rgba(5,14,24,.9));padding:8px;color:#dff1ff;}
+.phone-ai-status b{display:block;color:#fff;font:10px 'Share Tech Mono',monospace;margin-bottom:4px;}
+.phone-ai-status small{display:block;color:#a9c9de;font-size:9px;line-height:1.35;}
+.phone-ai-quick{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.phone-ai-quick button{border:1px solid rgba(127,195,255,.24);border-radius:999px;background:#12304d;color:#dff1ff;padding:6px 4px;font:8px 'Share Tech Mono',monospace;cursor:pointer;}
+.phone-ai-quick button:hover{border-color:var(--gold);color:#fff;}
+.phone-ai-chat{min-height:0;overflow:auto;border:1px solid rgba(111,146,178,.14);border-radius:12px;background:rgba(5,14,24,.62);padding:7px;}
+.phone-msg.ai .phone-bubble{background:#102f49;border:1px solid rgba(127,195,255,.18);}
+.phone-ai-compose{display:flex;gap:5px;border-top:1px solid rgba(111,146,178,.16);padding-top:7px;}
+.phone-ai-compose input{flex:1;min-width:0;background:#0d2033;border:1px solid rgba(111,146,178,.24);border-radius:999px;color:#fff;padding:7px 9px;font-size:10px;outline:none;}
+.phone-ai-compose button{border:1px solid rgba(127,195,255,.28);border-radius:8px;background:#17324e;color:#dff1ff;padding:7px 9px;font-size:10px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
 @keyframes phoneGlass4K{0%,100%{transform:translateX(-12%);opacity:.42;}50%{transform:translateX(12%);opacity:.68;}}
 @keyframes phoneIconSweep{0%,78%,100%{transform:translateX(-80%);}88%{transform:translateX(75%);}}
 @media (max-width:520px){
@@ -1905,6 +1918,15 @@ animation:straitFlow 2.8s linear infinite;}
 .specialty-node p{margin:0;color:#a9c9de;font-size:9px;line-height:1.35;}
 .specialty-node i{display:block;height:7px;border-radius:99px;background:rgba(111,146,178,.16);overflow:hidden;}
 .specialty-node u{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2e6bbf,#5dbf8a,#d4a017);box-shadow:0 0 12px rgba(127,195,255,.15);}
+.story-director-panel{display:grid;gap:10px;border:1px solid rgba(127,195,255,.2);border-radius:12px;background:linear-gradient(135deg,rgba(7,19,36,.86),rgba(9,38,54,.7));padding:12px;}
+.story-director-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.story-director-head b{display:block;color:#fff;font:12px 'Share Tech Mono',monospace;letter-spacing:.7px;}
+.story-director-head small{display:block;color:#9dbdd5;font-size:10px;line-height:1.35;margin-top:3px;}
+.story-director-head span{border:1px solid rgba(127,195,255,.24);border-radius:999px;background:rgba(5,14,24,.76);padding:6px 8px;color:#ffe2a2;font:9px 'Share Tech Mono',monospace;white-space:nowrap;}
+.story-director-flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;}
+.story-director-flow em{position:relative;border:1px solid rgba(111,146,178,.18);border-radius:8px;background:rgba(5,14,24,.72);padding:8px 6px;color:#cfeaff;font:9px/1.25 'Share Tech Mono',monospace;font-style:normal;text-align:center;min-height:44px;display:grid;place-items:center;}
+.story-director-flow em.active{border-color:rgba(212,160,23,.42);background:rgba(42,28,8,.56);color:#ffe2a2;box-shadow:0 0 16px rgba(212,160,23,.08);}
+.story-director-note{border:1px solid rgba(111,146,178,.14);border-radius:9px;background:rgba(5,14,24,.64);padding:8px;color:#a9c9de;font-size:10px;line-height:1.4;}
 .sim-device-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
 .sim-device-card{min-height:90px;border:1px solid rgba(127,195,255,.2);border-radius:9px;background:radial-gradient(circle at 30% 30%,rgba(46,107,191,.18),transparent 48%),rgba(5,14,24,.86);padding:8px;position:relative;overflow:hidden;}
 .sim-device-card b{display:block;color:#fff;font:10px 'Share Tech Mono',monospace;margin-bottom:5px;}
@@ -2036,9 +2058,9 @@ animation:straitFlow 2.8s linear infinite;}
 .premium-sim-grid b{display:block;color:#fff;font-size:10px;margin-bottom:4px;}
 .premium-sim-grid small{display:block;color:#9dbdd5;font-size:9px;line-height:1.35;}
 @keyframes simSweep{0%{transform:translateX(0) rotate(18deg);opacity:.2}50%{opacity:1}100%{transform:translateX(230%) rotate(18deg);opacity:.2}}
-@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.mission2-grid,.specialty-tree{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry{grid-template-columns:1fr 1fr;}}
+@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.mission2-grid,.specialty-tree{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry,.story-director-flow{grid-template-columns:1fr 1fr;}}
 @media (max-width:820px){.charter-sof,.premium-sim-grid,.training-roadmap,.premium-preview-strip{grid-template-columns:1fr 1fr;}.charter-form-grid,.document-form-grid{grid-template-columns:1fr;}}
-@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.specialty-tree{grid-template-columns:1fr;}.mission2-top,.mission2-consequence{align-items:flex-start;flex-direction:column;}.mission2-badge{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}}
+@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.specialty-tree,.story-director-flow{grid-template-columns:1fr;}.mission2-top,.mission2-consequence,.story-director-head{align-items:flex-start;flex-direction:column;}.mission2-badge,.story-director-head span{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}}
 @media (max-width:560px){
   #home-screen{justify-content:flex-start;padding:18px 12px 28px;}
   .home-ship{font-size:48px;}
