@@ -555,7 +555,11 @@ const STYPES=[
 const PREMIUM_KEY = 'guverte-premium-v1';
 const PREMIUM_PRODUCT_ID = 'premium_full_pack';
 const PREMIUM_PRICE_LABEL = '75 TL';
+const ADS_REMOVAL_KEY = 'guverte-no-ads-v1';
+const ADS_REMOVAL_PRODUCT_ID = 'remove_ads';
+const ADS_REMOVAL_PRICE_LABEL = '50 TL';
 let premiumUnlocked = (()=>{try{return localStorage.getItem(PREMIUM_KEY)==='1';}catch(e){return false;}})();
+let adsRemoved = (()=>{try{return localStorage.getItem(ADS_REMOVAL_KEY)==='1';}catch(e){return false;}})();
 const PREMIUM_PACKAGE_CATALOG = [
   'Proje yuk ve heavy-lift',
   'Kruvaziyer / yolcu operasyonu',
@@ -612,6 +616,20 @@ function getPremiumBillingBridge(){
             reject(err);
           }
         });
+      },
+      restoreProduct(productId){
+        return new Promise((resolve, reject)=>{
+          pendingResolve = resolve;
+          pendingReject = reject;
+          try{
+            if(typeof window.GuverteBillingNative.restoreProduct === 'function') window.GuverteBillingNative.restoreProduct(productId);
+            else throw new Error('Bu uygulama surumunde urun bazli geri yukleme yok.');
+          }catch(err){
+            pendingResolve = null;
+            pendingReject = null;
+            reject(err);
+          }
+        });
       }
     };
     return window.GuverteBilling;
@@ -641,6 +659,29 @@ async function openPremiumPurchase(){
   }
   showNotif('💳','Premium Ucretli Paket',`${PREMIUM_PRICE_LABEL} · Google Play Billing baglaninca bu buton odeme ekranini acar. Paket: ${PREMIUM_PACKAGE_CATALOG.join(' · ')}`);
 }
+async function openAdsRemovalPurchase(){
+  if(adsRemoved){
+    showNotif('🚫','Reklamlar Kapali','Reklamlari kaldirma paketi zaten aktif.');
+    return;
+  }
+  const billing = getPremiumBillingBridge();
+  if(billing && typeof billing.purchasePremium === 'function'){
+    try{
+      showNotif('💳','Reklamlari Kaldir',`${ADS_REMOVAL_PRICE_LABEL} · Google Play odeme ekrani aciliyor.`);
+      const result = await billing.purchasePremium(ADS_REMOVAL_PRODUCT_ID);
+      const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
+      if(result?.ok && receipt){
+        grantAdsRemovalFromPurchase(`GP-${receipt}`);
+      }else{
+        showNotif('🔒','Odeme Tamamlanmadi','Reklam kaldirma onayi gelmedi. Satin alma yapildiysa geri yukleme deneyebilirsin.');
+      }
+    }catch(err){
+      showNotif('⚠️','Odeme Baslatilamadi',String(err?.message || err || 'Google Play Billing baglantisi kurulamadi.'));
+    }
+    return;
+  }
+  showNotif('💳','Reklamlari Kaldir',`${ADS_REMOVAL_PRICE_LABEL} · Google Play Billing baglaninca bu buton odeme ekranini acar.`);
+}
 async function restorePremiumPurchase(){
   const billing = getPremiumBillingBridge();
   if(!billing || typeof billing.restorePremium !== 'function'){
@@ -660,6 +701,25 @@ async function restorePremiumPurchase(){
     showNotif('⚠️','Geri Yukleme Basarisiz',String(err?.message || err || 'Satin alma gecmisi okunamadi.'));
   }
 }
+async function restoreAdsRemovalPurchase(){
+  const billing = getPremiumBillingBridge();
+  if(!billing || typeof billing.restoreProduct !== 'function'){
+    showNotif('🔁','Geri Yukleme Hazir Degil','Google Play Billing urun bazli geri yukleme hazir degil.');
+    return;
+  }
+  try{
+    showNotif('🔁','Reklam Paketi','Google Play satin alma gecmisi kontrol ediliyor.');
+    const result = await billing.restoreProduct(ADS_REMOVAL_PRODUCT_ID);
+    const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
+    if(result?.ok && receipt){
+      grantAdsRemovalFromPurchase(`GP-${receipt}`);
+    }else{
+      showNotif('🔒','Paket Bulunamadi','Bu Google Play hesabinda reklam kaldirma satin alma bulunamadi.');
+    }
+  }catch(err){
+    showNotif('⚠️','Geri Yukleme Basarisiz',String(err?.message || err || 'Satin alma gecmisi okunamadi.'));
+  }
+}
 function grantPremiumPackageFromPurchase(receipt=''){
   if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
     showNotif('🔒','Odeme Onayi Gerekli','Premium sadece gecerli satin alma onayi ile acilir.');
@@ -668,6 +728,17 @@ function grantPremiumPackageFromPurchase(receipt=''){
   premiumUnlocked = true;
   try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
   showNotif('🔓','Premium Aktif','Odeme onayi alindi. Ozel gemiler, ileri operasyonlar ve pro kriz paketleri acildi.');
+  buildIntro();
+  return true;
+}
+function grantAdsRemovalFromPurchase(receipt=''){
+  if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
+    showNotif('🔒','Odeme Onayi Gerekli','Reklam kaldirma sadece gecerli satin alma onayi ile acilir.');
+    return false;
+  }
+  adsRemoved = true;
+  try{localStorage.setItem(ADS_REMOVAL_KEY,'1');}catch(e){}
+  showNotif('🚫','Reklamlar Kaldirildi','50 TL reklam kaldirma paketi aktif edildi.');
   buildIntro();
   return true;
 }
@@ -10643,7 +10714,7 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button><button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button><button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button><button type="button" onclick="openAdsRemovalPurchase()">${adsRemoved?'Reklamsiz Aktif':`${ADS_REMOVAL_PRICE_LABEL} Reklam Kaldir`}</button><button type="button" onclick="restoreAdsRemovalPurchase()">Reklam Geri Yukle</button>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
@@ -15374,6 +15445,7 @@ function buildSavePayload(){
     gameplayMode,
     missionDirectorState,
     premiumUnlocked,
+    adsRemoved,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
     currentIdx,
@@ -15491,6 +15563,7 @@ function applyLoadedGameState(data){
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
   premiumUnlocked = !!data.premiumUnlocked || premiumUnlocked;
+  adsRemoved = !!data.adsRemoved || adsRemoved;
   selYear = data.selYear || 2018;
   selType = data.selType || 'kuru';
   selKontrat = Number.isFinite(data.selKontrat) ? data.selKontrat : 0;

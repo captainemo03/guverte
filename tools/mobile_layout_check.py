@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=119",
-        "index.css?v=108",
+        "index.js?v=120",
+        "index.css?v=109",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -111,6 +111,15 @@ REQUIRED = {
         "ship-tab-card",
         "renderShipChoiceSummary",
         "introMenuPage === 'ship'",
+    ],
+    "cinema exit and ad removal": [
+        "cinema-exit-btn",
+        "toggleCinemaMode(false)",
+        "ADS_REMOVAL_PRODUCT_ID",
+        "ADS_REMOVAL_PRICE_LABEL",
+        "openAdsRemovalPurchase",
+        "restoreAdsRemovalPurchase",
+        "adsRemoved",
     ],
     "clean gameplay ui": [
         "stats-summary",

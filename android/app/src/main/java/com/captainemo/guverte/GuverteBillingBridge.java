@@ -19,6 +19,7 @@ import java.util.List;
 
 public class GuverteBillingBridge implements PurchasesUpdatedListener {
     private static final String PREMIUM_PRODUCT_ID = "premium_full_pack";
+    private static final String ADS_REMOVAL_PRODUCT_ID = "remove_ads";
     private final Activity activity;
     private final WebView webView;
     private final BillingClient billingClient;
@@ -35,13 +36,19 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
 
     @JavascriptInterface
     public void purchasePremium(String productId) {
-        final String safeProductId = PREMIUM_PRODUCT_ID.equals(productId) ? productId : PREMIUM_PRODUCT_ID;
+        final String safeProductId = normalizeProductId(productId);
         connect(() -> queryAndLaunchPurchase(safeProductId));
     }
 
     @JavascriptInterface
     public void restorePremium() {
-        connect(this::queryOwnedPremium);
+        connect(() -> queryOwnedProduct(PREMIUM_PRODUCT_ID));
+    }
+
+    @JavascriptInterface
+    public void restoreProduct(String productId) {
+        final String safeProductId = normalizeProductId(productId);
+        connect(() -> queryOwnedProduct(safeProductId));
     }
 
     private void connect(Runnable onReady) {
@@ -103,7 +110,7 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
         });
     }
 
-    private void queryOwnedPremium() {
+    private void queryOwnedProduct(String productId) {
         QueryPurchasesParams params = QueryPurchasesParams.newBuilder()
                 .setProductType(BillingClient.ProductType.INAPP)
                 .build();
@@ -112,24 +119,29 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
                 sendResult(false, "", "Satin alma geri yuklenemedi: " + billingResult.getDebugMessage());
                 return;
             }
-            Purchase premium = findPremiumPurchase(purchases);
-            if (premium == null) {
-                sendResult(false, "", "Bu Google Play hesabinda premium satin alma bulunamadi.");
+            Purchase purchase = findKnownPurchase(purchases, productId);
+            if (purchase == null) {
+                sendResult(false, "", "Bu Google Play hesabinda satin alma bulunamadi: " + productId);
                 return;
             }
-            handlePurchase(premium);
+            handlePurchase(purchase, productId);
         });
     }
 
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
-            Purchase premium = findPremiumPurchase(purchases);
+            Purchase premium = findKnownPurchase(purchases, PREMIUM_PRODUCT_ID);
             if (premium != null) {
-                handlePurchase(premium);
+                handlePurchase(premium, PREMIUM_PRODUCT_ID);
                 return;
             }
-            sendResult(false, "", "Satin alma listesinde premium paket yok.");
+            Purchase adsRemoval = findKnownPurchase(purchases, ADS_REMOVAL_PRODUCT_ID);
+            if (adsRemoval != null) {
+                handlePurchase(adsRemoval, ADS_REMOVAL_PRODUCT_ID);
+                return;
+            }
+            sendResult(false, "", "Satin alma listesinde tanimli urun yok.");
             return;
         }
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
@@ -139,10 +151,10 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
         sendResult(false, "", "Satin alma basarisiz: " + billingResult.getDebugMessage());
     }
 
-    private Purchase findPremiumPurchase(List<Purchase> purchases) {
+    private Purchase findKnownPurchase(List<Purchase> purchases, String productId) {
         if (purchases == null) return null;
         for (Purchase purchase : purchases) {
-            if (purchase.getProducts().contains(PREMIUM_PRODUCT_ID)
+            if (purchase.getProducts().contains(productId)
                     && purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
                 return purchase;
             }
@@ -150,26 +162,37 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
         return null;
     }
 
-    private void handlePurchase(Purchase purchase) {
+    private void handlePurchase(Purchase purchase, String productId) {
         if (!purchase.isAcknowledged()) {
             AcknowledgePurchaseParams acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
                     .setPurchaseToken(purchase.getPurchaseToken())
                     .build();
             billingClient.acknowledgePurchase(acknowledgeParams, billingResult -> {
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    sendResult(true, purchase.getPurchaseToken(), "");
+                    sendResult(true, purchase.getPurchaseToken(), productId, "");
                 } else {
                     sendResult(false, "", "Satin alma onaylanamadi: " + billingResult.getDebugMessage());
                 }
             });
         } else {
-            sendResult(true, purchase.getPurchaseToken(), "");
+            sendResult(true, purchase.getPurchaseToken(), productId, "");
         }
     }
 
+    private String normalizeProductId(String productId) {
+        if (ADS_REMOVAL_PRODUCT_ID.equals(productId)) return ADS_REMOVAL_PRODUCT_ID;
+        if (PREMIUM_PRODUCT_ID.equals(productId)) return PREMIUM_PRODUCT_ID;
+        return PREMIUM_PRODUCT_ID;
+    }
+
     private void sendResult(boolean ok, String token, String message) {
+        sendResult(ok, token, "", message);
+    }
+
+    private void sendResult(boolean ok, String token, String productId, String message) {
         String json = "{\"ok\":" + ok
                 + ",\"purchaseToken\":\"" + escapeJson(token) + "\""
+                + ",\"productId\":\"" + escapeJson(productId) + "\""
                 + ",\"message\":\"" + escapeJson(message) + "\"}";
         String script = "window.__guverteBillingNativeResult && window.__guverteBillingNativeResult(" + json + ");";
         activity.runOnUiThread(() -> webView.evaluateJavascript(script, null));

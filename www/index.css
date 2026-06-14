@@ -301,6 +301,9 @@ input[type=text]::placeholder{color:var(--text3);}
 #more-tools-panel .tb-btn{min-height:34px;}
 #game.cinema-mode #clock-wrap,#game.cinema-mode #contract-bar,#game.cinema-mode #weather-bar,#game.cinema-mode #opsbar,#game.cinema-mode #live-watch-feed,#game.cinema-mode #guidance-strip,#game.cinema-mode #mission-director,#game.cinema-mode #stats-summary,#game.cinema-mode #statrow,#game.cinema-mode #psychrow,#game.cinema-mode #toolbar,#game.cinema-mode #more-tools-panel,#game.cinema-mode #botbar{display:none!important;}
 #game.cinema-mode #topbar{background:linear-gradient(180deg,rgba(3,10,18,.72),rgba(3,10,18,.2));border-bottom:0;position:absolute;left:0;right:0;top:0;z-index:12;}
+#cinema-exit-btn{display:none;position:fixed;right:14px;top:14px;z-index:80;border:1px solid rgba(212,160,23,.55);border-radius:999px;background:rgba(5,14,24,.88);color:#ffe2a2;padding:9px 12px;font:10px 'Share Tech Mono',monospace;letter-spacing:.8px;box-shadow:0 10px 26px rgba(0,0,0,.32);cursor:pointer;}
+#game.cinema-mode #cinema-exit-btn{display:block;}
+#cinema-exit-btn:hover{background:rgba(44,29,8,.94);color:#fff;border-color:rgba(255,226,162,.8);}
 #game.cinema-mode #scene-graphic{min-height:clamp(210px,38vh,340px);}
 #game.cinema-mode #story{padding-top:18px;}
 #game.cinema-mode #speechstage{grid-template-columns:180px minmax(0,1fr) 180px;gap:24px;}
