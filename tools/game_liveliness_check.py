@@ -274,6 +274,17 @@ CHECKS = {
         "sim-training-grid",
         "monthlyCaptainReviewState",
     ],
+    "mission director 2 spine": [
+        "getMissionDirector2Steps",
+        "buildMissionDirector2Panel",
+        "Mission Director 2.0",
+        "buildSpecialtyTreePanel",
+        "awardSpecialtyXpFromChoice",
+        "GEMI TIPI UZMANLIK AGACI",
+        "Kaza Replay",
+        "Kamara / Serbest Zaman",
+        "Cihaz Sinavlari",
+    ],
     "passage operations pack": [
         "getPassagePlanCard",
         "getBridgeTeamRolePanel",

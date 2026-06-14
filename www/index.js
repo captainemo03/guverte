@@ -11140,6 +11140,7 @@ function handleSceneChoice(sc, c2, ch){
   }
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
   completeMissionFromChoice(sc,c2);
+  awardSpecialtyXpFromChoice(sc,c2);
   maybeQueueDevicePracticeFromScene(sc,c2);
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
@@ -13266,6 +13267,36 @@ function getTopSpecialtyLabel(){
   const labels={container:'Konteynerci',tanker:'Tankerci',bulk:'Bulkci',lng:'LNGci',offshore:'Offshore',roro:'Ro-Ro',safety:'Emniyetci',navigation:'Seyirci',people:'Insan Yoneten'};
   const top=Object.entries(specialtyXP).sort((a,b)=>b[1]-a[1])[0] || ['navigation',0];
   return `${labels[top[0]]||top[0]} (${top[1]})`;
+}
+
+function getSpecialtyMeta(){
+  return {
+    navigation:{label:'Seyirci', icon:'ECDIS', desc:'Route monitoring, CPA/TCPA, UKC, TSS ve passage plan disiplini.'},
+    safety:{label:'Emniyetci', icon:'SAFE', desc:'Fire, MOB, permit, PSC/class, near miss ve corrective action.'},
+    people:{label:'Insan Yoneten', icon:'CREW', desc:'Murettebat gerilimi, vardiya yorgunlugu, iletisim ve guven hafizasi.'},
+    tanker:{label:'Tankerci', icon:'TNK', desc:'Manifold, line-up, ESD, inert gas, COW ve cargo watch.'},
+    lng:{label:'LNGci', icon:'LNG', desc:'Reliquefaction, cargo compressor, gas detection ve low-temperature risk.'},
+    container:{label:'Konteynerci', icon:'BOX', desc:'Bay-row-tier, lashing, reefer alarm ve terminal operasyonu.'},
+    bulk:{label:'Bulkci', icon:'BLK', desc:'Loading sequence, trim, draft survey, hold cleanliness ve grab operasyonu.'},
+    offshore:{label:'Offshore', icon:'DP', desc:'Platform 500 m zone, DP alarm, ROV, cable/pipe lay ve supply run.'},
+    roro:{label:'Ro-Ro', icon:'RORO', desc:'Ramp, lashings, fire watch, vehicle deck ventilation ve stability.'}
+  };
+}
+
+function awardSpecialtyXpFromChoice(sc,c2){
+  if(!sc || !c2) return;
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''} ${c2.text||''}`.toLowerCase();
+  const quality = c2.tag === 'kritik' ? 3 : c2.tag === 'akilli' ? 2 : c2.tag === 'cesur' || c2.tag === 'sosyal' ? 1 : 0;
+  const add = (key, base=1)=>{ specialtyXP[key] = (specialtyXP[key]||0) + base + quality; };
+  if(/radar|ecdis|route|waypoint|cpa|tcpa|ukc|tss|pilot station|chart|harita|seyir/.test(blob)) add('navigation',1);
+  if(/fire|yangin|mob|abandon|permit|psc|survey|class|deficiency|near.?miss|risk|safety/.test(blob)) add('safety',1);
+  if(/crew|murettebat|kavga|complaint|yorgun|itaatsizlik|moral|aile|psikoloji|lostromo|asci|zabit/.test(blob)) add('people',1);
+  if(/tanker|manifold|line-up|esd|inert|cow|purging|gas freeing|slop|cargo control/.test(blob)) add('tanker',1);
+  if(/lng|reliquefaction|compressor|cryogenic|low temperature/.test(blob)) add('lng',2);
+  if(/container|bay|row|tier|lashing|reefer|terminal|gantry/.test(blob)) add('container',1);
+  if(/bulk|hold|grab|draft survey|trim|hatch|coal|grain/.test(blob)) add('bulk',1);
+  if(/offshore|platform|dp|rov|cable|pipe|anchor handling|ahts|psv|research|survey line/.test(blob)) add('offshore',1);
+  if(/roro|ramp|vehicle deck|car carrier/.test(blob)) add('roro',1);
 }
 
 function renderCareerPanel(){
@@ -22678,6 +22709,79 @@ function openSimCenter(){
   renderSimCenter();
 }
 
+function getMissionDirector2Steps(){
+  const sc = sceneQueue[currentIdx] || {};
+  const plan = getMissionDirectorPlan(sc);
+  const done = new Set(missionDirectorState?.completed || []);
+  const base = plan.steps?.length ? plan.steps : [
+    makeMissionStep('handover','Vardiya bilgisini al'),
+    makeMissionStep('weather','Hava/deniz durumunu oku'),
+    makeMissionStep('route','Rota ve trafik durumunu izle'),
+    makeMissionStep('report','Kaptana rapor ver'),
+    makeMissionStep('logbook','Logbook satirini temiz tut')
+  ];
+  return base.map((s,i)=>({
+    ...s,
+    status: done.has(s.id) ? 'done' : i === base.findIndex(x=>!done.has(x.id)) ? 'active' : 'locked'
+  }));
+}
+
+function buildMissionDirector2Panel(){
+  const sc = sceneQueue[currentIdx] || {};
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const st = liveVoyageState || computeLiveVoyageState(sc);
+  const steps = getMissionDirector2Steps();
+  const deviceOpen = Object.entries(devicePracticeProgress || {}).filter(([,v])=>v===0).slice(0,4);
+  const docDone = Object.keys(documentTrainingState.completed || {}).length;
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  return `<div class="mission2-panel">
+    <div class="mission2-top">
+      <div><b>Mission Director 2.0</b><small>${phoneSafe(missionDirectorState?.title || getMissionDirectorPlan(sc).title)} · sahneler artik vardiya zinciri gibi akar</small></div>
+      <div class="mission2-badge">${phoneSafe(route?.name || 'Rota bekliyor')}</div>
+    </div>
+    <div class="mission2-chain">
+      ${steps.map((s,i)=>`<button class="${s.status}" onclick="completeMissionStep('${s.id}','Mission Director 2.0: ${s.label.replace(/'/g,"\\'")}'); renderSimCenter()"><em>${i+1}</em><b>${phoneSafe(s.label)}</b></button>`).join('')}
+    </div>
+    <div class="mission2-telemetry">
+      <span><b>ETA</b>${phoneSafe(st.eta || '--')}</span>
+      <span><b>SOG/COG</b>${phoneSafe(st.sog || '--')} kt · ${phoneSafe(st.cog || '--')}</span>
+      <span><b>CPA/TCPA</b>${phoneSafe(st.cpa || '--')} nm · ${phoneSafe(st.tcpa || '--')}</span>
+      <span><b>UKC</b>${phoneSafe(st.ukc || '--')} m</span>
+      <span><b>Next WP</b>${phoneSafe(st.nextWp || getVoyageWaypoint?.()?.name || '--')}</span>
+    </div>
+    <div class="mission2-grid">
+      <button onclick="openDevices()"><b>Cihaz Sinavlari</b><small>${devicePracticeScore.ok}/${devicePracticeScore.total} tamam · ${phoneSafe(deviceOpen.map(([k])=>getDeviceDef(k)?.name || k).join(', ') || 'aktif tekrar yok')}</small></button>
+      <button onclick="openMap()"><b>Gercek Sefer Modu</b><small>Waypoint, TSS, CPA, UKC, route check ve chart gorevleri rota uzerinde calisir.</small></button>
+      <button onclick="renderSimCenter()"><b>Belge Ekranlari</b><small>NOR, SOF, Pilot Card, Hot Work, Enclosed Space ve Near Miss formlari: ${docDone}/${DOCUMENT_TRAINING_FORMS.length}</small></button>
+      <button onclick="runIncidentReplay(buildIncidentReplayTimeline(sceneQueue[currentIdx]||{}, {tag:'kritik', text:'Mission Director replay'}))"><b>Kaza Replay</b><small>Near miss olursa CPA dustu → rapor geldi → karar sonucu diye olay tekrar edilir.</small></button>
+      <button onclick="createCaptainReviewNow(); renderSimCenter()"><b>Kaptan Review</b><small>Ay sonu iyi/hata/hedef konusmasi logbook ve telefona duser.</small></button>
+      <button onclick="openCabin()"><b>Kamara / Serbest Zaman</b><small>Uyku, ders, aile, spor, gemi ici tur ve rutinler statlara etki eder.</small></button>
+    </div>
+    <div class="mission2-consequence ${heat>=6?'warn':heat<=2?'good':''}">
+      <b>Olay Zinciri</b><span>Kucuk hata → ekip guveni/ofis/PSC baskisi → kaptan sorusu → logbook/mail/replay. Su an isi: office ${consequenceTrace.office}, PSC ${consequenceTrace.psc}, crew ${consequenceTrace.trust}.</span>
+    </div>
+  </div>`;
+}
+
+function buildSpecialtyTreePanel(){
+  const meta = getSpecialtyMeta();
+  const max = Math.max(18, ...Object.values(specialtyXP || {}));
+  const order = ['navigation','safety','people','tanker','lng','container','bulk','offshore','roro'];
+  return `<div class="specialty-tree">
+    ${order.map(key=>{
+      const xp = specialtyXP[key] || 0;
+      const pct = Math.min(100, Math.round((xp / max) * 100));
+      const lvl = xp >= 42 ? 'Uzman' : xp >= 24 ? 'Yetkin' : xp >= 10 ? 'Gelisen' : 'Baslangic';
+      const m = meta[key] || {label:key,icon:key.toUpperCase(),desc:''};
+      return `<div class="specialty-node ${xp>=24?'open':''}">
+        <div><em>${phoneSafe(m.icon)}</em><b>${phoneSafe(m.label)}</b><span>${phoneSafe(lvl)} · ${xp} XP</span></div>
+        <p>${phoneSafe(m.desc)}</p>
+        <i><u style="width:${pct}%"></u></i>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
 function renderSimCenter(){
   const body=document.getElementById('sim-body'); if(!body) return;
   const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
@@ -22687,6 +22791,9 @@ function renderSimCenter(){
   const office = getOfficeBand();
   const tasks = getSimOpenTasks();
   body.innerHTML = `<div class="sim-dashboard">
+    <div class="sim-section wide">
+      ${buildMissionDirector2Panel()}
+    </div>
     <div class="sim-section">
       <div class="sim-head"><span>VARDIYA / ROTA</span><span>${phoneSafe(watchState.code)}</span></div>
       ${getSimRouteSvg()}
@@ -22806,6 +22913,10 @@ function renderSimCenter(){
         <button onclick="openCareer()">Kariyer</button>
         <button onclick="openAchievements()">Basarilar</button>
       </div>
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>GEMI TIPI UZMANLIK AGACI</span><span>${phoneSafe(getTopSpecialtyLabel())}</span></div>
+      ${buildSpecialtyTreePanel()}
     </div>
     <div class="sim-section wide">
       <div class="sim-head"><span>MURETTEBAT HAFIZASI</span><span>kararlarin iz birakir</span></div>

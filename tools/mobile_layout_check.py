@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=114",
-        "index.css?v=103",
+        "index.js?v=115",
+        "index.css?v=104",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
