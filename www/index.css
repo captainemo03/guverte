@@ -412,6 +412,55 @@ input[type=text]::placeholder{color:var(--text3);}
 .live-4k-port-haze{opacity:.46;background:radial-gradient(ellipse at 15% 77%,rgba(255,200,105,.22),transparent 24%),radial-gradient(ellipse at 78% 73%,rgba(255,200,105,.14),transparent 28%),linear-gradient(180deg,transparent 0 50%,rgba(255,200,105,.06) 68%,transparent 100%);filter:blur(.35px);animation:portHaze4K 6.5s ease-in-out infinite;}
 .live-4k-wave-burst{opacity:.42;background:radial-gradient(ellipse at 18% 78%,rgba(235,248,255,.22),transparent 18%),radial-gradient(ellipse at 56% 84%,rgba(235,248,255,.16),transparent 22%),repeating-linear-gradient(172deg,transparent 0 18px,rgba(235,248,255,.08) 20px 22px,transparent 23px 42px);animation:waveBurst4K 2.8s ease-in-out infinite;}
 .live-4k-specialist-grid{opacity:.4;background:linear-gradient(90deg,transparent 0 10%,rgba(129,247,184,.14) 10.5%,transparent 11.5%,transparent 30%,rgba(255,212,90,.1) 31%,transparent 32%),radial-gradient(circle at 72% 28%,rgba(129,247,184,.18),transparent 20%);background-size:90px 100%,auto;animation:specialistGrid4K 7s linear infinite;}
+.live-4k-depth-ships{opacity:.2;background:radial-gradient(ellipse at 18% 62%,rgba(127,195,255,.18),transparent 12%),radial-gradient(ellipse at 52% 58%,rgba(255,212,90,.1),transparent 11%),radial-gradient(ellipse at 82% 66%,rgba(127,195,255,.14),transparent 10%);filter:blur(.5px);animation:trafficWakeSlide 16s linear infinite;}
+.live-4k-lens-dust{opacity:.16;background:radial-gradient(circle at 16% 22%,rgba(255,255,255,.24) 0 1px,transparent 2px),radial-gradient(circle at 46% 28%,rgba(255,255,255,.14) 0 1px,transparent 2px),radial-gradient(circle at 78% 18%,rgba(255,255,255,.18) 0 1px,transparent 2px),radial-gradient(circle at 64% 76%,rgba(255,255,255,.12) 0 1px,transparent 2px);animation:lensDustFloat 9s ease-in-out infinite;}
+.live-graphics-boost{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;}
+.live-nav-telemetry{position:absolute;left:3%;right:3%;top:4%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;opacity:.88;}
+.live-nav-telemetry span{border:1px solid rgba(127,195,255,.22);border-radius:999px;background:rgba(4,13,22,.7);color:#cfeaff;padding:4px 6px;text-align:center;font:7px 'Share Tech Mono',monospace;box-shadow:0 0 14px rgba(127,195,255,.06);}
+.live-ais-list{position:absolute;left:4%;bottom:16%;width:150px;border:1px solid rgba(127,195,255,.22);border-radius:9px;background:rgba(3,10,18,.72);padding:7px;box-shadow:0 10px 24px rgba(0,0,0,.22);}
+.live-ais-list b{display:block;color:#7fc3ff;font:7px 'Share Tech Mono',monospace;margin-bottom:5px;}
+.live-ais-list span{display:block;color:#cfeaff;font:6.5px/1.45 'Share Tech Mono',monospace;border-top:1px solid rgba(127,195,255,.08);padding-top:3px;}
+.live-ais-list span.warn{color:#ffb0b0;animation:alarm-flash .9s infinite;}
+.live-route-trail{position:absolute;left:28%;right:22%;top:47%;height:48px;border-top:1px dashed rgba(255,215,131,.45);transform:rotate(-8deg);}
+.live-route-trail i{position:absolute;top:-5px;width:8px;height:8px;border-radius:50%;background:#ffd783;box-shadow:0 0 12px rgba(255,215,131,.45);animation:routeWpPulse 1.6s infinite;}
+.live-route-trail i:nth-child(1){left:0}.live-route-trail i:nth-child(2){left:46%;animation-delay:.25s}.live-route-trail i:nth-child(3){right:0;animation-delay:.5s}
+.live-route-trail b{position:absolute;left:18%;top:-12px;width:14px;height:20px;background:#fff;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);animation:routeShipGlide 5.2s ease-in-out infinite;}
+.live-yard-depth{position:absolute;left:8%;right:8%;bottom:20%;height:72px;opacity:.68;}
+.live-yard-depth i{position:absolute;bottom:0;width:18%;height:40%;background:linear-gradient(180deg,rgba(255,196,88,.18),rgba(8,20,32,.42));border-top:1px solid rgba(255,196,88,.28);}
+.live-yard-depth i:nth-child(1){left:3%;height:44%}.live-yard-depth i:nth-child(2){left:29%;height:68%;animation:terminalTwinkle 2.8s infinite}.live-yard-depth i:nth-child(3){left:56%;height:52%}.live-yard-depth i:nth-child(4){right:2%;height:72%;animation:terminalTwinkle 3.2s infinite}
+.live-tug-wake{position:absolute;right:14%;bottom:27%;width:118px;height:28px;background:repeating-linear-gradient(170deg,rgba(235,248,255,.16) 0 2px,transparent 3px 13px);border-radius:50%;animation:wakeFoam 4s ease-in-out infinite;}
+.live-line-tension-card{position:absolute;right:5%;bottom:17%;width:86px;border:1px solid rgba(255,216,120,.24);border-radius:8px;background:rgba(4,13,22,.72);padding:7px;}
+.live-line-tension-card b{display:block;color:#ffe2a2;font:7px 'Share Tech Mono',monospace;margin-bottom:5px;}
+.live-line-tension-card span{display:block;height:6px;border-radius:999px;background:linear-gradient(90deg,#5dbf8a,#d4a017,#c97070);animation:lineStrain .7s infinite;}
+.live-window-beads{position:absolute;inset:0;opacity:.72;}
+.live-window-beads i{position:absolute;top:-12%;width:2px;height:72px;border-radius:99px;background:linear-gradient(180deg,transparent,rgba(230,246,255,.42),transparent);animation:rainBeadFall 1.9s linear infinite;}
+.live-window-beads i:nth-child(1){left:18%;animation-delay:-.1s}.live-window-beads i:nth-child(2){left:34%;animation-delay:-.7s}.live-window-beads i:nth-child(3){left:52%;animation-delay:-1.2s}.live-window-beads i:nth-child(4){left:69%;animation-delay:-.4s}.live-window-beads i:nth-child(5){left:84%;animation-delay:-1.5s}
+.live-horizon-roll{position:absolute;left:-12%;right:-12%;bottom:34%;height:1px;background:linear-gradient(90deg,transparent,rgba(220,238,255,.36),transparent);animation:horizonRoll 2.8s ease-in-out infinite;}
+.live-ecr-trend{position:absolute;left:6%;top:15%;width:130px;height:74px;border:1px solid rgba(255,120,90,.22);border-radius:10px;background:rgba(18,8,6,.68);padding:8px;}
+.live-ecr-trend b{display:block;color:#ffb0b0;font:7px 'Share Tech Mono',monospace;margin-bottom:7px;}
+.live-ecr-trend span{display:block;height:6px;margin:7px 0;border-radius:99px;background:linear-gradient(90deg,#5dbf8a,#d4a017,#c97070);animation:ecrTrendPulse 1.1s ease-in-out infinite;}
+.live-ecr-trend span:nth-child(3){animation-delay:.2s}.live-ecr-trend span:nth-child(4){animation-delay:.4s}
+.live-engine-vibration{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,160,80,.04) 27px 29px,transparent 30px 54px);animation:engineVibe .18s steps(2,end) infinite;opacity:.5;}
+.live-ai-nudge{position:absolute;right:4%;top:52%;max-width:138px;border:1px solid rgba(35,167,199,.32);border-radius:12px;background:linear-gradient(180deg,rgba(15,58,78,.78),rgba(4,13,22,.76));padding:7px 8px;box-shadow:0 10px 26px rgba(0,0,0,.2);animation:aiNudgeFloat 4s ease-in-out infinite;}
+.live-ai-nudge b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:8px;background:#23a7c7;color:#03111b;font:9px 'Share Tech Mono',monospace;margin-right:6px;}
+.live-ai-nudge span{color:#dff1ff;font:8px/1.25 'Share Tech Mono',monospace;}
+.live-crew-shadow{position:absolute;bottom:15%;width:36px;height:92px;border-radius:24px 24px 8px 8px;background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.04));filter:blur(.3px);opacity:.22;animation:crewShift 6s ease-in-out infinite;}
+.live-crew-shadow.s1{left:12%;}.live-crew-shadow.s2{right:18%;height:74px;animation-delay:-2s;}
+.live-microtask-pulse{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);border:1px solid rgba(255,216,120,.24);border-radius:50%;animation:microTaskPing 2.4s ease-out infinite;opacity:.55;}
+.live-microtask-pulse i{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:#ffd783;box-shadow:0 0 14px rgba(255,216,120,.55);transform:translate(-50%,-50%);}
+.live-microtask-pulse span{position:absolute;left:50%;top:50%;border:1px solid rgba(255,216,120,.28);border-radius:50%;transform:translate(-50%,-50%);animation:microTaskRing 2.4s ease-out infinite;}
+.live-microtask-pulse span:nth-child(2){width:42px;height:42px}.live-microtask-pulse span:nth-child(3){width:68px;height:68px;animation-delay:.3s}
+@keyframes lensDustFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(7px,-5px)}}
+@keyframes routeWpPulse{0%,100%{opacity:.48;transform:scale(.86)}50%{opacity:1;transform:scale(1.14)}}
+@keyframes routeShipGlide{0%,100%{transform:translateX(0) rotate(8deg)}50%{transform:translateX(170px) rotate(8deg)}}
+@keyframes rainBeadFall{0%{transform:translateY(-60px);opacity:0}15%{opacity:.75}100%{transform:translateY(330px);opacity:0}}
+@keyframes horizonRoll{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(8px) rotate(1.2deg)}}
+@keyframes ecrTrendPulse{0%,100%{filter:brightness(.8);transform:scaleX(.86)}50%{filter:brightness(1.35);transform:scaleX(1)}}
+@keyframes engineVibe{0%{transform:translateX(-1px)}100%{transform:translateX(1px)}}
+@keyframes aiNudgeFloat{0%,100%{transform:translateY(0);opacity:.62}35%,70%{opacity:.95}50%{transform:translateY(-5px)}}
+@keyframes crewShift{0%,100%{transform:translateX(0);opacity:.16}50%{transform:translateX(12px);opacity:.3}}
+@keyframes microTaskPing{0%{opacity:0;transform:translate(-50%,-50%) scale(.75)}22%{opacity:.72}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+@keyframes microTaskRing{0%{opacity:.7;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.2)}}
 .live-radar-screen,.live-ecdis-screen,.live-vhf-panel,.live-engine-panel{image-rendering:auto;}
 .live-radar-screen{filter:saturate(1.14) contrast(1.08);}
 .live-radar-screen b{outline:1px solid rgba(129,247,184,.18);}

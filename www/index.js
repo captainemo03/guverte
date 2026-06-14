@@ -8797,13 +8797,50 @@ function getScene4KOverlay(sc, blob){
   if(tags.includes('premium')){
     layers.push('<div class="live-4k-premium-beam"></div><div class="live-4k-operation-sparks"></div><div class="live-4k-specialist-grid"></div>');
   }
+  layers.push('<div class="live-4k-depth-ships"></div><div class="live-4k-lens-dust"></div>');
   return `<div class="${tags.join(' ')}" aria-hidden="true">${layers.join('')}</div>`;
+}
+
+function getGraphicLivelinessOverlay(sc, blob){
+  const st = liveVoyageState || computeLiveVoyageState(sc || {});
+  const profile = getSceneBackdropProfile(sc);
+  const parts = [];
+  const navLike = /radar|bridge|kopruustu|köprüüstü|ecdis|ais|arpa|chart|route|seyir|vhf|vts|pilot/.test(blob);
+  const portLike = /harbor|liman|terminal|berth|rihtim|rıhtım|tug|pilot|mooring|all fast/.test(blob);
+  const stormLike = /storm|firtina|swell|rain|yagmur|yağmur|sis|fog|mist/.test(blob) || profile === 'storm';
+  const engineLike = /engine|makine|blackout|generator|pump|compressor|alarm/.test(blob);
+  if(navLike){
+    parts.push(`<div class="live-nav-telemetry">
+      <span>SOG ${phoneSafe(st.sog || '--')}</span><span>COG ${phoneSafe(st.cog || '---')}</span><span>CPA ${phoneSafe(st.cpa || '--')}</span><span>TCPA ${phoneSafe(st.tcpa || '--')}</span><span>UKC ${phoneSafe(st.ukc || '--')}</span>
+    </div>`);
+    parts.push(`<div class="live-ais-list">
+      <b>AIS / ARPA</b>
+      <span class="${Number(st.cpa)<1.1?'warn':''}">M/V ORION · CPA ${phoneSafe(st.cpa || '--')}</span>
+      <span>CHEM TANKER · TCPA ${phoneSafe(st.tcpa || '--')}m</span>
+      <span>FISHING · COG ${phoneSafe(st.cog || '082')}</span>
+    </div>`);
+    parts.push('<div class="live-route-trail"><i></i><i></i><i></i><b></b></div>');
+  }
+  if(portLike){
+    parts.push('<div class="live-yard-depth"><i></i><i></i><i></i><i></i></div><div class="live-tug-wake"></div><div class="live-line-tension-card"><b>LINE</b><span></span></div>');
+  }
+  if(stormLike){
+    parts.push('<div class="live-window-beads"><i></i><i></i><i></i><i></i><i></i></div><div class="live-horizon-roll"></div>');
+  }
+  if(engineLike){
+    parts.push('<div class="live-ecr-trend"><b>ECR TREND</b><span></span><span></span><span></span></div><div class="live-engine-vibration"></div>');
+  }
+  parts.push(`<div class="live-ai-nudge"><b>AI</b><span>${phoneSafe(st.alert ? 'Risk yuksek: cihaz + rapor' : 'Sahne baglami okunuyor')}</span></div>`);
+  parts.push('<div class="live-crew-shadow s1"></div><div class="live-crew-shadow s2"></div>');
+  parts.push('<div class="live-microtask-pulse"><i></i><span></span><span></span></div>');
+  return `<div class="live-graphics-boost profile-${profile}" aria-hidden="true">${parts.join('')}</div>`;
 }
 
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
   parts.push(getScene4KOverlay(sc, blob));
+  parts.push(getGraphicLivelinessOverlay(sc, blob));
   parts.push('<div class="live-watch-silhouette"></div><div class="live-status-strip"><span></span><span></span><span></span></div>');
   if(!/engine|makine|galley|asci|aşçı|kamara|cabin/.test(blob)){
     parts.push('<div class="live-passing-light l1"></div><div class="live-passing-light l2"></div>');
@@ -12646,6 +12683,7 @@ function computeLiveVoyageState(sc){
   const cpaVal = Math.max(0.25, 2.6 - pressure * 0.17 - ((sceneNo % 5) * 0.11));
   const ukcVal = Math.max(0.7, 5.4 - pressure * 0.28 - (/ukc|squat|shallow|pilot|berth/i.test(`${sc?.sub||''} ${sc?.text||''}`) ? 1.1 : 0));
   const sogVal = Math.max(3.5, 14.2 - pressure * 0.42 - (voyagePressure.speed === 'Speed azalt' ? 3.0 : voyagePressure.speed === 'Dead slow hazir' ? 8.4 : 0));
+  const cogVal = (42 + sceneNo * 17 + pressure * 5 + (activeVoyageProgress || 0) * 23) % 360;
   liveVoyageState = {
     route:route?.name || 'Rota yok',
     progress,
@@ -12654,6 +12692,7 @@ function computeLiveVoyageState(sc){
     tcpa:String(Math.max(4, Math.round(etaMin / 7))),
     ukc:ukcVal.toFixed(1),
     sog:sogVal.toFixed(1),
+    cog:String(Math.round(cogVal)).padStart(3,'0'),
     nextWp:next?.name || wp?.name || '--',
     chart:next?.chart || wp?.chart || selectedPortChart,
     alert:cpaVal < 1.0 || ukcVal < 1.5 || pressure >= 7
@@ -21462,7 +21501,7 @@ function getSceneLiveBeats(sc){
   if(!beats.length && sc && !sc.alert){
     add(850,'Gemi yasiyor: cihaz fanlari, VHF cizirtisi ve vardiya notlari arka planda akiyor.','');
   }
-  return beats.slice(0,4);
+  return beats.slice(0,5);
 }
 function scheduleSceneLiveSequence(sc){
   clearSceneLiveSequence();
@@ -24088,6 +24127,25 @@ function maybeTriggerMidScenePhone(sc){
   sceneLiveSequenceTimers.push(timer);
 }
 
+function maybeTriggerAiMateSceneNudge(sc){
+  if(!sc || sc._aiMateSceneNudge) return;
+  sc._aiMateSceneNudge = true;
+  const timer = setTimeout(()=>{
+    const ctx = getPhoneAiContext ? getPhoneAiContext() : null;
+    const prompt = ctx?.risk >= 5 ? 'Hata zinciri sicak. Once emniyet, sonra rapor, sonra logbook.'
+      : ctx?.devices?.length ? `Acik cihaz tekrar gorevi var: ${ctx.devices.slice(0,2).join(', ')}.`
+      : Number(ctx?.cpa || 9) < 1.2 ? 'CPA daraliyor. Radar/ECDIS cross-check ve kaptana kisa rapor.'
+      : 'Mission Director sonraki adimi takip et: veriyi teyit et, net rapor ver.';
+    addWatchFeed(`AI Mate: ${prompt}`, ctx?.risk >= 5 ? 'warn' : 'good');
+    if(phoneAiState?.messages){
+      phoneAiState.messages.push({from:'AI Mate', text:prompt, me:false});
+      phoneAiState.messages = phoneAiState.messages.slice(-30);
+    }
+    if(Math.random() > .35) pushPhoneMessage('AI Mate', prompt, {open:false});
+  }, 1850);
+  sceneLiveSequenceTimers.push(timer);
+}
+
 function maybeTriggerLiveRoutineFlow(sc){
   if(!sc || sc._routineFlowSent) return;
   sc._routineFlowSent = true;
@@ -24331,6 +24389,7 @@ function onSceneRender(sc){
   }
   scheduleSceneLiveSequence(sc);
   maybeTriggerMidScenePhone(sc);
+  maybeTriggerAiMateSceneNudge(sc);
   maybeTriggerLivingShipBeat(sc);
   maybeTriggerLiveRoutineFlow(sc);
   scheduleDynamicMiniChain(sc);
