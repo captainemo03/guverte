@@ -10608,6 +10608,7 @@ function renderCharacterCreator(){
 
 function buildIntro(){
   refreshShipSpecs();
+  ensureShipSelectScreen();
   refreshSaveEntryActions();
   renderPlayModeSelector();
   document.getElementById('yearsel').innerHTML='';
@@ -10636,7 +10637,7 @@ function buildIntro(){
         showNotif('🔒','Premium Gerekli','Bu ozel gemi ve pro operasyon paketleri premium pakete dahildir.');
         return;
       }
-      selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();selectedVoyageRouteKey='';renderVoyageRouteSelector();
+      selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();selectedVoyageRouteKey='';renderVoyageRouteSelector();renderShipChoiceSummary();
     };
     st.appendChild(d);
   });
@@ -10648,8 +10649,103 @@ function buildIntro(){
   updateSugs();
   renderVoyageRouteSelector();
   renderCharacterCreator();
+  renderShipChoiceSummary();
   applyLanguageUI();
   setIntroMenuPage(introMenuPage);
+}
+
+function ensureShipSelectScreen(){
+  const app = document.getElementById('app');
+  if(!app) return;
+  let screen = document.getElementById('ship-select-screen');
+  if(!screen){
+    screen = document.createElement('div');
+    screen.id = 'ship-select-screen';
+    screen.className = 'app-screen';
+    screen.innerHTML = `
+      <button type="button" class="setup-back-btn ship-back-btn" onclick="openSetupScreen()">← Hazirlik Ekrani</button>
+      <div class="ship-select-hero">
+        <div class="ship-select-icon">⚓</div>
+        <div>
+          <span>SEFER PLANLAMA</span>
+          <b>Gemi, kontrat ve rota secimi</b>
+          <p>Bu sayfada sadece gemi tipi, kontrat, rota ve gemi adi var. Oyun baslamadan once sefer dosyani temizce hazirla.</p>
+        </div>
+      </div>
+      <div class="ship-select-layout">
+        <section class="ship-select-main"></section>
+        <aside class="ship-select-side">
+          <div class="ship-select-preview">
+            <div class="ship-preview-sea"><i></i><i></i><b></b></div>
+            <div id="ship-select-summary" class="ship-select-summary"></div>
+          </div>
+          <button type="button" class="ship-select-confirm" onclick="openSetupScreen()">Secimi Onayla</button>
+        </aside>
+      </div>`;
+    const game = document.getElementById('game');
+    app.insertBefore(screen, game || null);
+  }
+
+  const intro = document.getElementById('intro');
+  if(intro && !document.getElementById('ship-choice-summary')){
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'fcard ship-choice-summary-card';
+    summaryCard.innerHTML = `
+      <div class="fcard-t">SEFER / GEMI SECIMI</div>
+      <div id="ship-choice-summary" class="ship-choice-summary"></div>
+      <button type="button" class="ship-choice-open" onclick="openShipSelectScreen()">Gemi, kontrat ve rota sec</button>`;
+    const creatorCard = document.getElementById('creator-wrap')?.closest('.fcard');
+    intro.insertBefore(summaryCard, creatorCard?.nextSibling || document.getElementById('go-btn'));
+  }
+
+  const main = screen.querySelector('.ship-select-main');
+  const side = screen.querySelector('.ship-select-side');
+  const shipCard = document.getElementById('shiptype')?.closest('.fcard');
+  const contractCard = document.getElementById('kontratsel')?.closest('.fcard');
+  const routeCard = document.getElementById('route-select-grid')?.closest('.fcard');
+  const nameCard = document.getElementById('shipnameinp')?.closest('.fcard');
+  [shipCard, contractCard, routeCard].forEach(card=>{
+    if(card && main && card.parentElement !== main){
+      card.classList.add('ship-select-card');
+      main.appendChild(card);
+    }
+  });
+  if(nameCard && side && nameCard.parentElement !== side){
+    nameCard.classList.add('ship-select-card');
+    side.insertBefore(nameCard, side.querySelector('.ship-select-confirm'));
+    const inp = document.getElementById('shipnameinp');
+    if(inp && !inp.dataset.summaryBound){
+      inp.dataset.summaryBound = '1';
+      inp.addEventListener('input', renderShipChoiceSummary);
+    }
+  }
+}
+
+function getSelectedContractDef(){
+  const konts = KONTRAT_DEFS[selType] || [];
+  return konts[selKontrat] || konts[0] || {ay:0, izin:0, ucret:'-'};
+}
+
+function renderShipChoiceSummary(){
+  const type = STYPES.find(t=>t.key===selType) || STYPES[0];
+  const spec = getShipSpec(type?.key || selType);
+  const kont = getSelectedContractDef();
+  const route = getSelectedVoyageRoute ? getSelectedVoyageRoute() : null;
+  const shipName = document.getElementById('shipnameinp')?.value || (SNAMES[selType] || ['M/V Ege Meltem'])[0];
+  const locked = type?.premium && !premiumUnlocked;
+  const html = `
+    <div class="ship-summary-top">
+      <span class="ship-summary-ico">${locked ? '🔒' : (type?.ico || '⚓')}</span>
+      <div><b>${phoneSafe(type?.nm || 'Gemi')}</b><small>${phoneSafe(shipName || 'Gemi adi secilmedi')}</small></div>
+    </div>
+    <div class="ship-summary-grid">
+      <span><b>Tip</b>${phoneSafe(type?.ds || '-')}</span>
+      <span><b>Tonaj</b>${phoneSafe(spec?.tonLabel || type?.ton || '-')}</span>
+      <span><b>Surat</b>${phoneSafe(spec?.speedLabel || type?.spd || '-')}</span>
+      <span><b>Kontrat</b>${phoneSafe(kont?.ay || '-')}+${phoneSafe(kont?.izin || '-')} ay</span>
+    </div>
+    <div class="ship-summary-route"><b>Rota</b><span>${phoneSafe(route?.name || 'Rota secilmedi')}</span><small>${phoneSafe(route ? `${route.start} → ${route.end}` : 'Haritalar rotaya gore acilir')}</small></div>`;
+  document.querySelectorAll('#ship-choice-summary,#ship-select-summary').forEach(el=>{ if(el) el.innerHTML = html; });
 }
 
 function updateKontrat(){
@@ -10664,7 +10760,7 @@ function updateKontrat(){
     const d=document.createElement('div');
     d.className='kont-card'+(i===selKontrat?' active':'');
     d.innerHTML=`<div class="kc-ay">${k.ay}+1</div><div class="kc-lbl">ay seyir + ${k.izin} ay izin</div><div class="kc-ucret">Ücret: ${k.ucret}</div><div class="kc-izin">✓ ${k.bonus}</div>`;
-    d.onclick=()=>{selKontrat=i;document.querySelectorAll('.kont-card').forEach(x=>x.classList.remove('active'));d.classList.add('active');};
+    d.onclick=()=>{selKontrat=i;document.querySelectorAll('.kont-card').forEach(x=>x.classList.remove('active'));d.classList.add('active');renderShipChoiceSummary();};
     c.appendChild(d);
   });
 }
@@ -10672,9 +10768,10 @@ function updateKontrat(){
 function updateSugs(){
   const names=SNAMES[selType]||[];
   const c=document.getElementById('shipsugs');c.innerHTML='';
-  names.forEach(n=>{const d=document.createElement('div');d.className='ssug';d.textContent=n;d.onclick=()=>{document.getElementById('shipnameinp').value=n;};c.appendChild(d);});
+  names.forEach(n=>{const d=document.createElement('div');d.className='ssug';d.textContent=n;d.onclick=()=>{document.getElementById('shipnameinp').value=n;renderShipChoiceSummary();};c.appendChild(d);});
   if(!document.getElementById('shipnameinp').value||!names.includes(document.getElementById('shipnameinp').value))
     document.getElementById('shipnameinp').value=names[0]||'';
+  renderShipChoiceSummary();
 }
 
 // ===== STAT YÖNETİMİ =====
@@ -14850,11 +14947,11 @@ function setGameplayMode(mode){
 }
 
 function setAppScreen(screen='home'){
-  const normalized = ['home','setup','game'].includes(screen) ? screen : 'home';
-  document.body.classList.remove('screen-home','screen-setup','screen-game');
+  const normalized = ['home','setup','ship','game'].includes(screen) ? screen : 'home';
+  document.body.classList.remove('screen-home','screen-setup','screen-ship','screen-game');
   document.body.classList.add(`screen-${normalized}`);
   document.querySelectorAll('.app-screen').forEach(el=>el.classList.remove('active'));
-  const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : 'game';
+  const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : normalized === 'ship' ? 'ship-select-screen' : 'game';
   const active = document.getElementById(activeId);
   if(active) active.classList.add('active');
   if(normalized !== 'game'){
@@ -14878,7 +14975,15 @@ function openHomeScreen(){
 function openSetupScreen(){
   setIntroMenuPage('play');
   setAppScreen('setup');
+  renderShipChoiceSummary();
   refreshSaveEntryActions();
+  window.scrollTo?.(0,0);
+}
+
+function openShipSelectScreen(){
+  ensureShipSelectScreen();
+  setAppScreen('ship');
+  renderShipChoiceSummary();
   window.scrollTo?.(0,0);
 }
 
@@ -20905,6 +21010,7 @@ function getMajorTradeRouteChoices(type=selType){
 function setSelectedVoyageRoute(key){
   selectedVoyageRouteKey = TRADE_VOYAGE_ROUTES.some(r=>r.key===key) ? key : '';
   renderVoyageRouteSelector();
+  renderShipChoiceSummary();
 }
 
 function getSelectedVoyageRoute(){
@@ -20926,6 +21032,7 @@ function renderVoyageRouteSelector(){
       <small>${phoneSafe(route.start)} → ${phoneSafe(route.end)} · ${wpCount} waypoint</small>
     </button>`;
   }).join('');
+  renderShipChoiceSummary();
 }
 
 function selectVoyageRouteForShipType(type=selType){
