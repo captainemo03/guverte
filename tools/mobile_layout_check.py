@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=118",
-        "index.css?v=107",
+        "index.js?v=119",
+        "index.css?v=108",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -103,14 +103,14 @@ REQUIRED = {
         "setSelectedVoyageRoute",
         "MAJOR_TRADE_ROUTE_KEYS",
     ],
-    "separate ship selection screen": [
-        "ship-select-screen",
+    "setup ship selection tab": [
+        "data-intro-tab=\"ship\"",
         "openShipSelectScreen",
         "ensureShipSelectScreen",
         "ship-choice-summary",
-        "ship-select-layout",
+        "ship-tab-card",
         "renderShipChoiceSummary",
-        "screen-ship",
+        "introMenuPage === 'ship'",
     ],
     "clean gameplay ui": [
         "stats-summary",

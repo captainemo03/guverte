@@ -10655,37 +10655,6 @@ function buildIntro(){
 }
 
 function ensureShipSelectScreen(){
-  const app = document.getElementById('app');
-  if(!app) return;
-  let screen = document.getElementById('ship-select-screen');
-  if(!screen){
-    screen = document.createElement('div');
-    screen.id = 'ship-select-screen';
-    screen.className = 'app-screen';
-    screen.innerHTML = `
-      <button type="button" class="setup-back-btn ship-back-btn" onclick="openSetupScreen()">← Hazirlik Ekrani</button>
-      <div class="ship-select-hero">
-        <div class="ship-select-icon">⚓</div>
-        <div>
-          <span>SEFER PLANLAMA</span>
-          <b>Gemi, kontrat ve rota secimi</b>
-          <p>Bu sayfada sadece gemi tipi, kontrat, rota ve gemi adi var. Oyun baslamadan once sefer dosyani temizce hazirla.</p>
-        </div>
-      </div>
-      <div class="ship-select-layout">
-        <section class="ship-select-main"></section>
-        <aside class="ship-select-side">
-          <div class="ship-select-preview">
-            <div class="ship-preview-sea"><i></i><i></i><b></b></div>
-            <div id="ship-select-summary" class="ship-select-summary"></div>
-          </div>
-          <button type="button" class="ship-select-confirm" onclick="openSetupScreen()">Secimi Onayla</button>
-        </aside>
-      </div>`;
-    const game = document.getElementById('game');
-    app.insertBefore(screen, game || null);
-  }
-
   const intro = document.getElementById('intro');
   if(intro && !document.getElementById('ship-choice-summary')){
     const summaryCard = document.createElement('div');
@@ -10698,26 +10667,22 @@ function ensureShipSelectScreen(){
     intro.insertBefore(summaryCard, creatorCard?.nextSibling || document.getElementById('go-btn'));
   }
 
-  const main = screen.querySelector('.ship-select-main');
-  const side = screen.querySelector('.ship-select-side');
+  const goBtn = document.getElementById('go-btn');
   const shipCard = document.getElementById('shiptype')?.closest('.fcard');
   const contractCard = document.getElementById('kontratsel')?.closest('.fcard');
   const routeCard = document.getElementById('route-select-grid')?.closest('.fcard');
   const nameCard = document.getElementById('shipnameinp')?.closest('.fcard');
-  [shipCard, contractCard, routeCard].forEach(card=>{
-    if(card && main && card.parentElement !== main){
-      card.classList.add('ship-select-card');
-      main.appendChild(card);
+  [shipCard, contractCard, routeCard, nameCard].forEach(card=>{
+    if(card && intro && card.parentElement !== intro){
+      card.classList.add('ship-tab-card');
+      intro.insertBefore(card, goBtn || null);
     }
   });
-  if(nameCard && side && nameCard.parentElement !== side){
-    nameCard.classList.add('ship-select-card');
-    side.insertBefore(nameCard, side.querySelector('.ship-select-confirm'));
-    const inp = document.getElementById('shipnameinp');
-    if(inp && !inp.dataset.summaryBound){
-      inp.dataset.summaryBound = '1';
-      inp.addEventListener('input', renderShipChoiceSummary);
-    }
+  [shipCard, contractCard, routeCard, nameCard].forEach(card=>card?.classList.add('ship-tab-card'));
+  const inp = document.getElementById('shipnameinp');
+  if(inp && !inp.dataset.summaryBound){
+    inp.dataset.summaryBound = '1';
+    inp.addEventListener('input', renderShipChoiceSummary);
   }
 }
 
@@ -10745,7 +10710,7 @@ function renderShipChoiceSummary(){
       <span><b>Kontrat</b>${phoneSafe(kont?.ay || '-')}+${phoneSafe(kont?.izin || '-')} ay</span>
     </div>
     <div class="ship-summary-route"><b>Rota</b><span>${phoneSafe(route?.name || 'Rota secilmedi')}</span><small>${phoneSafe(route ? `${route.start} → ${route.end}` : 'Haritalar rotaya gore acilir')}</small></div>`;
-  document.querySelectorAll('#ship-choice-summary,#ship-select-summary').forEach(el=>{ if(el) el.innerHTML = html; });
+  document.querySelectorAll('#ship-choice-summary').forEach(el=>{ if(el) el.innerHTML = html; });
 }
 
 function updateKontrat(){
@@ -14947,11 +14912,11 @@ function setGameplayMode(mode){
 }
 
 function setAppScreen(screen='home'){
-  const normalized = ['home','setup','ship','game'].includes(screen) ? screen : 'home';
-  document.body.classList.remove('screen-home','screen-setup','screen-ship','screen-game');
+  const normalized = ['home','setup','game'].includes(screen) ? screen : 'home';
+  document.body.classList.remove('screen-home','screen-setup','screen-game');
   document.body.classList.add(`screen-${normalized}`);
   document.querySelectorAll('.app-screen').forEach(el=>el.classList.remove('active'));
-  const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : normalized === 'ship' ? 'ship-select-screen' : 'game';
+  const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : 'game';
   const active = document.getElementById(activeId);
   if(active) active.classList.add('active');
   if(normalized !== 'game'){
@@ -14982,7 +14947,8 @@ function openSetupScreen(){
 
 function openShipSelectScreen(){
   ensureShipSelectScreen();
-  setAppScreen('ship');
+  setIntroMenuPage('ship');
+  setAppScreen('setup');
   renderShipChoiceSummary();
   window.scrollTo?.(0,0);
 }
@@ -15039,7 +15005,7 @@ function setHomeMenuPage(page='play'){
 }
 
 function setIntroMenuPage(page='play'){
-  introMenuPage = ['play','options','premium'].includes(page) ? page : 'play';
+  introMenuPage = ['play','ship','options','premium'].includes(page) ? page : 'play';
   document.querySelectorAll('.intro-menu-tab').forEach(btn=>{
     const active = btn.dataset.introTab === introMenuPage;
     btn.classList.toggle('active', active);
@@ -15051,14 +15017,19 @@ function setIntroMenuPage(page='play'){
   const cards = Array.from(document.querySelectorAll('#intro > .fcard'));
   cards.forEach(card=>{
     const isPremium = card.classList.contains('intro-premium-card');
+    const isShip = card.classList.contains('ship-tab-card');
+    const isShipSummary = card.classList.contains('ship-choice-summary-card');
     const isOptions = !!card.querySelector('#play-mode-select,#intro-language-select,#sound-btn');
-    const show = introMenuPage === 'premium' ? isPremium : introMenuPage === 'options' ? isOptions : (!isOptions && !isPremium);
+    const show = introMenuPage === 'premium' ? isPremium
+      : introMenuPage === 'options' ? isOptions
+      : introMenuPage === 'ship' ? isShip
+      : (!isOptions && !isPremium && !isShip) || isShipSummary;
     card.hidden = !show;
   });
   const launch = document.getElementById('go-btn');
   const saveActions = document.getElementById('save-entry-actions');
-  if(launch) launch.style.display = introMenuPage === 'play' ? 'block' : 'none';
-  if(saveActions) saveActions.style.display = introMenuPage === 'play' ? 'flex' : 'none';
+  if(launch) launch.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'block' : 'none';
+  if(saveActions) saveActions.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'flex' : 'none';
 }
 
 function renderPlayModeSelector(){
