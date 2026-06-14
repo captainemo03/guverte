@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=120",
-        "index.css?v=109",
+        "index.js?v=121",
+        "index.css?v=110",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -133,8 +133,8 @@ REQUIRED = {
     "mobile creator portrait fit": [
         "creator-mobile-portrait-fit",
         ".creator-preview-stage .portrait-composite.preview",
-        "width:min(62vw,230px)",
-        "scale(.86)",
+        "width:min(48vw,190px)",
+        "scale(.74)",
     ],
     "ultra 4k expansion": [
         "ULTRA_4K_ROUTE_EXPANSION",

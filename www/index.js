@@ -10714,19 +10714,21 @@ function buildIntro(){
   });
   const p=document.createElement('div');
   p.className='premium-pack-card'+(premiumUnlocked?' active':'');
-  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button><button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button><button type="button" onclick="openAdsRemovalPurchase()">${adsRemoved?'Reklamsiz Aktif':`${ADS_REMOVAL_PRICE_LABEL} Reklam Kaldir`}</button><button type="button" onclick="restoreAdsRemovalPurchase()">Reklam Geri Yukle</button>`;
+  p.innerHTML=`<b>${premiumUnlocked?'Premium Paket Aktif':`Premium Paket · ${PREMIUM_PRICE_LABEL}`}</b><span>${PREMIUM_PACKAGE_CATALOG.join(' · ')}</span><div class="premium-pack-actions"><button type="button" onclick="openPremiumPurchase()">${premiumUnlocked?'Aktif':`${PREMIUM_PRICE_LABEL} Satin Al`}</button><button type="button" onclick="openAdsRemovalPurchase()">${adsRemoved?'Reklamsiz Aktif':`${ADS_REMOVAL_PRICE_LABEL} Reklam Kaldir`}</button></div>`;
   st.appendChild(p);
   updateKontrat();
   updateSugs();
   renderVoyageRouteSelector();
   renderCharacterCreator();
   renderShipChoiceSummary();
+  renderSetupOnboardingGuide();
   applyLanguageUI();
   setIntroMenuPage(introMenuPage);
 }
 
 function ensureShipSelectScreen(){
   const intro = document.getElementById('intro');
+  ensureSetupOnboardingGuide();
   if(intro && !document.getElementById('ship-choice-summary')){
     const summaryCard = document.createElement('div');
     summaryCard.className = 'fcard ship-choice-summary-card';
@@ -10755,6 +10757,51 @@ function ensureShipSelectScreen(){
     inp.dataset.summaryBound = '1';
     inp.addEventListener('input', renderShipChoiceSummary);
   }
+}
+
+function getSetupOnboardingSteps(){
+  return [
+    {key:'character',tab:'play',label:'Karakter',desc:'Adini, donemini ve karakter tabanini hazirla.'},
+    {key:'ship',tab:'ship',label:'Gemi',desc:'Gemi tipini ve kontratini sec.'},
+    {key:'route',tab:'ship',label:'Rota',desc:'Sefer rotasini sec; haritalar buna gore acilacak.'},
+    {key:'difficulty',tab:'options',label:'Zorluk',desc:'Basit, Gercekci veya Uzman akisini belirle.'},
+    {key:'start',tab:'play',label:'Basla',desc:'Ozet temizse vardiyaya cik.'}
+  ];
+}
+
+function getSetupOnboardingIndex(){
+  if((document.getElementById('nameinp')?.value || '').trim().length < 2) return 0;
+  if(!selType || !getSelectedContractDef()) return 1;
+  if(!getSelectedVoyageRoute || !getSelectedVoyageRoute()) return 2;
+  if(!gameplayMode) return 3;
+  return 4;
+}
+
+function ensureSetupOnboardingGuide(){
+  const shell = document.getElementById('intro-menu-shell');
+  if(!shell || document.getElementById('setup-onboarding-guide')) return;
+  const guide = document.createElement('div');
+  guide.id = 'setup-onboarding-guide';
+  guide.className = 'setup-onboarding-guide';
+  shell.insertAdjacentElement('afterend', guide);
+}
+
+function goSetupOnboardingStep(index){
+  const step = getSetupOnboardingSteps()[index] || getSetupOnboardingSteps()[0];
+  setIntroMenuPage(step.tab);
+  const guide = document.getElementById('setup-onboarding-guide');
+  if(guide) guide.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+function renderSetupOnboardingGuide(){
+  const guide = document.getElementById('setup-onboarding-guide');
+  if(!guide) return;
+  const activeIndex = getSetupOnboardingIndex();
+  guide.innerHTML = `<div class="setup-onboarding-head"><b>Ilk acilis akisi</b><span>Ekrani bogmadan tek tek ilerle.</span></div>
+    <div class="setup-onboarding-steps">${getSetupOnboardingSteps().map((s,i)=>`
+      <button type="button" class="${i<activeIndex?'done':i===activeIndex?'active':''}" onclick="goSetupOnboardingStep(${i})">
+        <b>${i+1}. ${phoneSafe(s.label)}</b><small>${phoneSafe(s.desc)}</small>
+      </button>`).join('')}</div>`;
 }
 
 function getSelectedContractDef(){
@@ -13610,7 +13657,14 @@ function showEnd(){
   document.getElementById('endf').textContent=flavor;
   document.getElementById('endd').textContent=desc;
   document.getElementById('endv').innerHTML=verdict;
+  const firstOffer = (shipOffers && shipOffers[0]) || buildShipOffers()[0];
+  const captainLine = avg>=65 ? 'Kaptan: Bu kontratta vardiya disiplini ve rapor dilin guclendi.' : 'Kaptan: Temel guvenlik iyi, ama cihaz/harita tekrarini aksatmayacaksin.';
+  const familyLine = mood>=55 ? 'Aile: Sesini duymak iyi geldi, donus tarihini bekliyoruz.' : 'Aile: Uzak kalman zor oldu; bir sonraki kontratta daha cok haberleselim.';
+  const companyLine = `Sirket: ${firstOffer?.label || 'Ayni gemide kal'} teklifi hazir. Maas: $${firstOffer?.pay || careerState.salary}/ay.`;
   document.getElementById('endgrid').innerHTML=
+    '<div class="ecard contract-report-card"><div class="ecv" style="color:#ffe2a2;">KPT</div><div class="ecl">'+captainLine+'</div></div>'+
+    '<div class="ecard contract-report-card"><div class="ecv" style="color:#8de0b4;">AILE</div><div class="ecl">'+familyLine+'</div></div>'+
+    '<div class="ecard contract-report-card"><div class="ecv" style="color:#6fa8dc;">OFIS</div><div class="ecl">'+companyLine+'</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#6fa8dc;">'+Math.round(stats.cesaret)+'</div><div class="ecl">CESARET</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#d4a017;">'+Math.round(stats.bilgi)+'</div><div class="ecl">BİLGİ</div></div>'+
     '<div class="ecard"><div class="ecv" style="color:#5dbf8a;">'+Math.round(stats.sayginlik)+'</div><div class="ecl">SAYGINLIK</div></div>'+
@@ -13622,6 +13676,7 @@ function showEnd(){
     actions.innerHTML = shipOffers.map(o=>`<button class="rbtn" onclick="takeShipOffer('${o.key}')">${o.label}<br><small>${o.ship} · $${o.pay}/ay</small></button>`).join('') +
       '<button class="rbtn secondary" onclick="restartGame()">Ayril / Yeni Oyun</button>';
   }
+  maybeShowAdBreak('contract_end');
   saveGameState(false);
 }
 
@@ -13816,6 +13871,7 @@ function restartGame(){
 }
 
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
+document.getElementById('nameinp').addEventListener('input',renderSetupOnboardingGuide);
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
 
 // ===== MÜRETTEBAT İLİŞKİ SİSTEMİ =====
@@ -15101,6 +15157,7 @@ function setIntroMenuPage(page='play'){
   const saveActions = document.getElementById('save-entry-actions');
   if(launch) launch.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'block' : 'none';
   if(saveActions) saveActions.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'flex' : 'none';
+  renderSetupOnboardingGuide();
 }
 
 function renderPlayModeSelector(){
@@ -16357,11 +16414,13 @@ function handlePortChartTaskClick(svg, ev, port){
     mapTaskWrongAttempts[attemptKey] = wrongCount;
     const penaltyNow = !near && wrongCount >= 3 && wrongCount % 3 === 0;
     status.className = near ? 'warn' : 'bad';
-    status.textContent = near
+    const retryText = near
       ? `Yaklastin. ${training.focus} Bilgi cezasi yok; sembol/derinlik/rota iliskisini tekrar kontrol et.`
       : penaltyNow
         ? `Hedef bu degil. ${training.wrong} Uc uzak denemeden sonra sadece -1 bilgi egitim cezasi uygulandi.`
         : `Hedef bu degil. ${training.wrong} Ceza yok; ${Math.max(0, 3-wrongCount)} uzak deneme sonra kucuk egitim cezasi gelir.`;
+    status.innerHTML = `${phoneSafe(retryText)} <button class="map-retry-btn" onclick="ensureTaskPort(getCurrentMapTask()); renderMap();">Dogru charti ac / tekrar dene</button>`;
+    addWatchFeed(`Harita egitimi: ${near?'yaklastin':'yanlis bolge'} - ${training.focus || training.wrong}`, near?'warn':'');
     if(penaltyNow){
       applyEffect({bilgi:-1},{skipContractTick:true});
       addLiveLogbook('HARITA HATASI', `${task.title}: ${training.wrong}`, true);
@@ -22189,7 +22248,28 @@ function renderPhoneAppMenu(){
   </div>
   <div class="phone-menu-hint">Cihaz egitimleri artik telefon uygulamasi gibi durmuyor; sahnelerden ve Cihaz Egitim Merkezi'nden aciliyor.</div>`;
 }
-function closeLifePanel(id){ document.getElementById(id)?.classList.remove('show'); }
+const adBreakState = {lastKey:''};
+function maybeShowAdBreak(reason='safe_point'){
+  if(adsRemoved) return false;
+  const sceneNo = Math.max(0, contractDays || currentIdx || 0);
+  const key = `${reason}-${sceneNo}-${careerState.contracts || 0}`;
+  if(adBreakState.lastKey === key) return false;
+  adBreakState.lastKey = key;
+  const labels = {
+    month_end:'Ay sonu reklam arasi',
+    contract_end:'Kontrat sonu reklam arasi',
+    sim_exit:'Egitim merkezi cikisi reklam arasi',
+    safe_point:'Kisa reklam arasi'
+  };
+  showNotif('AD', labels[reason] || labels.safe_point, `Reklamlari ${ADS_REMOVAL_PRICE_LABEL} ile kalici kaldirabilirsin.`);
+  addWatchFeed(`${labels[reason] || labels.safe_point}: oyun sadece guvenli aralarda reklam gosterir.`, 'warn');
+  pushPhoneMessage('Sistem', `${labels[reason] || labels.safe_point}. Reklamlari kaldirma urunu: ${ADS_REMOVAL_PRODUCT_ID} (${ADS_REMOVAL_PRICE_LABEL}).`, {open:false});
+  return true;
+}
+function closeLifePanel(id){
+  document.getElementById(id)?.classList.remove('show');
+  if(id === 'sim-panel') maybeShowAdBreak('sim_exit');
+}
 function openLiveLogbook(){
   if(!canUseFeature('logbook')) return;
   completeMissionFromFeature('logbook');
@@ -22927,8 +23007,39 @@ function renderPremiumPackagePanel(){
     ['dp','Offshore DP','offset / thruster'],
     ['ice','Ice convoy','lead / icing']
   ];
+  const productCards = [
+    {
+      cls:'premium',
+      title:'Premium Paket',
+      price:PREMIUM_PRICE_LABEL,
+      id:PREMIUM_PRODUCT_ID,
+      active:premiumUnlocked,
+      desc:'Proje gemisi, kruvaziyer, arastirma, offshore, buz seyri, ileri cihaz sim ve 3D operasyonlar.',
+      buy:'openPremiumPurchase()',
+      restore:'restorePremiumPurchase()'
+    },
+    {
+      cls:'ads',
+      title:'Reklamlari Kaldir',
+      price:ADS_REMOVAL_PRICE_LABEL,
+      id:ADS_REMOVAL_PRODUCT_ID,
+      active:adsRemoved,
+      desc:'Ucretsiz surumdeki ay sonu, kontrat sonu ve egitim merkezi cikisi reklam aralarini kapatir.',
+      buy:'openAdsRemovalPurchase()',
+      restore:'restoreAdsRemovalPurchase()'
+    }
+  ];
   return `<div class="premium-sim-panel ${premiumUnlocked?'active':''}">
     <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Kilitli gorev onizlemesi, dahil gemiler ve 3D operasyonlar.</span></div>
+    <div class="premium-product-grid">${productCards.map(p=>`
+      <div class="premium-product-card ${p.cls} ${p.active?'active':''}">
+        <strong>${phoneSafe(p.title)}</strong>
+        <em>${p.active?'AKTIF':phoneSafe(p.price)}</em>
+        <small>${phoneSafe(p.desc)}</small>
+        <code>${phoneSafe(p.id)}</code>
+        <div><button onclick="${p.buy}">${p.active?'Aktif':'Satin al'}</button><button onclick="${p.restore}">Geri yukle</button></div>
+      </div>`).join('')}</div>
+    ${renderBillingDebugPanel()}
     <div class="premium-preview-strip">${previews.map(([cls,title,sub])=>`
       <button class="premium-preview-card ${cls} ${premiumUnlocked?'':'locked'}" onclick="${premiumUnlocked?'openCareer()':'openPremiumPurchase()'}">
         <i></i><b>${title}</b><small>${sub}</small><em>${premiumUnlocked?'acik':'kilitli demo'}</em>
@@ -22939,6 +23050,21 @@ function renderPremiumPackagePanel(){
       <button onclick="restorePremiumPurchase()">Geri yukle</button>
       <button onclick="openCareer()">Gemi teklifleri</button>
     </div>
+  </div>`;
+}
+
+function renderBillingDebugPanel(){
+  const billingBridge = !!(window.Capacitor?.Plugins?.GuverteBilling);
+  const rows = [
+    ['premium_full_pack', premiumUnlocked ? 'aktif' : 'kilitli'],
+    ['remove_ads', adsRemoved ? 'aktif' : 'kilitli'],
+    ['Billing bridge', billingBridge ? 'bagli' : 'web/test modu'],
+    ['Restore', 'Premium ve reklam kaldirma ayri kontrol edilir']
+  ];
+  return `<div class="billing-debug-panel">
+    <div class="billing-debug-head"><b>Play Console urun kontrolu</b><span>Test ederken ID ve durumlar tek yerde.</span></div>
+    <div class="billing-debug-grid">${rows.map(([a,b])=>`<span><b>${phoneSafe(a)}</b><em>${phoneSafe(b)}</em></span>`).join('')}</div>
+    <div class="sim-actions compact"><button onclick="restorePremiumPurchase()">Premium restore</button><button onclick="restoreAdsRemovalPurchase()">Reklam restore</button><button onclick="showNotif('BILLING','Kontrol','Urun ID: premium_full_pack / remove_ads')">ID kontrol</button></div>
   </div>`;
 }
 
@@ -23402,10 +23528,20 @@ function maybeQueueDevicePracticeFromScene(sc,c2){
   const hardScene = !!sc?.alert || /alarm|mayday|distress|sis|fog|storm|firtina|swell|pilot|liman|berth|engine|makine/i.test(`${sc?.sub||''} ${sc?.text||''}`);
   if(!weakChoice && !hardScene) return;
   devicePracticeProgress[key] = 0;
+  activeDeviceKey = key;
+  deviceMenuPath[key] = 'root';
   const def = getDeviceDef(key);
   const name = def ? def.name : key.toUpperCase();
-  pushPhoneMessage('Egitim', `${name} pratigi acildi. Cihaz Egitim Merkezi uzerinden tekrar et.`, {open:false});
-  addWatchFeed(`Egitim gorevi: ${name}`, 'warn');
+  const reason = weakChoice ? 'Zayif karar sonrasi zorunlu tekrar gorevi' : 'Sahne riski nedeniyle onleyici tekrar gorevi';
+  pushPhoneMessage('Egitim', `${name} pratigi acildi. ${reason}. Cihaz Egitim Merkezi uzerinden tekrar et.`, {open:false});
+  addWatchFeed(`Egitim gorevi: ${name} · ${reason}`, 'warn');
+  addLiveLogbook('CIHAZ PRAKTIGI', `${name}: ${reason}.`, true);
+  if(weakChoice){
+    sceneLiveSequenceTimers.push(setTimeout(()=>{
+      if(!document.getElementById('devices-panel')?.classList.contains('show')) openDevices();
+      else renderDevices();
+    }, 900));
+  }
 }
 function renderPhone(){
   ensureFamilyGroup();
@@ -24255,6 +24391,7 @@ function maybeCreateMonthlyMemorySummary(sc,c2){
   pushPhoneMessage('Telefon Albümü',`${caption} Bu ayin kartlari albume eklendi.`);
   pushFamilyGroupMessage('Anne',`Ay ${month} bitti demek... Kendine dikkat et, firsat bulunca bize bir fotograf daha at.`);
   addWatchFeed(`Ay ${month} hatira ozeti hazirlandi`, 'good');
+  maybeShowAdBreak('month_end');
 }
 
 function maybeTriggerMidScenePhone(sc){
