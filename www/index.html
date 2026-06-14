@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<link rel="stylesheet" href="./index.css?v=102">
+<link rel="stylesheet" href="./index.css?v=103">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -473,20 +473,28 @@
     <div id="mission-steps"></div>
   </div>
   <div id="toolbar">
+    <button class="tb-btn primary-tool" onclick="openMap()">🗺️ HARİTA</button>
+    <button class="tb-btn primary-tool" onclick="openDevices()">📡 CİHAZ</button>
+    <button class="tb-btn primary-tool" onclick="togglePhone()">TEL</button>
+    <button class="tb-btn primary-tool" onclick="openNotes()">🧭 NOTLAR</button>
+    <button class="tb-btn more-tool" onclick="toggleMoreTools()">DAHA FAZLA</button>
+  </div>
+  <div id="more-tools-panel">
     <button class="tb-btn" onclick="openColreg()" data-i18n="ui.colreg">COLREG</button>
-    <button class="tb-btn" onclick="openNotes()">🧭 NOTLARIM</button>
-    <button class="tb-btn" onclick="openMap()">🗺️ HARİTA</button>
-    <button class="tb-btn" onclick="openDevices()">📡 CİHAZLAR</button>
-    <button class="tb-btn" onclick="openSimCenter()">SIM</button>
+    <button class="tb-btn" onclick="openSimCenter()">SIM MERKEZİ</button>
     <button class="tb-btn" onclick="openCareer()">KARİYER</button>
     <button class="tb-btn" onclick="openShipWalk()">GEMI</button>
     <button class="tb-btn" onclick="openCabin()">KAMARA</button>
     <button class="tb-btn" onclick="openLiveLogbook()">DEFTER</button>
-    <button class="tb-btn" onclick="togglePhone()">TEL</button>
     <button class="tb-btn" onclick="openJournal()">📓 GÜNLÜK</button>
     <button class="tb-btn" onclick="openAlbum()">📷 ALBÜM<span id="tb-photos-count">0</span></button>
     <button class="tb-btn" onclick="toggleCrew()">👥 EKİP</button>
+    <button class="tb-btn" onclick="toggleCinemaMode()">SİNEMA MODU</button>
   </div>
+  <button id="stats-summary" onclick="toggleStatsExpanded()">
+    <span id="stats-summary-main">Cesaret 50 · Bilgi 30 · Saygınlık 40 · Dinçlik 80</span>
+    <small id="stats-summary-sub">Detayları aç</small>
+  </button>
   <div id="statrow">
     <div class="stat"><div class="stop"><span class="slbl">CESARET</span><span class="sico">💪</span></div><div id="s-cesaret" class="sval" style="color:#6fa8dc;">50</div><div class="sbarw"><div id="b-cesaret" class="sbar" style="width:50%;background:#2e6bbf;"></div></div></div>
     <div class="stat"><div class="stop"><span class="slbl">BİLGİ</span><span class="sico">🧠</span></div><div id="s-bilgi" class="sval" style="color:#d4a017;">30</div><div class="sbarw"><div id="b-bilgi" class="sbar" style="width:30%;background:#c9952a;"></div></div></div>
@@ -596,6 +604,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=113"></script>
+<script src="./index.js?v=114"></script>
 </body>
 </html>

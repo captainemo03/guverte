@@ -11039,6 +11039,7 @@ function updateStats(old,opts={}){
   document.getElementById('b-yorgunluk').style.background=dv>=70?'#1a7a3c':dv>=40?'#c9952a':'#8b2222';
   document.getElementById('s-yorgunluk').style.color=dv>=70?'#5dbf8a':dv>=40?'#d4a017':'#c97070';
   updatePsychRow();
+  updateStatsSummary();
 
   const s=stats.sayginlik;
   document.getElementById('repstars').textContent=s>=80?'⭐⭐⭐⭐⭐':s>=60?'⭐⭐⭐⭐':s>=40?'⭐⭐⭐':s>=20?'⭐⭐':'⭐';
@@ -12938,6 +12939,7 @@ function scheduleSyncedSceneFx(sc){
 }
 
 function renderScene(idx){
+  toggleMoreTools(false);
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
   const sc=sceneQueue[currentIdx];
@@ -13545,6 +13547,9 @@ function beginGame(){
   devicePracticeScore={ok:0,total:0};
   starlinkStatus={online:true, latency:42, obstruction:3, plan:'Crew + operational data', lastCheck:'--:--'};
   missionDirectorState={sceneId:'', title:'', steps:[], completed:[]};
+  statsExpanded=false;
+  moreToolsOpen=false;
+  cinemaMode=false;
   watchCycleLog={handovers:0, logbook:0, portPrep:0};
   careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,paidMonths:0,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
@@ -14737,6 +14742,9 @@ let gameplayMode = 'realistic';
 let introMenuPage = 'play';
 let homeMenuPage = 'play';
 let savePanelOpen = false;
+let statsExpanded = false;
+let moreToolsOpen = false;
+let cinemaMode = false;
 let missionDirectorState = {sceneId:'', title:'', steps:[], completed:[]};
 
 function getGameplayModeDef(){
@@ -14788,8 +14796,37 @@ function openGameScreen(){
   if(g){
     g.style.display='flex';
     g.style.flexDirection='column';
+    g.classList.toggle('stats-collapsed', !statsExpanded);
+    g.classList.toggle('cinema-mode', cinemaMode);
   }
   window.scrollTo?.(0,0);
+}
+
+function toggleStatsExpanded(force){
+  statsExpanded = typeof force === 'boolean' ? force : !statsExpanded;
+  const g=document.getElementById('game');
+  if(g) g.classList.toggle('stats-collapsed', !statsExpanded);
+  updateStatsSummary();
+}
+
+function toggleMoreTools(force){
+  moreToolsOpen = typeof force === 'boolean' ? force : !moreToolsOpen;
+  document.getElementById('more-tools-panel')?.classList.toggle('show', moreToolsOpen);
+}
+
+function toggleCinemaMode(force){
+  cinemaMode = typeof force === 'boolean' ? force : !cinemaMode;
+  const g=document.getElementById('game');
+  if(g) g.classList.toggle('cinema-mode', cinemaMode);
+  toggleMoreTools(false);
+  showNotif(cinemaMode ? '🎬' : '▣', cinemaMode ? 'Sinema Modu' : 'Normal Mod', cinemaMode ? 'Arayuz sadeleşti; sahne ve diyalog one cikti.' : 'Tum oyun panelleri geri geldi.');
+}
+
+function updateStatsSummary(){
+  const main=document.getElementById('stats-summary-main');
+  const sub=document.getElementById('stats-summary-sub');
+  if(main) main.textContent=`Cesaret ${Math.round(stats.cesaret)} · Bilgi ${Math.round(stats.bilgi)} · Saygınlık ${Math.round(stats.sayginlik)} · Dinçlik ${Math.round(stats.dinclik)}`;
+  if(sub) sub.textContent=statsExpanded ? 'Detayları kapat' : 'Detayları aç';
 }
 
 function setHomeMenuPage(page='play'){

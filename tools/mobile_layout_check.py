@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=113",
-        "index.css?v=102",
+        "index.js?v=114",
+        "index.css?v=103",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -102,6 +102,15 @@ REQUIRED = {
         "renderVoyageRouteSelector",
         "setSelectedVoyageRoute",
         "MAJOR_TRADE_ROUTE_KEYS",
+    ],
+    "clean gameplay ui": [
+        "stats-summary",
+        "toggleStatsExpanded",
+        "more-tools-panel",
+        "toggleMoreTools",
+        "cinema-mode",
+        "toggleCinemaMode",
+        "primary-tool",
     ],
     "mobile creator portrait fit": [
         "creator-mobile-portrait-fit",
