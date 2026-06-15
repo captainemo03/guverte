@@ -51,6 +51,11 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
         connect(() -> queryOwnedProduct(safeProductId));
     }
 
+    @JavascriptInterface
+    public void checkProducts() {
+        connect(this::queryBillingSetup);
+    }
+
     private void connect(Runnable onReady) {
         if (billingClient.isReady()) {
             if (onReady != null) activity.runOnUiThread(onReady);
@@ -128,6 +133,43 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
         });
     }
 
+    private void queryBillingSetup() {
+        List<QueryProductDetailsParams.Product> products = new ArrayList<>();
+        products.add(QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(PREMIUM_PRODUCT_ID)
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build());
+        products.add(QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(ADS_REMOVAL_PRODUCT_ID)
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build());
+
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(products)
+                .build();
+
+        billingClient.queryProductDetailsAsync(params, (billingResult, productDetailsResult) -> {
+            if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                sendBillingStatus(false, "Urun kontrolu basarisiz: " + billingResult.getDebugMessage(), false, false);
+                return;
+            }
+            List<ProductDetails> details = productDetailsResult == null ? null : productDetailsResult.getProductDetailsList();
+            boolean premiumFound = false;
+            boolean adsFound = false;
+            if (details != null) {
+                for (ProductDetails detail : details) {
+                    if (PREMIUM_PRODUCT_ID.equals(detail.getProductId())) premiumFound = true;
+                    if (ADS_REMOVAL_PRODUCT_ID.equals(detail.getProductId())) adsFound = true;
+                }
+            }
+            boolean ok = premiumFound && adsFound;
+            String message = ok
+                    ? "Google Play urunleri bulundu ve sorgulanabiliyor."
+                    : "Eksik Play Console urunu var. premium_full_pack=" + premiumFound + ", remove_ads=" + adsFound;
+            sendBillingStatus(ok, message, premiumFound, adsFound);
+        });
+    }
+
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
@@ -194,6 +236,22 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
                 + ",\"purchaseToken\":\"" + escapeJson(token) + "\""
                 + ",\"productId\":\"" + escapeJson(productId) + "\""
                 + ",\"message\":\"" + escapeJson(message) + "\"}";
+        sendJsonResult(json);
+    }
+
+    private void sendBillingStatus(boolean ok, String message, boolean premiumFound, boolean adsFound) {
+        String json = "{\"ok\":" + ok
+                + ",\"type\":\"billingStatus\""
+                + ",\"packageName\":\"" + escapeJson(activity.getPackageName()) + "\""
+                + ",\"premiumProductId\":\"" + PREMIUM_PRODUCT_ID + "\""
+                + ",\"removeAdsProductId\":\"" + ADS_REMOVAL_PRODUCT_ID + "\""
+                + ",\"premiumFound\":" + premiumFound
+                + ",\"removeAdsFound\":" + adsFound
+                + ",\"message\":\"" + escapeJson(message) + "\"}";
+        sendJsonResult(json);
+    }
+
+    private void sendJsonResult(String json) {
         String script = "window.__guverteBillingNativeResult && window.__guverteBillingNativeResult(" + json + ");";
         activity.runOnUiThread(() -> webView.evaluateJavascript(script, null));
     }

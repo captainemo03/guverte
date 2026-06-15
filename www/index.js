@@ -630,11 +630,44 @@ function getPremiumBillingBridge(){
             reject(err);
           }
         });
+      },
+      checkProducts(){
+        return new Promise((resolve, reject)=>{
+          pendingResolve = resolve;
+          pendingReject = reject;
+          try{
+            if(typeof window.GuverteBillingNative.checkProducts === 'function') window.GuverteBillingNative.checkProducts();
+            else throw new Error('Bu uygulama surumunde Play urun kontrolu yok.');
+          }catch(err){
+            pendingResolve = null;
+            pendingReject = null;
+            reject(err);
+          }
+        });
       }
     };
     return window.GuverteBilling;
   }
   return null;
+}
+async function checkBillingProducts(){
+  const billing = getPremiumBillingBridge();
+  if(!billing || typeof billing.checkProducts !== 'function'){
+    showNotif('BILLING','Web/Test Modu','Android build icinde Google Play urun kontrolu calisir. Play Console urunleri: premium_full_pack ve remove_ads.');
+    return;
+  }
+  try{
+    showNotif('BILLING','Urunler Kontrol Ediliyor','Google Play Console urun listesi sorgulaniyor.');
+    const result = await billing.checkProducts();
+    const packageName = result?.packageName || 'com.captainemo.guverte';
+    const msg = result?.ok
+      ? `Tamam: ${packageName} icin premium_full_pack ve remove_ads bulundu.`
+      : `${packageName}: ${result?.message || 'Urunlerden biri bulunamadi.'}`;
+    showNotif(result?.ok?'OK':'UYARI','Play Billing Kontrol',msg);
+    addLiveLogbook?.('BILLING CHECK', msg, true);
+  }catch(err){
+    showNotif('UYARI','Play Billing Kontrol',String(err?.message || err || 'Urun kontrolu calismadi.'));
+  }
 }
 async function openPremiumPurchase(){
   if(premiumUnlocked){
@@ -23299,7 +23332,7 @@ function renderPremiumPackagePanel(){
 }
 
 function renderBillingDebugPanel(){
-  const billingBridge = !!(window.Capacitor?.Plugins?.GuverteBilling);
+  const billingBridge = !!(window.GuverteBillingNative || window.GuverteBilling);
   const rows = [
     ['premium_full_pack', premiumUnlocked ? 'aktif' : 'kilitli'],
     ['remove_ads', adsRemoved ? 'aktif' : 'kilitli'],
@@ -23309,7 +23342,7 @@ function renderBillingDebugPanel(){
   return `<div class="billing-debug-panel">
     <div class="billing-debug-head"><b>Play Console urun kontrolu</b><span>Test ederken ID ve durumlar tek yerde.</span></div>
     <div class="billing-debug-grid">${rows.map(([a,b])=>`<span><b>${phoneSafe(a)}</b><em>${phoneSafe(b)}</em></span>`).join('')}</div>
-    <div class="sim-actions compact"><button onclick="restorePremiumPurchase()">Premium restore</button><button onclick="restoreAdsRemovalPurchase()">Reklam restore</button><button onclick="showNotif('BILLING','Kontrol','Urun ID: premium_full_pack / remove_ads')">ID kontrol</button></div>
+    <div class="sim-actions compact"><button onclick="restorePremiumPurchase()">Premium restore</button><button onclick="restoreAdsRemovalPurchase()">Reklam restore</button><button onclick="checkBillingProducts()">Play urun kontrol</button></div>
   </div>`;
 }
 
