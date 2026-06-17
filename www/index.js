@@ -14371,6 +14371,16 @@ let worldMapPanX = 0;
 let worldMapPanY = 0;
 let worldMapDragState = null;
 let worldMapDidPan = false;
+let mapRenderCache = {
+  worldKey:'',
+  worldHtml:'',
+  portKey:'',
+  portHtml:'',
+  portMetaKey:'',
+  portMetaHtml:'',
+  filesKey:'',
+  filesHtml:''
+};
 const WORLD_MAP_FEATURES = [
   {name:'North Atlantic Ocean', kind:'ocean', x:86, y:78, min:1},
   {name:'South Atlantic Ocean', kind:'ocean', x:96, y:202, min:1},
@@ -16245,11 +16255,21 @@ function selectPortChart(name){
   selectedPortChart = name;
   mapRouteDraftPoints = [];
   if(mapView !== 'library') mapView = 'library';
+  invalidateMapRenderCache('port');
   renderMap();
 }
 function adjustPortChartZoom(delta){
+  const beforeBucket = getPortChartDetailBucket();
   portChartZoom = Math.max(1, Math.min(6, +(portChartZoom + delta).toFixed(2)));
-  if(mapView === 'library') renderMapLibrary();
+  const afterBucket = getPortChartDetailBucket();
+  if(mapView === 'library'){
+    if(beforeBucket === afterBucket){
+      fastUpdatePortChartViewport();
+    }else{
+      invalidateMapRenderCache('port');
+      renderMapLibrary();
+    }
+  }
 }
 
 function autoOpenVoyageChart(sc){
@@ -16286,6 +16306,47 @@ function getPortChartDetailLabel(){
   return zoom >= 3.2 ? 'Close Detail'
     : zoom >= 1.7 ? 'Approach Detail'
     : 'ECDIS Overview';
+}
+
+function getPortChartDetailBucket(){
+  const zoom = getPortChartEffectiveZoom();
+  return zoom >= 3.2 ? 'close' : zoom >= 1.7 ? 'approach' : 'overview';
+}
+
+function getWorldMapDetailBucket(){
+  return worldMapZoom >= 2.15 ? 'close' : worldMapZoom >= 1.45 ? 'approach' : 'overview';
+}
+
+function invalidateMapRenderCache(scope='all'){
+  if(scope === 'all' || scope === 'world'){
+    mapRenderCache.worldKey = '';
+    mapRenderCache.worldHtml = '';
+  }
+  if(scope === 'all' || scope === 'port'){
+    mapRenderCache.portKey = '';
+    mapRenderCache.portHtml = '';
+    mapRenderCache.portMetaKey = '';
+    mapRenderCache.portMetaHtml = '';
+  }
+  if(scope === 'all' || scope === 'files'){
+    mapRenderCache.filesKey = '';
+    mapRenderCache.filesHtml = '';
+  }
+}
+
+function fastUpdatePortChartViewport(){
+  const chartSvg = document.getElementById('port-chart-svg');
+  const chartZoomLabel = document.getElementById('port-chart-zoom-label');
+  const chartDetailLabel = document.getElementById('port-chart-detail-label');
+  if(chartSvg) chartSvg.setAttribute('viewBox', getPortChartViewBox());
+  if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
+  if(chartDetailLabel) chartDetailLabel.textContent = getPortChartDetailLabel();
+}
+
+function fastUpdateWorldMapViewport(){
+  const svg = document.getElementById('map-svg');
+  if(svg) svg.setAttribute('viewBox', getWorldMapViewBox());
+  updateWorldMapZoomLabel();
 }
 
 function getPortChartTaskGeometry(port){
@@ -18038,8 +18099,16 @@ function renderMapLibrary(){
   const entries = getPortChartEntries();
   const activeRoute = getActiveVoyageRoute();
   const activeCharts = new Set([activeRoute?.chart, ...(activeRoute?.charts || []), ...(activeRoute?.waypoints || []).map(w=>w.chart)].filter(Boolean));
-  files.innerHTML = entries.map(port=>`
-    <button class="map-file ${port.name===selectedPortChart?'active':''}" onclick="selectPortChart('${port.name.replace(/'/g,"\\'")}')">
+  const filesKey = [
+    entries.length,
+    selectedPortChart,
+    activeRoute?.key || selectedVoyageRouteKey || '',
+    [...visitedPorts].sort().join('|')
+  ].join('::');
+  if(mapRenderCache.filesKey !== filesKey){
+    mapRenderCache.filesKey = filesKey;
+    mapRenderCache.filesHtml = entries.map(port=>`
+      <button class="map-file ${port.name===selectedPortChart?'active':''}" onclick="selectPortChart('${port.name.replace(/'/g,"\\'")}')">
       <span class="map-file-main">
         <span class="map-file-ico">🗂</span>
         <span class="map-file-text">
@@ -18049,7 +18118,9 @@ function renderMapLibrary(){
       </span>
       <span class="map-file-tag">${activeCharts.has(port.name)?'sefer':visitedPorts.has(port.name)?'ugrandi':'arsiv'}</span>
     </button>
-  `).join('');
+    `).join('');
+  }
+  if(files.innerHTML !== mapRenderCache.filesHtml) files.innerHTML = mapRenderCache.filesHtml;
   if(!active){
     chartSvg.innerHTML = '';
     chartTitle.textContent = 'Liman Haritasi';
@@ -18060,14 +18131,39 @@ function renderMapLibrary(){
   const region = profile.region;
   chartSvg.classList.add('shodb-style');
   chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
-  chartSvg.innerHTML = buildPortChartSvg(active);
+  const portKey = [
+    active.name,
+    getPortChartDetailBucket(),
+    getActiveVoyageRoute()?.key || selectedVoyageRouteKey || '',
+    activeVoyageProgress,
+    JSON.stringify(deviceChartOverlayState || {}),
+    getCurrentMapTask()?.id || '',
+    completedMapTasks.has(getCurrentMapTask()?.id || '') ? 'done' : 'open'
+  ].join('::');
+  if(mapRenderCache.portKey !== portKey){
+    mapRenderCache.portKey = portKey;
+    mapRenderCache.portHtml = buildPortChartSvg(active);
+  }
+  if(chartSvg.dataset.cacheKey !== portKey){
+    chartSvg.innerHTML = mapRenderCache.portHtml;
+    chartSvg.dataset.cacheKey = portKey;
+  }
   initPortChartInteractions(chartSvg);
   chartSvg.onclick = (ev)=>handlePortChartTaskClick(chartSvg, ev, active);
   chartSvg.setAttribute('viewBox', getPortChartViewBox());
   renderMapRouteDraftOverlay(chartSvg);
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
   if(chartDetailLabel) chartDetailLabel.textContent = getPortChartDetailLabel();
-  chartMeta.innerHTML = `
+  const metaKey = [
+    active.name,
+    active.kind,
+    activeRoute?.key || selectedVoyageRouteKey || '',
+    visitedPorts.has(active.name) ? 'visited' : 'archive',
+    activeCharts.has(active.name) ? 'active' : 'off'
+  ].join('::');
+  if(mapRenderCache.portMetaKey !== metaKey){
+    mapRenderCache.portMetaKey = metaKey;
+    mapRenderCache.portMetaHtml = `
     <div class="chart-meta-card">
       <div class="chart-meta-label">Dosya / Yayin</div>
       <div class="chart-meta-value">DOSYA: ${active.name.replace(/ /g,'_').toUpperCase()}.chart<br>YAYIN: ${profile.publication}<br>CHART NO: ${profile.chartNo} · ${profile.edition}</div>
@@ -18092,6 +18188,8 @@ function renderMapLibrary(){
       <div class="chart-meta-label">Chart Notu</div>
       <div class="chart-meta-value">${profile.notes}<br>${activeCharts.has(active.name)?`AKTIF SEFER DOSYASI: ${activeRoute.name} icin gerekli chart.`:'Arsiv chart; sefer rota dosyasina dahil degil.'}</div>
     </div>`;
+  }
+  if(chartMeta.innerHTML !== mapRenderCache.portMetaHtml) chartMeta.innerHTML = mapRenderCache.portMetaHtml;
   updateMapTaskBox(active);
   normalizeClickableSurface('#map-panel button,.map-task-target,.world-click-zone');
 }
@@ -18161,6 +18259,7 @@ function updateWorldMapZoomLabel(){
 
 function adjustWorldMapZoom(delta){
   const prev = worldMapZoom;
+  const beforeBucket = getWorldMapDetailBucket();
   worldMapZoom = Math.max(1, Math.min(3.2, +(worldMapZoom + delta).toFixed(2)));
   if(worldMapZoom !== prev){
     const centerX = worldMapPanX + (440 / prev) / 2;
@@ -18168,14 +18267,19 @@ function adjustWorldMapZoom(delta){
     worldMapPanX = centerX - (440 / worldMapZoom) / 2;
     worldMapPanY = centerY - (260 / worldMapZoom) / 2;
   }
-  renderMap();
+  if(beforeBucket === getWorldMapDetailBucket()){
+    fastUpdateWorldMapViewport();
+  }else{
+    invalidateMapRenderCache('world');
+    renderMap();
+  }
 }
 
 function resetWorldMapView(){
   worldMapZoom = 1;
   worldMapPanX = 0;
   worldMapPanY = 0;
-  renderMap();
+  fastUpdateWorldMapViewport();
 }
 
 function initWorldMapInteractions(svg){
@@ -18346,6 +18450,10 @@ function updateShipPosition(sceneLoc){
   }
 }
 
+function getWorldMapLegendText(){
+  return `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · Nokta/liman/gecit uzerine tiklayinca chart acilir · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
+}
+
 function renderMap(){
   const panel = document.getElementById('map-panel');
   const tabs = document.querySelectorAll('.map-tab');
@@ -18381,6 +18489,25 @@ function renderMap(){
     region==='DOGU ASYA' ? '#c1e4ee' :
     region==='KUZEY PASIFIK / JAPONYA' ? '#bedfea' :
     '#d8eef7';
+  const activeRoute = getActiveVoyageRoute();
+  const worldKey = [
+    region,
+    getWorldMapDetailBucket(),
+    activeRoute?.key || selectedVoyageRouteKey || '',
+    activeVoyageProgress,
+    routeHistory.length,
+    `${shipPosition.x},${shipPosition.y}`,
+    [...visitedPorts].sort().join('|')
+  ].join('::');
+  if(svg && mapRenderCache.worldKey === worldKey && mapRenderCache.worldHtml){
+    if(svg.dataset.cacheKey !== worldKey){
+      svg.innerHTML = mapRenderCache.worldHtml;
+      svg.dataset.cacheKey = worldKey;
+    }
+    svg.onclick = (ev)=>handleWorldMapClick(svg, ev);
+    if(legend) legend.textContent = getWorldMapLegendText();
+    return;
+  }
   let s = buildWorldAtlasBaseLayer(regionTint);
   s+=buildWorldShodbChartIndexOverlay();
   s+=buildWorldMapFeatureLayer();
@@ -18389,7 +18516,6 @@ function renderMap(){
     s+=`<path d="M${i*60} ${80+i*20} Q${i*60+30} ${75+i*20} ${i*60+60} ${80+i*20}" fill="none" stroke="#8cbfd0" stroke-width="1" opacity=".35"/>`;
   }
 
-  const activeRoute = getActiveVoyageRoute();
   if(activeRoute?.waypoints?.length){
     const routePoints = activeRoute.waypoints.map((w,i)=>getWorldMapPoint(w, i, activeRoute.waypoints.length));
     const pts = routePoints.map(w=>`${w.x},${w.y}`).join(' ');
@@ -18482,9 +18608,12 @@ function renderMap(){
   s+=`<path d="M362 68 h22 l7 3 h6 v2 h-35 z" fill="#204765" opacity=".45"/>`;
   s+=`</g>`;
 
+  mapRenderCache.worldKey = worldKey;
+  mapRenderCache.worldHtml = s;
   svg.innerHTML = s;
+  svg.dataset.cacheKey = worldKey;
   svg.onclick = (ev)=>handleWorldMapClick(svg, ev);
-  legend.textContent = `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · Nokta/liman/gecit uzerine tiklayinca chart acilir · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
+  if(legend) legend.textContent = getWorldMapLegendText();
 }
 
 // ===== SEYİR GÜNLÜĞİ =====
