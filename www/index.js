@@ -23560,6 +23560,171 @@ function buildStoryDirectorPanel(){
   </div>`;
 }
 
+function getRealismDirectorPanel(){
+  const sc = sceneQueue[currentIdx] || {};
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const st = liveVoyageState || computeLiveVoyageState(sc);
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  const watchItems = getRealWatchFlowItems();
+  return `<div class="realism-director-panel">
+    <div class="realism-director-head">
+      <div>
+        <b>Gercekcilik Yonetmeni</b>
+        <small>Vardiya, sefer, cihaz, telefon, crew hafizasi ve olay zincirlerini tek akista baglar.</small>
+      </div>
+      <span>${phoneSafe(route?.name || 'Rota secilmedi')} · ${phoneSafe(watchState.code || '--')}</span>
+    </div>
+    <div class="realism-director-grid">
+      <div class="realism-watch-card">
+        <div class="sim-mini-title">GERCEK VARDIYA AKISI</div>
+        <div class="watch-flow-mini">
+          ${watchItems.map(item=>`<button class="${item.active?'active':''}" onclick="completeRealWatchItem('${item.id}')"><b>${phoneSafe(item.time)}</b><span>${phoneSafe(item.label)}</span><small>${phoneSafe(item.note)}</small></button>`).join('')}
+        </div>
+      </div>
+      <div class="realism-voyage-card">
+        <div class="sim-mini-title">CANLI SEFER</div>
+        <div class="voyage-live-grid">
+          <span><b>ETA</b>${phoneSafe(st.eta || '--')}</span>
+          <span><b>SOG / COG</b>${phoneSafe(st.sog || '--')} kt · ${phoneSafe(st.cog || '--')}</span>
+          <span><b>CPA / TCPA</b>${phoneSafe(st.cpa || '--')} nm · ${phoneSafe(st.tcpa || '--')}</span>
+          <span><b>UKC</b>${phoneSafe(st.ukc || '--')} m</span>
+          <span><b>VTS</b>${voyagePressure.vhf==='Yogun'?'Cagri bekleniyor':'Watch normal'}</span>
+          <span><b>ECDIS</b>${heat>=5?'Alarm/replay riski':'Route monitor'}</span>
+        </div>
+      </div>
+    </div>
+    ${getBridgeConsoleLauncherPanel()}
+    ${getEventChainLauncherPanel()}
+    ${getThreeAreaLauncherPanel()}
+  </div>`;
+}
+
+function getRealWatchFlowItems(){
+  const current = watchState?.code || '0800-1200';
+  const rows = [
+    ['0000-0400','Gece vardiyasi','gece emri, radar/VHF, BNWAS'],
+    ['0400-0800','Sabah oncesi','hava raporu, logbook, teslim'],
+    ['0800-1200','Gunduz vardiyasi','rota, trafik, cihaz kontrol'],
+    ['1200-1600','Ikindi nobeti','liman/seyir takip, crew mesajlari'],
+    ['1600-2000','Aksam vardiyasi','pilot/VTS hazirligi, rapor'],
+    ['2000-2400','Geceye giris','night order, safety round, devir']
+  ];
+  return rows.map(([time,label,note],idx)=>({id:`watch_${idx}`,time,label,note,active:current===time || current.replace(/\s/g,'')===time}));
+}
+
+function completeRealWatchItem(id){
+  const item = getRealWatchFlowItems().find(x=>x.id===id) || getRealWatchFlowItems()[0];
+  completeMissionStep('handover', `Gercek vardiya akisi: ${item.label}`);
+  addLiveLogbook('VARDIYA AKISI', `${item.time} ${item.label}: ${item.note}`, true);
+  addWatchFeed(`Vardiya akisi tamamlandi: ${item.label}`, 'good');
+  pushPhoneMessage('Kopruustu', `${item.time} vardiya notu: ${item.note}`, {open:false});
+  applyEffect({bilgi:1,sayginlik:1,dinclik:-1},{skipContractTick:true});
+  renderSimCenter();
+}
+
+function getBridgeConsoleLauncherPanel(){
+  const devices = [
+    ['radar','Radar / ARPA','target acquire, CPA/TCPA, trial manoeuvre'],
+    ['ecdis','ECDIS','route check, safety contour, alarm ack'],
+    ['ais','AIS','target detail, voyage/static data cross-check'],
+    ['vhf','VHF / DSC','CH16, working channel, distress, radio log'],
+    ['bnwas','BNWAS','stage timer, acknowledge, bypass log'],
+    ['echo','Echo Sounder','offset, shallow alarm, depth trend'],
+    ['gyro','Gyro','source, repeater, radar/ECDIS feed'],
+    ['autopilot','Engine Telegraph','standby, helm/engine order discipline']
+  ];
+  return `<div class="bridge-console-launcher">
+    <div class="sim-mini-title">TAM KOPRUUSTU CIHAZ KONSOLU</div>
+    <div class="bridge-console-grid">
+      ${devices.map(([key,title,desc])=>`<button onclick="openRealBridgeConsole('${key}')"><b>${phoneSafe(title)}</b><small>${phoneSafe(desc)}</small></button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function openRealBridgeConsole(key){
+  const actual = key === 'engine' ? 'autopilot' : key;
+  activeDeviceKey = actual;
+  deviceMenuPath[actual] = 'root';
+  if(!(actual in devicePracticeProgress)) devicePracticeProgress[actual] = 0;
+  completeMissionStep('route', `Kopruustu konsolu: ${getDeviceDef(actual).name}`);
+  addLiveLogbook('KOPRUUSTU KONSOLU', `${getDeviceDef(actual).name} yakinlastirma modunda acildi.`, true);
+  addWatchFeed(`Konsol zoom: ${getDeviceDef(actual).name}`, 'good');
+  openDevices();
+}
+
+function getEventChainLauncherPanel(){
+  const chains = [
+    ['vhf','VHF cagri zinciri','VHF cagri -> radar hedef -> kaptan raporu -> logbook -> sirket mail'],
+    ['pilot','Pilot / tug zinciri','pilot boarding -> MPX -> tug made fast -> final approach -> all fast'],
+    ['engine','Makine alarm zinciri','alarm -> ECR kontrol -> kopru raporu -> logbook -> kaptan review'],
+    ['inspection','PSC / survey zinciri','belge -> ekipman -> deficiency -> corrective action -> office mail'],
+    ['incident','Near miss zinciri','CPA dusus -> replay -> root cause -> corrective action -> takip']
+  ];
+  return `<div class="event-chain-launcher">
+    <div class="sim-mini-title">OLAY ZINCIRI SISTEMI</div>
+    <div class="event-chain-grid">
+      ${chains.map(([key,title,desc])=>`<button onclick="triggerRealEventChain('${key}')"><b>${phoneSafe(title)}</b><small>${phoneSafe(desc)}</small></button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function triggerRealEventChain(kind='vhf'){
+  const chains = {
+    vhf:['VHF: VTS cagrisi duyuldu','Radar: ilgili hedef acquire edildi','Kaptan: kisa risk raporu verildi','Logbook: konum/saat/kanal yazildi','Şirket: operasyon maili kayda girdi'],
+    pilot:['Pilot station teyit edildi','Pilot ladder ve lee hazirlandi','MPX: draft/engine/tug plan tekrar edildi','Römorkor made fast','All fast zamani SOF dosyasina yazildi'],
+    engine:['Makine alarmi tekrar etti','ECR panelinde generator/cooling trend bakildi','Kopruye teknik rapor verildi','Kaptan hiz/rota kararini onayladi','Logbook ve office mail acildi'],
+    inspection:['Denetci belge istedi','Ekipman gosterildi','Eksik riskine corrective action yazildi','PSC/class notu logbooka dustu','Ofis takip maili olustu'],
+    incident:['Radar hedefi yaklasti','CPA/TCPA dususu replaye alindi','Kok neden secildi','Corrective action yazildi','Kaptan ay sonu review icin not dustu']
+  };
+  const lines = chains[kind] || chains.vhf;
+  lines.forEach((line,i)=>{
+    sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(`Zincir ${i+1}/${lines.length}: ${line}`, i===0 || i===lines.length-1 ? 'warn' : 'good'), 180 + i*620));
+  });
+  const deviceKey = kind === 'engine' ? 'gyro' : kind === 'pilot' ? 'ecdis' : kind === 'incident' ? 'radar' : kind === 'inspection' ? 'ecdis' : 'vhf';
+  devicePracticeProgress[deviceKey] = 0;
+  activeDeviceKey = deviceKey;
+  addLiveLogbook('OLAY ZINCIRI', lines.join(' -> '), true);
+  addCompanyMailThread('Olay zinciri takibi', `${lines.join(' -> ')}. Ilgili cihaz pratigi otomatik acildi: ${getDeviceDef(deviceKey).name}.`, kind==='incident'?'warn':'info');
+  pushPhoneMessage('Kaptan', `Olay zinciri basladi: ${lines[0]}. Once cihaz, sonra rapor, sonra logbook.`, {open:false});
+  applyEffect({bilgi:2,sayginlik:1,dinclik:-1},{skipContractTick:true});
+  showNotif('CHAIN','Olay Zinciri', 'Cihaz pratigi, logbook, telefon ve mail birbirine baglandi.');
+  renderSimCenter();
+}
+
+function getThreeAreaLauncherPanel(){
+  const areas = [
+    ['bridge','3D kopruustu cihaz masasi','radar, ECDIS, VHF, telegraph'],
+    ['deck','3D guverte / halat','head, stern, spring, snap-back'],
+    ['engine','3D makine kontrol odasi','alarm, generator, pump, tank'],
+    ['lifeboat','3D filika / davit egitimi','lifeboat, rescue boat, liferaft'],
+    ['manifold','3D tanker manifold','valve, ESD, pressure, drip tray']
+  ];
+  return `<div class="three-area-launcher">
+    <div class="sim-mini-title">3D EGITIM ALANLARI</div>
+    <div class="three-area-grid">
+      ${areas.map(([key,title,desc])=>`<button onclick="openThreeTrainingArea('${key}')"><b>${phoneSafe(title)}</b><small>${phoneSafe(desc)}</small></button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function openThreeTrainingArea(area){
+  const labels = {
+    bridge:'3D kopruustu: cihaz masasinda radar/ECDIS/VHF yaklastirma',
+    deck:'3D guverte: halat sirasi ve snap-back alanlari',
+    engine:'3D makine: alarm paneli, generator ve pompa kontrolu',
+    lifeboat:'3D filika: davit, can sali ve kurtarma ekipmani',
+    manifold:'3D manifold: ESD, pressure gauge, valve line-up'
+  };
+  addWatchFeed(labels[area] || '3D egitim alani acildi', area==='engine'?'warn':'good');
+  addLiveLogbook('3D EGITIM', labels[area] || '3D egitim alani acildi', true);
+  if(area === 'bridge') openRealBridgeConsole('radar');
+  else if(area === 'deck') { markMooringLine('3D deck line handling'); openShipWalk?.(); }
+  else if(area === 'engine') markEngineCheck('3D engine control room');
+  else if(area === 'manifold') markCargoCheck('3D tanker manifold line-up');
+  else pushPhoneMessage('Egitim', labels[area] || '3D egitim alani acildi', {open:false});
+  showNotif('3D','Egitim Alani', labels[area] || '3D egitim alani hazir.');
+}
+
 function renderSimCenter(){
   const body=document.getElementById('sim-body'); if(!body) return;
   const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
@@ -23574,6 +23739,9 @@ function renderSimCenter(){
     </div>
     <div class="sim-section wide">
       ${buildStoryDirectorPanel()}
+    </div>
+    <div class="sim-section wide">
+      ${getRealismDirectorPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>VARDIYA / ROTA</span><span>${phoneSafe(watchState.code)}</span></div>
