@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=124",
-        "index.css?v=111",
+        "index.js?v=129",
+        "index.css?v=115",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -78,6 +78,13 @@ REQUIRED = {
         "runMapTaskReplay",
         "getClickedWorldChartIndexSheet",
     ],
+    "expanded map workspace": [
+        "#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1900px,calc(100vw - 16px));height:calc(100dvh - 16px);",
+        "#map-world-view{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;}",
+        "#map-svg{width:100%;height:calc(100dvh - 138px);",
+        "#port-chart-svg{width:100%;height:calc(100dvh - 280px);",
+        "#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:10px;max-height:none;",
+    ],
     "intro menu pages": [
         "home-screen",
         "home-page-play",
@@ -102,6 +109,15 @@ REQUIRED = {
         "renderVoyageRouteSelector",
         "setSelectedVoyageRoute",
         "MAJOR_TRADE_ROUTE_KEYS",
+    ],
+    "new voyage route pack": [
+        "ADDITIONAL_NAVIGATION_ROUTES",
+        "us_pnw_asia_grain",
+        "australia_japan_lng",
+        "gulf_europe_crude_cape",
+        "blacksea_india_bulk",
+        "north_europe_canada_stlawrence",
+        "asia_australia_container",
     ],
     "setup ship selection tab": [
         "data-intro-tab=\"ship\"",
@@ -135,6 +151,15 @@ REQUIRED = {
         ".creator-preview-stage .portrait-composite.preview",
         "width:min(48vw,190px)",
         "scale(.74)",
+    ],
+    "mobile fit overhaul": [
+        "mobile-fit-overhaul",
+        "body.screen-game{height:100dvh;overflow:hidden;}",
+        "#story{flex:1 1 auto;min-height:0;overflow:auto;",
+        "#choices{flex:0 0 auto;display:grid;grid-template-columns:1fr;",
+        "mobile-landscape-fit",
+        "body.screen-game{height:100svh;overflow:hidden;}",
+        "#map-box,#devices-box,#notes-box,#journal-box,#colreg-box",
     ],
     "ultra 4k expansion": [
         "ULTRA_4K_ROUTE_EXPANSION",

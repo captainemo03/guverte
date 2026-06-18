@@ -4852,6 +4852,34 @@ function portraitStripeCount(role){
   return 0;
 }
 
+function getPortraitUniformRole(cfg={}){
+  const roleBlob = normalizeTrAscii(`${cfg.uniformRole||''} ${cfg.__roleKey||''} ${cfg.role||''} ${cfg.roleTitle||''} ${cfg.title||''} ${cfg.__name||''} ${cfg.name||''}`);
+  const base = (cfg.base || cfg.__base) === 'female' ? 'female' : 'male';
+  if(base === 'female' && (/suvari|kaptan|captain/.test(roleBlob) || cfg.__roleKey === 'suvari')) return 'female-captain';
+  if(base === 'female' && (cfg.isPlayer || /stajyer|cadet|student/.test(roleBlob))) return 'female-cadet';
+  return '';
+}
+
+function buildPortraitUniformLayers(cfg={}, variant='avatar'){
+  const uniformRole = getPortraitUniformRole(cfg);
+  if(!uniformRole) return '';
+  const isCaptain = uniformRole === 'female-captain';
+  const stripeCount = isCaptain ? Math.max(4, Math.min(4, Number(cfg.stripes || 4))) : 0;
+  const stripeBars = Array.from({length:stripeCount}, (_,i)=>`<i style="--i:${i}"></i>`).join('');
+  const rankBars = stripeBars
+    ? `<span class="uniform-rank left">${stripeBars}</span><span class="uniform-rank right">${stripeBars}</span>`
+    : '';
+  const label = isCaptain ? 'KPT' : 'STJ';
+  return `<span class="uniform-detail ${uniformRole} ${variant}" aria-hidden="true">
+    ${rankBars}
+    <span class="uniform-badge">${label}</span>
+    <span class="uniform-rosette"></span>
+    <span class="uniform-jacket-line"></span>
+    <span class="uniform-cut left"></span>
+    <span class="uniform-cut right"></span>
+  </span>`;
+}
+
 function portraitHairPath(style='short'){
   const map = {
     short:'M58 55c6-15 22-26 43-26 17 0 32 7 41 22l-1 11c-10-9-23-14-40-14-18 0-31 6-40 16z',
@@ -8940,11 +8968,49 @@ function getGraphicLivelinessOverlay(sc, blob){
   return `<div class="live-graphics-boost profile-${profile}" aria-hidden="true">${parts.join('')}</div>`;
 }
 
+function isModernBridgeScene(sc, blob=''){
+  const hay = blob || `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const flags = getScene3DFeatureFlags(sc || {});
+  return flags.bridgeConsole || flags.harborApproach || flags.routeTable || /bridge|kopruustu|köprüüstü|radar|arpa|ecdis|ais|vhf|dsc|gmdss|bnwas|gyro|telegraph|chart room|seyir|route|vts|pilot|tss|bogaz|boğaz/.test(hay);
+}
+
+function getModernBridgeOverlay(sc, blob=''){
+  if(!isModernBridgeScene(sc, blob)) return '';
+  const hay = blob || `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const st = liveVoyageState || computeLiveVoyageState(sc || {});
+  const hot = /mayday|distress|mob|fire|yangin|yangın|blackout|korsan|pirate|alarm/.test(hay) || sc?.alert || Number(st.cpa) < 1.1;
+  const isPilot = /pilot|tug|berth|liman|harbor|terminal|all fast/.test(hay);
+  const isVts = /vts|tss|strait|bogaz|boğaz|reporting point/.test(hay);
+  const vhf = /dsc|channel 70|ch70/.test(hay) ? '70' : hot ? '16' : isVts ? '12' : isPilot ? '14' : '13';
+  return `<div class="modern-bridge-overlay ${hot?'warn':''}" aria-hidden="true">
+    <div class="modern-bridge-window-grid"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="modern-bridge-reflection"></div>
+    <div class="modern-bridge-traffic-lights"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="modern-bridge-console">
+      <section class="modern-bridge-panel modern-bridge-ecdis">
+        <b>ECDIS</b><em>ROUTE MON</em><span class="mb-route"></span><span class="mb-ship"></span><i class="wp1"></i><i class="wp2"></i><i class="wp3"></i>
+      </section>
+      <section class="modern-bridge-panel modern-bridge-radar">
+        <b>RADAR / ARPA</b><em>CPA ${phoneSafe(st.cpa || '--')}</em><span class="mb-sweep"></span><i class="t1"></i><i class="t2"></i><i class="t3"></i>
+      </section>
+      <section class="modern-bridge-panel modern-bridge-ais">
+        <b>AIS TARGETS</b><span>M/V ORION</span><span>TCPA ${phoneSafe(st.tcpa || '--')}m</span><span>COG ${phoneSafe(st.cog || '---')}</span>
+      </section>
+      <section class="modern-bridge-panel modern-bridge-vhf">
+        <b>VHF DSC</b><strong>CH${phoneSafe(vhf)}</strong><em>${hot?'DISTRESS WATCH':isPilot?'PILOT / TUG':isVts?'VTS REPORT':'BRIDGE WATCH'}</em><span></span><span></span><span></span>
+      </section>
+      <section class="modern-bridge-panel modern-bridge-bnwas"><b>BNWAS</b><strong>OK</strong><span></span></section>
+      <section class="modern-bridge-panel modern-bridge-telegraph"><b>TELEGRAPH</b><i></i><em>${isPilot?'D/SLOW':'STBY'}</em></section>
+    </div>
+  </div>`;
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
   parts.push(getScene4KOverlay(sc, blob));
   parts.push(getGraphicLivelinessOverlay(sc, blob));
+  parts.push(getModernBridgeOverlay(sc, blob));
   parts.push('<div class="live-watch-silhouette"></div><div class="live-status-strip"><span></span><span></span><span></span></div>');
   if(!/engine|makine|galley|asci|aşçı|kamara|cabin/.test(blob)){
     parts.push('<div class="live-passing-light l1"></div><div class="live-passing-light l2"></div>');
@@ -9664,6 +9730,7 @@ let livingShipState={thanks:false,note:false,argue:false,complaint:false};
 let sceneChoiceTimer=null;
 let sceneChoiceAutoPick=false;
 let sceneLiveSequenceTimers=[];
+const PLAYER_DECISION_TIMERS_ENABLED = false;
 let watchState={code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
 let voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
 let consequenceTrace={office:0, psc:0, trust:0};
@@ -9937,7 +10004,7 @@ function resolvePortraitIndexFromConfig(cfg={}){
 
 function normalizePortraitConfig(cfg={}){
   const out = {...cfg};
-  out.base = out.base === 'female' ? 'female' : 'male';
+  out.base = (out.base || out.__base) === 'female' ? 'female' : 'male';
   if(out.base === 'female') out.beard = 'clean';
   const sheetUpgradeMap = {
     'assets/crew-portraits.png':PORTRAIT_SHEET_ASSETS.crew,
@@ -10184,7 +10251,7 @@ function renderPortraitSprite(cfg={}, variant='avatar'){
   const bodyScaleX = Math.max(.88, Math.min(1.18, 1 + (w - 72) / 210));
   const traitStyle = `--hair:${cfg.hairColor || '#1e1612'};--skin:${cfg.skin || '#d9a27c'};--eye:${cfg.eye || '#496b8d'};--body-x:${bodyScaleX};--body-y:${bodyScaleY};`;
   const traitClasses = `hair-${cfg.hair||'short'} beard-${cfg.beard||'clean'} face-${cfg.face||'soft'} base-${cfg.base||'male'} uniform-${cfg.uniform||'classic'}`;
-  const traitLayers = '';
+  const traitLayers = buildPortraitUniformLayers(cfg, variant);
   if(cfg.isPlayer && cfg.faceAsset && cfg.portraitSheet){
     const idx = Number.isInteger(cfg.sheetIndex) ? cfg.sheetIndex : (Number.isInteger(cfg.model) ? cfg.model : 0);
     const cols = cfg.sheetCols || 4;
@@ -12945,7 +13012,7 @@ function getSceneDetailClass(sc){
 function getSceneFlavorClasses(sc){
   const hay = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const classes = ['scene-real-grain','scene-cinematic'];
-  if(/radar|ais|ecdis|arpa|bridge|kopruustu|köprüüstü/.test(hay)) classes.push('scene-live-nav','scene-glass-reflection');
+  if(/radar|ais|ecdis|arpa|bridge|kopruustu|köprüüstü/.test(hay)) classes.push('scene-live-nav','scene-glass-reflection','scene-modern-bridge');
   if(/galley|asci|cay|kahve|coffee/.test(hay)) classes.push('scene-human-cup');
   if(/engine|makine|rag|bez|oil|yagci|compressor/.test(hay)) classes.push('scene-human-rag');
   if(/deck|guverte|wet deck|rain stop|mooring|halat/.test(hay)) classes.push('scene-human-wetdeck');
@@ -13007,7 +13074,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const sceneArea = document.getElementById('scene-area');
   const story = document.getElementById('story');
   if(sceneArea){
-    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer','scene-cinematic','scene-location-bridge','scene-location-engine','scene-location-deck','scene-location-galley','scene-location-cabin');
+    sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-modern-bridge','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer','scene-cinematic','scene-location-bridge','scene-location-engine','scene-location-deck','scene-location-galley','scene-location-cabin');
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
@@ -14017,10 +14084,11 @@ function makeCrewPortrait(key, def){
   else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
   if(supportIdx!==null){
     return {
-      __portraitVersion:2,
+      __portraitVersion:3,
       __roleKey:key,
       __base:base,
       __name:def.name || '',
+      base,
       portraitSheet:supportSheet,
       sheetCols:3,
       sheetRows:2,
@@ -14035,10 +14103,12 @@ function makeCrewPortrait(key, def){
   const officerSheet = age==='young' ? PORTRAIT_SHEET_ASSETS.officerYoung : PORTRAIT_SHEET_ASSETS.officerMid;
   const officerIndexPool = OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
   return {
-    __portraitVersion:2,
+    __portraitVersion:3,
     __roleKey:key,
     __base:base,
     __name:def.name || '',
+    roleTitle:def.title || '',
+    uniformRole:getPortraitUniformRole({base,__roleKey:key,roleTitle:def.title,__name:def.name}),
     skin: pickRandom(PLAYER_LOOK.skin),
     base,
     age,
@@ -14067,7 +14137,7 @@ function getCrewPortraitForKey(key){
   const nextBase = inferPortraitBase(def);
   if(
     !current ||
-    current.__portraitVersion !== 2 ||
+    current.__portraitVersion !== 3 ||
     current.__roleKey !== key ||
     current.__base !== nextBase ||
     current.__name !== (def.name || '')
@@ -15214,6 +15284,159 @@ const EXTENDED_GLOBAL_VOYAGE_ROUTES = [
   }
 ];
 TRADE_VOYAGE_ROUTES.push(...EXTENDED_GLOBAL_VOYAGE_ROUTES);
+const ADDITIONAL_NAVIGATION_ROUTES = [
+  {
+    key:'us_pnw_asia_grain',
+    name:'ABD Pasifik Kuzeybati - Asya Tahil Hatti',
+    trade:'Bulk / grain Pacific',
+    chart:'ABD Pasifik Kuzeybati - Asya Tahil Hatti',
+    start:'Seattle',
+    end:'Yokohama',
+    distanceNm:4300,
+    etaDays:12,
+    charts:['Seattle','Transpasifik Dogu Hatti','North Pacific Weather Route','Yokohama'],
+    waypoints:[
+      {name:'Seattle grain terminal', x:62, y:86, note:'Draft survey, hold cleanliness, river/traffic departure', chart:'Seattle', risk:'Cargo / pilotage'},
+      {name:'Juan de Fuca outbound', x:58, y:88, note:'Traffic lanes, fog and pilot disembark', chart:'ABD Pasifik Kuzeybati - Asya Tahil Hatti', risk:'Fog / traffic'},
+      {name:'North Pacific low pressure gate', x:180, y:62, note:'Weather routing, hatch cover watch and fuel margin', chart:'North Pacific Weather Route', risk:'Heavy weather'},
+      {name:'Date line fatigue watch', x:242, y:66, note:'Long ocean watch, logbook and fatigue management', chart:'Transpasifik Dogu Hatti', risk:'Fatigue'},
+      {name:'Japan grain arrival', x:414, y:86, note:'VTS, pilot station, draft and discharge docs', chart:'Yokohama', risk:'Pilotage / draft'}
+    ]
+  },
+  {
+    key:'australia_japan_lng',
+    name:'Avustralya - Japonya LNG Hatti',
+    trade:'LNG / enerji',
+    chart:'Avustralya - Japonya LNG Hatti',
+    start:'Sydney',
+    end:'Yokohama',
+    distanceNm:4100,
+    etaDays:11,
+    charts:['Sydney','Torres Bogazi','Guney Cin Denizi Ana Konteyner Hatti','Yokohama'],
+    waypoints:[
+      {name:'Australian LNG terminal departure', x:420, y:232, note:'Cargo condition, ESD link and pilot out', chart:'Sydney', risk:'LNG terminal'},
+      {name:'Coral Sea weather gate', x:398, y:198, note:'Tropical low, swell and cargo pressure monitoring', chart:'Avustralya - Japonya LNG Hatti', risk:'Weather / cargo'},
+      {name:'Torres Strait pilot check', x:396, y:210, note:'Reef pilotage, UKC and speed discipline', chart:'Torres Bogazi', risk:'Reef / UKC'},
+      {name:'Philippine Sea northbound', x:398, y:132, note:'Squalls, fishing fleets and AIS clutter', chart:'Guney Cin Denizi Ana Konteyner Hatti', risk:'Traffic / squall'},
+      {name:'Japan LNG terminal approach', x:414, y:86, note:'Pilot, terminal safety zone and cargo docs', chart:'Yokohama', risk:'Pilotage / terminal'}
+    ]
+  },
+  {
+    key:'gulf_europe_crude_cape',
+    name:'Korfez - Avrupa Ham Petrol Cape Alternatifi',
+    trade:'Tanker / crude via Cape',
+    chart:'Korfez - Avrupa Ham Petrol Cape Alternatifi',
+    start:'Ras Tanura',
+    end:'Rotterdam',
+    distanceNm:11800,
+    etaDays:34,
+    charts:['Ras Tanura','Hurmuz Bogazi','Fujairah','Aden Korfezi','Cape of Good Hope Alternatif Rotasi','Gine Korfezi','Dover TSS - English Channel','Rotterdam'],
+    waypoints:[
+      {name:'Ras Tanura crude departure', x:331, y:138, note:'Cargo figures, manifold closeout and sea berth departure', chart:'Ras Tanura', risk:'Tanker ops'},
+      {name:'Hormuz westbound security', x:342, y:145, note:'Security watch, reporting and narrow water CPA', chart:'Hurmuz Bogazi', risk:'Security / chokepoint'},
+      {name:'Gulf of Aden HRA gate', x:274, y:218, note:'BMP measures, citadel readiness and VHF discipline', chart:'Aden Korfezi', risk:'Security'},
+      {name:'Cape reroute weather gate', x:126, y:246, note:'Cape swell, fuel ROB and engine readiness', chart:'Cape of Good Hope Alternatif Rotasi', risk:'Heavy weather'},
+      {name:'Gulf of Guinea northbound', x:88, y:188, note:'Offshore traffic, security reports and weather', chart:'Gine Korfezi', risk:'Security / weather'},
+      {name:'Dover tanker inbound', x:187, y:82, note:'ECA, TSS and pilot ETA update', chart:'Dover TSS - English Channel', risk:'TSS'},
+      {name:'Rotterdam crude terminal', x:188, y:76, note:'Pilot, tugs, terminal readiness and cargo docs', chart:'Rotterdam', risk:'Terminal'}
+    ]
+  },
+  {
+    key:'blacksea_india_bulk',
+    name:'Karadeniz - Hindistan Bulk Hatti',
+    trade:'Bulk / tahil-komur',
+    chart:'Karadeniz - Hindistan Bulk Hatti',
+    start:'Samsun',
+    end:'Mumbai',
+    distanceNm:4300,
+    etaDays:14,
+    charts:['Samsun','İstanbul Bogazi','Çanakkale Bogazi','Suveys','Babulmendep','Arap Denizi - Malakka Ham Petrol Hatti','Mumbai'],
+    waypoints:[
+      {name:'Samsun bulk departure', x:231, y:90, note:'Draft survey, hatch cover and Black Sea weather', chart:'Samsun', risk:'Swell / draft'},
+      {name:'Bosphorus southbound report', x:220, y:96, note:'VTS, current and local traffic', chart:'İstanbul Bogazi', risk:'Current / VTS'},
+      {name:'Dardanelles current gate', x:212, y:101, note:'TSS, ferries and speed order', chart:'Çanakkale Bogazi', risk:'TSS / current'},
+      {name:'Suez southbound convoy', x:252, y:132, note:'Pilot, convoy slot and UKC', chart:'Suveys', risk:'Canal / UKC'},
+      {name:'Bab el-Mandeb southbound', x:270, y:166, note:'Security watch and traffic lane', chart:'Babulmendep', risk:'Security'},
+      {name:'Arabian Sea monsoon arrival', x:304, y:166, note:'Swell, speed loss and ETA report', chart:'Arap Denizi - Malakka Ham Petrol Hatti', risk:'Monsoon'},
+      {name:'Mumbai bulk anchorage', x:286, y:164, note:'Pilot, anchorage density and cargo documents', chart:'Mumbai', risk:'Anchorage / docs'}
+    ]
+  },
+  {
+    key:'west_med_west_africa_feeder',
+    name:'Bati Akdeniz - Bati Afrika Feeder Hatti',
+    trade:'Feeder konteyner / Afrika servisi',
+    chart:'Bati Akdeniz - Bati Afrika Feeder Hatti',
+    start:'Valensiya',
+    end:'Gine Korfezi',
+    distanceNm:3300,
+    etaDays:11,
+    charts:['Valensiya','Cebelitarık','Canary Route','Gine Korfezi','Batı Afrika - Avrupa Tanker Rotasi'],
+    waypoints:[
+      {name:'Valencia feeder departure', x:180, y:108, note:'Terminal slot, reefers and pilot out', chart:'Valensiya', risk:'Terminal / traffic'},
+      {name:'Gibraltar southbound merge', x:174, y:120, note:'Traffic lane, reporting and current', chart:'Cebelitarık', risk:'Traffic'},
+      {name:'Canary traffic separation', x:154, y:140, note:'Fishing traffic, weather and speed order', chart:'Canary Route', risk:'Traffic / weather'},
+      {name:'West Africa security briefing', x:104, y:176, note:'Security level, anti-piracy watch and VHF reporting', chart:'Batı Afrika - Avrupa Tanker Rotasi', risk:'Security'},
+      {name:'Gulf of Guinea port approach', x:88, y:188, note:'Pilot station, anchorage density and port docs', chart:'Gine Korfezi', risk:'Pilotage / security'}
+    ]
+  },
+  {
+    key:'north_europe_canada_stlawrence',
+    name:'Kuzey Avrupa - Kanada St. Lawrence Hatti',
+    trade:'Konteyner / nehir-deniz',
+    chart:'Kuzey Avrupa - Kanada St. Lawrence Hatti',
+    start:'Hamburg',
+    end:'Montreal',
+    distanceNm:3650,
+    etaDays:11,
+    charts:['Hamburg','Elbe Nehri','Dover TSS - English Channel','Kuzey Atlantik Ana Hatti','Great Lakes - St. Lawrence Hatti','Montreal'],
+    waypoints:[
+      {name:'Hamburg river departure', x:42, y:10, note:'Elbe tide, pilot and UKC', chart:'Hamburg', risk:'River / tide'},
+      {name:'Elbe outbound pilot', x:40, y:12, note:'Current, traffic and squat', chart:'Elbe Nehri', risk:'Squat / traffic'},
+      {name:'Dover westbound TSS', x:187, y:82, note:'Ferry crossing, TSS and CPA', chart:'Dover TSS - English Channel', risk:'TSS'},
+      {name:'North Atlantic ice advisory', x:128, y:78, note:'Weather routing, ice warning and ECA planning', chart:'Kuzey Atlantik Ana Hatti', risk:'Weather / ice'},
+      {name:'St. Lawrence pilot exchange', x:88, y:70, note:'River pilot, current and restricted channel', chart:'Great Lakes - St. Lawrence Hatti', risk:'River pilotage'},
+      {name:'Montreal berth window', x:82, y:68, note:'Lock/river timing, terminal slot and customs', chart:'Montreal', risk:'Berthing / documents'}
+    ]
+  },
+  {
+    key:'med_us_gulf_products',
+    name:'Akdeniz - ABD Korfezi Product Tanker Hatti',
+    trade:'Product tanker / refined products',
+    chart:'Akdeniz - ABD Korfezi Product Tanker Hatti',
+    start:'Marsilya',
+    end:'Houston',
+    distanceNm:5600,
+    etaDays:17,
+    charts:['Marsilya','Cebelitarık','Kuzey Atlantik Ana Hatti','Meksika Korfezi','Houston'],
+    waypoints:[
+      {name:'Marseille product terminal', x:190, y:101, note:'Line-up, samples, MSDS and pilot out', chart:'Marsilya', risk:'Tanker terminal'},
+      {name:'Gibraltar westbound exit', x:174, y:120, note:'Traffic merge, weather and reporting', chart:'Cebelitarık', risk:'Traffic'},
+      {name:'Atlantic product tanker leg', x:128, y:112, note:'Tank atmosphere, cargo temperature and ETA', chart:'Kuzey Atlantik Ana Hatti', risk:'Cargo / weather'},
+      {name:'US Gulf weather watch', x:66, y:128, note:'Squall, offshore traffic and pilot timing', chart:'Meksika Korfezi', risk:'Weather / offshore'},
+      {name:'Houston product berth', x:61, y:130, note:'Pilot, terminal readiness, manifold and cargo docs', chart:'Houston', risk:'Pilotage / terminal'}
+    ]
+  },
+  {
+    key:'asia_australia_container',
+    name:'Uzak Dogu - Avustralya Konteyner Servisi',
+    trade:'Konteyner / Asia-Australia',
+    chart:'Uzak Dogu - Avustralya Konteyner Servisi',
+    start:'Singapur',
+    end:'Sydney',
+    distanceNm:3900,
+    etaDays:11,
+    charts:['Singapur','Lombok Bogazi','Torres Bogazi','Avustralya - Cin Demir Cevheri Hatti','Sydney'],
+    waypoints:[
+      {name:'Singapore southbound departure', x:371, y:167, note:'VTIS, bunker traffic and pilot out', chart:'Singapur', risk:'Traffic / bunker'},
+      {name:'Lombok southbound gate', x:382, y:188, note:'Current, swell and deep-water passage', chart:'Lombok Bogazi', risk:'Current / swell'},
+      {name:'Arafura Sea weather watch', x:396, y:204, note:'Tropical weather and long ocean watch', chart:'Uzak Dogu - Avustralya Konteyner Servisi', risk:'Weather'},
+      {name:'Torres Strait reef pilot', x:396, y:210, note:'Reef pilot, UKC and reporting', chart:'Torres Bogazi', risk:'Reef / UKC'},
+      {name:'Australia east coast approach', x:410, y:224, note:'Coastal traffic, ECA and pilot station', chart:'Avustralya - Cin Demir Cevheri Hatti', risk:'Coastal traffic'},
+      {name:'Sydney container berth', x:420, y:232, note:'Pilot, terminal window and lashing release', chart:'Sydney', risk:'Pilotage / terminal'}
+    ]
+  }
+];
+TRADE_VOYAGE_ROUTES.push(...ADDITIONAL_NAVIGATION_ROUTES);
 Object.assign(WORLD_MAP_POINT_LOOKUP, {
   'port said':[251,128],
   'cristobal arrival queue':[69,150],
@@ -15291,7 +15514,63 @@ Object.assign(WORLD_MAP_POINT_LOOKUP, {
   'guney amerika - avrupa reefer hatti':[138,156],
   'rio de la plata - avrupa tahil hatti':[144,150],
   'jebel ali - dogu afrika feeder hatti':[304,184],
-  'dunya cevrimi egitim rotasi':[228,124]
+  'dunya cevrimi egitim rotasi':[228,124],
+  'seattle':[62,86],
+  'seattle grain terminal':[62,86],
+  'juan de fuca outbound':[58,88],
+  'north pacific low pressure gate':[180,62],
+  'date line fatigue watch':[242,66],
+  'japan grain arrival':[414,86],
+  'australian lng terminal departure':[420,232],
+  'coral sea weather gate':[398,198],
+  'torres strait pilot check':[396,210],
+  'philippine sea northbound':[398,132],
+  'japan lng terminal approach':[414,86],
+  'ras tanura crude departure':[331,138],
+  'hormuz westbound security':[342,145],
+  'gulf of aden hra gate':[274,218],
+  'cape reroute weather gate':[126,246],
+  'gulf of guinea northbound':[88,188],
+  'dover tanker inbound':[187,82],
+  'rotterdam crude terminal':[188,76],
+  'samsun bulk departure':[231,90],
+  'bosphorus southbound report':[220,96],
+  'dardanelles current gate':[212,101],
+  'suez southbound convoy':[252,132],
+  'bab el-mandeb southbound':[270,166],
+  'arabian sea monsoon arrival':[304,166],
+  'mumbai bulk anchorage':[286,164],
+  'valencia feeder departure':[180,108],
+  'gibraltar southbound merge':[174,120],
+  'canary traffic separation':[154,140],
+  'west africa security briefing':[104,176],
+  'gulf of guinea port approach':[88,188],
+  'montreal':[82,68],
+  'hamburg river departure':[42,10],
+  'elbe outbound pilot':[40,12],
+  'dover westbound tss':[187,82],
+  'north atlantic ice advisory':[128,78],
+  'st. lawrence pilot exchange':[88,70],
+  'montreal berth window':[82,68],
+  'marseille product terminal':[190,101],
+  'gibraltar westbound exit':[174,120],
+  'atlantic product tanker leg':[128,112],
+  'us gulf weather watch':[66,128],
+  'houston product berth':[61,130],
+  'singapore southbound departure':[371,167],
+  'lombok southbound gate':[382,188],
+  'arafura sea weather watch':[396,204],
+  'torres strait reef pilot':[396,210],
+  'australia east coast approach':[410,224],
+  'sydney container berth':[420,232],
+  'abd pasifik kuzeybati - asya tahil hatti':[226,76],
+  'avustralya - japonya lng hatti':[406,158],
+  'korfez - avrupa ham petrol cape alternatifi':[220,170],
+  'karadeniz - hindistan bulk hatti':[254,132],
+  'bati akdeniz - bati afrika feeder hatti':[132,150],
+  'kuzey avrupa - kanada st. lawrence hatti':[124,74],
+  'akdeniz - abd korfezi product tanker hatti':[128,116],
+  'uzak dogu - avustralya konteyner servisi':[394,198]
 });
 const SAVE_KEY = 'guverte-save-v1';
 const PLAY_MODE_DEFS = {
@@ -21500,6 +21779,14 @@ const MAJOR_TRADE_ROUTE_KEYS = [
   'car_carrier_asia_europe',
   'jebelali_east_africa_feeder',
   'round_world_training_route',
+  'us_pnw_asia_grain',
+  'australia_japan_lng',
+  'gulf_europe_crude_cape',
+  'blacksea_india_bulk',
+  'west_med_west_africa_feeder',
+  'north_europe_canada_stlawrence',
+  'med_us_gulf_products',
+  'asia_australia_container',
   'australia_china_iron',
   'indonesia_china_coal',
   'west_africa_europe_tanker',
@@ -21548,9 +21835,9 @@ function renderVoyageRouteSelector(){
 function selectVoyageRouteForShipType(type=selType){
   const typeKey = String(type || '').toLowerCase();
   let candidates = TRADE_VOYAGE_ROUTES;
-  if(/tanker|lng/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/energy|gulf|tanker|lng|west_africa|norway|shuttle|offload|jebelali/.test(`${r.key} ${r.trade}`));
-  else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil|australia|indonesia|us_gulf|bulk|komur|cevheri|tahil|grain|rio_plate/.test(`${r.key} ${r.trade}`));
-  else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific|north_atlantic|panama_far_east|feeder|konteyner|container|india_europe|china_us|med_shortsea|round_world/.test(`${r.key} ${r.trade}`));
+  if(/tanker|lng/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/energy|gulf|tanker|lng|west_africa|norway|shuttle|offload|jebelali|crude|products|australia_japan_lng|med_us_gulf/.test(`${r.key} ${r.trade}`));
+  else if(/bulk|kuru/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/blacksea|brazil|australia|indonesia|us_gulf|bulk|komur|cevheri|tahil|grain|rio_plate|pnw|blacksea_india/.test(`${r.key} ${r.trade}`));
+  else if(/kont|container/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/eu_far_east|transpacific|north_atlantic|panama_far_east|feeder|konteyner|container|india_europe|china_us|med_shortsea|round_world|stlawrence|asia_australia/.test(`${r.key} ${r.trade}`));
   else if(/roro/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/roro|feeder|turkey_adriatic|blacksea|eu_far_east|car_carrier|pctc|vehicle/.test(`${r.key} ${r.trade}`));
   else if(/proje|project/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/project|proje|heavy|modul/.test(`${r.key} ${r.trade}`));
   else if(/kruvaziyer|cruise/.test(typeKey)) candidates = TRADE_VOYAGE_ROUTES.filter(r=>/cruise|kruvaziyer|passenger/.test(`${r.key} ${r.trade}`));
@@ -23671,7 +23958,7 @@ function buildStoryDirectorPanel(){
   else flow.push('Cihaz/veri teyit','Kisa rapor');
   flow.push(heat>=5?'Duzeltici aksiyon':'Logbook gir','Teslim / follow-up');
   const nextSceneBias = heat>=6 ? 'Sonraki sahnelerde kaptan/ofis daha cok soru sorar.'
-    : stats.dinclik < 35 ? 'Yorgunluk sahnelerinde sure kisalir ve aldatıcı secenek artar.'
+    : stats.dinclik < 35 ? 'Yorgunlukta ipuclari ve prosedur destegi artar; karar icin acele ettirilmezsin.'
     : route ? 'Seyir rotasi ilerledikce harita, VTS ve cihaz gorevleri acilir.'
     : 'Rota secimi gelirse seyir omurgasi daha net akar.';
   return `<div class="story-director-panel">
@@ -24649,6 +24936,10 @@ function triggerRandomEvent(){
 
 function showEventCard(ev){
   eventActive = true;
+  if(eventTimer){
+    clearInterval(eventTimer);
+    eventTimer = null;
+  }
   document.getElementById('event-icon').textContent = ev.icon;
   document.getElementById('event-title').textContent = ev.title;
   document.getElementById('event-text').textContent = ev.text;
@@ -24659,7 +24950,10 @@ function showEventCard(ev){
     b.className = 'event-choice';
     b.textContent = c.text;
     b.onclick = () => {
-      clearInterval(eventTimer);
+      if(eventTimer){
+        clearInterval(eventTimer);
+        eventTimer = null;
+      }
       applyEffect(c.effect);
       addJournalEntry(`Ani olay: ${ev.title} — "${c.text}" seçildi.`);
       document.getElementById('event-card').classList.remove('show');
@@ -24668,8 +24962,19 @@ function showEventCard(ev){
     ec.appendChild(b);
   });
   document.getElementById('event-card').classList.add('show');
+  const timerEl = document.getElementById('event-timer');
+  if(!PLAYER_DECISION_TIMERS_ENABLED){
+    if(timerEl){
+      timerEl.textContent = 'Sakin oyna';
+      timerEl.style.display = 'none';
+    }
+    return;
+  }
   let t = ev.timer;
-  document.getElementById('event-timer').textContent = t;
+  if(timerEl){
+    timerEl.style.display = '';
+    timerEl.textContent = t;
+  }
   eventTimer = setInterval(() => {
     t--;
     const el = document.getElementById('event-timer');
@@ -25063,6 +25368,7 @@ function scheduleDynamicMiniChain(sc){
 
 function startSceneChoiceTimer(sc, ch){
   clearSceneChoiceTimer();
+  if(!PLAYER_DECISION_TIMERS_ENABLED) return;
   const panel = document.getElementById('calc-panel');
   const hasActiveDecisionPanel = !!(panel && panel.classList.contains('show'));
   if(!sc || !ch || (ch.style.display === 'none' && !hasActiveDecisionPanel)) return;
