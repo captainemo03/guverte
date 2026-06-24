@@ -9019,6 +9019,77 @@ function getCinematicOverlay(sc){
   </div>`;
 }
 
+function getCinematicFlowLines(sc){
+  const rawText = typeof sc?.text === 'function' ? sc.text(pn,sn) : (sc?.text || '');
+  const textLines = String(rawText).split(/\n\s*\n/).map(line=>line.trim()).filter(Boolean).slice(0,3);
+  const beatLines = (Array.isArray(sc?.cinematicBeats) ? sc.cinematicBeats : []).slice(0,4);
+  return [...textLines, ...beatLines].filter(Boolean);
+}
+
+function renderCinematicTextFrame(lines, activeIndex, done=false){
+  const textEl = document.getElementById('text');
+  if(!textEl) return;
+  const visible = lines.slice(0, Math.max(1, activeIndex + 1));
+  textEl.innerHTML = `<div class="cinematic-text-flow">
+    ${visible.map((line,idx)=>`<p class="${idx===activeIndex && !done ? 'active' : ''}">${phoneSafe(translateGameText(line))}</p>`).join('')}
+    ${done ? '<small>Sinematik tamamlandi. Normal sahne akisina donebilirsin.</small>' : ''}
+  </div>`;
+}
+
+function finishCinematicFlow(sc, ch, primaryChoice, opts={}){
+  clearSceneLiveSequence();
+  const lines = getCinematicFlowLines(sc);
+  renderCinematicTextFrame(lines, Math.max(0, lines.length-1), true);
+  const continueBtn = ch?.querySelector('[data-cinematic-continue]');
+  const skipBtn = ch?.querySelector('[data-cinematic-skip]');
+  if(continueBtn){
+    continueBtn.disabled = false;
+    continueBtn.classList.remove('locked');
+    continueBtn.textContent = translateGameText(primaryChoice?.text || sc?.choice || 'Devam et');
+    continueBtn.focus({preventScroll:true});
+  }
+  if(skipBtn){
+    skipBtn.disabled = false;
+    skipBtn.textContent = opts.skipped ? translateGameText('Geçildi') : translateGameText('Atla');
+  }
+}
+
+function setupCinematicSceneFlow(sc, ch){
+  if(!sc?.cinematic || !ch) return false;
+  clearSceneLiveSequence();
+  const primaryChoice = getSceneRenderChoices(sc)[0] || sc.choices?.[0];
+  const lines = getCinematicFlowLines(sc);
+  const duration = sc.cinematicDurationMs || Math.min(12000, Math.max(8000, 5600 + lines.length * 900));
+  const step = Math.max(900, Math.floor(duration / Math.max(2, lines.length + 1)));
+  ch.classList.add('cinematic-controls');
+  ch.style.display = '';
+  ch.innerHTML = `<button class="cbtn cinematic-skip-btn" data-cinematic-skip type="button">${translateGameText('Atla')}</button>
+    <button class="cbtn cinematic-continue-btn locked" data-cinematic-continue type="button" disabled>${translateGameText('Devam et')}</button>`;
+  const skipBtn = ch.querySelector('[data-cinematic-skip]');
+  const continueBtn = ch.querySelector('[data-cinematic-continue]');
+  const finish = (opts={})=>finishCinematicFlow(sc, ch, primaryChoice, opts);
+  const proceed = ()=>{
+    if(primaryChoice) handleSceneChoice(sc, primaryChoice, ch);
+  };
+  skipBtn.onclick = ()=>{
+    clearSceneLiveSequence();
+    finish({skipped:true});
+    proceed();
+  };
+  continueBtn.onclick = proceed;
+  renderCinematicTextFrame(lines, 0, false);
+  lines.forEach((line,idx)=>{
+    const timer = setTimeout(()=>{
+      renderCinematicTextFrame(lines, idx, false);
+      addWatchFeed(`Sinematik ${idx+1}/${lines.length}: ${translateGameText(line)}`, idx===lines.length-1 ? 'good' : '');
+    }, idx * step);
+    sceneLiveSequenceTimers.push(timer);
+  });
+  const finishTimer = setTimeout(()=>finish(), duration);
+  sceneLiveSequenceTimers.push(finishTimer);
+  return true;
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
@@ -12937,7 +13008,10 @@ function createCinematicScene(key){
   return {
     ...def,
     cinematic:true,
+    cinematicType:def.type || key,
     cinematicKey:key,
+    cinematicBeats:def.beats || [],
+    cinematicDurationMs:def.durationMs || 10000,
     choices:[{
       text:def.choice || 'Devam et',
       tag:'kritik',
@@ -13512,6 +13586,7 @@ function renderScene(idx){
   scheduleSyncedSceneFx(sc);
 
   const ch=document.getElementById('choices');ch.innerHTML='';
+  ch.classList.remove('cinematic-controls');
   renderCalcPanel(sc, ch);
   const hasTacticalPanel = renderTacticalPanel(sc, ch);
   const hasInspectionPanel = renderInspectionPanel(sc, ch);
@@ -13527,7 +13602,10 @@ function renderScene(idx){
     b.onclick=()=>handleSceneChoice(sc,c2,ch);
     ch.appendChild(b);
   });
-  if(sc.calc || hasTacticalPanel || hasInspectionPanel || hasInteractionPanel || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
+  const cinematicFlowActive = setupCinematicSceneFlow(sc, ch);
+  if(cinematicFlowActive){
+    ch.style.display='';
+  }else if(sc.calc || hasTacticalPanel || hasInspectionPanel || hasInteractionPanel || hasDocPanel || hasStowagePanel || hasMooringPanel || hasEmergencyPanel){
     ch.style.display='none';
   }else{
     ch.style.display='';

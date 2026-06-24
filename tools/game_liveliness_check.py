@@ -76,6 +76,8 @@ CHECKS = {
         "CINEMATIC_SCENES",
         "injectCinematicScenes",
         "getCinematicOverlay",
+        "setupCinematicSceneFlow",
+        "finishCinematicFlow",
         "cin_intro_join",
         "cin_first_storm",
         "cin_pilot_boarding",
@@ -83,6 +85,8 @@ CHECKS = {
         "cin_emergency_flash",
         "cin_contract_end",
         "cinematic-beat-strip",
+        "cinematic-text-flow",
+        "data-cinematic-skip",
     ],
     "modern bridge overlay": [
         "getModernBridgeOverlay",
