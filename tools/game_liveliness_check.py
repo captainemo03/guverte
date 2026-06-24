@@ -72,6 +72,18 @@ CHECKS = {
         "VHF DSC RADIOTELEPHONE",
         "DISTRESS WATCH",
     ],
+    "cinematic scene pack": [
+        "CINEMATIC_SCENES",
+        "injectCinematicScenes",
+        "getCinematicOverlay",
+        "cin_intro_join",
+        "cin_first_storm",
+        "cin_pilot_boarding",
+        "cin_all_fast",
+        "cin_emergency_flash",
+        "cin_contract_end",
+        "cinematic-beat-strip",
+    ],
     "modern bridge overlay": [
         "getModernBridgeOverlay",
         "isModernBridgeScene",

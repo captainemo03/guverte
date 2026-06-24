@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=134",
-        "index.css?v=119",
+        "index.js?v=135",
+        "index.css?v=120",
     ],
     "creator color controls removed": [
         "creator-uniform",
@@ -171,6 +171,14 @@ REQUIRED = {
         "live-4k-wave-burst",
         "traffic-research",
         "traffic-roro",
+    ],
+    "cinematic scene pack": [
+        "CINEMATIC_SCENES",
+        "injectCinematicScenes",
+        "getCinematicOverlay",
+        "scene-cinematic-",
+        "cinematic-shot",
+        "cinematic-beat-strip",
     ],
 }
 

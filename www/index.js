@@ -9005,9 +9005,24 @@ function getModernBridgeOverlay(sc, blob=''){
   </div>`;
 }
 
+function getCinematicOverlay(sc){
+  if(!sc?.cinematic) return '';
+  const type = phoneSafe(sc.cinematicType || sc.cinematicKey || 'scene');
+  const beats = Array.isArray(sc.cinematicBeats) ? sc.cinematicBeats.slice(0,4) : [];
+  const beatHtml = beats.map((beat, idx)=>`<span style="--i:${idx}">${phoneSafe(translateGameText(beat))}</span>`).join('');
+  return `<div class="cinematic-shot cinematic-${type}">
+    <div class="cinematic-letterbox top"></div>
+    <div class="cinematic-letterbox bottom"></div>
+    <div class="cinematic-camera-pan"></div>
+    <div class="cinematic-event-layer"></div>
+    <div class="cinematic-beat-strip">${beatHtml}</div>
+  </div>`;
+}
+
 function getLiveSceneOverlay(sc){
   const blob = `${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
   const parts = [];
+  if(sc?.cinematic) parts.push(getCinematicOverlay(sc));
   parts.push(getScene4KOverlay(sc, blob));
   parts.push(getGraphicLivelinessOverlay(sc, blob));
   parts.push(getModernBridgeOverlay(sc, blob));
@@ -12805,6 +12820,156 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
   return [...mandatory_start, ...middle, ...documentChain, ...extraRouteScenes, ...extraEquipmentScenes, ...final];
 }
 
+const CINEMATIC_SCENES = {
+  joinShip:{
+    id:'cin_intro_join',
+    type:'join',
+    day:'Gün 1',
+    time:'06:10',
+    loc:'Liman sabahı · Gangway',
+    sub:'İlk gemiye katılış sinematiği',
+    who:'kaptan',
+    gfx:'harbor',
+    text:`Liman sabahı daha tam açılmamış. Terminal ışıkları geminin bordasında ince çizgiler bırakıyor; çantan omzunda, gangway'in ilk basamağında duruyorsun.
+
+Yukarıda nöbetçi zabit elindeki listeye bakıyor. Süvari köprüüstü camından kısa bir bakış atıyor; bu bakış "hoş geldin"den çok "bakalım gemi seni nasıl yoğuracak" gibi.
+
+İlk adımın artık okul koridoruna değil, çalışan bir geminin içine.`,
+    beats:['Liman ışıkları sönerken güverte canlanır','Çanta gangway basamağına vurur','Süvari ilk bakışı atar','Staj defteri açılır'],
+    choice:'Gangwayden çık ve gemiye katıl',
+    effect:{bilgi:1,sayginlik:1,dinclik:-1}
+  },
+  firstStorm:{
+    id:'cin_first_storm',
+    type:'storm',
+    day:'Gün 1',
+    time:'02:40',
+    loc:'Köprüüstü · Açık deniz',
+    sub:'İlk fırtına vardiyası',
+    who:'kaptan',
+    gfx:'storm',
+    alert:true,
+    text:`Camdan yağmur ip gibi akıyor. Radar sweep her dönüşte hedefleri yeniden parlatıyor; gemi omuzdan omuza sallanırken VHF cızırtısı kısa kısa yükseliyor.
+
+Süvari sesini büyütmeden konuşuyor:
+"Stajyer, panik yok. Hedefleri izle, CPA değişirse bana tek cümleyle rapor ver. Bu gece gemiyi bağırarak değil, okuyarak tutacağız."`,
+    beats:['Yağmur camda çizgi çizgi akar','Radar sweep hedefleri yakalar','VHF kısa bir burst verir','Süvari tek komutla vardiyayı toparlar'],
+    choice:'Radar ve VHF takibini sakin sürdür',
+    effect:{cesaret:2,bilgi:2,dinclik:-2}
+  },
+  pilotBoarding:{
+    id:'cin_pilot_boarding',
+    type:'pilot',
+    day:'Pilotaj Günü',
+    time:'05:30',
+    loc:'Pilot station · Liman yaklaşması',
+    sub:'Pilot boarding zinciri',
+    who:'z1',
+    gfx:'pilot',
+    text:`Ufukta pilot botun yeşil-kırmızı ışıkları görünüyor. Hız düşüyor, pilot merdiveni bordada kontrol ediliyor, güverte istasyonu kısa raporlar veriyor.
+
+Köprüüstünde herkes daha az konuşuyor ama daha çok dinliyor. Pilot bot yanaşırken tek anons gelir:
+"Pilot boat alongside. Ladder safe. Stand by for pilot onboard."`,
+    beats:['Pilot bot bordaya yaklaşır','Speed düşer, heading sabitlenir','Merdiven son kez kontrol edilir','Pilot onboard raporu gelir'],
+    choice:'Pilot boarding zincirini onayla',
+    effect:{bilgi:2,sayginlik:1}
+  },
+  allFast:{
+    id:'cin_all_fast',
+    type:'allfast',
+    day:'Liman Günü',
+    time:'08:15',
+    loc:'Rıhtım · Terminal',
+    sub:'All fast / liman bağlama',
+    who:'lostromo',
+    gfx:'harbor',
+    text:`Terminal ışıkları sodyum sarısı parlıyor. Römorkör kıç omuzluktan ayrılırken baş halat geriliyor, spring hafif titriyor, güverte ekibi snap-back alanının dışında kalıyor.
+
+Lostromo telsizden kısa ve net bildiriyor:
+"Forward all fast. Aft all fast. Gangway hazırlanıyor."
+
+Geminin hareketi duruyor ama operasyon yeni başlıyor.`,
+    beats:['Halatlar gerilir','Römorkör ayrılır','Terminal vinçleri yanar','All fast raporu tamamlanır'],
+    choice:'All fast raporunu logbook için not et',
+    effect:{sayginlik:2,bilgi:1}
+  },
+  emergency:{
+    id:'cin_emergency_flash',
+    type:'emergency',
+    day:'Acil Durum',
+    time:'03:18',
+    loc:'Köprüüstü · Alarm anı',
+    sub:'MOB / yangın / blackout ilk tepki',
+    who:'z2',
+    gfx:'bridge',
+    alert:true,
+    text:`Bir saniyeliğine ışıklar düşer. Alarm paneli kırmızı pulse verir, VHF cızırtısı keskinleşir, köprüüstünde herkes aynı anda başını kaldırır.
+
+Bu sahnede kahramanlık değil ilk tepki kazanır: alarmı doğrula, pozisyonu sabitle, ekibi çağır, kaptana kısa rapor ver.
+
+Gemi kriz anında hızlı değil, sıralı düşünen insanları ödüllendirir.`,
+    beats:['Kırmızı flash gelir','Alarm paneli pulse verir','Kısa kamera sarsıntısı olur','İlk tepki zinciri beklenir'],
+    choice:'Alarm zincirini sırayla başlat',
+    effect:{cesaret:2,bilgi:2,sayginlik:1,dinclik:-1}
+  },
+  contractEnd:{
+    id:'cin_contract_end',
+    type:'contract',
+    day:'Kontrat Sonu',
+    time:'17:20',
+    loc:'Kamara · Ay sonu raporu',
+    sub:'Foto albümü, kaptan yorumu ve şirket teklifi',
+    who:'kaptan',
+    gfx:'cabin',
+    text:`Telefon albümünde bu kontratın küçük kareleri birikmiş: ilk pilot, ilk all fast, ilk fırtına, ilk hata ve ilk gerçek takdir.
+
+Süvari raporunu kapatmadan önce son kez bakıyor:
+"Bu gemide ne öğrendiğini sadece notların değil, kararların gösterecek. Şimdi rapora geçelim; güçlü tarafını, zayıf tarafını ve sonraki gemi tekliflerini birlikte göreceğiz."`,
+    beats:['Foto albümü akar','Kaptan yorumu açılır','Aile mesajı düşer','Şirket yeni rota/gemi teklifi yollar'],
+    choice:'Kontrat raporunu aç',
+    effect:{sayginlik:2,bilgi:1}
+  }
+};
+
+function createCinematicScene(key){
+  const def = CINEMATIC_SCENES[key];
+  if(!def) return null;
+  return {
+    ...def,
+    cinematic:true,
+    cinematicKey:key,
+    choices:[{
+      text:def.choice || 'Devam et',
+      tag:'kritik',
+      domain:'bridge',
+      effect:def.effect || {}
+    }]
+  };
+}
+
+function insertCinematicScene(queue, key, ratio, opts={}){
+  const scene = createCinematicScene(key);
+  if(!scene || !Array.isArray(queue) || queue.some(s=>s && s.id===scene.id)) return;
+  const finalIdx = queue.findIndex(s=>s && s.id==='FINAL');
+  const endLimit = finalIdx >= 0 ? finalIdx : queue.length;
+  const minIndex = opts.afterStart ? Math.min(1, endLimit) : 0;
+  const target = opts.beforeFinal ? endLimit : Math.round(endLimit * ratio);
+  const pos = Math.max(minIndex, Math.min(endLimit, target));
+  queue.splice(pos, 0, scene);
+}
+
+function injectCinematicScenes(queue, opts={}){
+  if(!Array.isArray(queue) || !queue.length) return queue;
+  const includeJoin = opts.includeJoin !== false;
+  if(includeJoin) insertCinematicScene(queue, 'joinShip', 0.02, {afterStart:true});
+  insertCinematicScene(queue, 'firstStorm', 0.18, {afterStart:true});
+  insertCinematicScene(queue, 'pilotBoarding', 0.34, {afterStart:true});
+  insertCinematicScene(queue, 'allFast', 0.50, {afterStart:true});
+  insertCinematicScene(queue, 'emergency', 0.68, {afterStart:true});
+  insertCinematicScene(queue, 'contractEnd', 0.92, {beforeFinal:true});
+  return queue;
+}
+
 const RECOVERY_SCENE_IDS = new Set(['s146','s147','s148','s149','s150','s183','s184','s185','s186','s187','s187b','s187c','s187d','s187e','s187f','s187g','s187h','s187i','s187j','s187k','s187l']);
 const HARBOR_RECOVERY_SCENE_IDS = new Set(['s147','s150','s186','s187c','s187e','s187h','s187j']);
 const LOW_ENERGY_RECOVERY_SCENE_IDS = new Set(['s187k','s187l']);
@@ -13071,6 +13236,7 @@ function triggerLiveScenePresentation(sc, choicesWrap){
   const story = document.getElementById('story');
   if(sceneArea){
     sceneArea.classList.remove('scene-motion-bridge','scene-motion-engine','scene-motion-harbor','scene-motion-storm','scene-motion-strait','scene-motion-alert','scene-ambient-sea','scene-ambient-night','scene-ambient-harbor','scene-ambient-storm','scene-ambient-strait','scene-fade-once','scene-detail-radar','scene-detail-engine','scene-detail-harbor','scene-detail-deck','scene-detail-stormglass','scene-transition-dawn','scene-transition-offshore','scene-transition-enginebay','scene-transition-generic','scene-live-nav','scene-human-cup','scene-human-rag','scene-human-wetdeck','scene-human-sodium','scene-human-salt','scene-real-grain','scene-glass-reflection','scene-modern-bridge','scene-weather-heavy','scene-light-bloom','scene-fog-bank','scene-port-depth','scene-engine-heat','scene-wake-layer','scene-cinematic','scene-location-bridge','scene-location-engine','scene-location-deck','scene-location-galley','scene-location-cabin');
+    Array.from(sceneArea.classList).filter(cls=>cls.startsWith('scene-cinematic-')).forEach(cls=>sceneArea.classList.remove(cls));
     void sceneArea.offsetWidth;
     sceneArea.classList.add('scene-fade-once');
     const motionClass = getSceneMotionClass(sc);
@@ -13079,6 +13245,9 @@ function triggerLiveScenePresentation(sc, choicesWrap){
     const detailClass = getSceneDetailClass(sc);
     if(detailClass) sceneArea.classList.add(detailClass);
     getSceneFlavorClasses(sc).forEach(cls=>sceneArea.classList.add(cls));
+    if(sc?.cinematic){
+      sceneArea.classList.add('scene-cinematic', `scene-cinematic-${sc.cinematicType || sc.cinematicKey || 'scene'}`);
+    }
   }
   if(story){
     story.classList.remove('story-live');
@@ -13798,6 +13967,7 @@ function continueContractOnShip(offerKey='same'){
   const pool=buildScenePool(pn,sn,selYear,selType,selectedStartPort,selectedStartScenario);
   const nextQueue=buildSceneQueue(pool, contractTotal, selYear)
     .filter(s=>s && s.id!=='s01' && s.id!=='FINAL');
+  injectCinematicScenes(nextQueue, {includeJoin:false});
   const finalScene = oldFinal || pool.find(s=>s.id==='FINAL');
   if(!nextQueue.length || !finalScene){
     showNotif('!','Devam Hazirlanamadi','Yeni senaryo paketi olusturulurken sorun oldu.');
@@ -13847,6 +14017,7 @@ function beginGame(){
   activateVoyageRoute(nextRoute);
   const pool=buildScenePool(pn,sn,selYear,selType,selectedStartPort,selectedStartScenario);
   sceneQueue=buildSceneQueue(pool, contractTotal, selYear);
+  injectCinematicScenes(sceneQueue, {includeJoin:true});
   const birthdayScene = buildBirthdaySurpriseScene();
   const insertAt = Math.min(sceneQueue.length-1, Math.max(4, 6 + Math.floor(Math.random()*Math.max(2, Math.floor(sceneQueue.length/3)))));
   sceneQueue.splice(insertAt, 0, birthdayScene);
