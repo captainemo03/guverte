@@ -10717,8 +10717,6 @@ function renderCreatorRow(elId, values, selected, kind){
       else if(elId==='creator-face'){ playerAppearance.face=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-hair'){ playerAppearance.hair=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-beard'){ playerAppearance.beard=v; syncPlayerModelFromTraits(); }
-      else if(elId==='creator-haircolor'){ playerAppearance.hairColor=v; syncPlayerModelFromTraits(); }
-      else if(elId==='creator-eye') playerAppearance.eye=v;
       else if(elId==='creator-uniform') playerAppearance.uniform=v;
       renderCharacterCreator();
     };
@@ -10771,8 +10769,6 @@ function renderCharacterCreator(){
     if(beardLbl) beardLbl.style.display = '';
     renderCreatorRow('creator-beard', PLAYER_LOOK.beard, playerAppearance.beard, 'text');
   }
-  renderCreatorRow('creator-haircolor', PLAYER_LOOK.hairColor, playerAppearance.hairColor, 'swatch');
-  renderCreatorRow('creator-eye', PLAYER_LOOK.eye, playerAppearance.eye, 'swatch');
   renderCreatorRow('creator-uniform', PLAYER_LOOK.uniform, playerAppearance.uniform, 'text');
   renderPortraitTargets();
 }

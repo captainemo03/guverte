@@ -45,8 +45,11 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=129",
-        "index.css?v=115",
+        "index.js?v=134",
+        "index.css?v=119",
+    ],
+    "creator color controls removed": [
+        "creator-uniform",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -179,6 +182,15 @@ def main() -> int:
         for needle in needles:
             if needle not in blob:
                 missing.append(f"{group}: {needle}")
+    removed_creator_controls = [
+        "id=\"creator-haircolor\"",
+        "id=\"creator-eye\"",
+        "renderCreatorRow('creator-haircolor'",
+        "renderCreatorRow('creator-eye'",
+    ]
+    for needle in removed_creator_controls:
+        if needle in blob:
+            missing.append(f"creator color controls removed: unexpected {needle}")
     if missing:
         print("MOBILE_LAYOUT_QA_FAIL")
         for item in missing:
