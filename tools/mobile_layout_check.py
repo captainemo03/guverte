@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=136",
-        "index.css?v=121",
+        "index.js?v=138",
+        "index.css?v=123",
     ],
     "creator color controls removed": [
         "creator-uniform",
@@ -82,11 +82,21 @@ REQUIRED = {
         "getClickedWorldChartIndexSheet",
     ],
     "expanded map workspace": [
-        "#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1900px,calc(100vw - 16px));height:calc(100dvh - 16px);",
+        "#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1900px,calc(100vw - 16px));height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);padding:12px;position:relative;overflow:auto;",
+        "overscroll-behavior:contain",
         "#map-world-view{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;}",
-        "#map-svg{width:100%;height:calc(100dvh - 138px);",
-        "#port-chart-svg{width:100%;height:calc(100dvh - 280px);",
+        "#map-svg{width:100%;height:min(760px,calc(100dvh - 138px));",
+        "#port-chart-svg{width:100%;height:min(720px,calc(100dvh - 280px));",
+        "touch-action:pan-y pinch-zoom",
         "#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:10px;max-height:none;",
+    ],
+    "political world atlas": [
+        "political-atlas",
+        "world-country",
+        "world-country-line",
+        "atlas-label",
+        "country-label",
+        "worldSeaGrad",
     ],
     "intro menu pages": [
         "home-screen",
@@ -182,6 +192,8 @@ REQUIRED = {
         "cinematic-beat-strip",
         "cinematic-text-flow",
         "cinematic-controls",
+        "cinematic-props",
+        "cin-prop pilot-boat",
     ],
 }
 

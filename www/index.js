@@ -9010,11 +9010,20 @@ function getCinematicOverlay(sc){
   const type = phoneSafe(sc.cinematicType || sc.cinematicKey || 'scene');
   const beats = Array.isArray(sc.cinematicBeats) ? sc.cinematicBeats.slice(0,4) : [];
   const beatHtml = beats.map((beat, idx)=>`<span style="--i:${idx}">${phoneSafe(translateGameText(beat))}</span>`).join('');
+  const propMap = {
+    join:'<i class="cin-prop gangway"></i><i class="cin-prop bag"></i><i class="cin-prop captain-window"></i><i class="cin-prop deck-light a"></i><i class="cin-prop deck-light b"></i>',
+    storm:'<i class="cin-prop rain r1"></i><i class="cin-prop rain r2"></i><i class="cin-prop radar-dish"></i><i class="cin-prop lightning-mark"></i><i class="cin-prop wave-hit"></i>',
+    pilot:'<i class="cin-prop pilot-boat"></i><i class="cin-prop pilot-ladder"></i><i class="cin-prop speed-chip">SPEED 6.0</i><i class="cin-prop pilot-light"></i>',
+    allfast:'<i class="cin-prop mooring rope-a"></i><i class="cin-prop mooring rope-b"></i><i class="cin-prop tug-away"></i><i class="cin-prop terminal-crane"></i><i class="cin-prop allfast-chip">ALL FAST</i>',
+    emergency:'<i class="cin-prop blackout"></i><i class="cin-prop alarm-panel"></i><i class="cin-prop red-flash"></i><i class="cin-prop response-chain">ALARM · POSITION · TEAM · REPORT</i>',
+    contract:'<i class="cin-prop photo-card p1"></i><i class="cin-prop photo-card p2"></i><i class="cin-prop photo-card p3"></i><i class="cin-prop phone-message"></i><i class="cin-prop company-offer"></i>'
+  };
   return `<div class="cinematic-shot cinematic-${type}">
     <div class="cinematic-letterbox top"></div>
     <div class="cinematic-letterbox bottom"></div>
     <div class="cinematic-camera-pan"></div>
     <div class="cinematic-event-layer"></div>
+    <div class="cinematic-props">${propMap[type] || ''}</div>
     <div class="cinematic-beat-strip">${beatHtml}</div>
   </div>`;
 }
@@ -18846,26 +18855,93 @@ function initWorldMapInteractions(svg){
 }
 
 function buildWorldAtlasBaseLayer(regionTint){
-  let s = `<rect width="440" height="260" fill="${regionTint}" rx="6"/>`;
+  let s = `<defs>
+    <linearGradient id="worldSeaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9f2fb"/>
+      <stop offset=".52" stop-color="${regionTint}"/>
+      <stop offset="1" stop-color="#b8dfea"/>
+    </linearGradient>
+    <filter id="atlasShadow" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx=".8" dy="1.1" stdDeviation=".9" flood-color="#5f6f69" flood-opacity=".22"/>
+    </filter>
+    <pattern id="atlasHatch" width="7" height="7" patternUnits="userSpaceOnUse">
+      <path d="M0 7 L7 0" stroke="#ffffff" stroke-width=".35" opacity=".18"/>
+    </pattern>
+  </defs>`;
+  s += `<rect width="440" height="260" fill="url(#worldSeaGrad)" rx="6"/>`;
   s+=`<style>
     .world-chart text{font-family:'Share Tech Mono',monospace;letter-spacing:0}
-    .world-land{fill:#ead7a6;stroke:#8a744c;stroke-width:.55}
-    .world-coast{fill:#f1dfad;stroke:#8a744c;stroke-width:.55}
-    .world-lane{fill:none;stroke:#9b3151;stroke-width:1.25;stroke-dasharray:7 5;opacity:.48}
-    .world-lane.secondary{stroke:#245f9a;stroke-width:1;opacity:.36}
-    .world-grid{stroke:#7fb2c4;stroke-width:.45;opacity:.2}
-  </style><g class="world-chart">`;
-  for(let x=40;x<440;x+=40) s+=`<path class="world-grid" d="M${x} 14 V248"/>`;
+    .political-atlas .world-land{stroke:#5e694a;stroke-width:.72;filter:url(#atlasShadow);vector-effect:non-scaling-stroke}
+    .political-atlas .world-country{stroke:#fff8dc;stroke-width:.46;vector-effect:non-scaling-stroke;opacity:.98}
+    .political-atlas .world-country-line{fill:none;stroke:#fff8dc;stroke-width:.45;opacity:.74;vector-effect:non-scaling-stroke}
+    .political-atlas .world-coast{fill:#f4e5b0;stroke:#5e694a;stroke-width:.7;vector-effect:non-scaling-stroke}
+    .political-atlas .atlas-label{fill:#1d2f38;stroke:#fff7d0;stroke-width:1.4;stroke-opacity:.78;font-weight:700}
+    .political-atlas .country-label{fill:#233f47;stroke:#fff7d0;stroke-width:1.05;stroke-opacity:.72;font-weight:700}
+    .political-atlas .sea-title{fill:#245c78;stroke:#eaf8fb;stroke-width:1.2;stroke-opacity:.82;font-style:italic}
+    .world-lane{fill:none;stroke:#9b3151;stroke-width:1.35;stroke-dasharray:7 5;opacity:.56}
+    .world-lane.secondary{stroke:#245f9a;stroke-width:1.05;opacity:.4}
+    .world-grid{stroke:#6ea8ba;stroke-width:.42;opacity:.22}
+    .world-meridian-label{fill:#56869a;font:5px 'Share Tech Mono',monospace;stroke:none}
+  </style><g class="world-chart political-atlas">`;
+  for(let x=40;x<440;x+=40) s+=`<path class="world-grid" d="M${x} 12 V249"/><text class="world-meridian-label" x="${x-5}" y="256">${x-220 > 0 ? '+' : ''}${Math.round((x-220)/2)}°</text>`;
   for(let y=40;y<260;y+=40) s+=`<path class="world-grid" d="M8 ${y} H432"/>`;
-  s+=`<path class="world-land" d="M20 30 Q48 15 78 27 Q101 40 92 75 Q83 104 69 123 Q52 140 62 168 Q74 197 96 228 Q80 235 60 212 Q40 186 34 160 Q23 130 33 103 Q45 72 20 30 Z"/>`;
-  s+=`<path class="world-land" d="M100 150 Q124 138 145 154 Q164 172 155 204 Q146 235 118 252 Q97 232 92 203 Q88 173 100 150 Z"/>`;
-  s+=`<path class="world-land" d="M166 48 Q201 34 244 45 Q282 58 304 84 Q328 112 316 140 Q292 137 268 124 Q244 112 221 111 Q198 109 178 96 Q160 78 166 48 Z"/>`;
-  s+=`<path class="world-land" d="M210 96 Q238 100 257 124 Q268 146 257 177 Q246 207 232 236 Q210 224 202 190 Q194 158 199 128 Q202 112 210 96 Z"/>`;
-  s+=`<path class="world-land" d="M286 72 Q330 42 379 58 Q420 72 430 101 Q415 124 382 119 Q356 116 337 137 Q318 155 290 145 Q306 119 286 72 Z"/>`;
-  s+=`<path class="world-land" d="M333 143 Q356 146 376 166 Q389 188 382 209 Q361 199 345 179 Q333 162 333 143 Z"/>`;
-  s+=`<path class="world-land" d="M384 199 Q410 204 426 229 Q418 248 392 242 Q374 231 384 199 Z"/>`;
-  s+=`<path class="world-coast" d="M188 82 Q204 76 218 84 Q224 93 218 101 Q202 99 190 94 Z"/>`;
-  s+=`<path class="world-coast" d="M221 99 Q231 99 238 106 Q234 112 222 109 Z"/>`;
+  s+=`<text class="sea-title" x="63" y="88" font-size="8.5">NORTH ATLANTIC</text>
+    <text class="sea-title" x="92" y="207" font-size="8">SOUTH ATLANTIC</text>
+    <text class="sea-title" x="345" y="128" font-size="9">PACIFIC</text>
+    <text class="sea-title" x="278" y="205" font-size="8.5">INDIAN OCEAN</text>`;
+
+  const countries = [
+    ['#9fd7a3','M18 34 Q43 18 72 26 Q86 34 92 52 L70 64 L49 61 L34 75 L21 62 Z'],
+    ['#f1c36d','M70 64 L92 52 Q96 75 84 98 L65 112 L49 92 Z'],
+    ['#c9df7a','M34 75 L49 61 L65 112 L53 137 Q35 124 29 106 Z'],
+    ['#e7a978','M53 137 Q73 126 94 143 L84 171 L62 169 Q48 156 53 137 Z'],
+    ['#b8d88d','M84 171 Q101 191 103 224 L91 235 Q74 212 62 169 Z'],
+    ['#d9b0d8','M102 152 Q125 138 145 154 L132 178 L108 174 Z'],
+    ['#f0d27a','M132 178 L155 202 Q148 232 119 252 L103 224 L108 174 Z'],
+    ['#d1e18f','M164 52 Q187 39 213 43 L204 67 L180 72 L166 64 Z'],
+    ['#f0b47a','M204 67 L213 43 Q242 44 264 56 L252 80 L224 82 Z'],
+    ['#b4d2ec','M180 72 L204 67 L224 82 L217 98 L190 95 L172 84 Z'],
+    ['#cfdc76','M224 82 L252 80 L270 102 L248 118 L221 111 L217 98 Z'],
+    ['#e8c174','M172 84 L190 95 L185 116 L164 118 L157 99 Z'],
+    ['#a8d59c','M185 116 L221 111 L235 136 L210 148 L190 137 Z'],
+    ['#f2d18a','M210 148 L235 136 L258 158 L247 190 L222 184 Z'],
+    ['#d5a4c2','M222 184 L247 190 L232 236 Q211 225 202 193 Z'],
+    ['#f6c16f','M252 80 Q292 57 334 55 L326 86 L284 96 L270 102 Z'],
+    ['#b7d98e','M326 86 L334 55 Q378 57 410 77 L392 104 L356 111 L320 101 Z'],
+    ['#dfad75','M270 102 L284 96 L320 101 L311 132 L282 139 L248 118 Z'],
+    ['#9ed5c3','M311 132 L356 111 L382 120 L366 148 L330 158 L282 139 Z'],
+    ['#edd077','M330 158 L366 148 L379 171 L358 189 L333 174 Z'],
+    ['#c2d984','M382 120 Q415 120 430 101 L421 84 Q438 102 427 125 L394 137 Z'],
+    ['#f0b48a','M356 111 L392 104 L394 137 L366 148 Z'],
+    ['#a4cfe7','M358 189 L379 171 Q391 190 382 209 Q364 203 358 189 Z'],
+    ['#e6cf79','M384 200 Q410 204 426 229 Q418 248 392 242 Q375 231 384 200 Z'],
+    ['#d9d690','M191 83 Q204 77 218 84 Q224 93 218 101 Q202 99 190 94 Z'],
+    ['#e7b7a8','M221 99 Q231 99 238 106 Q234 112 222 109 Z'],
+    ['#d9eef3','M178 28 Q206 10 238 22 Q220 37 188 39 Z'],
+  ];
+  countries.forEach(([fill,d], idx)=>{ s+=`<path class="world-country" d="${d}" fill="${fill}"/>`; });
+
+  s+=`<path d="M30 54 L87 50 M47 61 L50 111 M68 66 L84 96 M55 136 L94 143 M84 171 L103 224 M111 153 L132 178 M132 178 L155 202" class="world-country-line"/>
+    <path d="M166 64 L217 98 M204 67 L224 82 M252 80 L270 102 M248 118 L282 139 M221 111 L235 136 M210 148 L258 158 M222 184 L247 190 M326 86 L320 101 M356 111 L366 148 M392 104 L394 137 M330 158 L379 171" class="world-country-line"/>
+    <path class="world-coast" d="M151 102 Q164 95 178 103 Q178 113 164 118 Q152 114 151 102 Z"/>
+    <path class="world-coast" d="M194 99 Q204 97 211 103 Q205 110 193 108 Z"/>
+    <path class="world-coast" d="M239 113 Q251 114 260 123 Q252 130 240 126 Z"/>
+    <text class="atlas-label" x="48" y="47" font-size="8.5">N. AMERICA</text>
+    <text class="atlas-label" x="109" y="195" font-size="8.2">S. AMERICA</text>
+    <text class="atlas-label" x="184" y="78" font-size="8">EUROPE</text>
+    <text class="atlas-label" x="217" y="170" font-size="8.3">AFRICA</text>
+    <text class="atlas-label" x="320" y="96" font-size="9">ASIA</text>
+    <text class="atlas-label" x="390" y="229" font-size="7.6">AUSTRALIA</text>
+    <text class="country-label" x="56" y="72" font-size="5.8">USA</text>
+    <text class="country-label" x="63" y="122" font-size="5.8">MEXICO</text>
+    <text class="country-label" x="112" y="169" font-size="5.8">BRAZIL</text>
+    <text class="country-label" x="187" y="93" font-size="5.6">FRANCE</text>
+    <text class="country-label" x="210" y="96" font-size="5.6">TURKEY</text>
+    <text class="country-label" x="240" y="126" font-size="5.6">EGYPT</text>
+    <text class="country-label" x="321" y="143" font-size="5.6">IRAN</text>
+    <text class="country-label" x="340" y="164" font-size="5.6">INDIA</text>
+    <text class="country-label" x="384" y="116" font-size="5.6">CHINA</text>
+    <text class="country-label" x="407" y="91" font-size="5.4">JAPAN</text>`;
   s+=`<path class="world-lane" d="M190 82 Q176 103 174 120 Q207 122 252 132 Q270 166 300 166 Q338 166 371 167 Q398 142 420 104"/>`;
   s+=`<path class="world-lane" d="M69 150 Q118 133 174 120 Q218 116 252 132"/>`;
   s+=`<path class="world-lane secondary" d="M232 237 Q276 204 330 178 Q360 166 382 143"/>`;
