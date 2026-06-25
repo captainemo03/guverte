@@ -891,6 +891,19 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 .cin-prop.pilot-ladder{left:14%;top:26%;width:34px;height:46%;background:repeating-linear-gradient(180deg,transparent 0 13px,rgba(231,218,162,.78) 14px 16px,transparent 17px 24px);border-left:2px solid rgba(231,218,162,.72);border-right:2px solid rgba(231,218,162,.72);animation:ladderSway 2.2s ease-in-out infinite;}
 .cin-prop.speed-chip,.cin-prop.allfast-chip,.cin-prop.response-chain{right:8%;top:15%;border:1px solid rgba(255,216,138,.38);border-radius:999px;background:rgba(5,14,24,.75);color:#ffe2a2;font:10px 'Share Tech Mono',monospace;letter-spacing:1px;padding:7px 10px;box-shadow:0 10px 24px rgba(0,0,0,.24);}
 .cin-prop.pilot-light{right:31%;bottom:41%;width:8px;height:8px;border-radius:50%;background:#7fffd4;box-shadow:0 0 22px #7fffd4;animation:trafficLightPulse 1.1s infinite;}
+.cin-prop.departure-wake{left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,transparent,rgba(67,157,220,.22),rgba(255,255,255,.12));clip-path:polygon(0 35%,45% 55%,100% 34%,100% 100%,0 100%);animation:wakeFoam 2.8s ease-in-out infinite;}
+.cin-prop.departure-route{left:23%;right:18%;top:48%;height:4px;background:linear-gradient(90deg,transparent,#d44b54,#ffd36f);transform:rotate(-8deg);box-shadow:0 0 16px rgba(255,211,111,.28);animation:routeGlow 2.8s ease-in-out infinite;}
+.cin-prop.tug-away.departure{left:auto;right:10%;bottom:30%;animation:pilotBoatApproach 4.6s ease-in-out infinite reverse;}
+.cin-prop.telegraph-chip,.cin-prop.security-level,.cin-prop.mrcc-line{right:8%;top:15%;border:1px solid rgba(255,216,138,.38);border-radius:999px;background:rgba(5,14,24,.75);color:#ffe2a2;font:10px 'Share Tech Mono',monospace;letter-spacing:1px;padding:7px 10px;box-shadow:0 10px 24px rgba(0,0,0,.24);}
+.cin-prop.berth-lights{left:0;right:0;top:54%;height:8px;background:repeating-linear-gradient(90deg,rgba(255,211,111,.9) 0 6px,transparent 6px 42px);filter:drop-shadow(0 0 8px rgba(255,211,111,.48));animation:terminalTwinkle 1.6s linear infinite;}
+.cin-prop.radar-dish.night{right:12%;top:16%;width:132px;height:132px;}
+.cin-prop.ais-stream{left:10%;top:18%;width:168px;height:86px;border:1px solid rgba(127,195,255,.26);border-radius:10px;background:rgba(4,16,28,.7);}
+.cin-prop.ais-stream::before{content:"AIS TARGETS";position:absolute;left:10px;top:8px;color:#bde7ff;font:8px 'Share Tech Mono',monospace;}
+.cin-prop.ais-stream::after{content:"";position:absolute;left:12px;right:12px;top:28px;height:44px;background:repeating-linear-gradient(180deg,rgba(127,195,255,.55) 0 2px,transparent 2px 12px);animation:logbookWrite 2s steps(4,end) infinite;}
+.cin-prop.logbook-page{left:17%;bottom:22%;width:118px;height:70px;border-radius:8px;background:rgba(226,235,224,.88);box-shadow:0 14px 30px rgba(0,0,0,.3);transform:rotate(-4deg);animation:paperFloat 3.2s ease-in-out infinite;}
+.cin-prop.logbook-page::after{content:"LOG 0300";position:absolute;left:12px;top:12px;color:#14263b;font:9px 'Share Tech Mono',monospace;}
+.cin-prop.vhf-pulse{right:27%;bottom:26%;width:52px;height:36px;border-radius:8px;border:1px solid rgba(255,211,111,.36);background:rgba(8,28,46,.74);box-shadow:0 0 18px rgba(255,211,111,.16);animation:alarm-flash 1.1s infinite;}
+.cin-prop.far-traffic{left:0;right:0;top:42%;height:4px;background:radial-gradient(circle at 15% 50%,#fff 0 2px,transparent 3px),radial-gradient(circle at 44% 50%,#7fffd4 0 2px,transparent 3px),radial-gradient(circle at 78% 50%,#ff5959 0 2px,transparent 3px);animation:trafficLightPulse 2.4s infinite;}
 .cin-prop.mooring{height:3px;left:7%;right:6%;background:linear-gradient(90deg,transparent,rgba(255,219,126,.96),transparent);box-shadow:0 0 14px rgba(255,219,126,.35);animation:mooringLineTension 1.25s ease-in-out infinite;}
 .cin-prop.rope-a{bottom:34%;transform:rotate(-4deg)}.cin-prop.rope-b{bottom:25%;transform:rotate(5deg);animation-delay:.22s}
 .cin-prop.tug-away{left:8%;bottom:18%;width:86px;height:30px;background:linear-gradient(180deg,#dce8ef 0 38%,#245675 39% 70%,#061522 71%);clip-path:polygon(0 40%,80% 35%,100% 0,95% 100%,8% 100%);animation:tugDepart 5.2s ease-in-out infinite;}
@@ -902,6 +915,29 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 .cin-prop.alarm-panel::after{content:"";position:absolute;left:12px;right:12px;bottom:14px;height:34px;background:radial-gradient(circle at 14% 50%,#ff4444 0 5px,transparent 6px),radial-gradient(circle at 42% 50%,#ff4444 0 5px,transparent 6px),radial-gradient(circle at 70% 50%,#ff4444 0 5px,transparent 6px);animation:alarm-flash .52s infinite;}
 .cin-prop.red-flash{inset:0;background:radial-gradient(circle,rgba(255,0,0,.3),transparent 56%);animation:emergencyFlash .68s infinite;}
 .cin-prop.response-chain{top:auto;bottom:26%;right:8%;border-color:rgba(255,112,112,.44);color:#ffd0d0;}
+.cin-prop.blackout.deep{background:radial-gradient(circle at 48% 38%,rgba(127,195,255,.08),rgba(0,0,0,.56) 65%);animation:blackoutBlink 2s ease-in-out infinite;}
+.cin-prop.alarm-panel.generator::before{content:"GENERATOR / BUSBAR";}
+.cin-prop.generator-bars{left:10%;bottom:22%;width:190px;height:58px;border:1px solid rgba(93,245,138,.28);border-radius:12px;background:rgba(4,20,14,.72);}
+.cin-prop.generator-bars::after{content:"";position:absolute;left:12px;right:12px;bottom:14px;height:28px;background:linear-gradient(90deg,#5df58a 0 24%,rgba(93,245,138,.18) 24% 34%,#5df58a 34% 58%,rgba(93,245,138,.18) 58% 68%,#5df58a 68% 100%);transform-origin:left center;animation:generatorRecover 2.4s ease-in-out infinite;}
+.cin-prop.voltage-wave{left:13%;top:23%;width:164px;height:50px;border-bottom:2px solid rgba(127,195,255,.32);background:linear-gradient(90deg,transparent,rgba(127,195,255,.18),transparent);clip-path:polygon(0 60%,10% 40%,20% 65%,30% 35%,40% 62%,50% 42%,60% 64%,70% 38%,80% 62%,90% 43%,100% 60%,100% 100%,0 100%);animation:routeGlow 1.3s ease-in-out infinite;}
+.cin-prop.fastboat{width:54px;height:18px;border-radius:30px 30px 6px 6px;background:linear-gradient(180deg,#eaf4f8 0 38%,#192b3c 39%);box-shadow:0 12px 24px rgba(0,0,0,.32),0 0 16px rgba(255,255,255,.16);animation:fastBoatApproach 3.4s ease-in-out infinite;}
+.cin-prop.fastboat.b1{right:26%;bottom:31%;}.cin-prop.fastboat.b2{right:15%;bottom:42%;animation-delay:.45s;}
+.cin-prop.security-level{color:#ffd0d0;border-color:rgba(255,112,112,.5);}
+.cin-prop.citadel-door{left:9%;bottom:21%;width:94px;height:118px;border:2px solid rgba(127,195,255,.32);background:linear-gradient(180deg,rgba(31,49,66,.88),rgba(5,14,24,.88));box-shadow:inset 0 0 0 8px rgba(255,255,255,.025);animation:doorLock 2.8s ease-in-out infinite;}
+.cin-prop.citadel-door::after{content:"LOCKED";position:absolute;left:18px;bottom:20px;color:#5df58a;font:9px 'Share Tech Mono',monospace;}
+.cin-prop.clipboard{left:10%;top:18%;width:132px;height:172px;border-radius:10px;background:linear-gradient(180deg,#e5edf5,#b9c5d1);box-shadow:0 18px 34px rgba(0,0,0,.3);animation:paperFloat 3.8s ease-in-out infinite;}
+.cin-prop.clipboard::after{content:"PSC CHECKLIST";position:absolute;left:14px;top:18px;color:#14263b;font:9px 'Share Tech Mono',monospace;}
+.cin-prop.deficiency-stamp{right:13%;top:26%;width:128px;height:44px;border:3px solid rgba(255,82,82,.72);border-radius:7px;color:#ffb8b8;font:12px 'Share Tech Mono',monospace;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg);animation:stampHit 2.8s ease-in-out infinite;}
+.cin-prop.deficiency-stamp::before{content:"DEFICIENCY?";}
+.cin-prop.officer-card{right:13%;bottom:27%;width:130px;height:70px;border:1px solid rgba(127,195,255,.3);border-radius:9px;background:rgba(6,22,36,.78);}
+.cin-prop.officer-card::before{content:"PORT STATE CONTROL";position:absolute;left:10px;top:10px;color:#bde7ff;font:8px 'Share Tech Mono',monospace;}
+.cin-prop.document-stack{left:37%;bottom:22%;width:148px;height:62px;background:repeating-linear-gradient(180deg,#dbe4ec 0 11px,#b9c4cf 11px 14px);border-radius:7px;box-shadow:0 16px 28px rgba(0,0,0,.24);}
+.cin-prop.helicopter{right:12%;top:22%;width:118px;height:30px;border-radius:999px;background:#d8e2ec;box-shadow:0 0 28px rgba(255,255,255,.2);animation:heliHover 1.25s ease-in-out infinite;}
+.cin-prop.helicopter::before{content:"";position:absolute;left:20px;right:20px;top:-9px;height:3px;background:rgba(216,226,236,.9);animation:rotorSpin .18s linear infinite;}
+.cin-prop.helipad{left:13%;bottom:20%;width:142px;height:142px;border:2px solid rgba(127,195,255,.42);border-radius:50%;background:radial-gradient(circle,rgba(127,195,255,.08),rgba(5,14,24,.66));box-shadow:inset 0 0 0 24px rgba(127,195,255,.04);}
+.cin-prop.helipad::after{content:"H";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#dff1ff;font:bold 46px 'Barlow',sans-serif;}
+.cin-prop.stretcher{left:39%;bottom:28%;width:96px;height:18px;border-radius:999px;background:#ffd36f;box-shadow:0 0 16px rgba(255,211,111,.2);animation:stretcherMove 3s ease-in-out infinite;}
+.cin-prop.mrcc-line{top:auto;bottom:22%;border-color:rgba(127,195,255,.36);color:#dff1ff;}
 .cin-prop.photo-card{top:19%;width:102px;height:72px;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:linear-gradient(135deg,rgba(127,195,255,.28),rgba(5,14,24,.78));box-shadow:0 18px 30px rgba(0,0,0,.25);animation:photoFloat 4.8s ease-in-out infinite;}
 .cin-prop.photo-card::after{content:"";position:absolute;left:10px;right:10px;bottom:10px;height:10px;border-radius:99px;background:rgba(255,255,255,.22);}
 .cin-prop.photo-card.p1{left:11%;transform:rotate(-7deg)}.cin-prop.photo-card.p2{left:38%;top:15%;animation-delay:.4s}.cin-prop.photo-card.p3{right:15%;transform:rotate(6deg);animation-delay:.8s}
@@ -918,11 +954,23 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 .cinematic-storm .cinematic-event-layer::after{content:"";position:absolute;right:11%;top:18%;width:130px;height:130px;border:1px solid rgba(115,245,175,.42);border-radius:50%;background:conic-gradient(from 12deg,rgba(115,245,175,.56),transparent 22%,transparent 100%);animation:radar-sweep 1.8s linear infinite;opacity:.7;}
 .cinematic-pilot .cinematic-event-layer{background:radial-gradient(circle at 70% 54%,rgba(116,204,255,.28),transparent 13%),linear-gradient(90deg,transparent,rgba(255,213,128,.14),transparent);animation:harborLightSweep 4.8s ease-in-out infinite;}
 .cinematic-pilot .cinematic-event-layer::before{content:"";position:absolute;right:15%;bottom:27%;width:78px;height:22px;border-radius:36px 36px 9px 9px;background:linear-gradient(180deg,#e8edf2,#27384a 62%,#06101b 63%);box-shadow:0 0 18px rgba(255,220,135,.25);animation:pilotBoatApproach 4.2s ease-in-out infinite;}
+.cinematic-departure .cinematic-event-layer{background:linear-gradient(90deg,rgba(255,199,93,.14),transparent 48%,rgba(127,195,255,.18)),radial-gradient(circle at 78% 58%,rgba(255,216,138,.22),transparent 15%);animation:harborLightSweep 5s ease-in-out infinite;}
+.cinematic-departure .cinematic-event-layer::after{content:"DEPARTURE SEQUENCE";position:absolute;left:7%;top:18%;border:1px solid rgba(255,216,138,.28);border-radius:9px;background:rgba(5,14,24,.68);color:#ffe2a2;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:8px 11px;}
+.cinematic-nightwatch .cinematic-event-layer{background:radial-gradient(circle at 82% 22%,rgba(93,245,138,.16),transparent 16%),radial-gradient(circle at 30% 48%,rgba(127,195,255,.12),transparent 20%),linear-gradient(180deg,rgba(0,0,0,.18),transparent);animation:cinematicPan 8s ease-in-out infinite;}
+.cinematic-nightwatch .cinematic-event-layer::after{content:"WATCH 0300 · RADAR · AIS · VHF";position:absolute;left:9%;top:16%;color:#bde7ff;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;}
 .cinematic-allfast .cinematic-event-layer{background:linear-gradient(90deg,transparent 0 15%,rgba(255,199,93,.18) 25%,transparent 48%,rgba(255,199,93,.12) 70%,transparent 90%);animation:sodiumPulse 3.8s ease-in-out infinite;}
 .cinematic-allfast .cinematic-event-layer::before,.cinematic-allfast .cinematic-event-layer::after{content:"";position:absolute;left:9%;right:8%;height:2px;background:linear-gradient(90deg,rgba(255,219,126,.12),rgba(255,219,126,.86),rgba(255,219,126,.14));box-shadow:0 0 12px rgba(255,219,126,.26);transform-origin:left center;animation:mooringLineTension 1.8s ease-in-out infinite;}
 .cinematic-allfast .cinematic-event-layer::before{bottom:33%;transform:rotate(-3deg)}.cinematic-allfast .cinematic-event-layer::after{bottom:25%;transform:rotate(4deg);animation-delay:.28s}
 .cinematic-emergency .cinematic-event-layer{background:radial-gradient(circle at 50% 44%,rgba(255,66,66,.28),transparent 26%),linear-gradient(90deg,transparent,rgba(255,0,0,.12),transparent);animation:emergencyFlash .72s ease-in-out infinite;}
 .cinematic-emergency .cinematic-event-layer::after{content:"ALARM · FIRST RESPONSE";position:absolute;right:7%;top:20%;border:1px solid rgba(255,109,109,.54);border-radius:9px;background:rgba(36,5,8,.62);color:#ffd0d0;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:9px 12px;box-shadow:0 0 24px rgba(255,60,60,.24);animation:alarm-flash .62s infinite;}
+.cinematic-blackout .cinematic-event-layer{background:radial-gradient(circle at 50% 44%,rgba(255,66,66,.18),transparent 24%),linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.1));animation:blackoutBlink 1.8s ease-in-out infinite;}
+.cinematic-blackout .cinematic-event-layer::after{content:"BLACKOUT · GENERATOR RECOVERY";position:absolute;right:7%;top:20%;border:1px solid rgba(255,109,109,.48);border-radius:9px;background:rgba(36,5,8,.62);color:#ffd0d0;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:9px 12px;box-shadow:0 0 24px rgba(255,60,60,.18);}
+.cinematic-piracy .cinematic-event-layer{background:conic-gradient(from 120deg at 72% 38%,rgba(93,245,138,.24),transparent 24%,transparent),radial-gradient(circle at 78% 48%,rgba(255,64,64,.16),transparent 20%);animation:cinematicPan 4.8s ease-in-out infinite;}
+.cinematic-piracy .cinematic-event-layer::after{content:"BMP WATCH · FAST CRAFT";position:absolute;left:8%;top:18%;border:1px solid rgba(255,109,109,.46);border-radius:9px;background:rgba(32,5,8,.62);color:#ffd0d0;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:9px 12px;}
+.cinematic-psc .cinematic-event-layer{background:linear-gradient(90deg,rgba(255,255,255,.12),transparent 52%,rgba(255,216,138,.1)),radial-gradient(circle at 21% 42%,rgba(255,255,255,.14),transparent 18%);animation:cinematicPan 7s ease-in-out infinite;}
+.cinematic-psc .cinematic-event-layer::after{content:"PSC · DOCUMENTS · EQUIPMENT";position:absolute;right:8%;top:18%;border:1px solid rgba(127,195,255,.3);border-radius:9px;background:rgba(5,14,24,.68);color:#dff1ff;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:9px 12px;}
+.cinematic-medevac .cinematic-event-layer{background:radial-gradient(circle at 30% 67%,rgba(127,195,255,.2),transparent 20%),radial-gradient(circle at 80% 23%,rgba(255,255,255,.22),transparent 16%);animation:harborLightSweep 4.8s ease-in-out infinite;}
+.cinematic-medevac .cinematic-event-layer::after{content:"MEDEVAC · HELIDECK · MRCC";position:absolute;left:8%;top:18%;border:1px solid rgba(127,195,255,.34);border-radius:9px;background:rgba(5,14,24,.68);color:#dff1ff;font:9px 'Share Tech Mono',monospace;letter-spacing:1px;padding:9px 12px;}
 .cinematic-contract .cinematic-event-layer{background:linear-gradient(90deg,rgba(127,195,255,.1),transparent 40%,rgba(255,209,120,.12)),radial-gradient(circle at 24% 42%,rgba(255,255,255,.16),transparent 13%);animation:cinematicPan 9s ease-in-out infinite;}
 .cinematic-contract .cinematic-event-layer::before{content:"PHOTO ALBUM · CAPTAIN REVIEW · FAMILY MESSAGE";position:absolute;left:7%;top:19%;width:190px;border:1px solid rgba(126,195,255,.28);border-radius:12px;background:rgba(3,10,18,.66);color:#d7ecff;font:8px/1.6 'Share Tech Mono',monospace;letter-spacing:.8px;padding:10px 12px;box-shadow:0 16px 34px rgba(0,0,0,.26);}
 .cinematic-text-flow{display:grid;gap:11px;width:100%;}
@@ -948,6 +996,14 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 @keyframes tugDepart{0%,100%{transform:translateX(0) scale(.96);opacity:.7}50%{transform:translateX(34px) scale(1.04);opacity:1}}
 @keyframes blackoutBlink{0%,100%{opacity:.12}46%{opacity:.62}54%{opacity:.18}}
 @keyframes photoFloat{0%,100%{translate:0 0}50%{translate:0 -8px}}
+@keyframes routeGlow{0%,100%{filter:brightness(.82);opacity:.64}50%{filter:brightness(1.35);opacity:1}}
+@keyframes logbookWrite{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+@keyframes paperFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(-2deg)}}
+@keyframes generatorRecover{0%{transform:scaleX(.18);filter:brightness(.75)}52%{transform:scaleX(.62);filter:brightness(1.08)}100%{transform:scaleX(1);filter:brightness(1.24)}}
+@keyframes doorLock{0%,100%{filter:brightness(.86);transform:translateX(0)}50%{filter:brightness(1.18);transform:translateX(3px)}}
+@keyframes stampHit{0%,62%,100%{opacity:.48;transform:scale(1.08) rotate(-8deg)}68%,82%{opacity:1;transform:scale(1) rotate(-8deg)}}
+@keyframes heliHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes stretcherMove{0%,100%{transform:translateX(-10px)}50%{transform:translateX(14px)}}
 .scene-location-bridge #scene-graphic{background:linear-gradient(180deg,#071423,#020913);}
 .scene-location-engine #scene-graphic{background:linear-gradient(180deg,#130d09,#04070b);}
 .scene-location-deck #scene-graphic{background:linear-gradient(180deg,#071625,#030b14);}

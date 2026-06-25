@@ -9014,8 +9014,14 @@ function getCinematicOverlay(sc){
     join:'<i class="cin-prop gangway"></i><i class="cin-prop bag"></i><i class="cin-prop captain-window"></i><i class="cin-prop deck-light a"></i><i class="cin-prop deck-light b"></i>',
     storm:'<i class="cin-prop rain r1"></i><i class="cin-prop rain r2"></i><i class="cin-prop radar-dish"></i><i class="cin-prop lightning-mark"></i><i class="cin-prop wave-hit"></i>',
     pilot:'<i class="cin-prop pilot-boat"></i><i class="cin-prop pilot-ladder"></i><i class="cin-prop speed-chip">SPEED 6.0</i><i class="cin-prop pilot-light"></i>',
+    departure:'<i class="cin-prop departure-wake"></i><i class="cin-prop departure-route"></i><i class="cin-prop tug-away departure"></i><i class="cin-prop telegraph-chip">D/SLOW AHEAD</i><i class="cin-prop berth-lights"></i>',
+    nightwatch:'<i class="cin-prop radar-dish night"></i><i class="cin-prop ais-stream"></i><i class="cin-prop logbook-page"></i><i class="cin-prop vhf-pulse"></i><i class="cin-prop far-traffic"></i>',
     allfast:'<i class="cin-prop mooring rope-a"></i><i class="cin-prop mooring rope-b"></i><i class="cin-prop tug-away"></i><i class="cin-prop terminal-crane"></i><i class="cin-prop allfast-chip">ALL FAST</i>',
     emergency:'<i class="cin-prop blackout"></i><i class="cin-prop alarm-panel"></i><i class="cin-prop red-flash"></i><i class="cin-prop response-chain">ALARM · POSITION · TEAM · REPORT</i>',
+    blackout:'<i class="cin-prop blackout deep"></i><i class="cin-prop alarm-panel generator"></i><i class="cin-prop generator-bars"></i><i class="cin-prop voltage-wave"></i><i class="cin-prop response-chain">GEN · HZ · STEERING · REPORT</i>',
+    piracy:'<i class="cin-prop radar-dish security"></i><i class="cin-prop fastboat b1"></i><i class="cin-prop fastboat b2"></i><i class="cin-prop security-level">SECURITY LEVEL 2</i><i class="cin-prop citadel-door"></i>',
+    psc:'<i class="cin-prop clipboard"></i><i class="cin-prop deficiency-stamp"></i><i class="cin-prop officer-card"></i><i class="cin-prop document-stack"></i>',
+    medevac:'<i class="cin-prop helicopter"></i><i class="cin-prop helipad"></i><i class="cin-prop stretcher"></i><i class="cin-prop mrcc-line">MRCC / MEDICAL / BRIDGE</i>',
     contract:'<i class="cin-prop photo-card p1"></i><i class="cin-prop photo-card p2"></i><i class="cin-prop photo-card p3"></i><i class="cin-prop phone-message"></i><i class="cin-prop company-offer"></i>'
   };
   return `<div class="cinematic-shot cinematic-${type}">
@@ -12954,6 +12960,42 @@ Köprüüstünde herkes daha az konuşuyor ama daha çok dinliyor. Pilot bot yan
     choice:'Pilot boarding zincirini onayla',
     effect:{bilgi:2,sayginlik:1}
   },
+  portDeparture:{
+    id:'cin_port_departure',
+    type:'departure',
+    day:'Kalkış Günü',
+    time:'22:10',
+    loc:'Liman çıkışı · Rıhtım',
+    sub:'Liman kalkışı sinematiği',
+    who:'kaptan',
+    gfx:'harbor',
+    text:`Rıhtım ışıkları kıç aynada küçülüyor. Baş halat alındı, kıç spring boşlandı, römorkör son kez omuzluktan itiyor.
+
+Köprüüstünde süvari kısa konuşuyor:
+"Dead slow ahead. Dümeni acele ettirme. Önce geminin kıçını oku, sonra rotayı." 
+
+Terminal geride kalırken sefer dosyası gerçekten açılıyor; bundan sonra rota, VHF ve radar aynı hikâyenin parçası.`,
+    beats:['Son halat gemiye alınır','Römorkör omuzluktan ayrılır','Engine telegraph dead slow ahead olur','Rota çizgisi ilk waypointe akar'],
+    choice:'Kalkış zincirini başlat',
+    effect:{bilgi:2,sayginlik:1,dinclik:-1}
+  },
+  nightWatch:{
+    id:'cin_night_watch',
+    type:'nightwatch',
+    day:'Gece Vardiyası',
+    time:'03:00',
+    loc:'Köprüüstü · Trafik ayrım hattı',
+    sub:'Canlı gece vardiyası',
+    who:'z1',
+    gfx:'bridge',
+    text:`Köprüüstü karanlık ama cihazlar yaşıyor: radar sweep dönüyor, AIS hedefleri küçük küçük kayıyor, VHF arada cızırtıyla kendini hatırlatıyor.
+
+Nöbetçi zabit logbook satırını gösteriyor:
+"Bu gece hikâye şık seçmek değil. Hedefi gör, rotayı oku, VHF'i dinle, sonra karar ver."`,
+    beats:['Radar sweep hedefi yakalar','AIS listesi güncellenir','VHF kısa bir çağrı verir','Logbook satırı açılır'],
+    choice:'Gece vardiyası akışını devral',
+    effect:{bilgi:2,cesaret:1,dinclik:-1}
+  },
   allFast:{
     id:'cin_all_fast',
     type:'allfast',
@@ -12991,6 +13033,76 @@ Gemi kriz anında hızlı değil, sıralı düşünen insanları ödüllendirir.
     beats:['Kırmızı flash gelir','Alarm paneli pulse verir','Kısa kamera sarsıntısı olur','İlk tepki zinciri beklenir'],
     choice:'Alarm zincirini sırayla başlat',
     effect:{cesaret:2,bilgi:2,sayginlik:1,dinclik:-1}
+  },
+  engineBlackout:{
+    id:'cin_engine_blackout',
+    type:'blackout',
+    day:'Makine Alarmı',
+    time:'04:50',
+    loc:'Köprüüstü · Ana makine alarmı',
+    sub:'Blackout / generator recovery zinciri',
+    who:'carkci',
+    gfx:'engine',
+    alert:true,
+    text:`Önce fan sesi inceliyor, sonra ışıklar bir anlığına sönüyor. Alarm paneli kırmızıya dönerken köprüüstünde herkes istemsizce konsola bakıyor.
+
+Çarkçıbaşı telsizden sert ama kontrollü konuşuyor:
+"Standby generator online'a geliyor. Köprü, hız ve dümen etkisini raporlayın. Ben frekansı toparlıyorum."`,
+    beats:['Işıklar kısa düşer','Alarm paneli kırmızı pulse verir','Generator barı tekrar yükselir','Köprü makineye speed/steering raporu verir'],
+    choice:'Blackout ilk raporunu ver',
+    effect:{cesaret:2,bilgi:2,dinclik:-2}
+  },
+  piracyZone:{
+    id:'cin_piracy_zone',
+    type:'piracy',
+    day:'Risk Bölgesi',
+    time:'04:00',
+    loc:'Aden Körfezi · BMP vardiyası',
+    sub:'Korsan bölgesi güvenlik zinciri',
+    who:'kaptan',
+    gfx:'bridge',
+    alert:true,
+    text:`Radar ekranında iki küçük hedef hızla büyüyor. Dışarıda karanlık, içeride güvenlik planı tek tek açılıyor: kapılar, citadel, VHF, ışıklar, ekip dağılımı.
+
+Süvari sesini alçaltıyor:
+"Panik yapmayacağız. Hedefi izle, security level'ı teyit et, kapıları kilitle, raporu tek cümleyle ver."`,
+    beats:['Hızlı bot hedefi yaklaşır','Security level yükselir','Citadel kapı zinciri kontrol edilir','VHF raporu hazırlanır'],
+    choice:'BMP güvenlik zincirini başlat',
+    effect:{cesaret:3,bilgi:1,sayginlik:1,dinclik:-2}
+  },
+  pscInspection:{
+    id:'cin_psc_inspection',
+    type:'psc',
+    day:'Denetim Günü',
+    time:'09:20',
+    loc:'Liman · PSC boarding',
+    sub:'PSC / belge ve ekipman denetimi',
+    who:'kaptan',
+    gfx:'harbor',
+    text:`Gangway başında üniformalı denetçi dosyasını açıyor. İlk bakış belgeye değil, geminin düzenine gidiyor: ISM, fire plan, LSA, logbook ve drill kayıtları.
+
+Süvari sana dönüyor:
+"Koşma. Önce ne istediğini dinle. Belgeyi aç, ekipmanı göster, eksik varsa saklama; doğru cevap bazen 'hemen düzeltiyorum'dur."`,
+    beats:['Denetçi gangwayden çıkar','Belge listesi açılır','Fire/LSA ekipmanı istenir','Deficiency riski değerlendirilir'],
+    choice:'PSC dosyasını düzenli aç',
+    effect:{bilgi:2,sayginlik:2}
+  },
+  cruiseMedevac:{
+    id:'cin_cruise_medevac',
+    type:'medevac',
+    day:'Premium Operasyon',
+    time:'16:40',
+    loc:'Kruvaziyer · Helideck hazırlığı',
+    sub:'Medevac / yolcu ve MRCC koordinasyonu',
+    who:'z2',
+    gfx:'harbor',
+    alert:true,
+    text:`Anons sistemi kısa bir ton veriyor. Helideck ışıkları yanıyor, güvenlik hattı kuruluyor, medical team yolcuyu sedyeyle getirirken MRCC telsizde bekliyor.
+
+Burada iyi denizcilik sadece rota değil: kalabalığı sakin tutmak, ekipleri doğru yere almak ve tek frekansta temiz konuşmak.`,
+    beats:['Helideck ışıkları yanar','Medical team sedyeyi getirir','MRCC bağlantısı kurulur','Yolcu alanı emniyete alınır'],
+    choice:'Medevac koordinasyonunu yönet',
+    effect:{cesaret:2,bilgi:2,sayginlik:2,dinclik:-2}
   },
   contractEnd:{
     id:'cin_contract_end',
@@ -13046,8 +13158,14 @@ function injectCinematicScenes(queue, opts={}){
   const includeJoin = opts.includeJoin !== false;
   if(includeJoin) insertCinematicScene(queue, 'joinShip', 0.02, {afterStart:true});
   insertCinematicScene(queue, 'firstStorm', 0.18, {afterStart:true});
+  insertCinematicScene(queue, 'portDeparture', 0.26, {afterStart:true});
+  insertCinematicScene(queue, 'nightWatch', 0.30, {afterStart:true});
   insertCinematicScene(queue, 'pilotBoarding', 0.34, {afterStart:true});
   insertCinematicScene(queue, 'allFast', 0.50, {afterStart:true});
+  insertCinematicScene(queue, 'engineBlackout', 0.60, {afterStart:true});
+  insertCinematicScene(queue, 'piracyZone', 0.72, {afterStart:true});
+  insertCinematicScene(queue, 'pscInspection', 0.80, {afterStart:true});
+  if(premiumUnlocked || selType === 'kruvaziyer') insertCinematicScene(queue, 'cruiseMedevac', 0.86, {afterStart:true});
   insertCinematicScene(queue, 'emergency', 0.68, {afterStart:true});
   insertCinematicScene(queue, 'contractEnd', 0.92, {beforeFinal:true});
   return queue;
