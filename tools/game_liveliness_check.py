@@ -318,7 +318,8 @@ CHECKS = {
         "renderPortraitTargets",
         "PORTRAIT_SHEET_ASSETS",
         "support-style-female-cutout.png",
-        "__portraitVersion:3",
+        "CREW_PORTRAIT_VERSION = 4",
+        "female:[1,3,6]",
         "sheetUpgradeMap",
     ],
     "mobile landscape support": [

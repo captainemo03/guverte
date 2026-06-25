@@ -4770,13 +4770,14 @@ const PLAYER_PHOTO_MODELS = {
   }
 };
 const crewPortraits = {};
+const CREW_PORTRAIT_VERSION = 4;
 const FEMALE_NAME_MARKERS = [
   'serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yagmur','zeynep',
   'nermin','pinar','ayse','aylin','burcu','eylul','sevim','dilek','merve','cansu','busra','gizem','damla',
   'sibel','gul','eda','esra','nisa','naz','sude','nilay','melda','funda','umay','alara','idil','lara','seda',
   'nehir','isil','duru','ceyda','ayca','selinay','bade','ceren','ilayda','buse','mina','pelin','ada','asli',
   'ebru','hande','meltem','figen','sevda','humeyra','hulya','gulsah','meryem','berrin','ceylin','beste',
-  'koral','deniz'
+  'koral','deniz','burcin','necla','serap','sultan','yasemin','ozge','nur','fatma','emel','gokce','irem'
 ];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
 const NAME_STOPWORDS = new Set(['kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3']);
@@ -4808,12 +4809,12 @@ function inferPortraitBase(def={}){
 const PLAYER_MODEL_PRESETS = PLAYER_PHOTO_MODELS;
 const OFFICER_SHEET_POOLS = {
   young:{
-    male:[0,2,4,6,8,10,12,14],
-    female:[1,3,5,7,9,11,13,15]
+    male:[0,2,4,6],
+    female:[1,3,5,7]
   },
   mid:{
-    male:[0,2,4,6,8,10,12,14],
-    female:[1,3,5,7,9,11,13,15]
+    male:[0,2,4,5,7],
+    female:[1,3,6]
   }
 };
 const PORTRAIT_SHEET_ASSETS = {
@@ -10088,18 +10089,25 @@ function resolvePortraitIndexFromConfig(cfg={}){
   const hairColor = cfg.hairColor || '#1e1612';
   const age = cfg.age || 'young';
   if(base === 'female'){
-    if(hair === 'ponytail') return 9;
-    if(hair === 'braid') return 11;
-    if(hair === 'long') return 13;
-    if(hair === 'crop' || hairColor === '#d7d0bd') return 15;
-    if(age === 'mid' || age === 'veteran' || age === 'senior') return (hair === 'bob' || face === 'sharp') ? 7 : 5;
+    if(age === 'mid' || age === 'veteran' || age === 'senior'){
+      if(hair === 'bun' || hair === 'ponytail' || hair === 'braid') return 6;
+      if(hair === 'slick' || hair === 'bob' || face === 'sharp') return 3;
+      return 1;
+    }
+    if(hair === 'ponytail' || hair === 'braid' || hair === 'bun') return 5;
+    if(hair === 'long' || hair === 'crop' || hairColor === '#d7d0bd') return 7;
     return (hair === 'slick' || face === 'sharp') ? 3 : 1;
   }
-  if(hair === 'fade' || beard === 'stubble') return 8;
-  if(hair === 'buzz' || beard === 'goatee') return 10;
-  if(hair === 'undercut' || beard === 'moustache' || hairColor === '#b48a55') return 12;
-  if(hair === 'long' || face === 'square') return 14;
-  if(age === 'mid' || age === 'veteran' || age === 'senior') return (beard === 'full' || hairColor === '#6a4b35') ? 6 : 4;
+  if(age === 'mid' || age === 'veteran' || age === 'senior'){
+    if(beard === 'full' || hairColor === '#6a4b35') return 4;
+    if(hair === 'slick' || face === 'sharp') return 2;
+    if(hair === 'buzz' || beard === 'clean') return 7;
+    return 0;
+  }
+  if(hair === 'fade' || beard === 'stubble') return 4;
+  if(hair === 'buzz' || beard === 'goatee') return 6;
+  if(hair === 'undercut' || beard === 'moustache' || hairColor === '#b48a55') return 4;
+  if(hair === 'long' || face === 'square') return 6;
   return (hair === 'slick' || face === 'sharp') ? 2 : 0;
 }
 
@@ -14456,7 +14464,7 @@ function makeCrewPortrait(key, def){
   else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
   if(supportIdx!==null){
     return {
-      __portraitVersion:3,
+      __portraitVersion:CREW_PORTRAIT_VERSION,
       __roleKey:key,
       __base:base,
       __name:def.name || '',
@@ -14475,7 +14483,7 @@ function makeCrewPortrait(key, def){
   const officerSheet = age==='young' ? PORTRAIT_SHEET_ASSETS.officerYoung : PORTRAIT_SHEET_ASSETS.officerMid;
   const officerIndexPool = OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young.male;
   return {
-    __portraitVersion:3,
+    __portraitVersion:CREW_PORTRAIT_VERSION,
     __roleKey:key,
     __base:base,
     __name:def.name || '',
@@ -14509,7 +14517,7 @@ function getCrewPortraitForKey(key){
   const nextBase = inferPortraitBase(def);
   if(
     !current ||
-    current.__portraitVersion !== 3 ||
+    current.__portraitVersion !== CREW_PORTRAIT_VERSION ||
     current.__roleKey !== key ||
     current.__base !== nextBase ||
     current.__name !== (def.name || '')
