@@ -1929,6 +1929,330 @@ function buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec){
   return [];
 }
 
+function buildSpecialistCrewScenes(n,sn,yr,stype,st,shipSpec){
+  const active = new Set(getSpecialistCrewKeysForShipType(stype));
+  const scenes = [];
+  const has = (...keys) => keys.some(k=>active.has(k));
+
+  if(has('navsubay')){
+    scenes.push(
+      {id:`spec_${stype}_nav_01`,gfx:"compass",alert:false,day:"Uzman Gun",time:"04:25",loc:"Chart Room / ECDIS",sub:"Passage plan ve route check",who:"navsubay",
+      text:`Navigasyon subayı passage plan dosyasını açtı. ${sn} için seçilen rota tamamlanmış gibi görünüyor ama ECDIS route check iki alarm veriyor: biri safety contour, biri de waypoint dönüş yarıçapı.\n\n"${n}, rota sadece çizgi değildir. Bu iki alarmı imza atmadan önce nasıl ele alırsın?"`,
+      choices:shuffleChoices([
+        {text:"Alarmı tek tek açar; safety contour, XTE, turn radius ve no-go alanını passage plan ile düzeltirim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"ECDIS bazen fazla alarm verir, route check'i not düşüp imzalarım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-5}},
+        {text:"Kaptan görmeden alarmı acknowledge ederim",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}
+      ])},
+      {id:`spec_${stype}_nav_02`,gfx:"bridge",alert:false,day:"Uzman Gun",time:"22:40",loc:"Köprüüstü",sub:"AIS ve radar bilgisi çelişiyor",who:"navsubay",
+      text:`Bir hedef AIS'te 12 knot görünüyor ama radar plot'u daha yavaş kayıyor. CPA değeri de oynuyor.\n\nNavigasyon subayı sesini düşürdü: "AIS bilgi verir, gerçeklik garantisi vermez. Şimdi nasıl teyit edersin?"`,
+      choices:shuffleChoices([
+        {text:"Radar ARPA plot, görsel bearing, AIS statik bilgi ve VHF çağrısını birlikte teyit ederim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"AIS modern cihazdır, radar kaymasını yağmura bağlarım",tag:"korkak",effect:{bilgi:-11,sayginlik:-9}},
+        {text:"Sadece hedefe VHF atıp cevap beklerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:2}}
+      ])}
+    );
+  }
+
+  if(has('telsiz')){
+    scenes.push(
+      {id:`spec_${stype}_radio_01`,gfx:"bridge",alert:false,day:"Uzman Gun",time:"11:16",loc:"GMDSS Konsolu",sub:"DSC urgency mi safety mi?",who:"telsiz",
+      text:`Telsiz subayı DSC ekranını sana çevirdi. Yakında sürüklenen küçük bir tekne var; can tehlikesi net değil ama trafik uyarılması gerekiyor.\n\n"Burada MAYDAY diye bağırmak kolay. Profesyonel ayrım ne?"`,
+      choices:shuffleChoices([
+        {text:"Tehlikenin seviyesini ayırır; urgency/safety mesajını pozisyon, durum ve kanal bilgisiyle kurarım",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"En güçlü mesaj olsun diye MAYDAY Relay geçerim",tag:"cesur",effect:{cesaret:4,bilgi:-7,sayginlik:-8}},
+        {text:"Sadece VHF 16'da genel bir uyarı yapıp log tutmam",tag:"korkak",effect:{bilgi:-9,sayginlik:-7}}
+      ])},
+      {id:`spec_${stype}_radio_02`,gfx:"bridge",alert:false,day:"Uzman Gun",time:"18:05",loc:"NAVTEX / MF-HF Masası",sub:"NAVTEX uyarısını vardiyaya bağlamak",who:"telsiz",
+      text:`NAVTEX'te yeni bir seyir uyarısı düştü: chart üzerinde route leg'e yakın temporary exclusion zone var.\n\nTelsiz subayı: "Mesaj okumak işin yarısı. Bunu köprüüstü kararına nasıl çevirirsin?"`,
+      choices:shuffleChoices([
+        {text:"Uyarıyı rota bacağına işler, OOW/kaptan bilgilendirir ve logbook'a mesaj saatini yazarım",tag:"kritik",effect:{bilgi:14,sayginlik:10}},
+        {text:"NAVTEX mesajını sadece dosyaya koyarım, ECDIS'e sonra bakarız",tag:"itaatkar",effect:{bilgi:4,sayginlik:-3}},
+        {text:"Eski uyarı olabilir diye dikkate almam",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}
+      ])}
+    );
+  }
+
+  if(has('elektrik')){
+    scenes.push(
+      {id:`spec_${stype}_eto_01`,gfx:"engine",alert:true,day:"Uzman Gun",time:"02:35",loc:"Elektrik Pano Odası",sub:"GMDSS battery / UPS düşük voltaj",who:"elektrik",
+      text:`Elektrik zabiti seni GMDSS battery panelinin önüne çağırdı. Şarj akımı dalgalı, UPS bypass ışığı kısa kısa yanıyor.\n\n"Bu köprüüstünde küçük ışık gibi görünür; acil durumda haberleşme giderse büyük olay olur. İlk kontrolün ne?"`,
+      choices:shuffleChoices([
+        {text:"Battery voltage, charger status, UPS bypass, yük listesi ve alarm logunu birlikte kontrol ederim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Şarj cihazını kapatıp açar, sonra bakarım",tag:"cesur",effect:{cesaret:3,bilgi:-8,sayginlik:-7}},
+        {text:"GMDSS çalışıyorsa alarmı yarına bırakırım",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}
+      ])}
+    );
+  }
+
+  if(has('bunkering')){
+    scenes.push(
+      {id:`spec_${stype}_bunker_01`,gfx:"cargo",alert:false,day:"Uzman Gun",time:"09:20",loc:"Bunker Station",sub:"Sample, seal ve overflow riski",who:"bunkering",
+      text:`Bunker barge yanladı. Bunkering zabiti hortum, drip tray ve sample şişelerini gösterdi.\n\n"Bu iş sadece yakıt almak değil. Bir hata hem çevre hem şirket dosyası açar. Başlamadan neyi tamam görmeden rate istemezsin?"`,
+      choices:shuffleChoices([
+        {text:"Ullage, manifold watch, SOPEP, communication signal, sample ve seal numarasını teyit ederim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Barge hazırsa düşük rate ile başlatıp eksikleri sonra tamamlarım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-6}},
+        {text:"Overflow alarmı çalışıyorsa manuel watch gerekmez derim",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}
+      ])}
+    );
+  }
+
+  if(has('fitter')){
+    scenes.push(
+      {id:`spec_${stype}_fitter_01`,gfx:"engine",alert:false,day:"Uzman Gun",time:"15:30",loc:"Makine Atölyesi",sub:"Flanş kaçağı ve mekanik izolasyon",who:"fitter",
+      text:`Fitter seni sıcak bir pompa hattının yanına çağırdı. Flanş kenarında ince sızıntı var; üretim baskısı "şimdilik sıkalım" diyor.\n\n"Denizde en pahalı anahtar bazen dokunmadığın anahtardır. Neyi kanıtlamadan işe girmezsin?"`,
+      choices:shuffleChoices([
+        {text:"Basınçsızlık, sıcaklık, izolasyon/LOTO, permit ve uygun conta bilgisini teyit ederim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Bir tur sıkarız; kaçak durursa rapor yazarız",tag:"cesur",effect:{cesaret:4,bilgi:-8,sayginlik:-8}},
+        {text:"Usta bilir diyerek sadece izlerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:2}}
+      ])}
+    );
+  }
+
+  if(has('limantemsilci')){
+    scenes.push(
+      {id:`spec_${stype}_portrep_01`,gfx:"harbor",alert:false,day:"Uzman Gun",time:"06:50",loc:"Terminal Ofisi",sub:"Berth, pilot, tug ve belge baskısı",who:"limantemsilci",
+      text:`Liman temsilcisi terminal mailini açtı: rıhtım hazır, ama pilot saati değişmiş; acente hâlâ clearance belgesini bekliyor.\n\n"Gemide gerçek operasyon böyle akar. Tek bir bilgiye bakıp 'hazırız' diyemezsin. Kaptana neyi net raporlarsın?"`,
+      choices:shuffleChoices([
+        {text:"Berth readiness, pilot time, tug order, clearance ve terminal kısıtını tek kısa raporda toplarım",tag:"kritik",effect:{bilgi:14,sayginlik:11}},
+        {text:"Rıhtım hazırsa kaptana hazırız derim",tag:"itaatkar",effect:{bilgi:3,sayginlik:-5}},
+        {text:"Acenteden cevap gelene kadar kimseye bilgi vermem",tag:"korkak",effect:{bilgi:-8,sayginlik:-8}}
+      ])}
+    );
+  }
+
+  if(has('pumpman')){
+    scenes.push(
+      {id:`spec_${stype}_pumpman_01`,gfx:"cargo",alert:true,day:"Tanker Uzmani",time:"13:05",loc:"Manifold / Cargo Watch",sub:"Pressure surge ve line-up teyidi",who:"pumpman",
+      text:`Manifold basıncı bir anda oynadı. Pumpman elini kaldırdı, rate arttırma isteğini durdurdu.\n\n"Stajyer, basınç konuşur. Bu oynamayı sadece terminal debisi sanarsan overflow'a yürürsün. İlk üç teyit?"`,
+      choices:shuffleChoices([
+        {text:"Manifold pressure trend, valve line-up, tank ullage ve terminal rate teyidini birlikte yaparım",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+        {text:"Terminal istiyorsa rate'i korur, alarm gelirse bakarım",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Sadece pompa sesini dinler, line-up'a sonra bakarım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-4}}
+      ])}
+    );
+  }
+
+  if(has('gazsubay')){
+    scenes.push(
+      {id:`spec_${stype}_gas_01`,gfx:"cargo",alert:false,day:"Tanker/LNG Uzmani",time:"07:40",loc:"Gas Safety Station",sub:"Gas test değerlerini okumak",who:"gazsubay",
+      text:`Gaz kontrol subayı ölçüm cihazını sana uzattı: O2, LEL ve toxic reading ekranda.\n\n"Rakamları görmek yetmez. Permit saatini, ölçüm noktasını ve işi bağlamazsan bu değer sadece süs olur. Nasıl raporlarsın?"`,
+      choices:shuffleChoices([
+        {text:"O2/LEL/toxic değeri, ölçüm noktası, saat, permit ve havalandırma durumunu birlikte raporlarım",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"LEL sıfırsa diğer değerleri kısa geçerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:-4}},
+        {text:"Cihaz temiz gösterdi diye sözlü onay yeter derim",tag:"korkak",effect:{bilgi:-11,sayginlik:-11}}
+      ])}
+    );
+  }
+
+  if(has('konteynerzabit')){
+    scenes.push(
+      {id:"spec_kont_container_01",gfx:"cargo",alert:false,day:"Konteyner Uzmani",time:"16:20",loc:"Cargo Office",sub:"Bay-row-tier ve reefer alarmı",who:"konteynerzabit",
+      text:`Konteyner zabiti sana stowage planı ve reefer listesini açtı. Bir konteyner listede 32 bay / 04 row / 86 tier görünüyor, ama alarm panelinde farklı slot yanıyor.\n\n"Bu gemide yanlış slot, yanlış karar demektir. Nasıl doğrularsın?"`,
+      choices:shuffleChoices([
+        {text:"Bay-row-tier, reefer plug listesi, IMDG ayrımı ve güverte teyidini karşılaştırırım",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Alarm panelindeki slota gider, manifestoya sonra bakarım",tag:"itaatkar",effect:{bilgi:4,sayginlik:-4}},
+        {text:"Reefer alarmını terminal hatası sayıp kapatırım",tag:"korkak",effect:{bilgi:-11,sayginlik:-11}}
+      ])}
+    );
+  }
+
+  if(has('bulkzabit')){
+    scenes.push(
+      {id:"spec_bulk_cargo_01",gfx:"cargo",alert:false,day:"Bulk Uzmani",time:"10:10",loc:"Ambar Ağzı",sub:"Loading sequence / trim baskısı",who:"bulkzabit",
+      text:`Dökme yük zabiti loading sequence'i gösterdi. Terminal hızlı yüklemek istiyor; trim pruvaya doğru artıyor.\n\n"Bulk gemide acele çoğu zaman trim olarak geri döner. Hangi sınırı takip edersin?"`,
+      choices:shuffleChoices([
+        {text:"Draft, trim, stress limit, deballast sırası ve ambar dağılımını birlikte takip ederim",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Terminal hızlıysa önce yükü alır, trim'i sonda düzeltiriz",tag:"cesur",effect:{cesaret:4,bilgi:-8,sayginlik:-8}},
+        {text:"Sadece yükleme sonunda draft survey yaparım",tag:"itaatkar",effect:{bilgi:4,sayginlik:-4}}
+      ])}
+    );
+  }
+
+  if(has('medic')){
+    scenes.push(
+      {id:`spec_${stype}_medical_01`,gfx:"bridge",alert:true,day:"Medikal Uzman",time:"21:18",loc:"Revir / Köprüüstü",sub:"Medevac hazırlığı",who:"medic",
+      text:`Gemi hekimi köprüüstüne çıktı. Bir kişide ciddi göğüs ağrısı var; MRCC bilgi istiyor.\n\n"Ben klinik bilgiyi veririm, köprüüstü deniz tarafını hazırlar. MRCC için hangi bilgiler eksik kalamaz?"`,
+      choices:shuffleChoices([
+        {text:"Position, course/speed, weather, patient status, helicopter/tender opsiyonunu net hazırlarım",tag:"kritik",effect:{bilgi:16,sayginlik:12,cesaret:3}},
+        {text:"Sadece hastanın durumunu gönderir, gemi bilgisini sonra eklerim",tag:"itaatkar",effect:{bilgi:4,sayginlik:-5}},
+        {text:"Panik olmasın diye olayı köprü dışında tutarım",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}}
+      ])}
+    );
+  }
+
+  if(has('security')){
+    scenes.push(
+      {id:`spec_${stype}_security_01`,gfx:"pirate",alert:true,day:"Güvenlik Uzmani",time:"03:30",loc:"ISPS / Köprüüstü",sub:"Access control ve security level",who:"security",
+      text:`Güvenlik zabiti liman girişinde visitor log'u ve CCTV ekranını gösterdi. Bir servis ekibi listede yok ama gate'ten geçmek istiyor.\n\n"Denizde güvenlik çoğu zaman nazik ama net bir hayır demektir. Ne yaparsın?"`,
+      choices:shuffleChoices([
+        {text:"Access list, kimlik, acente teyidi, kaptan/OOW bilgisi ve escort kuralını uygularım",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Terminal gecikmesin diye içeri alır, sonra kayıt açarım",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}},
+        {text:"Kapıda tartışmayı büyütmeden acenteyi beklerim",tag:"itaatkar",effect:{bilgi:5,sayginlik:3}}
+      ])}
+    );
+  }
+
+  if(has('cevrezabit')){
+    scenes.push(
+      {id:`spec_${stype}_env_01`,gfx:"cargo",alert:false,day:"Çevre Uzmani",time:"17:25",loc:"MARPOL Station",sub:"ORB / sludge transfer kaydı",who:"cevrezabit",
+      text:`Çevresel işler subayı ORB sayfasını açtı. Sludge transfer yapılmış ama tank sounding ve saat notu eksik.\n\n"Denizde çevre ihlali bazen yanlış kayıtla başlar. Bunu nasıl düzeltirsin?"`,
+      choices:shuffleChoices([
+        {text:"Tank sounding, transfer saati, miktar, sorumlu kişi ve ORB referansını tutarlı tamamlarım",tag:"kritik",effect:{bilgi:15,sayginlik:12}},
+        {text:"Yaklaşık miktar yazıp sayfayı kapatırım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-7}},
+        {text:"Küçük transfer diye ORB'ye girmem",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}}
+      ])}
+    );
+  }
+
+  if(has('hydro')){
+    scenes.push(
+      {id:"spec_research_hydro_01",gfx:"compass",alert:false,day:"Araştırma Uzmani",time:"06:15",loc:"Survey Lab",sub:"Multibeam survey line",who:"hydro",
+      text:`Hidrografik araştırmacı survey grid'ini ekrana aldı. Akıntı gemiyi hat dışına itiyor; multibeam verisinde boşluk oluşabilir.\n\n"Bu rota güzel çizilmiş olabilir, ama veri boşluğu raporda konuşur. Nasıl tutarsın?"`,
+      choices:shuffleChoices([
+        {text:"XTE limit, SOG, tide correction, line overlap ve log saatini birlikte izlerim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Hat biraz kayarsa yazılımla doldururuz derim",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}},
+        {text:"Bilim ekibinin hız isteğine uyarım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-5}}
+      ])}
+    );
+  }
+
+  if(has('biyolog')){
+    scenes.push(
+      {id:"spec_research_bio_01",gfx:"sea",alert:false,day:"Araştırma Uzmani",time:"12:50",loc:"Arka Güverte",sub:"Numune alma zinciri",who:"biyolog",
+      text:`Deniz biyoloğu numune kaplarını dizdi. Deck'te swell artıyor, ama plankton örneğinin zamanı geldi.\n\n"Bilimsel saat önemli, ama güvenli çalışma da veri kalitesinin parçası. Operasyonu nasıl başlatırsın?"`,
+      choices:shuffleChoices([
+        {text:"PPE, deck limit, numune etiketi, pozisyon/saat ve köprü-güverte haberleşmesini teyit ederim",tag:"kritik",effect:{bilgi:15,sayginlik:11}},
+        {text:"Numune saati kaçmasın diye hemen indiririm",tag:"cesur",effect:{cesaret:4,bilgi:-8,sayginlik:-8}},
+        {text:"Numune işini tamamen bilim ekibine bırakırım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-4}}
+      ])}
+    );
+  }
+
+  if(has('rovtech')){
+    scenes.push(
+      {id:`spec_${stype}_rov_01`,gfx:"engine",alert:true,day:"Subsea Uzmani",time:"01:05",loc:"ROV / DP Kontrol",sub:"Tether tension alarmı",who:"rovtech",
+      text:`ROV teknisyeni monitörü işaret etti. Tether tension yükseliyor, DP offset küçük ama sürekli artıyor.\n\n"Burada kahramanlık ROV'u zorlamak değil. Ne zaman recovery dersin?"`,
+      choices:shuffleChoices([
+        {text:"Tether tension trend, DP offset, akıntı ve güvenli recovery limitini birlikte değerlendiririm",tag:"kritik",effect:{bilgi:17,sayginlik:13}},
+        {text:"Biraz daha görüntü alalım, sonra toparlarız derim",tag:"cesur",effect:{cesaret:4,bilgi:-9,sayginlik:-9}},
+        {text:"DP alarmı kırmızıya dönmeden beklerim",tag:"korkak",effect:{bilgi:-11,sayginlik:-12}}
+      ])}
+    );
+  }
+
+  if(has('hotelmgr')){
+    scenes.push(
+      {id:"spec_cruise_hotel_01",gfx:"galley",alert:false,day:"Kruvaziyer Uzmani",time:"08:35",loc:"Guest Services",sub:"Yolcu akışı ve anons",who:"hotelmgr",
+      text:`Hotel müdürü gangway kuyruğunu ve yolcu bilgi ekranını gösterdi. Liman gecikmesi var; sosyal medyada şikayet başlamış.\n\n"Yolcu gemisinde bilgi yokluğu panik üretir. Nasıl anons kurarsın?"`,
+      choices:shuffleChoices([
+        {text:"Kısa, sakin, doğrulanmış saatli anons yapar; güvenlik ve yeni boarding akışını net veririm",tag:"kritik",effect:{bilgi:14,sayginlik:11,moral:3}},
+        {text:"Gecikmeyi söylemeyip kuyruk dağılana kadar beklerim",tag:"korkak",effect:{bilgi:-10,sayginlik:-11}},
+        {text:"Terminali suçlayan sert bir anons yaparım",tag:"cesur",effect:{cesaret:4,sayginlik:-8}}
+      ])}
+    );
+  }
+
+  if(has('steward')){
+    scenes.push(
+      {id:"spec_cruise_steward_01",gfx:"cabin",alert:false,day:"Kruvaziyer Uzmani",time:"19:05",loc:"Kabin Koridoru",sub:"Kayıp yolcu çocuğu",who:"steward",
+      text:`Stewardess telaşlı ama kontrollü: bir çocuk kabin koridorunda ailesinden ayrılmış. Yolcular kalabalık, anons yapılırsa panik büyüyebilir.\n\n"Sakin ve izlenebilir bir akış kurmamız lazım. İlk adım?"`,
+      choices:shuffleChoices([
+        {text:"Son görülen yer, güvenli refakat, security/guest services bilgilendirmesi ve aile teyidi kurarım",tag:"kritik",effect:{bilgi:14,sayginlik:12}},
+        {text:"Hemen genel anons yapıp herkesi haberdar ederim",tag:"cesur",effect:{cesaret:4,bilgi:-7,sayginlik:-7}},
+        {text:"Biraz bekleyelim, ailesi bulur derim",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}
+      ])}
+    );
+  }
+
+  if(has('welder')){
+    scenes.push(
+      {id:`spec_${stype}_welder_01`,gfx:"fire",alert:false,day:"Teknik Uzman",time:"14:45",loc:"Hot Work Area",sub:"Kaynak işi ve fire watch",who:"welder",
+      text:`Kaynakçı usta elektrodu hazırladı ama elini kaldırmadı. Yakın bölgede boya kabı, alt güvertede kablo tavası var.\n\n"Permit var diye iş güvenli olmaz. Kıvılcım aşağı inerse kim görecek?"`,
+      choices:shuffleChoices([
+        {text:"Hot work permit, gas test, fire watch, izolasyon ve alt güverte kontrolünü tamamlatırım",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Permit imzalıysa işi başlatır, yangın tüpünü yakına koyarım",tag:"itaatkar",effect:{bilgi:4,sayginlik:-6}},
+        {text:"Kısa kaynak işi diye fire watch istemem",tag:"korkak",effect:{bilgi:-12,sayginlik:-12}}
+      ])}
+    );
+  }
+
+  if(has('firesafety')){
+    scenes.push(
+      {id:`spec_${stype}_fireteam_01`,gfx:"fire",alert:true,day:"Yangin Uzmani",time:"23:10",loc:"Fire Control Station",sub:"Zone seçimi ve ekip sırası",who:"firesafety",
+      text:`Yangın panelinde iki zone yanıp sönüyor. Biri galley, biri kablo tavasına yakın servis alanı. Fire team leader sana baktı.\n\n"İlk yanlış zone'a ekip yollarsan ikinci dakika kaybolur. Ne yaparsın?"`,
+      choices:shuffleChoices([
+        {text:"Alarm zone, koku/duman teyidi, elektrik izolasyonu, doğru ekipman ve boundary cooling sırasını kurarım",tag:"kritik",effect:{bilgi:17,sayginlik:13,cesaret:3}},
+        {text:"En yakın zone'a ekibi yollar, sonra diğerine bakarım",tag:"cesur",effect:{cesaret:4,bilgi:-8,sayginlik:-8}},
+        {text:"Panel karışık diye kaptanın gelmesini beklerim",tag:"korkak",effect:{bilgi:-10,sayginlik:-10}}
+      ])}
+    );
+  }
+
+  if(has('gemicibasi','gemici')){
+    scenes.push(
+      {id:`spec_${stype}_deckcrew_01`,gfx:"harbor",alert:false,day:"Güverte Ekibi",time:"06:25",loc:"Forward Station",sub:"Gemici başı iş bölümü",who:has('gemicibasi')?'gemicibasi':'gemici',
+      text:`Forward station kalabalık. Head line, breast line ve spring aynı anda konuşuluyor; yeni gemici hangi halatı takip edeceğini karıştırdı.\n\nGemici başı sana döndü: "Burada bağırmak değil, net düzen kurmak iş. Stajyer, ekibi nasıl toparlarsın?"`,
+      choices:shuffleChoices([
+        {text:"Her halat için kişi, komut, safe zone ve stop signal'i ayrı netleştiririm",tag:"kritik",effect:{bilgi:15,sayginlik:12,uyum:4}},
+        {text:"En yakındaki halata geçip kendim çekmeye başlarım",tag:"cesur",effect:{cesaret:4,bilgi:-6,sayginlik:-5}},
+        {text:"Lostromo bağırınca herkes anlar diye beklerim",tag:"korkak",effect:{bilgi:-9,sayginlik:-8}}
+      ])},
+      {id:`spec_${stype}_deckcrew_02`,gfx:"harbor",alert:true,day:"Güverte Ekibi",time:"18:10",loc:"Aft Station",sub:"Yanlış el işareti ve snap-back çizgisi",who:"gemici",
+      text:`Kıçta bir el işareti yanlış anlaşıldı. Halat kısa süre gerildi, gemici bir adım snap-back alanına yaklaştı.\n\n"Hold on mu slack away mi?" diye bağırdı biri. O an ne yaparsın?`,
+      choices:shuffleChoices([
+        {text:"Operasyonu stop eder, komutu tek ağızdan tekrar ettirir ve gemiciyi güvenli alana çekerim",tag:"kritik",effect:{bilgi:16,sayginlik:13,cesaret:3}},
+        {text:"Karışıklık büyümesin diye halata küçük müdahale ederim",tag:"cesur",effect:{cesaret:4,bilgi:-8,sayginlik:-8}},
+        {text:"Yanlış anlaşılmış olabilir ama devam ederiz derim",tag:"korkak",effect:{bilgi:-12,sayginlik:-11}}
+      ])}
+    );
+  }
+
+  if(has('motorcu','ucmuhendis','yagcibasi','elektrisyen')){
+    scenes.push(
+      {id:`spec_${stype}_enginecrew_01`,gfx:"engine",alert:false,day:"Makine Ekibi",time:"03:40",loc:"Engine Round",sub:"Motorcu round değerleri",who:has('motorcu')?'motorcu':'ucmuhendis',
+      text:`Motorcu round kağıdını uzattı. Bir pompanın discharge pressure değeri küçük ama sürekli düşüyor; sıcaklık hâlâ limit içinde.\n\n"Bu alarm değil diye görmezsen sabaha iş çıkar," dedi. Nasıl raporlarsın?`,
+      choices:shuffleChoices([
+        {text:"Pressure trend, sıcaklık, pompa sesi, standby pump ve log saatini birlikte raporlarım",tag:"kritik",effect:{bilgi:16,sayginlik:12}},
+        {text:"Limit aşılmadığı için sadece sonraki round'a bırakırım",tag:"itaatkar",effect:{bilgi:3,sayginlik:-5}},
+        {text:"Alarm yoksa köprüye bilgi vermeye gerek yok derim",tag:"korkak",effect:{bilgi:-10,sayginlik:-9}}
+      ])},
+      {id:`spec_${stype}_enginecrew_02`,gfx:"engine_fault",alert:true,day:"Makine Ekibi",time:"12:35",loc:"Purifier Room",sub:"3. mühendis purifier alarmı",who:has('ucmuhendis')?'ucmuhendis':'yagcibasi',
+      text:`Purifier alarmı kısa kısa öttü. 3. mühendis panelde sludge discharge zamanına baktı; yağcıbaşı numune rengini gösteriyor.\n\n"Alarmı susturmak çözüm değildir. İlk teşhis zinciri?"`,
+      choices:shuffleChoices([
+        {text:"Alarm kodu, feed rate, sıcaklık, sludge cycle, numune görünümü ve bypass riskini kontrol ederim",tag:"kritik",effect:{bilgi:17,sayginlik:12}},
+        {text:"Reset atar, tekrar verirse başmühendise söylerim",tag:"itaatkar",effect:{bilgi:2,sayginlik:-7}},
+        {text:"Purifier küçük yardımcı makine, operasyonu etkilemez derim",tag:"korkak",effect:{bilgi:-11,sayginlik:-10}}
+      ])}
+    );
+  }
+
+  if(has('kambuz','garson','filipinliasci')){
+    scenes.push(
+      {id:`spec_${stype}_service_01`,gfx:"galley",alert:false,day:"Servis Ekibi",time:"19:15",loc:"Messroom / Galley",sub:"Kumanya, alerjen ve crew morali",who:has('filipinliasci')?'filipinliasci':(has('garson')?'garson':'kambuz'),
+      text:`Akşam servisi başlamadan önce galley kalabalık. Bir crew üyesinin alerjisi var; aynı anda vardiyadan çıkan ekip yorgun ve sinirli.\n\nServis ekibi sana baktı: "Food allergy, hijyen ve moral aynı anda yönetilir. Ne yaparsın?"`,
+      choices:shuffleChoices([
+        {text:"Alerjen listesini teyit eder, servis akışını sakin tutar ve hijyen/ayrı servis zincirini kurarım",tag:"kritik",effect:{bilgi:13,sayginlik:10,moral:4}},
+        {text:"Herkes aç, önce hızlı servis yapalım; alerjiyi sonra sorarız",tag:"korkak",effect:{bilgi:-10,sayginlik:-10,moral:-4}},
+        {text:"Sadece aşçıya bırakıp yemekhane dışında beklerim",tag:"itaatkar",effect:{bilgi:3,sayginlik:-3}}
+      ])}
+    );
+  }
+
+  if(has('latinab','ruscarkci','hindliyagci','filipinliasci')){
+    scenes.push(
+      {id:`spec_${stype}_intlcrew_01`,gfx:"bridge",alert:false,day:"Farklı Milletler",time:"10:45",loc:"Crew Coordination",sub:"English repeat-back ve kültür farkı",who:has('latinab')?'latinab':(has('ruscarkci')?'ruscarkci':'hindliyagci'),
+      text:`Yabancı crew ile kısa bir operasyon brifingi yapılıyor. Komut İngilizce geldi: "Hold position, wait for my signal, keep clear of the snap-back zone."\n\nBir kişi sadece başını salladı ama anladığından emin değilsin. Profesyonel tavır ne?`,
+      choices:shuffleChoices([
+        {text:"Kısa repeat-back ister, el işaretiyle güvenli alanı gösterir ve kritik komutu tekrar ettiririm",tag:"kritik",effect:{bilgi:15,sayginlik:12,uyum:4}},
+        {text:"Başını salladıysa anlamıştır diye devam ederim",tag:"itaatkar",effect:{bilgi:2,sayginlik:-6}},
+        {text:"Herkesin önünde İngilizcesini küçümserim",tag:"korkak",effect:{bilgi:-10,sayginlik:-12,uyum:-5}}
+      ])}
+    );
+  }
+
+  return scenes;
+}
+
 // ===== 60 SENARYO HAVUZU =====
 function buildScenePool(n,sn,yr,stype,startPort=selectedStartPort,startScenario=selectedStartScenario){
   const era=ERA_TECH[yr]||ERA_TECH[2018];
@@ -4705,7 +5029,10 @@ choices:[
 {text:"'Bu hayatı seçiyorum — her zorluğuyla'",tag:"cesur",effect:{cesaret:15,sayginlik:12},next:'end'},
 {text:"'Henüz tam emin değilim ama devam edeceğim'",tag:"itaatkar",effect:{sayginlik:8,bilgi:5},next:'end'}]},
   ];
-  return baseScenes.concat(buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec));
+  return baseScenes.concat(
+    buildSpecialistCrewScenes(n,sn,yr,stype,st,shipSpec),
+    buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec)
+  );
 }
 
 // ===== KONTRAT SİSTEMİ =====
@@ -4770,7 +5097,7 @@ const PLAYER_PHOTO_MODELS = {
   }
 };
 const crewPortraits = {};
-const CREW_PORTRAIT_VERSION = 4;
+const CREW_PORTRAIT_VERSION = 5;
 const FEMALE_NAME_MARKERS = [
   'serra','leyla','defne','selda','ece','melis','selen','derya','ipek','nil','selin','elif','yagmur','zeynep',
   'nermin','pinar','ayse','aylin','burcu','eylul','sevim','dilek','merve','cansu','busra','gizem','damla',
@@ -4780,7 +5107,11 @@ const FEMALE_NAME_MARKERS = [
   'koral','deniz','burcin','necla','serap','sultan','yasemin','ozge','nur','fatma','emel','gokce','irem'
 ];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
-const NAME_STOPWORDS = new Set(['kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3']);
+const NAME_STOPWORDS = new Set([
+  'kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3',
+  'gemici','basi','motorcu','kambuzcu','garson','elektrisyen','steward','stewardess','hotel','muduru','chief','engineer','cook','oiler','ab',
+  'deck','foreman','rating','motorman','pumpman','fitter','welder','doctor','medical','security','officer'
+]);
 
 function normalizeTrAscii(v=''){
   return String(v)
@@ -9829,6 +10160,15 @@ let shipOffers=[];
 let familyUnread=0;
 let dialogueHistory=[];
 let livingShipState={thanks:false,note:false,argue:false,complaint:false};
+let playerBondState={
+  score:0,
+  decisions:0,
+  lastHookKey:'',
+  lastAiScene:'',
+  lastCaptainReviewMonth:0,
+  signatureMoments:[],
+  monthlyReviews:[]
+};
 let sceneChoiceTimer=null;
 let sceneChoiceAutoPick=false;
 let sceneLiveSequenceTimers=[];
@@ -11579,6 +11919,7 @@ function handleSceneChoice(sc, c2, ch){
   maybeCreateNearMissReplay(sc,c2);
   triggerDecisionReplayAndOfficerFeedback(sc,c2);
   maybeCreateMonthlyMemorySummary(sc,c2);
+  runPlayerBondDirector(sc,c2,resolvedEffect);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
   const neg=Object.entries(resolvedEffect).filter(([k,v])=>v<0&&k!=='yorgunluk').map(([k,v])=>v+' '+k).join(' ');
@@ -14254,6 +14595,7 @@ function beginGame(){
   seenPhotoMoments.clear();
   dialogueHistory=[];
   livingShipState={thanks:false,note:false,argue:false,complaint:false};
+  playerBondState={score:0,decisions:0,lastHookKey:'',lastAiScene:'',lastCaptainReviewMonth:0,signatureMoments:[],monthlyReviews:[]};
   watchState={code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
   voyagePressure={swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
   consequenceTrace={office:0, psc:0, trust:0};
@@ -14321,6 +14663,7 @@ function beginGame(){
   nextEventAt=5+Math.floor(Math.random()*4);
   randomizeCrewRoster();
   initCrewSystem();
+  applyActiveSpecialistCrewToPhone(selType);
   const routeInfo = getActiveVoyageRoute();
   if(routeInfo){
     phoneMessages.push({from:'Şirket', text:`Sefer emri: ${routeInfo.name}. ${routeInfo.start} -> ${routeInfo.end}, yaklasik ${routeInfo.distanceNm} NM / ${routeInfo.etaDays} gun. Haritalarim sekmesindeki sefer chartlarini kullan.`, me:false});
@@ -14424,6 +14767,161 @@ const CREW_DEFS = {
     prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
     secrets:["IGF ve tanker familiarization notlarini kendi arşivinde tutar.","Gaz ölçüm cihazını vardiya başında iki kez kontrol eder.","Sessizdir ama doğru raporu duyunca hemen destek olur."],
     tips:["LEL/O2/H2S değerlerini net oku","Permit ve gas test saatini karıştırma","Gaz emniyetinde emin değilsen durdur"]},
+  navsubay: {name:"Navigasyon Subayı Nil", icon:"🧭", title:"Navigation Officer", trust:44,
+    style:"Rota, waypoint, ECDIS alarmi ve passage plan disiplinine bakar.",
+    prefs:{kritik:3,akilli:3,itaatkar:0,sosyal:0,cesur:-1,korkak:-4},
+    secrets:["Her kritik rotada contingency port listesini ayrıca tutar.","ECDIS route check'i bitmeden kalemini kapatmaz.","Seyir hatası anlatılırken kişiye değil zincire bakar."],
+    tips:["Waypoint ve XTE limitlerini birlikte oku","Route check alarmını asla ezbere kapatma","Pilot station/VTS saatlerini passage plan'a bağla"]},
+  telsiz: {name:"Telsiz Subayı Derya", icon:"📡", title:"GMDSS / Radio Officer", trust:43,
+    style:"VHF/MF-HF/DSC dilinde kisa, net ve standart ifade bekler.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Her vardiya başı DSC test kayıtlarını sessizce kontrol eder.","SMCP cümlelerini not kartlarında taşır.","Yanlış kanal seçildiğinde önce zamanı yazar, sonra konuşur."],
+    tips:["Kanal, çağrı işareti ve pozisyonu net ver","Distress/urgency/safety ayrımını karıştırma","NAVTEX ve DSC log saatlerini kaydet"]},
+  elektrik: {name:"Elektrik Zabiti Ece", icon:"⚡", title:"ETO / Elektrik Zabiti", trust:41,
+    style:"GMDSS battery, UPS, alarm paneli ve sensör beslemesini sakin kontrol eder.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Radar blackout sebebini bir kez loose terminalden yakaladı.","Yedek sigortaları kendi etiket sistemiyle tutar.","Alarm panelindeki küçük titreşimi bile duyar."],
+    tips:["UPS/battery voltajını logla","Sensor lost alarmında beslemeyi de düşün","Elektrik izolasyonunu izin formuna bağla"]},
+  pumpman: {name:"Pumpman Selim", icon:"🛢️", title:"Pumpman / Pompa Ustası", trust:46,
+    style:"Manifold, stripping, line-up ve basinc trendinde aceleyi sevmez.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:-1,korkak:-4},
+    secrets:["Bir terminalde overflow'u başlamadan basınç sesinden yakaladı.","Pompa sesinden cavitation kokusunu ayırır.","Manifold kör flanşlarını fotoğraflayıp saklar."],
+    tips:["Line-up'ı iki kişiyle teyit et","Manifold pressure trendini gözden kaçırma","ESD ve SOPEP hazır olmadan rate isteme"]},
+  konteynerzabit: {name:"Konteyner Zabiti Merve", icon:"📦", title:"Container Officer", trust:44,
+    style:"Bay-row-tier, reefer alarm, lashing ve dangerous cargo ayrimini birlikte okur.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["İlk kontratında bir reefer alarmını crew chat mesajından yakaladı.","IMDG manifestosuna renk kodu verir.","Twistlock sayısını yük planına not düşer."],
+    tips:["Bay-row-tier'i elle tekrar et","Reefer listesi ve IMDG ayrımını karşılaştır","Lashing raporunda foto ve saat bırak"]},
+  bulkzabit: {name:"Dökme Yük Zabiti Arda", icon:"⛏️", title:"Bulk Cargo Officer", trust:44,
+    style:"Loading sequence, trim, hold cleanliness ve draft survey zincirini sever.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Tahıl yükünde küçük bir nem farkını kapak kenarında yakaladı.","Draft survey cetvelini kendi kısa notlarıyla taşır.","Loading master ile tartışırken bile sesini yükseltmez."],
+    tips:["Ambar temizliğini fotoğraflı kaydet","Draft/trim değerini loading order ile karşılaştır","Free surface ve listeyi yük sırasına bağla"]},
+  medic: {name:"Gemi Hekimi Aslı", icon:"⚕️", title:"Ship Doctor / Medical", trust:45,
+    style:"Hasta mahremiyeti, triage, medevac ve MRCC iletişimini profesyonel ister.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:1,cesur:0,korkak:-4},
+    secrets:["Kruvaziyer hattında bir gece üç vaka triage etti.","Medical log'da yorum değil bulgu yazar.","Panigı azaltmak için önce ekibi sakinleştirir."],
+    tips:["Semptom-zaman-bulgu zincirini net tut","MRCC için position/course/speed hazırla","Yolcu/crew mahremiyetini koru"]},
+  security: {name:"Güvenlik Zabiti Kerem", icon:"🛡️", title:"Ship Security Officer", trust:42,
+    style:"ISPS, citadel, access control ve kalabalik yönetiminde gevsemez.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Aden hattında yanlış alarmı panik yaratmadan yönetti.","Visitor log defterini liman polisi gibi okur.","Güvenlik zaafını kişisel mesele değil sistem meselesi sayar."],
+    tips:["Visitor/access log'u eksiksiz tut","Security level değişimini herkese aynı dille duyur","Citadel ve kapı zincirini önceden kontrol et"]},
+  cevrezabit: {name:"Çevresel İşler Subayı İpek", icon:"🌿", title:"Environmental Officer", trust:43,
+    style:"MARPOL, sludge, garbage, ballast water ve ORB kaydinda sifir tolerans ister.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Bir PSC denetiminde eksik etiketi deficiency olmadan tamamladı.","ORB saatlerini vardiya loguyla karşılaştırır.","Atık ayrımında en çok 'küçük torba' hatasına kızar."],
+    tips:["ORB/Garbage record saatlerini tutarlı yaz","SOPEP ve spill kit yerini bil","Ballast exchange kaydını rota ile eşleştir"]},
+  bunkering: {name:"Bunkering Zabiti Can", icon:"⛽", title:"Bunkering Officer", trust:42,
+    style:"Bunker checklist, sample, manifold watch ve overflow riskine takilir.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Numune mührünü yanlış seriyle kapatan barge'ı yakaladı.","Bunker öncesi tank ullage değerini üç kez kontrol eder.","SOPEP dolabını ilk o açar, son o kapatır."],
+    tips:["Ullage, rate, sample ve seal numarasını birlikte tut","Overflow alarmı ve SOPEP hazır olmadan başlamama","Barge ile stop signal'i baştan teyit et"]},
+  hydro: {name:"Hidrografik Araştırmacı Selin", icon:"🌊", title:"Hydrographic Surveyor", trust:44,
+    style:"Survey line, multibeam, tide correction ve veri kalitesini rota kadar ciddiye alir.",
+    prefs:{kritik:3,akilli:3,itaatkar:0,sosyal:1,cesur:-1,korkak:-4},
+    secrets:["Bozuk tide offset'ini veri boşluğundan önce fark etti.","Survey grid'ini kahvesinden daha düzenli tutar.","Bilimsel baskı ile seyir emniyetini ayırmayı sever."],
+    tips:["Survey line XTE limitini koru","Tide/offset ve hız bilgisini survey log'a bağla","Veri boşluğunu saklama, nedeniyle kaydet"]},
+  biyolog: {name:"Deniz Biyoloğu Defne", icon:"🐚", title:"Marine Biologist", trust:44,
+    style:"Numune alma saatini ister ama güverte emniyeti sınırını da bilir.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:2,cesur:0,korkak:-3},
+    secrets:["İlk plankton örneğini fırtına sonrası kaybetti; o günden beri sabırlı.","Numune etiketlerini çift dille yazar.","Sessiz kalır ama yanlış numune zincirine hemen itiraz eder."],
+    tips:["Numune zamanı, pozisyon ve hava bilgisini birlikte yaz","Bilim ekibiyle emniyet sınırını açık konuş","Etiket/saklama zincirini bozma"]},
+  rovtech: {name:"ROV Teknisyeni Bora", icon:"🎮", title:"ROV / Subsea Technician", trust:42,
+    style:"Tether tension, DP offset, umbilical ve recovery kararinda teknik netlik ister.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Bir kez ROV'u gövde altından santimlerle kurtardı.","Tether sesini monitörden önce fark eder.","DP alarmında asla 'bir dakika daha' demez."],
+    tips:["Tether tension ve DP offset'i birlikte izle","Recovery kararını geciktirme","Subsea hedefe dokunmadan önce risk sınıfı sor"]},
+  hotelmgr: {name:"Hotel Müdürü Leyla", icon:"🛳️", title:"Hotel / Guest Services", trust:43,
+    style:"Kruvaziyerde kalabalik, hijyen, anons ve misafir akisını operasyon gibi yönetir.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:2,cesur:0,korkak:-3},
+    secrets:["Bir liman gecikmesini yolcu panigine dönmeden anonsla çözdü.","Housekeeping raporlarını rota planı kadar düzenli ister.","Crew moralini yolcu şikayetinden önce fark eder."],
+    tips:["Yolcu anonsunu kısa ve sakin tut","Gangway sayımı ve muster bilgisini ayrı tut","Hotel load/blackoutta ekip koordinasyonunu unutma"]},
+  steward: {name:"Stewardess Dilek", icon:"🧺", title:"Stewardess / Kamarot", trust:45,
+    style:"Kabin düzeni, yolcu akışı ve küçük insan anlarını iyi okur.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:3,cesur:0,korkak:-3},
+    secrets:["İlk cruise kontratında kayıp çocuğu panik olmadan buldu.","Kabin koridorundaki sessizliği bile takip eder.","Yorgun crew için kahve saatini hiç kaçırmaz."],
+    tips:["Yolcu bilgisi ile güvenliği karıştırma","Kabin/koridor olaylarını küçük görme","Kalabalıkta sakin ses tonu kullan"]},
+  fitter: {name:"Makine Reisi Fitter Murat", icon:"🧰", title:"Fitter / Makine Reisi", trust:45,
+    style:"Pompa, flans, kaynak onarimi ve mekanik izolasyonda aceleye karsi durur.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Bir gece crack'i boya çizgisi gibi görünen yerden yakaladı.","Anahtar takımını kimseye kolay vermez.","İyi stajyeri çizim okumasından tanır."],
+    tips:["İzolasyon ve LOTO olmadan işe girme","Flans/conta işinde basınç kalmadığını doğrula","Sıcak işte permit ve gas test ara"]},
+  welder: {name:"Kaynakçı Usta Volkan", icon:"🔥", title:"Welder / Hot Work", trust:42,
+    style:"Hot work permit, fire watch, gas test ve izolasyon olmadan tek kıvılcım istemez.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Tersanede küçük kıvılcımın büyük yangına dönüşmesini gördü.","Kaynak perdesini eksik görürse operasyonu başlatmaz.","Fire watch kişisini adıyla teyit eder."],
+    tips:["Hot work permit ve fire watch'u teyit et","Yakın çevrede yanıcı malzeme bırakma","Gaz test saatini formdan oku"]},
+  limantemsilci: {name:"Liman Temsilcisi Esra", icon:"🏢", title:"Port Representative", trust:40,
+    style:"ETA, berth, tug, pilot, belge ve terminal baskisini tek dosyada toparlar.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:1,cesur:0,korkak:-3},
+    secrets:["Liman gecikmesini bazen tek doğru mail ile çözer.","Terminalin sözlü vaadini yazıya dökmeden rahat etmez.","Acenteyle ilişkisi iyi ama kör güvenmez."],
+    tips:["Pilot/tug/berth saatlerini yazılı teyit et","Terminal baskısını kaptana filtrele","Belge eksikse erken bildir"]},
+  firesafety: {name:"Gemi İtfaiye Lideri Okan", icon:"🧯", title:"Fire Team Leader", trust:44,
+    style:"Yangin zone, ekipman sirasi, boundary cooling ve sayimda net komut ister.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Bir eğitim yangınında yanlış tüp seçen ekibi sahada durdurdu.","SCBA saatini kendi nabzı gibi takip eder.","En çok panik değil, sessiz eksik sayım korkutur."],
+    tips:["Fire zone ve muster sayımını net tut","Doğru söndürücü/SCBA sırasını seç","Boundary cooling ve elektrik izolasyonunu unutma"]},
+  gemicibasi: {name:"Gemici Başı Rıza", icon:"⚓", title:"Deck Foreman / Gemici Başı", trust:47,
+    style:"Güverte vardiyasını toplar; hangi işin kimin elinde olduğunu net görmek ister.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:1,cesur:0,korkak:-3},
+    secrets:["Güvertede kimin yorgun olduğunu daha yürüyüşünden anlar.","Palamar öncesi halatların fotoğrafını kendi arşivinde tutar.","Genç tayfayı sert görünerek korur."],
+    tips:["Güverte iş bölümü ve stop komutunu netleştir","PPE ve snap-back alanını kontrol et","Ekip yorgunluğunu hafife alma"]},
+  gemici: {name:"Gemici Eren", icon:"🪢", title:"Deck Rating / Gemici", trust:50,
+    style:"Pratik işte hızlıdır; net komut ve doğru tekrar duymak ister.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:2,cesur:1,korkak:-3},
+    secrets:["İlk gemisinde halat işinde korktuğunu kimseye söylemedi.","İngilizce komutları cebindeki küçük karttan çalışır.","İyi stajyeri işi bitince halatı toplamasından tanır."],
+    tips:["Komutu kısa tekrar et","Halat ve el işaretlerini karıştırma","Güverte işinde yardım istemekten çekinme"]},
+  motorcu: {name:"Motorcu Kerem", icon:"🔧", title:"Motorman / Motorcu", trust:44,
+    style:"Engine round, sıcaklık, basınç ve ses değişimini düzenli takip eder.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Ana makine sesindeki küçük değişimi çoğu zabitten önce duyar.","Round kağıdını çizgi çizgi doldurur.","Kendi el fenerini kimseye vermez."],
+    tips:["Round değerlerini tahminle yazma","Pompa, sıcaklık ve basınç trendini birlikte oku","Makinede acele etme"]},
+  ucmuhendis: {name:"3. Mühendis Doruk", icon:"🛠️", title:"3. Engineer", trust:42,
+    style:"Purifier, generator, boiler ve günlük makine bakımında düzen arar.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["İlk kontratında purifier alarmını yanlış susturdu; şimdi kimseye susturtmaz.","Jeneratör load sharing grafiğini sürekli izler.","Küçük bakım işini raporsuz bırakmaz."],
+    tips:["Purifier alarmını sebebiyle oku","Jeneratör yük paylaşımını takip et","Bakım sonrası log ve test yaz"]},
+  yagcibasi: {name:"Yağcıbaşı Onur", icon:"🛢️", title:"Head Oiler / Yağcıbaşı", trust:45,
+    style:"Yağ numunesi, filtre, drip tray ve sızıntı disiplinini önemser.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Yağ kokusundan yakıt karışmasını ayırır.","Kirli drip tray görünce önce foto çeker, sonra temizletir.","Stajyere en çok temiz iş teslimini öğretir."],
+    tips:["Numune etiketini eksiksiz yaz","Filtre differential pressure değerini not al","Sızıntıyı küçük diye geçme"]},
+  elektrisyen: {name:"Elektrisyen Sarp", icon:"💡", title:"Electrician / Elektrisyen", trust:42,
+    style:"Aydınlatma, alarm devresi, kablo tavası ve küçük elektrik arızalarında sistemli gider.",
+    prefs:{kritik:3,akilli:2,itaatkar:1,sosyal:0,cesur:0,korkak:-3},
+    secrets:["Bir liman gecesi güverte ışığını tek kablo etiketiyle çözdü.","Yanında her zaman etiket makinesi taşır.","Kablo tavasında düzensizlik görünce sessizce foto alır."],
+    tips:["Elektrik izolasyonunu teyit et","Kablo etiketi ve devre numarasını yaz","Alarm devresinde sadece lambaya bakma"]},
+  kambuz: {name:"Kambuzcu Mete", icon:"🍽️", title:"Kambuz / Steward", trust:48,
+    style:"Messroom düzeni, kumanya, içme suyu ve crew moralini gündelik hayatta taşır.",
+    prefs:{kritik:1,akilli:1,itaatkar:1,sosyal:3,cesur:0,korkak:-2},
+    secrets:["Kimin morali bozuksa yemeğe geliş saatinden anlar.","Kumanya listesinde eksik çayı asla affetmez.","Sessiz iyiliği sever; büyük lafı sevmez."],
+    tips:["Messroom düzenini küçümseme","Kumanya ve içme suyu stokunu takip et","Teşekkür etmeyi unutma"]},
+  garson: {name:"Garson Lara", icon:"☕", title:"Service Steward / Garson", trust:46,
+    style:"Yolcu ve crew servisinde sakin ses, hızlı gözlem ve hijyen ister.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:3,cesur:0,korkak:-3},
+    secrets:["Kalabalık cruise servisinde bir panik anını sadece doğru yönlendirmeyle çözdü.","Dolu tepsiden önce kaçış yoluna bakar.","Yolcu şikayetini kişisel almaz, kayıt altına alır."],
+    tips:["Servis alanında kaçış yolunu açık tut","Hijyen ve alerjen bilgisini sor","Yolcu şikayetini sakin kaydet"]},
+  ruscarkci: {name:"Chief Engineer Viktor Sokolov", icon:"🌍", title:"Russian Chief Engineer", trust:40,
+    style:"Az konuşur; English teknik raporda sayı, alarm adı ve zaman ister.",
+    prefs:{kritik:3,akilli:2,itaatkar:0,sosyal:0,cesur:0,korkak:-4},
+    secrets:["Black Sea kış hattında yıllarca çalıştı.","Teknik çizimi cümleden daha çok sever.","Yanlış sayı verilirse bir daha aynı kişiden rapor istemez."],
+    tips:["Alarm adı, saat ve değeri İngilizce net söyle","Tahmin yerine ölçüm ver","Repeat-back yap"]},
+  filipinliasci: {name:"Chief Cook Miguel Santos", icon:"🌍", title:"Filipino Chief Cook", trust:49,
+    style:"Galley hijyeni, crew morali ve İngilizce kısa mutfak komutlarını birlikte yönetir.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:3,cesur:0,korkak:-3},
+    secrets:["Her yeni crew için ilk hafta özel küçük bir yemek yapar.","Gıda alerjisi listesini ezbere bilir.","Messroom tartışmasını çorba dağıtırken yumuşatır."],
+    tips:["Food allergy listesini sor","Galley hijyen zincirini takip et","Kısa İngilizce servis komutlarını öğren"]},
+  hindliyagci: {name:"Oiler Arjun Mehta", icon:"🌍", title:"Indian Oiler", trust:44,
+    style:"Makinede sessiz çalışır; doğru valve number ve pump tag ile hemen anlar.",
+    prefs:{kritik:2,akilli:2,itaatkar:1,sosyal:1,cesur:0,korkak:-3},
+    secrets:["Bir kez yanlış valve tag yüzünden transferi son anda durdurdu.","Makine round'unda kendi shorthand notları vardır.","İyi ekip arkadaşını sessiz destekten tanır."],
+    tips:["Valve number ve pump tag'i net söyle","İngilizce teknik kelimeyi kısa tut","Transfer öncesi tekrar oku"]},
+  latinab: {name:"AB Mateo Alvarez", icon:"🌍", title:"Latin American AB", trust:46,
+    style:"Mooring ve deck işinde hızlıdır; English-Spanish karışık kısa komutlara alışkındır.",
+    prefs:{kritik:2,akilli:1,itaatkar:1,sosyal:2,cesur:1,korkak:-3},
+    secrets:["Panama geçişlerinde uzun süre çalıştı.","Halat komutlarını iki dilde tekrar eder.","Güleryüzlüdür ama snap-back alanında şakası yoktur."],
+    tips:["Heaving line, slack away, hold on komutlarını tekrar et","El işaretiyle sözlü komutu eşleştir","Güvenli alanı önce göster"]}
 };
 
 const CREW_NAME_POOLS = {
@@ -14441,8 +14939,152 @@ const CREW_NAME_POOLS = {
   musa:["Tayfa Musa","Tayfa Emir","Tayfa Sarp","Tayfa Yiğit","Tayfa Kaan","Tayfa Kerem","Tayfa Eda","Tayfa Deniz","Tayfa Furkan","Tayfa Nisa","Tayfa Alihan","Tayfa Poyraz","Tayfa Yağmur","Tayfa Ceylin","Tayfa Mertcan","Tayfa Beste"],
   mateintl:["2/O Daniel Reyes","2/O Liam Walker","2/O Marco Silva","2/O Adrian Cole","2/O Ethan Brooks","2/O Jonas Keller"],
   abintl:["AB Marko Petrov","AB Luka Marin","AB Stefan Kovac","AB Miguel Santos","AB Ivan Petrov","AB Tomas Novak"],
-  motormanintl:["Motorman Alex Costa","Motorman Bruno Lima","Motorman Diego Cruz","Motorman Pavel Sidorov","Motorman Leo Martin","Motorman Rafael Costa"]
+  motormanintl:["Motorman Alex Costa","Motorman Bruno Lima","Motorman Diego Cruz","Motorman Pavel Sidorov","Motorman Leo Martin","Motorman Rafael Costa"],
+  gazsubay:["Gaz Kontrol Subayı Elif","Gaz Kontrol Subayı Selin","Gaz Kontrol Subayı Pınar","Gaz Kontrol Subayı Hakan","Gaz Kontrol Subayı Murat","Gaz Kontrol Subayı Ece"],
+  navsubay:["Navigasyon Subayı Nil","Navigasyon Subayı Derya","Navigasyon Subayı Eren","Navigasyon Subayı Selin","Navigasyon Subayı Kerem","Navigasyon Subayı Ece","Navigasyon Subayı Arda","Navigasyon Subayı Defne"],
+  telsiz:["Telsiz Subayı Derya","Telsiz Subayı Can","Telsiz Subayı İpek","Telsiz Subayı Mert","Telsiz Subayı Nilay","Telsiz Subayı Bora","Telsiz Subayı Elif","Telsiz Subayı Ozan"],
+  elektrik:["Elektrik Zabiti Ece","Elektrik Zabiti Emre","Elektrik Zabiti Aylin","Elektrik Zabiti Kaan","Elektrik Zabiti Ebru","Elektrik Zabiti Oğuz","Elektrik Zabiti Aslı","Elektrik Zabiti Doruk"],
+  pumpman:["Pumpman Selim","Pumpman Murat","Pumpman Volkan","Pumpman Eren","Pumpman Hakan","Pumpman Onur","Pumpman Serkan","Pumpman Kaan"],
+  konteynerzabit:["Konteyner Zabiti Merve","Konteyner Zabiti Deniz","Konteyner Zabiti Cem","Konteyner Zabiti Nisa","Konteyner Zabiti Baran","Konteyner Zabiti Ece","Konteyner Zabiti Sarp","Konteyner Zabiti Defne"],
+  bulkzabit:["Dökme Yük Zabiti Arda","Dökme Yük Zabiti Pınar","Dökme Yük Zabiti Kerem","Dökme Yük Zabiti Selin","Dökme Yük Zabiti Ozan","Dökme Yük Zabiti Damla","Dökme Yük Zabiti Bora","Dökme Yük Zabiti İpek"],
+  medic:["Gemi Hekimi Aslı","Gemi Hekimi Elif","Gemi Hekimi Murat","Gemi Hekimi Leyla","Gemi Hekimi Can","Gemi Hekimi Selin","Gemi Hekimi Emre","Gemi Hekimi Ebru"],
+  security:["Güvenlik Zabiti Kerem","Güvenlik Zabiti Serra","Güvenlik Zabiti Barış","Güvenlik Zabiti Eda","Güvenlik Zabiti Onur","Güvenlik Zabiti Derya","Güvenlik Zabiti Koral","Güvenlik Zabiti Nil"],
+  cevrezabit:["Çevresel İşler Subayı İpek","Çevresel İşler Subayı Ece","Çevresel İşler Subayı Arda","Çevresel İşler Subayı Defne","Çevresel İşler Subayı Can","Çevresel İşler Subayı Selin","Çevresel İşler Subayı Ebru","Çevresel İşler Subayı Ozan"],
+  bunkering:["Bunkering Zabiti Can","Bunkering Zabiti Melis","Bunkering Zabiti Kerem","Bunkering Zabiti Derya","Bunkering Zabiti Mert","Bunkering Zabiti Pınar","Bunkering Zabiti Bora","Bunkering Zabiti Ece"],
+  hydro:["Hidrografik Araştırmacı Selin","Hidrografik Araştırmacı Eren","Hidrografik Araştırmacı Defne","Hidrografik Araştırmacı Baran","Hidrografik Araştırmacı Ece","Hidrografik Araştırmacı Ozan"],
+  biyolog:["Deniz Biyoloğu Defne","Deniz Biyoloğu Aslı","Deniz Biyoloğu Murat","Deniz Biyoloğu Derya","Deniz Biyoloğu Kerem","Deniz Biyoloğu Nil"],
+  rovtech:["ROV Teknisyeni Bora","ROV Teknisyeni Ece","ROV Teknisyeni Kaan","ROV Teknisyeni Selin","ROV Teknisyeni Emre","ROV Teknisyeni Derya"],
+  hotelmgr:["Hotel Müdürü Leyla","Hotel Müdürü Ebru","Hotel Müdürü Can","Hotel Müdürü Nilay","Hotel Müdürü Barış","Hotel Müdürü Selda"],
+  steward:["Stewardess Dilek","Stewardess Merve","Stewardess Nisa","Steward Eren","Steward Baran","Stewardess Ceren","Steward Kaan","Stewardess İpek"],
+  fitter:["Makine Reisi Fitter Murat","Makine Reisi Fitter Hakan","Makine Reisi Fitter Volkan","Makine Reisi Fitter Eren","Makine Reisi Fitter Onur","Makine Reisi Fitter Kaan"],
+  welder:["Kaynakçı Usta Volkan","Kaynakçı Usta Selim","Kaynakçı Usta Murat","Kaynakçı Usta Barış","Kaynakçı Usta Okan","Kaynakçı Usta Arif"],
+  limantemsilci:["Liman Temsilcisi Esra","Liman Temsilcisi Ece","Liman Temsilcisi Kerem","Liman Temsilcisi Defne","Liman Temsilcisi Can","Liman Temsilcisi Pınar"],
+  firesafety:["Gemi İtfaiye Lideri Okan","Gemi İtfaiye Lideri Selin","Gemi İtfaiye Lideri Murat","Gemi İtfaiye Lideri Ece","Gemi İtfaiye Lideri Kaan","Gemi İtfaiye Lideri Leyla"],
+  gemicibasi:["Gemici Başı Rıza","Gemici Başı Leyla","Gemici Başı Hakan","Gemici Başı Sibel","Gemici Başı Yusuf","Gemici Başı Derya"],
+  gemici:["Gemici Eren","Gemici Musa","Gemici Cansu","Gemici Baran","Gemici Eda","Gemici Oğuz","Gemici Nil","Gemici Sarp"],
+  motorcu:["Motorcu Kerem","Motorcu Selim","Motorcu Aylin","Motorcu Hakan","Motorcu Büşra","Motorcu Volkan","Motorcu Ece","Motorcu Kaan"],
+  ucmuhendis:["3. Mühendis Doruk","3. Mühendis Ebru","3. Mühendis Ozan","3. Mühendis Selin","3. Mühendis Emir","3. Mühendis Derya"],
+  yagcibasi:["Yağcıbaşı Onur","Yağcıbaşı Mehmet","Yağcıbaşı Ece","Yağcıbaşı Volkan","Yağcıbaşı Nilay","Yağcıbaşı Koral"],
+  elektrisyen:["Elektrisyen Sarp","Elektrisyen Ece","Elektrisyen Kerem","Elektrisyen Aylin","Elektrisyen Bora","Elektrisyen İpek"],
+  kambuz:["Kambuzcu Mete","Kambuzcu Dilek","Kambuzcu Ali","Kambuzcu Sevim","Kambuzcu Can","Kambuzcu Merve"],
+  garson:["Garson Lara","Garson Eren","Garson Duru","Garson Baran","Garson Nisa","Garson Deniz"],
+  ruscarkci:["Chief Engineer Viktor Sokolov","Chief Engineer Ivan Morozov","Chief Engineer Pavel Orlov","Chief Engineer Alexei Kuznetsov"],
+  filipinliasci:["Chief Cook Miguel Santos","Chief Cook Carlo Reyes","Chief Cook Angelo Cruz","Chief Cook Paolo Garcia"],
+  hindliyagci:["Oiler Arjun Mehta","Oiler Ravi Nair","Oiler Dev Patel","Oiler Kabir Sharma"],
+  latinab:["AB Mateo Alvarez","AB Diego Morales","AB Luis Herrera","AB Rafael Castillo"]
 };
+
+const BASE_CREW_KEYS = ['suvari','z1','z2','z3','carkci','bas2','lostromo','lostromo2','yagci','asci','hasan','musa','mateintl','abintl','motormanintl'];
+const SHIP_TYPE_SPECIALIST_KEYS = {
+  kuru:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','yagcibasi','elektrisyen','kambuz','bunkering','fitter','latinab','hindliyagci','limantemsilci'],
+  tanker:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','yagcibasi','elektrisyen','gazsubay','pumpman','bunkering','cevrezabit','security','fitter','ruscarkci','hindliyagci','latinab','limantemsilci'],
+  kont:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','elektrisyen','konteynerzabit','bunkering','security','cevrezabit','latinab','filipinliasci','limantemsilci'],
+  roro:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','security','fitter','latinab','limantemsilci'],
+  bulk:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','bulkzabit','cevrezabit','fitter','hindliyagci','limantemsilci'],
+  lng:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','gazsubay','pumpman','bunkering','cevrezabit','security','fitter','ruscarkci','hindliyagci','limantemsilci'],
+  proje:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','welder','fitter','security','latinab','limantemsilci'],
+  kruvaziyer:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','medic','security','hotelmgr','steward','kambuz','garson','filipinliasci','cevrezabit','firesafety','limantemsilci'],
+  arastirma:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','hydro','biyolog','rovtech','medic','cevrezabit','firesafety','latinab'],
+  offshore:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','security','rovtech','welder','fitter','medic','firesafety','latinab','hindliyagci'],
+  buz:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','medic','welder','fitter','security','cevrezabit','ruscarkci'],
+  cable:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','rovtech','welder','fitter','cevrezabit','latinab'],
+  pipe:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','rovtech','welder','fitter','cevrezabit','security','latinab'],
+  shuttle:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','gazsubay','pumpman','bunkering','cevrezabit','security','fitter','ruscarkci','hindliyagci']
+};
+const SPECIALIST_CREW_SHIP_LABELS = {
+  kuru:'kuru yük ve genel ticaret gemilerinde',
+  tanker:'tanker operasyonunda',
+  kont:'konteyner servisinde',
+  roro:'Ro-Ro operasyonunda',
+  bulk:'dökme yük seferinde',
+  lng:'LNG/gaz taşıma operasyonunda',
+  proje:'proje yük gemisinde',
+  kruvaziyer:'kruvaziyer/yolcu gemisinde',
+  arastirma:'araştırma ve survey gemisinde',
+  offshore:'offshore support operasyonunda',
+  buz:'buz sınıfı seferde',
+  cable:'kablo döşeme operasyonunda',
+  pipe:'boru döşeme operasyonunda',
+  shuttle:'FPSO shuttle tanker operasyonunda'
+};
+const CREW_ROLE_ATLAS_GROUPS = [
+  {key:'captains', title:'KAPTANLAR', tone:'blue', icon:'⚓', roles:[
+    {key:'suvari', label:'Kaptan', note:'4 çizgi, son karar, night orders'},
+    {key:'z1', label:'1. Zabit', note:'Yük, belge, güverte operasyonu'},
+    {key:'z2', label:'2. Zabit', note:'Seyir, rota, ECDIS/radar'},
+    {key:'z3', label:'3. Zabit', note:'Emniyet, GMDSS, tatbikat'},
+    {key:'navsubay', label:'Navigasyon Subayı', note:'Passage plan ve route check'}
+  ]},
+  {key:'deck', title:'GÜVERTE PERSONELİ', tone:'cyan', icon:'🪢', roles:[
+    {key:'lostromo', label:'Lostromo', note:'Güverte ekibi ve palamar'},
+    {key:'gemicibasi', label:'Gemici Başı', note:'Deck foreman, iş bölümü'},
+    {key:'gemici', label:'Gemici', note:'Halat, deck round, el işareti'},
+    {key:'hasan', label:'Usta Gemici', note:'Deneyimli deck rating'},
+    {key:'musa', label:'Stajyer/Tayfa', note:'Yeni crew, öğrenme bağı'}
+  ]},
+  {key:'engine', title:'MAKİNE PERSONELİ', tone:'green', icon:'⚙️', roles:[
+    {key:'carkci', label:'Baş Mühendis', note:'Makine ve enerji sorumlusu'},
+    {key:'bas2', label:'2. Mühendis', note:'Jeneratör, pompa, alarm'},
+    {key:'ucmuhendis', label:'3. Mühendis', note:'Purifier ve günlük bakım'},
+    {key:'motorcu', label:'Motorcu', note:'Engine round ve sıcaklık'},
+    {key:'yagcibasi', label:'Yağcıbaşı', note:'Yağ, filtre, drip tray'},
+    {key:'elektrisyen', label:'Elektrisyen', note:'Kablo, ışık, alarm devresi'}
+  ]},
+  {key:'hotel', title:'MÜRETTEBAT / SERVİS', tone:'purple', icon:'👥', roles:[
+    {key:'asci', label:'Aşçı', note:'Crew morali ve galley'},
+    {key:'kambuz', label:'Kambuz', note:'Messroom, kumanya, servis'},
+    {key:'garson', label:'Garson', note:'Kruvaziyer servis akışı'},
+    {key:'medic', label:'Gemi Doktoru', note:'Triage, medical log, MRCC'},
+    {key:'steward', label:'Kamarot', note:'Kabin, yolcu akışı, düzen'},
+    {key:'security', label:'Güvenlik Zabiti', note:'ISPS ve access control'}
+  ]},
+  {key:'female', title:'KADIN PERSONEL', tone:'orange', icon:'♀', roles:[
+    {key:'suvari', label:'Kadın Kaptan', note:'İsim/portre cinsiyet eşleşmesi korunur'},
+    {key:'z2', label:'Kadın Zabit', note:'Seyir ve vardiya rolleri'},
+    {key:'elektrik', label:'Kadın ETO', note:'UPS/GMDSS battery ve alarm'},
+    {key:'medic', label:'Kadın Doktor', note:'Revir ve medevac'},
+    {key:'hotelmgr', label:'Kadın Hotel Müdürü', note:'Kruvaziyer hotel ops'}
+  ]},
+  {key:'international', title:'FARKLI MİLLETLER', tone:'sky', icon:'🌐', roles:[
+    {key:'mateintl', label:'Watch Officer', note:'English bridge phrases'},
+    {key:'latinab', label:'Latin American AB', note:'Mooring komutları'},
+    {key:'ruscarkci', label:'Russian Chief Engineer', note:'Teknik İngilizce rapor'},
+    {key:'filipinliasci', label:'Filipino Chief Cook', note:'Galley/hijyen/crew morale'},
+    {key:'hindliyagci', label:'Indian Oiler', note:'Valve/pump tag iletişimi'}
+  ]}
+];
+
+function getSpecialistCrewKeysForShipType(type){
+  const activeType = type || (typeof selType !== 'undefined' ? selType : 'kuru');
+  return [...new Set(SHIP_TYPE_SPECIALIST_KEYS[activeType] || SHIP_TYPE_SPECIALIST_KEYS.kuru || [])].filter(k=>CREW_DEFS[k]);
+}
+
+function getActiveCrewKeysForShipType(type){
+  return [...new Set([...BASE_CREW_KEYS, ...getSpecialistCrewKeysForShipType(type)])].filter(k=>CREW_DEFS[k]);
+}
+
+function isSpecialistCrewActive(key,type){
+  return getSpecialistCrewKeysForShipType(type).includes(key);
+}
+
+function applyActiveSpecialistCrewToPhone(type){
+  const keys = getSpecialistCrewKeysForShipType(type);
+  const specialists = keys.map(k=>CREW_DEFS[k]).filter(Boolean);
+  if(!specialists.length || typeof phoneContacts === 'undefined') return;
+  specialists.slice(0,8).forEach(def=>{
+    if(!phoneContacts.some(c=>c.name === def.name)){
+      phoneContacts.push({name:def.name, number:'Crew', role:def.title || 'Specialist'});
+    }
+  });
+  if(typeof ensurePhoneGroup === 'function'){
+    ensurePhoneGroup('Crew Chat', specialists.slice(0,8).map(def=>def.name));
+  }
+  if(Array.isArray(phoneMessages)){
+    const label = SPECIALIST_CREW_SHIP_LABELS[type] || 'bu gemide';
+    const roster = specialists.slice(0,5).map(def=>def.name.replace(/\s+/g,' ')).join(', ');
+    phoneMessages.push({from:'Crew Chat', chat:'Crew Chat', text:`Yeni uzman ekip ${label} aktif: ${roster}. Bu kişiler bazı sahnelerde sadece ilgili gemi tipinde konuşacak.`, me:false});
+  }
+}
 
 function pickRandom(list){
   return list[Math.floor(Math.random()*list.length)];
@@ -14459,9 +15101,9 @@ function makeCrewPortrait(key, def){
     cook:[5]
   };
   let supportIdx = null;
-  if(/(^| )(carkci|bas2|yagci|motormanintl)( |$)|muhendis|makine|motorman|engine rating/.test(roleBlob)) supportIdx = pickRandom(supportPool.engine);
-  else if(/(^| )(lostromo|lostromo2|hasan|musa|abintl)( |$)|guverte|silici|tayfa|able seafarer|deck/.test(roleBlob)) supportIdx = pickRandom(supportPool.deck);
-  else if(/(^| )asci( |$)|yemekhane|galley/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
+  if(/(^| )(carkci|bas2|yagci|motormanintl|pumpman|fitter|welder|rovtech|motorcu|ucmuhendis|yagcibasi|elektrisyen|ruscarkci|hindliyagci)( |$)|muhendis|makine|motorman|engine rating|pompa|pumpman|fitter|kaynak|welder|rov|subsea|hot work|oiler|electrician|chief engineer/.test(roleBlob)) supportIdx = pickRandom(supportPool.engine);
+  else if(/(^| )(lostromo|lostromo2|hasan|musa|abintl|gemicibasi|gemici|latinab)( |$)|guverte|silici|tayfa|able seafarer|deck|deck foreman|deck rating/.test(roleBlob)) supportIdx = pickRandom(supportPool.deck);
+  else if(/(^| )(asci|steward|kambuz|garson|filipinliasci)( |$)|yemekhane|galley|hotel|guest services|kamarot|service steward|chief cook/.test(roleBlob)) supportIdx = pickRandom(supportPool.cook);
   if(supportIdx!==null){
     return {
       __portraitVersion:CREW_PORTRAIT_VERSION,
@@ -14564,6 +15206,7 @@ function updateCrewTrust(crewKey, delta){
 }
 
 function getCrewKeyFromWho(who){
+  if(who && CREW_DEFS[who]) return who;
   const map = {
     lostromo:'lostromo', silici:'lostromo2', yagci:'yagci', asci:'asci',
     hasan:'hasan', musa:'musa', suvari:'suvari', z1:'z1', z2:'z2',
@@ -14582,11 +15225,47 @@ function getCrewDisplay(who){
   return CREW[who] || CREW.anlatici;
 }
 
+function getCrewRoleAtlasPanel(type=selType, opts={}){
+  const active = new Set(getActiveCrewKeysForShipType(type));
+  const compact = !!opts.compact;
+  const shipLabel = STYPES.find(x=>x.key===type)?.nm || type || 'Gemi';
+  const groups = CREW_ROLE_ATLAS_GROUPS.map(group=>{
+    const cards = group.roles.map(role=>{
+      const def = CREW_DEFS[role.key];
+      const isActive = active.has(role.key);
+      const portrait = def ? renderPortraitSprite(getCrewPortraitForKey(role.key) || makeCrewPortrait(role.key, def), compact ? 'crew' : 'avatar') : '';
+      const title = def?.title || role.label;
+      const name = def?.name || role.label;
+      return `<div class="crew-atlas-card ${isActive?'active':'locked'}">
+        <span class="crew-atlas-portrait">${portrait || '<i></i>'}</span>
+        <b>${phoneSafe(role.label)}</b>
+        <small>${phoneSafe(name)}</small>
+        <em>${phoneSafe(title)}</em>
+        <p>${phoneSafe(role.note)}</p>
+        <strong>${isActive?'AKTIF':'BU GEMIDE YOK'}</strong>
+      </div>`;
+    }).join('');
+    return `<section class="crew-atlas-group ${phoneSafe(group.tone)}">
+      <div class="crew-atlas-title"><span>${phoneSafe(group.icon)}</span><b>${phoneSafe(group.title)}</b></div>
+      <div class="crew-atlas-cards">${cards}</div>
+    </section>`;
+  }).join('');
+  return `<div class="crew-atlas ${compact?'compact':''}">
+    <div class="crew-atlas-head">
+      <div><b>PERSONEL ATLASI</b><small>${phoneSafe(shipLabel)} için aktif rol kadrosu ve kilitli/uygun olmayan roller</small></div>
+      <span>${active.size} aktif</span>
+    </div>
+    ${groups}
+  </div>`;
+}
+
 function renderCrewCards(){
   const c = document.getElementById('crew-cards');
   if(!c) return;
-  c.innerHTML = '';
-  Object.entries(CREW_DEFS).forEach(([key,def]) => {
+  c.innerHTML = getCrewRoleAtlasPanel(typeof selType !== 'undefined' ? selType : 'kuru', {compact:true});
+  getActiveCrewKeysForShipType(typeof selType !== 'undefined' ? selType : 'kuru').forEach(key => {
+    const def = CREW_DEFS[key];
+    if(!def) return;
     const trust = crewTrust[key] || def.trust;
     const unlocked = crewUnlocked[key] || 0;
     const color = trust>=70?'#5dbf8a':trust>=50?'#d4a017':'#c97070';
@@ -16481,6 +17160,7 @@ function buildSavePayload(){
     seenPhotoMoments:Array.from(seenPhotoMoments||[]),
     dialogueHistory,
     livingShipState,
+    playerBondState,
     watchState,
     voyagePressure,
     consequenceTrace,
@@ -16608,6 +17288,11 @@ function applyLoadedGameState(data){
   seenPhotoMoments = new Set(Array.isArray(data.seenPhotoMoments) ? data.seenPhotoMoments : []);
   dialogueHistory = Array.isArray(data.dialogueHistory) ? data.dialogueHistory : [];
   livingShipState = data.livingShipState || {thanks:false,note:false,argue:false,complaint:false};
+  playerBondState = data.playerBondState && typeof data.playerBondState === 'object'
+    ? {score:0,decisions:0,lastHookKey:'',lastAiScene:'',lastCaptainReviewMonth:0,signatureMoments:[],monthlyReviews:[], ...data.playerBondState}
+    : {score:0,decisions:0,lastHookKey:'',lastAiScene:'',lastCaptainReviewMonth:0,signatureMoments:[],monthlyReviews:[]};
+  playerBondState.signatureMoments = Array.isArray(playerBondState.signatureMoments) ? playerBondState.signatureMoments : [];
+  playerBondState.monthlyReviews = Array.isArray(playerBondState.monthlyReviews) ? playerBondState.monthlyReviews : [];
   watchState = data.watchState || {code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
   voyagePressure = data.voyagePressure || {swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
   consequenceTrace = data.consequenceTrace || {office:0, psc:0, trust:0};
@@ -24604,7 +25289,14 @@ function renderSimCenter(){
       ${buildStoryDirectorPanel()}
     </div>
     <div class="sim-section wide">
+      ${getPlayerBondPanel()}
+    </div>
+    <div class="sim-section wide">
       ${getRealismDirectorPanel()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>PERSONEL ATLASI</span><span>${phoneSafe(STYPES.find(x=>x.key===selType)?.nm || selType)}</span></div>
+      ${getCrewRoleAtlasPanel(selType)}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>VARDIYA / ROTA</span><span>${phoneSafe(watchState.code)}</span></div>
@@ -25719,6 +26411,152 @@ function maybeCreateMonthlyMemorySummary(sc,c2){
   pushFamilyGroupMessage('Anne',`Ay ${month} bitti demek... Kendine dikkat et, firsat bulunca bize bir fotograf daha at.`);
   addWatchFeed(`Ay ${month} hatira ozeti hazirlandi`, 'good');
   maybeShowAdBreak('month_end');
+}
+
+function getChoiceQuality(tag=''){
+  if(tag === 'kritik' || tag === 'akilli') return 'strong';
+  if(tag === 'sosyal' || tag === 'cesur') return 'human';
+  if(tag === 'korkak' || tag === 'hileli' || tag === 'itaatkar') return 'weak';
+  return 'neutral';
+}
+
+function getPlayerBondScore(){
+  const memories = Object.values(careerMemory || {}).filter(Boolean).length;
+  const strongChoices = choicesMade.filter(c=>c.tag === 'kritik' || c.tag === 'akilli').length;
+  const weakChoices = choicesMade.filter(c=>c.tag === 'korkak' || c.tag === 'hileli').length;
+  const phoneLife = Math.min(14, Math.floor((phoneMessages?.length || 0) / 9));
+  const photoLife = Math.min(14, (photos?.length || 0) * 2);
+  const crewLife = Math.min(18, Object.values(crewMemoryNotes || {}).filter(Boolean).length * 3);
+  const voyageLife = Math.min(12, Math.floor((activeVoyageProgress || 0) * 2));
+  const careerLife = Math.min(16, (careerState.contracts || 0) * 5 + (careerState.rankIndex || 0) * 4);
+  const sceneLife = Math.min(22, strongChoices * 2 + (playerBondState.decisions || 0));
+  const penalty = Math.min(18, weakChoices * 2 + Math.max(0, consequenceTrace.office + consequenceTrace.psc - 3));
+  return clamp(12 + memories * 3 + phoneLife + photoLife + crewLife + voyageLife + careerLife + sceneLife - penalty);
+}
+
+function getPlayerBondTheme(){
+  const heat = consequenceTrace.office + consequenceTrace.psc + consequenceTrace.trust;
+  if(stats.dinclik < 28) return 'Yorgun ama birakmayan stajyer';
+  if(heat >= 8) return 'Hatalarinin izini temizlemeye calisan denizci';
+  if((photos?.length || 0) >= 5) return 'Hatiralari biriken ilk kontrat';
+  if((careerState.rankIndex || 0) >= 1) return 'Terfi yoluna girmis zabit adayi';
+  if(specialtyXP.people > specialtyXP.navigation && specialtyXP.people > specialtyXP.safety) return 'Insan yonetimiyle one cikan denizci';
+  if(specialtyXP.navigation >= specialtyXP.safety) return 'Seyir ve cihaz disipliniyle buyuyen denizci';
+  return 'Emniyet refleksi gelisen stajyer';
+}
+
+function getPlayerBondNextNeed(){
+  const openDevices = Object.entries(devicePracticeProgress || {}).filter(([,v])=>v===0).map(([k])=>getDeviceDef(k)?.name || k.toUpperCase());
+  if(stats.dinclik < 35) return 'Kisa uyku veya aile aramasi yap; yorgunluk karar kalitesini bozuyor.';
+  if(openDevices.length) return `${openDevices.slice(0,2).join(' ve ')} tekrar gorevini kapat.`;
+  if(consequenceTrace.office + consequenceTrace.psc >= 5) return 'Logbook, office mail ve root cause satirlarini temizle.';
+  if((photos?.length || 0) < 3) return 'Telefonla bir hatira cek; kontrat raporu daha kisilikli olur.';
+  if(stats.bilgi < 55) return 'Cihaz egitimi veya notlar uzerinden bilgi tabanini guclendir.';
+  return 'Bir sonraki vardiyada temiz rapor + logbook zincirini koru.';
+}
+
+function buildPlayerBondDebrief(sc,c2,quality){
+  const st = liveVoyageState || computeLiveVoyageState(sc || {});
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const speaker = getCrewDisplay(sc?.who || '').name || 'Kaptan';
+  const base = quality === 'strong'
+    ? 'Bu karar guven olusturdu; ayni zinciri logbook ve cihaz teyidiyle kapat.'
+    : quality === 'weak'
+      ? 'Bu secim iz birakti; simdi toparlama sirasi emniyet, kaptan raporu, logbook ve gerekirse tekrar pratigi.'
+      : 'Bu karar gemi hayatina insan tarafindan baglandi; yine de prosedur zincirini bos birakma.';
+  return `${base} Sahne: ${sc?.sub || sc?.loc || 'vardiya'}. Konusan: ${speaker}. Rota: ${route?.name || 'aktif rota'}, ETA ${st.eta}, CPA ${st.cpa}, UKC ${st.ukc}.`;
+}
+
+function runPlayerBondDirector(sc,c2,effect={}){
+  if(!sc || !c2) return;
+  const key = `${sc.id || currentIdx}-${choicesMade.length}`;
+  if(playerBondState.lastHookKey === key) return;
+  playerBondState.lastHookKey = key;
+  playerBondState.decisions = (playerBondState.decisions || 0) + 1;
+  const quality = getChoiceQuality(c2.tag || '');
+  playerBondState.score = getPlayerBondScore();
+  const month = Math.max(1, Math.floor((contractDays || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const moment = {
+    month,
+    scene: sc.sub || sc.loc || sc.id || 'Sahne',
+    choice: String(c2.text || '').slice(0,140),
+    quality,
+    route: route?.name || '',
+    score: playerBondState.score,
+    ts: Date.now()
+  };
+  playerBondState.signatureMoments.unshift(moment);
+  playerBondState.signatureMoments = playerBondState.signatureMoments.slice(0,10);
+  addJournalEntry(`[KISISEL HAFIZA] ${moment.scene}: ${quality} karar. Bag skoru ${playerBondState.score}/100.`, sc.day, sc.time);
+
+  const debrief = buildPlayerBondDebrief(sc,c2,quality);
+  if(quality === 'weak' || playerBondState.decisions % 2 === 0 || sc.alert){
+    phoneAiState.messages.push({from:'AI Mate', text:`AI MATE DEBRIEF: ${debrief}`, me:false});
+    phoneAiState.messages = phoneAiState.messages.slice(-30);
+    pushPhoneMessage('AI Mate', debrief, {open:false});
+  }
+
+  if(quality === 'strong'){
+    addWatchFeed('Kariyer hafizasi: temiz karar kaptan review dosyasina dustu','good');
+    if(Math.random() < .45) pushPhoneMessage('Kaptan','Bu karari review dosyasina olumlu not olarak yaziyorum. Nedenini de anlatabilecek durumda ol.', {open:false});
+  }else if(quality === 'weak'){
+    addWatchFeed('Kariyer hafizasi: zayif karar sonraki sahnede soru olarak donebilir','warn');
+    const deviceKey = getRemedialDeviceForScene(sc);
+    if(deviceKey) devicePracticeProgress[deviceKey] = 0;
+    pushPhoneMessage('Kaptan','Bu karar sonraki degerlendirmede sorulacak. Toparlamak icin cihaz, rapor ve logbook zincirini tamamla.', {open:false});
+  }else if(quality === 'human'){
+    if(Math.random() < .5) pushFamilyGroupMessage('Anne','Sesin daha iyi geliyor. Denizde insan kalabildigin surece guclusun.');
+  }
+
+  if(playerBondState.decisions % 4 === 0 || sc.alert){
+    const photoKey = `bond-memory-${playerBondState.decisions}-${sc.id || currentIdx}`;
+    tryAddMomentPhoto(photoKey, 'Kariyer Hafizasi', `${moment.scene}: ${getPlayerBondTheme()}. Secim: ${moment.choice}`, sc.gfx || 'bridge');
+  }
+
+  if(contractDays && contractDays % CONTRACT_SCENES_PER_MONTH === 0 && playerBondState.lastCaptainReviewMonth !== month){
+    playerBondState.lastCaptainReviewMonth = month;
+    const review = {
+      month,
+      score: playerBondState.score,
+      theme:getPlayerBondTheme(),
+      next:getPlayerBondNextNeed(),
+      ts:Date.now()
+    };
+    playerBondState.monthlyReviews.unshift(review);
+    playerBondState.monthlyReviews = playerBondState.monthlyReviews.slice(0,8);
+    pushPhoneMessage('Kaptan', `Ay ${month} review: ${review.theme}. Sonraki hedefin: ${review.next}`, {open:false});
+    addCompanyMailThread(`Ay ${month} oyuncu hafiza raporu`, `Bag skoru ${review.score}/100. Tema: ${review.theme}. Hedef: ${review.next}`, 'info');
+  }
+
+  if(panelIsOpen('sim-panel')) renderSimCenter();
+}
+
+function getPlayerBondPanel(){
+  const score = getPlayerBondScore();
+  const theme = getPlayerBondTheme();
+  const nextNeed = getPlayerBondNextNeed();
+  const moments = (playerBondState.signatureMoments || []).slice(0,4);
+  const reviews = (playerBondState.monthlyReviews || []).slice(0,2);
+  return `<div class="player-bond-panel">
+    <div class="player-bond-head">
+      <div><b>OYUNCU BAGLILIK DIREKTORU</b><small>AI Mate, aile, kaptan review, album, kariyer ve cihaz tekrarlarini tek hafizada birlestirir.</small></div>
+      <span>${score}/100</span>
+    </div>
+    <div class="player-bond-grid">
+      <div class="player-bond-score"><i style="width:${score}%"></i><b>${phoneSafe(theme)}</b><small>${phoneSafe(nextNeed)}</small></div>
+      <div class="player-bond-thread"><b>Yasayan gemi izleri</b><small>Telefon: ${phoneMessages.length} mesaj · Album: ${photos.length} fotograf · Crew hafizasi: ${Object.values(crewMemoryNotes||{}).filter(Boolean).length} kisi · Replay: ${investigationDossier.length} dosya</small></div>
+      <button class="player-bond-action" onclick="openPhoneAi()">AI Mate'e sor</button>
+      <button class="player-bond-action" onclick="openCareer()">Kariyer raporu</button>
+      <button class="player-bond-action" onclick="openAlbum()">Hatira albumu</button>
+      <button class="player-bond-action" onclick="openCabin()">Kamara / serbest zaman</button>
+    </div>
+    <div class="player-bond-moments">
+      ${(moments.length ? moments : [{month:1,scene:'Henuz hafiza yok',choice:'Ilk kararindan sonra burasi kisilesmeye baslar.',quality:'neutral',score}]).map(m=>`
+        <div class="player-bond-moment ${phoneSafe(m.quality)}"><b>Ay ${phoneSafe(m.month)} · ${phoneSafe(m.scene)}</b><small>${phoneSafe(m.choice)} · skor ${phoneSafe(m.score || score)}</small></div>`).join('')}
+    </div>
+    ${reviews.length ? `<div class="player-bond-reviews">${reviews.map(r=>`<span>Ay ${phoneSafe(r.month)} review: ${phoneSafe(r.theme)} · ${phoneSafe(r.next)}</span>`).join('')}</div>` : ''}
+  </div>`;
 }
 
 function maybeTriggerMidScenePhone(sc){

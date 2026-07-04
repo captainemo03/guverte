@@ -177,6 +177,38 @@ def first_name_from_display(display: str) -> str:
         "1.",
         "2.",
         "3.",
+        "gemici",
+        "basi",
+        "başı",
+        "motorcu",
+        "kambuzcu",
+        "garson",
+        "elektrisyen",
+        "müdürü",
+        "aşçı",
+        "yağcı",
+        "çarkçı",
+        "güvenlik",
+        "steward",
+        "stewardess",
+        "hotel",
+        "muduru",
+        "chief",
+        "engineer",
+        "cook",
+        "oiler",
+        "ab",
+        "deck",
+        "foreman",
+        "rating",
+        "motorman",
+        "pumpman",
+        "fitter",
+        "welder",
+        "doctor",
+        "medical",
+        "security",
+        "officer",
     }
     tokens = [
         re.sub(r"[^\w.]", "", normalize_tr_ascii(part))
@@ -251,7 +283,7 @@ def check_languages() -> None:
 
 def check_character_portraits() -> None:
     section = "character"
-    require_token(section, "const CREW_PORTRAIT_VERSION = 4;", JS)
+    require_token(section, "const CREW_PORTRAIT_VERSION = 5;", JS)
     require_token(section, "female:[1,3,5,7]", JS)
     require_token(section, "female:[1,3,6]", JS)
     require_token(section, "if(out.base === 'female') out.beard = 'clean';", JS)
@@ -401,8 +433,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=139",
-        "index.css?v=124",
+        "index.js?v=142",
+        "index.css?v=126",
     ]:
         require_token(section, token)
 
