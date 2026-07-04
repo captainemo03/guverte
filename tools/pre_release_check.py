@@ -1,0 +1,498 @@
+"""Pre-release QA bundle for the maritime browser game.
+
+This is a dependency-free Python guardrail. It catches the regressions that
+usually hurt the game before a mobile/Play Store build: half-wired languages,
+wrong crew gender portraits, tiny/click-broken chart targets, billing product
+ID drift, suspicious scene text, and asset bloat.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+import re
+import struct
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WWW = ROOT / "www"
+TOOLS = ROOT / "tools"
+ASSETS = WWW / "assets"
+
+INDEX_JS = WWW / "index.js"
+INDEX_CSS = WWW / "index.css"
+INDEX_HTML = WWW / "index.html"
+PACKAGE_JSON = ROOT / "package.json"
+ANDROID_BILLING = (
+    ROOT
+    / "android"
+    / "app"
+    / "src"
+    / "main"
+    / "java"
+    / "com"
+    / "captainemo"
+    / "guverte"
+    / "GuverteBillingBridge.java"
+)
+
+
+JS = INDEX_JS.read_text(encoding="utf-8")
+CSS = INDEX_CSS.read_text(encoding="utf-8")
+HTML = INDEX_HTML.read_text(encoding="utf-8")
+PACKAGE = PACKAGE_JSON.read_text(encoding="utf-8")
+ANDROID = ANDROID_BILLING.read_text(encoding="utf-8") if ANDROID_BILLING.exists() else ""
+ALL_SOURCE = "\n".join([JS, CSS, HTML, PACKAGE, ANDROID])
+
+ERRORS: list[str] = []
+WARNINGS: list[str] = []
+INFO: list[str] = []
+
+
+def fail(section: str, detail: str) -> None:
+    ERRORS.append(f"[{section}] {detail}")
+
+
+def warn(section: str, detail: str) -> None:
+    WARNINGS.append(f"[{section}] {detail}")
+
+
+def ok(section: str, detail: str) -> None:
+    INFO.append(f"[{section}] {detail}")
+
+
+def require_token(section: str, token: str, source: str = ALL_SOURCE) -> None:
+    if token not in source:
+        fail(section, f"Missing token: {token}")
+
+
+def normalize_tr_ascii(value: str = "") -> str:
+    table = str.maketrans(
+        {
+            "ç": "c",
+            "ğ": "g",
+            "ı": "i",
+            "ö": "o",
+            "ş": "s",
+            "ü": "u",
+            "Ç": "c",
+            "Ğ": "g",
+            "İ": "i",
+            "I": "i",
+            "Ö": "o",
+            "Ş": "s",
+            "Ü": "u",
+        }
+    )
+    return value.translate(table).lower().replace("i̇", "i")
+
+
+def extract_balanced(text: str, open_index: int, open_char: str = "{", close_char: str = "}") -> str:
+    """Return a balanced JS-ish block, ignoring braces inside strings."""
+    if open_index < 0 or open_index >= len(text) or text[open_index] != open_char:
+        return ""
+    depth = 0
+    quote = ""
+    escaped = False
+    for idx in range(open_index, len(text)):
+        ch = text[idx]
+        if quote:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                quote = ""
+            continue
+        if ch in ("'", '"', "`"):
+            quote = ch
+            continue
+        if ch == open_char:
+            depth += 1
+        elif ch == close_char:
+            depth -= 1
+            if depth == 0:
+                return text[open_index : idx + 1]
+    return ""
+
+
+def object_after(marker: str, source: str = JS) -> str:
+    pos = source.find(marker)
+    if pos < 0:
+        return ""
+    brace = source.find("{", pos)
+    return extract_balanced(source, brace, "{", "}")
+
+
+def array_after(marker: str, source: str = JS) -> str:
+    pos = source.find(marker)
+    if pos < 0:
+        return ""
+    bracket = source.find("[", pos)
+    return extract_balanced(source, bracket, "[", "]")
+
+
+def js_string_values(block: str) -> list[str]:
+    return [m.group(2) for m in re.finditer(r"(['\"])(.*?)(?<!\\)\1", block, re.S)]
+
+
+def i18n_object_for_lang(lang: str) -> str:
+    if lang == "ru":
+        ru = object_after("I18N.ru=", JS)
+        if ru:
+            return ru
+    i18n = object_after("const I18N=", JS)
+    match = re.search(rf"\b{re.escape(lang)}\s*:\s*{{", i18n)
+    if not match:
+        return ""
+    return extract_balanced(i18n, match.end() - 1, "{", "}")
+
+
+def i18n_keys(lang: str) -> set[str]:
+    obj = i18n_object_for_lang(lang)
+    return set(re.findall(r"'([^']+)'\s*:", obj))
+
+
+def first_name_from_display(display: str) -> str:
+    stopwords = {
+        "kaptan",
+        "bas",
+        "baski",
+        "muhendis",
+        "zabit",
+        "lostromo",
+        "silici",
+        "yagci",
+        "asci",
+        "tayfa",
+        "usta",
+        "hanim",
+        "bey",
+        "1",
+        "2",
+        "3",
+        "1.",
+        "2.",
+        "3.",
+    }
+    tokens = [
+        re.sub(r"[^\w.]", "", normalize_tr_ascii(part))
+        for part in display.split()
+    ]
+    tokens = [token for token in tokens if token and token not in stopwords]
+    return tokens[0] if tokens else ""
+
+
+def check_languages() -> None:
+    section = "language"
+    langs = set(re.findall(r"\n\s+([a-z]{2})\s*:\s*{label:", object_after("const GAME_LANGUAGES=", JS)))
+    required = {"tr", "en", "es", "de", "fr", "ru", "zh"}
+    missing_langs = sorted(required - langs)
+    if missing_langs:
+        fail(section, f"GAME_LANGUAGES missing: {', '.join(missing_langs)}")
+    else:
+        ok(section, "All supported language switches are declared.")
+
+    mandatory_keys = {
+        "ui.language",
+        "ui.save",
+        "ui.sound",
+        "ui.map",
+        "ui.devices",
+        "ui.phone",
+        "save.center",
+        "save.saveGame",
+        "mode.simple",
+        "mode.realistic",
+        "role.master",
+        "guide.default",
+        "scene.brief",
+        "scene.task",
+        "scene.inspectTask",
+    }
+    en = i18n_keys("en")
+    if not mandatory_keys.issubset(en):
+        fail(section, f"English I18N missing mandatory keys: {sorted(mandatory_keys - en)}")
+
+    for lang in ("en", "es", "de", "fr", "ru", "zh"):
+        keys = i18n_keys(lang)
+        if not keys:
+            fail(section, f"I18N object not found for {lang}.")
+            continue
+        missing = sorted(mandatory_keys - keys)
+        if missing:
+            fail(section, f"{lang} mandatory I18N keys missing: {missing}")
+        if len(keys) < 40:
+            warn(section, f"{lang} has only {len(keys)} I18N keys; consider expanding menu coverage.")
+
+    for lang in ("en", "es", "de", "fr", "ru", "zh"):
+        if f"\n  {lang}:[" not in JS:
+            fail(section, f"DYNAMIC_TRANSLATIONS has no {lang} section.")
+
+    turkish_leftovers = {
+        "Kaptan",
+        "Süvari",
+        "Stajyer",
+        "Köprüüstü",
+        "Güverte",
+        "Liman",
+        "Harita Gorevi",
+        "Kayitli gemi",
+    }
+    for lang in ("en", "es", "de", "fr", "ru", "zh"):
+        obj = i18n_object_for_lang(lang)
+        leftovers = sorted(word for word in turkish_leftovers if word in obj)
+        if leftovers:
+            warn(section, f"{lang} I18N still contains Turkish UI words: {leftovers[:6]}")
+
+
+def check_character_portraits() -> None:
+    section = "character"
+    require_token(section, "const CREW_PORTRAIT_VERSION = 4;", JS)
+    require_token(section, "female:[1,3,5,7]", JS)
+    require_token(section, "female:[1,3,6]", JS)
+    require_token(section, "if(out.base === 'female') out.beard = 'clean';", JS)
+    require_token(section, "support-style-female-cutout.png", JS)
+    require_token(section, "support-style-male-cutout.png", JS)
+
+    markers_block = array_after("const FEMALE_NAME_MARKERS", JS)
+    markers = {normalize_tr_ascii(value) for value in js_string_values(markers_block)}
+    known_female = {
+        "elif",
+        "pinar",
+        "nilay",
+        "ece",
+        "serra",
+        "leyla",
+        "defne",
+        "derya",
+        "busra",
+        "aylin",
+        "alara",
+        "nermin",
+        "ayse",
+        "burcu",
+        "zeynep",
+        "selin",
+        "gizem",
+        "asli",
+        "ebru",
+        "dilek",
+    }
+    missing = sorted(known_female - markers)
+    if missing:
+        fail(section, f"Known female names missing from marker list: {missing}")
+
+    pools = object_after("const CREW_NAME_POOLS", JS)
+    crew_names = js_string_values(pools)
+    wrong_known = []
+    for display in crew_names:
+        first = first_name_from_display(display)
+        if first in known_female and first not in markers and "hanim" not in normalize_tr_ascii(display):
+            wrong_known.append(display)
+    if wrong_known:
+        fail(section, f"Female crew names not protected by marker list: {wrong_known[:8]}")
+
+    if "__portraitVersion:3" in JS:
+        fail(section, "Old crew portrait cache version 3 is still present in index.js.")
+
+    old_indexes = re.findall(r"female:\[([^\]]*9[^\]]*|[^\]]*11[^\]]*|[^\]]*13[^\]]*|[^\]]*15[^\]]*)\]", JS)
+    if old_indexes:
+        fail(section, "Female officer pools still contain non-existent 16-cell sheet indexes.")
+
+    ok(section, f"Checked {len(crew_names)} crew name presets and portrait gender guardrails.")
+
+
+def check_map_and_ecdis() -> None:
+    section = "map"
+    for token in [
+        "const MAP_TASKS = [",
+        "getMapTaskVisibleHitboxes",
+        "isInsideVisibleHitbox",
+        "normalizeClickableSurface",
+        "getClickedWorldChartIndexSheet",
+        "buildEcdisChartControlOverlay",
+        "runMapTaskReplay",
+        "buildWorldShodbChartIndexOverlay",
+        "TRADE_VOYAGE_ROUTES.push",
+        "MAJOR_TRADE_ROUTE_KEYS",
+    ]:
+        require_token(section, token, JS)
+
+    tasks = array_after("const MAP_TASKS", JS)
+    task_count = len(re.findall(r"\bid\s*:\s*['\"]", tasks))
+    if task_count < 12:
+        fail(section, f"Expected at least 12 map tasks, found {task_count}.")
+    else:
+        ok(section, f"Map task count: {task_count}.")
+
+    if "tol:" not in JS and "hitboxes" not in JS:
+        fail(section, "No tolerance/hitbox language found for map tasks.")
+    if "chart bu görev için uygun değil" in normalize_tr_ascii(JS):
+        warn(section, "A hard 'chart not suitable' style message may still exist; prefer teaching fallback.")
+
+
+def check_billing_products() -> None:
+    section = "billing"
+    expected = {
+        "PREMIUM_PRODUCT_ID": "premium_full_pack",
+        "ADS_REMOVAL_PRODUCT_ID": "remove_ads",
+        "PREMIUM_PRICE_LABEL": "75 TL",
+        "ADS_REMOVAL_PRICE_LABEL": "50 TL",
+    }
+    for const_name, value in expected.items():
+        require_token(section, f"const {const_name} = '{value}';", JS)
+    if not ANDROID_BILLING.exists():
+        warn(section, "Android billing bridge file not found; web QA only.")
+    else:
+        for value in ("premium_full_pack", "remove_ads"):
+            if value not in ANDROID:
+                fail(section, f"Android billing bridge missing product ID: {value}")
+        ok(section, "Premium and remove-ads product IDs are aligned with Android bridge.")
+
+
+def parse_effect_numbers() -> list[int]:
+    nums: list[int] = []
+    for body in re.findall(r"effect\s*:\s*{([^}]*)}", JS):
+        nums.extend(int(n) for n in re.findall(r"[-+]?\d+", body))
+    return nums
+
+
+def check_scene_balance_and_text() -> None:
+    section = "scene"
+    scene_ids = re.findall(r"\bid\s*:\s*['\"`]([^'\"`]+)['\"`]", JS)
+    if len(scene_ids) < 250:
+        fail(section, f"Scene/data id count unexpectedly low: {len(scene_ids)}")
+    else:
+        ok(section, f"Scene/data id count: {len(scene_ids)}.")
+
+    for bad in ("\ufffd", "[object Object]", "undefined undefined"):
+        if bad in JS:
+            fail(section, f"Suspicious broken text token found: {bad!r}")
+
+    nums = parse_effect_numbers()
+    if not nums:
+        fail(section, "No choice effect values found.")
+        return
+    positives = sum(1 for n in nums if n > 0)
+    negatives = sum(1 for n in nums if n < 0)
+    if negatives < max(40, positives // 8):
+        warn(section, f"Negative stat effects look sparse: {negatives} negative vs {positives} positive values.")
+    max_abs = max(abs(n) for n in nums)
+    if max_abs > 30:
+        warn(section, f"Very large stat swing found: {max_abs}. Check balance.")
+    if "tag:\"hileli\"" not in JS and "tag:'hileli'" not in JS:
+        fail(section, "No hileli shortcut choices found.")
+
+    writing_tokens = len(re.findall(r"<textarea|documentTrainingState|input type=\"text\"", JS))
+    if writing_tokens < 3:
+        warn(section, "Few document/writing-mode tokens found; form QA may be incomplete.")
+
+
+def check_mobile_and_hitboxes() -> None:
+    section = "mobile"
+    for token in [
+        "@media (orientation: landscape)",
+        "100svh",
+        "overflow-y:auto",
+        "hitbox-standard",
+        "button.hitbox-standard::after",
+        "touch-action:pan-y pinch-zoom",
+        "index.js?v=139",
+        "index.css?v=124",
+    ]:
+        require_token(section, token)
+
+    # Catch obviously tiny button styles in new panels.
+    suspicious = re.findall(r"min-height\s*:\s*(\d+)px", CSS)
+    tiny = [int(v) for v in suspicious if int(v) < 30]
+    if len(tiny) > 8:
+        warn(section, f"Many min-height values below 30px found: {len(tiny)}. Review mobile tap comfort.")
+
+
+def png_has_alpha(path: Path) -> bool:
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return False
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return False
+    pos = 8
+    has_trns = False
+    color_type = -1
+    while pos + 8 <= len(data):
+        length = struct.unpack(">I", data[pos : pos + 4])[0]
+        chunk = data[pos + 4 : pos + 8]
+        payload = data[pos + 8 : pos + 8 + length]
+        if chunk == b"IHDR" and len(payload) >= 13:
+            color_type = payload[9]
+        if chunk == b"tRNS":
+            has_trns = True
+        if chunk == b"IEND":
+            break
+        pos += 12 + length
+    return color_type in (4, 6) or has_trns
+
+
+def check_assets() -> None:
+    section = "assets"
+    if not ASSETS.exists():
+        warn(section, "www/assets folder not found.")
+        return
+    image_ext = {".png", ".jpg", ".jpeg", ".webp", ".avif"}
+    images = [p for p in ASSETS.rglob("*") if p.suffix.lower() in image_ext]
+    if not images:
+        warn(section, "No image assets found.")
+        return
+
+    large = sorted((p for p in images if p.stat().st_size > 1_500_000), key=lambda p: p.stat().st_size, reverse=True)
+    if large:
+        warn(section, "Large assets over 1.5 MB: " + ", ".join(f"{p.name}={p.stat().st_size//1024}KB" for p in large[:8]))
+
+    referenced = JS + "\n" + CSS + "\n" + HTML
+    unused = [p.name for p in images if p.name not in referenced and not p.name.endswith("-source.png")]
+    if len(unused) > 12:
+        warn(section, f"{len(unused)} image assets are not directly referenced; review for Play Store size.")
+
+    cutouts = [p for p in images if "cutout" in p.name and p.suffix.lower() == ".png"]
+    no_alpha = [p.name for p in cutouts if not png_has_alpha(p)]
+    if no_alpha:
+        warn(section, "Cutout PNGs without alpha channel may show black boxes: " + ", ".join(no_alpha[:8]))
+
+
+def check_route_generation_hook() -> None:
+    section = "voyage-data"
+    generator = TOOLS / "generate_voyage_data.py"
+    if not generator.exists():
+        fail(section, "tools/generate_voyage_data.py is missing.")
+    else:
+        text = generator.read_text(encoding="utf-8")
+        for token in ("STRATEGIC_ROUTE_SEEDS", "waypoints", "chartTasks", "json.dump"):
+            require_token(section, token, text)
+
+
+def main() -> int:
+    check_languages()
+    check_character_portraits()
+    check_map_and_ecdis()
+    check_billing_products()
+    check_scene_balance_and_text()
+    check_mobile_and_hitboxes()
+    check_assets()
+    check_route_generation_hook()
+
+    for line in INFO:
+        print(f"OK {line}")
+    for line in WARNINGS:
+        print(f"WARN {line}")
+    if ERRORS:
+        for line in ERRORS:
+            print(f"ERROR {line}")
+        print(f"PRE_RELEASE_QA_FAILED errors={len(ERRORS)} warnings={len(WARNINGS)}")
+        return 1
+    print(f"PRE_RELEASE_QA_OK warnings={len(WARNINGS)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
