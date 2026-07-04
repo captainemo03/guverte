@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "node -e \"const fs=require('fs'); new Function(fs.readFileSync('www/index.js','utf8')); console.log('JS_OK');\" && python tools/game_liveliness_check.py && python tools/mobile_layout_check.py && python tools/pre_release_check.py",
-    "qa": "npm test"
+    "qa": "npm test",
+    "assets:optimize": "python tools/optimize_assets.py",
+    "voyage:generate": "python tools/generate_voyage_data.py --pretty"
   },
   "repository": {
     "type": "git",

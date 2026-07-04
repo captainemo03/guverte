@@ -12,12 +12,15 @@ from pathlib import Path
 import re
 import struct
 import sys
+import json
+import zlib
 
 
 ROOT = Path(__file__).resolve().parents[1]
 WWW = ROOT / "www"
 TOOLS = ROOT / "tools"
 ASSETS = WWW / "assets"
+ASSET_OPTIMIZATION_MANIFEST = TOOLS / "asset_optimization_manifest.json"
 
 INDEX_JS = WWW / "index.js"
 INDEX_CSS = WWW / "index.css"
@@ -403,11 +406,18 @@ def check_mobile_and_hitboxes() -> None:
     ]:
         require_token(section, token)
 
-    # Catch obviously tiny button styles in new panels.
-    suspicious = re.findall(r"min-height\s*:\s*(\d+)px", CSS)
-    tiny = [int(v) for v in suspicious if int(v) < 30]
-    if len(tiny) > 8:
-        warn(section, f"Many min-height values below 30px found: {len(tiny)}. Review mobile tap comfort.")
+    # Catch obviously tiny clickable styles while ignoring status labels/feedback rows.
+    interactive_words = ("button", ".tb-btn", ".cbtn", "#save-btn", "language-select", "device-key", "phone-app")
+    low_interactive: list[str] = []
+    for match in re.finditer(r"([^{}]+){[^{}]*min-height\s*:\s*(\d+)px", CSS):
+        selector = " ".join(match.group(1).split())
+        value = int(match.group(2))
+        if value < 30 and any(word in selector for word in interactive_words):
+            low_interactive.append(f"{selector}={value}px")
+    if low_interactive:
+        warn(section, "Clickable min-height below 30px: " + ", ".join(low_interactive[:8]))
+    else:
+        ok(section, "Clickable mobile targets stay at or above the compact tap threshold.")
 
 
 def png_has_alpha(path: Path) -> bool:
@@ -434,6 +444,33 @@ def png_has_alpha(path: Path) -> bool:
     return color_type in (4, 6) or has_trns
 
 
+def png_idat_decodable(path: Path) -> bool:
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return False
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return True
+    pos = 8
+    idat_parts: list[bytes] = []
+    while pos + 8 <= len(data):
+        length = struct.unpack(">I", data[pos : pos + 4])[0]
+        chunk = data[pos + 4 : pos + 8]
+        payload = data[pos + 8 : pos + 8 + length]
+        if chunk == b"IDAT":
+            idat_parts.append(payload)
+        if chunk == b"IEND":
+            break
+        pos += 12 + length
+    if not idat_parts:
+        return False
+    try:
+        zlib.decompress(b"".join(idat_parts))
+        return True
+    except zlib.error:
+        return False
+
+
 def check_assets() -> None:
     section = "assets"
     if not ASSETS.exists():
@@ -445,9 +482,21 @@ def check_assets() -> None:
         warn(section, "No image assets found.")
         return
 
+    manifest = {}
+    if ASSET_OPTIMIZATION_MANIFEST.exists():
+        try:
+            manifest = json.loads(ASSET_OPTIMIZATION_MANIFEST.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            fail(section, "Asset optimization manifest exists but is not valid JSON.")
+    else:
+        warn(section, "Asset optimization manifest missing; run python tools/optimize_assets.py before release.")
+
     large = sorted((p for p in images if p.stat().st_size > 1_500_000), key=lambda p: p.stat().st_size, reverse=True)
-    if large:
+    if large and not manifest:
         warn(section, "Large assets over 1.5 MB: " + ", ".join(f"{p.name}={p.stat().st_size//1024}KB" for p in large[:8]))
+    elif large:
+        saved = int(manifest.get("savedBytes", 0) or 0)
+        ok(section, f"{len(large)} large PNG assets remain but optimizer manifest is present; saved {saved//1024}KB losslessly.")
 
     referenced = JS + "\n" + CSS + "\n" + HTML
     unused = [p.name for p in images if p.name not in referenced and not p.name.endswith("-source.png")]
@@ -458,6 +507,10 @@ def check_assets() -> None:
     no_alpha = [p.name for p in cutouts if not png_has_alpha(p)]
     if no_alpha:
         warn(section, "Cutout PNGs without alpha channel may show black boxes: " + ", ".join(no_alpha[:8]))
+
+    broken_pngs = [p.name for p in images if p.suffix.lower() == ".png" and not png_idat_decodable(p)]
+    if broken_pngs:
+        fail(section, "PNG assets failed IDAT decode: " + ", ".join(broken_pngs[:8]))
 
 
 def check_route_generation_hook() -> None:

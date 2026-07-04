@@ -2541,7 +2541,7 @@ animation:straitFlow 2.8s linear infinite;}
   #charname{font-size:11px;line-height:1.1;}
   #charrole,#shipinfo{font-size:7px;line-height:1.1;}
   #topright{gap:4px;}
-  #save-btn{min-height:28px;padding:5px 7px;}
+  #save-btn{min-height:32px;padding:6px 8px;}
   #contract-bar,#guidance-strip{flex:0 0 auto;}
   #contract-bar{padding:3px 7px;font-size:7px;line-height:1.25;}
   #guidance-strip{padding:5px 7px;}
@@ -2662,7 +2662,7 @@ animation:straitFlow 2.8s linear infinite;}
   #charrole,#shipinfo{font-size:7px;}
   #topright{gap:4px;}
   #save-btn{padding:5px 8px;font-size:8px;border-radius:6px;}
-  .language-select.compact{max-width:48px;min-height:28px;font-size:9px;}
+  .language-select.compact{max-width:52px;min-height:32px;font-size:9px;}
   #repwrap{display:none;}
   #save-panel{max-height:46svh;overflow:auto;padding:8px;}
   #save-panel-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
@@ -2676,7 +2676,7 @@ animation:straitFlow 2.8s linear infinite;}
   #live-watch-feed{min-height:22px;padding:3px 8px;flex:0 0 auto;}
   #toolbar{order:98;flex:0 0 auto;overflow-x:auto;overflow-y:hidden;padding:5px 7px;gap:5px;scrollbar-width:none;}
   #toolbar::-webkit-scrollbar{display:none;}
-  .tb-btn{font-size:8px;padding:6px 8px;min-height:28px;}
+  .tb-btn{font-size:8px;padding:6px 8px;min-height:34px;}
   #statrow,#psychrow{flex:0 0 auto;}
   .stat,.psychstat{padding:3px 5px;}
   .slbl,.plbl{font-size:6px;}
@@ -2772,9 +2772,9 @@ animation:straitFlow 2.8s linear infinite;}
   #text{font-size:11px;line-height:1.42;}
   #dialogue-log,#replystage{display:none;}
   #choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:5px 7px;max-height:30svh;overflow:auto;}
-  .cbtn{min-height:32px;font-size:9px;line-height:1.2;padding:6px 8px;}
+  .cbtn{min-height:36px;font-size:9px;line-height:1.2;padding:7px 8px;}
   #toolbar{padding:4px 6px;gap:4px;grid-template-columns:repeat(5,minmax(0,1fr));}
-  .tb-btn{min-height:28px;padding:4px 5px;font-size:7px;line-height:1.1;}
+  .tb-btn{min-height:34px;padding:5px 5px;font-size:7px;line-height:1.1;}
   #ship-phone{bottom:34px;max-height:calc(100svh - 38px);}
   #phone-frame{height:min(340px,calc(100svh - 40px));}
   #map-box,#devices-box,#notes-box,#journal-box,#colreg-box{max-height:calc(100svh - 12px);padding:10px;}

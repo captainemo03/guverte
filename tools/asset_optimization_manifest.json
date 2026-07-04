@@ -1,0 +1,360 @@
+{
+  "schema": "guverte.asset-optimization.v1",
+  "generatedAt": 1783191166,
+  "dryRun": false,
+  "processed": 35,
+  "changed": 30,
+  "savedBytes": 1943127,
+  "entries": [
+    {
+      "path": "www/assets/bg/harbor.png",
+      "oldBytes": 2360064,
+      "newBytes": 2383490,
+      "savedBytes": 0,
+      "width": 1774,
+      "height": 887,
+      "changed": false,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/bg/night.png",
+      "oldBytes": 1965408,
+      "newBytes": 1979525,
+      "savedBytes": 0,
+      "width": 1672,
+      "height": 941,
+      "changed": false,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/bg/opensea.png",
+      "oldBytes": 2038078,
+      "newBytes": 2034225,
+      "savedBytes": 3853,
+      "width": 1693,
+      "height": 929,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/bg/storm.png",
+      "oldBytes": 2180977,
+      "newBytes": 2172679,
+      "savedBytes": 8298,
+      "width": 1672,
+      "height": 941,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/bg/strait.png",
+      "oldBytes": 2560313,
+      "newBytes": 2571897,
+      "savedBytes": 0,
+      "width": 1774,
+      "height": 887,
+      "changed": false,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-alt.png",
+      "oldBytes": 1582711,
+      "newBytes": 1435279,
+      "savedBytes": 147432,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-cutout.png",
+      "oldBytes": 1972726,
+      "newBytes": 1945518,
+      "savedBytes": 27208,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-illustrated-mid-cutout.png",
+      "oldBytes": 1914796,
+      "newBytes": 1809683,
+      "savedBytes": 105113,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-illustrated-mid.png",
+      "oldBytes": 1594445,
+      "newBytes": 1452709,
+      "savedBytes": 141736,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-illustrated-young-cutout.png",
+      "oldBytes": 1868355,
+      "newBytes": 1769436,
+      "savedBytes": 98919,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-illustrated-young.png",
+      "oldBytes": 1541927,
+      "newBytes": 1409400,
+      "savedBytes": 132527,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-source.png",
+      "oldBytes": 1985738,
+      "newBytes": 1792050,
+      "savedBytes": 193688,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-veteran-cutout.png",
+      "oldBytes": 2077424,
+      "newBytes": 1978361,
+      "savedBytes": 99063,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits-veteran.png",
+      "oldBytes": 1676321,
+      "newBytes": 1520118,
+      "savedBytes": 156203,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/crew-portraits.png",
+      "oldBytes": 1923600,
+      "newBytes": 1899491,
+      "savedBytes": 24109,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/fire-classes-overview.png",
+      "oldBytes": 2418298,
+      "newBytes": 2477172,
+      "savedBytes": 0,
+      "width": 1640,
+      "height": 959,
+      "changed": false,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/lsa-overview.png",
+      "oldBytes": 2101443,
+      "newBytes": 2102091,
+      "savedBytes": 0,
+      "width": 1774,
+      "height": 887,
+      "changed": false,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-bosun-a.png",
+      "oldBytes": 384604,
+      "newBytes": 375850,
+      "savedBytes": 8754,
+      "width": 384,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-bosun-b.png",
+      "oldBytes": 333746,
+      "newBytes": 331786,
+      "savedBytes": 1960,
+      "width": 384,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-engine-a.png",
+      "oldBytes": 304162,
+      "newBytes": 301571,
+      "savedBytes": 2591,
+      "width": 470,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-engine-b.png",
+      "oldBytes": 308616,
+      "newBytes": 306278,
+      "savedBytes": 2338,
+      "width": 520,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-engine-c.png",
+      "oldBytes": 323311,
+      "newBytes": 321128,
+      "savedBytes": 2183,
+      "width": 496,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-bosun-a.png",
+      "oldBytes": 436289,
+      "newBytes": 427605,
+      "savedBytes": 8684,
+      "width": 512,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-bosun-b.png",
+      "oldBytes": 366870,
+      "newBytes": 366244,
+      "savedBytes": 626,
+      "width": 512,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-engine-a.png",
+      "oldBytes": 339003,
+      "newBytes": 335931,
+      "savedBytes": 3072,
+      "width": 512,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-engine-b.png",
+      "oldBytes": 311042,
+      "newBytes": 309063,
+      "savedBytes": 1979,
+      "width": 512,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-engine-c.png",
+      "oldBytes": 320127,
+      "newBytes": 317718,
+      "savedBytes": 2409,
+      "width": 512,
+      "height": 512,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female-source.png",
+      "oldBytes": 2124098,
+      "newBytes": 1971227,
+      "savedBytes": 152871,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-female.png",
+      "oldBytes": 2128413,
+      "newBytes": 2103755,
+      "savedBytes": 24658,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-portraits-source.png",
+      "oldBytes": 2193863,
+      "newBytes": 2033022,
+      "savedBytes": 160841,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-portraits.png",
+      "oldBytes": 2327284,
+      "newBytes": 2297697,
+      "savedBytes": 29587,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-style-female-cutout.png",
+      "oldBytes": 2072327,
+      "newBytes": 1953287,
+      "savedBytes": 119040,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-style-female.png",
+      "oldBytes": 1518516,
+      "newBytes": 1433143,
+      "savedBytes": 85373,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-style-male-cutout.png",
+      "oldBytes": 2185911,
+      "newBytes": 2064334,
+      "savedBytes": 121577,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    },
+    {
+      "path": "www/assets/support-style-male.png",
+      "oldBytes": 1606060,
+      "newBytes": 1529625,
+      "savedBytes": 76435,
+      "width": 1536,
+      "height": 1024,
+      "changed": true,
+      "dryRun": false
+    }
+  ]
+}
