@@ -5104,18 +5104,31 @@ const FEMALE_NAME_MARKERS = [
   'sibel','gul','eda','esra','nisa','naz','sude','nilay','melda','funda','umay','alara','idil','lara','seda',
   'nehir','isil','duru','ceyda','ayca','selinay','bade','ceren','ilayda','buse','mina','pelin','ada','asli',
   'ebru','hande','meltem','figen','sevda','humeyra','hulya','gulsah','meryem','berrin','ceylin','beste',
-  'koral','deniz','burcin','necla','serap','sultan','yasemin','ozge','nur','fatma','emel','gokce','irem'
+  'koral','deniz','burcin','necla','serap','sultan','yasemin','ozge','nur','fatma','emel','gokce','irem',
+  'emily','sarah','grace','olivia','sophia','chloe','mary','hannah','claire','mia','isabella','emma',
+  'lucia','sofia','carmen','isabel','maria','ana','elena','valeria','paula','camila',
+  'anna','lena','clara','greta','leonie','sophie','marlene','julia',
+  'marie','camille','julie','elise','amelie','audrey','celine','chloe',
+  'анна','ольга','елена','наталья','ирина','светлана','мария','дарья','алиса','вера',
+  '李娜','王芳','刘芳','陈静','张敏','赵丽','周梅','孙婷','林雪','吴敏'
 ];
 const FEMALE_NAME_LOOKUP = new Set(FEMALE_NAME_MARKERS.map(v => normalizeTrAscii(v)));
 const NAME_STOPWORDS = new Set([
   'kaptan','bas','baski','muhendis','zabit','lostromo','silici','yagci','asci','tayfa','usta','hanim','bey','1.','2.','3.','1','2','3',
   'gemici','basi','motorcu','kambuzcu','garson','elektrisyen','steward','stewardess','hotel','muduru','chief','engineer','cook','oiler','ab',
-  'deck','foreman','rating','motorman','pumpman','fitter','welder','doctor','medical','security','officer'
-]);
+  'deck','foreman','rating','motorman','pumpman','fitter','welder','doctor','medical','security','officer','captain','second','third','able','seafarer','radio','navigation','container','bulk','cargo','environmental','bunkering','hydrographic','surveyor','marine','biologist','rov','technician','manager','waiter','electrician','port','agent','fire','team','leader','senior','russian','filipino','indian','latin','american',
+  'capitan','jefe','jefa','maquinas','oficial','contramaestre','marinero','marinera','cocinero','cocinera','mecanico','mecanica','radio','seguridad','medico','medica','ambiental','electrico','electrica','puerto','agente',
+  'kapitan','kapitaen','offizier','ingenieur','bootsmann','matrose','koch','kochin','mechaniker','funk','sicherheit','arzt','arztin','elektriker','hafenagent',
+  'capitaine','chef','mecanicien','mecanicienne','officier','maitre','marin','cuisinier','cuisiniere','medecin','securite','radio','electricien','electricienne','portuaire',
+  'капитан','старший','старшая','механик','помощник','вахтенный','вахтенная','боцман','матрос','повар','врач','электрик','радист','оператор','офицер','безопасности','эколог','портовый','агент',
+  '船长','大副','二副','三副','轮机长','大管轮','二管轮','三管轮','水手长','水手','机工','厨师','医生','电机员','保安','服务员','无线电员','航海员','集装箱','散货','环保','加油','港口','代理','消防','队长'
+].map(v => normalizeTrAscii(v)));
 
 function normalizeTrAscii(v=''){
   return String(v)
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
     .replace(/i̇/g,'i')
     .replace(/ç/g,'c')
     .replace(/ğ/g,'g')
@@ -5131,7 +5144,7 @@ function inferPortraitBase(def={}){
   if(/\bbey\b/.test(normalizedName)) return 'male';
   const tokens = normalizeTrAscii(def.name || '')
     .split(/\s+/)
-    .map(t => t.replace(/[^\w.]/g,''))
+    .map(t => t.replace(/[^\p{L}\p{N}.]/gu,''))
     .filter(Boolean)
     .filter(t => !NAME_STOPWORDS.has(t));
   const firstName = tokens[0] || '';
@@ -11920,6 +11933,7 @@ function handleSceneChoice(sc, c2, ch){
   triggerDecisionReplayAndOfficerFeedback(sc,c2);
   maybeCreateMonthlyMemorySummary(sc,c2);
   runPlayerBondDirector(sc,c2,resolvedEffect);
+  runAdvancedWatchSpine(sc,c2,resolvedEffect);
 
   const pos=Object.entries(resolvedEffect).filter(([k,v])=>v>0&&k!=='yorgunluk').map(([k,v])=>'+'+v+' '+k).join(' ');
   const neg=Object.entries(resolvedEffect).filter(([k,v])=>v<0&&k!=='yorgunluk').map(([k,v])=>v+' '+k).join(' ');
@@ -14974,7 +14988,107 @@ const CREW_NAME_POOLS = {
   latinab:["AB Mateo Alvarez","AB Diego Morales","AB Luis Herrera","AB Rafael Castillo"]
 };
 
+const CREW_LOCALIZED_ROLE_TITLES = {
+  en:{suvari:'Captain',z1:'Chief Officer',z2:'Second Officer',z3:'Third Officer',carkci:'Chief Engineer',bas2:'Second Engineer',lostromo:'Bosun',lostromo2:'Deck Rating',yagci:'Oiler',asci:'Chief Cook',hasan:'Able Seafarer',musa:'Deck Cadet',mateintl:'Watch Officer',abintl:'AB',motormanintl:'Motorman',gazsubay:'Gas Safety Officer',navsubay:'Navigation Officer',telsiz:'Radio Officer',elektrik:'ETO',pumpman:'Pumpman',konteynerzabit:'Container Officer',bulkzabit:'Bulk Cargo Officer',medic:'Ship Doctor',security:'Security Officer',cevrezabit:'Environmental Officer',bunkering:'Bunkering Officer',hydro:'Hydrographic Surveyor',biyolog:'Marine Biologist',rovtech:'ROV Technician',hotelmgr:'Hotel Manager',steward:'Steward',fitter:'Fitter',welder:'Welder',limantemsilci:'Port Agent',firesafety:'Fire Team Leader',gemicibasi:'Deck Foreman',gemici:'Deckhand',motorcu:'Motorman',ucmuhendis:'Third Engineer',yagcibasi:'Senior Oiler',elektrisyen:'Electrician',kambuz:'Galley Steward',garson:'Waiter',ruscarkci:'Russian Chief Engineer',filipinliasci:'Filipino Chief Cook',hindliyagci:'Indian Oiler',latinab:'Latin American AB'},
+  es:{suvari:'Capitán',z1:'Primer Oficial',z2:'Segundo Oficial',z3:'Tercer Oficial',carkci:'Jefe de Máquinas',bas2:'Segundo Mecánico',lostromo:'Contramaestre',lostromo2:'Marinero de Cubierta',yagci:'Aceitero',asci:'Cocinero Jefe',hasan:'Marinero Experto',musa:'Cadete de Cubierta',mateintl:'Oficial de Guardia',abintl:'Marinero AB',motormanintl:'Motorista',gazsubay:'Oficial de Seguridad Gas',navsubay:'Oficial de Navegación',telsiz:'Oficial de Radio',elektrik:'Oficial ETO',pumpman:'Bombero de Carga',konteynerzabit:'Oficial de Contenedores',bulkzabit:'Oficial de Granel',medic:'Médico de Buque',security:'Oficial de Seguridad',cevrezabit:'Oficial Ambiental',bunkering:'Oficial de Bunkering',hydro:'Hidrógrafo',biyolog:'Biólogo Marino',rovtech:'Técnico ROV',hotelmgr:'Gerente Hotelero',steward:'Camarero',fitter:'Ajustador',welder:'Soldador',limantemsilci:'Agente Portuario',firesafety:'Jefe de Bomberos',gemicibasi:'Jefe de Cubierta',gemici:'Marinero',motorcu:'Motorista',ucmuhendis:'Tercer Mecánico',yagcibasi:'Aceitero Mayor',elektrisyen:'Electricista',kambuz:'Ayudante de Cocina',garson:'Camarero',ruscarkci:'Jefe de Máquinas Ruso',filipinliasci:'Cocinero Filipino',hindliyagci:'Aceitero Indio',latinab:'Marinero Latino'},
+  de:{suvari:'Kapitän',z1:'Erster Offizier',z2:'Zweiter Offizier',z3:'Dritter Offizier',carkci:'Leitender Ingenieur',bas2:'Zweiter Ingenieur',lostromo:'Bootsmann',lostromo2:'Decksmatrose',yagci:'Öler',asci:'Chefkoch',hasan:'Vollmatrose',musa:'Deckskadett',mateintl:'Wachoffizier',abintl:'AB-Matrose',motormanintl:'Motormann',gazsubay:'Gassicherheits-Offizier',navsubay:'Navigationsoffizier',telsiz:'Funkoffizier',elektrik:'ETO-Offizier',pumpman:'Pumpenmann',konteynerzabit:'Container-Offizier',bulkzabit:'Schüttgut-Offizier',medic:'Schiffsarzt',security:'Sicherheitsoffizier',cevrezabit:'Umweltoffizier',bunkering:'Bunker-Offizier',hydro:'Hydrograf',biyolog:'Meeresbiologe',rovtech:'ROV-Techniker',hotelmgr:'Hotelmanager',steward:'Steward',fitter:'Schlosser',welder:'Schweißer',limantemsilci:'Hafenagent',firesafety:'Feuerteamleiter',gemicibasi:'Decksvormann',gemici:'Matrose',motorcu:'Motormann',ucmuhendis:'Dritter Ingenieur',yagcibasi:'Senior Öler',elektrisyen:'Elektriker',kambuz:'Küchensteward',garson:'Kellner',ruscarkci:'Russischer Leitender Ingenieur',filipinliasci:'Philippinischer Chefkoch',hindliyagci:'Indischer Öler',latinab:'Lateinamerikanischer AB'},
+  fr:{suvari:'Capitaine',z1:'Second Capitaine',z2:'Deuxième Officier',z3:'Troisième Officier',carkci:'Chef Mécanicien',bas2:'Deuxième Mécanicien',lostromo:'Maître d’équipage',lostromo2:'Matelot de Pont',yagci:'Graisseur',asci:'Chef Cuisinier',hasan:'Matelot Qualifié',musa:'Cadet Pont',mateintl:'Officier de Quart',abintl:'Matelot AB',motormanintl:'Motoriste',gazsubay:'Officier Sécurité Gaz',navsubay:'Officier Navigation',telsiz:'Officier Radio',elektrik:'Officier ETO',pumpman:'Pompiste',konteynerzabit:'Officier Conteneurs',bulkzabit:'Officier Vrac',medic:'Médecin de Bord',security:'Officier Sûreté',cevrezabit:'Officier Environnement',bunkering:'Officier Soutage',hydro:'Hydrographe',biyolog:'Biologiste Marin',rovtech:'Technicien ROV',hotelmgr:'Directeur Hôtel',steward:'Steward',fitter:'Ajusteur',welder:'Soudeur',limantemsilci:'Agent Portuaire',firesafety:'Chef Équipe Incendie',gemicibasi:'Chef de Pont',gemici:'Matelot',motorcu:'Motoriste',ucmuhendis:'Troisième Mécanicien',yagcibasi:'Graisseur Senior',elektrisyen:'Électricien',kambuz:'Steward Cambuse',garson:'Serveur',ruscarkci:'Chef Mécanicien Russe',filipinliasci:'Chef Cuisinier Philippin',hindliyagci:'Graisseur Indien',latinab:'Matelot Latino'},
+  ru:{suvari:'Капитан',z1:'Старший помощник',z2:'Второй помощник',z3:'Третий помощник',carkci:'Старший механик',bas2:'Второй механик',lostromo:'Боцман',lostromo2:'Палубный матрос',yagci:'Моторист-смазчик',asci:'Старший повар',hasan:'Матрос AB',musa:'Палубный кадет',mateintl:'Вахтенный помощник',abintl:'Матрос AB',motormanintl:'Моторист',gazsubay:'Офицер газовой безопасности',navsubay:'Навигационный офицер',telsiz:'Радиоофицер',elektrik:'Электромеханик',pumpman:'Пампмен',konteynerzabit:'Контейнерный офицер',bulkzabit:'Офицер навалочных грузов',medic:'Судовой врач',security:'Офицер безопасности',cevrezabit:'Экологический офицер',bunkering:'Бункеровочный офицер',hydro:'Гидрограф',biyolog:'Морской биолог',rovtech:'Техник ROV',hotelmgr:'Отель-менеджер',steward:'Стюард',fitter:'Слесарь',welder:'Сварщик',limantemsilci:'Портовый агент',firesafety:'Руководитель пожарной группы',gemicibasi:'Палубный бригадир',gemici:'Матрос',motorcu:'Моторист',ucmuhendis:'Третий механик',yagcibasi:'Старший смазчик',elektrisyen:'Электрик',kambuz:'Камбузный стюард',garson:'Официант',ruscarkci:'Русский старший механик',filipinliasci:'Филиппинский старший повар',hindliyagci:'Индийский смазчик',latinab:'Латиноамериканский матрос'},
+  zh:{suvari:'船长',z1:'大副',z2:'二副',z3:'三副',carkci:'轮机长',bas2:'大管轮',lostromo:'水手长',lostromo2:'甲板水手',yagci:'加油工',asci:'大厨',hasan:'高级水手',musa:'甲板实习生',mateintl:'值班驾驶员',abintl:'高级水手',motormanintl:'机工',gazsubay:'气体安全员',navsubay:'航海员',telsiz:'无线电员',elektrik:'电机员',pumpman:'泵匠',konteynerzabit:'集装箱驾驶员',bulkzabit:'散货驾驶员',medic:'船医',security:'保安员',cevrezabit:'环保员',bunkering:'加油员',hydro:'水文测量员',biyolog:'海洋生物学家',rovtech:'ROV 技术员',hotelmgr:'酒店经理',steward:'乘务员',fitter:'钳工',welder:'焊工',limantemsilci:'港口代理',firesafety:'消防队长',gemicibasi:'甲板班长',gemici:'水手',motorcu:'机工',ucmuhendis:'三管轮',yagcibasi:'高级加油工',elektrisyen:'电工',kambuz:'厨房服务员',garson:'服务员',ruscarkci:'俄罗斯轮机长',filipinliasci:'菲律宾大厨',hindliyagci:'印度加油工',latinab:'拉美水手'}
+};
+const CREW_POOL_GENDER_PROFILE = {
+  pumpman:'male',fitter:'male',welder:'male',ruscarkci:'male',hindliyagci:'male',latinab:'male',
+  medic:'mixed',hotelmgr:'mixed',steward:'mixed',asci:'mixed',kambuz:'mixed',garson:'mixed',
+  suvari:'mixed',z1:'mixed',z2:'mixed',z3:'mixed',carkci:'mixed',bas2:'mixed',lostromo:'mixed'
+};
+const LOCALIZED_CREW_NAME_CULTURES = {
+  en:{female:['Emily Carter','Sarah Mitchell','Grace Bennett','Olivia Harper','Sophia Reed','Chloe Morgan','Mary Evans','Hannah Brooks','Claire Wilson','Mia Turner'],male:['James Walker','Liam Thompson','Noah Parker','William Foster','Ethan Brooks','Jack Collins','Henry Adams','Oliver Hayes','Daniel Cooper','Thomas Ward'],specialNames:{ruscarkci:['Russian Chief Engineer Viktor Sokolov','Russian Chief Engineer Pavel Orlov','Russian Chief Engineer Alexei Morozov'],filipinliasci:['Filipino Chief Cook Maria Santos','Filipino Chief Cook Carlo Reyes','Filipino Chief Cook Elena Cruz'],hindliyagci:['Indian Oiler Arjun Mehta','Indian Oiler Ravi Nair','Indian Oiler Dev Patel'],latinab:['Latin American AB Mateo Alvarez','Latin American AB Diego Morales','Latin American AB Sofia Castillo']}},
+  es:{female:['Lucía Morales','Sofía Herrera','Carmen Ruiz','Isabel Ortega','María Navarro','Ana Castillo','Elena Vidal','Valeria Torres','Paula Ríos','Camila Santos'],male:['Diego Herrera','Javier Ortega','Mateo Alvarez','Santiago Reyes','Alejandro Molina','Carlos Vargas','Pablo Navarro','Miguel Santos','Rafael Castillo','Luis Romero'],specialNames:{ruscarkci:['Jefe de Máquinas Ruso Viktor Sokolov','Jefe de Máquinas Ruso Pavel Orlov','Jefe de Máquinas Ruso Alexei Morozov'],filipinliasci:['Cocinero Filipino Maria Santos','Cocinero Filipino Carlo Reyes','Cocinero Filipino Elena Cruz'],hindliyagci:['Aceitero Indio Arjun Mehta','Aceitero Indio Ravi Nair','Aceitero Indio Dev Patel'],latinab:['Marinero Latino Mateo Alvarez','Marinero Latino Diego Morales','Marinero Latino Sofía Castillo']}},
+  de:{female:['Anna Schneider','Lena Weber','Clara Fischer','Sophie Becker','Greta Wagner','Hannah Braun','Leonie Keller','Marlene Hoffmann','Julia Krüger','Maria Vogel'],male:['Lukas Weber','Markus Braun','Tobias Klein','Jonas Keller','Felix Wagner','Maximilian Fischer','Niklas Becker','Leon Hoffmann','David Schmitt','Simon Vogel'],specialNames:{ruscarkci:['Russischer Leitender Ingenieur Viktor Sokolov','Russischer Leitender Ingenieur Pavel Orlov','Russischer Leitender Ingenieur Alexei Morozov'],filipinliasci:['Philippinischer Chefkoch Maria Santos','Philippinischer Chefkoch Carlo Reyes','Philippinischer Chefkoch Elena Cruz'],hindliyagci:['Indischer Öler Arjun Mehta','Indischer Öler Ravi Nair','Indischer Öler Dev Patel'],latinab:['Lateinamerikanischer AB Mateo Alvarez','Lateinamerikanischer AB Diego Morales','Lateinamerikanischer AB Sofia Castillo']}},
+  fr:{female:['Claire Moreau','Sophie Dubois','Marie Laurent','Camille Bernard','Julie Martin','Élise Garnier','Chloé Petit','Amélie Robert','Audrey Lefèvre','Céline Mercier'],male:['Julien Bernard','Marc Laurent','Antoine Dubois','Lucas Moreau','Hugo Martin','Pierre Garnier','Thomas Petit','Nicolas Robert','Mathieu Lefèvre','Louis Mercier'],specialNames:{ruscarkci:['Chef Mécanicien Russe Viktor Sokolov','Chef Mécanicien Russe Pavel Orlov','Chef Mécanicien Russe Alexei Morozov'],filipinliasci:['Chef Cuisinier Philippin Maria Santos','Chef Cuisinier Philippin Carlo Reyes','Chef Cuisinier Philippin Elena Cruz'],hindliyagci:['Graisseur Indien Arjun Mehta','Graisseur Indien Ravi Nair','Graisseur Indien Dev Patel'],latinab:['Matelot Latino Mateo Alvarez','Matelot Latino Diego Morales','Matelot Latino Sofia Castillo']}},
+  ru:{female:['Анна Соколова','Ольга Петрова','Елена Морозова','Наталья Орлова','Ирина Кузнецова','Светлана Волкова','Мария Фёдорова','Дарья Иванова','Алиса Павлова','Вера Смирнова'],male:['Иван Петров','Виктор Соколов','Павел Орлов','Алексей Морозов','Дмитрий Волков','Сергей Кузнецов','Никита Иванов','Михаил Фёдоров','Олег Павлов','Андрей Смирнов'],specialNames:{ruscarkci:['Русский старший механик Виктор Соколов','Русский старший механик Павел Орлов','Русский старший механик Алексей Морозов'],filipinliasci:['Филиппинский старший повар Мария Сантос','Филиппинский старший повар Карло Рейес','Филиппинский старший повар Елена Круз'],hindliyagci:['Индийский смазчик Арджун Мехта','Индийский смазчик Рави Наир','Индийский смазчик Дев Патель'],latinab:['Латиноамериканский матрос Матео Альварес','Латиноамериканский матрос Диего Моралес','Латиноамериканский матрос София Кастильо']}},
+  zh:{female:['李娜','王芳','刘芳','陈静','张敏','赵丽','周梅','孙婷','林雪','吴敏'],male:['王海','张伟','李强','陈杰','刘洋','赵磊','周航','孙涛','林峰','吴斌'],specialNames:{ruscarkci:['俄罗斯轮机长 维克托·索科洛夫','俄罗斯轮机长 帕维尔·奥尔洛夫','俄罗斯轮机长 阿列克谢·莫罗佐夫'],filipinliasci:['菲律宾大厨 玛丽亚·桑托斯','菲律宾大厨 卡洛·雷耶斯','菲律宾大厨 埃琳娜·克鲁兹'],hindliyagci:['印度加油工 阿琼·梅塔','印度加油工 拉维·奈尔','印度加油工 德夫·帕特尔'],latinab:['拉美水手 马特奥·阿尔瓦雷斯','拉美水手 迭戈·莫拉莱斯','拉美水手 索菲亚·卡斯蒂略']}}
+};
+
+function rotateCrewNameList(list=[],offset=0){
+  if(!list.length) return [];
+  return list.map((_,idx)=>list[(idx+offset)%list.length]);
+}
+
+function localizedCrewNamesForKey(lang,key,index){
+  const culture = LOCALIZED_CREW_NAME_CULTURES[lang];
+  const roles = CREW_LOCALIZED_ROLE_TITLES[lang] || CREW_LOCALIZED_ROLE_TITLES.en;
+  if(!culture) return CREW_NAME_POOLS[key] || [];
+  if(culture.specialNames?.[key]) return culture.specialNames[key];
+  const profile = CREW_POOL_GENDER_PROFILE[key] || 'mixed';
+  const male = rotateCrewNameList(culture.male,index);
+  const female = rotateCrewNameList(culture.female,index);
+  let names = [];
+  if(profile === 'male') names = male.slice(0,8);
+  else if(profile === 'female') names = female.slice(0,8);
+  else names = [female[0],male[0],female[1],male[1],female[2],male[2],female[3],male[3]].filter(Boolean);
+  const role = roles[key] || CREW_LOCALIZED_ROLE_TITLES.en[key] || '';
+  return names.map(name=>`${role} ${name}`.trim());
+}
+
+function buildLocalizedCrewNamePools(lang){
+  const pools = {};
+  Object.keys(CREW_NAME_POOLS).forEach((key,index)=>{
+    pools[key] = localizedCrewNamesForKey(lang,key,index);
+  });
+  return pools;
+}
+
+const CREW_NAME_POOLS_BY_LANG = {
+  tr:CREW_NAME_POOLS,
+  en:buildLocalizedCrewNamePools('en'),
+  es:buildLocalizedCrewNamePools('es'),
+  de:buildLocalizedCrewNamePools('de'),
+  fr:buildLocalizedCrewNamePools('fr'),
+  ru:buildLocalizedCrewNamePools('ru'),
+  zh:buildLocalizedCrewNamePools('zh')
+};
+const CREW_LOCALIZED_NAME_QA_SAMPLES = ['Captain Emily Carter','Capitán Lucía Morales','Kapitän Anna Schneider','Capitaine Claire Moreau','Капитан Анна Соколова','船长 李娜'];
+
+function getCrewNamePoolForLanguage(lang){
+  const safeLang = CREW_NAME_POOLS_BY_LANG[lang] ? lang : 'tr';
+  return {...CREW_NAME_POOLS, ...(CREW_NAME_POOLS_BY_LANG[safeLang] || {})};
+}
+
 const BASE_CREW_KEYS = ['suvari','z1','z2','z3','carkci','bas2','lostromo','lostromo2','yagci','asci','hasan','musa','mateintl','abintl','motormanintl'];
+const STANDARD_TRADING_CREW_KEYS = ['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz'];
+const SHIP_TYPE_ACTIVE_CREW_KEYS = {
+  kuru:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','bulkzabit','elektrik'],
+  bulk:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','bulkzabit','elektrik'],
+  kont:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','konteynerzabit','elektrik','telsiz'],
+  roro:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','security','elektrik'],
+  tanker:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','gazsubay','pumpman','bunkering','elektrik','security'],
+  lng:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','gazsubay','pumpman','bunkering','elektrik','security','ruscarkci'],
+  proje:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','hasan','musa','motorcu','yagci','asci','kambuz','welder','fitter','security','limantemsilci'],
+  kruvaziyer:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','asci','medic','security','hotelmgr','steward','kambuz','garson','filipinliasci','firesafety','cevrezabit','elektrik'],
+  arastirma:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','asci','hydro','biyolog','rovtech','medic','cevrezabit','telsiz','elektrik'],
+  offshore:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','asci','security','rovtech','welder','fitter','medic','firesafety','elektrik'],
+  buz:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','yagci','asci','medic','welder','fitter','security','ruscarkci','elektrik'],
+  cable:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','asci','rovtech','welder','fitter','cevrezabit','elektrik','telsiz'],
+  pipe:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','asci','rovtech','welder','fitter','security','cevrezabit','elektrik'],
+  shuttle:['suvari','z1','z2','z3','carkci','bas2','ucmuhendis','lostromo','gemicibasi','gemici','motorcu','yagci','asci','kambuz','gazsubay','pumpman','bunkering','security','elektrik','ruscarkci']
+};
+const SHIP_TYPE_CREW_COUNT_NOTES = {
+  kuru:'18 aktif',
+  bulk:'18 aktif',
+  kont:'19 aktif',
+  roro:'18 aktif',
+  tanker:'21 aktif',
+  lng:'22 aktif',
+  proje:'20 aktif',
+  kruvaziyer:'22 aktif oyun kadrosu',
+  arastirma:'19 aktif',
+  offshore:'19 aktif',
+  buz:'19 aktif',
+  cable:'18 aktif',
+  pipe:'18 aktif',
+  shuttle:'20 aktif'
+};
 const SHIP_TYPE_SPECIALIST_KEYS = {
   kuru:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','yagcibasi','elektrisyen','kambuz','bunkering','fitter','latinab','hindliyagci','limantemsilci'],
   tanker:['navsubay','telsiz','elektrik','gemicibasi','gemici','motorcu','ucmuhendis','yagcibasi','elektrisyen','gazsubay','pumpman','bunkering','cevrezabit','security','fitter','ruscarkci','hindliyagci','latinab','limantemsilci'],
@@ -15060,29 +15174,45 @@ function getSpecialistCrewKeysForShipType(type){
 }
 
 function getActiveCrewKeysForShipType(type){
-  return [...new Set([...BASE_CREW_KEYS, ...getSpecialistCrewKeysForShipType(type)])].filter(k=>CREW_DEFS[k]);
+  const activeType = type || (typeof selType !== 'undefined' ? selType : 'kuru');
+  const profile = SHIP_TYPE_ACTIVE_CREW_KEYS[activeType] || STANDARD_TRADING_CREW_KEYS;
+  return [...new Set(profile)].filter(k=>CREW_DEFS[k]);
+}
+
+function getActiveSpecialistCrewKeysForShipType(type){
+  const active = new Set(getActiveCrewKeysForShipType(type));
+  const standard = new Set(STANDARD_TRADING_CREW_KEYS);
+  return [...active].filter(k=>!standard.has(k));
+}
+
+function getCrewRosterNote(type){
+  const activeType = type || (typeof selType !== 'undefined' ? selType : 'kuru');
+  const activeCount = getActiveCrewKeysForShipType(activeType).length;
+  const note = SHIP_TYPE_CREW_COUNT_NOTES[activeType] || `${activeCount} aktif`;
+  const specialistPool = getSpecialistCrewKeysForShipType(activeType).length;
+  return `${note} · ${specialistPool} rol havuzu`;
 }
 
 function isSpecialistCrewActive(key,type){
-  return getSpecialistCrewKeysForShipType(type).includes(key);
+  return getActiveSpecialistCrewKeysForShipType(type).includes(key);
 }
 
 function applyActiveSpecialistCrewToPhone(type){
-  const keys = getSpecialistCrewKeysForShipType(type);
+  const keys = getActiveSpecialistCrewKeysForShipType(type);
   const specialists = keys.map(k=>CREW_DEFS[k]).filter(Boolean);
   if(!specialists.length || typeof phoneContacts === 'undefined') return;
-  specialists.slice(0,8).forEach(def=>{
+  specialists.slice(0,6).forEach(def=>{
     if(!phoneContacts.some(c=>c.name === def.name)){
       phoneContacts.push({name:def.name, number:'Crew', role:def.title || 'Specialist'});
     }
   });
   if(typeof ensurePhoneGroup === 'function'){
-    ensurePhoneGroup('Crew Chat', specialists.slice(0,8).map(def=>def.name));
+    ensurePhoneGroup('Crew Chat', specialists.slice(0,6).map(def=>def.name));
   }
   if(Array.isArray(phoneMessages)){
     const label = SPECIALIST_CREW_SHIP_LABELS[type] || 'bu gemide';
     const roster = specialists.slice(0,5).map(def=>def.name.replace(/\s+/g,' ')).join(', ');
-    phoneMessages.push({from:'Crew Chat', chat:'Crew Chat', text:`Yeni uzman ekip ${label} aktif: ${roster}. Bu kişiler bazı sahnelerde sadece ilgili gemi tipinde konuşacak.`, me:false});
+    phoneMessages.push({from:'Crew Chat', chat:'Crew Chat', text:`Aktif gemi kadrosu ${label}: ${getCrewRosterNote(type)}. Uzman kişiler: ${roster || 'rutin kadro'}.`, me:false});
   }
 }
 
@@ -15169,9 +15299,11 @@ function getCrewPortraitForKey(key){
   return crewPortraits[key];
 }
 
-function randomizeCrewRoster(){
-  Object.keys(CREW_NAME_POOLS).forEach(key=>{
-    if(CREW_DEFS[key]) CREW_DEFS[key].name = pickRandom(CREW_NAME_POOLS[key]);
+function randomizeCrewRoster(lang){
+  const activeLang = lang || (typeof gameLanguage !== 'undefined' ? gameLanguage : 'tr');
+  const pools = getCrewNamePoolForLanguage(activeLang);
+  Object.keys(pools).forEach(key=>{
+    if(CREW_DEFS[key]) CREW_DEFS[key].name = pickRandom(pools[key]);
     if(CREW_DEFS[key]) crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]);
   });
 }
@@ -15230,7 +15362,9 @@ function getCrewRoleAtlasPanel(type=selType, opts={}){
   const compact = !!opts.compact;
   const shipLabel = STYPES.find(x=>x.key===type)?.nm || type || 'Gemi';
   const groups = CREW_ROLE_ATLAS_GROUPS.map(group=>{
-    const cards = group.roles.map(role=>{
+    const roles = compact ? group.roles.filter(role=>active.has(role.key)) : group.roles;
+    if(compact && !roles.length) return '';
+    const cards = roles.map(role=>{
       const def = CREW_DEFS[role.key];
       const isActive = active.has(role.key);
       const portrait = def ? renderPortraitSprite(getCrewPortraitForKey(role.key) || makeCrewPortrait(role.key, def), compact ? 'crew' : 'avatar') : '';
@@ -15252,8 +15386,8 @@ function getCrewRoleAtlasPanel(type=selType, opts={}){
   }).join('');
   return `<div class="crew-atlas ${compact?'compact':''}">
     <div class="crew-atlas-head">
-      <div><b>PERSONEL ATLASI</b><small>${phoneSafe(shipLabel)} için aktif rol kadrosu ve kilitli/uygun olmayan roller</small></div>
-      <span>${active.size} aktif</span>
+      <div><b>${compact?'AKTIF GEMI KADROSU':'PERSONEL ATLASI'}</b><small>${phoneSafe(shipLabel)} · ${compact?'bu gemide bulunan ekip':'aktif ekip ve eğitim amaçlı rol havuzu'}</small></div>
+      <span>${phoneSafe(getCrewRosterNote(type))}</span>
     </div>
     ${groups}
   </div>`;
@@ -17189,6 +17323,13 @@ function buildSavePayload(){
     achievementsUnlocked,
     crewFatigueState,
     deviceFaultState,
+    watchDirector3State,
+    workRestState,
+    brmCoachState,
+    editableReportState,
+    surpriseInspectionState,
+    certificateState,
+    scenarioEditorState,
     devicePracticeProgress,
     devicePracticeScore,
     starlinkStatus,
@@ -17324,6 +17465,27 @@ function applyLoadedGameState(data){
   pendingPhoneCall = null;
   crewFatigueState = data.crewFatigueState || {deck:22,engine:18,bridge:20,galley:12};
   deviceFaultState = data.deviceFaultState || {radar:false,ecdis:false,gyro:false,ais:false};
+  watchDirector3State = data.watchDirector3State && typeof data.watchDirector3State === 'object'
+    ? {watchKey:'', completed:[], lastPhase:'handover', ...data.watchDirector3State, completed:Array.isArray(data.watchDirector3State.completed) ? data.watchDirector3State.completed : []}
+    : {watchKey:'', completed:[], lastPhase:'handover'};
+  workRestState = data.workRestState && typeof data.workRestState === 'object'
+    ? {watchHours:0, restHours:10, fatigueRisk:18, violations:0, lastSceneId:'', lastRestLog:'', ...data.workRestState}
+    : {watchHours:0, restHours:10, fatigueRisk:18, violations:0, lastSceneId:'', lastRestLog:''};
+  brmCoachState = data.brmCoachState && typeof data.brmCoachState === 'object'
+    ? {score:0, lastRole:'', calls:[], ...data.brmCoachState, calls:Array.isArray(data.brmCoachState.calls) ? data.brmCoachState.calls : []}
+    : {score:0, lastRole:'', calls:[]};
+  editableReportState = data.editableReportState && typeof data.editableReportState === 'object'
+    ? {weather:'', route:'', cpa:'', pilot:'', allFast:'', engine:'', lastSaved:'', ...data.editableReportState}
+    : {weather:'', route:'', cpa:'', pilot:'', allFast:'', engine:'', lastSaved:''};
+  surpriseInspectionState = data.surpriseInspectionState && typeof data.surpriseInspectionState === 'object'
+    ? {active:false, type:'PSC', lastIndex:-1, findings:[], classRisk:0, pscRisk:0, ...data.surpriseInspectionState, findings:Array.isArray(data.surpriseInspectionState.findings) ? data.surpriseInspectionState.findings : []}
+    : {active:false, type:'PSC', lastIndex:-1, findings:[], classRisk:0, pscRisk:0};
+  certificateState = data.certificateState && typeof data.certificateState === 'object'
+    ? {active:'brm', completed:{}, lastCourse:'', ...data.certificateState, completed:data.certificateState.completed && typeof data.certificateState.completed === 'object' ? data.certificateState.completed : {}}
+    : {active:'brm', completed:{}, lastCourse:''};
+  scenarioEditorState = data.scenarioEditorState && typeof data.scenarioEditorState === 'object'
+    ? {...scenarioEditorState, ...data.scenarioEditorState}
+    : scenarioEditorState;
   devicePracticeProgress = data.devicePracticeProgress || {};
   devicePracticeScore = data.devicePracticeScore || {ok:0,total:0};
   starlinkStatus = data.starlinkStatus && typeof data.starlinkStatus === 'object' ? {...starlinkStatus, ...data.starlinkStatus} : starlinkStatus;
@@ -17876,6 +18038,26 @@ function getMapTaskShortLabel(task){
   return labels[task?.id] || (task?.title || 'TASK').slice(0,8).toUpperCase();
 }
 
+function getMapTaskChartSymbol(task){
+  const symbols = {
+    pilot:{code:'PILOT STN', cls:'pilot', glyph:'P'},
+    anchorage:{code:'ANCHORAGE', cls:'anchor', glyph:'⚓'},
+    tss:{code:'TSS FLOW', cls:'traffic', glyph:'↗'},
+    berth:{code:'TURN BASIN', cls:'berth', glyph:'TB'},
+    reporting:{code:'VTS REPORT', cls:'report', glyph:'R'},
+    noanchoring:{code:'NO ANCH', cls:'noanchor', glyph:'⊘'},
+    alternateroute:{code:'ALT ROUTE', cls:'route', glyph:'ALT'},
+    waypoint:{code:'NEXT WP', cls:'waypoint', glyph:'WP'},
+    cpa:{code:'CPA RISK', cls:'cpa', glyph:'CPA'},
+    ukc:{code:'UKC CHECK', cls:'ukc', glyph:'UKC'},
+    eca:{code:'ECA LINE', cls:'eca', glyph:'ECA'},
+    weatheravoid:{code:'WX AVOID', cls:'weather', glyph:'WX'},
+    cablecrossing:{code:'CABLE XING', cls:'cable', glyph:'CBL'},
+    offshorezone:{code:'500 m ZONE', cls:'offshore', glyph:'500'}
+  };
+  return symbols[task?.id] || {code:'CHART FIX', cls:'fix', glyph:'FIX'};
+}
+
 function renderMapTaskChips(activePort){
   const holder = document.getElementById('port-chart-tasklist');
   if(!holder) return;
@@ -17933,29 +18115,38 @@ function buildMapTaskTargetOverlay(port){
   const target = getMapTaskTarget(task, port);
   const tx = Math.max(34, Math.min(406, target.x));
   const ty = Math.max(34, Math.min(226, target.y));
-  const labelX = tx > 260 ? tx - 118 : tx + 18;
-  const labelY = ty < 52 ? ty + 32 : ty - 20;
-  const rayEndX = tx > 260 ? tx - 10 : tx + 10;
+  const labelW = 132;
+  const labelX = Math.max(18, Math.min(440 - labelW - 8, tx > 260 ? tx - labelW - 22 : tx + 22));
+  const labelY = Math.max(24, Math.min(238, ty < 58 ? ty + 42 : ty - 28));
+  const rayStartX = tx > labelX ? labelX + labelW : labelX;
+  const rayEndX = tx > labelX ? tx - 12 : tx + 12;
+  const symbol = getMapTaskChartSymbol(task);
+  const tol = Math.min(38, Math.max(22, Number(target.tol || 32)));
   return `
-    <g class="map-task-target" data-task="${task.id}" data-x="${target.x}" data-y="${target.y}">
-      <circle cx="${tx}" cy="${ty}" r="${Math.min(34, target.tol)}" fill="rgba(255,212,90,.12)" stroke="#ffd45a" stroke-width="2" stroke-dasharray="7,4"/>
-      <circle cx="${tx}" cy="${ty}" r="6" fill="#ffd45a" stroke="#07131f" stroke-width="1.4"/>
-      <path d="M${labelX} ${labelY} H${rayEndX}" stroke="#ffd45a" stroke-width="1.3" stroke-dasharray="4,3"/>
-      <rect x="${labelX-6}" y="${labelY-15}" width="112" height="17" rx="5" fill="rgba(5,16,28,.92)" stroke="#ffd45a" stroke-width="1"/>
-      <text x="${labelX}" y="${labelY-4}" fill="#ffd45a" font-size="7.2" font-family="monospace">${target.label || task.title}</text>
+    <g class="map-task-target chart-task-${symbol.cls}" data-task="${task.id}" data-x="${target.x}" data-y="${target.y}">
+      <circle class="map-task-cursor" cx="${tx}" cy="${ty}" r="${tol}" fill="rgba(255,205,79,.06)" stroke="#ffc94d" stroke-width="1.45" stroke-dasharray="2.6,3.2"/>
+      <circle class="map-task-bearing" cx="${tx}" cy="${ty}" r="${Math.max(10, tol*.42)}" fill="none" stroke="rgba(129,247,184,.78)" stroke-width=".9" stroke-dasharray="1.5,2.2"/>
+      <path class="map-task-crosshair" d="M${tx-12} ${ty} H${tx+12} M${tx} ${ty-12} V${ty+12}" stroke="#e8f6fb" stroke-width=".95"/>
+      <rect class="map-task-symbol-plate" x="${tx-12}" y="${ty-9}" width="24" height="18" rx="4"/>
+      <text class="map-task-symbol-text" x="${tx}" y="${ty+3.5}" text-anchor="middle">${symbol.glyph}</text>
+      <path class="map-task-leader" d="M${rayStartX} ${labelY-6} L${rayEndX} ${ty}" />
+      <rect class="map-task-callout" x="${labelX}" y="${labelY-25}" width="${labelW}" height="35" rx="6"/>
+      <text class="map-task-code" x="${labelX+8}" y="${labelY-11}">${symbol.code}</text>
+      <text class="map-task-name" x="${labelX+8}" y="${labelY+2}">${target.label || task.title}</text>
     </g>`;
 }
 
 function getMapTaskTargetLabelBox(target){
   const tx = Math.max(34, Math.min(406, target.x));
   const ty = Math.max(34, Math.min(226, target.y));
-  const labelX = tx > 260 ? tx - 118 : tx + 18;
-  const labelY = ty < 52 ? ty + 32 : ty - 20;
+  const labelW = 132;
+  const labelX = Math.max(18, Math.min(440 - labelW - 8, tx > 260 ? tx - labelW - 22 : tx + 22));
+  const labelY = Math.max(24, Math.min(238, ty < 58 ? ty + 42 : ty - 28));
   return {
-    x: labelX - 10,
-    y: labelY - 19,
-    w: 122,
-    h: 25
+    x: labelX - 8,
+    y: labelY - 31,
+    w: labelW + 16,
+    h: 47
   };
 }
 
@@ -22444,6 +22635,22 @@ let achievementsUnlocked = {};
 let pendingPhoneCall = null;
 let crewFatigueState = {deck:22,engine:18,bridge:20,galley:12};
 let deviceFaultState = {radar:false,ecdis:false,gyro:false,ais:false};
+let watchDirector3State = {watchKey:'', completed:[], lastPhase:'handover'};
+let workRestState = {watchHours:0, restHours:10, fatigueRisk:18, violations:0, lastSceneId:'', lastRestLog:''};
+let brmCoachState = {score:0, lastRole:'', calls:[]};
+let editableReportState = {weather:'', route:'', cpa:'', pilot:'', allFast:'', engine:'', lastSaved:''};
+let surpriseInspectionState = {active:false, type:'PSC', lastIndex:-1, findings:[], classRisk:0, pscRisk:0};
+let certificateState = {active:'brm', completed:{}, lastCourse:''};
+let scenarioEditorState = {
+  shipType:'kuru',
+  route:'Turkish Straits Transit',
+  weather:'clear',
+  event:'vhf',
+  character:'Kaptan',
+  correct:'Prosedure gore kisa rapor ver, cihaz ve logbook ile teyit et.',
+  wrong:'Hizli gec, kayit ve ekip teyidini sonra hallederiz.',
+  generated:null
+};
 
 const PHONE_SITES = [
   {key:'home', title:'SeaNet Ana Sayfa', url:'seanet.ship/home', desc:'Starlink/VSAT uzerinden gemi ici kisa haberler, aile mesajlari ve vardiya linkleri.'},
@@ -25170,6 +25377,378 @@ function completeRealWatchItem(id){
   renderSimCenter();
 }
 
+function getWatchDirector3Steps(){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  return [
+    {id:'handoverIn', label:'Vardiya teslimi', note:`${watchState.code || '--'} · gece emri, onceki olay, alarm bypass`},
+    {id:'weather', label:'Hava kontrolu', note:`Swell ${voyagePressure.swell} · gorus ${voyagePressure.visibility} · akinti ${voyagePressure.current}`},
+    {id:'routeCpa', label:'Rota / CPA', note:`${route?.name || 'Rota secilmedi'} · ${wp?.name || 'next WP bekliyor'}`},
+    {id:'vhfCall', label:'VHF / VTS', note:`${voyagePressure.vhf === 'Yogun' ? 'VTS/Pilot cagrisi bekleniyor' : 'CH16 watch + yerel kanal'}`},
+    {id:'logbook', label:'Logbook', note:'hava, rota, CPA, pilot/all fast/makine alarmi satirlari'},
+    {id:'handoverOut', label:'Teslim verme', note:'siradaki zabite risk, trafik, ariza ve takip notu'}
+  ];
+}
+
+function syncWatchDirector3(sc){
+  const key = `${watchState.code || 'watch'}-${Math.floor((contractDays || 0) / 2)}`;
+  if(watchDirector3State.watchKey !== key){
+    watchDirector3State.watchKey = key;
+    watchDirector3State.completed = [];
+    watchDirector3State.lastPhase = 'handoverIn';
+  }
+  const blob = `${sc?.id||''} ${sc?.sub||''} ${sc?.text||''} ${sc?.loc||''}`.toLowerCase();
+  if(/weather|hava|swell|fog|sis|barometre|wind/.test(blob)) watchDirector3State.lastPhase = 'weather';
+  else if(/radar|cpa|ecdis|route|waypoint|ukc|tss|harita/.test(blob)) watchDirector3State.lastPhase = 'routeCpa';
+  else if(/vhf|vts|pilot|dsc|mayday|pan-pan/.test(blob)) watchDirector3State.lastPhase = 'vhfCall';
+  else if(/logbook|defter|report|rapor/.test(blob)) watchDirector3State.lastPhase = 'logbook';
+}
+
+function completeWatchDirector3Step(id){
+  const steps = getWatchDirector3Steps();
+  const step = steps.find(s=>s.id === id);
+  if(!step) return;
+  if(watchDirector3State.completed.includes(id)){
+    watchDirector3State.lastPhase = id;
+    renderSimCenter();
+    return;
+  }
+  watchDirector3State.completed.push(id);
+  watchDirector3State.lastPhase = id;
+  const missionMap = {handoverIn:'handover', weather:'weather', routeCpa:'radar', vhfCall:'vhf', logbook:'logbook', handoverOut:'handover'};
+  completeMissionStep(missionMap[id] || 'report', `Vardiya Direktoru 3.0: ${step.label}`);
+  addLiveLogbook('VARDIYA DIREKTORU', `${step.label}: ${step.note}`, true);
+  addWatchFeed(`Vardiya Direktoru: ${step.label}`, id === 'handoverOut' ? 'good' : 'info');
+  applyEffect({bilgi:1,sayginlik:id==='handoverOut'?2:1,dinclik:-1},{skipContractTick:true});
+  renderSimCenter();
+}
+
+function getWatchDirector3Panel(){
+  const steps = getWatchDirector3Steps();
+  const done = new Set(watchDirector3State.completed || []);
+  const firstOpen = steps.find(s=>!done.has(s.id))?.id || steps[steps.length-1].id;
+  const completion = Math.round((done.size / steps.length) * 100);
+  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  return `<div class="watch3-panel">
+    <div class="watch3-head">
+      <div><b>Vardiya Direktoru 3.0</b><small>teslim -> hava -> rota/CPA -> VHF -> logbook -> teslim verme</small></div>
+      <span>${completion}%</span>
+    </div>
+    <div class="watch3-steps">
+      ${steps.map((s,i)=>{
+        const cls = done.has(s.id) ? 'done' : s.id === firstOpen ? 'active' : '';
+        return `<button class="${cls}" onclick="completeWatchDirector3Step('${s.id}')"><em>${i+1}</em><b>${phoneSafe(s.label)}</b><small>${phoneSafe(s.note)}</small></button>`;
+      }).join('')}
+    </div>
+    <div class="watch3-telemetry">
+      <span><b>ETA</b>${phoneSafe(st.eta || '--')}</span>
+      <span><b>CPA/TCPA</b>${phoneSafe(st.cpa || '--')} nm · ${phoneSafe(st.tcpa || '--')}</span>
+      <span><b>UKC</b>${phoneSafe(st.ukc || '--')} m</span>
+      <span><b>Next WP</b>${phoneSafe(st.nextWp || '--')}</span>
+    </div>
+  </div>`;
+}
+
+function tickWorkRestFromScene(sc){
+  if(!sc || workRestState.lastSceneId === sc.id) return;
+  workRestState.lastSceneId = sc.id;
+  const activeWatch = /bridge|radar|ecdis|vhf|pilot|harbor|storm|engine/i.test(`${sc.gfx||''} ${sc.sub||''} ${sc.text||''}`);
+  if(activeWatch){
+    workRestState.watchHours = Math.min(18, Math.round((workRestState.watchHours + 0.6) * 10) / 10);
+    workRestState.restHours = Math.max(0, Math.round((workRestState.restHours - 0.35) * 10) / 10);
+  }else{
+    workRestState.restHours = Math.min(14, Math.round((workRestState.restHours + 0.15) * 10) / 10);
+  }
+  if(workRestState.watchHours > 14 || workRestState.restHours < 6){
+    workRestState.violations = Math.min(9, workRestState.violations + 1);
+  }
+  workRestState.fatigueRisk = clamp(Math.round((100 - stats.dinclik) + workRestState.watchHours * 2.2 + workRestState.violations * 7 - workRestState.restHours), 0, 100);
+  if(workRestState.fatigueRisk > 78 && gameplayMode === 'expert'){
+    addWatchFeed('Work/Rest uyarisi: dinlenme plani yapmadan uzman modda hata riski artar.', 'warn');
+  }
+}
+
+function logRestBlock(hours=4){
+  const h = Number(hours) || 4;
+  workRestState.restHours = Math.min(14, Math.round((workRestState.restHours + h) * 10) / 10);
+  workRestState.watchHours = Math.max(0, Math.round((workRestState.watchHours - h * .55) * 10) / 10);
+  workRestState.fatigueRisk = clamp(workRestState.fatigueRisk - Math.round(h*7), 0, 100);
+  workRestState.lastRestLog = `${h} saat dinlenme loglandi`;
+  applyEffect({dinclik:Math.round(h*3),moral:1},{skipContractTick:true});
+  addLiveLogbook('WORK / REST', `${h} saat dinlenme kaydi girildi. Rest ${workRestState.restHours}h, risk ${workRestState.fatigueRisk}%.`, true);
+  showNotif('REST','Work/Rest','Dinlenme saati kayda girdi.');
+  renderSimCenter();
+}
+
+function getWorkRestHoursPanel(){
+  const riskClass = workRestState.fatigueRisk >= 75 ? 'warn' : workRestState.fatigueRisk <= 35 ? 'good' : '';
+  const restPct = clamp(Math.round((workRestState.restHours / 14) * 100), 0, 100);
+  const watchPct = clamp(Math.round((workRestState.watchHours / 18) * 100), 0, 100);
+  return `<div class="work-rest-panel">
+    <div class="work-rest-head"><b>Work/Rest Hours</b><span class="${riskClass}">Risk ${workRestState.fatigueRisk}%</span></div>
+    <div class="work-rest-bars">
+      <div><b>Rest window</b><i><u style="width:${restPct}%"></u></i><small>${workRestState.restHours}h · MLC/STCW takip</small></div>
+      <div><b>Watch load</b><i><u style="width:${watchPct}%"></u></i><small>${workRestState.watchHours}h · ihlal ${workRestState.violations}</small></div>
+    </div>
+    <div class="sim-actions compact">
+      <button onclick="logRestBlock(2)">2h rest</button>
+      <button onclick="logRestBlock(4)">4h rest</button>
+      <button onclick="addLiveLogbook('WORK / REST','Nobet tesliminde dinlenme ve fatigue riski zabite raporlandi.',true); renderSimCenter()">Teslime yaz</button>
+    </div>
+    <small>${phoneSafe(workRestState.lastRestLog || 'Dinlenme azaldikca stat hemen dusmez; once hata riski ve ipucu baskisi artar.')}</small>
+  </div>`;
+}
+
+const BRM_TASKS = [
+  ['Kaptan','risk-approval','CPA/UKC, pilot niyeti ve contingency onayi'],
+  ['OOW','cross-check','Radar/ECDIS/AIS/VHF cross-check ve logbook'],
+  ['Gozcu','visual','isik, sis, hedef acisi, guverte emniyeti'],
+  ['Dumenci','helm','dumen emri repeat-back ve steady raporu'],
+  ['Pilot','mpx','draft, engine, tug plan, berth approach MPX']
+];
+
+function assignBrmTask(role, task){
+  brmCoachState.lastRole = role;
+  brmCoachState.score = Math.min(100, (brmCoachState.score || 0) + 8);
+  brmCoachState.calls = [{role, task, at:watchState.code || '--'}, ...(brmCoachState.calls || [])].slice(0,6);
+  addLiveLogbook('BRM / KOPRUUSTU EKIBI', `${role}: ${task}`, true);
+  addWatchFeed(`BRM: ${role} -> ${task}`, 'good');
+  completeMissionStep('report', `BRM rol dagitimi: ${role}`);
+  applyEffect({bilgi:1,sayginlik:2},{skipContractTick:true});
+  renderSimCenter();
+}
+
+function getBrmManagementPanel(){
+  const calls = (brmCoachState.calls || []).slice(0,3).map(c=>`<span>${phoneSafe(c.at)} · ${phoneSafe(c.role)}: ${phoneSafe(c.task)}</span>`).join('');
+  return `<div class="brm3-panel">
+    <div class="brm3-head"><b>BRM / Kopruustu Ekip Yonetimi</b><span>Skor ${brmCoachState.score || 0}</span></div>
+    <div class="brm3-grid">
+      ${BRM_TASKS.map(([role,key,task])=>`<button onclick="assignBrmTask('${role}','${task.replace(/'/g,"\\'")}')"><b>${role}</b><small>${task}</small></button>`).join('')}
+    </div>
+    <div class="brm3-log">${calls || '<span>Henuz rol dagitimi yok.</span>'}</div>
+  </div>`;
+}
+
+function updateEditableReportField(key,value){
+  if(!(key in editableReportState)) return;
+  editableReportState[key] = String(value || '').slice(0,120);
+}
+
+function saveEditableReport(){
+  const rows = [
+    ['Hava', editableReportState.weather],
+    ['Rota', editableReportState.route],
+    ['CPA', editableReportState.cpa],
+    ['Pilot onboard', editableReportState.pilot],
+    ['All fast', editableReportState.allFast],
+    ['Makine alarmi', editableReportState.engine]
+  ].filter(([,v])=>String(v||'').trim());
+  if(!rows.length){
+    showNotif('LOG','Rapor Defteri','Once en az bir kritik satir doldur.');
+    return;
+  }
+  rows.forEach(([k,v])=>addLiveLogbook(`LOGBOOK / ${k.toUpperCase()}`, v, true));
+  editableReportState.lastSaved = new Date().toISOString();
+  completeMissionStep('logbook','Gercek logbook satirlari duzeltildi');
+  applyEffect({bilgi:2,sayginlik:2},{skipContractTick:true});
+  showNotif('LOG','Rapor Defteri','Kritik satirlar logbooka islendi.');
+  renderSimCenter();
+}
+
+function getEditableReportBookPanel(){
+  const fields = [
+    ['weather','Hava / deniz','Swell, gorus, ruzgar, barometre'],
+    ['route','Rota','WP, chart, TSS, no-go, contingency'],
+    ['cpa','CPA / Radar','target, CPA/TCPA, manevra niyeti'],
+    ['pilot','Pilot onboard','boarding time, MPX, tug plan'],
+    ['allFast','All fast','halat sirasi, berth, SOF saati'],
+    ['engine','Makine alarmi','alarm, ECR raporu, hiz karari']
+  ];
+  return `<div class="editable-report-panel">
+    <div class="editable-report-grid">
+      ${fields.map(([key,label,placeholder])=>`<label><span>${label}</span><input value="${phoneSafe(editableReportState[key] || '')}" placeholder="${phoneSafe(placeholder)}" oninput="updateEditableReportField('${key}', this.value)"></label>`).join('')}
+    </div>
+    <div class="sim-actions compact">
+      <button onclick="saveEditableReport()">Logbook'a isle</button>
+      <button onclick="openLiveLogbook()">Defteri ac</button>
+      <button onclick="editableReportState={weather:'',route:'',cpa:'',pilot:'',allFast:'',engine:'',lastSaved:''}; renderSimCenter()">Temizle</button>
+    </div>
+  </div>`;
+}
+
+const INSPECTION_FINDING_POOL = [
+  ['doc','Certificate / crew list', 'Belge tarihi, imza ve gemi bilgisi esitlenmeli.'],
+  ['fire','Fire station', 'Yangin dolabi, nozzle, hose ve ekipman kondisyonu gosterilmeli.'],
+  ['lifesaving','LSA readiness', 'Filika, can sali, EPIRB/SART ve muster list kontrol.'],
+  ['logbook','Official logbook', 'Hava, rota, alarm ve pilot/all fast satirlari tutarli olmali.'],
+  ['engine','Engine room safety', 'Bilge, purifier, quick closing valve ve alarm trendi.'],
+  ['deck','Mooring deck', 'Snap-back marking, PPE, halat kondisyonu ve toolbox talk.']
+];
+
+function triggerSurpriseInspection(type='PSC'){
+  const offset = (currentIdx + (type === 'Class' ? 2 : 0)) % INSPECTION_FINDING_POOL.length;
+  surpriseInspectionState.active = true;
+  surpriseInspectionState.type = type;
+  surpriseInspectionState.lastIndex = currentIdx;
+  surpriseInspectionState.findings = [0,1,2].map(n=>{
+    const item = INSPECTION_FINDING_POOL[(offset+n)%INSPECTION_FINDING_POOL.length];
+    return {key:item[0], title:item[1], note:item[2], closed:false};
+  });
+  if(type === 'Class') surpriseInspectionState.classRisk = Math.min(100, surpriseInspectionState.classRisk + 18);
+  else surpriseInspectionState.pscRisk = Math.min(100, surpriseInspectionState.pscRisk + 18);
+  addWatchFeed(`${type} denetimi: belge/ekipman/deficiency zinciri acildi`, 'warn');
+  addLiveLogbook(`${type} DENETIM`, 'Surpriz denetim basladi; belge, ekipman ve corrective action takip edilecek.', true);
+  pushPhoneMessage('Şirket', `${type} inspector onboard. Eksikleri kisa notla kapat, deficiency acilmasin.`, {open:false});
+  renderSimCenter();
+}
+
+function maybeTriggerSurpriseInspection(sc){
+  if(!sc || gameplayMode === 'simple') return;
+  if(surpriseInspectionState.lastIndex === currentIdx) return;
+  const blob = `${sc.id||''} ${sc.sub||''} ${sc.text||''} ${sc.loc||''}`.toLowerCase();
+  const scheduled = currentIdx > 5 && (currentIdx % 21 === 9);
+  if(scheduled || /psc|survey|class|denetim|inspector|deficiency/.test(blob)){
+    triggerSurpriseInspection(/class|survey/.test(blob) ? 'Class' : 'PSC');
+  }
+}
+
+function closeInspectionFinding(key){
+  const f = (surpriseInspectionState.findings || []).find(x=>x.key === key);
+  if(!f) return;
+  f.closed = true;
+  surpriseInspectionState.pscRisk = Math.max(0, surpriseInspectionState.pscRisk - 8);
+  surpriseInspectionState.classRisk = Math.max(0, surpriseInspectionState.classRisk - 8);
+  addLiveLogbook('DEFICIENCY CLOSE-OUT', `${f.title}: ${f.note}`, true);
+  addWatchFeed(`Denetim close-out: ${f.title}`, 'good');
+  applyEffect({bilgi:1,sayginlik:2},{skipContractTick:true});
+  renderSimCenter();
+}
+
+function getSurpriseInspectionPanel(){
+  const findings = surpriseInspectionState.findings || [];
+  const visibleFindings = findings.length ? findings : [{key:'demo', title:'Denetim bekliyor', note:'Manuel PSC/Class baslatabilir veya rota ilerledikce ansizin gelebilir.', closed:false}];
+  const findingButtons = visibleFindings.map(f=>{
+    const action = f.key === 'demo' ? "triggerSurpriseInspection('PSC')" : `closeInspectionFinding('${String(f.key).replace(/'/g,"\\'")}')`;
+    return `<button class="${f.closed?'done':''}" onclick="${action}"><b>${phoneSafe(f.title)}</b><small>${phoneSafe(f.closed?'Kapandi':f.note)}</small></button>`;
+  }).join('');
+  return `<div class="inspection3-panel ${surpriseInspectionState.active?'active':''}">
+    <div class="inspection3-head"><b>PSC / Class Surprise Walkthrough</b><span>${phoneSafe(surpriseInspectionState.type)} · PSC ${surpriseInspectionState.pscRisk}% · Class ${surpriseInspectionState.classRisk}%</span></div>
+    <div class="inspection3-list">
+      ${findingButtons}
+    </div>
+    <div class="sim-actions compact"><button onclick="triggerSurpriseInspection('PSC')">PSC baslat</button><button onclick="triggerSurpriseInspection('Class')">Class survey</button><button onclick="surpriseInspectionState.active=false; renderSimCenter()">Kapat</button></div>
+  </div>`;
+}
+
+const CERTIFICATE_COURSES = {
+  brm:{title:'BRM', desc:'Bridge resource management, role allocation, closed-loop communication.', xp:'navigation'},
+  ecdis:{title:'ECDIS Refresh', desc:'Safety contour, route check, alarm acknowledge, ENC discipline.', xp:'navigation'},
+  gmdss:{title:'GMDSS', desc:'VHF DSC, MF/HF, EPIRB, SART, radio log and distress chain.', xp:'safety'},
+  tanker:{title:'Tanker Familiarization', desc:'IG, manifold, ESD, line-up, gas freeing and COW basics.', xp:'tanker'},
+  fire:{title:'Advanced Fire Fighting', desc:'Fire class, boundary cooling, SCBA team and command chain.', xp:'safety'},
+  radar:{title:'Radar / ARPA', desc:'Target acquire, CPA/TCPA, trial manoeuvre, guard zones.', xp:'navigation'}
+};
+
+function completeCertificateCourse(key){
+  const course = CERTIFICATE_COURSES[key];
+  if(!course) return;
+  certificateState.completed[key] = true;
+  certificateState.active = key;
+  certificateState.lastCourse = course.title;
+  specialtyXP[course.xp] = (specialtyXP[course.xp] || 0) + 6;
+  applyEffect({bilgi:4,sayginlik:2,dinclik:-2},{skipContractTick:true});
+  addLiveLogbook('SERTIFIKA / KURS', `${course.title}: ${course.desc}`, true);
+  pushPhoneMessage('Kurs Portali', `${course.title} modulu tamamlandi. Sonraki kariyer review icin dosyana eklendi.`, {open:false});
+  showNotif('CERT','Kurs Tamamlandi', course.title);
+  renderSimCenter();
+}
+
+function getCertificateCoursePanel(){
+  return `<div class="certificate3-grid">
+    ${Object.entries(CERTIFICATE_COURSES).map(([key,c])=>`<button class="${certificateState.completed?.[key]?'done':''}" onclick="completeCertificateCourse('${key}')"><b>${phoneSafe(c.title)}</b><small>${phoneSafe(c.desc)}</small><em>${certificateState.completed?.[key]?'tamamlandi':'baslat'}</em></button>`).join('')}
+  </div>`;
+}
+
+function setScenarioEditorField(key,value){
+  if(!(key in scenarioEditorState)) return;
+  scenarioEditorState[key] = String(value || '').slice(0,140);
+}
+
+function generateScenarioEditorPreview(){
+  const route = scenarioEditorState.route || getActiveVoyageRoute?.()?.name || 'custom route';
+  const charName = scenarioEditorState.character || 'Kaptan';
+  const event = scenarioEditorState.event || 'vhf';
+  const weather = scenarioEditorState.weather || 'clear';
+  const gfx = event === 'engine' ? 'engine' : event === 'storm' ? 'storm' : event === 'mooring' ? 'harbor' : 'bridge';
+  scenarioEditorState.generated = {
+    id:`custom_${Date.now()}`,
+    day:`Gun ${Math.max(1,currentDay||1)}`,
+    time:watchState.code?.slice(0,5) || '08:00',
+    who:charName,
+    loc:route,
+    sub:`Senaryo Editoru - ${event.toUpperCase()}`,
+    gfx,
+    text:`${route} rotasinda ${weather} sartinda ${event} olayi gelisti. ${charName} senden kisa, kayitli ve ekip destekli bir karar bekliyor.`,
+    choices:[
+      {text:scenarioEditorState.correct, tag:'kritik', effect:{bilgi:4,sayginlik:4,dinclik:-2}},
+      {text:scenarioEditorState.wrong, tag:'hileli', effect:{bilgi:-3,sayginlik:-4,dinclik:-1}}
+    ],
+    custom:true
+  };
+  addWatchFeed('Senaryo editoru: yeni sahne taslagi hazirlandi.', 'good');
+  renderSimCenter();
+}
+
+function insertCustomScenario(){
+  if(!scenarioEditorState.generated) generateScenarioEditorPreview();
+  const scene = scenarioEditorState.generated;
+  if(!scene) return;
+  sceneQueue.splice(Math.min(sceneQueue.length, currentIdx + 1), 0, {...scene, id:`${scene.id}_${sceneQueue.length}`});
+  addLiveLogbook('SENARYO EDITORU', `${scene.sub}: rota ${scene.loc}`, true);
+  showNotif('EDIT','Senaryo Eklendi','Yeni sahne siradaki akisa eklendi.');
+  scenarioEditorState.generated = null;
+  renderSimCenter();
+}
+
+function getScenarioEditorPanel(){
+  const preview = scenarioEditorState.generated;
+  const shipButtons = ['kuru','tanker','container','lng','cruise','research','project'].map(key=>`<button class="${scenarioEditorState.shipType===key?'active':''}" onclick="setScenarioEditorField('shipType','${key}'); renderSimCenter()">${phoneSafe(key)}</button>`).join('');
+  const eventButtons = ['vhf','radar','ecdis','mooring','engine','storm','psc'].map(key=>`<button class="${scenarioEditorState.event===key?'active':''}" onclick="setScenarioEditorField('event','${key}'); renderSimCenter()">${phoneSafe(key.toUpperCase())}</button>`).join('');
+  return `<div class="scenario-editor-panel">
+    <div class="scenario-editor-pills">${shipButtons}</div>
+    <div class="scenario-editor-pills">${eventButtons}</div>
+    <div class="scenario-editor-grid">
+      <label><span>Rota</span><input value="${phoneSafe(scenarioEditorState.route)}" oninput="setScenarioEditorField('route', this.value)"></label>
+      <label><span>Hava</span><input value="${phoneSafe(scenarioEditorState.weather)}" oninput="setScenarioEditorField('weather', this.value)"></label>
+      <label><span>Karakter</span><input value="${phoneSafe(scenarioEditorState.character)}" oninput="setScenarioEditorField('character', this.value)"></label>
+      <label><span>Dogru cevap</span><input value="${phoneSafe(scenarioEditorState.correct)}" oninput="setScenarioEditorField('correct', this.value)"></label>
+      <label><span>Hileli / riskli cevap</span><input value="${phoneSafe(scenarioEditorState.wrong)}" oninput="setScenarioEditorField('wrong', this.value)"></label>
+    </div>
+    <div class="scenario-preview">${preview ? `<b>${phoneSafe(preview.sub)}</b><small>${phoneSafe(preview.text)}</small>` : '<small>Taslak uretince burada sahne ozeti gorunur.</small>'}</div>
+    <div class="sim-actions compact"><button onclick="generateScenarioEditorPreview()">Taslak uret</button><button onclick="insertCustomScenario()">Akisa ekle</button><button onclick="openSimCenter()">Merkezde kal</button></div>
+  </div>`;
+}
+
+function getCleanModeSystemPanel(){
+  return `<div class="clean-mode-panel">
+    ${Object.entries(PLAY_MODE_DEFS).map(([key,def])=>`<button class="${gameplayMode===key?'active':''}" onclick="setGameplayMode('${key}'); renderSimCenter()"><b>${phoneSafe(def.label)}</b><small>${phoneSafe(def.desc)}</small></button>`).join('')}
+  </div>`;
+}
+
+function runAdvancedWatchSpine(sc,c2,effect={}){
+  const blob = `${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
+  if(/weather|hava|swell|fog|sis|barometre|wind/.test(blob)) completeWatchDirector3Step('weather');
+  if(/radar|cpa|tcpa|ecdis|route|waypoint|ukc|tss|harita/.test(blob)) completeWatchDirector3Step('routeCpa');
+  if(/vhf|vts|pilot|dsc|mayday|pan-pan|kanal/.test(blob)) completeWatchDirector3Step('vhfCall');
+  if(/logbook|defter|rapor|report|sof|nor/.test(blob)) completeWatchDirector3Step('logbook');
+  if(c2?.tag === 'hileli' || c2?.tag === 'korkak'){
+    workRestState.fatigueRisk = clamp((workRestState.fatigueRisk || 0) + 6, 0, 100);
+    brmCoachState.score = Math.max(0, (brmCoachState.score || 0) - 4);
+  }else if(c2?.tag === 'kritik' || c2?.tag === 'akilli'){
+    brmCoachState.score = Math.min(100, (brmCoachState.score || 0) + 3);
+  }
+}
+
 function getBridgeConsoleLauncherPanel(){
   const devices = [
     ['radar','Radar / ARPA','target acquire, CPA/TCPA, trial manoeuvre'],
@@ -25286,6 +25865,9 @@ function renderSimCenter(){
       ${buildMissionDirector2Panel()}
     </div>
     <div class="sim-section wide">
+      ${getWatchDirector3Panel()}
+    </div>
+    <div class="sim-section wide">
       ${buildStoryDirectorPanel()}
     </div>
     <div class="sim-section wide">
@@ -25345,12 +25927,28 @@ function renderSimCenter(){
       ${renderDocumentPracticePanel()}
     </div>
     <div class="sim-section wide">
+      <div class="sim-head"><span>GERCEK LOGBOOK / RAPOR DEFTERI</span><span>kritik satirlari duzelt</span></div>
+      ${getEditableReportBookPanel()}
+    </div>
+    <div class="sim-section wide">
       <div class="sim-head"><span>OYUN ICI EGITIM YOLU</span><span>ilk ay sade, sonra katmanli</span></div>
       ${renderTrainingRoadmapPanel()}
     </div>
     <div class="sim-section wide">
+      <div class="sim-head"><span>SERTIFIKALAR VE KURSLAR</span><span>BRM · ECDIS · GMDSS · tanker · fire</span></div>
+      ${getCertificateCoursePanel()}
+    </div>
+    <div class="sim-section wide">
       <div class="sim-head"><span>PREMIUM PAKET EKRANI</span><span>${premiumUnlocked?'aktif':PREMIUM_PRICE_LABEL}</span></div>
       ${renderPremiumPackagePanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>WORK / REST HOURS</span><span>fatigue risk</span></div>
+      ${getWorkRestHoursPanel()}
+    </div>
+    <div class="sim-section">
+      <div class="sim-head"><span>BRM EKIP YONETIMI</span><span>role assignment</span></div>
+      ${getBrmManagementPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>BRIDGE TEAM ROLLERI</span><span>kime ne soylersin</span></div>
@@ -25376,6 +25974,14 @@ function renderSimCenter(){
       <div class="sim-head"><span>KAZA / NEAR MISS REPLAY</span><span>timeline</span></div>
       ${getAccidentReplayPanel()}
     </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>SURPRIZ PSC / CLASS DENETIMI</span><span>walkthrough · deficiency</span></div>
+      ${getSurpriseInspectionPanel()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>SENARYO EDITORU</span><span>kendi sahneni kur</span></div>
+      ${getScenarioEditorPanel()}
+    </div>
     <div class="sim-section">
       <div class="sim-head"><span>KISISEL DEFTER</span><span>oyuncu notu</span></div>
       ${getPersonalNotebookPanel()}
@@ -25387,6 +25993,7 @@ function renderSimCenter(){
     <div class="sim-section">
       <div class="sim-head"><span>KADEMELI ZORLUK</span><span>${phoneSafe(gameplayMode)}</span></div>
       ${getDifficultyProfileCard()}
+      ${getCleanModeSystemPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>KAPTAN DEGERLENDIRME</span><span>ay sonu</span></div>
@@ -26194,9 +26801,9 @@ const INTERACTION_PANEL_CONFIGS = {
     correctTag:'kritik',
     midTag:'akilli',
     hotspots:[
-      {id:'target1', x:88, y:68, r:18, label:'T1'},
-      {id:'target2', x:168, y:52, r:22, label:'T2'},
-      {id:'target3', x:238, y:88, r:18, label:'T3'}
+      {id:'target1', x:92, y:76, r:18, label:'CONTACT A', short:'A', cpa:'1.8', tcpa:'14', brg:'312', vector:'M92 76 l-32 -18', type:'cargo'},
+      {id:'target2', x:176, y:48, r:22, label:'CONTACT B', short:'B', cpa:'0.4', tcpa:'08', brg:'046', vector:'M176 48 l-18 42', type:'ferry', risk:true},
+      {id:'target3', x:246, y:88, r:18, label:'CONTACT C', short:'C', cpa:'2.6', tcpa:'21', brg:'118', vector:'M246 88 l28 12', type:'coaster'}
     ]
   },
   s415:{
@@ -26236,7 +26843,14 @@ function buildHotspotConfig(title, hint, caption, expected, correctTag, midTag, 
     x:slots[i]?.x || (70 + i*54),
     y:slots[i]?.y || 78,
     r:slots[i]?.r || 18,
-    label:item?.label || String.fromCharCode(65+i)
+    label:item?.label || String.fromCharCode(65+i),
+    short:item?.short || item?.label || String.fromCharCode(65+i),
+    cpa:item?.cpa || '',
+    tcpa:item?.tcpa || '',
+    brg:item?.brg || '',
+    vector:item?.vector || '',
+    type:item?.type || '',
+    risk:!!item?.risk
   }));
   return {title,hint,caption,expected,correctTag,midTag,hotspots:spots};
 }
@@ -26290,7 +26904,11 @@ function getAutoInteractionConfig(sc){
       'CPA daralan hedefi isaretle. AIS etiketi tek basina karar degildir.',
       'Hedefin vektoru ve CPA halkasi birlikte okunur.',
       'target2','kritik','akilli',
-      [{id:'target1',label:'T1'},{id:'target2',label:'T2'},{id:'target3',label:'T3'}]
+      [
+        {id:'target1',label:'CONTACT A',short:'A',cpa:'1.8',tcpa:'14',brg:'312',type:'cargo'},
+        {id:'target2',label:'CONTACT B',short:'B',cpa:'0.4',tcpa:'08',brg:'046',type:'ferry',risk:true},
+        {id:'target3',label:'CONTACT C',short:'C',cpa:'2.6',tcpa:'21',brg:'118',type:'coaster'}
+      ]
     );
   }
   if(/ecdis|route monitor|safety contour|xtd|no-go|chart/.test(blob)){
@@ -26719,6 +27337,72 @@ function renderVhfInteractionVisual(cfg){
   </div>`;
 }
 
+function renderRadarInteractionVisual(cfg){
+  const contacts = cfg.hotspots.map((h,i)=>{
+    const vector = h.vector || `M${h.x} ${h.y} l${i===1?-22:22} ${i===1?34:-16}`;
+    const riskCls = h.risk || h.id === cfg.expected ? 'risk' : '';
+    return `<g class="radar-contact ${riskCls}" data-hotspot="${h.id}">
+      <path class="radar-contact-vector" d="${vector}"/>
+      <circle class="radar-contact-guard" cx="${h.x}" cy="${h.y}" r="${Math.max(14,h.r)}"/>
+      <path class="radar-contact-echo" d="M${h.x-5} ${h.y+4} L${h.x} ${h.y-7} L${h.x+5} ${h.y+4} Z"/>
+      <text class="radar-contact-tag" x="${h.x+10}" y="${h.y-8}">${phoneSafe(h.short || h.label)}</text>
+      <text class="radar-contact-data" x="${h.x+10}" y="${h.y+5}">CPA ${phoneSafe(h.cpa || '--')}</text>
+    </g>`;
+  }).join('');
+  return `<div class="radar-task-console">
+    <div class="radar-task-head"><span>RADAR / ARPA · N-UP · 6 NM</span><b>CPA GUARD ACTIVE</b></div>
+    <svg class="radar-task-ppi" viewBox="0 0 320 148" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <defs>
+        <radialGradient id="radarTaskGlow" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#123d35"/>
+          <stop offset="72%" stop-color="#092334"/>
+          <stop offset="100%" stop-color="#04101b"/>
+        </radialGradient>
+        <linearGradient id="radarTaskSweep" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgba(129,247,184,.02)"/>
+          <stop offset="100%" stop-color="rgba(129,247,184,.42)"/>
+        </linearGradient>
+      </defs>
+      <rect width="320" height="148" rx="12" fill="url(#radarTaskGlow)"/>
+      <g class="radar-range-rings">
+        <circle cx="160" cy="74" r="24"/>
+        <circle cx="160" cy="74" r="48"/>
+        <circle cx="160" cy="74" r="72"/>
+        <path d="M160 6 V142 M92 74 H228 M111 25 L209 123 M209 25 L111 123"/>
+      </g>
+      <path class="radar-sweep-task" d="M160 74 L160 6 A68 68 0 0 1 215 34 Z"/>
+      <path class="radar-own-vector" d="M160 74 L160 34"/>
+      <path class="radar-ownship" d="M160 60 L168 88 L160 82 L152 88 Z"/>
+      <circle class="radar-cpa-ring" cx="176" cy="48" r="30"/>
+      ${contacts}
+      <text class="radar-screen-note" x="12" y="136">EBL/VRM · ARPA TARGETS · select contact with closing CPA</text>
+    </svg>
+    <div class="radar-contact-choices">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot radar-contact-choice" data-hotspot="${h.id}">
+        <b>${phoneSafe(h.label)}</b>
+        <small>BRG ${phoneSafe(h.brg || '--')} · CPA ${phoneSafe(h.cpa || '--')} NM · TCPA ${phoneSafe(h.tcpa || '--')}m</small>
+      </button>`).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
+function renderGenericInteractionVisual(cfg){
+  return `<div class="doc-visual">
+    <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
+      <circle cx="160" cy="60" r="42" fill="none" stroke="#214a62" stroke-width="1.5"/>
+      <circle cx="160" cy="60" r="28" fill="none" stroke="#214a62" stroke-width="1.2"/>
+      <path d="M160 60 L212 28" stroke="#81f7b8" stroke-width="2.6" stroke-linecap="round"/>
+      ${cfg.hotspots.map(h=>`<g class="interaction-pulse"><circle cx="${h.x}" cy="${h.y}" r="${h.r}" fill="rgba(127,195,255,.08)" stroke="#7fc3ff" stroke-dasharray="5 4"/><text x="${h.x-11}" y="${h.y+3}" fill="#cfeaff" font-size="7.2" font-family="monospace">${phoneSafe(h.short || h.label)}</text></g>`).join('')}
+    </svg>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>
+  <div class="interaction-hotspots">
+    ${cfg.hotspots.map(h=>`<button class="interaction-hotspot" data-hotspot="${h.id}">${phoneSafe(h.label)}</button>`).join('')}
+  </div>`;
+}
+
 function renderInteractionPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
   const cfg = INTERACTION_PANEL_CONFIGS[sc?.id] || getAutoInteractionConfig(sc);
@@ -26726,19 +27410,7 @@ function renderInteractionPanel(sc, ch){
   panel.className='calc-panel show';
   const visual = cfg.kind === 'vhf'
     ? renderVhfInteractionVisual(cfg)
-    : `<div class="doc-visual">
-      <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${cfg.title}">
-        <rect width="320" height="120" rx="10" fill="#0a1b2d"/>
-        <circle cx="160" cy="60" r="42" fill="none" stroke="#214a62" stroke-width="1.5"/>
-        <circle cx="160" cy="60" r="28" fill="none" stroke="#214a62" stroke-width="1.2"/>
-        <path d="M160 60 L212 28" stroke="#81f7b8" stroke-width="2.6" stroke-linecap="round"/>
-        ${cfg.hotspots.map(h=>`<g class="interaction-pulse"><circle cx="${h.x}" cy="${h.y}" r="${h.r}" fill="rgba(127,195,255,.08)" stroke="#7fc3ff" stroke-dasharray="5 4"/><text x="${h.x-11}" y="${h.y+3}" fill="#cfeaff" font-size="7.2" font-family="monospace">${h.label}</text></g>`).join('')}
-      </svg>
-      <div class="doc-visual-caption">${cfg.caption}</div>
-    </div>
-    <div class="interaction-hotspots">
-      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot" data-hotspot="${h.id}">${h.label}</button>`).join('')}
-    </div>`;
+    : /radar|arpa|cpa|target/i.test(cfg.title || '') ? renderRadarInteractionVisual(cfg) : renderGenericInteractionVisual(cfg);
   panel.innerHTML = `<div class="decision-box">
     <div class="decision-title">${cfg.title}</div>
     <div class="decision-hint">${cfg.hint}</div>
@@ -26778,6 +27450,8 @@ function onSceneRender(sc){
   // Hava güncelle
   updateWeather(sc.gfx);
   updateOpsHud(sc);
+  syncWatchDirector3(sc);
+  tickWorkRestFromScene(sc);
   applyScenePsychDrift(sc);
   maybeTriggerCompanyPressureBeat(sc);
   // Harita pozisyonunu güncelle
@@ -26846,6 +27520,7 @@ function onSceneRender(sc){
   maybeTriggerAiMateSceneNudge(sc);
   maybeTriggerLivingShipBeat(sc);
   maybeTriggerLiveRoutineFlow(sc);
+  maybeTriggerSurpriseInspection(sc);
   scheduleDynamicMiniChain(sc);
   // Rastgele olay
   maybeTrigerEvent();

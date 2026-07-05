@@ -209,6 +209,19 @@ def first_name_from_display(display: str) -> str:
         "medical",
         "security",
         "officer",
+        "captain",
+        "second",
+        "third",
+        "able",
+        "seafarer",
+        "capitan",
+        "kapitan",
+        "kapitaen",
+        "capitaine",
+        "chef",
+        "oficial",
+        "offizier",
+        "officier",
     }
     tokens = [
         re.sub(r"[^\w.]", "", normalize_tr_ascii(part))
@@ -289,6 +302,14 @@ def check_character_portraits() -> None:
     require_token(section, "if(out.base === 'female') out.beard = 'clean';", JS)
     require_token(section, "support-style-female-cutout.png", JS)
     require_token(section, "support-style-male-cutout.png", JS)
+    require_token(section, "CREW_NAME_POOLS_BY_LANG", JS)
+    require_token(section, "getCrewNamePoolForLanguage", JS)
+    require_token(section, "Captain Emily Carter", JS)
+    require_token(section, "Capitán Lucía Morales", JS)
+    require_token(section, "Kapitän Anna Schneider", JS)
+    require_token(section, "Capitaine Claire Moreau", JS)
+    require_token(section, "Капитан Анна Соколова", JS)
+    require_token(section, "船长 李娜", JS)
 
     markers_block = array_after("const FEMALE_NAME_MARKERS", JS)
     markers = {normalize_tr_ascii(value) for value in js_string_values(markers_block)}
@@ -313,6 +334,22 @@ def check_character_portraits() -> None:
         "asli",
         "ebru",
         "dilek",
+        "emily",
+        "sarah",
+        "lucia",
+        "sofia",
+        "carmen",
+        "anna",
+        "lena",
+        "claire",
+        "sophie",
+        "marie",
+        "анна",
+        "ольга",
+        "елена",
+        "李娜",
+        "王芳",
+        "刘芳",
     }
     missing = sorted(known_female - markers)
     if missing:
@@ -338,6 +375,32 @@ def check_character_portraits() -> None:
     ok(section, f"Checked {len(crew_names)} crew name presets and portrait gender guardrails.")
 
 
+def check_crew_roster_counts() -> None:
+    section = "crew-roster"
+    for token in (
+        "SHIP_TYPE_ACTIVE_CREW_KEYS",
+        "STANDARD_TRADING_CREW_KEYS",
+        "getActiveSpecialistCrewKeysForShipType",
+        "getCrewRosterNote",
+        "kont:'19 aktif'",
+        "AKTIF GEMI KADROSU",
+    ):
+        require_token(section, token, JS)
+
+    active_rosters = object_after("const SHIP_TYPE_ACTIVE_CREW_KEYS", JS)
+    match = re.search(r"\bkont\s*:\s*\[([^\]]+)\]", active_rosters, re.S)
+    if not match:
+        fail(section, "Container active crew profile is missing.")
+        return
+    container_count = len(re.findall(r"['\"]([^'\"]+)['\"]", match.group(1)))
+    if container_count > 22:
+        fail(section, f"Container active crew is too high: {container_count}; expected 18-22.")
+    elif container_count < 16:
+        warn(section, f"Container active crew looks low: {container_count}.")
+    else:
+        ok(section, f"Container active crew count is realistic for game scope: {container_count}.")
+
+
 def check_map_and_ecdis() -> None:
     section = "map"
     for token in [
@@ -351,6 +414,12 @@ def check_map_and_ecdis() -> None:
         "buildWorldShodbChartIndexOverlay",
         "TRADE_VOYAGE_ROUTES.push",
         "MAJOR_TRADE_ROUTE_KEYS",
+        "getMapTaskChartSymbol",
+        "map-task-callout",
+        "renderRadarInteractionVisual",
+        "radar-task-console",
+        "CONTACT B",
+        "cpa:'0.4'",
     ]:
         require_token(section, token, JS)
 
@@ -363,6 +432,8 @@ def check_map_and_ecdis() -> None:
 
     if "tol:" not in JS and "hitboxes" not in JS:
         fail(section, "No tolerance/hitbox language found for map tasks.")
+    if "label:'T1'" in JS or 'label:"T1"' in JS:
+        fail(section, "Debug-style T1 radar target labels are visible again.")
     if "chart bu görev için uygun değil" in normalize_tr_ascii(JS):
         warn(section, "A hard 'chart not suitable' style message may still exist; prefer teaching fallback.")
 
@@ -433,8 +504,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=142",
-        "index.css?v=126",
+        "index.js?v=146",
+        "index.css?v=128",
     ]:
         require_token(section, token)
 
@@ -556,15 +627,42 @@ def check_route_generation_hook() -> None:
             require_token(section, token, text)
 
 
+def check_watch_director_realism() -> None:
+    section = "watch-realism"
+    for token in (
+        "watchDirector3State",
+        "getWatchDirector3Panel",
+        "completeWatchDirector3Step",
+        "workRestState",
+        "getWorkRestHoursPanel",
+        "brmCoachState",
+        "getBrmManagementPanel",
+        "editableReportState",
+        "getEditableReportBookPanel",
+        "surpriseInspectionState",
+        "getSurpriseInspectionPanel",
+        "maybeTriggerSurpriseInspection",
+        "CERTIFICATE_COURSES",
+        "getCertificateCoursePanel",
+        "scenarioEditorState",
+        "getScenarioEditorPanel",
+        "runAdvancedWatchSpine",
+        "Vardiya Direktoru 3.0",
+    ):
+        require_token(section, token, JS)
+
+
 def main() -> int:
     check_languages()
     check_character_portraits()
+    check_crew_roster_counts()
     check_map_and_ecdis()
     check_billing_products()
     check_scene_balance_and_text()
     check_mobile_and_hitboxes()
     check_assets()
     check_route_generation_hook()
+    check_watch_director_realism()
 
     for line in INFO:
         print(f"OK {line}")
