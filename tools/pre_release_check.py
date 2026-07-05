@@ -420,6 +420,12 @@ def check_map_and_ecdis() -> None:
         "radar-task-console",
         "CONTACT B",
         "cpa:'0.4'",
+        "renderMooringInteractionVisual",
+        "mooring-operation-console",
+        "mooring-snap-zone",
+        "mooring-safe-zone",
+        "SAFE STAND-BY",
+        "TENSION RISING",
     ]:
         require_token(section, token, JS)
 
@@ -504,8 +510,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=146",
-        "index.css?v=128",
+        "index.js?v=147",
+        "index.css?v=129",
     ]:
         require_token(section, token)
 

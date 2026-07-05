@@ -26948,13 +26948,19 @@ function getAutoInteractionConfig(sc){
     );
   }
   if(/mooring|halat|snap-back|tug|römorkör|romorkor|all fast/.test(blob)){
-    return buildHotspotConfig(
+    const cfg = buildHotspotConfig(
       'MOORING EMNIYET ALANI',
       'Halat gerilimi artarken guvenli bolgeyi ve sirayi sec.',
       'Snap-back zone gorunmeden halat operasyonu okunmus sayilmaz.',
       'safe','kritik','itaatkar',
-      [{id:'line',label:'LINE'},{id:'safe',label:'SAFE'},{id:'bight',label:'BIGHT'}]
+      [
+        {id:'line',label:'Gergin hat',short:'LINE'},
+        {id:'safe',label:'Guvenli bolge',short:'SAFE'},
+        {id:'bight',label:'Bight / dolanan kisim',short:'BIGHT'}
+      ]
     );
+    cfg.kind = 'mooring';
+    return cfg;
   }
   return null;
 }
@@ -27387,6 +27393,93 @@ function renderRadarInteractionVisual(cfg){
   </div>`;
 }
 
+function renderMooringInteractionVisual(cfg){
+  return `<div class="mooring-operation-console">
+    <div class="mooring-operation-head">
+      <span>FORE / AFT MOORING STATION</span>
+      <b>TENSION RISING · SNAP-BACK WATCH</b>
+    </div>
+    <svg class="mooring-operation-svg" viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <defs>
+        <linearGradient id="mooringSea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#102a3f"/>
+          <stop offset="100%" stop-color="#061827"/>
+        </linearGradient>
+        <linearGradient id="mooringDeck" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#182839"/>
+          <stop offset="52%" stop-color="#263949"/>
+          <stop offset="100%" stop-color="#142333"/>
+        </linearGradient>
+        <linearGradient id="mooringQuay" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#3a4248"/>
+          <stop offset="100%" stop-color="#1c242a"/>
+        </linearGradient>
+      </defs>
+      <rect width="520" height="230" rx="16" fill="url(#mooringSea)"/>
+      <path class="mooring-water-lines" d="M0 196 C70 183 116 210 184 194 S310 180 384 198 S470 206 520 190"/>
+      <rect class="mooring-quay" x="0" y="0" width="520" height="72" fill="url(#mooringQuay)"/>
+      <path class="mooring-quay-edge" d="M0 72 H520"/>
+      <g class="mooring-bollards">
+        <g transform="translate(74 44)"><ellipse cx="0" cy="0" rx="16" ry="8"/><rect x="-12" y="-17" width="24" height="18" rx="5"/></g>
+        <g transform="translate(260 44)"><ellipse cx="0" cy="0" rx="16" ry="8"/><rect x="-12" y="-17" width="24" height="18" rx="5"/></g>
+        <g transform="translate(446 44)"><ellipse cx="0" cy="0" rx="16" ry="8"/><rect x="-12" y="-17" width="24" height="18" rx="5"/></g>
+      </g>
+      <path class="mooring-ship-hull" d="M34 132 C82 102 178 92 310 98 C392 102 458 118 494 144 L474 194 C344 215 146 211 52 184 Z"/>
+      <path class="mooring-ship-deck" d="M66 138 C154 118 330 119 456 148 L443 178 C320 196 168 194 76 172 Z" fill="url(#mooringDeck)"/>
+      <g class="mooring-fairleads">
+        <rect x="102" y="131" width="24" height="10" rx="3"/>
+        <rect x="386" y="143" width="24" height="10" rx="3"/>
+      </g>
+      <path class="mooring-line main" data-hotspot="line" d="M113 136 C104 116 88 80 74 44"/>
+      <path class="mooring-line spring" data-hotspot="line" d="M397 148 C360 116 306 82 260 44"/>
+      <path class="mooring-line breast" data-hotspot="line" d="M405 148 C422 112 436 78 446 44"/>
+      <path class="mooring-snap-zone z1" d="M74 44 C124 82 134 126 113 136 C94 116 80 84 74 44 Z"/>
+      <path class="mooring-snap-zone z2" d="M260 44 C332 74 388 116 397 148 C340 130 292 92 260 44 Z"/>
+      <path class="mooring-bight-zone" data-hotspot="bight" d="M168 166 C196 150 230 151 254 169 C228 189 194 188 168 166 Z"/>
+      <g class="mooring-crew">
+        <g transform="translate(142 162)"><circle cx="0" cy="-16" r="7"/><rect x="-6" y="-9" width="12" height="24" rx="5"/><text x="-20" y="27">AB</text></g>
+        <g transform="translate(302 157)"><circle cx="0" cy="-16" r="7"/><rect x="-6" y="-9" width="12" height="24" rx="5"/><text x="-30" y="27">BOSUN</text></g>
+      </g>
+      <g class="mooring-safe-zone" data-hotspot="safe">
+        <rect x="262" y="156" width="102" height="42" rx="16"/>
+        <text x="313" y="181" text-anchor="middle">SAFE STAND-BY</text>
+      </g>
+      <g class="mooring-danger-label">
+        <text x="92" y="98">SNAP-BACK</text>
+        <text x="316" y="106">SNAP-BACK</text>
+      </g>
+      <g class="mooring-mini-panel">
+        <rect x="18" y="82" width="128" height="39" rx="8"/>
+        <text x="30" y="99">LINE TENSION</text>
+        <rect x="30" y="106" width="94" height="7" rx="4"/>
+        <rect class="mooring-tension-fill" x="30" y="106" width="68" height="7" rx="4"/>
+      </g>
+      <g class="mooring-mini-panel right">
+        <rect x="376" y="82" width="126" height="39" rx="8"/>
+        <text x="388" y="99">NEXT ACTION</text>
+        <text class="mooring-next-action" x="388" y="114">KEEP CLEAR / READBACK</text>
+      </g>
+    </svg>
+    <div class="mooring-step-strip">
+      <span><b>1</b> Halat yolunu oku</span>
+      <span><b>2</b> Snap-back alanini bosalt</span>
+      <span class="active"><b>3</b> Guvenli stand-by bolgesi</span>
+      <span><b>4</b> Komutu repeat-back yap</span>
+    </div>
+    <div class="mooring-choice-grid">
+      ${cfg.hotspots.map(h=>{
+        const detail = h.id === 'safe' ? 'Personel burada durur; hat calisirken risk cemberinin disinda kalir.'
+          : h.id === 'line' ? 'Gergin hattin uzerinde/uzantisinda durulmaz; once yolunu oku.'
+          : 'Bight icine ayak/el sokulmaz; halat kapanirsa kacis yoktur.';
+        return `<button class="interaction-hotspot mooring-choice ${h.id==='safe'?'recommended':''}" data-hotspot="${h.id}">
+          <b>${phoneSafe(h.label)}</b><small>${phoneSafe(detail)}</small>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
 function renderGenericInteractionVisual(cfg){
   return `<div class="doc-visual">
     <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
@@ -27410,7 +27503,9 @@ function renderInteractionPanel(sc, ch){
   panel.className='calc-panel show';
   const visual = cfg.kind === 'vhf'
     ? renderVhfInteractionVisual(cfg)
+    : cfg.kind === 'mooring' ? renderMooringInteractionVisual(cfg)
     : /radar|arpa|cpa|target/i.test(cfg.title || '') ? renderRadarInteractionVisual(cfg) : renderGenericInteractionVisual(cfg);
+  panel.dataset.locked = '';
   panel.innerHTML = `<div class="decision-box">
     <div class="decision-title">${cfg.title}</div>
     <div class="decision-hint">${cfg.hint}</div>
@@ -27419,6 +27514,7 @@ function renderInteractionPanel(sc, ch){
   </div>`;
   panel.querySelectorAll('[data-hotspot]').forEach(btn=>{
     btn.onclick=(ev)=>{
+      if(panel.dataset.locked === 'true') return;
       const hit = ev.target.closest('[data-hotspot]') || btn;
       const pickedId = hit.dataset.hotspot;
       const picked = pickedId === cfg.expected
@@ -27427,9 +27523,13 @@ function renderInteractionPanel(sc, ch){
       const feedback = document.getElementById('interaction-feedback');
       const good = pickedId === cfg.expected;
       if(cfg.kind === 'vhf') completeMissionStep('vhf', good ? 'VHF kanali dogru secildi' : 'VHF kanali secildi, teyit gerekli');
+      else if(cfg.kind === 'mooring') completeMissionStep('deck', good ? 'Mooring guvenli bolge dogru secildi' : 'Mooring risk bolgesi secildi, tekrar kontrol gerekli');
       else completeMissionStep(cfg.title.includes('RADAR') ? 'radar' : cfg.title.includes('ECDIS') ? 'ecdis' : cfg.title.includes('FIRE') || cfg.title.includes('MOB') ? 'alarm' : 'device');
       feedback.className = `decision-feedback ${good?'':'warn'}`.trim();
-      feedback.textContent = good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.';
+      feedback.textContent = cfg.kind === 'mooring'
+        ? (good ? 'Dogru: personel gergin halatin uzantisi ve bight disinda, guvenli stand-by bolgesinde kalir.' : 'Riskli: LINE veya BIGHT uzerinde durmak snap-back/caught-in tehlikesi yaratir. Once alan bosaltilir.')
+        : (good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.');
+      panel.dataset.locked = 'true';
       panel.querySelectorAll('[data-hotspot]').forEach(el=>el.disabled=true);
       setTimeout(()=>handleSceneChoice(sc,picked,ch),850);
     };

@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=146",
-        "index.css?v=128",
+        "index.js?v=147",
+        "index.css?v=129",
     ],
     "creator color controls removed": [
         "creator-uniform",
