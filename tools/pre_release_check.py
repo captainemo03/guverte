@@ -434,10 +434,7 @@ def check_map_and_ecdis() -> None:
         "SAFE STAND-BY",
         "TENSION RISING",
         "groan-of-the-keel.mp3",
-        "salted-dawn.mp3",
         "startIntroRecordedTrack",
-        "playEndSuccessTrack",
-        "maybeStartEndSuccessTrack",
         "playIntroSynthMaritimeTheme",
         "playIntroMaritimeTheme",
         "maybeStartIntroMaritimeTheme",
@@ -525,8 +522,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=151",
-        "index.css?v=130",
+        "index.js?v=153",
+        "index.css?v=131",
     ]:
         require_token(section, token)
 

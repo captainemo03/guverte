@@ -45,8 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=151",
-        "index.css?v=130",
+        "index.js?v=153",
+        "index.css?v=131",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -112,6 +112,7 @@ REQUIRED = {
         "intro-premium-card",
         "intro-audio-card",
         "sound-option-btn",
+        "audio-mixer",
     ],
     "intro route selector": [
         "route-select-grid",

@@ -8,8 +8,7 @@
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="preload" href="./assets/audio/salted-dawn.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=130">
+<link rel="stylesheet" href="./index.css?v=131">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -185,6 +184,13 @@
 <!-- ANA MENÜ -->
 <div id="home-screen" class="app-screen active">
   <div class="home-hero">
+    <div class="home-cinematic-sea" aria-hidden="true">
+      <span class="home-cinematic-radar"></span>
+      <span class="home-cinematic-ship"></span>
+      <span class="home-cinematic-light"></span>
+      <span class="home-cinematic-fog f1"></span>
+      <span class="home-cinematic-fog f2"></span>
+    </div>
     <div class="home-ship">🚢</div>
     <div class="home-title">Güverte</div>
     <div class="home-sub">Bir Stajyerin Hikayesi</div>
@@ -228,6 +234,7 @@
         </select>
       </div>
       <button id="home-sound-btn" class="sound-option-btn" onclick="toggleSound()">🔊 Ses Acik</button>
+      <div class="audio-mixer" data-audio-mixer="home"></div>
     </div>
 
     <div id="home-page-premium" class="home-page" data-home-page="premium">
@@ -322,20 +329,17 @@
         <div class="creator-row" id="creator-base"></div>
         <span class="flbl">Yaş Grubu</span>
         <div class="creator-row" id="creator-age"></div>
-        <span class="flbl">Poz</span>
-        <div class="creator-row" id="creator-pose"></div>
         <span class="flbl">Boy / Kilo</span>
         <div class="creator-row" id="creator-body"></div>
         <span class="flbl">Arka Plan Mekanı</span>
         <div class="creator-row" id="creator-scene"></div>
         <span class="flbl">Portre Modeli</span>
         <div class="creator-row" id="creator-model"></div>
-        <span class="flbl">Yüz Tipi</span>
-        <div class="creator-row" id="creator-face"></div>
         <span class="flbl">Saç Modeli</span>
         <div class="creator-row" id="creator-hair"></div>
         <span class="flbl">Sakal</span>
         <div class="creator-row" id="creator-beard"></div>
+        <div class="creator-auto-uniform-note">Uniforma, apolet ve rozet rol/rutbeye gore otomatik atanir.</div>
       </div>
     </div>
   </div>
@@ -379,6 +383,7 @@
   <div class="fcard intro-audio-card">
     <div class="fcard-t">Ses Ayari</div>
     <button id="sound-btn" class="sound-option-btn" onclick="toggleSound()">🔊 Ses Acik</button>
+    <div class="audio-mixer" data-audio-mixer="setup"></div>
     <div class="mode-hint">Ortam sesi, VHF cizirtisi, alarm ve sahne efektlerini buradan acip kapat.</div>
   </div>
 
@@ -610,6 +615,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=151"></script>
+<script src="./index.js?v=153"></script>
 </body>
 </html>

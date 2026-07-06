@@ -11173,10 +11173,8 @@ function renderCreatorRow(elId, values, selected, kind){
       if(elId==='creator-skin') playerAppearance.skin=v;
       else if(elId==='creator-base') setPlayerBase(v);
       else if(elId==='creator-age'){ playerAppearance.age=v; syncPlayerModelFromTraits(); }
-      else if(elId==='creator-pose') playerAppearance.pose=v;
       else if(elId==='creator-scene') playerAppearance.scene=v;
       else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
-      else if(elId==='creator-face'){ playerAppearance.face=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-hair'){ playerAppearance.hair=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-beard'){ playerAppearance.beard=v; syncPlayerModelFromTraits(); }
       renderCharacterCreator();
@@ -11215,11 +11213,9 @@ function renderCharacterCreator(){
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-age', PLAYER_LOOK.age, playerAppearance.age, 'text');
-  renderCreatorRow('creator-pose', PLAYER_LOOK.pose, playerAppearance.pose, 'text');
   renderCreatorBodyControls();
   renderCreatorRow('creator-scene', PLAYER_LOOK.scene, playerAppearance.scene, 'text');
   renderCreatorRow('creator-model', modelPool, String(playerAppearance.model), 'text');
-  renderCreatorRow('creator-face', PLAYER_LOOK.face, playerAppearance.face, 'text');
   renderCreatorRow('creator-hair', hairPool, playerAppearance.hair, 'text');
   const beardRow = document.getElementById('creator-beard');
   const beardLbl = beardRow ? beardRow.previousElementSibling : null;
@@ -11278,6 +11274,7 @@ function buildIntro(){
   renderCharacterCreator();
   renderShipChoiceSummary();
   renderSetupOnboardingGuide();
+  renderAudioMixer();
   applyLanguageUI();
   setIntroMenuPage(introMenuPage);
 }
@@ -14414,9 +14411,11 @@ function showEnd(){
   stopAllMusic();
   closeContractCareerBooks();
   document.getElementById('game').style.display='none';
-  document.getElementById('endscr').style.display='flex';
-  setTimeout(maybeStartEndSuccessTrack, 120);
-
+  const endScreen = document.getElementById('endscr');
+  if(endScreen){
+    endScreen.style.display='flex';
+    endScreen.classList.remove('final-tier-gold','final-tier-strong','final-tier-learning');
+  }
   const avg=(stats.cesaret+stats.bilgi+stats.sayginlik)/3;
   const cesurC=choicesMade.filter(c=>c.tag==='cesur').length;
   const kritikC=choicesMade.filter(c=>c.tag==='kritik').length;
@@ -14426,25 +14425,30 @@ function showEnd(){
   const completedScenes = contractDays;
 
   let emoji,title,flavor,desc,verdict;
+  let finalTier = 'learning';
   if(kritikC>=2&&stats.cesaret>=60&&avg>=60){
+    finalTier='gold';
     emoji='🛡️';title='Krizlerin Denizcisi';
     flavor=`"Bu stajyer dört krizde donmadı." — Süvari, ${selYear}`;
     desc=`${pn}, ${totalMonths} aylik ${stObj.nm} kontratinda ${completedScenes} sahne tamamlayarak makine arizasi, bogaz gecisi ve kriz kararlarinda iz birakti.`;
     verdict=`<strong>Staj Raporu (${selYear}):</strong> Kriz yönetimi olağanüstü. ${kont.bonus} kazanıldı. İleri kademe eğitim tavsiye edilir.`;
     setTimeout(sfxSuccess,300);
   }else if(stats.sayginlik>=70&&avg>=65){
+    finalTier='gold';
     emoji='🏆';title='Geleceğin Süvarisi';
     flavor=`"Bu stajyer 10 yıl içinde köprüye çıkar." — Süvari, ${selYear}`;
     desc=`${pn}, ${sn}'da kendini kanıtladı. Mürettebat seninle gurur duyuyor.`;
     verdict=`<strong>Staj Raporu (${selYear}):</strong> Teknik bilgi üstün. Mürettebat uyumu mükemmel. ${kont.bonus} kazanıldı.`;
     setTimeout(sfxSuccess,300);
   }else if(stats.bilgi>=65&&avg>=55){
+    finalTier='strong';
     emoji='🧭';title='Yetenekli Denizci';
     flavor=`"Teknik kafası güçlü." — 1. Zabiti`;
     desc=`${pn} bilgi konusunda üstün. Saha gelişiyor.`;
     verdict=`<strong>Staj Raporu (${selYear}):</strong> Teorik bilgi kuvvetli. ${kont.bonus} kazanıldı.`;
     setTimeout(sfxSuccess,300);
   }else if(cesurC>=5&&stats.cesaret>=60){
+    finalTier='strong';
     emoji='⚓';title='Cesur Güverte Adamı';
     flavor=`"Korkmuyor." — Lostromo`;
     desc=`${pn} öne çıktı, risk üstlendi.`;
@@ -14482,6 +14486,7 @@ function showEnd(){
   verdict+=` <br><strong>Gemi Tipi Uzmanlığı:</strong> ${getTopSpecialtyLabel()}.`;
   verdict+=` <br><strong>Terfi Mülakati:</strong> "Neden ${calculatePromotionReport().nextRank} icin hazirsin?", "Son near miss sana ne ogretti?", "Radar ve AIS celisirse hangisini nasil teyit edersin?"`;
   verdict+=` <br><strong>Uzmanlasma:</strong> ${specialization.top}. <strong>Ikincil hat:</strong> ${specialization.second}.`;
+  verdict+=renderFinalCinematicBlock({finalTier,title,avg,totalMonths,completedScenes});
   verdict+=renderContractCinematicReport();
   verdict+=` <br><br><strong>Karar:</strong> Gemide kalirsan ayni ekip hafizasi, statlar, telefon mesajlari ve kayitlarla yeni senaryo paketine devam edersin. Ayrilirsan bu kontrat kariyer raporu olarak kapanir.`;
   document.getElementById('ende').textContent=emoji;
@@ -14489,6 +14494,7 @@ function showEnd(){
   document.getElementById('endf').textContent=flavor;
   document.getElementById('endd').textContent=desc;
   document.getElementById('endv').innerHTML=verdict;
+  if(endScreen) endScreen.classList.add(`final-tier-${finalTier}`);
   const firstOffer = (shipOffers && shipOffers[0]) || buildShipOffers()[0];
   const captainLine = avg>=65 ? 'Kaptan: Bu kontratta vardiya disiplini ve rapor dilin guclendi.' : 'Kaptan: Temel guvenlik iyi, ama cihaz/harita tekrarini aksatmayacaksin.';
   const familyLine = mood>=55 ? 'Aile: Sesini duymak iyi geldi, donus tarihini bekliyoruz.' : 'Aile: Uzak kalman zor oldu; bir sonraki kontratta daha cok haberleselim.';
@@ -14514,7 +14520,6 @@ function showEnd(){
 
 function continueContractOnShip(offerKey='same'){
   clearSceneChoiceTimer();
-  stopEndSuccessTrack(true);
   const stObj=STYPES.find(x=>x.key===selType);
   const offer = (shipOffers.length?shipOffers:buildShipOffers()).find(o=>o.key===offerKey) || buildShipOffers()[0];
   if(isPremiumShipType(offer.type) && !premiumUnlocked){
@@ -16818,15 +16823,16 @@ function openHomeScreen(){
 }
 
 function openSetupScreen(){
+  stopIntroMaritimeTheme();
   setIntroMenuPage('play');
   setAppScreen('setup');
   renderShipChoiceSummary();
   refreshSaveEntryActions();
-  setTimeout(maybeStartIntroMaritimeTheme, 80);
   window.scrollTo?.(0,0);
 }
 
 function openShipSelectScreen(){
+  stopIntroMaritimeTheme();
   ensureShipSelectScreen();
   setIntroMenuPage('ship');
   setAppScreen('setup');
@@ -16884,6 +16890,7 @@ function setHomeMenuPage(page='play'){
   document.querySelectorAll('.home-page').forEach(panel=>{
     panel.classList.toggle('active', panel.dataset.homePage === homeMenuPage);
   });
+  renderAudioMixer();
 }
 
 function setIntroMenuPage(page='play'){
@@ -16913,6 +16920,7 @@ function setIntroMenuPage(page='play'){
   if(launch) launch.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'block' : 'none';
   if(saveActions) saveActions.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'flex' : 'none';
   renderSetupOnboardingGuide();
+  renderAudioMixer();
 }
 
 function renderPlayModeSelector(){
@@ -18179,6 +18187,28 @@ function normalizeClickableSurface(selector='button,[role="button"],.interaction
   });
 }
 
+function getMapTaskReadingCue(task, port){
+  const training = getMapTaskTraining(task?.id);
+  const target = task && port ? getMapTaskTarget(task, port) : null;
+  const cueByTask = {
+    pilot:'Pilot boarding point genelde fairway disinda, pilot ladder/speed azaltma zincirinden once aranir.',
+    anchorage:'Demir yeri icin derinlik, no-anchoring notu, trafik ayrim duzeni ve lee/swell etkisini birlikte oku.',
+    tss:'TSS icin trafik yon oklarini, separation zone sinirini ve crossing acisini kontrol et.',
+    berth:'Berth approach icin turning basin, tug plan ve final heading noktasini birlikte oku.',
+    reporting:'Reporting/VTS noktasi kanal bilgisiyle birlikte rota uzerinde veya gecit girisinde aranir.',
+    waypoint:'Next waypoint icin rota bacagi, XTD limiti ve wheel-over noktasini kontrol et.',
+    cpa:'CPA gorevinde hedef sembolu, vektor yonu ve kendi gemi rotasi ayni anda okunur.',
+    ukc:'UKC gorevinde safety contour, draft, squat ve en dusuk derinlik ayni karara baglanir.',
+    eca:'ECA/change-over cizgisi yakit gecis plani ve logbook notuyla birlikte okunur.',
+    weatheravoid:'Weather routing icin rota bacaklarini swell/low pressure alanindan uzak tut.',
+    cablecrossing:'Kablo/boru gecisi demirleme yasagi, izin ve chart notlariyla birlikte okunur.',
+    offshorezone:'Offshore 500 m zone platform etrafindaki izin/abort point halkasidir.'
+  };
+  const cue = cueByTask[task?.id] || training.focus;
+  const targetLabel = target?.label || task?.title || 'chart target';
+  return `<div class="map-reading-cue"><i>ENC</i><span><b>${phoneSafe(targetLabel)}</b><br>${phoneSafe(cue)} ${phoneSafe(training.focus)}</span></div>`;
+}
+
 function updateMapTaskBox(port){
   const task = getCurrentMapTask();
   ensureTaskPort(task);
@@ -18202,7 +18232,7 @@ function updateMapTaskBox(port){
   }
   title.textContent = `${task.title} · ${effectivePort?.name || ''}`;
   const training = getMapTaskTraining(task.id);
-  desc.innerHTML = `${renderMapMissionChainPanel()}<div>${phoneSafe(task.desc)} Egitim odagi: ${phoneSafe(training.focus)}${task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${phoneSafe(effectivePort.name)} charti uzerindesin.` : ''}</div>`;
+  desc.innerHTML = `${renderMapMissionChainPanel()}${getMapTaskReadingCue(task, effectivePort)}<div>${phoneSafe(task.desc)} Egitim odagi: ${phoneSafe(training.focus)}${task.preferredPort && effectivePort?.name===task.preferredPort ? ` Bu tur ${phoneSafe(effectivePort.name)} charti uzerindesin.` : ''}</div>`;
   status.className = '';
   const target = getMapTaskTarget(task, effectivePort);
   status.textContent = completedMapTasks.has(task.id) ? 'Tamamlandi. Istersen sonraki goreve gecebilirsin.' : `${target.label || task.title} halkasini haritada bul ve isaretle.`;
@@ -18447,6 +18477,37 @@ function renderContractCinematicReport(){
     <br>• Ekip vedasi: en guclu alan ${phoneSafe(best)}, zayif alan ${phoneSafe(weakest)}
     <br>• Sirket teklifi: ${phoneSafe(company)}
     <br>• Aile mesaji: ${phoneSafe(family)}`;
+}
+
+function renderFinalCinematicBlock(opts={}){
+  const tier = opts.finalTier || 'learning';
+  const firstOffer = (shipOffers && shipOffers[0]) || buildShipOffers()[0];
+  const album = photos.slice(-3).map(p=>p.title || 'Hatira');
+  while(album.length < 3) album.push(['Ilk vardiya','Kopruustu notu','Kontrat sonu'][album.length]);
+  const captainSpeech = tier === 'gold'
+    ? 'Kaptan son konusmasinda seni yeni vardiya sorumluluguna hazir gordugunu soyledi.'
+    : tier === 'strong'
+      ? 'Kaptan son konusmasinda disiplinin iyi oldugunu, cihaz tekrarini surdurman gerektigini soyledi.'
+      : 'Kaptan son konusmasinda bu kontrati bir ogrenme dosyasi gibi kapatmani istedi.';
+  const familyMsg = mood >= 55
+    ? 'Aile grubunda donus gunu, liman fotografi ve bir sonraki izin plani konusuluyor.'
+    : 'Aile mesajinda daha cok haber vermen ve dinlenmen isteniyor.';
+  const offerLine = firstOffer
+    ? `${firstOffer.label}: ${firstOffer.ship} · $${firstOffer.pay}/ay`
+    : `Ayni gemi · $${careerState.salary}/ay`;
+  const reportStyle = tier === 'gold' ? 'Altin rapor' : tier === 'strong' ? 'Guclu rapor' : 'Ogrenme raporu';
+  return `<div class="final-cinematic">
+    <div class="final-cinematic-head"><span>FINAL CINEMATIC</span><span>${phoneSafe(reportStyle)}</span></div>
+    <div class="final-beat-strip">
+      <div class="final-beat"><b>Kaptanin son konusmasi</b><span>${phoneSafe(captainSpeech)}</span></div>
+      <div class="final-beat"><b>Gemiden inis</b><span>Gangway acik, cantan hazir, kontrat defteri kapanirken yeni teklifler masada.</span></div>
+      <div class="final-beat"><b>Aile mesaji</b><span>${phoneSafe(familyMsg)}</span></div>
+      <div class="final-beat"><b>Yeni kontrat</b><span>${phoneSafe(offerLine)}</span></div>
+    </div>
+    <div class="final-memory-cards">
+      ${album.map(item=>`<div>ALBUM · ${phoneSafe(item)}</div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function avgCrewTrustForReport(){
@@ -22873,14 +22934,37 @@ function resetDevicePractice(){
   deviceLogLine = `${def.name}: pratik sifirlandi. Ilk adimdan basla.`;
   renderDevices();
 }
+
+function getDeviceTrainingCoach(def, expected){
+  const key = def?.key || '';
+  if(key === 'vhf') return `Kanal secimi tek basina yetmez; mesaj turu, DSC zinciri, PTT disiplini ve readback sirasini takip et. Siradaki beklenen adim: ${expected}.`;
+  if(key === 'radar') return `Once hedefi acquire et, sonra CPA/TCPA ve vektorleri oku. Trial manoeuvre ancak hedef verisi oturduktan sonra anlamli olur.`;
+  if(key === 'ecdis') return `Route check, safety contour ve alarm acknowledge ayni zincirin parcalari. Sadece rotaya degil, no-go ve sensor durumuna da bak.`;
+  if(key === 'gmdss' || key === 'mf-hf') return `Distress/urgency rutini cihaz menusu, kanal/frekans, mesaj tipi ve onay adimlariyla okunur.`;
+  if(key === 'ais') return `AIS bilgi verir ama tek basina karar verdirmez; radar/visual kontrol ve CPA karsilastirmasi gerekir.`;
+  if(key === 'starlink') return `Baglanti sagligi, obstruction, failover ve latency ayni panelden takip edilir; kritik haberlesmede backup dusun.`;
+  return `Cihaz pratigi sira mantigiyla ilerler. Beklenen adim: ${expected}. Yanlis adimda stat degil, once egitim aciklamasi gelir.`;
+}
+
+function getDeviceWrongExplanation(def, label, expected){
+  const key = def?.key || '';
+  if(key === 'vhf') return `VHF'de ${label} erken/yanlis secildi. Once ${expected} adimini tamamla; kanal, mesaj tipi ve readback sirasi bozulmamali.`;
+  if(key === 'radar') return `Radar ekraninda ${label} icin veri zinciri eksik. Beklenen adim ${expected}; hedef acquire edilmeden CPA/TCPA yorumu zayif kalir.`;
+  if(key === 'ecdis') return `ECDIS'te ${label} dogru baglamda degil. Beklenen adim ${expected}; route check, safety contour ve alarm listesi birlikte okunur.`;
+  if(key === 'gmdss' || key === 'mf-hf') return `${label} secimi haberlesme zincirini atliyor. Beklenen adim ${expected}; distress/urgency menusu sirasiyla ilerler.`;
+  return `${label} bu adim icin erken. Beklenen adim: ${expected}. Sirayi takip et ve menude ilgili alani yeniden sec.`;
+}
+
 function renderDevicePracticeTask(def){
   const practice = getDevicePractice(def);
   const expected = getDeviceExpectedAction(def);
-  if(!practice) return `${def.task}<div class="device-task-path">Beklenen adim: ${expected}</div>`;
+  const coach = `<div class="device-coach-card"><i>?</i><div><b>Cihaz koçu</b>${phoneSafe(getDeviceTrainingCoach(def, expected))}</div></div>`;
+  if(!practice) return `${def.task}${coach}<div class="device-task-path">Beklenen adim: ${expected}</div>`;
   const idx = getDevicePracticeIndex(def);
   const done = idx >= practice.steps.length;
   return `<div class="device-practice-title">${practice.title}</div>
     <div class="device-practice-phrase">${practice.phrase}</div>
+    ${coach}
     <div class="device-practice-steps">${practice.steps.map((s,i)=>`<span class="${i<idx?'done':i===idx?'active':''}">${i+1}. ${s}</span>`).join('')}</div>
     <div class="device-task-path">${done?'Pratik tamamlandi. Istersen sifirlayip tekrar dene.':'Siradaki adim: '+expected}</div>
     <button class="device-mini-btn" onclick="resetDevicePractice()">Pratigi sifirla</button>`;
@@ -22960,7 +23044,7 @@ function useDeviceKey(label, type='action', target=''){
   }else{
     if(def.key === 'starlink') updateStarlinkFromDeviceStep(label, false);
     updateDeviceChartOverlay(def, label, false);
-    deviceLogLine = `YANLIS SIRA / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. Beklenen adim: ${expected}.`;
+    deviceLogLine = `YANLIS SIRA / EKSIK: ${getDeviceBreadcrumb(def)} > ${label}. ${getDeviceWrongExplanation(def, label, expected)}`;
   }
   renderDevices();
 }
@@ -27934,26 +28018,58 @@ let sceneAudioLoopTimers = [];
 let introThemePlaying = false;
 let introThemeTimers = [];
 const INTRO_THEME_SRC = './assets/audio/groan-of-the-keel.mp3';
-const END_SUCCESS_THEME_SRC = './assets/audio/salted-dawn.mp3';
 let introRecordedTrack = null;
 let introRecordedTrackFadeTimer = null;
 let introRecordedTrackFailed = false;
-let endSuccessTrack = null;
-let endSuccessTrackFadeTimer = null;
-let endSuccessTrackFailed = false;
 
 
 let soundEnabled = true;
+let audioLevels = {music:.48, effects:.92, ambiance:.78};
 function toggleSound(){
   soundEnabled = !soundEnabled;
   document.querySelectorAll('#sound-btn,#home-sound-btn').forEach(btn=>{
     if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
   });
   if(!soundEnabled) stopAllMusic();
-  else {
-    maybeStartEndSuccessTrack();
-    maybeStartIntroMaritimeTheme();
+  else maybeStartIntroMaritimeTheme();
+  renderAudioMixer();
+}
+
+function clampAudioLevel(value){
+  return Math.max(0, Math.min(1, Number(value) || 0));
+}
+
+function getAudioLevel(kind){
+  return soundEnabled ? clampAudioLevel(audioLevels[kind] == null ? 1 : audioLevels[kind]) : 0;
+}
+
+function setAudioLevel(kind, value){
+  if(!['music','effects','ambiance'].includes(kind)) return;
+  audioLevels[kind] = clampAudioLevel(value);
+  if(kind === 'music'){
+    if(introRecordedTrack && introThemePlaying){
+      introRecordedTrack.volume = .48 * getAudioLevel('music');
+    }
+    if(musicGain && audioCtx){
+      musicGain.gain.setTargetAtTime(.78 * getAudioLevel('music'), audioCtx.currentTime, .18);
+    }
   }
+  renderAudioMixer();
+}
+
+function renderAudioMixer(){
+  const rows = [
+    ['music','Muzik'],
+    ['effects','Efekt'],
+    ['ambiance','Ambiyans']
+  ].map(([key,label])=>{
+    const value = Math.round(getAudioLevel(key) * 100);
+    return `<label class="audio-row"><b>${label}</b><input type="range" min="0" max="100" value="${value}" data-audio-kind="${key}" oninput="setAudioLevel('${key}', this.value/100)"><output>${value}%</output></label>`;
+  }).join('');
+  document.querySelectorAll('.audio-mixer').forEach(box=>{
+    box.innerHTML = rows;
+    box.classList.toggle('muted', !soundEnabled);
+  });
 }
 
 const _origPlayTone = playTone;
@@ -27974,6 +28090,7 @@ function getAudioCtx(){
 function playTone(freq, type, duration, vol, delay=0){
   const ctx = getAudioCtx();
   if(!ctx) return;
+  vol = Math.max(0.0001, Number(vol || 0) * getAudioLevel('effects'));
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.connect(gain);
@@ -27990,6 +28107,7 @@ function playTone(freq, type, duration, vol, delay=0){
 function playNoise(duration, vol, delay=0){
   const ctx = getAudioCtx();
   if(!ctx) return;
+  vol = Math.max(0.0001, Number(vol || 0) * getAudioLevel('effects'));
   const bufSize = ctx.sampleRate * duration;
   const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
   const data = buf.getChannelData(0);
@@ -28014,7 +28132,6 @@ function playNoise(duration, vol, delay=0){
 let ambianceNodes = [];
 function stopAllMusic(){
   stopIntroRecordedTrack(true);
-  stopEndSuccessTrack(true);
   introThemePlaying = false;
   introThemeTimers.forEach(t=>clearTimeout(t));
   introThemeTimers = [];
@@ -28033,7 +28150,7 @@ function playDroneNote(freq, vol, ctx){
   const gain = ctx.createGain();
   osc.type = 'sine';
   osc.frequency.value = freq;
-  gain.gain.value = vol;
+  gain.gain.value = Math.max(0.0001, Number(vol || 0) * getAudioLevel('ambiance'));
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start();
@@ -28042,12 +28159,7 @@ function playDroneNote(freq, vol, ctx){
 }
 
 function isIntroAudioScreen(){
-  return document.body.classList.contains('screen-home') || document.body.classList.contains('screen-setup');
-}
-
-function isEndSuccessAudioScreen(){
-  const endScreen = document.getElementById('endscr');
-  return !!endScreen && endScreen.style.display !== 'none';
+  return document.body.classList.contains('screen-home');
 }
 
 function getIntroRecordedTrack(){
@@ -28100,14 +28212,14 @@ function startIntroRecordedTrack(){
     const playPromise = audio.play();
     if(playPromise && typeof playPromise.then === 'function'){
       playPromise
-        .then(()=>fadeIntroRecordedTrack(.48, 1800))
+        .then(()=>fadeIntroRecordedTrack(.48 * getAudioLevel('music'), 1800))
         .catch(()=>{
           introRecordedTrackFailed = true;
           stopIntroRecordedTrack(true);
           if(introThemePlaying && soundEnabled && isIntroAudioScreen()) playIntroSynthMaritimeTheme();
         });
     }else{
-      fadeIntroRecordedTrack(.48, 1800);
+      fadeIntroRecordedTrack(.48 * getAudioLevel('music'), 1800);
     }
     return true;
   }catch(e){
@@ -28115,76 +28227,6 @@ function startIntroRecordedTrack(){
     stopIntroRecordedTrack(true);
     return false;
   }
-}
-
-function getEndSuccessTrack(){
-  if(endSuccessTrack || endSuccessTrackFailed) return endSuccessTrack;
-  try{
-    endSuccessTrack = new Audio(END_SUCCESS_THEME_SRC);
-    endSuccessTrack.preload = 'auto';
-    endSuccessTrack.loop = true;
-    endSuccessTrack.volume = 0.0001;
-  }catch(e){
-    endSuccessTrackFailed = true;
-  }
-  return endSuccessTrack;
-}
-
-function fadeEndSuccessTrack(target=.5, ms=1800){
-  const audio = endSuccessTrack;
-  if(!audio) return;
-  if(endSuccessTrackFadeTimer) clearInterval(endSuccessTrackFadeTimer);
-  const start = audio.volume || 0.0001;
-  const startedAt = Date.now();
-  endSuccessTrackFadeTimer = setInterval(()=>{
-    const t = Math.min(1, (Date.now() - startedAt) / Math.max(1, ms));
-    audio.volume = start + (target - start) * t;
-    if(t >= 1){
-      clearInterval(endSuccessTrackFadeTimer);
-      endSuccessTrackFadeTimer = null;
-    }
-  }, 80);
-}
-
-function stopEndSuccessTrack(reset=false){
-  if(endSuccessTrackFadeTimer){
-    clearInterval(endSuccessTrackFadeTimer);
-    endSuccessTrackFadeTimer = null;
-  }
-  if(!endSuccessTrack) return;
-  try{
-    endSuccessTrack.pause();
-    endSuccessTrack.volume = 0.0001;
-    if(reset) endSuccessTrack.currentTime = 0;
-  }catch(e){}
-}
-
-function playEndSuccessTrack(){
-  if(!soundEnabled || !isEndSuccessAudioScreen()) return false;
-  const audio = getEndSuccessTrack();
-  if(!audio || endSuccessTrackFailed) return false;
-  try{
-    audio.volume = 0.0001;
-    const playPromise = audio.play();
-    if(playPromise && typeof playPromise.then === 'function'){
-      playPromise
-        .then(()=>fadeEndSuccessTrack(.52, 2200))
-        .catch(()=>{
-          stopEndSuccessTrack(true);
-        });
-    }else{
-      fadeEndSuccessTrack(.52, 2200);
-    }
-    return true;
-  }catch(e){
-    stopEndSuccessTrack(true);
-    return false;
-  }
-}
-
-function maybeStartEndSuccessTrack(){
-  if(!soundEnabled || !isEndSuccessAudioScreen()) return;
-  playEndSuccessTrack();
 }
 
 function playIntroThemeNote(freq, delay=0, dur=.72, vol=.035){
@@ -28220,7 +28262,7 @@ function playIntroSynthMaritimeTheme(){
   if(!ctx) return;
   musicGain = ctx.createGain();
   musicGain.gain.setValueAtTime(0.0001, ctx.currentTime);
-  musicGain.gain.linearRampToValueAtTime(0.78, ctx.currentTime + 1.2);
+  musicGain.gain.linearRampToValueAtTime(0.78 * getAudioLevel('music'), ctx.currentTime + 1.2);
   musicGain.connect(ctx.destination);
 
   const low = ctx.createOscillator();
@@ -28234,7 +28276,7 @@ function playIntroSynthMaritimeTheme(){
   mid.frequency.value = 96;
   lfo.frequency.value = .08;
   lfoGain.gain.value = .012;
-  droneGain.gain.value = .028;
+  droneGain.gain.value = .028 * getAudioLevel('ambiance');
   lfo.connect(lfoGain);
   lfoGain.connect(droneGain.gain);
   low.connect(droneGain);
@@ -28739,7 +28781,7 @@ function playSceneAudio(sc){
 // ===== BAŞLATMA =====
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
-document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); maybeStartEndSuccessTrack(); },{passive:true});
+document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
 buildIntro();
 openHomeScreen();
 
