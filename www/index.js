@@ -11179,7 +11179,6 @@ function renderCreatorRow(elId, values, selected, kind){
       else if(elId==='creator-face'){ playerAppearance.face=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-hair'){ playerAppearance.hair=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-beard'){ playerAppearance.beard=v; syncPlayerModelFromTraits(); }
-      else if(elId==='creator-uniform') playerAppearance.uniform=v;
       renderCharacterCreator();
     };
     row.appendChild(b);
@@ -11231,7 +11230,6 @@ function renderCharacterCreator(){
     if(beardLbl) beardLbl.style.display = '';
     renderCreatorRow('creator-beard', PLAYER_LOOK.beard, playerAppearance.beard, 'text');
   }
-  renderCreatorRow('creator-uniform', PLAYER_LOOK.uniform, playerAppearance.uniform, 'text');
   renderPortraitTargets();
 }
 
@@ -14417,6 +14415,7 @@ function showEnd(){
   closeContractCareerBooks();
   document.getElementById('game').style.display='none';
   document.getElementById('endscr').style.display='flex';
+  setTimeout(maybeStartEndSuccessTrack, 120);
 
   const avg=(stats.cesaret+stats.bilgi+stats.sayginlik)/3;
   const cesurC=choicesMade.filter(c=>c.tag==='cesur').length;
@@ -14515,6 +14514,7 @@ function showEnd(){
 
 function continueContractOnShip(offerKey='same'){
   clearSceneChoiceTimer();
+  stopEndSuccessTrack(true);
   const stObj=STYPES.find(x=>x.key===selType);
   const offer = (shipOffers.length?shipOffers:buildShipOffers()).find(o=>o.key===offerKey) || buildShipOffers()[0];
   if(isPremiumShipType(offer.type) && !premiumUnlocked){
@@ -27933,6 +27933,14 @@ let musicGain = null;
 let sceneAudioLoopTimers = [];
 let introThemePlaying = false;
 let introThemeTimers = [];
+const INTRO_THEME_SRC = './assets/audio/groan-of-the-keel.mp3';
+const END_SUCCESS_THEME_SRC = './assets/audio/salted-dawn.mp3';
+let introRecordedTrack = null;
+let introRecordedTrackFadeTimer = null;
+let introRecordedTrackFailed = false;
+let endSuccessTrack = null;
+let endSuccessTrackFadeTimer = null;
+let endSuccessTrackFailed = false;
 
 
 let soundEnabled = true;
@@ -27942,7 +27950,10 @@ function toggleSound(){
     if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
   });
   if(!soundEnabled) stopAllMusic();
-  else maybeStartIntroMaritimeTheme();
+  else {
+    maybeStartEndSuccessTrack();
+    maybeStartIntroMaritimeTheme();
+  }
 }
 
 const _origPlayTone = playTone;
@@ -28002,6 +28013,8 @@ function playNoise(duration, vol, delay=0){
 // Müzik/ambians döngü sistemi
 let ambianceNodes = [];
 function stopAllMusic(){
+  stopIntroRecordedTrack(true);
+  stopEndSuccessTrack(true);
   introThemePlaying = false;
   introThemeTimers.forEach(t=>clearTimeout(t));
   introThemeTimers = [];
@@ -28032,6 +28045,148 @@ function isIntroAudioScreen(){
   return document.body.classList.contains('screen-home') || document.body.classList.contains('screen-setup');
 }
 
+function isEndSuccessAudioScreen(){
+  const endScreen = document.getElementById('endscr');
+  return !!endScreen && endScreen.style.display !== 'none';
+}
+
+function getIntroRecordedTrack(){
+  if(introRecordedTrack || introRecordedTrackFailed) return introRecordedTrack;
+  try{
+    introRecordedTrack = new Audio(INTRO_THEME_SRC);
+    introRecordedTrack.preload = 'auto';
+    introRecordedTrack.loop = true;
+    introRecordedTrack.volume = 0.0001;
+  }catch(e){
+    introRecordedTrackFailed = true;
+  }
+  return introRecordedTrack;
+}
+
+function fadeIntroRecordedTrack(target=.46, ms=1500){
+  const audio = introRecordedTrack;
+  if(!audio) return;
+  if(introRecordedTrackFadeTimer) clearInterval(introRecordedTrackFadeTimer);
+  const start = audio.volume || 0.0001;
+  const startedAt = Date.now();
+  introRecordedTrackFadeTimer = setInterval(()=>{
+    const t = Math.min(1, (Date.now() - startedAt) / Math.max(1, ms));
+    audio.volume = start + (target - start) * t;
+    if(t >= 1){
+      clearInterval(introRecordedTrackFadeTimer);
+      introRecordedTrackFadeTimer = null;
+    }
+  }, 80);
+}
+
+function stopIntroRecordedTrack(reset=false){
+  if(introRecordedTrackFadeTimer){
+    clearInterval(introRecordedTrackFadeTimer);
+    introRecordedTrackFadeTimer = null;
+  }
+  if(!introRecordedTrack) return;
+  try{
+    introRecordedTrack.pause();
+    introRecordedTrack.volume = 0.0001;
+    if(reset) introRecordedTrack.currentTime = 0;
+  }catch(e){}
+}
+
+function startIntroRecordedTrack(){
+  const audio = getIntroRecordedTrack();
+  if(!audio || introRecordedTrackFailed) return false;
+  try{
+    audio.volume = 0.0001;
+    const playPromise = audio.play();
+    if(playPromise && typeof playPromise.then === 'function'){
+      playPromise
+        .then(()=>fadeIntroRecordedTrack(.48, 1800))
+        .catch(()=>{
+          introRecordedTrackFailed = true;
+          stopIntroRecordedTrack(true);
+          if(introThemePlaying && soundEnabled && isIntroAudioScreen()) playIntroSynthMaritimeTheme();
+        });
+    }else{
+      fadeIntroRecordedTrack(.48, 1800);
+    }
+    return true;
+  }catch(e){
+    introRecordedTrackFailed = true;
+    stopIntroRecordedTrack(true);
+    return false;
+  }
+}
+
+function getEndSuccessTrack(){
+  if(endSuccessTrack || endSuccessTrackFailed) return endSuccessTrack;
+  try{
+    endSuccessTrack = new Audio(END_SUCCESS_THEME_SRC);
+    endSuccessTrack.preload = 'auto';
+    endSuccessTrack.loop = true;
+    endSuccessTrack.volume = 0.0001;
+  }catch(e){
+    endSuccessTrackFailed = true;
+  }
+  return endSuccessTrack;
+}
+
+function fadeEndSuccessTrack(target=.5, ms=1800){
+  const audio = endSuccessTrack;
+  if(!audio) return;
+  if(endSuccessTrackFadeTimer) clearInterval(endSuccessTrackFadeTimer);
+  const start = audio.volume || 0.0001;
+  const startedAt = Date.now();
+  endSuccessTrackFadeTimer = setInterval(()=>{
+    const t = Math.min(1, (Date.now() - startedAt) / Math.max(1, ms));
+    audio.volume = start + (target - start) * t;
+    if(t >= 1){
+      clearInterval(endSuccessTrackFadeTimer);
+      endSuccessTrackFadeTimer = null;
+    }
+  }, 80);
+}
+
+function stopEndSuccessTrack(reset=false){
+  if(endSuccessTrackFadeTimer){
+    clearInterval(endSuccessTrackFadeTimer);
+    endSuccessTrackFadeTimer = null;
+  }
+  if(!endSuccessTrack) return;
+  try{
+    endSuccessTrack.pause();
+    endSuccessTrack.volume = 0.0001;
+    if(reset) endSuccessTrack.currentTime = 0;
+  }catch(e){}
+}
+
+function playEndSuccessTrack(){
+  if(!soundEnabled || !isEndSuccessAudioScreen()) return false;
+  const audio = getEndSuccessTrack();
+  if(!audio || endSuccessTrackFailed) return false;
+  try{
+    audio.volume = 0.0001;
+    const playPromise = audio.play();
+    if(playPromise && typeof playPromise.then === 'function'){
+      playPromise
+        .then(()=>fadeEndSuccessTrack(.52, 2200))
+        .catch(()=>{
+          stopEndSuccessTrack(true);
+        });
+    }else{
+      fadeEndSuccessTrack(.52, 2200);
+    }
+    return true;
+  }catch(e){
+    stopEndSuccessTrack(true);
+    return false;
+  }
+}
+
+function maybeStartEndSuccessTrack(){
+  if(!soundEnabled || !isEndSuccessAudioScreen()) return;
+  playEndSuccessTrack();
+}
+
 function playIntroThemeNote(freq, delay=0, dur=.72, vol=.035){
   const ctx = getAudioCtx();
   if(!ctx || !musicGain) return;
@@ -28054,10 +28209,15 @@ function playIntroThemeNote(freq, delay=0, dur=.72, vol=.035){
 
 function playIntroMaritimeTheme(){
   if(!soundEnabled || !isIntroAudioScreen() || introThemePlaying) return;
-  const ctx = getAudioCtx();
-  if(!ctx) return;
   stopAllMusic();
   introThemePlaying = true;
+  if(startIntroRecordedTrack()) return;
+  playIntroSynthMaritimeTheme();
+}
+
+function playIntroSynthMaritimeTheme(){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
   musicGain = ctx.createGain();
   musicGain.gain.setValueAtTime(0.0001, ctx.currentTime);
   musicGain.gain.linearRampToValueAtTime(0.78, ctx.currentTime + 1.2);
@@ -28101,6 +28261,7 @@ function playIntroMaritimeTheme(){
 }
 
 function stopIntroMaritimeTheme(){
+  stopIntroRecordedTrack(true);
   introThemePlaying = false;
   introThemeTimers.forEach(t=>clearTimeout(t));
   introThemeTimers = [];
@@ -28578,7 +28739,7 @@ function playSceneAudio(sc){
 // ===== BAŞLATMA =====
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
-document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
+document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); maybeStartEndSuccessTrack(); },{passive:true});
 buildIntro();
 openHomeScreen();
 

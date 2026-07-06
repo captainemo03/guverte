@@ -45,11 +45,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=148",
+        "index.js?v=151",
         "index.css?v=130",
-    ],
-    "creator color controls removed": [
-        "creator-uniform",
     ],
     "4k dynamic background": [
         "__bgRenderScale",
@@ -208,8 +205,10 @@ def main() -> int:
     removed_creator_controls = [
         "id=\"creator-haircolor\"",
         "id=\"creator-eye\"",
+        "id=\"creator-uniform\"",
         "renderCreatorRow('creator-haircolor'",
         "renderCreatorRow('creator-eye'",
+        "renderCreatorRow('creator-uniform'",
     ]
     for needle in removed_creator_controls:
         if needle in blob:
