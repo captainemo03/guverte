@@ -16813,6 +16813,7 @@ function openHomeScreen(){
   setAppScreen('home');
   setHomeMenuPage(homeMenuPage || 'play');
   refreshSaveEntryActions();
+  setTimeout(maybeStartIntroMaritimeTheme, 80);
   window.scrollTo?.(0,0);
 }
 
@@ -16821,6 +16822,7 @@ function openSetupScreen(){
   setAppScreen('setup');
   renderShipChoiceSummary();
   refreshSaveEntryActions();
+  setTimeout(maybeStartIntroMaritimeTheme, 80);
   window.scrollTo?.(0,0);
 }
 
@@ -16833,6 +16835,7 @@ function openShipSelectScreen(){
 }
 
 function openGameScreen(){
+  stopIntroMaritimeTheme();
   setAppScreen('game');
   const g=document.getElementById('game');
   if(g){
@@ -26780,6 +26783,7 @@ const LIVING_SHIP_BEATS = [
 
 const INTERACTION_PANEL_CONFIGS = {
   s409:{
+    kind:'vhf',
     title:'VHF WORKING CHANNEL',
     hint:'CH16 nobetini korurken olay icin dogru calisma kanalini sec.',
     caption:'Her VHF olayi CH16 degildir; pilot/VTS operasyonunda uygun working channel secilir.',
@@ -26794,6 +26798,7 @@ const INTERACTION_PANEL_CONFIGS = {
     ]
   },
   s414:{
+    kind:'radar',
     title:'RADAR HEDEF SECIMI',
     hint:'Ham echo ile ARPA yorumunu birlikte okuyup tehlikeli hedefi isaretle.',
     caption:'Sari vektor ve daralan CPA cizgisi tehlikeli hedefi ele verir.',
@@ -26807,6 +26812,7 @@ const INTERACTION_PANEL_CONFIGS = {
     ]
   },
   s415:{
+    kind:'ecdis',
     title:'ECDIS SAFETY CONTOUR',
     hint:'No-go alani ve safety contour mantigina gore riskli bolgeyi sec.',
     caption:'Kirmizi/amber sinir no-go dusuncesine en yakin alan.',
@@ -26820,6 +26826,7 @@ const INTERACTION_PANEL_CONFIGS = {
     ]
   },
   s252:{
+    kind:'fire',
     title:'YANGIN PANELI / BOLGE SECIMI',
     hint:'Galley yangininda once dogru mahal ve dogru ilk aksiyonu isaretle.',
     caption:'Yag yangini ve elektrik panosu ayni refleksle sonmez; bolgeyi net sec.',
@@ -26853,6 +26860,11 @@ function buildHotspotConfig(title, hint, caption, expected, correctTag, midTag, 
     risk:!!item?.risk
   }));
   return {title,hint,caption,expected,correctTag,midTag,hotspots:spots};
+}
+
+function withInteractionKind(cfg, kind){
+  cfg.kind = kind;
+  return cfg;
 }
 
 function getVhfInteractionConfig(sc, blob){
@@ -26899,7 +26911,7 @@ function getAutoInteractionConfig(sc){
     return getVhfInteractionConfig(sc, blob);
   }
   if(/radar|arpa|cpa|tcpa|ais target|guard zone/.test(blob)){
-    return buildHotspotConfig(
+    return withInteractionKind(buildHotspotConfig(
       'RADAR / CPA TARGET',
       'CPA daralan hedefi isaretle. AIS etiketi tek basina karar degildir.',
       'Hedefin vektoru ve CPA halkasi birlikte okunur.',
@@ -26909,43 +26921,73 @@ function getAutoInteractionConfig(sc){
         {id:'target2',label:'CONTACT B',short:'B',cpa:'0.4',tcpa:'08',brg:'046',type:'ferry',risk:true},
         {id:'target3',label:'CONTACT C',short:'C',cpa:'2.6',tcpa:'21',brg:'118',type:'coaster'}
       ]
-    );
+    ), 'radar');
   }
   if(/ecdis|route monitor|safety contour|xtd|no-go|chart/.test(blob)){
-    return buildHotspotConfig(
+    return withInteractionKind(buildHotspotConfig(
       'ECDIS ALARM / SAFETY CONTOUR',
       'Alarm satiri ve no-go alani uzerinden riskli bolgeyi sec.',
       'Safety contour, XTD ve sensor status ayni anda okunur.',
       'zone2','kritik','itaatkar',
-      [{id:'zone1',label:'A'},{id:'zone2',label:'B'},{id:'zone3',label:'C'}]
-    );
+      [
+        {id:'zone1',label:'Safe water'},
+        {id:'zone2',label:'No-go alarm'},
+        {id:'zone3',label:'Sensor line'}
+      ]
+    ), 'ecdis');
   }
   if(/mob|man overboard|adam denize|williamson|anderson|scharnow/.test(blob)){
-    return buildHotspotConfig(
+    return withInteractionKind(buildHotspotConfig(
       'MOB BUTONU / TARAF ISARETI',
       'MOB aninda ilk saniyeyi kaybetme: buton, taraf, goz temasi.',
       'MOB zinciri butonla baslar; mevki ve donus hemen takip eder.',
       'mob','kritik','cesur',
-      [{id:'lookout',label:'LOOK'},{id:'mob',label:'MOB'},{id:'log',label:'LOG'}]
-    );
+      [{id:'lookout',label:'LOOKOUT'},{id:'mob',label:'MOB BUTTON'},{id:'log',label:'LOG'}]
+    ), 'mob');
   }
   if(/fire|yangin|yangın|smoke|duman|co2|extinguisher|fire panel/.test(blob)){
-    return buildHotspotConfig(
+    return withInteractionKind(buildHotspotConfig(
       'FIRE ZONE SECIMI',
       'Dogru mahali sec; sonra dogru sondurme ortami gelir.',
       'Yanginda panel zone ve yangin sinifi birlikte okunur.',
       'galley','kritik','itaatkar',
-      [{id:'panel',label:'PANEL'},{id:'galley',label:'ZONE'},{id:'store',label:'STORE'}]
-    );
+      [{id:'panel',label:'Alarm panel'},{id:'galley',label:'Galley zone'},{id:'store',label:'Store'}]
+    ), 'fire');
+  }
+  if(/lifeboat|life boat|filika|davit|can sali|liferaft|rescue boat|abandon ship|muster/.test(blob)){
+    return withInteractionKind(buildHotspotConfig(
+      'LIFEBOAT / DAVIT HAZIRLIK',
+      'Terk veya filika hazirliginda once muster, davit ve release zincirini dogru oku.',
+      'Filika hazirligi sadece tekne degil; brake, fall, painter, plug ve sayim zinciridir.',
+      'davit','kritik','itaatkar',
+      [
+        {id:'muster',label:'Muster count'},
+        {id:'davit',label:'Davit / brake'},
+        {id:'raft',label:'Liferaft canister'}
+      ]
+    ), 'survival');
+  }
+  if(/bunker|bunkering|manifold|sopep|drip tray|overflow|sample|esd|line-up|hose|scupper/.test(blob)){
+    return withInteractionKind(buildHotspotConfig(
+      'BUNKER MANIFOLD KONTROL',
+      'Transfer baslamadan manifold, drip tray, sample, SOPEP ve ESD zincirini sec.',
+      'Bunker operasyonunda kucuk bir damlama bile ticari ve cevre dosyasina doner.',
+      'manifold','kritik','akilli',
+      [
+        {id:'sample',label:'Sample / seal'},
+        {id:'manifold',label:'Manifold + drip tray'},
+        {id:'overflow',label:'Overflow alarm'}
+      ]
+    ), 'bunker');
   }
   if(/platform|offshore|dp |dynamic positioning|abort point|500 m|safety zone/.test(blob)){
-    return buildHotspotConfig(
+    return withInteractionKind(buildHotspotConfig(
       'DP ABORT POINT',
       'Platform yaklasmasinda abort noktasini gecmeden karari ver.',
       'DP offset, thruster load ve 500 m zone birlikte takip edilir.',
       'abort','kritik','akilli',
       [{id:'hold',label:'HOLD'},{id:'abort',label:'ABORT'},{id:'close',label:'CLOSE'}]
-    );
+    ), 'dp');
   }
   if(/mooring|halat|snap-back|tug|römorkör|romorkor|all fast/.test(blob)){
     const cfg = buildHotspotConfig(
@@ -27480,6 +27522,255 @@ function renderMooringInteractionVisual(cfg){
   </div>`;
 }
 
+function getInteractionKind(cfg, sc){
+  if(cfg?.kind) return cfg.kind;
+  const blob = `${cfg?.title||''} ${cfg?.hint||''} ${cfg?.caption||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/vhf|dsc|channel|kanal/.test(blob)) return 'vhf';
+  if(/radar|arpa|cpa|target/.test(blob)) return 'radar';
+  if(/ecdis|safety contour|route|chart|xtd|no-go/.test(blob)) return 'ecdis';
+  if(/fire|yangin|smoke|galley|zone/.test(blob)) return 'fire';
+  if(/lifeboat|filika|davit|liferaft|rescue boat|abandon|muster/.test(blob)) return 'survival';
+  if(/bunker|manifold|sopep|sample|overflow|drip tray|esd/.test(blob)) return 'bunker';
+  if(/mob|man overboard|adam denize/.test(blob)) return 'mob';
+  if(/mooring|halat|snap-back|bight|all fast/.test(blob)) return 'mooring';
+  if(/dp|abort|platform|offshore/.test(blob)) return 'dp';
+  return 'generic';
+}
+
+function getInteractionGuide(kind){
+  const guides = {
+    vhf:['VHF cihazinda dogru kanali sec.', 'Once dinle, sonra kisa ve standart phrase ile cevap ver.'],
+    radar:['CPA/TCPA daralan hedefi sec.', 'AIS etiketi tek basina karar degildir; vektor ve guard ring birlikte okunur.'],
+    ecdis:['Alarm listesinde gercek riski isaretle.', 'Safety contour, no-go, XTD ve sensor status ayni ekranda dusunulur.'],
+    fire:['Yangin panelinde dogru zone sec.', 'Mahal, yangin sinifi ve ilk sondurme ortami birlikte karar verir.'],
+    survival:['Filika/davit hazirlik zincirini sec.', 'Muster count, brake, fall, painter ve release gear sirasi bozulmaz.'],
+    bunker:['Manifold transfer oncesi kritik noktayi sec.', 'Drip tray, scupper, sample, ESD ve SOPEP hazirligi birlikte okunur.'],
+    mob:['MOB zincirinin ilk dogru noktasini sec.', 'Buton, taraf isareti, goz temasi ve log kaydi pes pese gelir.'],
+    mooring:['Snap-back alanindan uzak guvenli bolgeyi sec.', 'Gergin hat, bight ve personel konumu ayni anda okunur.'],
+    dp:['Abort noktasini gecmeden dogru karari sec.', 'DP offset, thruster load ve 500 m zone birlikte izlenir.'],
+    generic:['Sahnede istenen teknik bolgeyi sec.', 'Gorseldeki uyari, konum ve siralamayi birlikte oku.']
+  };
+  return guides[kind] || guides.generic;
+}
+
+function renderInteractionGuideCard(kind){
+  const [title, body] = getInteractionGuide(kind);
+  return `<div class="interaction-guide-card">
+    <b>SU AN NE YAPIYORSUN?</b>
+    <span>${phoneSafe(title)}</span>
+    <small>${phoneSafe(body)}</small>
+  </div>`;
+}
+
+function renderInteractionReplay(kind, good){
+  const map = {
+    ecdis: good
+      ? ['Alarm satiri acildi','No-go/safety contour riski secildi','Kaptana temiz route check raporu verildi']
+      : ['Alarm satiri goruldu','Yanlis alan rahat gorundu','Dogru hareket: no-go/safety contour alarmi secilir'],
+    fire: good
+      ? ['Alarm paneli okundu','Galley zone teyit edildi','Dogru ekip ve sondurme zinciri basladi']
+      : ['Alarm caldi','Yanlis mahal zaman kaybettirdi','Dogru hareket: panelde aktif zone secilir'],
+    survival: good
+      ? ['Muster count tamam','Davit/brake zinciri kontrol edildi','Filika hazirligi guvenli basladi']
+      : ['Terk alarmi geldi','Hazirlik sirasi karisti','Dogru hareket: davit/brake/release zinciri kontrol edilir'],
+    bunker: good
+      ? ['Transfer oncesi kontrol basladi','Manifold + drip tray teyit edildi','SOPEP/ESD zinciri hazir']
+      : ['Bunker hattinda basinç oynadi','Yanlis nokta overflow riskini buyuttu','Dogru hareket: manifold/drip tray/ESD teyidi'],
+    mob: good
+      ? ['MOB goruldu','MOB butonu ve taraf isareti verildi','Donus ve logbook zinciri basladi']
+      : ['MOB aninda saniye kaybi oldu','Goz temasi ve mevki gecikti','Dogru hareket: MOB butonu + taraf isareti'],
+    mooring: good
+      ? ['Halat gerildi','Personel snap-back disina alindi','Guvenli stand-by bolgesi korundu']
+      : ['Halat gerildi','Bight/line alani risk yaratti','Dogru hareket: guvenli stand-by bolgesi secilir'],
+    radar: good
+      ? ['Hedef acquire edildi','CPA/TCPA daralmasi okundu','Kaptana net hedef raporu verildi']
+      : ['Radar echo goruldu','Yanlis hedef daha rahat gorundu','Dogru hareket: daralan CPA hedefi secilir'],
+    vhf: good
+      ? ['Cagri dinlendi','Dogru kanal secildi','SMCP ile kisa cevap hazir']
+      : ['Cagri geldi','Kanal disiplini karisti','Dogru hareket: olay tipine gore CH16/DSC/working channel'],
+    dp: good
+      ? ['Platform zone okundu','Abort point gecilmeden karar verildi','DP offset kontrol altinda']
+      : ['Platform yaklasmasi surdu','Abort gecikirse risk buyur','Dogru hareket: abort point oncesi karar'],
+    generic: good
+      ? ['Gorsel okundu','Dogru bolge secildi','Rapor zinciri kapandi']
+      : ['Gorsel okundu','Riskli bolge secildi','Dogru hareket: uyari/konum/sira birlikte okunur']
+  };
+  const steps = map[kind] || map.generic;
+  return `<div class="interaction-replay ${good?'good':'warn'}">
+    ${steps.map((step,i)=>`<span><b>${i+1}</b>${phoneSafe(step)}</span>`).join('')}
+  </div>`;
+}
+
+function getInteractionFeedbackText(kind, good){
+  if(kind === 'mooring') return good
+    ? 'Dogru: personel gergin halatin uzantisi ve bight disinda, guvenli stand-by bolgesinde kalir.'
+    : 'Riskli: LINE veya BIGHT uzerinde durmak snap-back/caught-in tehlikesi yaratir. Once alan bosaltilir.';
+  if(kind === 'ecdis') return good
+    ? 'Dogru: alarm listesi, no-go alan ve safety contour ayni riskte bulustu.'
+    : 'Riskli: ECDIS ekrani guzel gorunse de no-go/safety contour alarmi atlanmaz.';
+  if(kind === 'fire') return good
+    ? 'Dogru: once aktif yangin zone secildi; ekip ve sondurme ortami buna gore gider.'
+    : 'Riskli: mahal karisirsa ekip yanlis yere kosar ve yangin buyur.';
+  if(kind === 'survival') return good
+    ? 'Dogru: filika/davit hazirligi sayim, brake, fall ve release zinciriyle baslar.'
+    : 'Riskli: sadece filikayi gormek yetmez; davit/brake/release kontrolu atlanamaz.';
+  if(kind === 'bunker') return good
+    ? 'Dogru: manifold, drip tray, sample, ESD ve SOPEP ayni transfer zincirinde kontrol edildi.'
+    : 'Riskli: bunker operasyonunda overflow veya damlama hemen cevre/ticaret dosyasina doner.';
+  if(kind === 'mob') return good
+    ? 'Dogru: MOB butonu, taraf isareti ve goz temasi ilk saniyede baslar.'
+    : 'Riskli: MOB aninda log veya tartisma once gelirse kisi gozden kaybolur.';
+  if(kind === 'radar') return good
+    ? 'Dogru: vektor ve CPA halkasi birlikte okununca tehlikeli hedef ortaya cikti.'
+    : 'Riskli: sadece etikete bakmak tehlikeli hedefi kacirir.';
+  if(kind === 'vhf') return good
+    ? 'Dogru: kanal disiplini oturdu; simdi kisa standart phrase ile rapor verilir.'
+    : 'Riskli: yanlis kanal trafikte zaman ve netlik kaybettirir.';
+  return good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.';
+}
+
+function renderEcdisInteractionVisual(cfg){
+  return `<div class="ecdis-task-console">
+    <div class="ecdis-task-head"><span>ECDIS ROUTE MONITOR · N-UP</span><b>ALARM LIST ACTIVE</b></div>
+    <svg class="ecdis-task-screen" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="520" height="250" rx="14" fill="#d7e8d0"/>
+      <path d="M0 70 C70 40 118 70 190 42 S308 54 370 26 S470 38 520 18 V0 H0 Z" fill="#e9d891"/>
+      <path d="M0 212 C82 198 132 222 205 205 S330 185 410 207 S486 224 520 206 V250 H0 Z" fill="#b9d9ea"/>
+      <g stroke="#7ba6a0" stroke-width=".7" opacity=".45">
+        <path d="M32 0 V250M84 0V250M136 0V250M188 0V250M240 0V250M292 0V250M344 0V250M396 0V250M448 0V250M500 0V250"/>
+        <path d="M0 34H520M0 68H520M0 102H520M0 136H520M0 170H520M0 204H520"/>
+      </g>
+      <path class="ecdis-safety-contour" d="M22 176 C104 156 176 170 250 136 S392 108 496 126"/>
+      <path class="ecdis-route-line" d="M58 206 L132 174 L226 152 L314 116 L432 82"/>
+      <g class="ecdis-waypoints"><circle cx="58" cy="206" r="5"/><circle cx="132" cy="174" r="5"/><circle cx="226" cy="152" r="5"/><circle cx="314" cy="116" r="5"/><circle cx="432" cy="82" r="5"/></g>
+      <g class="ecdis-nogo" data-hotspot="zone2">
+        <path d="M250 136 C292 110 340 104 384 119 C354 152 303 164 250 136 Z"/>
+        <text x="318" y="136" text-anchor="middle">NO-GO</text>
+      </g>
+      <g class="ecdis-safe-water" data-hotspot="zone1"><rect x="34" y="118" width="88" height="42" rx="12"/><text x="78" y="143" text-anchor="middle">SAFE WATER</text></g>
+      <g class="ecdis-sensor-box" data-hotspot="zone3"><rect x="386" y="158" width="98" height="48" rx="10"/><text x="435" y="178" text-anchor="middle">GPS/GYRO</text><text x="435" y="193" text-anchor="middle">SENSOR OK</text></g>
+      <g class="ecdis-alarm-list">
+        <rect x="20" y="16" width="184" height="54" rx="8"/>
+        <text x="32" y="34">ALARM LIST</text>
+        <text class="warn" x="32" y="50">SAFETY CONTOUR / XTD</text>
+        <text x="32" y="64">ACK AFTER RISK CHECK</text>
+      </g>
+      <text class="ecdis-note" x="270" y="232">Route check: safety contour · no-go area · sensor status · XTD</text>
+    </svg>
+    <div class="operation-choice-grid">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot operation-choice ${h.id==='zone2'?'recommended':''}" data-hotspot="${h.id}"><b>${phoneSafe(h.label)}</b><small>${h.id==='zone2'?'Alarm veren no-go/safety contour bolgesi.':h.id==='zone1'?'Emniyetli su gibi gorunur ama alarm burada degil.':'Sensor status kontrol edilir; risk alani degildir.'}</small></button>`).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
+function renderFireInteractionVisual(cfg){
+  return `<div class="fire-task-console">
+    <div class="fire-task-head"><span>FIRE ALARM PANEL</span><b>ZONE ACTIVE · MUSTER READY</b></div>
+    <div class="fire-panel-grid">
+      <button class="fire-zone interaction-hotspot" data-hotspot="panel"><b>BRIDGE PANEL</b><small>Alarm acknowledge / team call</small></button>
+      <button class="fire-zone active interaction-hotspot" data-hotspot="galley"><b>GALLEY ZONE</b><small>Class F / electrical isolation / blanket-foam</small></button>
+      <button class="fire-zone interaction-hotspot" data-hotspot="store"><b>PAINT STORE</b><small>Boundary cooling / ventilation stop</small></button>
+    </div>
+    <svg class="fire-room-svg" viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="520" height="150" rx="14" fill="#091827"/>
+      <rect x="30" y="34" width="146" height="80" rx="10" fill="#192b36" stroke="#42566b"/>
+      <rect x="196" y="34" width="146" height="80" rx="10" fill="#2a1617" stroke="#ff7b7b"/>
+      <rect x="362" y="34" width="126" height="80" rx="10" fill="#1d2731" stroke="#42566b"/>
+      <g class="fire-smoke"><path d="M242 108 C220 84 246 66 236 46 C276 68 242 80 286 112"/><path d="M300 108 C274 76 316 64 296 42 C338 66 294 86 332 114"/></g>
+      <g class="fire-flame"><path d="M264 108 C248 82 272 76 268 54 C290 76 306 88 286 112 Z"/><path d="M286 110 C276 94 294 84 292 66 C312 88 314 104 298 116 Z"/></g>
+      <text x="101" y="78" text-anchor="middle">PANEL</text><text x="269" y="78" text-anchor="middle">GALLEY</text><text x="425" y="78" text-anchor="middle">STORE</text>
+    </svg>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
+function renderSurvivalInteractionVisual(cfg){
+  return `<div class="survival-task-console">
+    <div class="survival-task-head"><span>LIFEBOAT / DAVIT STATION</span><b>MUSTER · BRAKE · RELEASE</b></div>
+    <svg class="survival-task-svg" viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="520" height="210" rx="14" fill="#081827"/>
+      <rect x="0" y="0" width="520" height="56" fill="#233544"/>
+      <path d="M82 56 C96 95 112 126 128 158" stroke="#8ea0aa" stroke-width="8" fill="none"/>
+      <path d="M304 56 C292 95 276 126 260 158" stroke="#8ea0aa" stroke-width="8" fill="none"/>
+      <line x1="128" y1="158" x2="260" y2="158" stroke="#b9c6ce" stroke-width="4"/>
+      <g class="survival-lifeboat" data-hotspot="davit">
+        <path d="M110 150 C132 122 244 122 278 150 L260 180 H128 Z"/>
+        <rect x="136" y="134" width="92" height="24" rx="12"/>
+        <text x="194" y="165" text-anchor="middle">DAVIT / BRAKE</text>
+      </g>
+      <g class="survival-muster" data-hotspot="muster">
+        <rect x="318" y="116" width="136" height="54" rx="12"/>
+        <text x="386" y="139" text-anchor="middle">MUSTER COUNT</text>
+        <text x="386" y="156" text-anchor="middle">PPE + NAME LIST</text>
+      </g>
+      <g class="survival-raft" data-hotspot="raft">
+        <rect x="348" y="62" width="72" height="30" rx="15"/>
+        <text x="384" y="82" text-anchor="middle">RAFT</text>
+      </g>
+      <path class="survival-fall" d="M104 56 L128 158 M282 56 L260 158"/>
+      <text class="survival-note" x="24" y="198">Check: muster · drain plug · painter · brake · fall · release gear · radio</text>
+    </svg>
+    <div class="operation-choice-grid">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot operation-choice ${h.id==='davit'?'recommended':''}" data-hotspot="${h.id}"><b>${phoneSafe(h.label)}</b><small>${h.id==='davit'?'Brake/fall/release zinciri hazirlikta kritik.':h.id==='muster'?'Sayim sarttir ama davit hazirligi yerine gecmez.':'Liferaft ayridir; filika daviti once kontrol edilir.'}</small></button>`).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
+function renderBunkerInteractionVisual(cfg){
+  return `<div class="bunker-task-console">
+    <div class="bunker-task-head"><span>BUNKER STATION · MANIFOLD WATCH</span><b>TRANSFER NOT STARTED</b></div>
+    <svg class="bunker-task-svg" viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="520" height="210" rx="14" fill="#071827"/>
+      <rect x="0" y="132" width="520" height="78" fill="#182536"/>
+      <path class="bunker-hose" d="M38 72 C126 42 184 114 252 90 S374 54 474 86"/>
+      <g class="bunker-manifold" data-hotspot="manifold">
+        <rect x="206" y="102" width="130" height="48" rx="12"/>
+        <circle cx="238" cy="126" r="15"/><circle cx="304" cy="126" r="15"/>
+        <rect x="222" y="154" width="96" height="16" rx="4"/>
+        <text x="271" y="184" text-anchor="middle">MANIFOLD + DRIP TRAY</text>
+      </g>
+      <g class="bunker-sample" data-hotspot="sample">
+        <rect x="64" y="112" width="86" height="58" rx="10"/>
+        <path d="M86 102 H128 L120 112 H94 Z" fill="#9dbdd5"/>
+        <text x="107" y="143" text-anchor="middle">SAMPLE</text>
+      </g>
+      <g class="bunker-overflow" data-hotspot="overflow">
+        <rect x="380" y="104" width="96" height="64" rx="10"/>
+        <path d="M408 126 h42 v18 h-42 z"/>
+        <text x="428" y="157" text-anchor="middle">OVERFLOW</text>
+      </g>
+      <rect class="bunker-esd" x="354" y="42" width="58" height="36" rx="10"/>
+      <text x="383" y="65" text-anchor="middle">ESD</text>
+      <text class="bunker-note" x="22" y="24">SOPEP READY · SCUPPER PLUGS · COMMS TEST · BDN/SAMPLE SEAL</text>
+    </svg>
+    <div class="operation-choice-grid">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot operation-choice ${h.id==='manifold'?'recommended':''}" data-hotspot="${h.id}"><b>${phoneSafe(h.label)}</b><small>${h.id==='manifold'?'Hose, flange, gasket, drip tray ve scupper birlikte kontrol edilir.':h.id==='sample'?'Sample/seal sarttir ama fiziksel transfer hattini tek basina guvenli yapmaz.':'Overflow watch izlenir; transfer oncesi manifold hazirligi ana noktadir.'}</small></button>`).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
+function renderMobInteractionVisual(cfg){
+  return `<div class="mob-task-console">
+    <div class="mob-task-head"><span>MOB QUICK ACTION</span><b>MARK · POINT · REPORT</b></div>
+    <svg class="mob-task-svg" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
+      <rect width="520" height="200" rx="14" fill="#071827"/>
+      <path class="mob-sea" d="M0 144 C72 124 130 162 206 140 S338 118 422 142 S490 158 520 136 V200 H0 Z"/>
+      <path class="mob-track" d="M72 130 C128 78 232 86 270 132 C304 172 226 184 190 146"/>
+      <g class="mob-button" data-hotspot="mob"><circle cx="258" cy="92" r="34"/><text x="258" y="98" text-anchor="middle">MOB</text></g>
+      <g class="mob-lookout" data-hotspot="lookout"><rect x="54" y="62" width="116" height="50" rx="12"/><text x="112" y="84" text-anchor="middle">LOOKOUT</text><text x="112" y="99" text-anchor="middle">POINT SIDE</text></g>
+      <g class="mob-log" data-hotspot="log"><rect x="350" y="58" width="116" height="58" rx="12"/><text x="408" y="82" text-anchor="middle">LOG / GPS</text><text x="408" y="98" text-anchor="middle">AFTER MARK</text></g>
+      <text class="mob-note" x="28" y="184">First seconds: shout side · press MOB · keep visual contact · turn plan</text>
+    </svg>
+    <div class="operation-choice-grid">
+      ${cfg.hotspots.map(h=>`<button class="interaction-hotspot operation-choice ${h.id==='mob'?'recommended':''}" data-hotspot="${h.id}"><b>${phoneSafe(h.label)}</b><small>${h.id==='mob'?'Mevkiyi hemen mark eder; taraf ve goz temasi pesinden gelir.':h.id==='lookout'?'Goz temasi sarttir ama MOB mark gecikmemeli.':'Log kaydi gerekir; ilk saniyenin yerine gecmez.'}</small></button>`).join('')}
+    </div>
+    <div class="doc-visual-caption">${phoneSafe(cfg.caption || '')}</div>
+  </div>`;
+}
+
 function renderGenericInteractionVisual(cfg){
   return `<div class="doc-visual">
     <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" aria-label="${phoneSafe(cfg.title)}">
@@ -27500,15 +27791,24 @@ function renderInteractionPanel(sc, ch){
   const panel = document.getElementById('calc-panel');
   const cfg = INTERACTION_PANEL_CONFIGS[sc?.id] || getAutoInteractionConfig(sc);
   if(!panel || !cfg) return false;
+  const kind = getInteractionKind(cfg, sc);
+  cfg.kind = kind;
   panel.className='calc-panel show';
-  const visual = cfg.kind === 'vhf'
+  const visual = kind === 'vhf'
     ? renderVhfInteractionVisual(cfg)
-    : cfg.kind === 'mooring' ? renderMooringInteractionVisual(cfg)
-    : /radar|arpa|cpa|target/i.test(cfg.title || '') ? renderRadarInteractionVisual(cfg) : renderGenericInteractionVisual(cfg);
+    : kind === 'radar' ? renderRadarInteractionVisual(cfg)
+    : kind === 'ecdis' ? renderEcdisInteractionVisual(cfg)
+    : kind === 'fire' ? renderFireInteractionVisual(cfg)
+    : kind === 'survival' ? renderSurvivalInteractionVisual(cfg)
+    : kind === 'bunker' ? renderBunkerInteractionVisual(cfg)
+    : kind === 'mob' ? renderMobInteractionVisual(cfg)
+    : kind === 'mooring' ? renderMooringInteractionVisual(cfg)
+    : renderGenericInteractionVisual(cfg);
   panel.dataset.locked = '';
   panel.innerHTML = `<div class="decision-box">
     <div class="decision-title">${cfg.title}</div>
     <div class="decision-hint">${cfg.hint}</div>
+    ${renderInteractionGuideCard(kind)}
     ${visual}
     <div id="interaction-feedback" class="decision-feedback"></div>
   </div>`;
@@ -27522,13 +27822,12 @@ function renderInteractionPanel(sc, ch){
         : (sc.choices.find(c=>c.tag===cfg.midTag) || sc.choices[1] || sc.choices[0]);
       const feedback = document.getElementById('interaction-feedback');
       const good = pickedId === cfg.expected;
-      if(cfg.kind === 'vhf') completeMissionStep('vhf', good ? 'VHF kanali dogru secildi' : 'VHF kanali secildi, teyit gerekli');
-      else if(cfg.kind === 'mooring') completeMissionStep('deck', good ? 'Mooring guvenli bolge dogru secildi' : 'Mooring risk bolgesi secildi, tekrar kontrol gerekli');
-      else completeMissionStep(cfg.title.includes('RADAR') ? 'radar' : cfg.title.includes('ECDIS') ? 'ecdis' : cfg.title.includes('FIRE') || cfg.title.includes('MOB') ? 'alarm' : 'device');
+      if(kind === 'vhf') completeMissionStep('vhf', good ? 'VHF kanali dogru secildi' : 'VHF kanali secildi, teyit gerekli');
+      else if(kind === 'mooring' || kind === 'bunker' || kind === 'survival') completeMissionStep('deck', good ? `${cfg.title} dogru secildi` : `${cfg.title} tekrar kontrol gerekli`);
+      else if(kind === 'fire' || kind === 'mob') completeMissionStep('alarm', good ? `${cfg.title} dogru secildi` : `${cfg.title} tekrar kontrol gerekli`);
+      else completeMissionStep(kind === 'radar' ? 'radar' : kind === 'ecdis' ? 'ecdis' : 'device');
       feedback.className = `decision-feedback ${good?'':'warn'}`.trim();
-      feedback.textContent = cfg.kind === 'mooring'
-        ? (good ? 'Dogru: personel gergin halatin uzantisi ve bight disinda, guvenli stand-by bolgesinde kalir.' : 'Riskli: LINE veya BIGHT uzerinde durmak snap-back/caught-in tehlikesi yaratir. Once alan bosaltilir.')
-        : (good ? 'Dogru bolgeyi isaretledin; yorumun teknik olarak oturdu.' : 'Bolge secildi ama tehdit okumasinda daha net olman gerekirdi.');
+      feedback.innerHTML = `<b>${phoneSafe(good ? 'Dogru karar' : 'Tekrar oku')}</b><span>${phoneSafe(getInteractionFeedbackText(kind, good))}</span>${renderInteractionReplay(kind, good)}`;
       panel.dataset.locked = 'true';
       panel.querySelectorAll('[data-hotspot]').forEach(el=>el.disabled=true);
       setTimeout(()=>handleSceneChoice(sc,picked,ch),850);
@@ -27632,6 +27931,8 @@ let audioCtx = null;
 let currentMusic = null;
 let musicGain = null;
 let sceneAudioLoopTimers = [];
+let introThemePlaying = false;
+let introThemeTimers = [];
 
 
 let soundEnabled = true;
@@ -27641,6 +27942,7 @@ function toggleSound(){
     if(btn) btn.textContent = soundEnabled ? '🔊 Ses Acik' : '🔇 Ses Kapali';
   });
   if(!soundEnabled) stopAllMusic();
+  else maybeStartIntroMaritimeTheme();
 }
 
 const _origPlayTone = playTone;
@@ -27700,6 +28002,9 @@ function playNoise(duration, vol, delay=0){
 // Müzik/ambians döngü sistemi
 let ambianceNodes = [];
 function stopAllMusic(){
+  introThemePlaying = false;
+  introThemeTimers.forEach(t=>clearTimeout(t));
+  introThemeTimers = [];
   ambianceNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
   ambianceNodes = [];
   if(musicGain) musicGain.gain.setTargetAtTime(0, getAudioCtx()?.currentTime||0, 0.3);
@@ -27721,6 +28026,89 @@ function playDroneNote(freq, vol, ctx){
   osc.start();
   ambianceNodes.push(osc);
   return osc;
+}
+
+function isIntroAudioScreen(){
+  return document.body.classList.contains('screen-home') || document.body.classList.contains('screen-setup');
+}
+
+function playIntroThemeNote(freq, delay=0, dur=.72, vol=.035){
+  const ctx = getAudioCtx();
+  if(!ctx || !musicGain) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  filter.type = 'lowpass';
+  filter.frequency.value = 880;
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + .06);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + dur);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(musicGain);
+  osc.start(ctx.currentTime + delay);
+  osc.stop(ctx.currentTime + delay + dur + .08);
+}
+
+function playIntroMaritimeTheme(){
+  if(!soundEnabled || !isIntroAudioScreen() || introThemePlaying) return;
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  stopAllMusic();
+  introThemePlaying = true;
+  musicGain = ctx.createGain();
+  musicGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  musicGain.gain.linearRampToValueAtTime(0.78, ctx.currentTime + 1.2);
+  musicGain.connect(ctx.destination);
+
+  const low = ctx.createOscillator();
+  const mid = ctx.createOscillator();
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  const droneGain = ctx.createGain();
+  low.type = 'sine';
+  mid.type = 'triangle';
+  low.frequency.value = 48;
+  mid.frequency.value = 96;
+  lfo.frequency.value = .08;
+  lfoGain.gain.value = .012;
+  droneGain.gain.value = .028;
+  lfo.connect(lfoGain);
+  lfoGain.connect(droneGain.gain);
+  low.connect(droneGain);
+  mid.connect(droneGain);
+  droneGain.connect(musicGain);
+  low.start(); mid.start(); lfo.start();
+  ambianceNodes.push(low, mid, lfo);
+
+  const motif = [196, 246.94, 293.66, 329.63, 293.66, 246.94, 220, 196];
+  function motifLoop(){
+    if(!introThemePlaying || !soundEnabled || !isIntroAudioScreen()) return;
+    motif.forEach((freq,i)=>playIntroThemeNote(freq, i*.58, i===3 ? 1.05 : .64, i===3 ? .046 : .032));
+    playIntroThemeNote(98, 0, 3.8, .018);
+    playIntroThemeNote(146.83, 2.4, 2.4, .016);
+    introThemeTimers.push(setTimeout(motifLoop, 7600));
+  }
+  function seaBreath(){
+    if(!introThemePlaying || !soundEnabled || !isIntroAudioScreen()) return;
+    playNoise(.34, .012);
+    introThemeTimers.push(setTimeout(seaBreath, 4200 + Math.random()*1800));
+  }
+  motifLoop();
+  introThemeTimers.push(setTimeout(seaBreath, 1200));
+}
+
+function stopIntroMaritimeTheme(){
+  introThemePlaying = false;
+  introThemeTimers.forEach(t=>clearTimeout(t));
+  introThemeTimers = [];
+}
+
+function maybeStartIntroMaritimeTheme(){
+  if(!soundEnabled || !isIntroAudioScreen()) return;
+  playIntroMaritimeTheme();
 }
 
 // === ÖZEL SES FONKSİYONLARI ===
@@ -28190,6 +28578,7 @@ function playSceneAudio(sc){
 // ===== BAŞLATMA =====
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
+document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
 buildIntro();
 openHomeScreen();
 

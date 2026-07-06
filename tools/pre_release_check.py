@@ -421,11 +421,20 @@ def check_map_and_ecdis() -> None:
         "CONTACT B",
         "cpa:'0.4'",
         "renderMooringInteractionVisual",
+        "renderEcdisInteractionVisual",
+        "renderFireInteractionVisual",
+        "renderSurvivalInteractionVisual",
+        "renderBunkerInteractionVisual",
+        "renderMobInteractionVisual",
+        "interaction-guide-card",
+        "interaction-replay",
         "mooring-operation-console",
         "mooring-snap-zone",
         "mooring-safe-zone",
         "SAFE STAND-BY",
         "TENSION RISING",
+        "playIntroMaritimeTheme",
+        "maybeStartIntroMaritimeTheme",
     ]:
         require_token(section, token, JS)
 
@@ -510,8 +519,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=147",
-        "index.css?v=129",
+        "index.js?v=148",
+        "index.css?v=130",
     ]:
         require_token(section, token)
 

@@ -732,6 +732,60 @@ input[type=text]::placeholder{color:var(--text3);}
 .mooring-choice.recommended{border-color:rgba(93,191,138,.45);box-shadow:0 0 16px rgba(93,191,138,.1);}
 .mooring-choice b{display:block;color:#fff;font-size:10px;margin-bottom:3px;}
 .mooring-choice small{display:block;color:#8fb3cc;font-size:8px;line-height:1.35;}
+.interaction-guide-card{border:1px solid rgba(212,160,23,.24);border-radius:10px;background:linear-gradient(135deg,rgba(47,34,7,.72),rgba(5,16,29,.86));padding:8px 9px;margin:0 0 9px;display:grid;gap:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);}
+.interaction-guide-card b{color:#ffd783;font:8px 'Share Tech Mono',monospace;letter-spacing:1px;}
+.interaction-guide-card span{color:#e8f6fb;font-size:11px;font-weight:700;line-height:1.35;}
+.interaction-guide-card small{color:#9dbdd5;font-size:9px;line-height:1.45;}
+.decision-feedback b{display:block;color:#e8f6fb;margin-bottom:3px;}
+.decision-feedback span{display:block;}
+.interaction-replay{display:grid;gap:5px;margin-top:8px;}
+.interaction-replay span{display:flex;align-items:center;gap:6px;border:1px solid rgba(111,168,220,.16);border-radius:8px;background:rgba(5,14,24,.62);padding:6px 7px;color:#9dbdd5;font:8.5px 'Share Tech Mono',monospace;line-height:1.35;}
+.interaction-replay b{display:inline-grid!important;place-items:center;flex:0 0 16px;width:16px;height:16px;border-radius:50%;background:#17324e;color:#ffd783;margin:0;}
+.interaction-replay.good span{border-color:rgba(93,191,138,.24);}
+.interaction-replay.warn span{border-color:rgba(255,180,82,.24);}
+.operation-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px;}
+.operation-choice{border-radius:10px!important;margin:0!important;padding:9px 8px!important;white-space:normal;text-align:left;align-items:flex-start!important;justify-content:flex-start!important;flex-direction:column;line-height:1.25;background:linear-gradient(180deg,rgba(10,30,50,.86),rgba(5,14,24,.94))!important;}
+.operation-choice.recommended{border-color:rgba(93,191,138,.48);box-shadow:0 0 16px rgba(93,191,138,.11);}
+.operation-choice b{display:block;color:#fff;font-size:10px;margin-bottom:3px;}
+.operation-choice small{display:block;color:#8fb3cc;font-size:8px;line-height:1.35;}
+.ecdis-task-console,.fire-task-console,.survival-task-console,.bunker-task-console,.mob-task-console{position:relative;margin:0 0 10px;border:1px solid rgba(127,195,255,.24);border-radius:15px;background:linear-gradient(180deg,rgba(6,18,31,.96),rgba(2,8,15,.98));padding:10px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.26),inset 0 0 0 1px rgba(255,255,255,.035);}
+.ecdis-task-head,.fire-task-head,.survival-task-head,.bunker-task-head,.mob-task-head{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#8ab0c8;font:8px 'Share Tech Mono',monospace;letter-spacing:.8px;margin-bottom:8px;}
+.ecdis-task-head b,.fire-task-head b,.survival-task-head b,.bunker-task-head b,.mob-task-head b{color:#ffd783;white-space:nowrap;}
+.ecdis-task-screen,.fire-room-svg,.survival-task-svg,.bunker-task-svg,.mob-task-svg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid rgba(111,168,220,.16);box-shadow:inset 0 0 34px rgba(127,195,255,.06);}
+.ecdis-safety-contour{fill:none;stroke:#f04f56;stroke-width:3;stroke-dasharray:8 5;animation:mapTargetPulse 1.2s ease-in-out infinite;}
+.ecdis-route-line{fill:none;stroke:#a1252f;stroke-width:3.2;stroke-linecap:round;}
+.ecdis-waypoints circle{fill:#fff9d2;stroke:#a1252f;stroke-width:1.4;}
+.ecdis-nogo{cursor:pointer;animation:dangerPulse 1.2s infinite;}
+.ecdis-nogo path{fill:rgba(240,79,86,.34);stroke:#a1252f;stroke-width:1.3;stroke-dasharray:5 4;}
+.ecdis-nogo text,.ecdis-safe-water text,.ecdis-sensor-box text{fill:#113047;font:8px 'Share Tech Mono',monospace;font-weight:700;}
+.ecdis-safe-water rect{fill:rgba(93,191,138,.22);stroke:#2f7c54;stroke-width:1.1;stroke-dasharray:6 4;cursor:pointer;}
+.ecdis-sensor-box rect{fill:rgba(127,195,255,.22);stroke:#315879;stroke-width:1.1;cursor:pointer;}
+.ecdis-alarm-list rect{fill:rgba(4,13,22,.78);stroke:#315879;stroke-width:1;}
+.ecdis-alarm-list text,.ecdis-note{fill:#103047;font:8px 'Share Tech Mono',monospace;}
+.ecdis-alarm-list .warn{fill:#a1252f;font-weight:700;}
+.fire-panel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:9px;}
+.fire-zone{min-height:62px;border:1px solid rgba(111,168,220,.2);border-radius:10px;background:rgba(5,14,24,.82);color:#cfeaff;text-align:left;padding:8px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
+.fire-zone b{display:block;color:#e8f6fb;font-size:9px;margin-bottom:4px;}.fire-zone small{display:block;color:#8fb3cc;font-size:7.5px;line-height:1.35;}
+.fire-zone.active{border-color:rgba(255,107,107,.55);background:rgba(83,18,22,.62);animation:alarm-flash .9s infinite;}
+.fire-room-svg text{fill:#e8f6fb;font:10px 'Share Tech Mono',monospace;paint-order:stroke;stroke:#06111c;stroke-width:1.5px;}
+.fire-smoke path{fill:none;stroke:rgba(196,210,220,.48);stroke-width:9;stroke-linecap:round;animation:stormMist 2.2s infinite;}
+.fire-flame path{fill:#ff8a30;stroke:#ffd45a;stroke-width:1.2;animation:softPulse .8s infinite;}
+.survival-lifeboat,.survival-muster,.survival-raft,.bunker-manifold,.bunker-sample,.bunker-overflow,.mob-button,.mob-lookout,.mob-log{cursor:pointer;}
+.survival-lifeboat path{fill:#ff8a30;stroke:#ffd45a;stroke-width:1.4;filter:drop-shadow(0 0 10px rgba(255,138,48,.22));}
+.survival-lifeboat rect,.survival-muster rect,.survival-raft rect{fill:rgba(11,31,48,.84);stroke:#7fc3ff;stroke-width:1.2;}
+.survival-lifeboat text,.survival-muster text,.survival-raft text,.survival-note{fill:#cfeaff;font:8px 'Share Tech Mono',monospace;paint-order:stroke;stroke:#06111c;stroke-width:1.4px;}
+.survival-fall{stroke:#ffd783;stroke-width:2;stroke-dasharray:6 4;animation:mooringLineStrain .8s infinite;}
+.bunker-hose{fill:none;stroke:#1b1f22;stroke-width:12;stroke-linecap:round;filter:drop-shadow(0 0 8px rgba(255,216,120,.12));animation:hosePulse 1.5s infinite;}
+.bunker-manifold rect,.bunker-sample rect,.bunker-overflow rect{fill:rgba(11,31,48,.88);stroke:#7fc3ff;stroke-width:1.2;}
+.bunker-manifold circle{fill:#607481;stroke:#d6c49b;stroke-width:3;animation:softPulse 1.2s infinite;}
+.bunker-sample path{fill:#9dbdd5;}.bunker-overflow path{fill:#ffb452;animation:alarm-flash 1s infinite;}
+.bunker-task-svg text,.bunker-note{fill:#cfeaff;font:8px 'Share Tech Mono',monospace;paint-order:stroke;stroke:#06111c;stroke-width:1.4px;}
+.bunker-esd{fill:#74151b;stroke:#ff8d8d;stroke-width:1.2;animation:alarm-flash 1.2s infinite;}
+.mob-sea{fill:#12355b;animation:mooringWater 3s infinite;}
+.mob-track{fill:none;stroke:#ffd783;stroke-width:2;stroke-dasharray:8 5;animation:mapTargetPulse 1.5s infinite;}
+.mob-button circle{fill:#861a24;stroke:#ff8d8d;stroke-width:3;animation:alarm-flash .7s infinite;}
+.mob-button text,.mob-lookout text,.mob-log text,.mob-note{fill:#e8f6fb;font:9px 'Share Tech Mono',monospace;paint-order:stroke;stroke:#06111c;stroke-width:1.5px;}
+.mob-lookout rect,.mob-log rect{fill:rgba(11,31,48,.84);stroke:#7fc3ff;stroke-width:1.2;}
 @keyframes mooringWater{0%,100%{transform:translateX(0);opacity:.48}50%{transform:translateX(8px);opacity:.72}}
 @keyframes mooringLineStrain{0%,100%{stroke-width:4.2;stroke-dashoffset:0;filter:drop-shadow(0 0 7px rgba(255,216,120,.22))}50%{stroke-width:5.2;stroke-dashoffset:-9;filter:drop-shadow(0 0 14px rgba(255,107,107,.36))}}
 @keyframes snapBackScan{0%,100%{opacity:.38;filter:brightness(.92)}50%{opacity:.78;filter:brightness(1.25)}}
@@ -740,7 +794,9 @@ input[type=text]::placeholder{color:var(--text3);}
 @media (max-width:620px){
   .mooring-operation-head{align-items:flex-start;flex-direction:column;}
   .mooring-operation-head b{white-space:normal;}
-  .mooring-step-strip,.mooring-choice-grid{grid-template-columns:1fr;}
+  .mooring-step-strip,.mooring-choice-grid,.operation-choice-grid,.fire-panel-grid{grid-template-columns:1fr;}
+  .ecdis-task-head,.fire-task-head,.survival-task-head,.bunker-task-head,.mob-task-head{align-items:flex-start;flex-direction:column;}
+  .ecdis-task-head b,.fire-task-head b,.survival-task-head b,.bunker-task-head b,.mob-task-head b{white-space:normal;}
   .mooring-step-strip span{font-size:8.5px;}
 }
 .hitbox-standard{touch-action:manipulation;-webkit-tap-highlight-color:rgba(212,160,23,.25);}
