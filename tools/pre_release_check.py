@@ -38,6 +38,7 @@ ANDROID_BILLING = (
     / "guverte"
     / "GuverteBillingBridge.java"
 )
+ANDROID_MANIFEST = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
 
 
 JS = INDEX_JS.read_text(encoding="utf-8")
@@ -45,7 +46,8 @@ CSS = INDEX_CSS.read_text(encoding="utf-8")
 HTML = INDEX_HTML.read_text(encoding="utf-8")
 PACKAGE = PACKAGE_JSON.read_text(encoding="utf-8")
 ANDROID = ANDROID_BILLING.read_text(encoding="utf-8") if ANDROID_BILLING.exists() else ""
-ALL_SOURCE = "\n".join([JS, CSS, HTML, PACKAGE, ANDROID])
+MANIFEST = ANDROID_MANIFEST.read_text(encoding="utf-8") if ANDROID_MANIFEST.exists() else ""
+ALL_SOURCE = "\n".join([JS, CSS, HTML, PACKAGE, ANDROID, MANIFEST])
 
 ERRORS: list[str] = []
 WARNINGS: list[str] = []
@@ -415,6 +417,11 @@ def check_map_and_ecdis() -> None:
         "TRADE_VOYAGE_ROUTES.push",
         "MAJOR_TRADE_ROUTE_KEYS",
         "getMapTaskChartSymbol",
+        "getMapTaskEffectiveTolerance",
+        "map-task-touch-area",
+        "showMapTapFeedback",
+        "focusCurrentMapTask",
+        "xMidYMid meet",
         "map-task-callout",
         "renderRadarInteractionVisual",
         "radar-task-console",
@@ -472,7 +479,27 @@ def check_billing_products() -> None:
         for value in ("premium_full_pack", "remove_ads"):
             if value not in ANDROID:
                 fail(section, f"Android billing bridge missing product ID: {value}")
+        if "return null;" not in ANDROID:
+            fail(section, "Unknown billing product IDs must not fall back to premium.")
         ok(section, "Premium and remove-ads product IDs are aligned with Android bridge.")
+    if ANDROID_MANIFEST.exists():
+        require_token(section, 'android:allowBackup="false"', MANIFEST)
+        require_token(section, 'android:fullBackupContent="false"', MANIFEST)
+        require_token(section, 'android:usesCleartextTraffic="false"', MANIFEST)
+    else:
+        warn(section, "Android manifest not found; mobile store hardening not checked.")
+    if "premiumUnlocked = !!data.premiumUnlocked" in JS or "adsRemoved = !!data.adsRemoved" in JS:
+        fail(section, "Saved game payload must not unlock premium or remove-ads purchases.")
+    if "localStorage.getItem(key)==='1'" in JS or "localStorage.setItem(PREMIUM_KEY,'1')" in JS or "localStorage.setItem(ADS_REMOVAL_KEY,'1')" in JS:
+        fail(section, "Purchase flags must not use a raw localStorage '1' marker.")
+    if "TEST-" in JS:
+        fail(section, "Production purchase markers must not accept TEST- local unlocks.")
+    for token in ("PURCHASE_MARKER_PREFIXES", "isTrustedPurchaseMarker", "writePurchasedFlag"):
+        require_token(section, token, JS)
+    if "premiumUnlocked || selType === 'kruvaziyer'" in JS:
+        fail(section, "Cruise premium cinematic is bypassing the premium gate.")
+    for token in ("requirePremiumAccess", "filterPremiumLockedScenes", "isPremiumContentScene"):
+        require_token(section, token, JS)
 
 
 def parse_effect_numbers() -> list[int]:
@@ -522,8 +549,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=153",
-        "index.css?v=132",
+        "index.js?v=154",
+        "index.css?v=133",
     ]:
         require_token(section, token)
 

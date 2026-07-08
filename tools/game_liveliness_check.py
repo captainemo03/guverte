@@ -337,6 +337,9 @@ CHECKS = {
     ],
     "cinematic audio and final polish": [
         "home-cinematic-sea",
+        "ship-containers",
+        "ship-bridge",
+        "ship-wake",
         "renderFinalCinematicBlock",
         "final-cinematic",
         "final-tier-gold",
@@ -344,6 +347,23 @@ CHECKS = {
         "getDeviceTrainingCoach",
         "map-reading-cue",
         "getMapTaskReadingCue",
+    ],
+    "privacy community premium policy": [
+        "GIZLILIK POLITIKASI",
+        "TOPLUM KURALLARI",
+        "PREMIUM / SATIN ALMA KURALLARI",
+        "notesTab === 'sozluk'",
+        "onclick=\"setNotesTab('politika')\"",
+        "Premium icerik yalnizca Google Play satin alma onayindan sonra acilir",
+    ],
+    "premium hard gate": [
+        "readPurchasedFlag",
+        "requirePremiumAccess",
+        "filterPremiumLockedScenes",
+        "isPremiumContentScene",
+        "PREMIUM_SCENE_ID_PREFIXES",
+        "premiumUnlocked = readPurchasedFlag(PREMIUM_KEY)",
+        "if(premiumUnlocked && selType === 'kruvaziyer')",
     ],
     "ship-specific specialist crew": [
         "SHIP_TYPE_SPECIALIST_KEYS",
@@ -667,13 +687,13 @@ def main() -> int:
     js_versions = re.findall(r"index\.js\?v=(\d+)", html)
     if not js_versions:
         missing.append("cache: index.js version query is missing")
-    elif int(js_versions[-1]) < 103:
+    elif int(js_versions[-1]) < 154:
         missing.append(f"cache: index.js version is stale ({js_versions[-1]})")
 
     css_versions = re.findall(r"index\.css\?v=(\d+)", html)
     if not css_versions:
         missing.append("cache: index.css version query is missing")
-    elif int(css_versions[-1]) < 91:
+    elif int(css_versions[-1]) < 133:
         missing.append(f"cache: index.css version is stale ({css_versions[-1]})")
 
     if not (ROOT / "www" / "vendor" / "three.module.js").exists():

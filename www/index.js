@@ -558,8 +558,22 @@ const PREMIUM_PRICE_LABEL = '75 TL';
 const ADS_REMOVAL_KEY = 'guverte-no-ads-v1';
 const ADS_REMOVAL_PRODUCT_ID = 'remove_ads';
 const ADS_REMOVAL_PRICE_LABEL = '50 TL';
-let premiumUnlocked = (()=>{try{return localStorage.getItem(PREMIUM_KEY)==='1';}catch(e){return false;}})();
-let adsRemoved = (()=>{try{return localStorage.getItem(ADS_REMOVAL_KEY)==='1';}catch(e){return false;}})();
+const PURCHASE_MARKER_PREFIXES = Object.freeze(['GP-', 'STORE-']);
+function isTrustedPurchaseMarker(value){
+  const marker = String(value || '');
+  return PURCHASE_MARKER_PREFIXES.some(prefix=>marker.startsWith(prefix));
+}
+function readPurchasedFlag(key){
+  try{return isTrustedPurchaseMarker(localStorage.getItem(key));}catch(e){return false;}
+}
+function writePurchasedFlag(key, receipt){
+  const marker = String(receipt || '');
+  if(!isTrustedPurchaseMarker(marker)) return false;
+  try{localStorage.setItem(key, marker);}catch(e){}
+  return true;
+}
+let premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
+let adsRemoved = readPurchasedFlag(ADS_REMOVAL_KEY);
 const PREMIUM_PACKAGE_CATALOG = [
   'Proje yuk ve heavy-lift',
   'Kruvaziyer / yolcu operasyonu',
@@ -575,6 +589,25 @@ function isPremiumShipType(typeKey){
 }
 function canUseShipType(typeKey){
   return !isPremiumShipType(typeKey) || premiumUnlocked;
+}
+const PREMIUM_SCENE_ID_PREFIXES = Object.freeze(['proje','cruise','research','offshore','ice','cable','pipe','shuttle','premium_tanker']);
+function isPremiumSceneId(id=''){
+  const sid = String(id || '');
+  return PREMIUM_SCENE_ID_PREFIXES.some(prefix=>sid.startsWith(prefix)) || sid === 'cin_cruise_medevac';
+}
+function isPremiumContentScene(sc){
+  if(!sc) return false;
+  return !!sc.premium || sc.cinematicKey === 'cruiseMedevac' || isPremiumSceneId(sc.id) || /^Premium\b/i.test(String(sc.day || ''));
+}
+function requirePremiumAccess(reason='Bu ozel gemi, rota veya operasyon premium pakete dahildir.'){
+  premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
+  if(premiumUnlocked) return true;
+  showNotif('🔒','Premium Gerekli', reason);
+  return false;
+}
+function filterPremiumLockedScenes(scenes){
+  if(premiumUnlocked) return scenes;
+  return (scenes || []).filter(sc=>!isPremiumContentScene(sc));
 }
 function getPremiumBillingBridge(){
   if(window.GuverteBilling && typeof window.GuverteBilling.purchasePremium === 'function') return window.GuverteBilling;
@@ -680,7 +713,7 @@ async function openPremiumPurchase(){
       showNotif('💳','Premium Satin Alma',`${PREMIUM_PRICE_LABEL} · Google Play odeme ekrani aciliyor.`);
       const result = await billing.purchasePremium(PREMIUM_PRODUCT_ID);
       const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
-      if(result?.ok && receipt){
+      if(result?.ok && receipt && (!result?.productId || result.productId === PREMIUM_PRODUCT_ID)){
         grantPremiumPackageFromPurchase(`GP-${receipt}`);
       }else{
         showNotif('🔒','Odeme Tamamlanmadi','Satin alma onayi gelmedi. Karttan cekim yapildiysa Play Store satin alma gecmisinden geri yukleme deneyebilirsin.');
@@ -703,7 +736,7 @@ async function openAdsRemovalPurchase(){
       showNotif('💳','Reklamlari Kaldir',`${ADS_REMOVAL_PRICE_LABEL} · Google Play odeme ekrani aciliyor.`);
       const result = await billing.purchasePremium(ADS_REMOVAL_PRODUCT_ID);
       const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
-      if(result?.ok && receipt){
+      if(result?.ok && receipt && (!result?.productId || result.productId === ADS_REMOVAL_PRODUCT_ID)){
         grantAdsRemovalFromPurchase(`GP-${receipt}`);
       }else{
         showNotif('🔒','Odeme Tamamlanmadi','Reklam kaldirma onayi gelmedi. Satin alma yapildiysa geri yukleme deneyebilirsin.');
@@ -725,7 +758,7 @@ async function restorePremiumPurchase(){
     showNotif('🔁','Premium Geri Yukleniyor','Google Play satin alma gecmisi kontrol ediliyor.');
     const result = await billing.restorePremium();
     const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
-    if(result?.ok && receipt){
+    if(result?.ok && receipt && (!result?.productId || result.productId === PREMIUM_PRODUCT_ID)){
       grantPremiumPackageFromPurchase(`GP-${receipt}`);
     }else{
       showNotif('🔒','Premium Bulunamadi','Bu Google Play hesabinda premium satin alma bulunamadi.');
@@ -744,7 +777,7 @@ async function restoreAdsRemovalPurchase(){
     showNotif('🔁','Reklam Paketi','Google Play satin alma gecmisi kontrol ediliyor.');
     const result = await billing.restoreProduct(ADS_REMOVAL_PRODUCT_ID);
     const receipt = result?.purchaseToken || result?.receipt || result?.orderId || '';
-    if(result?.ok && receipt){
+    if(result?.ok && receipt && (!result?.productId || result.productId === ADS_REMOVAL_PRODUCT_ID)){
       grantAdsRemovalFromPurchase(`GP-${receipt}`);
     }else{
       showNotif('🔒','Paket Bulunamadi','Bu Google Play hesabinda reklam kaldirma satin alma bulunamadi.');
@@ -754,23 +787,23 @@ async function restoreAdsRemovalPurchase(){
   }
 }
 function grantPremiumPackageFromPurchase(receipt=''){
-  if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
+  if(!/^(GP|STORE)-/.test(String(receipt))){
     showNotif('🔒','Odeme Onayi Gerekli','Premium sadece gecerli satin alma onayi ile acilir.');
     return false;
   }
   premiumUnlocked = true;
-  try{localStorage.setItem(PREMIUM_KEY,'1');}catch(e){}
+  writePurchasedFlag(PREMIUM_KEY, receipt);
   showNotif('🔓','Premium Aktif','Odeme onayi alindi. Ozel gemiler, ileri operasyonlar ve pro kriz paketleri acildi.');
   buildIntro();
   return true;
 }
 function grantAdsRemovalFromPurchase(receipt=''){
-  if(!/^(GP|STORE|TEST)-/.test(String(receipt))){
+  if(!/^(GP|STORE)-/.test(String(receipt))){
     showNotif('🔒','Odeme Onayi Gerekli','Reklam kaldirma sadece gecerli satin alma onayi ile acilir.');
     return false;
   }
   adsRemoved = true;
-  try{localStorage.setItem(ADS_REMOVAL_KEY,'1');}catch(e){}
+  writePurchasedFlag(ADS_REMOVAL_KEY, receipt);
   showNotif('🚫','Reklamlar Kaldirildi','50 TL reklam kaldirma paketi aktif edildi.');
   buildIntro();
   return true;
@@ -5029,10 +5062,10 @@ choices:[
 {text:"'Bu hayatı seçiyorum — her zorluğuyla'",tag:"cesur",effect:{cesaret:15,sayginlik:12},next:'end'},
 {text:"'Henüz tam emin değilim ama devam edeceğim'",tag:"itaatkar",effect:{sayginlik:8,bilgi:5},next:'end'}]},
   ];
-  return baseScenes.concat(
+  return filterPremiumLockedScenes(baseScenes.concat(
     buildSpecialistCrewScenes(n,sn,yr,stype,st,shipSpec),
-    buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec)
-  );
+    premiumUnlocked ? buildPremiumShipScenes(n,sn,yr,stype,st,shipSpec) : []
+  ));
 }
 
 // ===== KONTRAT SİSTEMİ =====
@@ -11257,7 +11290,7 @@ function buildIntro(){
     d.innerHTML=`<span class="sb-ico">${locked?'🔒':t.ico}</span><span class="sb-nm">${t.nm}</span><span class="sb-kont">${spec.tonLabel}<br>${locked?'Premium Paket':kontStr+' ay'}</span>${t.premium?'<span class="premium-chip">PREMIUM</span>':''}`;
     d.onclick=()=>{
       if(locked){
-        showNotif('🔒','Premium Gerekli','Bu ozel gemi ve pro operasyon paketleri premium pakete dahildir.');
+        requirePremiumAccess('Bu ozel gemi ve pro operasyon paketleri premium pakete dahildir.');
         return;
       }
       selType=t.key;document.querySelectorAll('.selb').forEach(x=>x.classList.remove('active'));d.classList.add('active');updateKontrat();updateSugs();selectedVoyageRouteKey='';renderVoyageRouteSelector();renderShipChoiceSummary();
@@ -11389,6 +11422,7 @@ function updateKontrat(){
   const c=document.getElementById('kontratsel');
   c.innerHTML='';
   if(isPremiumShipType(selType) && !premiumUnlocked){
+    selKontrat = 0;
     c.innerHTML='<div class="kont-card locked">Premium paket olmadan bu kontrat acilmaz.</div>';
     return;
   }
@@ -13230,7 +13264,7 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
     tanker:'premium_tanker',
     lng:'premium_tanker'
   };
-  const premiumPrefix = premiumUnlocked ? (premiumPrefixes[selType] || '') : (isPremiumShipType(selType) ? (premiumPrefixes[selType] || '') : '');
+  const premiumPrefix = premiumUnlocked ? (premiumPrefixes[selType] || '') : '';
   if(premiumPrefix){
     const premiumScenes = regular.filter(s=>String(s.id||'').startsWith(premiumPrefix) && !selectedRegular.some(x=>x.id===s.id));
     const guaranteed = premiumScenes.sort(()=>Math.random()-0.5).slice(0, Math.min(5, premiumScenes.length));
@@ -13261,7 +13295,7 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
   const injectAt = Math.min(middle.length, Math.max(5, Math.floor(middle.length*0.58)));
   middle.splice(injectAt, 0, ...portChainScenes);
 
-  return [...mandatory_start, ...middle, ...documentChain, ...extraRouteScenes, ...extraEquipmentScenes, ...final];
+  return filterPremiumLockedScenes([...mandatory_start, ...middle, ...documentChain, ...extraRouteScenes, ...extraEquipmentScenes, ...final]);
 }
 
 const CINEMATIC_SCENES = {
@@ -13489,6 +13523,7 @@ function createCinematicScene(key){
     cinematic:true,
     cinematicType:def.type || key,
     cinematicKey:key,
+    premium:key === 'cruiseMedevac',
     cinematicBeats:def.beats || [],
     cinematicDurationMs:def.durationMs || 10000,
     choices:[{
@@ -13523,7 +13558,7 @@ function injectCinematicScenes(queue, opts={}){
   insertCinematicScene(queue, 'engineBlackout', 0.60, {afterStart:true});
   insertCinematicScene(queue, 'piracyZone', 0.72, {afterStart:true});
   insertCinematicScene(queue, 'pscInspection', 0.80, {afterStart:true});
-  if(premiumUnlocked || selType === 'kruvaziyer') insertCinematicScene(queue, 'cruiseMedevac', 0.86, {afterStart:true});
+  if(premiumUnlocked && selType === 'kruvaziyer') insertCinematicScene(queue, 'cruiseMedevac', 0.86, {afterStart:true});
   insertCinematicScene(queue, 'emergency', 0.68, {afterStart:true});
   insertCinematicScene(queue, 'contractEnd', 0.92, {beforeFinal:true});
   return queue;
@@ -14527,7 +14562,7 @@ function continueContractOnShip(offerKey='same'){
   const stObj=STYPES.find(x=>x.key===selType);
   const offer = (shipOffers.length?shipOffers:buildShipOffers()).find(o=>o.key===offerKey) || buildShipOffers()[0];
   if(isPremiumShipType(offer.type) && !premiumUnlocked){
-    showNotif('🔒','Premium Gerekli','Bu gemi tipi premium pakete dahil.');
+    requirePremiumAccess('Bu gemi tipi premium pakete dahil.');
     return;
   }
   if(offer && offer.key !== 'same'){
@@ -14577,7 +14612,7 @@ function beginGame(){
   const ni=document.getElementById('nameinp').value.trim();
   const si=document.getElementById('shipnameinp').value.trim();
   if(isPremiumShipType(selType) && !premiumUnlocked){
-    showNotif('🔒','Premium Gerekli','Ozel gemiler ve pro operasyon paketleri ile baslamak icin premium paket gerekli.');
+    requirePremiumAccess('Ozel gemiler ve pro operasyon paketleri ile baslamak icin premium paket gerekli.');
     return;
   }
   pn=ni||'Stajyer';
@@ -16958,7 +16993,7 @@ function getFeatureUnlocks(sc){
   const simple = mode.level === 0;
   return {
     phone: !simple || sceneNo >= 5,
-    map: !simple && (sceneNo >= 7 - bonus || forced.map),
+    map: !simple,
     devices: !simple && (sceneNo >= 9 - bonus || forced.devices || forced.vhf),
     logbook: !simple && (sceneNo >= 10 - bonus || forced.logbook || assist),
     cabin: !simple && sceneNo >= 12 - bonus,
@@ -17301,8 +17336,6 @@ function buildSavePayload(){
     gameLanguage,
     gameplayMode,
     missionDirectorState,
-    premiumUnlocked,
-    adsRemoved,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
     currentIdx,
@@ -17427,15 +17460,19 @@ function applyLoadedGameState(data){
     : {sceneId:'', title:'', steps:[], completed:[]};
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
-  premiumUnlocked = !!data.premiumUnlocked || premiumUnlocked;
-  adsRemoved = !!data.adsRemoved || adsRemoved;
+  premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
+  adsRemoved = readPurchasedFlag(ADS_REMOVAL_KEY);
   selYear = data.selYear || 2018;
   selType = data.selType || 'kuru';
+  if(isPremiumShipType(selType) && !premiumUnlocked){
+    selType = 'kuru';
+    sn = 'M/V Ege Meltem';
+  }
   selKontrat = Number.isFinite(data.selKontrat) ? data.selKontrat : 0;
   contractDays = data.contractDays || 0;
   contractTotal = data.contractTotal || 0;
   currentIdx = Math.max(0, data.currentIdx || 0);
-  sceneQueue = Array.isArray(data.sceneQueue) ? data.sceneQueue : [];
+  sceneQueue = filterPremiumLockedScenes(Array.isArray(data.sceneQueue) ? data.sceneQueue : []);
   stats = data.stats || {cesaret:40,bilgi:22,sayginlik:32,dinclik:68};
   mood = data.mood ?? 58;
   psyche = data.psyche || {moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
@@ -17446,7 +17483,7 @@ function applyLoadedGameState(data){
   careerMemory = data.careerMemory || {firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   careerState = {...careerState, ...(data.careerState || {})};
   specialtyXP = {...specialtyXP, ...(data.specialtyXP || {})};
-  shipOffers = Array.isArray(data.shipOffers) ? data.shipOffers : [];
+  shipOffers = Array.isArray(data.shipOffers) ? data.shipOffers.filter(o=>!isPremiumShipType(o.type) || premiumUnlocked) : [];
   familyUnread = data.familyUnread || 0;
   choicesMade = Array.isArray(data.choicesMade) ? data.choicesMade : [];
   playerAppearance = {...playerAppearance, ...(data.playerAppearance || {})};
@@ -17601,6 +17638,7 @@ let activeMapTaskIndex = 0;
 const completedMapTasks = new Set();
 let mapRouteDraftPoints = [];
 const mapTaskWrongAttempts = {};
+let lastMapTapFeedbackId = 0;
 let lastAutoVoyageChartScene = '';
 let mapMissionChainState = {name:'pilotArrival', step:0, last:''};
 
@@ -17893,7 +17931,7 @@ function fastUpdatePortChartViewport(){
   const chartZoomLabel = document.getElementById('port-chart-zoom-label');
   const chartDetailLabel = document.getElementById('port-chart-detail-label');
   if(chartSvg){
-    chartSvg.setAttribute('preserveAspectRatio', 'none');
+    chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     chartSvg.setAttribute('viewBox', getPortChartViewBox());
   }
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
@@ -17903,7 +17941,7 @@ function fastUpdatePortChartViewport(){
 function fastUpdateWorldMapViewport(){
   const svg = document.getElementById('map-svg');
   if(svg){
-    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('viewBox', getWorldMapViewBox());
   }
   updateWorldMapZoomLabel();
@@ -18131,21 +18169,29 @@ function renderMapTaskChips(activePort){
 
 function getMapTaskTarget(task, port){
   const geo = getPortChartTaskGeometry(port);
-  if(task.id === 'reporting') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 36, label:'REPORTING / VTS'};
-  if(task.id === 'noanchoring') return {x: geo.coastLeft ? 282 : 158, y: geo.southFacing ? 196 : 194, tol: 38, label:'NO ANCHORING'};
-  if(task.id === 'alternateroute') return {x: 256, y: 158, tol: 48, label:'ALTERNATE ROUTE'};
-  if(task.id === 'waypoint') return {x: 274, y: 136, tol: 36, label:'NEXT WAYPOINT / WOP'};
-  if(task.id === 'cpa') return {x: 302, y: 104, tol: 34, label:'CPA / CROSSING TARGET'};
-  if(task.id === 'ukc') return {x: geo.coastLeft ? 292 : 148, y: geo.channelY + 34, tol: 34, label:'UKC / SQUAT CHECK'};
-  if(task.id === 'eca') return {x: 226, y: 88, tol: 42, label:'ECA / CHANGE-OVER'};
-  if(task.id === 'weatheravoid') return {x: 224, y: 174, tol: 48, label:'WEATHER AVOIDANCE'};
-  if(task.id === 'cablecrossing') return {x: geo.coastLeft ? 286 : 154, y: 184, tol: 36, label:'CABLE / PIPELINE'};
-  if(task.id === 'offshorezone') return {x: 300, y: 142, tol: 42, label:'500 m SAFETY ZONE'};
-  if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 38, label:'PILOT BOARDING'};
-  if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 36, label:'ANCHORAGE'};
-  if(task.id === 'tss') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 40, label:'TSS / TRAFFIC FLOW'};
-  if(task.id === 'berth') return {x: geo.turningBasinX, y: geo.channelY, tol: 34, label:'TURN / BERTH APPROACH'};
-  return {x: geo.channelEndX, y: geo.channelY, tol: 28, label:'TARGET'};
+  if(task.id === 'reporting') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 48, label:'REPORTING / VTS'};
+  if(task.id === 'noanchoring') return {x: geo.coastLeft ? 282 : 158, y: geo.southFacing ? 196 : 194, tol: 50, label:'NO ANCHORING'};
+  if(task.id === 'alternateroute') return {x: 256, y: 158, tol: 62, label:'ALTERNATE ROUTE'};
+  if(task.id === 'waypoint') return {x: 274, y: 136, tol: 48, label:'NEXT WAYPOINT / WOP'};
+  if(task.id === 'cpa') return {x: 302, y: 104, tol: 48, label:'CPA / CROSSING TARGET'};
+  if(task.id === 'ukc') return {x: geo.coastLeft ? 292 : 148, y: geo.channelY + 34, tol: 46, label:'UKC / SQUAT CHECK'};
+  if(task.id === 'eca') return {x: 226, y: 88, tol: 54, label:'ECA / CHANGE-OVER'};
+  if(task.id === 'weatheravoid') return {x: 224, y: 174, tol: 62, label:'WEATHER AVOIDANCE'};
+  if(task.id === 'cablecrossing') return {x: geo.coastLeft ? 286 : 154, y: 184, tol: 48, label:'CABLE / PIPELINE'};
+  if(task.id === 'offshorezone') return {x: 300, y: 142, tol: 56, label:'500 m SAFETY ZONE'};
+  if(task.id === 'pilot') return {x: geo.coastLeft ? 330 : 112, y: geo.southFacing ? 92 : 178, tol: 52, label:'PILOT BOARDING'};
+  if(task.id === 'anchorage') return {x: geo.coastLeft ? 180 : 260, y: 210, tol: 50, label:'ANCHORAGE'};
+  if(task.id === 'tss') return {x: geo.coastLeft ? 356 : 88, y: geo.channelY - 46, tol: 52, label:'TSS / TRAFFIC FLOW'};
+  if(task.id === 'berth') return {x: geo.turningBasinX, y: geo.channelY, tol: 48, label:'TURN / BERTH APPROACH'};
+  return {x: geo.channelEndX, y: geo.channelY, tol: 42, label:'TARGET'};
+}
+
+function getMapTaskEffectiveTolerance(task, target){
+  const base = Number(target?.tol || 44);
+  const typeBoost = task?.id === 'alternateroute' || task?.id === 'weatheravoid' ? 6 : 0;
+  const zoom = Math.max(1, getPortChartEffectiveZoom?.() || 1);
+  const overviewBoost = zoom < 1.45 ? 8 : zoom < 2 ? 4 : 0;
+  return Math.max(44, Math.min(72, base + typeBoost + overviewBoost));
 }
 
 function getSvgClickPoint(svg, ev){
@@ -18175,9 +18221,11 @@ function buildMapTaskTargetOverlay(port){
   const rayStartX = tx > labelX ? labelX + labelW : labelX;
   const rayEndX = tx > labelX ? tx - 12 : tx + 12;
   const symbol = getMapTaskChartSymbol(task);
-  const tol = Math.min(38, Math.max(22, Number(target.tol || 32)));
+  const touchTol = getMapTaskEffectiveTolerance(task, target);
+  const tol = Math.min(54, Math.max(28, touchTol * .78));
   return `
     <g class="map-task-target chart-task-${symbol.cls}" data-task="${task.id}" data-x="${target.x}" data-y="${target.y}">
+      <circle class="map-task-touch-area" cx="${tx}" cy="${ty}" r="${touchTol}"/>
       <circle class="map-task-cursor" cx="${tx}" cy="${ty}" r="${tol}" fill="rgba(255,205,79,.06)" stroke="#ffc94d" stroke-width="1.45" stroke-dasharray="2.6,3.2"/>
       <circle class="map-task-bearing" cx="${tx}" cy="${ty}" r="${Math.max(10, tol*.42)}" fill="none" stroke="rgba(129,247,184,.78)" stroke-width=".9" stroke-dasharray="1.5,2.2"/>
       <path class="map-task-crosshair" d="M${tx-12} ${ty} H${tx+12} M${tx} ${ty-12} V${ty+12}" stroke="#e8f6fb" stroke-width=".95"/>
@@ -18216,7 +18264,7 @@ function isInsideVisibleHitbox(x, y, boxes){
 function getMapTaskVisibleHitboxes(target){
   const tx = Math.max(34, Math.min(406, target.x));
   const ty = Math.max(34, Math.min(226, target.y));
-  const r = Math.max(34, Number(target.tol || 34));
+  const r = getMapTaskEffectiveTolerance(getCurrentMapTask(), target);
   return [
     {x:tx-r, y:ty-r, w:r*2, h:r*2, type:'target-ring'},
     {...getMapTaskTargetLabelBox(target), type:'target-label'}
@@ -18228,6 +18276,61 @@ function normalizeClickableSurface(selector='button,[role="button"],.interaction
     el.classList.add('hitbox-standard');
     if(!el.getAttribute('aria-label') && el.textContent?.trim()) el.setAttribute('aria-label', el.textContent.trim().replace(/\s+/g,' '));
   });
+}
+
+function showMapTapFeedback(svg, x, y, state='near', label='SECIM ALINDI'){
+  if(!svg) return;
+  lastMapTapFeedbackId += 1;
+  const id = lastMapTapFeedbackId;
+  const fx = Math.max(28, Math.min(412, Number(x) || 220));
+  const fy = Math.max(28, Math.min(232, Number(y) || 130));
+  const safeLabel = phoneSafe(String(label || 'SECIM ALINDI').slice(0, 28));
+  svg.querySelectorAll('.map-touch-feedback').forEach(el=>el.remove());
+  const labelX = Math.max(10, Math.min(326, fx + 12));
+  const labelY = Math.max(20, Math.min(246, fy - 12));
+  const markup = `<g class="map-touch-feedback ${state}" data-id="${id}" style="transform-box:fill-box;transform-origin:center;">
+    <circle cx="${fx}" cy="${fy}" r="13" fill="rgba(255,255,255,.025)" stroke-width="1.4"/>
+    <circle cx="${fx}" cy="${fy}" r="24" fill="none" stroke-width="1"/>
+    <rect x="${labelX}" y="${labelY-13}" width="104" height="20" rx="5"/>
+    <text x="${labelX+8}" y="${labelY}">${safeLabel}</text>
+  </g>`;
+  svg.insertAdjacentHTML('beforeend', markup);
+  window.setTimeout(()=>{
+    const el = svg.querySelector(`.map-touch-feedback[data-id="${id}"]`);
+    if(el) el.remove();
+  }, 1350);
+}
+
+function focusCurrentMapTask(){
+  mapView = 'library';
+  let task = getCurrentMapTask();
+  ensureTaskPort(task);
+  const port = ensureSelectedPortChart();
+  task = getCurrentMapTask();
+  if(!task || !port) return;
+  if(!isMapTaskAllowedForPort(task, port)){
+    ensureTaskPort(task);
+    renderMap();
+    return;
+  }
+  const target = getMapTaskTarget(task, port);
+  const beforeBucket = getPortChartDetailBucket();
+  portChartZoom = Math.max(portChartZoom || 1, 2.1);
+  const zoom = getPortChartEffectiveZoom();
+  const width = 440 / zoom;
+  const height = 260 / zoom;
+  const next = clampPortChartPan(target.x - width / 2, target.y - height / 2);
+  portChartPanX = +next.x.toFixed(2);
+  portChartPanY = +next.y.toFixed(2);
+  if(beforeBucket !== getPortChartDetailBucket()) invalidateMapRenderCache('port');
+  renderMap();
+  const svg = document.getElementById('port-chart-svg');
+  showMapTapFeedback(svg, target.x, target.y, 'near', 'GOREV BOLGESI');
+  const status = document.getElementById('port-chart-taskstatus');
+  if(status){
+    status.className = 'warn';
+    status.textContent = `${target.label || task.title} bolgesi merkeze alindi. Sembol, rota ve derinlik iliskisini kontrol ederek sec.`;
+  }
 }
 
 function getMapTaskReadingCue(task, port){
@@ -18292,11 +18395,13 @@ function handlePortChartTaskClick(svg, ev, port){
   const {x, y} = getSvgClickPoint(svg, ev);
   const sheet = getClickedChartIndexSheet(port, x, y);
   if(sheet){
+    showMapTapFeedback(svg, x, y, 'near', 'PAFTA ACILIYOR');
     openChartIndexSheet(sheet, port);
     return;
   }
   const allowed = isMapTaskAllowedForPort(task, port);
   if(!allowed){
+    showMapTapFeedback(svg, x, y, 'near', 'CHART DEGISIYOR');
     const status = document.getElementById('port-chart-taskstatus');
     const before = selectedPortChart;
     ensureTaskPort(task);
@@ -18313,8 +18418,9 @@ function handlePortChartTaskClick(svg, ev, port){
   const status = document.getElementById('port-chart-taskstatus');
   if(task.id === 'alternateroute'){
     mapRouteDraftPoints.push({x:+x.toFixed(1), y:+y.toFixed(1)});
+    showMapTapFeedback(svg, x, y, 'near', `ROTA NOKTASI ${mapRouteDraftPoints.length}`);
     renderMapRouteDraftOverlay(svg);
-    if(mapRouteDraftPoints.length >= 3 || Math.hypot(x-target.x, y-target.y) <= target.tol){
+    if(mapRouteDraftPoints.length >= 3 || Math.hypot(x-target.x, y-target.y) <= getMapTaskEffectiveTolerance(task, target)){
       completedMapTasks.add(task.id);
       progressMapMissionChain(task, true);
       if(status){
@@ -18335,7 +18441,9 @@ function handlePortChartTaskClick(svg, ev, port){
   const dist = Math.hypot(x-target.x, y-target.y);
   const labelHit = isInsideMapTaskTargetLabel(x, y, target);
   const visibleHit = isInsideVisibleHitbox(x, y, getMapTaskVisibleHitboxes(target));
-  if(dist <= target.tol || labelHit || visibleHit){
+  const touchTol = getMapTaskEffectiveTolerance(task, target);
+  if(dist <= touchTol || labelHit || visibleHit){
+    showMapTapFeedback(svg, x, y, 'good', 'SECIM OK');
     completedMapTasks.add(task.id);
     mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
     progressMapMissionChain(task, true);
@@ -18349,7 +18457,8 @@ function handlePortChartTaskClick(svg, ev, port){
     addJournalEntry(`[HARITA GOREVI] ${task.title} basariyla tamamlandi (${port.name}).`, 'Harita', '--:--');
     addLiveLogbook('HARITA EGITIMI', `${task.title}: ${training.correct}`, true);
   }else if(status){
-    const near = dist <= target.tol * 1.75;
+    const near = dist <= touchTol * 1.85;
+    showMapTapFeedback(svg, x, y, near ? 'near' : 'bad', near ? 'YAKLASTIN' : 'YANLIS BOLGE');
     const training = getMapTaskTraining(task.id);
     const attemptKey = getMapTaskAttemptKey(task, port);
     const wrongCount = near ? 0 : ((mapTaskWrongAttempts[attemptKey] || 0) + 1);
@@ -19772,7 +19881,7 @@ function renderMapLibrary(){
   const profile = getPortChartProfile(active);
   const region = profile.region;
   chartSvg.classList.add('shodb-style');
-  chartSvg.setAttribute('preserveAspectRatio', 'none');
+  chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
   const portKey = [
     active.name,
@@ -20171,7 +20280,7 @@ function renderMap(){
   initWorldMapInteractions(svg);
   updateWorldMapZoomLabel();
   if(svg){
-    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('viewBox', getWorldMapViewBox());
   }
   const region = getMapRegionByPosition(shipPosition);
@@ -20322,6 +20431,9 @@ const seenColregHints = new Set();
 const STUDENT_NOTES = [
   {head:"KOPRUUSTU VARDIYASI", body:"Look-out, COLREG, rota takibi, ECDIS kontrolu, radar cross-check ve logbook disiplini vardiyanin omurgasidir.<br>Vardiya devrinde rota, trafik, hava, makina durumu ve beklenen manevra net aktarilir.<br>Master'in standing orders ve night orders'i bilinmeden vardiya tutulmaz.", tip:"Once gozlem, sonra yorum."},
   {head:"ANA KURALLAR", body:"Sormadan varsayma.<br>Gormeden dogru kabul etme.<br>Hata gordugunde saklama, amire bildir.<br>PPE'siz ise baslama.<br>Snap-back zone'a girme.<br>Kapali mahalde permitsiz girme.<br>Stop komutu duyuldugunda herkes durur.<br>Near-miss de raporlanir.", tip:"Denizcilikte disiplin tekrar degil, hayatta kalma bicimidir."},
+  {head:"GIZLILIK POLITIKASI", body:"Oyun ilerlemesi, karakter secimleri, dil/ses ayarlari, premium durumu ve kayitlar cihazdaki localStorage / Android uygulama deposunda tutulur.<br>Referans foto yuklersen foto karakter onizlemesi icin cihaz icinde kullanilir; acik bir sunucuya yukleme akisi yoksa disari gonderilmez.<br>Telefon, aile grubu, crew chat ve AI Mate oyun ici simule sistemlerdir; gercek mesajlasma servisi veya gercek aile kisileri degildir.<br>Odeme karti, banka bilgisi ve Google Play hesabi bilgisi uygulamada saklanmaz; satin alma ve geri yukleme Google Play Billing tarafindan dogrulanir.<br>Destek, hata raporu veya ileride eklenecek cevrim ici ozelliklerde oyuncudan sadece gerekli teknik bilgi istenir; gereksiz kisisel veri istenmez.", tip:"Gizlilikte kural basit: oyun gerekmeyen veriyi istemez, odeme bilgisini tutmaz."},
+  {head:"TOPLUM KURALLARI", body:"Oyuncular ve topluluk alanlari icin saygili dil esastir.<br>Nefret soylemi, taciz, tehdit, zorbalik, cinsel icerikli rahatsiz edici mesaj, kisisel veri paylasimi, yasa disi faaliyet yonlendirmesi ve baskasinin hesabini/kimligini kullanma kabul edilmez.<br>Denizcilik senaryolari egitim ve oyun amaclidir; gercek gemi operasyonunda sirket proseduru, kaptan talimati, ulusal/uluslararasi mevzuat ve yetkili egitmen onceliklidir.<br>Toplulukta hata, kaza veya near miss anlatirken kisi adi, telefon, konum ve sirket bilgisi gibi hassas verileri paylasma.<br>Kural ihlali durumunda icerik kaldirma, erisim kisitlama veya rapor akisina yonlendirme uygulanabilir.", tip:"Toplulukta denizci uslubu: net, saygili, emniyet odakli."},
+  {head:"PREMIUM / SATIN ALMA KURALLARI", body:"Premium paket 75 TL olarak kurgulanmistir ve proje gemisi, kruvaziyer, arastirma, offshore, buz seyri, ileri cihaz simulasyonu, premium 3D operasyonlar ve ozel chart paketlerini acar.<br>Reklamlari kaldirma paketi 50 TL'dir ve premiumdan ayridir; sadece reklam aralarini kapatir.<br>Premium icerik satin alma onayi gelmeden acilmaz. Kayit dosyasi veya sahne ilerlemesi premium kilidini acamaz.<br>Geri yukleme ayni Google Play hesabi uzerindeki satin alma gecmisiyle yapilir. Iade ve odeme itirazlari Google Play kurallarina gore ilerler.<br>Premium olmayan oyuncu premium gemi, premium rota/sahne ve premium operasyon akisini oynayamaz; sadece kilitli paket bilgisini ve satin alma dugmelerini gorur.", tip:"Premium kilidi oyun kaydiyla degil, Play Billing onayiyla acilir."},
   {head:"OLCU BIRIMLERI - DENIZCILIK", body:"<b>1 deniz mili (NM)</b> = 1852 metre<br><b>1 knot (kt)</b> = saatte 1 deniz mili = 1.852 km/saat<br><b>1 kablo (cable)</b> = 0.1 deniz mili = 185.2 metre<br><b>1 kulac (fathom)</b> = 6 feet = 1.8288 metre<br><b>1 feet (ft)</b> = 0.3048 metre<br><b>1 inch</b> = 2.54 cm<br><b>1 metre</b> = 100 cm<br><b>1 santimetre</b> = 10 mm<br><b>1 ton</b> = 1000 kg<br><b>1 long ton</b> = 1016 kg yaklasik<br><b>1 short ton</b> = 907 kg yaklasik<br><b>DWT</b> = Deadweight tonnage; geminin tasiyabilecegi toplam agirlik kapasitesi<br><b>GT</b> = Gross Tonnage; hacim esasli tonaj olcusudur, agirlik degildir<br><b>TEU</b> = 20 feet'lik bir konteyner birimi<br><b>20 ft</b> = 6.096 metre<br><b>40 ft</b> = 12.192 metre<br><b>m3</b> = hacim birimi; tank, ambar ve stowage hesaplarinda kullanilir<br><b>t/m3</b> veya <b>kg/m3</b> = yogunluk birimi; draft survey, ballast ve yakit hesaplarinda gorulur<br><b>ppm</b> = millionda bir; OWS, su kalitesi ve gaz olcumlerinde gorulur<br><b>%LEL</b> = patlayici alt limit yuzdesi; gaz olcumlerinde kullanilir<br><b>bar</b> = basinÃ§ birimi; 1 bar yaklasik 100 kPa'dir<br><b>kW</b> = guc birimi; makine ve jeneratorde kullanilir<br><b>RPM</b> = dakikadaki devir sayisi; ana makine ve pompada gorulur<br><br><b>Pratik not:</b> Seyirde mesafe deniz miliyle, hiz knot ile, draft metre veya feet ile, yuk agirligi ton ile okunur.", tip:"Ayni soruda metre, feet, ton ve deniz mili bir araya gelebilir; birim karisinca hesap da karar da bozulur."},
   {head:"COLREG OZETI", body:"<b>Rule 5</b> proper look-out: goz, kulak, radar/AIS ve tum mevcut imkanlarla takip yapilir.<br><b>Rule 6</b> safe speed: gorus, trafik, draft, manevra ve sensor sinirlariyla birlikte degerlendirilir.<br><b>Rule 7</b> risk of collision: suphe varsa risk var kabul edilir; sabit kerteriz ve dusen CPA ciddiye alinir.<br><b>Rule 8</b> action to avoid collision: manevra erken, belirgin ve iyi denizcilige uygun olur.<br><b>Rule 9</b> dar kanal: sancak sinirina yakin seyredilir, gecis gereksiz engellenmez.<br><b>Rule 10</b> traffic separation scheme: serit disiplini korunur, akisi bozacak gecislerden kacinilir.<br><b>Rule 13</b> overtaking: yetisen gemi yol verir.<br><b>Rule 14</b> head-on: iki gemi de sancaga duser.<br><b>Rule 15</b> crossing: sancaginda gemi goruyorsan give-way sensin.<br><b>Rule 18</b> sorumluluk hiyerarsisi: NUC, RAM, CBD, fishing, sailing ve power-driven iliskisi birlikte okunur.<br><b>Rule 19</b> restricted visibility: safe speed, radar yorumu ve fog signal disiplini artar.", tip:"COLREG ezber listesi degil; durumu dogru okuyup erken davranma sanatidir."},
   {head:"GEMI MANEVRA TURLERI", body:"<b>Turning circle</b> geminin sabit dumen acisi altindaki donus karakterini gosterir; advance, transfer ve tactical diameter burada okunur.<br><b>Crash stop</b> ileri yoldaki geminin tam geri komutla ne kadar mesafede durdugunu anlamaya yarar.<br><b>Williamson turn</b>, <b>Anderson turn</b> ve <b>Scharnow turn</b> ozellikle MOB ve geri donus mantiginda anlatilan temel manevralardir.<br><b>Zig-zag test</b> geminin dumen komutuna cevabini ve overshoot acilarini degerlendirir.<br><b>Berthing</b> manevrasi ise dumen, makine, ruzgar, akinti, varsa thruster ve tug etkisinin birlikte okunmasidir.<br><b>Pervane yuruyusu</b> tek pervaneli gemilerde, ozellikle dusuk suratte ve astern darbelerinde kicin hangi tarafa atmaya meylettigini anlamak icin cok onemlidir.<br><br>"+buildManeuverGallery()+buildPropWalkCard(), tip:"Manevra, komut ezberi degil; geminin karakterini ve ortam kuvvetlerini birlikte okumaktir."},
@@ -21335,6 +21447,7 @@ const GLOSSARY_CATEGORIES = ['tum','seyir','guverte','makine','tankerlng','demir
 function getNoteCategory(note){
   if(note.head.includes('FORMULLER')) return 'formuller';
   if(note.head.includes('SOZLUGU')) return 'sozluk';
+  if(note.head.includes('GIZLILIK') || note.head.includes('TOPLUM') || note.head.includes('PREMIUM / SATIN ALMA')) return 'politika';
   return 'kurallar';
 }
 
@@ -25185,6 +25298,7 @@ function renderPremiumPackagePanel(){
   ];
   return `<div class="premium-sim-panel ${premiumUnlocked?'active':''}">
     <div class="premium-sim-head"><b>${premiumUnlocked?'PREMIUM AKTIF':'PREMIUM PAKET · '+PREMIUM_PRICE_LABEL}</b><span>Kilitli gorev onizlemesi, dahil gemiler ve 3D operasyonlar.</span></div>
+    <div class="premium-policy-note"><b>Google Play satin alma</b><span>Premium icerik sadece Play Billing onayi ve restore kontroluyle acilir. Kart bilgisi uygulamada tutulmaz; satin alma gecmisi Google Play hesabi uzerinden dogrulanir.</span></div>
     <div class="premium-product-grid">${productCards.map(p=>`
       <div class="premium-product-card ${p.cls} ${p.active?'active':''}">
         <strong>${phoneSafe(p.title)}</strong>
@@ -28749,5 +28863,3 @@ document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==
 document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
 buildIntro();
 openHomeScreen();
-
-

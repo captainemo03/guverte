@@ -37,6 +37,10 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
     @JavascriptInterface
     public void purchasePremium(String productId) {
         final String safeProductId = normalizeProductId(productId);
+        if (safeProductId == null) {
+            sendResult(false, "", "Tanimli olmayan urun: " + productId);
+            return;
+        }
         connect(() -> queryAndLaunchPurchase(safeProductId));
     }
 
@@ -48,6 +52,10 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
     @JavascriptInterface
     public void restoreProduct(String productId) {
         final String safeProductId = normalizeProductId(productId);
+        if (safeProductId == null) {
+            sendResult(false, "", "Tanimli olmayan urun: " + productId);
+            return;
+        }
         connect(() -> queryOwnedProduct(safeProductId));
     }
 
@@ -224,7 +232,7 @@ public class GuverteBillingBridge implements PurchasesUpdatedListener {
     private String normalizeProductId(String productId) {
         if (ADS_REMOVAL_PRODUCT_ID.equals(productId)) return ADS_REMOVAL_PRODUCT_ID;
         if (PREMIUM_PRODUCT_ID.equals(productId)) return PREMIUM_PRODUCT_ID;
-        return PREMIUM_PRODUCT_ID;
+        return null;
     }
 
     private void sendResult(boolean ok, String token, String message) {

@@ -8,7 +8,7 @@
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=132">
+<link rel="stylesheet" href="./index.css?v=133">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -37,7 +37,7 @@
         <button class="chart-zoom-btn" onclick="adjustWorldMapZoom(0.25)">+</button>
         <button class="chart-zoom-btn" onclick="resetWorldMapView()">Sifirla</button>
       </div>
-      <svg id="map-svg" viewBox="0 0 440 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="map-svg" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
       <div style="font-size:9px;color:var(--text3);margin-top:6px;font-family:'Share Tech Mono',monospace;" id="map-legend"></div>
     </div>
     <div id="map-library-view">
@@ -52,12 +52,15 @@
             <button class="chart-zoom-btn" onclick="adjustPortChartZoom(0.25)">+</button>
 	    </div>
 	  </div>
-        <svg id="port-chart-svg" viewBox="0 0 440 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="port-chart-svg" viewBox="0 0 440 260" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
         <div id="port-chart-meta"></div>
         <div id="port-chart-taskbox">
           <div id="port-chart-taskhead">
             <span>Harita Gorevi</span>
-            <button id="port-task-next" class="chart-zoom-btn" onclick="nextMapTask()">Sonraki</button>
+            <span class="map-task-actions">
+              <button id="port-task-focus" class="chart-zoom-btn" onclick="focusCurrentMapTask()">Merkeze Al</button>
+              <button id="port-task-next" class="chart-zoom-btn" onclick="nextMapTask()">Sonraki</button>
+            </span>
           </div>
           <div id="port-chart-tasklist"></div>
           <div id="port-chart-tasktitle"></div>
@@ -143,6 +146,7 @@
         <button class="notes-tab active" onclick="setNotesTab('kurallar')">Kurallar</button>
         <button class="notes-tab" onclick="setNotesTab('formuller')">Formuller</button>
         <button class="notes-tab" onclick="setNotesTab('sozluk')">Sozluk</button>
+        <button class="notes-tab" onclick="setNotesTab('politika')">Politika</button>
       </div>
       <div id="notes-glossary-filters"></div>
     </div>
@@ -186,7 +190,16 @@
   <div class="home-hero">
     <div class="home-cinematic-sea" aria-hidden="true">
       <span class="home-cinematic-radar"></span>
-      <span class="home-cinematic-ship"></span>
+      <span class="home-cinematic-ship">
+        <i class="ship-wake"></i>
+        <i class="ship-hull"></i>
+        <i class="ship-boot"></i>
+        <i class="ship-deck"></i>
+        <i class="ship-containers"></i>
+        <i class="ship-bridge"></i>
+        <i class="ship-mast"></i>
+        <i class="ship-lights"></i>
+      </span>
       <span class="home-cinematic-light"></span>
       <span class="home-cinematic-fog f1"></span>
       <span class="home-cinematic-fog f2"></span>
@@ -244,6 +257,7 @@
         <span>Proje yük</span><span>Kruvaziyer</span><span>Araştırma</span>
         <span>Offshore / DP</span><span>Buz seyri</span><span>Pro cihaz</span>
       </div>
+      <p class="home-premium-note">Premium icerik yalnizca Google Play satin alma onayindan sonra acilir. Kart bilgisi uygulamada tutulmaz; geri yukleme Play hesabi uzerinden yapilir.</p>
       <div class="intro-premium-actions">
         <button type="button" onclick="openPremiumPurchase()">75 TL ile Ac</button>
         <button type="button" onclick="restorePremiumPurchase()">Geri Yukle</button>
@@ -655,6 +669,6 @@
 </div>
 
 </div>
-<script src="./index.js?v=153"></script>
+<script src="./index.js?v=154"></script>
 </body>
 </html>
