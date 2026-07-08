@@ -1,132 +1,78 @@
-# Gizlilik Sözleşmesi (Privacy Policy)
+# Güverte Gizlilik Politikası
 
-**Son Güncelleme: 27 Mayıs 2026**
+**Son güncelleme: 8 Temmuz 2026**
 
-## 1. Giriş
+Bu politika, Güverte mobil oyununun hangi verileri neden işlediğini ve oyuncunun hangi seçeneklere sahip olduğunu açıklar.
 
-Güverte uygulaması ("Uygulama"), kullanıcıların ("Siz" veya "Kullanıcı") gizliliğini önemser. Bu Gizlilik Sözleşmesi, Uygulamayı kullandığınızda kişisel verilerinizi nasıl topladığımız, kullandığımız, koruduğumuz ve açığa çıkardığımız hakkında bilgi sağlar.
+## 1. Cihazda Saklanan Oyun Verileri
 
-Uygulamayı kullanarak, bu Gizlilik Sözleşmesinin şartlarını kabul etmiş olursunuz. Bu sözleşmeyi anlamıyorsanız, lütfen Uygulamayı kullanmadan önce bizimle iletişime geçin.
+Aşağıdaki bilgiler oyun deneyimini sürdürebilmek için cihazdaki uygulama deposunda saklanabilir:
 
-## 2. Toplanan Bilgiler
+- Oyun ilerlemesi, kayıt dosyası ve kariyer durumu
+- Karakter, gemi, rota, dil, ses ve oynanış tercihleri
+- Premium ve reklam kaldırma ürünlerinin yerel erişim işaretleri
+- Oyun içi telefon, aile sohbeti, mürettebat sohbeti ve AI Mate simülasyon kayıtları
 
-Uygulamayı kullanırken aşağıdaki bilgileri topluyor olabiliriz:
+Bu sohbetler gerçek mesajlaşma hizmeti değildir ve gerçek kişilere gönderilmez.
 
-### 2.1 Toplanan Veriler
-Uygulama **internet bağlantısı gerektirmez** ve **sunucularımıza veri göndermeyen** bir çevrimdışı uygulamadır. Aşağıdaki durumlar hariç, **kişisel veri toplamayız**:
+## 2. Referans Fotoğraf ve Kamera
 
-- **Lokal Uygulama Verileri**: Oyuncu ilerleme, tercihler ve ayarlar **yalnızca cihazınızda** saklanır
-- Üçüncü taraf sunuculara veri gönderilmez
-- İnternet bağlantısı veya çevrimiçi hizmetler kullanılmaz
+Oyuncu isterse karakter önerisi için fotoğraf seçebilir veya kamerayı açabilir. Referans görüntü, oyundaki karakter önizlemesini oluşturmak için cihaz üzerinde işlenir. Açıkça belirtilen ayrı bir çevrim içi özellik etkinleştirilmedikçe geliştirici sunucusuna yüklenmez.
 
-## 3. Bilgilerin Kullanımı
+Kamera veya fotoğraf erişimi isteğe bağlıdır. İzin verilmemesi oyunun temel oynanışını engellemez.
 
-Toplanan bilgileri aşağıdaki amaçlarla kullanırız:
+## 3. Reklamlar ve Google Mobile Ads
 
-- Uygulamayı çevrimdışı olarak çalıştırmak
-- Oyuncu ilerleme ve tercihlerini cihazda saklamak
-- Yasal yükümlülükleri yerine getirmek
+Ücretsiz sürüm, doğal geçiş noktalarında tam ekran geçiş reklamı gösterebilir. Reklamlar Google Mobile Ads SDK üzerinden sağlanır. Google ve reklam ortakları; reklam sunma, sıklık sınırlama, sahtekarlığı önleme, ölçüm ve yasal yükümlülükler için cihaz bilgisi, reklam kimliği, yaklaşık konum, IP adresi, uygulama etkileşimi ve tanılama verileri gibi bilgileri işleyebilir.
 
-## 4. Bilgilerin Paylaşılması
+Reklamlar kritik görev, alarm veya süreli operasyonun ortasında gösterilmez. `remove_ads` ürünü satın alındığında oyun reklam istemeyi ve göstermeyi durdurur.
 
-Uygulama çevrimdışı çalışır ve kişisel veri toplamadığı için, **bilgileriniz üçüncü taraflarla paylaşılmaz**.
+Google'ın verileri nasıl kullandığı hakkında:
 
-Bilgileriniz yalnızca aşağıdaki yasal durumlarda paylaşılabilir:
-- Mahkeme kararı veya devlet kurumunun yasal emri
+- https://policies.google.com/privacy
+- https://policies.google.com/technologies/partner-sites
 
-## 5. Veri Depolama ve Güvenlik
+## 4. Reklam Gizlilik Tercihleri
 
-### 5.1 Güvenlik Tedbirleri
-Uygulama çevrimdışı çalıştığı için:
-- Verileriniz hiçbir zaman ağ üzerinden iletilmez
-- Tüm veriler cihazınızda şifrelenmiş şekilde saklanır
-- Hiçbir uzak sunucu erişimi yapılmaz
-- Veri, yalnızca siz Uygulamayı kullandığınızda işlenir
+Uygulama, gerekli bölgelerde Google User Messaging Platform (UMP) aracılığıyla izin veya gizlilik tercih formu gösterebilir. Oyuncu, Options veya oyun içi telefon ayarlarından **Reklam Gizlilik Tercihleri** ekranını yeniden açabilir.
 
-### 5.2 Veri Saklama
-- Oyuncu ilerleme ve tercihler yalnızca cihazınızda saklanır
-- Uygulamayı silerseniz, tüm veriler cihazınızdan tamamen kaldırılır
-- Sunucu veya bulut deposunda veri tutulmaz
+İzin durumu reklam isteğinden önce kontrol edilir. Yasal izin alınmadan reklam istenmez.
 
-### 5.3 Güvenlik Sınırlamaları
-Uygulama çevrimdışı olduğundan, çoğu çevrimiçi güvenlik riski yoktur. Cihazınızın kendisine fiziksel erişim, depolanan verilere erişim sağlayabilir.
+## 5. Satın Almalar
 
-## 6. Kullanıcı Hakları
+Premium paket ve reklam kaldırma ürünü Google Play Billing üzerinden satılır. Kart numarası, banka bilgisi ve Google Play parola bilgisi uygulama tarafından görülmez veya saklanmaz.
 
-Uygulama kişisel veri toplamadığı için, geleneksel veri konu hakları geçerli değildir. Ancak:
+Uygulama, erişimi açmak ve satın almayı geri yüklemek için ürün kimliği, satın alma durumu ve Google Play satın alma belirtecini işleyebilir. Ödeme ve iade süreçleri Google Play tarafından yönetilir.
 
-### 6.1 Verilere Erişim
-- Cihazınızda depolanan Uygulama verilerine istediğiniz zaman erişebilirsiniz
+## 6. Veri Paylaşımı
 
-### 6.2 Veri Silme
-- Uygulamayı sildiğinizde, tüm veriler otomatik olarak kaldırılır
-- Uygulamada "Verileri Temizle" seçeneği kullanabilirsiniz
+Geliştirici, oyuncu verilerini satmaz. Veriler yalnızca şu durumlarda üçüncü tarafça işlenebilir:
 
-## 7. Çocukların Gizliliği
+- Google Mobile Ads ve UMP: reklam, izin ve ölçüm işlemleri
+- Google Play Billing: satın alma ve geri yükleme işlemleri
+- Yasal zorunluluk halinde yetkili kurum talepleri
 
-Uygulama tüm yaşlara, **3 yaş ve üstü**ne uygun bir oyundur. Uygulama:
-- Zararlı veya yetişkin içerik içermez
-- Reklam göstermez
-- Kişisel veri toplamaz
-- İnternet bağlantısı gerektirmez
+## 7. Veri Saklama ve Silme
 
-Çocukların güvenliğini ve gizliliğini tam olarak koruyoruz.
+Yerel oyun verileri uygulama cihazda kaldığı sürece tutulabilir. Oyuncu kayıt silme işlevini kullanabilir veya Android uygulama ayarlarından uygulama verilerini temizleyebilir. Uygulamayı kaldırmak çoğu yerel veriyi siler.
 
-## 8. Üçüncü Taraf Hizmetleri
+Google tarafından işlenen verilerin saklama süreleri Google'ın kendi politikalarına tabidir.
 
-Uygulama internet bağlantısı kullanmadığı için, **üçüncü taraf hizmetlerle iletişime geçmez**.
+## 8. Çocukların Gizliliği
 
-Teknoloji yığını:
-- **Capacitor**: Mobil uygulama çerçevesi (Apache License 2.0) - çevrimdışı kullanım
-- **Android Framework**: Google tarafından sağlanan
+Güverte genel kitleye yönelik bir denizcilik simülasyonudur. Geliştirici çocuklardan bilerek ad, adres, telefon veya benzeri doğrudan kimlik bilgileri istemez. Uygulamanın çocuklara sunulacağı ülkelerde Google Play hedef kitle, reklam ve aile politikaları ayrıca doğru yapılandırılmalıdır.
 
-Bu araçlar yalnızca lokal uygulama çalışması için kullanılır ve dış hizmetlere veri göndermez.
+## 9. Güvenlik
 
-## 9. Reklam
+Yerel kayıtların korunması için Android uygulama yedeklemesi kapatılmıştır ve açık metin ağ trafiğine izin verilmez. Bununla birlikte hiçbir teknik yöntem mutlak güvenlik garantisi vermez.
 
-**Uygulama reklam göstermez.** Tamamen reklamsız bir deneyim sunuyoruz.
+## 10. Haklar ve İletişim
 
-## 10. Bağlantılar ve Harici Hizmetler
+Bulunduğunuz ülkeye göre KVKK, GDPR, CCPA veya benzeri mevzuat kapsamında erişim, silme, düzeltme, itiraz ya da izin geri çekme haklarınız olabilir.
 
-Uygulama çevrimdışı çalışır ve dış web sitelerine veya hizmetlerine bağlantı içermez.
+Gizlilik soruları için:
 
-## 11. Gizlilik Sözleşmesinde Değişiklikler
+- **Geliştirici:** Eyüp Miraç OY
+- **E-posta:** eyupmirac.03oy@gmail.com
 
-Bu Gizlilik Sözleşmesini önceden haber vermeden güncelleyebiliriz. Önemli değişiklikler yapıldığında, Uygulamada bildirim gösterebiliriz. Sürekli kullanım, değişiklikleri kabul ettiğiniz anlamına gelir.
-
-## 12. Kişisel Veri Koruması Düzenlemeleri
-
-### 12.1 GDPR (Avrupa'da)
-Avrupa'da yaşıyorsanız, Genel Veri Koruma Yönetmeliği (GDPR) kapsamında korunursunuz. Yukarıda belirtilen tüm hakların geçerli olduğunu unutmayın.
-
-### 12.2 CCPA (Kaliforniya'da)
-Kaliforniya'da yaşıyorsanız, California Tüketici Gizlilik Yasası (CCPA) kapsamında ek haklar olabilir.
-
-### 12.3 KVKK (Türkiye'de)
-Türkiye'de yaşıyorsanız, Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında korunursunuz.
-
-## 13. İletişim ve İtirazlar
-
-Gizlilik konularında sorularınız, endişeleriniz veya şikayetleriniz varsa, aşağıdaki yollardan bize ulaşabilirsiniz:
-
-**E-posta:** eyupmirac.03oy@gmail.com
-
-Sizin endişelerinizi araştırmak için makul çaba göstereceğiz. Çözülemezse, ilgili veri koruma otoritesi nezdinde şikayette bulunma hakkına sahipsiniz.
-
-## 14. Sorumlu Kişi / Veri Sorumlusu
-
-**Geliştirici:** Eyüp Miraç OY
-
-**E-posta:** eyupmirac.03oy@gmail.com
-
-## 15. Ek Hükümler
-
-- Bu Gizlilik Sözleşmesi, Uygulamanın Kullanım Şartları ile birlikte okunmalıdır
-- Bu Sözleşme, her iki tarafa da bağlayıcı ve uygulanabilir
-- Herhangi bir hükmün geçersiz olması halinde, diğer hükümler geçerliliğini korur
-
----
-
-**Bu Gizlilik Sözleşmesi, Google Play Store'un gizlilik gereksinimleriyle uyumlu olacak şekilde hazırlanmıştır. Uygulama kişisel veri toplamadığından, maksimum gizlilik koruması sağlar.**
-
-**Son Güncelleme: 27 Mayıs 2026**
+Bu politika uygulama özellikleri veya yasal gereksinimler değiştiğinde güncellenebilir. Önemli değişiklikler uygulama içinde veya mağaza sayfasında duyurulabilir.

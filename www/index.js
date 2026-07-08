@@ -683,6 +683,63 @@ function getPremiumBillingBridge(){
   }
   return null;
 }
+function handleNativeAdEvent(result={}){
+  const type = String(result?.type || '');
+  if(type === 'shown'){
+    addWatchFeed?.('Guvenli gecis noktasinda reklam arasi basladi.', 'warn');
+  }else if(type === 'dismissed'){
+    addWatchFeed?.('Reklam kapandi; vardiya akisi kaldigi yerden devam ediyor.', 'good');
+  }else if(type === 'privacy_closed'){
+    showNotif('GIZLILIK','Reklam Tercihleri','Reklam gizlilik tercihlerin guncellendi.');
+  }else if(type === 'privacy_error'){
+    showNotif('UYARI','Reklam Gizliligi',String(result?.message || 'Gizlilik formu acilamadi.'));
+  }
+}
+function getAdsBridge(){
+  if(window.GuverteAds && typeof window.GuverteAds.showInterstitial === 'function') return window.GuverteAds;
+  if(window.GuverteAdsNative && typeof window.GuverteAdsNative.showInterstitial === 'function'){
+    window.__guverteAdsNativeEvent = handleNativeAdEvent;
+    window.GuverteAds = {
+      initialize(){
+        window.GuverteAdsNative.initializeAds();
+      },
+      setRemoved(removed){
+        window.GuverteAdsNative.setAdsRemoved(!!removed);
+      },
+      showInterstitial(reason){
+        window.GuverteAdsNative.showInterstitial(String(reason || 'safe_point'));
+      },
+      showPrivacyOptions(){
+        window.GuverteAdsNative.showPrivacyOptions();
+      },
+      getStatus(){
+        window.GuverteAdsNative.getStatus();
+      }
+    };
+    return window.GuverteAds;
+  }
+  return null;
+}
+function syncNativeAdsState(){
+  adsRemoved = readPurchasedFlag(ADS_REMOVAL_KEY);
+  const ads = getAdsBridge();
+  if(!ads) return false;
+  ads.setRemoved(adsRemoved);
+  if(!adsRemoved) ads.initialize();
+  return true;
+}
+function initializeAdSystem(){
+  window.__guverteAdsNativeEvent = handleNativeAdEvent;
+  syncNativeAdsState();
+}
+function openAdPrivacyOptions(){
+  const ads = getAdsBridge();
+  if(!ads || typeof ads.showPrivacyOptions !== 'function'){
+    showNotif('GIZLILIK','Reklam Tercihleri','Bu ayar Android uygulamasinda Google gizlilik formunu acar.');
+    return;
+  }
+  ads.showPrivacyOptions();
+}
 async function checkBillingProducts(){
   const billing = getPremiumBillingBridge();
   if(!billing || typeof billing.checkProducts !== 'function'){
@@ -804,6 +861,7 @@ function grantAdsRemovalFromPurchase(receipt=''){
   }
   adsRemoved = true;
   writePurchasedFlag(ADS_REMOVAL_KEY, receipt);
+  syncNativeAdsState();
   showNotif('🚫','Reklamlar Kaldirildi','50 TL reklam kaldirma paketi aktif edildi.');
   buildIntro();
   return true;
@@ -20431,7 +20489,7 @@ const seenColregHints = new Set();
 const STUDENT_NOTES = [
   {head:"KOPRUUSTU VARDIYASI", body:"Look-out, COLREG, rota takibi, ECDIS kontrolu, radar cross-check ve logbook disiplini vardiyanin omurgasidir.<br>Vardiya devrinde rota, trafik, hava, makina durumu ve beklenen manevra net aktarilir.<br>Master'in standing orders ve night orders'i bilinmeden vardiya tutulmaz.", tip:"Once gozlem, sonra yorum."},
   {head:"ANA KURALLAR", body:"Sormadan varsayma.<br>Gormeden dogru kabul etme.<br>Hata gordugunde saklama, amire bildir.<br>PPE'siz ise baslama.<br>Snap-back zone'a girme.<br>Kapali mahalde permitsiz girme.<br>Stop komutu duyuldugunda herkes durur.<br>Near-miss de raporlanir.", tip:"Denizcilikte disiplin tekrar degil, hayatta kalma bicimidir."},
-  {head:"GIZLILIK POLITIKASI", body:"Oyun ilerlemesi, karakter secimleri, dil/ses ayarlari, premium durumu ve kayitlar cihazdaki localStorage / Android uygulama deposunda tutulur.<br>Referans foto yuklersen foto karakter onizlemesi icin cihaz icinde kullanilir; acik bir sunucuya yukleme akisi yoksa disari gonderilmez.<br>Telefon, aile grubu, crew chat ve AI Mate oyun ici simule sistemlerdir; gercek mesajlasma servisi veya gercek aile kisileri degildir.<br>Odeme karti, banka bilgisi ve Google Play hesabi bilgisi uygulamada saklanmaz; satin alma ve geri yukleme Google Play Billing tarafindan dogrulanir.<br>Destek, hata raporu veya ileride eklenecek cevrim ici ozelliklerde oyuncudan sadece gerekli teknik bilgi istenir; gereksiz kisisel veri istenmez.", tip:"Gizlilikte kural basit: oyun gerekmeyen veriyi istemez, odeme bilgisini tutmaz."},
+  {head:"GIZLILIK POLITIKASI", body:"Oyun ilerlemesi, karakter secimleri, dil/ses ayarlari ve kayitlar cihazdaki uygulama deposunda tutulur.<br>Referans fotograf, karakter onizlemesi icin cihazda islenir; acikca belirtilen ayri bir cevrim ici ozellik yoksa gelistirici sunucusuna gonderilmez.<br>Ucretsiz surum Google Mobile Ads ile ay sonu, kontrat sonu ve egitim merkezi cikisi gibi dogal aralarda reklam gosterebilir. Reklam hizmeti cihaz bilgisi, reklam kimligi, IP, yaklasik konum, etkilesim ve tanilama verilerini isleyebilir.<br>Gerekli bolgelerde UMP izin formu reklam isteginden once acilir; reklam tercihleri Options veya telefon ayarlarindan yeniden yonetilebilir.<br>remove_ads satin alindiginda reklam isteme ve gosterme durur.<br>Odeme karti ve banka bilgisi uygulamada saklanmaz; satin alma Google Play Billing tarafindan dogrulanir.", tip:"Reklam ve odeme verileri ilgili Google hizmetlerinin gizlilik kosullarina tabidir."},
   {head:"TOPLUM KURALLARI", body:"Oyuncular ve topluluk alanlari icin saygili dil esastir.<br>Nefret soylemi, taciz, tehdit, zorbalik, cinsel icerikli rahatsiz edici mesaj, kisisel veri paylasimi, yasa disi faaliyet yonlendirmesi ve baskasinin hesabini/kimligini kullanma kabul edilmez.<br>Denizcilik senaryolari egitim ve oyun amaclidir; gercek gemi operasyonunda sirket proseduru, kaptan talimati, ulusal/uluslararasi mevzuat ve yetkili egitmen onceliklidir.<br>Toplulukta hata, kaza veya near miss anlatirken kisi adi, telefon, konum ve sirket bilgisi gibi hassas verileri paylasma.<br>Kural ihlali durumunda icerik kaldirma, erisim kisitlama veya rapor akisina yonlendirme uygulanabilir.", tip:"Toplulukta denizci uslubu: net, saygili, emniyet odakli."},
   {head:"PREMIUM / SATIN ALMA KURALLARI", body:"Premium paket 75 TL olarak kurgulanmistir ve proje gemisi, kruvaziyer, arastirma, offshore, buz seyri, ileri cihaz simulasyonu, premium 3D operasyonlar ve ozel chart paketlerini acar.<br>Reklamlari kaldirma paketi 50 TL'dir ve premiumdan ayridir; sadece reklam aralarini kapatir.<br>Premium icerik satin alma onayi gelmeden acilmaz. Kayit dosyasi veya sahne ilerlemesi premium kilidini acamaz.<br>Geri yukleme ayni Google Play hesabi uzerindeki satin alma gecmisiyle yapilir. Iade ve odeme itirazlari Google Play kurallarina gore ilerler.<br>Premium olmayan oyuncu premium gemi, premium rota/sahne ve premium operasyon akisini oynayamaz; sadece kilitli paket bilgisini ve satin alma dugmelerini gorur.", tip:"Premium kilidi oyun kaydiyla degil, Play Billing onayiyla acilir."},
   {head:"OLCU BIRIMLERI - DENIZCILIK", body:"<b>1 deniz mili (NM)</b> = 1852 metre<br><b>1 knot (kt)</b> = saatte 1 deniz mili = 1.852 km/saat<br><b>1 kablo (cable)</b> = 0.1 deniz mili = 185.2 metre<br><b>1 kulac (fathom)</b> = 6 feet = 1.8288 metre<br><b>1 feet (ft)</b> = 0.3048 metre<br><b>1 inch</b> = 2.54 cm<br><b>1 metre</b> = 100 cm<br><b>1 santimetre</b> = 10 mm<br><b>1 ton</b> = 1000 kg<br><b>1 long ton</b> = 1016 kg yaklasik<br><b>1 short ton</b> = 907 kg yaklasik<br><b>DWT</b> = Deadweight tonnage; geminin tasiyabilecegi toplam agirlik kapasitesi<br><b>GT</b> = Gross Tonnage; hacim esasli tonaj olcusudur, agirlik degildir<br><b>TEU</b> = 20 feet'lik bir konteyner birimi<br><b>20 ft</b> = 6.096 metre<br><b>40 ft</b> = 12.192 metre<br><b>m3</b> = hacim birimi; tank, ambar ve stowage hesaplarinda kullanilir<br><b>t/m3</b> veya <b>kg/m3</b> = yogunluk birimi; draft survey, ballast ve yakit hesaplarinda gorulur<br><b>ppm</b> = millionda bir; OWS, su kalitesi ve gaz olcumlerinde gorulur<br><b>%LEL</b> = patlayici alt limit yuzdesi; gaz olcumlerinde kullanilir<br><b>bar</b> = basinÃ§ birimi; 1 bar yaklasik 100 kPa'dir<br><b>kW</b> = guc birimi; makine ve jeneratorde kullanilir<br><b>RPM</b> = dakikadaki devir sayisi; ana makine ve pompada gorulur<br><br><b>Pratik not:</b> Seyirde mesafe deniz miliyle, hiz knot ile, draft metre veya feet ile, yuk agirligi ton ile okunur.", tip:"Ayni soruda metre, feet, ton ve deniz mili bir araya gelebilir; birim karisinca hesap da karar da bozulur."},
@@ -24366,7 +24424,9 @@ function renderPhoneSettings(){
     <div class="phone-setting-row"><b>SeaPhone</b><small>Gemi ici telefon · mesaj, web, album, not ve kayit menusu</small></div>
     <div class="phone-setting-row"><b>AILE grubu</b><small>Okunmamis: ${familyUnread}</small></div>
     <div class="phone-setting-row"><b>Vardiya</b><small>${watchState.code} · ${watchState.label}</small></div>
+    <div class="phone-setting-row"><b>Reklam</b><small>${adsRemoved?'Reklamlar kaldirildi':'Yalnizca dogal gecis noktalarinda interstitial reklam'}</small></div>
     <div class="phone-setting-row"><b>Kayit</b><small>Oyunu telefondan manuel kaydedebilirsin.</small></div>
+    <button class="phone-wide-btn" onclick="openAdPrivacyOptions()">Reklam gizlilik tercihleri</button>
     <button class="phone-wide-btn" onclick="saveGameState(true)">Oyunu kaydet</button>
   </div>`;
 }
@@ -24517,6 +24577,7 @@ function renderPhoneAppMenu(){
 }
 const adBreakState = {lastKey:''};
 function maybeShowAdBreak(reason='safe_point'){
+  adsRemoved = readPurchasedFlag(ADS_REMOVAL_KEY);
   if(adsRemoved) return false;
   const sceneNo = Math.max(0, contractDays || currentIdx || 0);
   const key = `${reason}-${sceneNo}-${careerState.contracts || 0}`;
@@ -24528,9 +24589,13 @@ function maybeShowAdBreak(reason='safe_point'){
     sim_exit:'Egitim merkezi cikisi reklam arasi',
     safe_point:'Kisa reklam arasi'
   };
-  showNotif('AD', labels[reason] || labels.safe_point, `Reklamlari ${ADS_REMOVAL_PRICE_LABEL} ile kalici kaldirabilirsin.`);
-  addWatchFeed(`${labels[reason] || labels.safe_point}: oyun sadece guvenli aralarda reklam gosterir.`, 'warn');
-  pushPhoneMessage('Sistem', `${labels[reason] || labels.safe_point}. Reklamlari kaldirma urunu: ${ADS_REMOVAL_PRODUCT_ID} (${ADS_REMOVAL_PRICE_LABEL}).`, {open:false});
+  const ads = getAdsBridge();
+  if(ads){
+    ads.setRemoved(false);
+    ads.showInterstitial(reason);
+  }else{
+    showNotif('AD TEST', labels[reason] || labels.safe_point, 'Gercek reklam Android uygulamasinda gosterilir.');
+  }
   return true;
 }
 function closeLifePanel(id){
@@ -28861,5 +28926,6 @@ function playSceneAudio(sc){
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
 document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
+initializeAdSystem();
 buildIntro();
 openHomeScreen();

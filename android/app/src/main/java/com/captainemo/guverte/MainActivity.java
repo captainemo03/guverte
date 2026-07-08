@@ -5,6 +5,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private GuverteBillingBridge billingBridge;
+    private GuverteAdsBridge adsBridge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -12,6 +13,8 @@ public class MainActivity extends BridgeActivity {
         if (getBridge() != null && getBridge().getWebView() != null) {
             billingBridge = new GuverteBillingBridge(this, getBridge().getWebView());
             getBridge().getWebView().addJavascriptInterface(billingBridge, "GuverteBillingNative");
+            adsBridge = new GuverteAdsBridge(this, getBridge().getWebView());
+            getBridge().getWebView().addJavascriptInterface(adsBridge, "GuverteAdsNative");
         }
     }
 
@@ -20,6 +23,10 @@ public class MainActivity extends BridgeActivity {
         if (billingBridge != null) {
             billingBridge.destroy();
             billingBridge = null;
+        }
+        if (adsBridge != null) {
+            adsBridge.destroy();
+            adsBridge = null;
         }
         super.onDestroy();
     }

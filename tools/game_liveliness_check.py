@@ -207,6 +207,13 @@ CHECKS = {
         "premium_full_pack",
         "com.android.vending.BILLING",
     ],
+    "android interstitial ads": [
+        "GuverteAdsNative",
+        "showInterstitial",
+        "maybeShowAdBreak",
+        "openAdPrivacyOptions",
+        "remove_ads",
+    ],
     "complexity and save flow": [
         "PLAY_MODE_DEFS",
         "renderPlayModeSelector",

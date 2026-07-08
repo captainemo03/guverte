@@ -500,6 +500,17 @@ def check_billing_products() -> None:
         fail(section, "Cruise premium cinematic is bypassing the premium gate.")
     for token in ("requirePremiumAccess", "filterPremiumLockedScenes", "isPremiumContentScene"):
         require_token(section, token, JS)
+    for token in ("GuverteAdsNative", "syncNativeAdsState", "openAdPrivacyOptions", "showInterstitial"):
+        require_token(section, token, JS)
+    ads_bridge = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteAdsBridge.java"
+    if ads_bridge.exists():
+        ads_java = ads_bridge.read_text(encoding="utf-8")
+        for token in ("InterstitialAd.load", "MIN_SHOW_INTERVAL_MS", "setAdsRemoved", "UserMessagingPlatform"):
+            if token not in ads_java:
+                fail(section, f"Android ads bridge missing token: {token}")
+        ok(section, "Interstitial ads, remove-ads native gate, cooldown, and UMP consent bridge are present.")
+    else:
+        fail(section, "Android interstitial ads bridge file not found.")
 
 
 def parse_effect_numbers() -> list[int]:
@@ -549,7 +560,7 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=154",
+        "index.js?v=155",
         "index.css?v=133",
     ]:
         require_token(section, token)
