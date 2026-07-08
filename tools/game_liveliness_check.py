@@ -224,6 +224,11 @@ CHECKS = {
         "getFeatureUnlocks",
         "updateGuidanceStrip",
         "guidance-strip",
+        "game-settings-btn",
+        "game-settings-panel",
+        "toggleGameSettings",
+        "exitToHomeFromGame",
+        "game-settings-play-mode-select",
         "toggleSavePanel",
         "save-panel-grid",
         "gameplayMode",
@@ -257,10 +262,14 @@ CHECKS = {
     "world atlas zoom map": [
         "WORLD_MAP_FEATURES",
         "WORLD_MAP_POINT_LOOKUP",
+        "WORLD_ATLAS_COUNTRIES",
         "buildWorldAtlasBaseLayer",
+        "buildNaturalEarthAtlasLayer",
         "buildWorldMapFeatureLayer",
         "political-atlas",
+        "natural-earth-atlas",
         "world-country",
+        "ne-country",
         "N. AMERICA",
         "TURKEY",
         "IRAN",
@@ -521,6 +530,8 @@ CHECKS = {
         "playIntroSynthMaritimeTheme",
         "playIntroMaritimeTheme",
         "maybeStartIntroMaritimeTheme",
+        "playSoftWaveWash",
+        "sfxOceanAmbiance('sea')",
         "buildLiveVoyageRouteMotionOverlay",
         "live-route-motion",
         "triggerDecisionReplayAndOfficerFeedback",
@@ -671,6 +682,9 @@ def main() -> int:
     timer_hooks = js.count("sceneLiveSequenceTimers.push")
     if timer_hooks < 5:
         missing.append(f"live timers: expected rich timed scene hooks, found {timer_hooks}")
+
+    if "setInterval(()=>playNoise" in js or "setInterval(()=>playTone" in js:
+        missing.append("audio ambiance: hard repeating click tone/noise loop remains")
 
     if missing:
         print("LIVELINESS_QA_FAIL")

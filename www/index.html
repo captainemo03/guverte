@@ -8,7 +8,7 @@
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=131">
+<link rel="stylesheet" href="./index.css?v=132">
 </head>
 <body>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
@@ -37,7 +37,7 @@
         <button class="chart-zoom-btn" onclick="adjustWorldMapZoom(0.25)">+</button>
         <button class="chart-zoom-btn" onclick="resetWorldMapView()">Sifirla</button>
       </div>
-      <svg id="map-svg" viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="map-svg" viewBox="0 0 440 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
       <div style="font-size:9px;color:var(--text3);margin-top:6px;font-family:'Share Tech Mono',monospace;" id="map-legend"></div>
     </div>
     <div id="map-library-view">
@@ -52,7 +52,7 @@
             <button class="chart-zoom-btn" onclick="adjustPortChartZoom(0.25)">+</button>
 	    </div>
 	  </div>
-        <svg id="port-chart-svg" viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="port-chart-svg" viewBox="0 0 440 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
         <div id="port-chart-meta"></div>
         <div id="port-chart-taskbox">
           <div id="port-chart-taskhead">
@@ -432,11 +432,51 @@
       <div id="shipinfo">—</div>
     </div>
     <div id="topright">
+      <button id="game-settings-btn" onclick="toggleGameSettings()" data-i18n="ui.settings" data-i18n-fallback="AYARLAR">AYARLAR</button>
       <button id="save-btn" onclick="toggleSavePanel()">KAYDET</button>
       <div id="repwrap"><div id="replbl">İTİBAR</div><div id="repstars">⭐⭐⭐</div></div>
     </div>
   </div>
   <button id="cinema-exit-btn" type="button" onclick="toggleCinemaMode(false)">Sinema Modundan Cik</button>
+  <div id="game-settings-panel">
+    <div class="game-settings-head">
+      <div>
+        <b data-i18n="ui.gameSettings" data-i18n-fallback="OYUN AYARLARI">OYUN AYARLARI</b>
+        <span data-i18n="ui.gameSettingsSubtitle" data-i18n-fallback="Ses, dil, oynanis ve cikis ayarlari.">Ses, dil, oynanis ve cikis ayarlari.</span>
+      </div>
+      <button type="button" onclick="toggleGameSettings(false)" data-i18n="ui.close" data-i18n-fallback="Kapat">Kapat</button>
+    </div>
+    <div class="game-settings-grid">
+      <div class="game-settings-card">
+        <b data-i18n="ui.audioSettings" data-i18n-fallback="Ses">Ses</b>
+        <button id="game-settings-sound-btn" class="sound-option-btn compact" onclick="toggleSound()">🔊 Ses Acik</button>
+        <div class="audio-mixer" data-audio-mixer="game"></div>
+      </div>
+      <div class="game-settings-card">
+        <b data-i18n="ui.gameLanguage" data-i18n-fallback="Oyun Dili">Oyun Dili</b>
+        <select id="game-settings-language-select" class="language-select wide" onchange="setGameLanguage(this.value)" aria-label="Oyun dili">
+          <option value="tr">TR - Turkce</option>
+          <option value="en">EN - English</option>
+          <option value="es">ES - Espanol</option>
+          <option value="de">DE - Deutsch</option>
+          <option value="fr">FR - Francais</option>
+          <option value="ru">RU - Русский</option>
+          <option value="zh">ZH - 中文</option>
+        </select>
+        <small data-i18n="ui.languageHint" data-i18n-fallback="Menuler, rehber, secenekler ve canli ceviri katmani bu dile gore guncellenir.">Menuler, rehber, secenekler ve canli ceviri katmani bu dile gore guncellenir.</small>
+      </div>
+      <div class="game-settings-card">
+        <b data-i18n="ui.playStyle" data-i18n-fallback="Oynanis Modu">Oynanis Modu</b>
+        <div id="game-settings-play-mode-select" class="mode-grid compact-home"></div>
+      </div>
+      <div class="game-settings-card game-settings-actions">
+        <b data-i18n="ui.gameActions" data-i18n-fallback="Oyun">Oyun</b>
+        <button type="button" class="game-settings-action primary" onclick="saveGameState(true)" data-i18n="save.saveGame" data-i18n-fallback="Oyunu Kaydet">Oyunu Kaydet</button>
+        <button type="button" class="game-settings-action" onclick="toggleSavePanel(true)" data-i18n="save.center" data-i18n-fallback="Kayit Merkezi">Kayit Merkezi</button>
+        <button type="button" class="game-settings-action danger" onclick="exitToHomeFromGame()" data-i18n="ui.saveAndMenu" data-i18n-fallback="Kaydet ve Ana Menuye Don">Kaydet ve Ana Menuye Don</button>
+      </div>
+    </div>
+  </div>
   <div id="save-panel">
     <div class="save-panel-head">
       <div>

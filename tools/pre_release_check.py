@@ -523,12 +523,12 @@ def check_mobile_and_hitboxes() -> None:
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
         "index.js?v=153",
-        "index.css?v=131",
+        "index.css?v=132",
     ]:
         require_token(section, token)
 
     # Catch obviously tiny clickable styles while ignoring status labels/feedback rows.
-    interactive_words = ("button", ".tb-btn", ".cbtn", "#save-btn", "language-select", "device-key", "phone-app")
+    interactive_words = ("button", ".tb-btn", ".cbtn", "#save-btn", "#game-settings-btn", "language-select", "device-key", "phone-app")
     low_interactive: list[str] = []
     for match in re.finditer(r"([^{}]+){[^{}]*min-height\s*:\s*(\d+)px", CSS):
         selector = " ".join(match.group(1).split())
