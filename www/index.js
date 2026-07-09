@@ -9,7 +9,9 @@
   function resize(){
     W=window.innerWidth;
     H=window.innerHeight;
-    DPR=Math.min(window.devicePixelRatio || 1, W < 900 ? 1.5 : 2);
+    const quality=document.documentElement.dataset.visualQuality || 'balanced';
+    const qualityCap=quality==='low' ? 1 : quality==='high' ? (W < 900 ? 1.75 : 2.5) : (W < 900 ? 1.5 : 2);
+    DPR=Math.min(window.devicePixelRatio || 1, qualityCap);
     cv.width=Math.max(1,Math.round(W*DPR));
     cv.height=Math.max(1,Math.round(H*DPR));
     cv.style.width=W+'px';
@@ -452,6 +454,7 @@
     t++;requestAnimationFrame(draw);
   }
   window.addEventListener('resize',resize);
+  window.addEventListener('guverte-visual-quality-change',resize);
   resize();draw();
 })();
 
@@ -9655,7 +9658,7 @@ let gameLanguage=(()=>{try{return GAME_LANGUAGES[localStorage.getItem('guverte-l
 const I18N={
   tr:{},
   en:{
-    'ui.language':'Language','ui.languageHint':'Choose the language used for menus, guidance, choices and the live translation layer.','ui.save':'SAVE','ui.sound':'Sound','ui.rep':'REPUTATION','ui.settings':'SETTINGS','ui.gameSettings':'GAME SETTINGS','ui.gameSettingsSubtitle':'Sound, language, play style and exit settings.','ui.close':'Close','ui.audioSettings':'Audio','ui.gameLanguage':'Game Language','ui.playStyle':'Play Style','ui.gameActions':'Game','ui.saveAndMenu':'Save and Return to Menu','ui.soundOn':'Sound On','ui.soundOff':'Sound Off',
+    'ui.language':'Language','ui.languageHint':'Choose the language used for menus, guidance, choices and the live translation layer.','ui.save':'SAVE','ui.sound':'Sound','ui.rep':'REPUTATION','ui.settings':'SETTINGS','ui.gameSettings':'GAME SETTINGS','ui.gameSettingsSubtitle':'Sound, language, play style and exit settings.','ui.close':'Close','ui.audioSettings':'Audio','ui.gameLanguage':'Game Language','ui.playStyle':'Play Style','ui.gameActions':'Game','ui.saveAndMenu':'Save and Return to Menu','ui.soundOn':'Sound On','ui.soundOff':'Sound Off','quality.title':'Visual Quality','quality.low':'Performance','quality.balanced':'Balanced','quality.high':'High',
     'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CHART','ui.devices':'DEVICES','ui.sim':'SIM','ui.career':'CAREER','ui.ship':'SHIP','ui.cabin':'CABIN','ui.logbook':'LOGBOOK','ui.phone':'PHONE','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
     'ui.continue':'Continue Saved Game','ui.deleteSave':'Delete Save','ui.startShip':'Join Ship','ui.mode':'Mode','ui.open':'Open','ui.basicStory':'Only story and basic choices.','ui.unlocked':'Open','ui.assist':'Assist mode is on: guidance is more instructional.','ui.slowUnlock':'New systems unlock gradually.',
     'mode.simple':'Simple','mode.simpleDesc':'Story, core decisions and a cleaner screen.','mode.realistic':'Realistic','mode.realisticDesc':'Devices, charts and logbook unlock gradually.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker and premium details are active.',
@@ -9673,7 +9676,7 @@ const I18N={
     'scene.inspectSituation':'An inspection, audit or document-control moment is active.','scene.inspectTask':'Show the correct record, equipment evidence and corrective action without improvising.'
   },
   es:{
-    'ui.language':'Idioma','ui.languageHint':'Elige el idioma de menus, guia, opciones y la capa de traduccion en vivo.','ui.save':'GUARDAR','ui.sound':'Sonido','ui.rep':'REPUTACION','ui.settings':'AJUSTES','ui.gameSettings':'AJUSTES DEL JUEGO','ui.gameSettingsSubtitle':'Sonido, idioma, estilo de juego y salida.','ui.close':'Cerrar','ui.audioSettings':'Audio','ui.gameLanguage':'Idioma del juego','ui.playStyle':'Estilo de juego','ui.gameActions':'Juego','ui.saveAndMenu':'Guardar y volver al menu','ui.soundOn':'Sonido activado','ui.soundOff':'Sonido desactivado',
+    'ui.language':'Idioma','ui.languageHint':'Elige el idioma de menus, guia, opciones y la capa de traduccion en vivo.','ui.save':'GUARDAR','ui.sound':'Sonido','ui.rep':'REPUTACION','ui.settings':'AJUSTES','ui.gameSettings':'AJUSTES DEL JUEGO','ui.gameSettingsSubtitle':'Sonido, idioma, estilo de juego y salida.','ui.close':'Cerrar','ui.audioSettings':'Audio','ui.gameLanguage':'Idioma del juego','ui.playStyle':'Estilo de juego','ui.gameActions':'Juego','ui.saveAndMenu':'Guardar y volver al menu','ui.soundOn':'Sonido activado','ui.soundOff':'Sonido desactivado','quality.title':'Calidad visual','quality.low':'Rendimiento','quality.balanced':'Equilibrado','quality.high':'Alta',
     'ui.colreg':'COLREG','ui.notes':'NOTAS','ui.map':'CARTA','ui.devices':'EQUIPOS','ui.sim':'SIM','ui.career':'CARRERA','ui.ship':'BUQUE','ui.cabin':'CAMAROTE','ui.logbook':'DIARIO','ui.phone':'TELEFONO','ui.journal':'BITACORA','ui.album':'ALBUM','ui.crew':'TRIPULACION',
     'ui.continue':'Continuar partida','ui.deleteSave':'Borrar partida','ui.startShip':'Embarcar','ui.mode':'Modo','ui.open':'Abierto','ui.basicStory':'Solo historia y decisiones basicas.','ui.unlocked':'Abierto','ui.assist':'Modo ayuda activo: la guia es mas instructiva.','ui.slowUnlock':'Los sistemas nuevos se abren gradualmente.',
     'mode.simple':'Simple','mode.simpleDesc':'Historia, decisiones basicas y pantalla mas limpia.','mode.realistic':'Realista','mode.realisticDesc':'Equipos, cartas y diario se abren gradualmente.','mode.expert':'Experto','mode.expertDesc':'CPA, UKC, PSC, tanquero y detalles premium activos.',
@@ -9691,7 +9694,7 @@ const I18N={
     'scene.inspectSituation':'Hay inspeccion, auditoria o control documental.','scene.inspectTask':'Muestra el registro correcto, evidencia del equipo y accion correctiva sin improvisar.'
   },
   de:{
-    'ui.language':'Sprache','ui.languageHint':'Wahle die Sprache fur Menus, Hinweise, Optionen und die Live-Ubersetzungsebene.','ui.save':'SPEICHERN','ui.sound':'Ton','ui.rep':'ANSEHEN','ui.settings':'EINSTELLUNGEN','ui.gameSettings':'SPIELEINSTELLUNGEN','ui.gameSettingsSubtitle':'Ton, Sprache, Spielstil und Beenden.','ui.close':'Schliessen','ui.audioSettings':'Audio','ui.gameLanguage':'Spielsprache','ui.playStyle':'Spielstil','ui.gameActions':'Spiel','ui.saveAndMenu':'Speichern und zum Menu','ui.soundOn':'Ton an','ui.soundOff':'Ton aus',
+    'ui.language':'Sprache','ui.languageHint':'Wahle die Sprache fur Menus, Hinweise, Optionen und die Live-Ubersetzungsebene.','ui.save':'SPEICHERN','ui.sound':'Ton','ui.rep':'ANSEHEN','ui.settings':'EINSTELLUNGEN','ui.gameSettings':'SPIELEINSTELLUNGEN','ui.gameSettingsSubtitle':'Ton, Sprache, Spielstil und Beenden.','ui.close':'Schliessen','ui.audioSettings':'Audio','ui.gameLanguage':'Spielsprache','ui.playStyle':'Spielstil','ui.gameActions':'Spiel','ui.saveAndMenu':'Speichern und zum Menu','ui.soundOn':'Ton an','ui.soundOff':'Ton aus','quality.title':'Grafikqualitat','quality.low':'Leistung','quality.balanced':'Ausgewogen','quality.high':'Hoch',
     'ui.colreg':'KVR','ui.notes':'NOTIZEN','ui.map':'KARTE','ui.devices':'GERATE','ui.sim':'SIM','ui.career':'KARRIERE','ui.ship':'SCHIFF','ui.cabin':'KAMMER','ui.logbook':'LOGBUCH','ui.phone':'TELEFON','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
     'ui.continue':'Spielstand laden','ui.deleteSave':'Spielstand loschen','ui.startShip':'An Bord gehen','ui.mode':'Modus','ui.open':'Offen','ui.basicStory':'Nur Geschichte und Grundentscheidungen.','ui.unlocked':'Offen','ui.assist':'Hilfsmodus aktiv: die Hinweise sind lehrreicher.','ui.slowUnlock':'Neue Systeme werden schrittweise freigeschaltet.',
     'mode.simple':'Einfach','mode.simpleDesc':'Geschichte, Kernentscheidungen und weniger Bildschirmfullung.','mode.realistic':'Realistisch','mode.realisticDesc':'Gerate, Karten und Logbuch werden schrittweise freigeschaltet.','mode.expert':'Experte','mode.expertDesc':'CPA, UKC, PSC, Tanker und Premiumdetails sind aktiv.',
@@ -9709,7 +9712,7 @@ const I18N={
     'scene.inspectSituation':'Inspektion, Audit oder Dokumentenkontrolle ist aktiv.','scene.inspectTask':'Richtigen Nachweis, Ausrustungsbeleg und Korrekturmassnahme zeigen, ohne zu improvisieren.'
   },
   fr:{
-    'ui.language':'Langue','ui.languageHint':'Choisis la langue des menus, consignes, choix et de la couche de traduction en direct.','ui.save':'SAUVER','ui.sound':'Son','ui.rep':'REPUTATION','ui.settings':'PARAMETRES','ui.gameSettings':'PARAMETRES DU JEU','ui.gameSettingsSubtitle':'Son, langue, style de jeu et sortie.','ui.close':'Fermer','ui.audioSettings':'Audio','ui.gameLanguage':'Langue du jeu','ui.playStyle':'Style de jeu','ui.gameActions':'Jeu','ui.saveAndMenu':'Sauver et retour menu','ui.soundOn':'Son active','ui.soundOff':'Son coupe',
+    'ui.language':'Langue','ui.languageHint':'Choisis la langue des menus, consignes, choix et de la couche de traduction en direct.','ui.save':'SAUVER','ui.sound':'Son','ui.rep':'REPUTATION','ui.settings':'PARAMETRES','ui.gameSettings':'PARAMETRES DU JEU','ui.gameSettingsSubtitle':'Son, langue, style de jeu et sortie.','ui.close':'Fermer','ui.audioSettings':'Audio','ui.gameLanguage':'Langue du jeu','ui.playStyle':'Style de jeu','ui.gameActions':'Jeu','ui.saveAndMenu':'Sauver et retour menu','ui.soundOn':'Son active','ui.soundOff':'Son coupe','quality.title':'Qualite visuelle','quality.low':'Performance','quality.balanced':'Equilibree','quality.high':'Elevee',
     'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CARTE','ui.devices':'APPAREILS','ui.sim':'SIM','ui.career':'CARRIERE','ui.ship':'NAVIRE','ui.cabin':'CABINE','ui.logbook':'JOURNAL','ui.phone':'TELEPHONE','ui.journal':'CARNET','ui.album':'ALBUM','ui.crew':'EQUIPAGE',
     'ui.continue':'Continuer la sauvegarde','ui.deleteSave':'Supprimer la sauvegarde','ui.startShip':'Monter a bord','ui.mode':'Mode','ui.open':'Ouvert','ui.basicStory':'Seulement histoire et choix de base.','ui.unlocked':'Ouvert','ui.assist':'Mode assistance actif : les consignes sont plus pedagogiques.','ui.slowUnlock':'Les nouveaux systemes se debloquent progressivement.',
     'mode.simple':'Simple','mode.simpleDesc':'Histoire, decisions principales et ecran plus clair.','mode.realistic':'Realiste','mode.realisticDesc':'Appareils, cartes et journal se debloquent progressivement.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker et details premium actifs.',
@@ -9727,7 +9730,7 @@ const I18N={
     'scene.inspectSituation':'Inspection, audit ou controle documentaire actif.','scene.inspectTask':'Montre le bon registre, les preuves d equipement et l action corrective sans improviser.'
   },
   zh:{
-    'ui.language':'语言','ui.languageHint':'选择菜单、提示、选项和实时翻译层使用的语言。','ui.save':'保存','ui.sound':'声音','ui.rep':'声望','ui.settings':'设置','ui.gameSettings':'游戏设置','ui.gameSettingsSubtitle':'声音、语言、玩法和退出设置。','ui.close':'关闭','ui.audioSettings':'音频','ui.gameLanguage':'游戏语言','ui.playStyle':'玩法模式','ui.gameActions':'游戏','ui.saveAndMenu':'保存并返回菜单','ui.soundOn':'声音开启','ui.soundOff':'声音关闭',
+    'ui.language':'语言','ui.languageHint':'选择菜单、提示、选项和实时翻译层使用的语言。','ui.save':'保存','ui.sound':'声音','ui.rep':'声望','ui.settings':'设置','ui.gameSettings':'游戏设置','ui.gameSettingsSubtitle':'声音、语言、玩法和退出设置。','ui.close':'关闭','ui.audioSettings':'音频','ui.gameLanguage':'游戏语言','ui.playStyle':'玩法模式','ui.gameActions':'游戏','ui.saveAndMenu':'保存并返回菜单','ui.soundOn':'声音开启','ui.soundOff':'声音关闭','quality.title':'画面质量','quality.low':'性能','quality.balanced':'均衡','quality.high':'高',
     'ui.colreg':'避碰规则','ui.notes':'笔记','ui.map':'海图','ui.devices':'设备','ui.sim':'模拟','ui.career':'职业','ui.ship':'船舶','ui.cabin':'舱室','ui.logbook':'日志','ui.phone':'电话','ui.journal':'航海日志','ui.album':'相册','ui.crew':'船员',
     'ui.continue':'继续存档','ui.deleteSave':'删除存档','ui.startShip':'登船','ui.mode':'模式','ui.open':'已开放','ui.basicStory':'仅故事和基础选择。','ui.unlocked':'已开放','ui.assist':'辅助模式已开启：提示会更教学化。','ui.slowUnlock':'新系统会逐步解锁。',
     'mode.simple':'简单','mode.simpleDesc':'故事、核心决策和更清爽的界面。','mode.realistic':'真实','mode.realisticDesc':'设备、海图和日志逐步解锁。','mode.expert':'专家','mode.expertDesc':'CPA、UKC、PSC、油轮和高级细节开启。',
@@ -9746,7 +9749,7 @@ const I18N={
   }
 };
 I18N.ru={
-  'ui.language':'Язык','ui.languageHint':'Выберите язык меню, подсказок, вариантов ответа и живого перевода.','ui.save':'СОХРАНИТЬ','ui.sound':'Звук','ui.rep':'РЕПУТАЦИЯ','ui.settings':'НАСТРОЙКИ','ui.gameSettings':'НАСТРОЙКИ ИГРЫ','ui.gameSettingsSubtitle':'Звук, язык, стиль игры и выход.','ui.close':'Закрыть','ui.audioSettings':'Аудио','ui.gameLanguage':'Язык игры','ui.playStyle':'Стиль игры','ui.gameActions':'Игра','ui.saveAndMenu':'Сохранить и в меню','ui.soundOn':'Звук включен','ui.soundOff':'Звук выключен',
+  'ui.language':'Язык','ui.languageHint':'Выберите язык меню, подсказок, вариантов ответа и живого перевода.','ui.save':'СОХРАНИТЬ','ui.sound':'Звук','ui.rep':'РЕПУТАЦИЯ','ui.settings':'НАСТРОЙКИ','ui.gameSettings':'НАСТРОЙКИ ИГРЫ','ui.gameSettingsSubtitle':'Звук, язык, стиль игры и выход.','ui.close':'Закрыть','ui.audioSettings':'Аудио','ui.gameLanguage':'Язык игры','ui.playStyle':'Стиль игры','ui.gameActions':'Игра','ui.saveAndMenu':'Сохранить и в меню','ui.soundOn':'Звук включен','ui.soundOff':'Звук выключен','quality.title':'Качество графики','quality.low':'Производительность','quality.balanced':'Баланс','quality.high':'Высокое',
   'ui.colreg':'МППСС','ui.notes':'ЗАМЕТКИ','ui.map':'КАРТА','ui.devices':'ПРИБОРЫ','ui.sim':'ТРЕНАЖЕР','ui.career':'КАРЬЕРА','ui.ship':'СУДНО','ui.cabin':'КАЮТА','ui.logbook':'ЖУРНАЛ','ui.phone':'ТЕЛЕФОН','ui.journal':'ДНЕВНИК','ui.album':'АЛЬБОМ','ui.crew':'ЭКИПАЖ',
   'ui.continue':'Продолжить сохранение','ui.deleteSave':'Удалить сохранение','ui.startShip':'Войти на судно','ui.mode':'Режим','ui.open':'Открыто','ui.basicStory':'Только история и базовые решения.','ui.unlocked':'Открыто','ui.assist':'Режим помощи включен: подсказки подробнее.','ui.slowUnlock':'Новые системы открываются постепенно.',
   'mode.simple':'Простой','mode.simpleDesc':'История, основные решения и более чистый экран.','mode.realistic':'Реалистичный','mode.realisticDesc':'Приборы, карты и журнал открываются постепенно.','mode.expert':'Эксперт','mode.expertDesc':'CPA, UKC, PSC, танкер и премиум-детали активны.',
@@ -10251,6 +10254,9 @@ function setGameLanguage(lang){
   setIntroMenuPage(introMenuPage);
   setHomeMenuPage(homeMenuPage);
   localizeStaticDom(document);
+  if(typeof setVisualQuality === 'function' && typeof getVisualQuality === 'function'){
+    setVisualQuality(getVisualQuality(), false);
+  }
 }
 let mood=58;
 let psyche={moral:58,yalnizlik:34,ofke:26,tukenme:31,uyum:55};
@@ -16868,6 +16874,8 @@ Object.assign(WORLD_MAP_POINT_LOOKUP, {
   'uzak dogu - avustralya konteyner servisi':[394,198]
 });
 const SAVE_KEY = 'guverte-save-v1';
+const SAVE_BACKUP_KEY = 'guverte-save-backup-v1';
+const SAVE_RECOVERY_KEY = 'guverte-save-recovery-v1';
 const PLAY_MODE_DEFS = {
   simple:{label:'Basit', desc:'Hikaye, temel secimler ve az ekran kalabaligi.', level:0},
   realistic:{label:'Gercekci', desc:'Cihaz, harita ve logbook yavas yavas acilir.', level:1},
@@ -17083,6 +17091,17 @@ function canUseFeature(feature, sc=sceneQueue[currentIdx] || null, notify=true){
 
 function getSceneGuidance(sc){
   const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const firstWatchSteps = [
+    'Sahneyi oku: kim konusuyor, nerede ve senden ne istiyor?',
+    'Secenek etiketine degil, emniyetli ve prosedurel davranisa odaklan.',
+    'Ust bardaki Kaydet ile ilerlemeni istedigin an koruyabilirsin.',
+    'Harita acildiginda once rota, gemi mevkii ve sonraki waypointi bul.',
+    'Cihaz gorevinde ekrani buyut; alarm, hedef ve degerleri birlikte oku.',
+    'Vardiya akisi artik sende: karar, rapor ve kayit birbirini takip eder.'
+  ];
+  if((careerState?.contracts || 0) === 0 && currentIdx < firstWatchSteps.length && !/fire|yangin|mob|abandon|distress|blackout/.test(blob)){
+    return `[Baslangic ${currentIdx+1}/${firstWatchSteps.length}] ${translateGameText(firstWatchSteps[currentIdx])}`;
+  }
   if((SYSTEM_STATE.consecutiveMistakes || 0) >= 2) return t('guide.support','Destek modu: acele etme, prosedure en yakin ve kanitli karari sec.');
   if((stats.dinclik || 0) < 24) return t('guide.tired','Dinclik dusuk: riskli kahramanlik yerine sakin ve prosedurel karar ver.');
   if(/vhf|dsc|mayday|pan-pan|vts|pilot exchange/.test(blob)) return t('guide.vhf','VHF kanalini ve cagri tipini netlestir.');
@@ -17298,7 +17317,7 @@ function completeMissionFromChoice(sc,c2){
 }
 
 function hasSavedGame(){
-  try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}
+  try{return !!(localStorage.getItem(SAVE_KEY) || localStorage.getItem(SAVE_BACKUP_KEY) || localStorage.getItem(SAVE_RECOVERY_KEY));}catch(e){return false;}
 }
 
 function refreshSaveEntryActions(){
@@ -17314,16 +17333,51 @@ function refreshSaveEntryActions(){
 }
 
 function getSavedGameMeta(){
+  return readSavedGamePayload(SAVE_KEY);
+}
+
+function readSavedGamePayload(key=SAVE_KEY){
   let raw = null;
-  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
+  try{ raw = localStorage.getItem(key); }catch(e){}
   if(!raw) return null;
   try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+
+function isValidSavedGamePayload(data){
+  return !!(data && typeof data === 'object' && Array.isArray(data.sceneQueue) && data.sceneQueue.length && data.stats && typeof data.stats === 'object');
+}
+
+function getRecoverySavePayload(){
+  const backup = readSavedGamePayload(SAVE_BACKUP_KEY);
+  if(isValidSavedGamePayload(backup)) return {data:backup, source:SAVE_BACKUP_KEY};
+  const recovery = readSavedGamePayload(SAVE_RECOVERY_KEY);
+  if(isValidSavedGamePayload(recovery)) return {data:recovery, source:SAVE_RECOVERY_KEY};
+  return null;
+}
+
+function recoverSavedGame(showToast=true){
+  const candidate = getRecoverySavePayload();
+  if(!candidate){
+    if(showToast) showNotif('!','Kurtarma Kaydi Yok','Gecerli bir otomatik yedek bulunamadi.');
+    return false;
+  }
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(candidate.data));
+    refreshSaveEntryActions();
+    renderSavePanel();
+    if(showToast) showNotif('KURTAR','Kayit Kurtarildi',`Otomatik yedek geri getirildi: ${formatSaveTime(candidate.data.savedAt)}`);
+    return true;
+  }catch(e){
+    if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_recovery_error', e);
+    if(showToast) showNotif('!','Kurtarma Basarisiz','Yedek geri yuklenemedi.');
+    return false;
+  }
 }
 
 function formatSaveTime(iso){
   if(!iso) return t('save.noSave','Kayit yok');
   try{
-    const locales={tr:'tr-TR',en:'en-US',es:'es-ES',de:'de-DE'};
+    const locales={tr:'tr-TR',en:'en-US',es:'es-ES',de:'de-DE',fr:'fr-FR',ru:'ru-RU',zh:'zh-CN'};
     return new Date(iso).toLocaleString(locales[gameLanguage] || 'tr-TR', {dateStyle:'short', timeStyle:'short'});
   }catch(e){
     return iso;
@@ -17370,6 +17424,7 @@ function renderSavePanel(){
   const summary = document.getElementById('save-panel-summary');
   if(!grid) return;
   const meta = getSavedGameMeta();
+  const recovery = getRecoverySavePayload();
   if(summary){
     summary.textContent = meta
       ? `${translateGameText('Son kayit')}: ${formatSaveTime(meta.savedAt)} · ${translateGameText('Sahne')} ${(meta.currentIdx||0)+1}`
@@ -17382,7 +17437,7 @@ function renderSavePanel(){
     <div class="save-card"><b>${t('save.current','Mevcut Oyun')}</b><small>${phoneSafe(pn || t('role.cadet','Stajyer'))} · ${phoneSafe(sn || translateGameText('Gemi'))}<br>${translateGameText('Sahne')} ${currentScene}<br>${phoneSafe(modeLabel)} ${translateGameText('mod')}</small></div>
     <div class="save-card"><b>${t('save.contract','Kontrat')}</b><small>${contractDays || 0}/${contractTotal || 0} ${translateGameText('sahne')}<br>${phoneSafe(translateGameText(getRankName ? getRankName() : 'Stajyer'))}<br>${phoneSafe(selYear)} · ${phoneSafe(selType)}</small></div>
     <div class="save-card"><b>${t('save.last','Son Kayit')}</b><small>${formatSaveTime(meta?.savedAt)}<br>${meta ? phoneSafe(meta.sn || translateGameText('Kayitli gemi')) : translateGameText('Kayit yok')}<br>${t('ui.mode','Mod')}: ${phoneSafe(savedMode)}</small></div>
-    <div class="save-card save-actions"><b>${t('save.actions','Islemler')}</b><button class="save-action-btn primary" onclick="saveGameState(true)">${t('save.saveGame','Oyunu Kaydet')}</button><button class="save-action-btn" onclick="loadSavedGame()">${t('save.loadGame','Kayittan Devam')}</button><button class="save-action-btn danger" onclick="deleteSavedGame()">${t('save.deleteGame','Kaydi Sil')}</button></div>`;
+    <div class="save-card save-actions"><b>${t('save.actions','Islemler')}</b><button class="save-action-btn primary" onclick="saveGameState(true)">${t('save.saveGame','Oyunu Kaydet')}</button><button class="save-action-btn" onclick="loadSavedGame()">${t('save.loadGame','Kayittan Devam')}</button><button class="save-action-btn" onclick="recoverSavedGame()">${translateGameText('Otomatik Yedegi Kurtar')}${recovery ? ` · ${formatSaveTime(recovery.data.savedAt)}` : ''}</button><button class="save-action-btn" onclick="exportSaveBackup()">${translateGameText('Kaydi Disa Aktar')}</button><button class="save-action-btn" onclick="triggerSaveImport()">${translateGameText('Kaydi Ice Aktar')}</button><button class="save-action-btn danger" onclick="deleteSavedGame()">${t('save.deleteGame','Kaydi Sil')}</button></div>`;
 }
 
 function buildSavePayload(){
@@ -17491,19 +17546,47 @@ function buildSavePayload(){
 function saveGameState(manual=false){
   if(!sceneQueue || !sceneQueue.length) return false;
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify(buildSavePayload()));
+    const previous = localStorage.getItem(SAVE_KEY);
+    if(previous){
+      try{
+        const parsedPrevious = JSON.parse(previous);
+        if(isValidSavedGamePayload(parsedPrevious)) localStorage.setItem(SAVE_BACKUP_KEY, previous);
+      }catch(e){
+        if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_backup_skipped', e, {currentIdx});
+      }
+    }
+    const next = JSON.stringify(buildSavePayload());
+    try{
+      localStorage.setItem(SAVE_KEY, next);
+    }catch(firstError){
+      localStorage.removeItem(SAVE_BACKUP_KEY);
+      localStorage.removeItem(SAVE_RECOVERY_KEY);
+      localStorage.setItem(SAVE_KEY, next);
+      if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_storage_recovered', firstError, {currentIdx});
+    }
+    if(manual || currentIdx % 5 === 0){
+      try{ localStorage.setItem(SAVE_RECOVERY_KEY, next); }
+      catch(e){
+        if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_recovery_copy_skipped', e, {currentIdx});
+      }
+    }
     refreshSaveEntryActions();
     renderSavePanel();
     if(manual) showNotif('💾','Oyun Kaydedildi',`Sahne ${currentIdx+1} icin kayit alindi.`);
     return true;
   }catch(e){
+    if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_write_error', e, {manual,currentIdx});
     if(manual) showNotif('!','Kayit Basarisiz','Kayit yazilirken bir sorun oldu.');
     return false;
   }
 }
 
 function deleteSavedGame(showToast=true){
-  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  try{
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(SAVE_BACKUP_KEY);
+    localStorage.removeItem(SAVE_RECOVERY_KEY);
+  }catch(e){}
   refreshSaveEntryActions();
   renderSavePanel();
   if(showToast) showNotif('🗑️','Kayit Silindi','Kaydedilen ilerleme temizlendi.');
@@ -17661,15 +17744,16 @@ function applyLoadedGameState(data){
 }
 
 function loadSavedGame(){
-  let raw = null;
-  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
-  if(!raw){
+  let data = readSavedGamePayload(SAVE_KEY);
+  if(!isValidSavedGamePayload(data) && recoverSavedGame(false)){
+    data = readSavedGamePayload(SAVE_KEY);
+  }
+  if(!isValidSavedGamePayload(data)){
     refreshSaveEntryActions();
     showNotif('!','Kayit Yok','Devam edilecek bir kayit bulunamadi.');
     return;
   }
   try{
-    const data = JSON.parse(raw);
     applyLoadedGameState(data);
     document.getElementById('crisis').style.display='none';
     document.getElementById('endscr').style.display='none';
@@ -17681,8 +17765,8 @@ function loadSavedGame(){
     renderSavePanel();
     showNotif('↻','Kayittan Devam','Kaydedilen oyuna geri donuldu.');
   }catch(e){
-    deleteSavedGame(false);
-    showNotif('!','Kayit Bozulmus','Eski kayit acilamadi; temizlendi.');
+    if(typeof recordReleaseDiagnostic === 'function') recordReleaseDiagnostic('save_load_error', e, {savedAt:data?.savedAt || ''});
+    showNotif('!','Kayit Acilamadi','Kayit silinmedi. Kayit Merkezi icinden otomatik yedegi kurtarabilirsin.');
   }
 }
 let mapView = 'world';
@@ -20489,7 +20573,7 @@ const seenColregHints = new Set();
 const STUDENT_NOTES = [
   {head:"KOPRUUSTU VARDIYASI", body:"Look-out, COLREG, rota takibi, ECDIS kontrolu, radar cross-check ve logbook disiplini vardiyanin omurgasidir.<br>Vardiya devrinde rota, trafik, hava, makina durumu ve beklenen manevra net aktarilir.<br>Master'in standing orders ve night orders'i bilinmeden vardiya tutulmaz.", tip:"Once gozlem, sonra yorum."},
   {head:"ANA KURALLAR", body:"Sormadan varsayma.<br>Gormeden dogru kabul etme.<br>Hata gordugunde saklama, amire bildir.<br>PPE'siz ise baslama.<br>Snap-back zone'a girme.<br>Kapali mahalde permitsiz girme.<br>Stop komutu duyuldugunda herkes durur.<br>Near-miss de raporlanir.", tip:"Denizcilikte disiplin tekrar degil, hayatta kalma bicimidir."},
-  {head:"GIZLILIK POLITIKASI", body:"Oyun ilerlemesi, karakter secimleri, dil/ses ayarlari ve kayitlar cihazdaki uygulama deposunda tutulur.<br>Referans fotograf, karakter onizlemesi icin cihazda islenir; acikca belirtilen ayri bir cevrim ici ozellik yoksa gelistirici sunucusuna gonderilmez.<br>Ucretsiz surum Google Mobile Ads ile ay sonu, kontrat sonu ve egitim merkezi cikisi gibi dogal aralarda reklam gosterebilir. Reklam hizmeti cihaz bilgisi, reklam kimligi, IP, yaklasik konum, etkilesim ve tanilama verilerini isleyebilir.<br>Gerekli bolgelerde UMP izin formu reklam isteginden once acilir; reklam tercihleri Options veya telefon ayarlarindan yeniden yonetilebilir.<br>remove_ads satin alindiginda reklam isteme ve gosterme durur.<br>Odeme karti ve banka bilgisi uygulamada saklanmaz; satin alma Google Play Billing tarafindan dogrulanir.", tip:"Reklam ve odeme verileri ilgili Google hizmetlerinin gizlilik kosullarina tabidir."},
+  {head:"GIZLILIK POLITIKASI", body:"Oyun ilerlemesi, karakter secimleri, dil/ses ayarlari ve kayitlar cihazdaki uygulama deposunda tutulur.<br>Referans fotograf, karakter onizlemesi icin cihazda islenir; acikca belirtilen ayri bir cevrim ici ozellik yoksa gelistirici sunucusuna gonderilmez.<br>Ucretsiz surum Google Mobile Ads ile ay sonu, kontrat sonu ve egitim merkezi cikisi gibi dogal aralarda reklam gosterebilir. Reklam hizmeti cihaz bilgisi, reklam kimligi, IP, yaklasik konum, etkilesim ve tanilama verilerini isleyebilir.<br>Gerekli bolgelerde UMP izin formu reklam isteginden once acilir; reklam tercihleri Options veya telefon ayarlarindan yeniden yonetilebilir.<br>remove_ads satin alindiginda reklam isteme ve gosterme durur.<br>Odeme karti ve banka bilgisi uygulamada saklanmaz; satin alma Google Play Billing tarafindan dogrulanir.<br>Yerel hata ve donma tanilamasi otomatik gonderilmez. Yalniz oyuncu tester raporunu kopyalar, indirir veya hata formunu acarsa paylasilir; ayni ekrandan silinebilir.<br>Disa aktarilan kayit dosyasinin saklanmasi ve paylasilmasi oyuncunun kontrolundedir.", tip:"Reklam ve odeme verileri ilgili Google hizmetlerinin gizlilik kosullarina tabidir."},
   {head:"TOPLUM KURALLARI", body:"Oyuncular ve topluluk alanlari icin saygili dil esastir.<br>Nefret soylemi, taciz, tehdit, zorbalik, cinsel icerikli rahatsiz edici mesaj, kisisel veri paylasimi, yasa disi faaliyet yonlendirmesi ve baskasinin hesabini/kimligini kullanma kabul edilmez.<br>Denizcilik senaryolari egitim ve oyun amaclidir; gercek gemi operasyonunda sirket proseduru, kaptan talimati, ulusal/uluslararasi mevzuat ve yetkili egitmen onceliklidir.<br>Toplulukta hata, kaza veya near miss anlatirken kisi adi, telefon, konum ve sirket bilgisi gibi hassas verileri paylasma.<br>Kural ihlali durumunda icerik kaldirma, erisim kisitlama veya rapor akisina yonlendirme uygulanabilir.", tip:"Toplulukta denizci uslubu: net, saygili, emniyet odakli."},
   {head:"PREMIUM / SATIN ALMA KURALLARI", body:"Premium paket 75 TL olarak kurgulanmistir ve proje gemisi, kruvaziyer, arastirma, offshore, buz seyri, ileri cihaz simulasyonu, premium 3D operasyonlar ve ozel chart paketlerini acar.<br>Reklamlari kaldirma paketi 50 TL'dir ve premiumdan ayridir; sadece reklam aralarini kapatir.<br>Premium icerik satin alma onayi gelmeden acilmaz. Kayit dosyasi veya sahne ilerlemesi premium kilidini acamaz.<br>Geri yukleme ayni Google Play hesabi uzerindeki satin alma gecmisiyle yapilir. Iade ve odeme itirazlari Google Play kurallarina gore ilerler.<br>Premium olmayan oyuncu premium gemi, premium rota/sahne ve premium operasyon akisini oynayamaz; sadece kilitli paket bilgisini ve satin alma dugmelerini gorur.", tip:"Premium kilidi oyun kaydiyla degil, Play Billing onayiyla acilir."},
   {head:"OLCU BIRIMLERI - DENIZCILIK", body:"<b>1 deniz mili (NM)</b> = 1852 metre<br><b>1 knot (kt)</b> = saatte 1 deniz mili = 1.852 km/saat<br><b>1 kablo (cable)</b> = 0.1 deniz mili = 185.2 metre<br><b>1 kulac (fathom)</b> = 6 feet = 1.8288 metre<br><b>1 feet (ft)</b> = 0.3048 metre<br><b>1 inch</b> = 2.54 cm<br><b>1 metre</b> = 100 cm<br><b>1 santimetre</b> = 10 mm<br><b>1 ton</b> = 1000 kg<br><b>1 long ton</b> = 1016 kg yaklasik<br><b>1 short ton</b> = 907 kg yaklasik<br><b>DWT</b> = Deadweight tonnage; geminin tasiyabilecegi toplam agirlik kapasitesi<br><b>GT</b> = Gross Tonnage; hacim esasli tonaj olcusudur, agirlik degildir<br><b>TEU</b> = 20 feet'lik bir konteyner birimi<br><b>20 ft</b> = 6.096 metre<br><b>40 ft</b> = 12.192 metre<br><b>m3</b> = hacim birimi; tank, ambar ve stowage hesaplarinda kullanilir<br><b>t/m3</b> veya <b>kg/m3</b> = yogunluk birimi; draft survey, ballast ve yakit hesaplarinda gorulur<br><b>ppm</b> = millionda bir; OWS, su kalitesi ve gaz olcumlerinde gorulur<br><b>%LEL</b> = patlayici alt limit yuzdesi; gaz olcumlerinde kullanilir<br><b>bar</b> = basinÃ§ birimi; 1 bar yaklasik 100 kPa'dir<br><b>kW</b> = guc birimi; makine ve jeneratorde kullanilir<br><b>RPM</b> = dakikadaki devir sayisi; ana makine ve pompada gorulur<br><br><b>Pratik not:</b> Seyirde mesafe deniz miliyle, hiz knot ile, draft metre veya feet ile, yuk agirligi ton ile okunur.", tip:"Ayni soruda metre, feet, ton ve deniz mili bir araya gelebilir; birim karisinca hesap da karar da bozulur."},

@@ -1,6 +1,6 @@
 # Güverte Gizlilik Politikası
 
-**Son güncelleme: 8 Temmuz 2026**
+**Son güncelleme: 9 Temmuz 2026**
 
 Bu politika, Güverte mobil oyununun hangi verileri neden işlediğini ve oyuncunun hangi seçeneklere sahip olduğunu açıklar.
 
@@ -74,5 +74,13 @@ Gizlilik soruları için:
 
 - **Geliştirici:** Eyüp Miraç OY
 - **E-posta:** eyupmirac.03oy@gmail.com
+
+## 11. Yerel Tanılama ve Tester Raporları
+
+Uygulama; çökme, JavaScript hatası, uzun süreli arayüz donması, cihaz/ekran özeti ve kayıt sağlığı gibi sınırlı teknik tanılama bilgilerini cihazda tutabilir. Bu kayıtlar oyuncunun mesaj içeriğini, referans fotoğrafını, kart bilgisini veya açık adresini içermez.
+
+Tanılama kayıtları geliştiriciye otomatik gönderilmez. Oyuncu yalnızca **Yayın Testi / Geri Bildirim** ekranından raporu kopyalar, JSON olarak dışa aktarır veya GitHub hata formunu açarsa seçtiği bilgiler paylaşılır. Aynı ekrandan yerel tanılama kayıtları silinebilir.
+
+Oyun kaydı JSON dosyası olarak dışa aktarılabilir ve yeniden içe alınabilir. Dışa aktarılan dosyanın saklanması ve paylaşılması oyuncunun kontrolündedir.
 
 Bu politika uygulama özellikleri veya yasal gereksinimler değiştiğinde güncellenebilir. Önemli değişiklikler uygulama içinde veya mağaza sayfasında duyurulabilir.

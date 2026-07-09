@@ -14,6 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_JS = ROOT / "www" / "index.js"
+RELEASE_QUALITY_JS = ROOT / "www" / "release-quality.js"
 INDEX_HTML = ROOT / "www" / "index.html"
 INDEX_CSS = ROOT / "www" / "index.css"
 ANDROID_BILLING = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteBillingBridge.java"
@@ -640,13 +641,14 @@ def read_text(path: Path) -> str:
 
 def main() -> int:
     js = read_text(INDEX_JS)
+    release_quality_js = read_text(RELEASE_QUALITY_JS) if RELEASE_QUALITY_JS.exists() else ""
     html = read_text(INDEX_HTML)
     css = read_text(INDEX_CSS)
     android_billing = read_text(ANDROID_BILLING) if ANDROID_BILLING.exists() else ""
     android_main = read_text(ANDROID_MAIN) if ANDROID_MAIN.exists() else ""
     android_gradle = read_text(ANDROID_GRADLE) if ANDROID_GRADLE.exists() else ""
     android_manifest = read_text(ANDROID_MANIFEST) if ANDROID_MANIFEST.exists() else ""
-    all_text = "\n".join([js, html, css, android_billing, android_main, android_gradle, android_manifest])
+    all_text = "\n".join([js, release_quality_js, html, css, android_billing, android_main, android_gradle, android_manifest])
     missing: list[str] = []
 
     for group, needles in CHECKS.items():
@@ -675,10 +677,10 @@ def main() -> int:
     for name in sorted(handler_calls):
         defined = re.search(
             rf"(?:function\s+{re.escape(name)}\s*\(|(?:const|let|var)\s+{re.escape(name)}\s*=|window\.{re.escape(name)}\s*=)",
-            js,
+            js + "\n" + release_quality_js,
         )
         if not defined:
-            missing.append(f"html handler: {name} is not defined in index.js")
+            missing.append(f"html handler: {name} is not defined in browser scripts")
 
     asset_refs = set()
     for match in re.findall(r"(?:src|href)=[\"']\.\/([^\"'#?]+)", html):

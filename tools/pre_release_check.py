@@ -560,7 +560,7 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=155",
+        "index.js?v=156",
         "index.css?v=133",
     ]:
         require_token(section, token)
