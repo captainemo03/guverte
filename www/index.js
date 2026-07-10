@@ -9483,6 +9483,38 @@ function getModernBridgeOverlay(sc, blob=''){
   </div>`;
 }
 
+function getProfessionalGraphicsOverlay(sc, blob=''){
+  const hay = blob || `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const flags = getScene3DFeatureFlags(sc || {});
+  const nav = flags.bridgeConsole || flags.routeTable || /radar|arpa|ecdis|ais|vhf|dsc|chart|harita|route|seyir|vts|pilot/.test(hay);
+  const atlas = flags.routeTable || /world atlas|atlas|dunya|dünya|bogaz|boğaz|canal|kanal|strait|passage plan|tss|pilot station|no anchoring/.test(hay);
+  const ops = flags.mooring || flags.manifold || flags.survival || flags.fire || flags.engineRoom || flags.premiumOps || flags.helicopter || flags.cargoLift;
+  const profile = getSceneBackdropProfile(sc || {});
+  const st = liveVoyageState || computeLiveVoyageState(sc || {});
+  const chips = [];
+  if(nav){
+    chips.push(`<span><b>RADAR</b><em>CPA ${phoneSafe(st.cpa || '--')}</em></span>`);
+    chips.push(`<span><b>ECDIS</b><em>WP ${phoneSafe(st.nextWp || st.wp || 'NEXT')}</em></span>`);
+    chips.push(`<span><b>VHF</b><em>${/pilot|tug|liman|harbor/.test(hay) ? 'CH14' : /vts|tss|strait|bogaz|boğaz/.test(hay) ? 'CH12' : 'CH16'}</em></span>`);
+    chips.push(`<span><b>AIS</b><em>SOG ${phoneSafe(st.sog || '--')}</em></span>`);
+  }
+  const atlasHtml = atlas ? `<div class="pro-atlas-chip"><b>ATLAS / ECDIS</b><span>chart scale + route monitor + task hitbox</span><i></i><i></i><i></i></div>` : '';
+  const presetHtml = `<div class="pro-preset-chip"><b>ROLE PRESET</b><span>gender + rank + uniform locked</span></div>`;
+  const opsHtml = ops ? `<div class="pro-ops-depth ${flags.premiumOps?'premium':''}">
+      <b>${flags.manifold?'MANIFOLD':flags.mooring?'MOORING':flags.survival?'LSA':flags.fire?'FIRE':flags.engineRoom?'ECR':'SPECIAL OPS'}</b>
+      <span></span><span></span><span></span>
+    </div>` : '';
+  const cinemaHtml = sc?.cinematic ? `<div class="pro-cinema-bar"><span>CINEMATIC</span><b>${phoneSafe(sc.cinematicKey || sc.id || 'scene')}</b></div>` : '';
+  return `<div class="pro-graphics-overlay profile-${profile} ${nav?'nav':''} ${atlas?'atlas':''} ${ops?'ops':''}" aria-hidden="true">
+    <div class="pro-glass-stack"><i></i><i></i><i></i></div>
+    ${chips.length ? `<div class="pro-device-row">${chips.join('')}</div>` : ''}
+    ${atlasHtml}
+    ${presetHtml}
+    ${opsHtml}
+    ${cinemaHtml}
+  </div>`;
+}
+
 function getCinematicOverlay(sc){
   if(!sc?.cinematic) return '';
   const type = phoneSafe(sc.cinematicType || sc.cinematicKey || 'scene');
@@ -9500,6 +9532,11 @@ function getCinematicOverlay(sc){
     piracy:'<i class="cin-prop radar-dish security"></i><i class="cin-prop fastboat b1"></i><i class="cin-prop fastboat b2"></i><i class="cin-prop security-level">SECURITY LEVEL 2</i><i class="cin-prop citadel-door"></i>',
     psc:'<i class="cin-prop clipboard"></i><i class="cin-prop deficiency-stamp"></i><i class="cin-prop officer-card"></i><i class="cin-prop document-stack"></i>',
     medevac:'<i class="cin-prop helicopter"></i><i class="cin-prop helipad"></i><i class="cin-prop stretcher"></i><i class="cin-prop mrcc-line">MRCC / MEDICAL / BRIDGE</i>',
+    suez:'<i class="cin-prop convoy-ship lead"></i><i class="cin-prop convoy-ship own"></i><i class="cin-prop canal-bank left"></i><i class="cin-prop canal-bank right"></i><i class="cin-prop vts-tag">SUEZ VTS</i>',
+    panama:'<i class="cin-prop lock-gate g1"></i><i class="cin-prop lock-gate g2"></i><i class="cin-prop mule-line l1"></i><i class="cin-prop mule-line l2"></i><i class="cin-prop water-level-chip">LOCK LEVEL +</i>',
+    mooring:'<i class="cin-prop snap-line s1"></i><i class="cin-prop snap-line s2"></i><i class="cin-prop snap-zone"></i><i class="cin-prop deck-crew safe"></i><i class="cin-prop line-tension">TENSION HIGH</i>',
+    manifold:'<i class="cin-prop loading-arm"></i><i class="cin-prop pressure-gauge"></i><i class="cin-prop drip-tray"></i><i class="cin-prop esd-button">ESD</i><i class="cin-prop sopep-kit"></i>',
+    rov:'<i class="cin-prop rov-screen"></i><i class="cin-prop rov-body"></i><i class="cin-prop seabed-line"></i><i class="cin-prop tether-bar">TETHER</i><i class="cin-prop dp-ring"></i>',
     contract:'<i class="cin-prop photo-card p1"></i><i class="cin-prop photo-card p2"></i><i class="cin-prop photo-card p3"></i><i class="cin-prop phone-message"></i><i class="cin-prop company-offer"></i>'
   };
   return `<div class="cinematic-shot cinematic-${type}">
@@ -9590,6 +9627,7 @@ function getLiveSceneOverlay(sc){
   parts.push(getScene4KOverlay(sc, blob));
   parts.push(getGraphicLivelinessOverlay(sc, blob));
   parts.push(getModernBridgeOverlay(sc, blob));
+  parts.push(getProfessionalGraphicsOverlay(sc, blob));
   parts.push('<div class="live-watch-silhouette"></div><div class="live-status-strip"><span></span><span></span><span></span></div>');
   if(!/engine|makine|galley|asci|aşçı|kamara|cabin/.test(blob)){
     parts.push('<div class="live-passing-light l1"></div><div class="live-passing-light l2"></div>');
@@ -10305,6 +10343,259 @@ let careerMemory={firstPilot:false,firstStorm:false,firstAllFast:false,firstNear
 const CAREER_RANKS=['Stajyer','3. Zabit','2. Zabit','1. Zabit','Süvari'];
 let careerState={rankIndex:0,contracts:0,seaMonths:0,money:0,salary:1200,leaveDays:0,companyOpinion:50,referenceLetters:[],lastContractClosed:false};
 let specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
+const RETENTION_KEY = 'guverte-retention-v1';
+const SEASON_CATALOG = [
+  {key:'straits', title:'Sezon 1 · Turk Bogazlari', route:'Istanbul Bogazi / Canakkale', theme:'pilotage, VTS, akinti ve dar su yolu disiplini', unlockXp:0, reward:'Bogaz Vardiyasi Rozeti'},
+  {key:'redsea', title:'Sezon 2 · Suez ve Kizildeniz', route:'Port Said - Jeddah - Bab el Mandeb', theme:'konvoy, guvenlik, sicak hava ve VHF baskisi', unlockXp:650, reward:'Kizildeniz Gece Nobeti'},
+  {key:'atlantic', title:'Sezon 3 · Kuzey Atlantik', route:'Rotterdam - New York', theme:'firtina, routing, radar ve fatigue yonetimi', unlockXp:1400, reward:'Atlantik Firtina Patch'},
+  {key:'offshore', title:'Sezon 4 · Offshore / Arastirma', route:'Platform, ROV, DP ve survey hatlari', theme:'premium operasyon, DP alarmi ve bilim ekibi koordinasyonu', unlockXp:2400, reward:'Pro Operasyon Yetkisi'}
+];
+const DAILY_MISSION_POOL = [
+  {key:'daily_vhf', label:'Bugunun VHF pratigi', desc:'Bir VHF/DSC adimini dogru tamamla.', event:'device', device:'vhf', target:1, xp:45},
+  {key:'daily_radar', label:'Radar hedef disiplini', desc:'Radar/AIS/ECDIS cihaz adimi tamamla.', event:'device', deviceAny:['radar','ais','ecdis'], target:1, xp:45},
+  {key:'daily_map', label:'Chart okuyarak isaretle', desc:'Bir harita/ECDIS gorevini dogru sec.', event:'map', target:1, xp:50},
+  {key:'daily_good_choice', label:'Temiz vardiya karari', desc:'Uc iyi/prosedurel sahne karari ver.', event:'choice_good', target:3, xp:40},
+  {key:'daily_family', label:'Aile baglantisi', desc:'Serbest zamanda aileyle iletisim kur.', event:'free_time', action:'family', target:1, xp:35},
+  {key:'daily_safety', label:'Safety round', desc:'Safety/GMDSS/sounding rutinlerinden birini yap.', event:'free_time', actionAny:['safety','gmdss','sounding'], target:1, xp:35},
+  {key:'daily_logbook', label:'Vardiya kaydi temizligi', desc:'Logbook veya hava raporu rutini tamamla.', event:'free_time', actionAny:['logbook','weather'], target:1, xp:35}
+];
+const WEEKLY_MISSION_POOL = [
+  {key:'weekly_map_pack', label:'Haftalik chart paketi', desc:'Bes harita/ECDIS gorevi bitir.', event:'map', target:5, xp:180},
+  {key:'weekly_devices', label:'Cihaz sim haftasi', desc:'Sekiz dogru cihaz adimi tamamla.', event:'device', target:8, xp:190},
+  {key:'weekly_captain_trust', label:'Kaptan guveni', desc:'On iyi/prosedurel sahne karari ver.', event:'choice_good', target:10, xp:160},
+  {key:'weekly_family_morale', label:'Denizde sosyal denge', desc:'Uc serbest zaman rutini tamamla.', event:'free_time', target:3, xp:150},
+  {key:'weekly_contract', label:'Kontrat raporu', desc:'Bir kontrati veya kariyer kapanisini rapora bagla.', event:'contract', target:1, xp:220}
+];
+
+function parseStoredJson(value, fallback){
+  try{return value ? JSON.parse(value) : fallback;}catch(e){return fallback;}
+}
+function getRetentionDateKey(date=new Date()){
+  return date.toISOString().slice(0,10);
+}
+function getRetentionWeekKey(date=new Date()){
+  const start = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  const day = Math.floor((Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()) - start.getTime()) / 86400000);
+  return `${date.getUTCFullYear()}-W${String(Math.floor(day/7)+1).padStart(2,'0')}`;
+}
+function retentionHash(value=''){
+  return String(value).split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+}
+function makeRetentionMission(template){
+  return {...template, progress:0, done:false, claimed:false};
+}
+function pickRetentionMissions(pool, count, seed){
+  const start = retentionHash(seed) % pool.length;
+  const out = [];
+  for(let i=0;i<Math.min(count,pool.length);i++) out.push(makeRetentionMission(pool[(start+i)%pool.length]));
+  return out;
+}
+function defaultRetentionState(){
+  const today = getRetentionDateKey();
+  const week = getRetentionWeekKey();
+  return {
+    xp:0,
+    streak:0,
+    lastSeenDay:'',
+    dailyKey:today,
+    weeklyKey:week,
+    dailyMissions:pickRetentionMissions(DAILY_MISSION_POOL,4,today),
+    weeklyMissions:pickRetentionMissions(WEEKLY_MISSION_POOL,3,week),
+    seasonKey:SEASON_CATALOG[0].key,
+    seasonXp:{},
+    leaderboard:[],
+    firstFive:{character:false,route:false,firstChoice:false,device:false,map:false,rewarded:false},
+    history:[]
+  };
+}
+function normalizeRetentionState(raw){
+  const base = defaultRetentionState();
+  const next = {...base, ...(raw && typeof raw === 'object' ? raw : {})};
+  next.xp = Math.max(0, Number(next.xp) || 0);
+  next.streak = Math.max(0, Number(next.streak) || 0);
+  next.dailyMissions = Array.isArray(next.dailyMissions) ? next.dailyMissions : base.dailyMissions;
+  next.weeklyMissions = Array.isArray(next.weeklyMissions) ? next.weeklyMissions : base.weeklyMissions;
+  next.seasonXp = next.seasonXp && typeof next.seasonXp === 'object' ? next.seasonXp : {};
+  next.leaderboard = Array.isArray(next.leaderboard) ? next.leaderboard.slice(0,12) : [];
+  next.firstFive = {character:false,route:false,firstChoice:false,device:false,map:false,rewarded:false, ...(next.firstFive || {})};
+  next.history = Array.isArray(next.history) ? next.history.slice(-24) : [];
+  return next;
+}
+function loadRetentionState(){
+  let raw = null;
+  try{ raw = parseStoredJson(localStorage.getItem(RETENTION_KEY), null); }catch(e){}
+  const state = normalizeRetentionState(raw);
+  ensureRetentionMissions(state);
+  return state;
+}
+let retentionState = loadRetentionState();
+function persistRetentionState(){
+  try{ localStorage.setItem(RETENTION_KEY, JSON.stringify(retentionState)); }catch(e){}
+}
+function getRetentionLevelInfo(xp=retentionState.xp){
+  const perLevel = 260;
+  const level = Math.max(1, Math.floor(xp / perLevel) + 1);
+  const current = xp % perLevel;
+  const pct = Math.round((current / perLevel) * 100);
+  return {level, current, needed:perLevel, pct};
+}
+function getActiveSeason(state=retentionState){
+  const available = SEASON_CATALOG.filter(s=>(state?.xp || 0) >= s.unlockXp);
+  const selected = SEASON_CATALOG.find(s=>s.key === state?.seasonKey && (state?.xp || 0) >= s.unlockXp);
+  return selected || available[available.length-1] || SEASON_CATALOG[0];
+}
+function ensureRetentionMissions(state=retentionState){
+  const today = getRetentionDateKey();
+  const week = getRetentionWeekKey();
+  if(state.dailyKey !== today){
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    state.streak = state.dailyKey === yesterday ? (state.streak || 0) + 1 : 1;
+    state.dailyKey = today;
+    state.dailyMissions = pickRetentionMissions(DAILY_MISSION_POOL,4,today);
+  }
+  if(state.weeklyKey !== week){
+    state.weeklyKey = week;
+    state.weeklyMissions = pickRetentionMissions(WEEKLY_MISSION_POOL,3,week);
+  }
+  const active = getActiveSeason(state);
+  state.seasonKey = active.key;
+  if(!state.seasonXp[state.seasonKey]) state.seasonXp[state.seasonKey] = 0;
+  return state;
+}
+function refreshRetentionUI(){
+  renderHomeRetentionPanel();
+  if(document.getElementById('career-panel')?.classList.contains('show')) renderCareerPanel();
+}
+function awardMetaXp(amount=0, reason='Ilerleme', category='general'){
+  ensureRetentionMissions();
+  const gain = Math.max(0, Math.round(Number(amount) || 0));
+  if(!gain) return;
+  const before = getRetentionLevelInfo();
+  retentionState.xp += gain;
+  const season = getActiveSeason();
+  retentionState.seasonKey = season.key;
+  retentionState.seasonXp[season.key] = (retentionState.seasonXp[season.key] || 0) + gain;
+  retentionState.history.push({at:new Date().toISOString(), reason, category, xp:gain});
+  retentionState.history = retentionState.history.slice(-24);
+  persistRetentionState();
+  const after = getRetentionLevelInfo();
+  if(after.level > before.level) showNotif('LVL','Level Atladi',`Denizci profili level ${after.level} oldu. ${reason}`);
+  addWatchFeed?.(`Profil XP +${gain}: ${reason}`, after.level > before.level ? 'good' : '');
+  refreshRetentionUI();
+}
+function missionMatchesEvent(mission, event, meta={}){
+  if(!mission || mission.done || mission.event !== event) return false;
+  if(mission.device && meta.deviceKey !== mission.device) return false;
+  if(Array.isArray(mission.deviceAny) && !mission.deviceAny.includes(meta.deviceKey)) return false;
+  if(mission.action && meta.action !== mission.action) return false;
+  if(Array.isArray(mission.actionAny) && !mission.actionAny.includes(meta.action)) return false;
+  if(mission.domain && meta.domain !== mission.domain) return false;
+  if(mission.tag && meta.tag !== mission.tag) return false;
+  return true;
+}
+function progressRetentionMission(event, meta={}, amount=1){
+  ensureRetentionMissions();
+  let changed = false;
+  [...retentionState.dailyMissions, ...retentionState.weeklyMissions].forEach(mission=>{
+    if(!missionMatchesEvent(mission,event,meta)) return;
+    mission.progress = Math.min(mission.target, (mission.progress || 0) + amount);
+    changed = true;
+    if(mission.progress >= mission.target && !mission.done){
+      mission.done = true;
+      mission.claimed = true;
+      awardMetaXp(mission.xp, mission.label, event);
+      showNotif('GOREV','Gorev Tamam',`${mission.label} · +${mission.xp} XP`);
+    }
+  });
+  if(changed){
+    persistRetentionState();
+    refreshRetentionUI();
+  }
+}
+function progressFirstFiveStep(step){
+  if(!retentionState.firstFive || retentionState.firstFive[step]) return;
+  retentionState.firstFive[step] = true;
+  const done = ['character','route','firstChoice','device','map'].every(k=>retentionState.firstFive[k]);
+  if(done && !retentionState.firstFive.rewarded){
+    retentionState.firstFive.rewarded = true;
+    awardMetaXp(120, 'Ilk 5 dakika zinciri tamamlandi', 'onboarding');
+    unlockAchievement?.('vhf_first');
+  }
+  persistRetentionState();
+  refreshRetentionUI();
+}
+function recordLeaderboardScore(reason='contract'){
+  ensureRetentionMissions();
+  const route = getActiveVoyageRoute?.();
+  const score = Math.max(0, Math.round(
+    (stats.cesaret || 0) * 1.1 +
+    (stats.bilgi || 0) * 1.25 +
+    (stats.sayginlik || 0) * 1.3 +
+    (stats.dinclik || 0) * .55 +
+    (completedMapTasks?.size || 0) * 9 +
+    (devicePracticeScore.ok || 0) * 5 -
+    (SYSTEM_STATE.totalMistakes || 0) * 8 -
+    (playerFlags.nearMiss || 0) * 10
+  ));
+  retentionState.leaderboard.unshift({
+    at:new Date().toISOString(),
+    name:pn || 'Stajyer',
+    ship:sn || '',
+    route:route?.name || 'Serbest sefer',
+    score,
+    reason,
+    rank:getRankName(),
+    mode:gameplayMode
+  });
+  retentionState.leaderboard = retentionState.leaderboard.sort((a,b)=>b.score-a.score).slice(0,12);
+  persistRetentionState();
+  return score;
+}
+function renderRetentionMissionList(missions){
+  return missions.map(m=>{
+    const pct = Math.min(100, Math.round(((m.progress || 0) / Math.max(1,m.target)) * 100));
+    return `<div class="retention-mission ${m.done?'done':''}">
+      <div><b>${phoneSafe(m.label)}</b><small>${phoneSafe(m.desc)}</small></div>
+      <span>${m.progress || 0}/${m.target}</span>
+      <i style="width:${pct}%"></i>
+    </div>`;
+  }).join('');
+}
+function renderRetentionLeaderboard(){
+  const list = retentionState.leaderboard || [];
+  if(!list.length) return '<div class="retention-empty">Ilk kontrat raporundan sonra liderlik tablosu dolacak.</div>';
+  return list.slice(0,5).map((row,i)=>`<div class="retention-rank"><b>#${i+1} ${phoneSafe(row.name)}</b><span>${row.score}</span><small>${phoneSafe(row.route)} · ${phoneSafe(row.rank)} · ${phoneSafe(row.mode)}</small></div>`).join('');
+}
+function renderRetentionPanel(compact=false){
+  ensureRetentionMissions();
+  const level = getRetentionLevelInfo();
+  const season = getActiveSeason();
+  const seasonXp = retentionState.seasonXp[season.key] || 0;
+  const nextSeason = SEASON_CATALOG.find(s=>s.unlockXp > retentionState.xp);
+  return `<div class="retention-panel ${compact?'compact':''}">
+    <div class="retention-head">
+      <div><span>CANLI KARIYER</span><b>Level ${level.level} · ${phoneSafe(season.title)}</b><small>${phoneSafe(season.theme)}</small></div>
+      <div class="retention-xp"><b>${retentionState.xp} XP</b><small>${level.current}/${level.needed} · streak ${retentionState.streak || 0}</small></div>
+    </div>
+    <div class="retention-progress"><i style="width:${level.pct}%"></i></div>
+    <div class="retention-season"><b>${phoneSafe(season.route)}</b><span>${phoneSafe(season.reward)} · sezon XP ${seasonXp}${nextSeason ? ` · sonraki ${nextSeason.unlockXp-retentionState.xp} XP` : ' · tum sezonlar acik'}</span></div>
+    <div class="retention-first-five">
+      ${[['character','Karakter'],['route','Rota'],['firstChoice','Ilk karar'],['device','Cihaz'],['map','Harita']].map(([k,label])=>`<span class="${retentionState.firstFive?.[k]?'done':''}">${phoneSafe(label)}</span>`).join('')}
+    </div>
+    <div class="retention-columns">
+      <div><em>Gunluk Gorevler</em>${renderRetentionMissionList(retentionState.dailyMissions)}</div>
+      <div><em>Haftalik Gorevler</em>${renderRetentionMissionList(retentionState.weeklyMissions)}</div>
+      <div><em>Liderlik</em>${renderRetentionLeaderboard()}</div>
+    </div>
+  </div>`;
+}
+function renderHomeRetentionPanel(){
+  const box = document.getElementById('home-retention-panel');
+  if(box) box.innerHTML = renderRetentionPanel(true);
+}
+function renderRetentionCommandPanel(){
+  return renderRetentionPanel(false);
+}
 let shipOffers=[];
 let familyUnread=0;
 let dialogueHistory=[];
@@ -10680,6 +10971,39 @@ function getPlayerModelPool(base, age=playerAppearance.age){
   return OFFICER_SHEET_POOLS[age]?.[base] || OFFICER_SHEET_POOLS.young[base] || OFFICER_SHEET_POOLS.young.male;
 }
 
+function getCreatorHairPool(base=playerAppearance.base){
+  return base === 'female'
+    ? ['bun','slick','waves','bob','crop','curly','long','ponytail','braid']
+    : ['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'];
+}
+
+function getCreatorDefaultHair(base=playerAppearance.base){
+  return base === 'female' ? 'waves' : 'quiff';
+}
+
+function normalizePlayerAppearance(){
+  if(!PLAYER_LOOK.base.includes(playerAppearance.base)) playerAppearance.base = 'male';
+  if(!PLAYER_LOOK.age.includes(playerAppearance.age)) playerAppearance.age = 'young';
+  if(!PLAYER_LOOK.skin.includes(playerAppearance.skin)) playerAppearance.skin = PLAYER_LOOK.skin[1] || '#d9a06f';
+  if(!PLAYER_LOOK.scene.includes(playerAppearance.scene)) playerAppearance.scene = 'opensea';
+  playerAppearance.height = Math.max(150, Math.min(205, Number(playerAppearance.height) || 175));
+  playerAppearance.weight = Math.max(45, Math.min(130, Number(playerAppearance.weight) || 72));
+  const hairPool = getCreatorHairPool(playerAppearance.base);
+  if(!hairPool.includes(playerAppearance.hair)) playerAppearance.hair = getCreatorDefaultHair(playerAppearance.base);
+  if(playerAppearance.base === 'female'){
+    playerAppearance.beard = 'clean';
+  }else if(!PLAYER_LOOK.beard.includes(playerAppearance.beard)){
+    playerAppearance.beard = 'trim';
+  }
+  const modelPool = getPlayerModelPool(playerAppearance.base, playerAppearance.age);
+  const model = Number(playerAppearance.model);
+  if(!modelPool.includes(model)){
+    syncPlayerModelFromTraits();
+    if(!modelPool.includes(Number(playerAppearance.model))) playerAppearance.model = modelPool[0] || 0;
+  }
+  return playerAppearance;
+}
+
 function syncPlayerAppearanceFromModel(){
   const presets = PLAYER_MODEL_PRESETS[playerAppearance.base] || {};
   const preset = presets[playerAppearance.model];
@@ -10734,12 +11058,13 @@ function setPlayerBase(base){
   playerAppearance.base = base;
   if(base === 'female'){
     playerAppearance.beard = 'clean';
-    if(!['bun','slick','waves','bob','crop','curly','long','ponytail','braid'].includes(playerAppearance.hair)) playerAppearance.hair = 'waves';
+    if(!getCreatorHairPool('female').includes(playerAppearance.hair)) playerAppearance.hair = getCreatorDefaultHair('female');
   }else{
-    if(!['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'].includes(playerAppearance.hair)) playerAppearance.hair = 'quiff';
+    if(!getCreatorHairPool('male').includes(playerAppearance.hair)) playerAppearance.hair = getCreatorDefaultHair('male');
     if(!playerAppearance.beard || playerAppearance.beard === 'clean') playerAppearance.beard = 'trim';
   }
   syncPlayerModelFromTraits();
+  normalizePlayerAppearance();
 }
 
 function getPortraitSpriteIndex(cfg={}){
@@ -11313,6 +11638,7 @@ function renderCreatorRow(elId, values, selected, kind){
       else if(elId==='creator-model'){ playerAppearance.model=Number(v); syncPlayerAppearanceFromModel(); }
       else if(elId==='creator-hair'){ playerAppearance.hair=v; syncPlayerModelFromTraits(); }
       else if(elId==='creator-beard'){ playerAppearance.beard=v; syncPlayerModelFromTraits(); }
+      normalizePlayerAppearance();
       renderCharacterCreator();
     };
     row.appendChild(b);
@@ -11322,6 +11648,7 @@ function renderCreatorRow(elId, values, selected, kind){
 function adjustCreatorNumber(key, delta){
   if(key === 'height') playerAppearance.height = Math.max(150, Math.min(205, (playerAppearance.height || 175) + delta));
   if(key === 'weight') playerAppearance.weight = Math.max(45, Math.min(130, (playerAppearance.weight || 72) + delta));
+  normalizePlayerAppearance();
   renderCharacterCreator();
 }
 
@@ -11341,11 +11668,18 @@ function renderCreatorBodyControls(){
     </div>`;
 }
 
+function renderCreatorIntegrityNote(){
+  const note = document.querySelector('.creator-auto-uniform-note');
+  if(!note) return;
+  const baseLabel = playerAppearance.base === 'female' ? 'Kadin taban' : 'Erkek taban';
+  const beardLabel = playerAppearance.base === 'female' ? 'sakal kilitli' : `sakal: ${playerAppearance.beard}`;
+  note.innerHTML = `Preset korumasi aktif: ${baseLabel} · model ${Number(playerAppearance.model)+1} · sac: ${phoneSafe(playerAppearance.hair)} · ${phoneSafe(beardLabel)}. Uniforma, apolet ve rozet rol/rutbeye gore otomatik atanir.`;
+}
+
 function renderCharacterCreator(){
+  normalizePlayerAppearance();
   const modelPool = getPlayerModelPool(playerAppearance.base, playerAppearance.age).map(String);
-  const hairPool = playerAppearance.base==='female'
-    ? ['bun','slick','waves','bob','crop','curly','long','ponytail','braid']
-    : ['quiff','slick','swept','curly','short','crop','parted','buzz','fade','undercut','long'];
+  const hairPool = getCreatorHairPool(playerAppearance.base);
   renderCreatorRow('creator-skin', PLAYER_LOOK.skin, playerAppearance.skin, 'swatch');
   renderCreatorRow('creator-base', PLAYER_LOOK.base, playerAppearance.base, 'text');
   renderCreatorRow('creator-age', PLAYER_LOOK.age, playerAppearance.age, 'text');
@@ -11363,6 +11697,8 @@ function renderCharacterCreator(){
     renderCreatorRow('creator-beard', PLAYER_LOOK.beard, playerAppearance.beard, 'text');
   }
   renderPortraitTargets();
+  renderCreatorIntegrityNote();
+  renderSetupOnboardingGuide();
 }
 
 function buildIntro(){
@@ -11466,6 +11802,34 @@ function getSetupOnboardingIndex(){
   return 4;
 }
 
+function getPremiumAccessSummary(){
+  const lockedShipCount = STYPES.filter(t=>t.premium).length;
+  const lockedRouteCount = TRADE_VOYAGE_ROUTES.filter(r=>r.premium).length;
+  const premiumLine = premiumUnlocked
+    ? 'Premium aktif: ozel gemi, rota ve ileri cihaz senaryolari acik.'
+    : `Premium kilitli: ${lockedShipCount} ozel gemi, ${lockedRouteCount} rota/operasyon paketi ${PREMIUM_PRICE_LABEL}.`;
+  const adsLine = adsRemoved
+    ? 'Reklam kaldirma aktif: reklam molalari kapali.'
+    : `Reklam kaldirma kilitli: ${ADS_REMOVAL_PRICE_LABEL}.`;
+  return {premiumUnlocked, adsRemoved, premiumLine, adsLine, lockedShipCount, lockedRouteCount};
+}
+
+function getSetupReadinessDetails(){
+  const nameReady = (document.getElementById('nameinp')?.value || '').trim().length >= 2;
+  const type = STYPES.find(t=>t.key===selType) || STYPES[0];
+  const route = getSelectedVoyageRoute ? getSelectedVoyageRoute() : null;
+  const kont = getSelectedContractDef();
+  const locked = type?.premium && !premiumUnlocked;
+  const warnings = [];
+  if(!nameReady) warnings.push('Stajyer adi eksik');
+  if(locked) warnings.push('Secilen gemi premium kilitli');
+  if(!route) warnings.push('Rota secilmedi');
+  if(!gameplayMode) warnings.push('Oynanis modu secilmedi');
+  const ready = !warnings.length;
+  const months = Number(kont?.ay || 0) + Number(kont?.izin || 0);
+  return {ready, warnings, nameReady, type, route, kont, months, locked};
+}
+
 function ensureSetupOnboardingGuide(){
   const shell = document.getElementById('intro-menu-shell');
   if(!shell || document.getElementById('setup-onboarding-guide')) return;
@@ -11486,11 +11850,23 @@ function renderSetupOnboardingGuide(){
   const guide = document.getElementById('setup-onboarding-guide');
   if(!guide) return;
   const activeIndex = getSetupOnboardingIndex();
+  const readiness = getSetupReadinessDetails();
+  const premium = getPremiumAccessSummary();
+  const routeLine = readiness.route
+    ? `${readiness.route.start} -> ${readiness.route.end} · ${readiness.route.distanceNm} NM`
+    : 'Rota bekleniyor';
+  const statusClass = readiness.ready ? 'ready' : readiness.locked ? 'locked' : 'warn';
+  const statusText = readiness.ready ? 'Kalkis icin hazir' : readiness.warnings.join(' · ');
   guide.innerHTML = `<div class="setup-onboarding-head"><b>Ilk acilis akisi</b><span>Ekrani bogmadan tek tek ilerle.</span></div>
     <div class="setup-onboarding-steps">${getSetupOnboardingSteps().map((s,i)=>`
       <button type="button" class="${i<activeIndex?'done':i===activeIndex?'active':''}" onclick="goSetupOnboardingStep(${i})">
         <b>${i+1}. ${phoneSafe(s.label)}</b><small>${phoneSafe(s.desc)}</small>
       </button>`).join('')}</div>`;
+  guide.innerHTML += `<div class="setup-readiness ${statusClass}">
+    <div><b>${phoneSafe(statusText)}</b><small>${phoneSafe(readiness.type?.nm || 'Gemi')} · ${readiness.months || '-'} ay · ${phoneSafe(getModeLabel(gameplayMode))}</small></div>
+    <div><b>${phoneSafe(readiness.route?.name || 'Sefer rotasi')}</b><small>${phoneSafe(routeLine)}</small></div>
+    <div><b>${premium.premiumUnlocked ? 'Premium acik' : 'Premium kilitli'}</b><small>${phoneSafe(premium.premiumLine)} ${phoneSafe(premium.adsLine)}</small></div>
+  </div>`;
 }
 
 function getSelectedContractDef(){
@@ -11505,6 +11881,7 @@ function renderShipChoiceSummary(){
   const route = getSelectedVoyageRoute ? getSelectedVoyageRoute() : null;
   const shipName = document.getElementById('shipnameinp')?.value || (SNAMES[selType] || ['M/V Ege Meltem'])[0];
   const locked = type?.premium && !premiumUnlocked;
+  const premium = getPremiumAccessSummary();
   const html = `
     <div class="ship-summary-top">
       <span class="ship-summary-ico">${locked ? '🔒' : (type?.ico || '⚓')}</span>
@@ -11516,8 +11893,10 @@ function renderShipChoiceSummary(){
       <span><b>Surat</b>${phoneSafe(spec?.speedLabel || type?.spd || '-')}</span>
       <span><b>Kontrat</b>${phoneSafe(kont?.ay || '-')}+${phoneSafe(kont?.izin || '-')} ay</span>
     </div>
-    <div class="ship-summary-route"><b>Rota</b><span>${phoneSafe(route?.name || 'Rota secilmedi')}</span><small>${phoneSafe(route ? `${route.start} → ${route.end}` : 'Haritalar rotaya gore acilir')}</small></div>`;
+    <div class="ship-summary-route"><b>Rota</b><span>${phoneSafe(route?.name || 'Rota secilmedi')}</span><small>${phoneSafe(route ? `${route.start} → ${route.end}` : 'Haritalar rotaya gore acilir')}</small></div>
+    <div class="ship-summary-route premium-state"><b>Magaza</b><span>${phoneSafe(premium.premiumUnlocked ? 'Premium aktif' : 'Premium kilitli')}</span><small>${phoneSafe(premium.adsRemoved ? 'Reklamsiz oynanis aktif.' : 'Reklam kaldirma ayri satin alma ile acilir.')}</small></div>`;
   document.querySelectorAll('#ship-choice-summary').forEach(el=>{ if(el) el.innerHTML = html; });
+  renderSetupOnboardingGuide();
 }
 
 function updateKontrat(){
@@ -12046,10 +12425,17 @@ function handleSceneChoice(sc, c2, ch){
     addLiveLogbook('CPA / RADAR',`Radar mode: ${RADAR_TRAINING_MODES[c2.radarMode].label}`,true);
   }
   choicesMade.push({tag:c2.tag,domain:getSceneDomain(sc),extraPressure:Object.keys(pressure.extra).length>0});
+  const sceneDomain = getSceneDomain(sc);
+  const goodRetentionChoice = ['kritik','akilli','cesur'].includes(c2.tag || '');
+  awardMetaXp(goodRetentionChoice ? 14 : 5, goodRetentionChoice ? 'Temiz sahne karari' : 'Sahne deneyimi', sceneDomain);
+  progressRetentionMission(goodRetentionChoice ? 'choice_good' : 'choice_any', {tag:c2.tag, domain:sceneDomain});
+  if(c2.tag === 'kritik') progressRetentionMission('critical_choice', {tag:c2.tag, domain:sceneDomain});
+  progressFirstFiveStep('firstChoice');
   completeMissionFromChoice(sc,c2);
   awardSpecialtyXpFromChoice(sc,c2);
   createTeacherFeedbackForChoice(sc,c2);
   maybeQueueDevicePracticeFromScene(sc,c2);
+  maybeQueueMapPracticeFromScene(sc,c2);
   scheduleAdvancedConsequences(sc,c2);
   applyCrewEffect(sc.who, c2.tag);
   updateCrewMemory(sc,c2);
@@ -13474,6 +13860,40 @@ Terminal geride kalırken sefer dosyası gerçekten açılıyor; bundan sonra ro
     choice:'Kalkış zincirini başlat',
     effect:{bilgi:2,sayginlik:1,dinclik:-1}
   },
+  suezConvoy:{
+    id:'cin_suez_convoy',
+    type:'suez',
+    day:'Konvoy Gunu',
+    time:'04:20',
+    loc:'Suez Canal · Northbound convoy',
+    sub:'Kanal gecisi / VTS ve konvoy disiplini',
+    who:'kaptan',
+    gfx:'harbor',
+    text:`Suez kanalinda ufuk daralir; deniz degil, iki kara arasinda ince bir rota okunur. Onde giden geminin izi, kendi hizini ve dumen disiplinini belirler.
+
+VTS kisa cagirir, kaptan haritayi isaret eder:
+"Konvoyda iyi denizcilik gosteris degil, sabirdir. Mesafeyi koru, hiz degistirme kararini tek basina verme, her sapmayi ECDIS ve VTS ile teyit et."`,
+    beats:['Kanal banklari yanlardan akar','Konvoy gemisi mesafeyi belirler','VTS kisa cagri verir','ECDIS route monitor alarmi izlenir'],
+    choice:'Konvoy mesafesini ve VTS raporunu takip et',
+    effect:{bilgi:2,sayginlik:1,dinclik:-1}
+  },
+  panamaLock:{
+    id:'cin_panama_lock',
+    type:'panama',
+    day:'Lock Gecisi',
+    time:'13:05',
+    loc:'Panama Canal · Lock chamber',
+    sub:'Lock / mule line / su seviyesi takibi',
+    who:'z1',
+    gfx:'harbor',
+    text:`Kilit kapaklari arkanizda kapanir. Gemi neredeyse durur ama operasyon durmaz: halatlar, mule line, su seviyesi ve kopruustu emirleri ayni anda akar.
+
+Nobetci zabit yavas konusur:
+"Burada acele etmek yok. Line tension, lock level ve pilot komutunu ayni tabloda okuyacaksin."`,
+    beats:['Lock gate kapanir','Su seviyesi yavas yukselir','Mule line gerilimi takip edilir','Pilot komutu tekrar edilir'],
+    choice:'Lock gecisi takip listesini uygula',
+    effect:{bilgi:2,cesaret:1,dinclik:-1}
+  },
   nightWatch:{
     id:'cin_night_watch',
     type:'nightwatch',
@@ -13509,6 +13929,59 @@ Geminin hareketi duruyor ama operasyon yeni başlıyor.`,
     beats:['Halatlar gerilir','Römorkör ayrılır','Terminal vinçleri yanar','All fast raporu tamamlanır'],
     choice:'All fast raporunu logbook için not et',
     effect:{sayginlik:2,bilgi:1}
+  },
+  mooringSnapback:{
+    id:'cin_mooring_snapback',
+    type:'mooring',
+    day:'Liman Operasyonu',
+    time:'07:45',
+    loc:'Bas istasyon · Mooring deck',
+    sub:'Snap-back alanindan guvenli stand-by',
+    who:'lostromo',
+    gfx:'harbor',
+    alert:true,
+    text:`Spring halati gerildikce ses incelir. Halat kopmamistir ama guverte bunu beklemeden davranir: herkes snap-back alaninin disina cikar, emirler kisa ve net kalir.
+
+Lostromo telsizi agir agir indirir:
+"Halata kahramanlik yapilmaz. Once emniyetli bolge, sonra rapor, sonra hareket."`,
+    beats:['Spring halati titrer','Snap-back bolgesi kirmizi taranir','Ekip guvenli stand-by alanina cekilir','All fast sirasi tekrar kurulur'],
+    choice:'Guvenli bolgeyi koru ve sirayi tekrar kur',
+    effect:{bilgi:2,cesaret:2,sayginlik:1,dinclik:-1}
+  },
+  tankerManifold:{
+    id:'cin_tanker_manifold',
+    type:'manifold',
+    day:'Tanker Operasyonu',
+    time:'10:30',
+    loc:'Manifold platformu · Cargo watch',
+    sub:'Line-up / ESD / sample / SOPEP zinciri',
+    who:'z1',
+    gfx:'cargo',
+    text:`Loading arm yavasca oturur. Pressure gauge kucuk dalgalanir, drip tray kontrol edilir, SOPEP sandigi gorunur yerde bekler.
+
+Guverte zabiti formu kapatmadan once sana bakar:
+"Line-up kagitta dogru diye sahada dogru sayilmaz. Valve, pressure, sample ve ESD ayni anda teyit edilir."`,
+    beats:['Loading arm manifolda oturur','Pressure gauge canli oynar','Sample bottle etiketlenir','ESD ve SOPEP hazirligi teyit edilir'],
+    choice:'Manifold readiness zincirini tamamla',
+    effect:{bilgi:3,sayginlik:1,dinclik:-1}
+  },
+  researchRov:{
+    id:'cin_research_rov',
+    type:'rov',
+    day:'Premium Arastirma',
+    time:'21:10',
+    loc:'Arastirma gemisi · ROV kontrol',
+    sub:'ROV kamera / DP / tether tension',
+    who:'z2',
+    gfx:'bridge',
+    premium:true,
+    text:`ROV ekraninda deniz tabani yavasca akar. DP ring hafif sapar, tether tension cizgisi her swell ile oynar.
+
+Arastirma sorumlusu kisa konusur:
+"Bu gemide rota kadar sabit kalmak da is. Tether gerilimini oku, DP offset'i izle, kamerayi acele ettirme."`,
+    beats:['ROV kamerasi deniz tabanini tarar','Tether tension bari dalgalanir','DP offset halkasi pulse verir','Numune noktasi isaretlenir'],
+    choice:'ROV / DP gozlemini sakin surdur',
+    effect:{bilgi:3,sayginlik:2,dinclik:-2}
   },
   emergency:{
     id:'cin_emergency_flash',
@@ -13621,12 +14094,13 @@ Süvari raporunu kapatmadan önce son kez bakıyor:
 function createCinematicScene(key){
   const def = CINEMATIC_SCENES[key];
   if(!def) return null;
+  const premiumKeys = new Set(['cruiseMedevac','researchRov']);
   return {
     ...def,
     cinematic:true,
     cinematicType:def.type || key,
     cinematicKey:key,
-    premium:key === 'cruiseMedevac',
+    premium:!!def.premium || premiumKeys.has(key),
     cinematicBeats:def.beats || [],
     cinematicDurationMs:def.durationMs || 10000,
     choices:[{
@@ -13657,11 +14131,16 @@ function injectCinematicScenes(queue, opts={}){
   insertCinematicScene(queue, 'portDeparture', 0.26, {afterStart:true});
   insertCinematicScene(queue, 'nightWatch', 0.30, {afterStart:true});
   insertCinematicScene(queue, 'pilotBoarding', 0.34, {afterStart:true});
+  insertCinematicScene(queue, 'suezConvoy', 0.40, {afterStart:true});
+  insertCinematicScene(queue, 'panamaLock', 0.46, {afterStart:true});
   insertCinematicScene(queue, 'allFast', 0.50, {afterStart:true});
+  insertCinematicScene(queue, 'mooringSnapback', 0.54, {afterStart:true});
+  if(/tanker|lng|shuttle/.test(selType || '')) insertCinematicScene(queue, 'tankerManifold', 0.58, {afterStart:true});
   insertCinematicScene(queue, 'engineBlackout', 0.60, {afterStart:true});
   insertCinematicScene(queue, 'piracyZone', 0.72, {afterStart:true});
   insertCinematicScene(queue, 'pscInspection', 0.80, {afterStart:true});
   if(premiumUnlocked && selType === 'kruvaziyer') insertCinematicScene(queue, 'cruiseMedevac', 0.86, {afterStart:true});
+  if(premiumUnlocked && /research|arastirma|araştırma/.test(selType || '')) insertCinematicScene(queue, 'researchRov', 0.88, {afterStart:true});
   insertCinematicScene(queue, 'emergency', 0.68, {afterStart:true});
   insertCinematicScene(queue, 'contractEnd', 0.92, {beforeFinal:true});
   return queue;
@@ -14346,6 +14825,9 @@ function closeContractCareerBooks(){
   tryAddMomentPhoto(`contract-${careerState.contracts+1}-memory`,'Kontrat Hatirasi',`${sn} uzerinde ${getContractTotalMonths()} ayin ozeti: ${getTopSpecialtyLabel()}, ${choicesMade.length} karar, ${photos.length} hatira.`, 'bridge');
   phonePhotoShares.unshift({title:'Kontrat Sonu Albumu', caption:`${getContractTotalMonths()} ay · ${photos.length} fotograf · ${getTopSpecialtyLabel()} · aile/crew mesajlari kaydedildi.`, gfx:'bridge', scene:currentIdx+1, sent:false});
   addCompanyMailThread('Kontrat kapanis raporu', `Guclu alan: ${getTopSpecialtyLabel()}. Zayif alanlar, cihaz tekrar gorevleri ve aile/crew moral etkisi kontrat dosyasina eklendi.`, 'info');
+  const boardScore = recordLeaderboardScore('contract');
+  awardMetaXp(260, `Kontrat kapandi · skor ${boardScore}`, 'contract');
+  progressRetentionMission('contract', {shipType:selType, score:boardScore});
   careerState.lastContractClosed = true;
   shipOffers = buildShipOffers();
 }
@@ -14409,6 +14891,8 @@ function doFreeTimeAction(key){
     pushPhoneMessage('Kaptan','Rutin gorevi kayda aldım. Boyle devam edersen vardiya devri temiz kalir.', {open:false});
   }
   addJournalEntry('[SERBEST ZAMAN] '+a.msg);
+  awardMetaXp(key === 'family' ? 16 : 10, `Serbest zaman: ${key}`, 'routine');
+  progressRetentionMission('free_time', {action:key});
   renderCareerPanel();
 }
 
@@ -14719,6 +15203,7 @@ function beginGame(){
     requirePremiumAccess('Ozel gemiler ve pro operasyon paketleri ile baslamak icin premium paket gerekli.');
     return;
   }
+  normalizePlayerAppearance();
   pn=ni||'Stajyer';
   sn=si||(SNAMES[selType]||['M/V Ege Meltem'])[0];
 
@@ -14831,6 +15316,10 @@ function beginGame(){
     phoneMessages.push({from:'Şirket', text:`Sefer emri: ${routeInfo.name}. ${routeInfo.start} -> ${routeInfo.end}, yaklasik ${routeInfo.distanceNm} NM / ${routeInfo.etaDays} gun. Haritalarim sekmesindeki sefer chartlarini kullan.`, me:false});
     addLiveLogbook('SEFER EMRI', `${routeInfo.name}: ${routeInfo.start} -> ${routeInfo.end} · ${routeInfo.distanceNm} NM`, true);
   }
+  ensureRetentionMissions();
+  progressFirstFiveStep('character');
+  progressFirstFiveStep('route');
+  awardMetaXp(24, 'Yeni kontrat hazirligi', 'start');
 
   openGameScreen();
   setTimeout(()=>{if(window._drawClock)window._drawClock();},50);
@@ -17030,6 +17519,7 @@ function openHomeScreen(){
   setAppScreen('home');
   setHomeMenuPage(homeMenuPage || 'play');
   refreshSaveEntryActions();
+  renderHomeRetentionPanel();
   setTimeout(maybeStartIntroMaritimeTheme, 80);
   window.scrollTo?.(0,0);
 }
@@ -17038,6 +17528,7 @@ function openSetupScreen(){
   stopIntroMaritimeTheme();
   setIntroMenuPage('play');
   setAppScreen('setup');
+  renderCharacterCreator();
   renderShipChoiceSummary();
   refreshSaveEntryActions();
   window.scrollTo?.(0,0);
@@ -17108,6 +17599,7 @@ function setHomeMenuPage(page='play'){
   });
   renderAudioMixer();
   syncCleanHudControls();
+  renderHomeRetentionPanel();
 }
 
 function setIntroMenuPage(page='play'){
@@ -17246,6 +17738,29 @@ function updateFeatureVisibility(sc){
   });
 }
 
+function getGamePolishStatus(sc){
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const voyage = liveVoyageState || computeLiveVoyageState(sc || {});
+  const openDevices = Object.entries(devicePracticeProgress || {})
+    .filter(([,progress])=>progress===0)
+    .map(([key])=>getDeviceDef(key)?.name || key.toUpperCase());
+  const mapTask = typeof getCurrentMapTask === 'function' ? getCurrentMapTask() : null;
+  const month = Math.max(1, Math.floor((contractDays || currentIdx || 0) / CONTRACT_SCENES_PER_MONTH) + 1);
+  const totalMonths = Math.max(1, getContractTotalMonths());
+  const routeLine = route ? `${route.name} ${voyage.progress || 0}%` : 'Sefer secili degil';
+  const deviceLine = openDevices.length ? `${openDevices.slice(0,2).join(', ')} tekrari` : 'Cihaz tekrari yok';
+  const mapLine = mapTask ? `${mapTask.title}` : 'Harita gorevi hazir';
+  const premiumLine = premiumUnlocked ? 'Premium acik' : 'Premium kilitli';
+  return {
+    routeLine,
+    deviceLine,
+    mapLine,
+    premiumLine,
+    short:`${routeLine} · ${deviceLine} · Ay ${month}/${totalMonths}`,
+    detailed:`${routeLine} · ${mapLine} · ${deviceLine} · ${premiumLine}`
+  };
+}
+
 function updateGuidanceStrip(sc){
   const modeEl = document.getElementById('guidance-mode');
   const textEl = document.getElementById('guidance-text');
@@ -17261,7 +17776,12 @@ function updateGuidanceStrip(sc){
       u.logbook?'Defter':'',
       u.sim?'Sim':''
     ].filter(Boolean).join(' · ');
-    unlockEl.textContent = u.assist ? t('ui.assist','Destek modu acik: rehber daha ogretici.') : open ? `${t('ui.unlocked','Acik')}: ${translateGameText(open)}` : t('ui.basicStory','Sadece hikaye ve temel secimler.');
+    const polish = getGamePolishStatus(sc);
+    unlockEl.textContent = u.assist
+      ? t('ui.assist','Destek modu acik: rehber daha ogretici.')
+      : open ? `${t('ui.unlocked','Acik')}: ${translateGameText(open)} · ${phoneSafe(polish.short)}`
+      : `${t('ui.basicStory','Sadece hikaye ve temel secimler.')} · ${phoneSafe(polish.short)}`;
+    unlockEl.title = polish.detailed;
   }
 }
 
@@ -17636,6 +18156,7 @@ function buildSavePayload(){
     scenarioEditorState,
     devicePracticeProgress,
     devicePracticeScore,
+    retentionState,
     starlinkStatus,
     watchCycleLog,
     scenesSinceEvent,
@@ -17736,10 +18257,21 @@ function applyLoadedGameState(data){
   careerMemory = data.careerMemory || {firstPilot:false,firstStorm:false,firstAllFast:false,firstNearMiss:false,firstPraise:false,investigations:0};
   careerState = {...careerState, ...(data.careerState || {})};
   specialtyXP = {...specialtyXP, ...(data.specialtyXP || {})};
+  if(data.retentionState && typeof data.retentionState === 'object'){
+    const loadedRetention = normalizeRetentionState(data.retentionState);
+    retentionState = normalizeRetentionState({
+      ...retentionState,
+      ...loadedRetention,
+      xp:Math.max(retentionState.xp || 0, loadedRetention.xp || 0),
+      leaderboard:[...(loadedRetention.leaderboard || []), ...(retentionState.leaderboard || [])].sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,12)
+    });
+    persistRetentionState();
+  }
   shipOffers = Array.isArray(data.shipOffers) ? data.shipOffers.filter(o=>!isPremiumShipType(o.type) || premiumUnlocked) : [];
   familyUnread = data.familyUnread || 0;
   choicesMade = Array.isArray(data.choicesMade) ? data.choicesMade : [];
   playerAppearance = {...playerAppearance, ...(data.playerAppearance || {})};
+  normalizePlayerAppearance();
   playerReferencePhoto = data.playerReferencePhoto || '';
   playerStyledFacePhoto = data.playerStyledFacePhoto || '';
   selectedStartPort = data.selectedStartPort || START_PORTS[0];
@@ -18677,8 +19209,14 @@ function handlePortChartTaskClick(svg, ev, port){
     showMapTapFeedback(svg, x, y, 'near', `ROTA NOKTASI ${mapRouteDraftPoints.length}`);
     renderMapRouteDraftOverlay(svg);
     if(mapRouteDraftPoints.length >= 3 || Math.hypot(x-target.x, y-target.y) <= getMapTaskEffectiveTolerance(task, target)){
+      const alreadyDone = completedMapTasks.has(task.id);
       completedMapTasks.add(task.id);
       progressMapMissionChain(task, true);
+      if(!alreadyDone){
+        awardMetaXp(14, `Harita gorevi: ${task.title}`, 'map');
+        progressRetentionMission('map', {taskId:task.id});
+        progressFirstFiveStep('map');
+      }
       if(status){
         status.className = '';
         status.textContent = 'Alternatif rota cizildi. Hava routing / ECA / risk alanini dikkate alan hat kabul edildi.';
@@ -18700,6 +19238,7 @@ function handlePortChartTaskClick(svg, ev, port){
   const touchTol = getMapTaskEffectiveTolerance(task, target);
   if(dist <= touchTol || labelHit || visibleHit){
     showMapTapFeedback(svg, x, y, 'good', 'SECIM OK');
+    const alreadyDone = completedMapTasks.has(task.id);
     completedMapTasks.add(task.id);
     mapTaskWrongAttempts[getMapTaskAttemptKey(task, port)] = 0;
     progressMapMissionChain(task, true);
@@ -18710,6 +19249,11 @@ function handlePortChartTaskClick(svg, ev, port){
     }
     completeMissionStep('map', 'Harita gorevi tamamlandi');
     applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
+    if(!alreadyDone){
+      awardMetaXp(14, `Harita gorevi: ${task.title}`, 'map');
+      progressRetentionMission('map', {taskId:task.id});
+      progressFirstFiveStep('map');
+    }
     addJournalEntry(`[HARITA GOREVI] ${task.title} basariyla tamamlandi (${port.name}).`, 'Harita', '--:--');
     addLiveLogbook('HARITA EGITIMI', `${task.title}: ${training.correct}`, true);
   }else if(status){
@@ -23427,6 +23971,9 @@ function useDeviceKey(label, type='action', target=''){
   devicePracticeScore.total++;
   if(label === expected){
     devicePracticeScore.ok++;
+    awardMetaXp(8, `${def.name} dogru cihaz adimi`, 'device');
+    progressRetentionMission('device', {deviceKey:def.key, label});
+    progressFirstFiveStep('device');
     addWatchFeed(`${def.name}: ${label} dogru uygulandi`, def.key==='vhf' ? 'warn' : 'good');
     if(def.key === 'vhf') playVhfPracticeBurst();
     if(def.key === 'starlink') updateStarlinkFromDeviceStep(label, true);
@@ -26319,10 +26866,15 @@ function triggerRealEventChain(kind='vhf'){
 function getThreeAreaLauncherPanel(){
   const areas = [
     ['bridge','3D kopruustu cihaz masasi','radar, ECDIS, VHF, telegraph'],
+    ['route3d','3D ECDIS rota masasi','waypoint, CPA, UKC, route monitor'],
     ['deck','3D guverte / halat','head, stern, spring, snap-back'],
     ['engine','3D makine kontrol odasi','alarm, generator, pump, tank'],
+    ['fire','3D yangin zone egitimi','zone, alarm, dogru sondurucu'],
     ['lifeboat','3D filika / davit egitimi','lifeboat, rescue boat, liferaft'],
-    ['manifold','3D tanker manifold','valve, ESD, pressure, drip tray']
+    ['manifold','3D tanker manifold','valve, ESD, pressure, drip tray'],
+    ['rov','3D ROV / DP arastirma','kamera, tether, DP offset'],
+    ['helideck','3D helideck medevac','clear deck, MRCC, stretcher'],
+    ['lifting','3D proje yuk lift','COG, sling angle, sea fastening']
   ];
   return `<div class="three-area-launcher">
     <div class="sim-mini-title">3D EGITIM ALANLARI</div>
@@ -26335,17 +26887,33 @@ function getThreeAreaLauncherPanel(){
 function openThreeTrainingArea(area){
   const labels = {
     bridge:'3D kopruustu: cihaz masasinda radar/ECDIS/VHF yaklastirma',
+    route3d:'3D ECDIS rota masasi: waypoint, CPA/TCPA ve UKC canli takip',
     deck:'3D guverte: halat sirasi ve snap-back alanlari',
     engine:'3D makine: alarm paneli, generator ve pompa kontrolu',
+    fire:'3D yangin: alarm zone, duman ve dogru sondurucu sirasi',
     lifeboat:'3D filika: davit, can sali ve kurtarma ekipmani',
-    manifold:'3D manifold: ESD, pressure gauge, valve line-up'
+    manifold:'3D manifold: ESD, pressure gauge, valve line-up',
+    rov:'3D arastirma: ROV kamera, tether tension ve DP offset',
+    helideck:'3D kruvaziyer: helideck medevac ve MRCC koordinasyonu',
+    lifting:'3D proje yuk: COG, sling angle ve sea fastening'
   };
+  if(['rov','helideck','lifting'].includes(area) && !premiumUnlocked){
+    addWatchFeed('Premium 3D operasyon kilitli: once premium paketi ac.', 'warn');
+    showNotif('PREMIUM','3D Operasyon Kilitli', 'ROV, medevac ve proje yuk 3D egitimleri premium paketle acilir.');
+    openPremiumPurchase?.();
+    return;
+  }
   addWatchFeed(labels[area] || '3D egitim alani acildi', area==='engine'?'warn':'good');
   addLiveLogbook('3D EGITIM', labels[area] || '3D egitim alani acildi', true);
   if(area === 'bridge') openRealBridgeConsole('radar');
+  else if(area === 'route3d') { openMap?.(); completeMissionStep('route','3D ECDIS rota masasi'); }
   else if(area === 'deck') { markMooringLine('3D deck line handling'); openShipWalk?.(); }
   else if(area === 'engine') markEngineCheck('3D engine control room');
+  else if(area === 'fire') { triggerRealEventChain('incident'); pushPhoneMessage('Egitim', labels[area], {open:false}); }
   else if(area === 'manifold') markCargoCheck('3D tanker manifold line-up');
+  else if(area === 'rov') { triggerRealEventChain('vhf'); progressRetentionMission?.('device'); }
+  else if(area === 'helideck') { triggerRealEventChain('vhf'); applyEffect({sayginlik:1,bilgi:1},{skipContractTick:true}); }
+  else if(area === 'lifting') { markCargoCheck('3D project cargo lifting'); applyEffect({bilgi:2},{skipContractTick:true}); }
   else pushPhoneMessage('Egitim', labels[area] || '3D egitim alani acildi', {open:false});
   showNotif('3D','Egitim Alani', labels[area] || '3D egitim alani hazir.');
 }
@@ -26359,6 +26927,10 @@ function renderSimCenter(){
   const office = getOfficeBand();
   const tasks = getSimOpenTasks();
   body.innerHTML = `<div class="sim-dashboard">
+    <div class="sim-section wide">
+      <div class="sim-head"><span>SEZON / GUNLUK HEDEF</span><span>oyuna geri donme sebebi</span></div>
+      ${renderRetentionCommandPanel()}
+    </div>
     <div class="sim-section wide">
       ${buildMissionDirector2Panel()}
     </div>
@@ -26627,6 +27199,25 @@ function getRemedialDeviceForScene(sc){
   if(/speed log|stw|sog|akinti|akıntı/.test(blob)) return 'speedlog';
   return '';
 }
+
+function getRemedialMapTaskForScene(sc){
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  if(/pilot station|pilot boarding|pilot/.test(blob)) return 'pilot';
+  if(/anchorage|demir|anchor/.test(blob)) return 'anchorage';
+  if(/tss|traffic separation|lane/.test(blob)) return 'tss';
+  if(/berth|rihtim|rıhtım|all fast/.test(blob)) return 'berth';
+  if(/reporting|vts|report point/.test(blob)) return 'reporting';
+  if(/no anchoring|no-go|demirleme yasak/.test(blob)) return 'noanchoring';
+  if(/alternate|contingency|sapma|weather avoid|firtina|storm/.test(blob)) return 'alternateroute';
+  if(/waypoint|next wp|wp/.test(blob)) return 'waypoint';
+  if(/cpa|tcpa|radar|arpa/.test(blob)) return 'cpa';
+  if(/ukc|squat|shallow|echo/.test(blob)) return 'ukc';
+  if(/eca|emission|marmara|baltic/.test(blob)) return 'eca';
+  if(/cable|pipeline|boru|kablo/.test(blob)) return 'cablecrossing';
+  if(/offshore|platform|fpso|500 m/.test(blob)) return 'offshorezone';
+  return '';
+}
+
 function maybeQueueDevicePracticeFromScene(sc,c2){
   const key = getRemedialDeviceForScene(sc);
   if(!key) return;
@@ -26647,6 +27238,31 @@ function maybeQueueDevicePracticeFromScene(sc,c2){
       if(!document.getElementById('devices-panel')?.classList.contains('show')) openDevices();
       else renderDevices();
     }, 900));
+  }
+}
+
+function maybeQueueMapPracticeFromScene(sc,c2){
+  const taskId = getRemedialMapTaskForScene(sc);
+  if(!taskId || !Array.isArray(MAP_TASKS)) return;
+  const weakChoice = c2?.tag === 'korkak' || c2?.tag === 'itaatkar' || c2?.tag === 'hileli';
+  const hardScene = !!sc?.alert || /pilot|liman|berth|tss|cpa|ukc|squat|fog|sis|storm|firtina|route|ecdis/i.test(`${sc?.sub||''} ${sc?.text||''}`);
+  if(!weakChoice && !hardScene) return;
+  const idx = MAP_TASKS.findIndex(task=>task.id === taskId);
+  if(idx < 0) return;
+  activeMapTaskIndex = idx;
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = route?.waypoints?.find(point=>point?.chart) || route?.waypoints?.[0];
+  if(wp?.chart) selectedPortChart = wp.chart;
+  const task = MAP_TASKS[idx];
+  const training = getMapTaskTraining(taskId);
+  pushPhoneMessage('Egitim', `Harita/ECDIS tekrari acildi: ${task.title}. ${training.focus}`, {open:false});
+  addWatchFeed(`Harita gorevi: ${task.title} · ${weakChoice ? 'yanlis karardan sonra tekrar' : 'sahne riski nedeniyle onleyici tekrar'}`, weakChoice ? 'warn' : '');
+  addLiveLogbook('HARITA PRAKTIGI', `${task.title}: ${training.focus}`, true);
+  if(weakChoice && canUseFeature('map', sc, false)){
+    sceneLiveSequenceTimers.push(setTimeout(()=>{
+      if(!document.getElementById('map-panel')?.classList.contains('show')) openMap();
+      else renderMap();
+    }, 1050));
   }
 }
 function renderPhone(){

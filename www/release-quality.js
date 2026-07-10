@@ -177,7 +177,7 @@
     return {
       generatedAt:new Date().toISOString(),
       app:'Guverte',
-      webBuild:'index-157/release-quality-2',
+      webBuild:'index-160/release-quality-5',
       device:getDeviceSummary(),
       scene:getSceneDiagnostic(),
       save:getSaveHealth(),
@@ -260,6 +260,66 @@
       push(deviceCount >= 8 && menuCount >= 8 && practiceCount >= 6 ? 'pass' : 'warn', 'Device simulator', `${deviceCount} cihaz · ${menuCount} menu agaci · ${practiceCount} pratik zinciri`);
     }catch(error){
       push('fail', 'Device simulator', compactError(error).message);
+    }
+
+    try{
+      const normalized = typeof normalizePlayerAppearance === 'function';
+      const noteReady = !!document.querySelector?.('.creator-auto-uniform-note');
+      push(normalized && noteReady ? 'pass' : 'warn', 'Creator preset guard', normalized
+        ? 'Karakter preset normalizasyonu ve rol bazli uniforma notu aktif.'
+        : 'Karakter preset normalizasyonu bulunamadi.');
+    }catch(error){
+      push('warn', 'Creator preset guard', compactError(error).message);
+    }
+
+    try{
+      const setupReady = typeof getSetupReadinessDetails === 'function' && typeof renderSetupOnboardingGuide === 'function';
+      const premiumReady = typeof getPremiumAccessSummary === 'function';
+      push(setupReady && premiumReady ? 'pass' : 'warn', 'Launch readiness', setupReady && premiumReady
+        ? 'Ilk akista karakter, gemi, rota, mod ve premium durumu tek panelde kontrol ediliyor.'
+        : 'Ilk akis / premium ozet baglantisi eksik.');
+    }catch(error){
+      push('warn', 'Launch readiness', compactError(error).message);
+    }
+
+    try{
+      const mapPractice = typeof maybeQueueMapPracticeFromScene === 'function' && typeof getRemedialMapTaskForScene === 'function';
+      const polish = typeof getGamePolishStatus === 'function';
+      push(mapPractice && polish ? 'pass' : 'warn', 'Mission polish spine', mapPractice && polish
+        ? 'Harita tekrari ve oyun ici durum kocu sahne kararlarina bagli.'
+        : 'Harita tekrari veya oyun ici durum kocu eksik.');
+    }catch(error){
+      push('warn', 'Mission polish spine', compactError(error).message);
+    }
+
+    try{
+      const retentionReady = typeof progressRetentionMission === 'function'
+        && typeof renderRetentionPanel === 'function'
+        && typeof recordLeaderboardScore === 'function';
+      const missionReady = typeof DAILY_MISSION_POOL !== 'undefined' && typeof WEEKLY_MISSION_POOL !== 'undefined';
+      push(retentionReady && missionReady ? 'pass' : 'warn', 'Retention loop', retentionReady && missionReady
+        ? 'Sezon, gunluk/haftalik gorev, XP ve leaderboard dongusu aktif.'
+        : 'Retention dongusu eksik.');
+    }catch(error){
+      push('warn', 'Retention loop', compactError(error).message);
+    }
+
+    try{
+      const graphicsReady = typeof getProfessionalGraphicsOverlay === 'function'
+        && typeof getModernBridgeOverlay === 'function'
+        && typeof getScene4KOverlay === 'function';
+      const cinemaReady = typeof CINEMATIC_SCENES !== 'undefined'
+        && !!CINEMATIC_SCENES.suezConvoy
+        && !!CINEMATIC_SCENES.panamaLock
+        && !!CINEMATIC_SCENES.tankerManifold
+        && !!CINEMATIC_SCENES.researchRov;
+      const threeReady = typeof getThreeAreaLauncherPanel === 'function'
+        && typeof openThreeTrainingArea === 'function';
+      push(graphicsReady && cinemaReady && threeReady ? 'pass' : 'warn', 'Professional graphics package', graphicsReady && cinemaReady && threeReady
+        ? 'Modern bridge, atlas/ECDIS overlay, cinematic pack and 3D training launchers are wired.'
+        : 'Professional graphics package needs review.');
+    }catch(error){
+      push('warn', 'Professional graphics package', compactError(error).message);
     }
 
     try{

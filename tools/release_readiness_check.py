@@ -34,13 +34,22 @@ def main() -> int:
         "SAVE_BACKUP_KEY", "SAVE_RECOVERY_KEY", "recoverSavedGame",
         "isValidSavedGamePayload", "guverte-visual-quality-change",
         "CLEAN_HUD_KEY", "setCleanHudMode", "enforcePremiumAccessGuards",
-        "sanitizeCrewPortraitRoster",
+        "sanitizeCrewPortraitRoster", "normalizePlayerAppearance",
+        "getSetupReadinessDetails", "getPremiumAccessSummary",
+        "maybeQueueMapPracticeFromScene", "getGamePolishStatus",
+        "RETENTION_KEY", "SEASON_CATALOG", "progressRetentionMission",
+        "recordLeaderboardScore", "renderRetentionCommandPanel",
+        "getProfessionalGraphicsOverlay", "suezConvoy", "panamaLock",
+        "tankerManifold", "researchRov", "getThreeAreaLauncherPanel",
     ], "save-quality")
     errors += require(html + css + quality, [
         "tester-feedback-panel", "release-health-summary", "data-quality-controls",
         "runReleaseSelfTest", "exportSaveBackup", "handleSaveImport",
         "release-hardening-summary", "getReleaseHardeningChecks",
-        "data-clean-hud-toggle", "clean-hud",
+        "data-clean-hud-toggle", "clean-hud", "setup-readiness",
+        "Creator preset guard", "Launch readiness", "Mission polish spine",
+        "Retention loop", "home-retention-panel", "retention-panel",
+        "Professional graphics package", "pro-graphics-overlay",
     ], "tester-ui")
     errors += require(activity + diagnostics, [
         "GuverteDiagnosticsNative", "installCrashHandler", "recordWebDiagnostic",
