@@ -24091,6 +24091,48 @@ function renderDevices(){
   normalizeClickableSurface('#devices-panel button,#device-screen');
 }
 
+function getDeviceLiveStrip(def){
+  const st = computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const expected = getDeviceExpectedAction(def);
+  const route = st.route || getActiveVoyageRoute()?.name || 'Rota yok';
+  const mode = {
+    radar:'ARPA / CPA',
+    ecdis:'ROUTE CHECK',
+    vhf:'DSC WATCH',
+    ais:'TARGET COMPARE',
+    gmdss:'DISTRESS',
+    navtex:'MSI',
+    starlink:'SATCOM',
+    ecr:'ECR WATCH'
+  }[def.key] || def.name;
+  return `<div class="device-live-strip">
+    <span><b>MODE</b>${phoneSafe(mode)}</span>
+    <span><b>ROUTE</b>${phoneSafe(route)}</span>
+    <span><b>CPA/TCPA</b>${phoneSafe(st.cpa)} NM / ${phoneSafe(st.tcpa)}m</span>
+    <span><b>SOG/COG</b>${phoneSafe(st.sog)} kt / ${phoneSafe(st.cog)}</span>
+    <span class="${st.alert?'warn':'ok'}"><b>NEXT</b>${phoneSafe(expected)}</span>
+  </div>`;
+}
+
+function getDeviceSimOverlay(def){
+  const st = liveVoyageState || computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const rows = {
+    radar:['RADAR / ARPA SIM', `Acquire target, read CPA/TCPA, set guard zone. UKC ${st.ukc} m.`],
+    ecdis:['ECDIS ROUTE CHECK', `Safety contour, no-go area and next waypoint: ${st.nextWp}.`],
+    vhf:['VHF / DSC CONSOLE', `Use channel, PTT, DSC and radio log in the correct order.`],
+    ais:['AIS COMPARE', `Compare AIS identity, COG/SOG and radar echo before reporting.`],
+    gmdss:['GMDSS DISTRESS', 'Open DSC menu, choose distress type, then follow voice procedure.'],
+    navtex:['NAVTEX MSI', 'Read warning, match area, and add the route risk note.'],
+    starlink:['STARLINK OPS', `Latency ${starlinkStatus.latency} ms, obstruction ${starlinkStatus.obstruction}%.`],
+    ecr:['ECR LINK', 'Bridge report must match generator, bilge, purifier and cooling alarms.']
+  };
+  const data = rows[def.key] || ['DEVICE SIM', def.task || 'Menu adimini dogru sec.'];
+  return `<div class="device-sim-overlay ${st.alert?'warn':''}">
+    <b>${phoneSafe(data[0])}</b>
+    <span>${phoneSafe(data[1])}</span>
+  </div>`;
+}
+
 function buildDeviceScreen(def){
   const panel = {
     radar:GFX.radar,
@@ -24103,8 +24145,16 @@ function buildDeviceScreen(def){
     bnwas:GFX.bnwas_panel
   }[def.key];
   const hint = `<button class="device-zoom-toggle" onclick="event.stopPropagation(); toggleDeviceScreenZoom()">${deviceScreenZoomed?'Kucult':'Buyut'}</button>`;
-  if(panel) return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${panel}</svg>${buildDeviceMenuOverlay(def)}${hint}`;
-  return `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${buildGmdssDeviceSvg(def)}</svg>${buildDeviceMenuOverlay(def)}${hint}`;
+  const svg = panel
+    ? `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${panel}</svg>`
+    : `<svg viewBox="0 0 480 145" xmlns="http://www.w3.org/2000/svg">${buildGmdssDeviceSvg(def)}</svg>`;
+  return `<div class="device-console-shell device-console-${phoneSafe(def.key)}">
+    ${svg}
+    ${getDeviceLiveStrip(def)}
+    ${buildDeviceMenuOverlay(def)}
+    ${getDeviceSimOverlay(def)}
+    ${hint}
+  </div>`;
 }
 
 function buildDeviceMenuOverlay(def){
@@ -26140,6 +26190,24 @@ function renderTrainingRoadmapPanel(){
     <div class="${open?'open':'locked'}"><b>${phoneSafe(label)}</b><span>${phoneSafe(desc)}</span><em>${open?'acik':'sirayla acilir'}</em></div>`).join('')}</div>`;
 }
 
+function previewPremiumDemo(kind='dp'){
+  const demos = {
+    lift:{title:'Proje yuk lift demo', line:'Crane hook, COG, sling angle ve sea fastening onizlemesi oynatildi.', chain:'COG kontrol -> sling angle -> stop lift karari'},
+    medevac:{title:'Kruvaziyer medevac demo', line:'Helideck clear, passenger announcement, MRCC ve medical handover zinciri goruldu.', chain:'Deck clear -> MRCC -> stretcher route'},
+    rov:{title:'Arastirma ROV demo', line:'ROV camera, tether tension, seabed scan ve DP watch ekranlari onizlendi.', chain:'DP hold -> ROV launch -> tether warning'},
+    dp:{title:'Offshore DP demo', line:'500 m safety zone, thruster load, DP offset ve platform approach onizlendi.', chain:'Approach zone -> DP offset -> abort point'},
+    ice:{title:'Buz seyri demo', line:'Ice chart, convoy lead, icing warning ve reduced visibility zinciri goruldu.', chain:'Ice edge -> convoy -> icing alarm'}
+  };
+  const demo = demos[kind] || demos.dp;
+  addWatchFeed(`Premium demo: ${demo.line}`, 'warn');
+  addLiveLogbook('PREMIUM DEMO', `${demo.title}: ${demo.chain}`, true);
+  pushPhoneMessage('Sirket Mail', `${demo.title} kilitli onizleme: ${demo.line} Tam gorev premium paketle acilir.`, {open:false});
+  showNotif('PREMIUM','Kilitli Onizleme', demo.line);
+  if(!premiumUnlocked){
+    setTimeout(()=>openPremiumPurchase(), 950);
+  }
+}
+
 function renderPremiumPackagePanel(){
   const packs = [
     ['Proje gemisi','Heavy-lift, COG, sling angle, sea fastening ve hareketli crane/lift sahneleri'],
@@ -26191,7 +26259,7 @@ function renderPremiumPackagePanel(){
       </div>`).join('')}</div>
     ${renderBillingDebugPanel()}
     <div class="premium-preview-strip">${previews.map(([cls,title,sub])=>`
-      <button class="premium-preview-card ${cls} ${premiumUnlocked?'':'locked'}" onclick="${premiumUnlocked?'openCareer()':'openPremiumPurchase()'}">
+      <button class="premium-preview-card ${cls} ${premiumUnlocked?'':'locked'}" onclick="${premiumUnlocked?'openCareer()':`previewPremiumDemo('${cls}')`}">
         <i></i><b>${title}</b><small>${sub}</small><em>${premiumUnlocked?'acik':'kilitli demo'}</em>
       </button>`).join('')}</div>
     <div class="premium-sim-grid">${packs.map(([a,b])=>`<div class="${premiumUnlocked?'':'locked'}"><b>${a}</b><small>${b}</small></div>`).join('')}</div>
@@ -26852,6 +26920,34 @@ function getCleanModeSystemPanel(){
   </div>`;
 }
 
+function getSimulationUpgradeHubPanel(){
+  const st = computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const actions = [
+    ['Tam ekran cihaz','Radar/ECDIS/VHF gercek konsol gibi acilir; hedef, alarm ve menu uzerinden pratik yaparsin.', "openRealBridgeConsole('radar')", 'device'],
+    ['Vardiya direktoru','Teslim -> hava -> rota/CPA -> VHF -> logbook -> teslim verme akisini tek ekranda takip et.', "completeWatchDirector3Step('handoverIn'); renderSimCenter()", 'watch'],
+    ['Canli sefer modu',`ETA ${st.eta}, SOG ${st.sog}, CPA ${st.cpa}, UKC ${st.ukc}; harita ve cihazlar ayni rotaya bagli.`, "openMap()", 'voyage'],
+    ['Kaza replay','Yanlis karar sonrasi hedef, CPA, rapor ve sonuc timeline olarak tekrar oynar.', "runAccidentReplay(); renderSimCenter()", 'replay'],
+    ['ECR / makine','Main engine mimic, generator, bilge, purifier, cooling ve quick closing mantigini calistir.', "markEngineCheck('ECR full mimic drill'); renderSimCenter()", 'engine'],
+    ['Cargo control','Tanker manifold, bulk loading, reefer/lashing ve ballast operasyonlarini panelden yonet.', "markCargoCheck('Cargo control room drill'); renderSimCenter()", 'cargo'],
+    ['BRM ekip yonetimi','Kaptan, pilot, OOW, lookout ve helmsman rolleriyle kime ne soyleyecegini sec.', "assignBrmTask('Gozcu','isik, sis, hedef acisi, guverte emniyeti')", 'brm'],
+    ['Belge formu','NOR, SOF, Pilot Card, Permit ve Near Miss formlarini gercek belge ekraninda doldur.', "documentTrainingState.active='nor'; autofillDocumentPracticeForm('nor')", 'document'],
+    ['Premium demo','Offshore DP, ROV, medevac, proje lift ve buz seyri kilitli onizlemelerini izle.', "previewPremiumDemo('dp')", 'premium']
+  ];
+  return `<div class="sim-upgrade-hub">
+    <div class="sim-upgrade-telemetry">
+      <span><b>ROTA</b>${phoneSafe(st.route)}</span>
+      <span><b>WAYPOINT</b>${phoneSafe(st.nextWp)}</span>
+      <span class="${st.alert?'warn':'ok'}"><b>RISK</b>${st.alert?'ALARM':'NORMAL'}</span>
+      <span><b>CIHAZ SKORU</b>${devicePracticeScore.ok}/${devicePracticeScore.total}</span>
+    </div>
+    <div class="sim-upgrade-grid">
+      ${actions.map(([title,desc,action,cls])=>`<button class="sim-upgrade-card ${cls}" onclick="${action}">
+        <b>${phoneSafe(title)}</b><small>${phoneSafe(desc)}</small><em>Ac</em>
+      </button>`).join('')}
+    </div>
+  </div>`;
+}
+
 function runAdvancedWatchSpine(sc,c2,effect={}){
   const blob = `${sc?.sub||''} ${sc?.text||''} ${c2?.text||''}`.toLowerCase();
   if(/weather|hava|swell|fog|sis|barometre|wind/.test(blob)) completeWatchDirector3Step('weather');
@@ -26888,6 +26984,7 @@ function getBridgeConsoleLauncherPanel(){
 function openRealBridgeConsole(key){
   const actual = key === 'engine' ? 'autopilot' : key;
   activeDeviceKey = actual;
+  deviceScreenZoomed = true;
   deviceMenuPath[actual] = 'root';
   if(!(actual in devicePracticeProgress)) devicePracticeProgress[actual] = 0;
   completeMissionStep('route', `Kopruustu konsolu: ${getDeviceDef(actual).name}`);
@@ -27005,6 +27102,10 @@ function renderSimCenter(){
     </div>
     <div class="sim-section wide">
       ${buildMissionDirector2Panel()}
+    </div>
+    <div class="sim-section wide">
+      <div class="sim-head"><span>SIMULASYON SEVIYE PAKETI</span><span>cihaz · vardiya · sefer · replay</span></div>
+      ${getSimulationUpgradeHubPanel()}
     </div>
     <div class="sim-section wide">
       ${getWatchDirector3Panel()}

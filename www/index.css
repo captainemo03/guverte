@@ -2249,6 +2249,7 @@ animation:straitFlow 2.8s linear infinite;}
 #devices-panel.show{display:flex;}
 #devices-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:calc(100% - 20px);max-width:1180px;max-height:92vh;padding:14px;overflow:auto;box-shadow:0 20px 70px rgba(0,0,0,.45);}
 #devices-title{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.device-title-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
 #devices-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:12px;align-items:start;}
 #devices-list{display:flex;flex-direction:column;gap:7px;max-height:76vh;overflow:auto;border:1px solid var(--border2);border-radius:10px;background:rgba(6,16,28,.72);padding:9px;}
 .device-tab{display:flex;align-items:center;gap:9px;text-align:left;border:1px solid rgba(111,146,178,.2);border-radius:8px;background:rgba(8,22,40,.92);color:var(--text2);padding:9px 10px;font-size:11px;font-family:'Share Tech Mono',monospace;cursor:pointer;}
@@ -2267,6 +2268,18 @@ animation:straitFlow 2.8s linear infinite;}
 #device-score{border:1px solid rgba(212,160,23,.28);border-radius:999px;background:rgba(212,160,23,.08);color:#ffd98a;padding:5px 10px;font-size:10px;font-family:'Share Tech Mono',monospace;white-space:nowrap;}
 #device-screen{border:1px solid rgba(111,146,178,.26);border-radius:12px;background:#05090d;min-height:310px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),inset 0 -40px 70px rgba(0,0,0,.28);}
 #device-screen svg{display:block;width:100%;height:auto;min-height:310px;}
+.device-console-shell{position:relative;min-height:inherit;overflow:hidden;background:radial-gradient(circle at 50% 18%,rgba(57,101,126,.18),transparent 34%),#05090d;}
+.device-console-shell svg{display:block;width:100%;height:auto;min-height:inherit;filter:contrast(1.04) saturate(1.08);}
+.device-console-shell::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 18%,rgba(0,0,0,.22)),repeating-linear-gradient(0deg,rgba(127,195,255,.035) 0 1px,transparent 1px 4px);mix-blend-mode:screen;opacity:.58;pointer-events:none;}
+.device-live-strip{position:absolute;z-index:4;left:12px;right:210px;top:10px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;pointer-events:none;}
+.device-live-strip span{min-width:0;border:1px solid rgba(127,195,255,.22);border-radius:7px;background:rgba(3,12,20,.82);box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);color:#dff1ff;padding:5px 6px;font:8px/1.2 'Share Tech Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-live-strip span.ok{border-color:rgba(93,191,138,.34);color:#b9ffd0;}
+.device-live-strip span.warn{border-color:rgba(255,196,88,.42);color:#ffe2a2;animation:softPulse 1.35s ease-in-out infinite;}
+.device-live-strip b{display:block;color:#7fc3ff;font-size:6.5px;margin-bottom:2px;letter-spacing:.7px;}
+.device-sim-overlay{position:absolute;z-index:4;left:12px;right:12px;bottom:10px;border:1px solid rgba(127,195,255,.22);border-radius:9px;background:linear-gradient(90deg,rgba(3,12,20,.88),rgba(6,24,38,.74));padding:8px 10px;color:#cfeaff;box-shadow:0 10px 28px rgba(0,0,0,.24);pointer-events:none;}
+.device-sim-overlay.warn{border-color:rgba(255,196,88,.4);background:linear-gradient(90deg,rgba(44,29,8,.88),rgba(5,14,24,.76));}
+.device-sim-overlay b{display:block;color:#fff;font:9px 'Share Tech Mono',monospace;letter-spacing:.8px;margin-bottom:3px;}
+.device-sim-overlay span{display:block;color:#a9c9de;font-size:8px;line-height:1.35;}
 .device-zoom-toggle{position:absolute;left:10px;top:10px;z-index:4;border:1px solid rgba(212,160,23,.35);border-radius:999px;background:rgba(5,16,28,.86);color:#ffe2a2;padding:5px 8px;font:9px 'Share Tech Mono',monospace;cursor:pointer;}
 .device-zoom-toggle:hover{background:rgba(42,28,8,.9);color:#fff;}
 #device-softkeys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px;}
@@ -2296,12 +2309,17 @@ animation:straitFlow 2.8s linear infinite;}
 .device-screen-menu-row{font-size:8px;color:#bde7ff;font-family:'Share Tech Mono',monospace;padding:4px 5px;border-top:1px solid rgba(111,146,178,.12);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .device-screen-menu-row.target{color:#a8f5c2;background:rgba(93,191,138,.08);border-radius:5px;}
 @media (max-width:760px){
+  #devices-title{align-items:flex-start;gap:8px;}
+  .device-title-actions{width:100%;justify-content:flex-start;}
   #devices-layout{grid-template-columns:1fr;}
   #devices-list{max-height:180px;}
   #device-softkeys{grid-template-columns:repeat(2,minmax(0,1fr));}
   #devices-box.device-zoomed #devices-layout{grid-template-columns:1fr;}
   #devices-box.device-zoomed #devices-list{max-height:132px;}
   #devices-box.device-zoomed #device-screen{min-height:420px;}
+  .device-live-strip{left:10px;right:10px;top:42px;grid-template-columns:repeat(2,minmax(0,1fr));}
+  .device-screen-menu{top:108px;right:10px;width:min(184px,calc(100% - 20px));}
+  .device-sim-overlay{left:10px;right:10px;bottom:8px;}
 }
 #notes-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:60;align-items:center;justify-content:center;}
 #notes-panel.show{display:flex;}
@@ -2677,6 +2695,23 @@ animation:straitFlow 2.8s linear infinite;}
 .mission2-consequence b{color:#fff;white-space:nowrap;}
 .mission2-consequence.warn{border-color:rgba(214,92,92,.38);background:rgba(50,16,16,.64);color:#ffb8b8;}
 .mission2-consequence.good{border-color:rgba(93,191,138,.32);background:rgba(8,40,26,.58);color:#a8f5c2;}
+.sim-upgrade-hub{display:grid;gap:10px;border:1px solid rgba(127,195,255,.2);border-radius:12px;background:linear-gradient(135deg,rgba(4,15,28,.9),rgba(8,32,50,.74));padding:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035),0 18px 38px rgba(0,0,0,.14);}
+.sim-upgrade-telemetry{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
+.sim-upgrade-telemetry span{border:1px solid rgba(111,146,178,.18);border-radius:9px;background:rgba(5,14,24,.72);padding:8px;color:#dff1ff;font:10px 'Share Tech Mono',monospace;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sim-upgrade-telemetry span.ok{border-color:rgba(93,191,138,.34);color:#b9ffd0;}
+.sim-upgrade-telemetry span.warn{border-color:rgba(255,196,88,.42);color:#ffe2a2;background:rgba(46,30,8,.65);}
+.sim-upgrade-telemetry b{display:block;color:#7fc3ff;font-size:8px;margin-bottom:3px;}
+.sim-upgrade-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.sim-upgrade-card{position:relative;min-height:92px;border:1px solid rgba(127,195,255,.2);border-radius:10px;background:linear-gradient(180deg,rgba(10,30,50,.78),rgba(5,14,24,.92));color:#dff1ff;text-align:left;padding:10px 10px 24px;cursor:pointer;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);}
+.sim-upgrade-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 25%,rgba(127,195,255,.14),transparent 28%),linear-gradient(120deg,transparent 0 55%,rgba(255,255,255,.04) 58%,transparent 64%);opacity:.9;pointer-events:none;}
+.sim-upgrade-card:hover{border-color:var(--gold);transform:translateY(-1px);}
+.sim-upgrade-card b,.sim-upgrade-card small,.sim-upgrade-card em{position:relative;z-index:1;display:block;}
+.sim-upgrade-card b{color:#fff;font:10px 'Share Tech Mono',monospace;letter-spacing:.6px;margin-bottom:6px;}
+.sim-upgrade-card small{color:#a9c9de;font-size:9px;line-height:1.35;}
+.sim-upgrade-card em{position:absolute;right:9px;bottom:8px;color:#ffd783;font:8px 'Share Tech Mono',monospace;font-style:normal;text-transform:uppercase;}
+.sim-upgrade-card.device{border-color:rgba(127,195,255,.3);}
+.sim-upgrade-card.engine,.sim-upgrade-card.cargo{border-color:rgba(255,196,88,.26);}
+.sim-upgrade-card.premium{border-color:rgba(232,184,75,.34);background:linear-gradient(180deg,rgba(46,30,8,.68),rgba(5,14,24,.92));}
 .specialty-tree{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
 .specialty-node{border:1px solid rgba(111,146,178,.18);border-radius:10px;background:rgba(5,14,24,.72);padding:9px;display:grid;gap:7px;min-height:112px;}
 .specialty-node.open{border-color:rgba(93,191,138,.3);background:linear-gradient(180deg,rgba(8,40,26,.36),rgba(5,14,24,.74));}
@@ -2985,9 +3020,9 @@ animation:straitFlow 2.8s linear infinite;}
 .scenario-preview{border:1px dashed rgba(127,195,255,.22);border-radius:9px;background:rgba(5,14,24,.58);padding:9px;color:#cfeaff;font-size:10px;line-height:1.45;}
 .scenario-preview b,.scenario-preview small{display:block;}
 @keyframes simSweep{0%{transform:translateX(0) rotate(18deg);opacity:.2}50%{opacity:1}100%{transform:translateX(230%) rotate(18deg);opacity:.2}}
-@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.mission2-grid,.specialty-tree,.bridge-console-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry,.story-director-flow,.event-chain-grid,.three-area-grid,.work-rest-bars{grid-template-columns:1fr 1fr;}.realism-director-grid{grid-template-columns:1fr;}.crew-atlas:not(.compact) .crew-atlas-cards{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.mission2-grid,.sim-upgrade-grid,.specialty-tree,.bridge-console-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry,.sim-upgrade-telemetry,.story-director-flow,.event-chain-grid,.three-area-grid,.work-rest-bars{grid-template-columns:1fr 1fr;}.realism-director-grid{grid-template-columns:1fr;}.crew-atlas:not(.compact) .crew-atlas-cards{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media (max-width:820px){.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip{grid-template-columns:1fr 1fr;}.billing-debug-grid{grid-template-columns:1fr 1fr;}.charter-form-grid,.document-form-grid{grid-template-columns:1fr;}}
-@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.specialty-tree,.story-director-flow,.billing-debug-grid,.bridge-console-grid,.event-chain-grid,.three-area-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.work-rest-bars,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr;}.mission2-top,.mission2-consequence,.story-director-head,.billing-debug-head,.realism-director-head,.player-bond-head,.crew-atlas-head,.watch3-head,.work-rest-head,.brm3-head,.inspection3-head{align-items:flex-start;flex-direction:column;}.mission2-badge,.story-director-head span,.realism-director-head span,.watch3-head span,.work-rest-head span,.brm3-head span,.inspection3-head span{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}.crew-atlas:not(.compact) .crew-atlas-cards,.crew-atlas.compact .crew-atlas-cards{grid-template-columns:1fr 1fr;}.crew-atlas-card{min-height:124px;}}
+@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.sim-upgrade-grid,.sim-upgrade-telemetry,.specialty-tree,.story-director-flow,.billing-debug-grid,.bridge-console-grid,.event-chain-grid,.three-area-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.work-rest-bars,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr;}.mission2-top,.mission2-consequence,.story-director-head,.billing-debug-head,.realism-director-head,.player-bond-head,.crew-atlas-head,.watch3-head,.work-rest-head,.brm3-head,.inspection3-head{align-items:flex-start;flex-direction:column;}.mission2-badge,.story-director-head span,.realism-director-head span,.watch3-head span,.work-rest-head span,.brm3-head span,.inspection3-head span{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}.crew-atlas:not(.compact) .crew-atlas-cards,.crew-atlas.compact .crew-atlas-cards{grid-template-columns:1fr 1fr;}.crew-atlas-card{min-height:124px;}}
 @media (max-width:560px){
   #home-screen{justify-content:flex-start;padding:18px 12px 28px;}
   .home-ship{font-size:48px;}
