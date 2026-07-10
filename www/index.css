@@ -3494,3 +3494,151 @@ html[data-visual-quality="high"] .home-cinematic-stage{image-rendering:auto;}
   .tester-feedback-actions{grid-template-columns:1fr;}
 }
 
+/* mobile-setup-compact-flow: keep onboarding readable without pushing creator too far down. */
+@media (max-width:520px){
+  .setup-onboarding-guide{padding:8px;margin-bottom:9px;}
+  .setup-onboarding-head{gap:4px;margin-bottom:6px;}
+  .setup-onboarding-head b{font-size:11px;}
+  .setup-onboarding-head span{font-size:8px;line-height:1.25;}
+  .setup-onboarding-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}
+  .setup-onboarding-steps button{min-height:46px;padding:6px;border-radius:7px;}
+  .setup-onboarding-steps b{font-size:8.5px;margin-bottom:2px;}
+  .setup-onboarding-steps small{
+    font-size:7px;
+    line-height:1.15;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .setup-readiness{
+    grid-template-columns:repeat(3,minmax(112px,1fr));
+    gap:5px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    scroll-snap-type:x proximity;
+  }
+  .setup-readiness>div{min-width:112px;padding:7px;scroll-snap-align:start;}
+  .setup-readiness b{font-size:8.5px;}
+  .setup-readiness small{
+    font-size:7px;
+    line-height:1.2;
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+}
+
+/* mobile-game-dialogue-containment: prevent portraits/bubbles from covering choices. */
+@media (max-width:760px) and (orientation:portrait){
+  body.screen-game #game:not(.cinema-mode) #scene-graphic{
+    min-height:clamp(92px,22svh,148px);
+    height:clamp(92px,22svh,148px);
+  }
+  body.screen-game #game:not(.cinema-mode) #story{
+    min-height:0;
+    overflow:auto;
+    padding:6px 7px;
+    gap:5px;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.screen-game #game:not(.cinema-mode) #speechstage{
+    grid-template-columns:minmax(62px,20%) minmax(0,1fr);
+    grid-template-areas:"speaker bubble" "player bubble";
+    gap:6px;
+    align-items:stretch;
+    min-height:0;
+  }
+  body.screen-game #game:not(.cinema-mode) #speechportrait,
+  body.screen-game #game:not(.cinema-mode) #playerstand{
+    height:clamp(68px,15svh,92px);
+    min-height:0;
+    border-radius:10px;
+  }
+  body.screen-game #game:not(.cinema-mode) #speechchar .portrait-composite.story,
+  body.screen-game #game:not(.cinema-mode) #playerstandchar .portrait-composite.story,
+  body.screen-game #game:not(.cinema-mode) #speechchar .portrait-photo-sheet.story,
+  body.screen-game #game:not(.cinema-mode) #playerstandchar .portrait-photo-sheet.story,
+  body.screen-game #game:not(.cinema-mode) #speechchar .portrait-sprite.story,
+  body.screen-game #game:not(.cinema-mode) #playerstandchar .portrait-sprite.story,
+  body.screen-game #game:not(.cinema-mode) #speechchar .portrait-photo.story,
+  body.screen-game #game:not(.cinema-mode) #playerstandchar .portrait-photo.story{
+    height:clamp(68px,15svh,92px) !important;
+    min-height:0 !important;
+    background-size:330% 185% !important;
+    background-position:var(--px,50%) var(--py,7%) !important;
+  }
+  body.screen-game #game:not(.cinema-mode) #speechbubble{
+    min-height:clamp(138px,30svh,190px);
+    max-height:clamp(138px,30svh,190px);
+    overflow:auto;
+    padding:8px 9px;
+    border-radius:12px;
+  }
+  body.screen-game #game:not(.cinema-mode) #speechbubble::before{display:none;}
+  body.screen-game #game:not(.cinema-mode) #text{font-size:10.5px;line-height:1.38;}
+  body.screen-game #game:not(.cinema-mode) #dialogue-log,
+  body.screen-game #game:not(.cinema-mode) #replystage{max-height:15svh;overflow:auto;}
+  body.screen-game #game:not(.cinema-mode) #choices{
+    max-height:24svh;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+
+/* mobile-landscape-dialogue-containment: short landscape phones get the same safe layout. */
+@media (orientation:landscape) and (max-height:500px) and (max-width:960px){
+  body.screen-game #game:not(.cinema-mode) #story{overflow:auto;}
+  body.screen-game #game:not(.cinema-mode) #speechbubble{max-height:clamp(84px,31svh,116px);}
+  body.screen-game #game:not(.cinema-mode) #choices{max-height:27svh;overflow:auto;}
+}
+
+/* map-touch-polish: make chart tasks feel like selectable ECDIS objects. */
+#port-chart-taskbox{
+  position:sticky;
+  bottom:0;
+  z-index:8;
+  margin-top:8px;
+  backdrop-filter:blur(9px);
+  box-shadow:0 -10px 22px rgba(0,0,0,.16),0 0 0 1px rgba(255,255,255,.025) inset;
+}
+#port-chart-svg .map-task-touch-area,
+#map-svg .map-task-touch-area{
+  fill:rgba(255,212,90,.055);
+  stroke:rgba(255,212,90,.5);
+  stroke-width:1.05;
+  stroke-dasharray:4 3;
+}
+#port-chart-svg .map-task-target:hover .map-task-touch-area,
+#map-svg .map-task-target:hover .map-task-touch-area,
+#port-chart-svg .map-task-target:focus .map-task-touch-area,
+#map-svg .map-task-target:focus .map-task-touch-area{
+  fill:rgba(168,245,194,.14);
+  stroke:#a8f5c2;
+  stroke-width:1.35;
+}
+#port-chart-svg .map-task-target .map-task-cursor,
+#map-svg .map-task-target .map-task-cursor{
+  filter:drop-shadow(0 0 5px rgba(255,212,90,.45));
+}
+#port-chart-svg .map-task-callout,
+#map-svg .map-task-callout{
+  fill:rgba(2,10,18,.96);
+  stroke-width:1.12;
+}
+#port-chart-svg .map-task-symbol-plate,
+#map-svg .map-task-symbol-plate{
+  fill:rgba(2,10,18,.96);
+  stroke-width:1.12;
+}
+@media (max-width:760px){
+  #port-chart-taskbox{
+    max-height:31dvh;
+    overflow:auto;
+    padding:8px;
+  }
+  .map-task-actions{justify-content:flex-start;}
+  .map-task-chip{min-height:34px;padding:6px 9px;}
+}
+

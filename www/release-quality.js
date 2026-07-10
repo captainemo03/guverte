@@ -177,7 +177,7 @@
     return {
       generatedAt:new Date().toISOString(),
       app:'Guverte',
-      webBuild:'index-160/release-quality-5',
+      webBuild:'index-161/release-quality-6',
       device:getDeviceSummary(),
       scene:getSceneDiagnostic(),
       save:getSaveHealth(),

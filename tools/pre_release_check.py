@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WWW = ROOT / "www"
 TOOLS = ROOT / "tools"
 ASSETS = WWW / "assets"
+VENDOR = WWW / "vendor"
 ASSET_OPTIMIZATION_MANIFEST = TOOLS / "asset_optimization_manifest.json"
 
 INDEX_JS = WWW / "index.js"
@@ -564,9 +565,9 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=160",
-        "index.css?v=136",
-        "release-quality.js?v=5",
+        "index.js?v=161",
+        "index.css?v=137",
+        "release-quality.js?v=6",
         "normalizePlayerAppearance",
         "getSetupReadinessDetails",
         "getPremiumAccessSummary",
@@ -654,6 +655,15 @@ def png_idat_decodable(path: Path) -> bool:
 
 def check_assets() -> None:
     section = "assets"
+    three_module = VENDOR / "three.module.js"
+    three_core = VENDOR / "three.core.js"
+    if three_module.exists():
+        three_module_text = three_module.read_text(encoding="utf-8", errors="ignore")
+        if "./three.core.js" in three_module_text and not three_core.exists():
+            fail(section, "www/vendor/three.core.js is missing but three.module.js imports it.")
+        elif "./three.core.js" in three_module_text:
+            ok(section, "Three.js module/core vendor pair is present.")
+
     if not ASSETS.exists():
         warn(section, "www/assets folder not found.")
         return
