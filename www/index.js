@@ -8904,6 +8904,13 @@ function getScene3DBridgeOverlay(sc){
     : isPilot ? 'PILOT'
     : isDsc ? 'DSC'
     : 'WATCH';
+  const heading = flags.harborApproach ? '082' : flags.storm ? '248' : flags.engineRoom ? '117' : isVts ? '044' : '116';
+  const sog = flags.harborApproach ? '6.2' : flags.storm ? '10.4' : flags.engineRoom ? '13.1' : '13.8';
+  const depth = flags.harborApproach ? '18.6' : flags.storm ? '86.0' : flags.manifold ? '21.4' : '42.4';
+  const rudder = flags.harborApproach ? 'P 05' : flags.storm ? 'MID' : flags.mooring ? 'S 03' : 'S 02';
+  const telegraph = flags.harborApproach ? 'DEAD SLOW AHEAD' : flags.storm ? 'HALF AHEAD' : flags.engineRoom ? 'STAND BY' : 'FULL AWAY';
+  const cpa = isDistress ? '0.7' : flags.harborApproach ? '1.1' : flags.storm ? '1.4' : '2.8';
+  const tcpa = isDistress ? '08' : flags.harborApproach ? '14' : flags.storm ? '19' : '31';
   const cls = ['bridge3d',
     flags.harborApproach?'bridge3d-harbor':'',
     flags.storm?'bridge3d-storm':'',
@@ -8923,8 +8930,18 @@ function getScene3DBridgeOverlay(sc){
     <div class="sea"></div>
     ${flags.harborApproach ? '<div class="bridge3d-tug"><i></i><b></b></div><div class="bridge3d-berth-lights"></div>' : ''}
     ${flags.storm ? '<div class="bridge3d-wave w1"></div><div class="bridge3d-wave w2"></div><div class="bridge3d-lightning"></div>' : ''}
+    <div class="bridge3d-overhead"><span>NAV LT</span><span>BNWAS</span><span>FIRE</span><span>GMDSS</span><span>DIM</span></div>
+    <div class="bridge3d-wipers"><i></i><i></i><i></i></div>
     <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="window w4"></div>
     <div class="console"></div>
+    <div class="bridge3d-repeater-row"><span>GYRO ${phoneSafe(heading)}°</span><span>ECHO ${phoneSafe(depth)}m</span><span>BNWAS OK</span></div>
+    <div class="bridge3d-conning">
+      <b>CONNING DISPLAY</b>
+      <span>HDG ${phoneSafe(heading)}°</span><span>SOG ${phoneSafe(sog)} kn</span><span>RUD ${phoneSafe(rudder)}</span><span>DEP ${phoneSafe(depth)} m</span>
+    </div>
+    <div class="bridge3d-telegraph"><b>ENGINE TELEGRAPH</b><i></i><span>${phoneSafe(telegraph)}</span></div>
+    <div class="bridge3d-ais-list"><b>AIS TARGETS</b><span>CPA ${phoneSafe(cpa)} nm</span><span>TCPA ${phoneSafe(tcpa)} m</span><span>VTS LINK</span></div>
+    <div class="bridge3d-button-bank"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <div class="bridge3d-device bridge3d-ecdis">
       <div class="label">ECDIS ROUTE</div>
       <div class="screen"><span class="route"></span><span class="ship"></span></div>
@@ -8938,7 +8955,7 @@ function getScene3DBridgeOverlay(sc){
       <div class="label">RADAR</div>
       <div class="screen"></div><i class="t1"></i><i class="t2"></i><i class="t3"></i>
     </div>
-    ${flags.engineRoom ? '<div class="bridge3d-ecr"><b>ECR</b><span></span><span></span><span></span><i></i></div>' : ''}
+    ${flags.engineRoom ? '<div class="bridge3d-ecr bridge3d-ecr-pro"><b>ECR / IAS</b><div class="ecr-ann"><em>ME</em><em class="warn">LO</em><em>GEN</em><em>FW</em></div><div class="ecr-mimic"><u class="bus"></u><small class="g1">G1</small><small class="g2">G2</small><small class="me">ME</small><small class="pump">PMP</small><u class="pipe p1"></u><u class="pipe p2"></u><u class="pipe p3"></u></div><div class="ecr-load"><u></u><u></u><u></u></div><strong>ME 72 RPM</strong></div>' : ''}
     ${flags.mooring ? '<div class="bridge3d-mooring-deck"><span class="head"></span><span class="stern"></span><span class="spring"></span><span class="breast"></span><b>SNAP-BACK</b></div>' : ''}
     ${flags.survival ? '<div class="bridge3d-survival-station"><span class="lifeboat"></span><span class="raft"></span><i></i><b>LSA</b></div>' : ''}
     ${flags.fire ? '<div class="bridge3d-fire-room"><span></span><span></span><span></span><b>FIRE ZONE</b></div>' : ''}
@@ -9076,6 +9093,23 @@ async function renderThreeBridgeScene(sc){
   scene.add(radarDisc);
   const sweep = addThreeBox(THREE, scene, [.26, .01, .01], [1.15, -.47, -.01], 0x81f7b8, 0x3ddf8a);
   sweep.rotation.y = -.18;
+
+  const conning = addThreeBox(THREE, scene, [.94, .38, .08], [0, -.32, -.17], 0x081521, 0x082238);
+  conning.rotation.x = -.1;
+  const conningGlow = addThreeBox(THREE, scene, [.76, .24, .025], [0, -.32, -.225], 0x12314a, hot?0x442018:0x0d4762);
+  conningGlow.rotation.x = -.1;
+  const overhead = addThreeBox(THREE, scene, [2.45, .12, .12], [0, .94, -1.0], 0x172636, 0x03070c);
+  overhead.rotation.x = .04;
+  const telegraphBase = addThreeBox(THREE, scene, [.22, .12, .2], [.74, -.64, .28], 0x1e2b36, 0x05090d);
+  telegraphBase.rotation.x = -.22;
+  const telegraphLever = addThreeBox(THREE, scene, [.035, .32, .035], [.76, -.49, .25], hot?0xff6b6b:0xffc458, hot?0x5a0808:0x4a2b08);
+  telegraphLever.rotation.z = harbor ? -.28 : storm ? .18 : -.08;
+  telegraphLever.rotation.x = -.22;
+  const aisRepeater = addThreeBox(THREE, scene, [.62, .34, .07], [1.82, -.5, .12], 0x07151d, 0x06261e);
+  aisRepeater.rotation.y = -.32;
+  aisRepeater.rotation.x = -.08;
+  trainingObjects.push({mesh:conningGlow, kind:'display', phase:.2});
+  trainingObjects.push({mesh:telegraphLever, kind:'telegraph', phase:.4, baseZ:telegraphLever.rotation.z});
 
   if(harbor){
     for(let i=0;i<7;i++){
@@ -9338,6 +9372,11 @@ async function renderThreeBridgeScene(sc){
     trainingObjects.forEach((obj)=>{
       if(obj.kind === 'alarm'){
         obj.mesh.material.emissiveIntensity = 1 + Math.max(0, Math.sin(t*6 + obj.phase))*.75;
+      }else if(obj.kind === 'display'){
+        obj.mesh.material.emissiveIntensity = .82 + Math.sin(t*2.2 + obj.phase)*.18;
+      }else if(obj.kind === 'telegraph'){
+        obj.mesh.rotation.z = obj.baseZ + Math.sin(t*1.8 + obj.phase)*.035;
+        obj.mesh.material.emissiveIntensity = .62 + Math.sin(t*2.4 + obj.phase)*.12;
       }else if(obj.kind === 'gauge' || obj.kind === 'meter' || obj.kind === 'valve' || obj.kind === 'wp'){
         obj.mesh.scale.y = 1 + Math.sin(t*2.3 + obj.phase)*.08;
         obj.mesh.material.emissiveIntensity = .75 + Math.sin(t*2 + obj.phase)*.16;
@@ -25746,16 +25785,49 @@ function markMooringLine(line){
 }
 
 function getEngineControlRoomPanel(){
+  const caution = Math.max(0, Math.min(10, Number(voyagePressure.caution || 0)));
+  const genLoad = Math.min(96, 52 + caution * 4 + (deviceFaultState.gyro ? 8 : 0));
+  const coolingTemp = Math.min(92, 72 + caution * 2);
+  const bilgeLevel = Math.min(68, 18 + caution * 4);
+  const rpm = voyagePressure.speed === 'Dead slow hazir' ? 38 : voyagePressure.speed === 'Full' ? 86 : 68;
+  const alarmClass = deviceFaultState.gyro || caution >= 7 ? 'warn' : 'good';
+  const alarmLabel = alarmClass === 'warn' ? 'ALARM WATCH' : 'NORMAL WATCH';
   const rows = [
     ['Alarm panel', deviceFaultState.gyro?'source alarm':'normal'],
-    ['Generator', voyagePressure.caution>=6?'standby online':'stable'],
-    ['Bilge', 'level trend checked'],
+    ['Generator', voyagePressure.caution>=6?'standby online':'load sharing stable'],
+    ['Bilge', bilgeLevel>45?'high level watch':'level trend checked'],
     ['Purifier', 'temp/pressure ok'],
     ['Fuel transfer', voyagePressure.speed==='Dead slow hazir'?'maneuvering fuel ready':'service tank ok'],
-    ['Cooling water', 'flow and temp watch'],
+    ['Cooling water', coolingTemp>84?'temp trend watch':'flow and temp normal'],
     ['Quick closing valve', 'remote station clear']
   ];
-  return `<div class="sim-control-grid">${rows.map(([a,b])=>`<button onclick="markEngineCheck('${a.replace(/'/g,"\\'")}')"><b>${a}</b><small>${b}</small></button>`).join('')}</div>`;
+  return `<div class="ecr-sim-panel">
+    <div class="ecr-sim-board">
+      <div class="ecr-sim-top">
+        <div><b>ECR / IAS WATCH</b><small>Main engine · generator · bilge · cooling water</small></div>
+        <span class="${alarmClass}">${alarmLabel}</span>
+      </div>
+      <div class="ecr-sim-screens">
+        <div class="ecr-screen main-engine"><b>MAIN ENGINE</b><strong>${rpm} RPM</strong><i style="width:${rpm}%"></i><small>Telegraph / manoeuvring response</small></div>
+        <div class="ecr-screen generator"><b>GENERATOR LOAD</b><strong>${genLoad}%</strong><i style="width:${genLoad}%"></i><small>Busbar · load sharing · standby</small></div>
+        <div class="ecr-screen cooling"><b>COOLING WATER</b><strong>${coolingTemp}°C</strong><i style="width:${coolingTemp}%"></i><small>Jacket / sea water temp trend</small></div>
+      </div>
+      <div class="ecr-sim-mimic">
+        <span class="busbar">440V BUSBAR</span>
+        <span class="gen g1">GEN 1</span>
+        <span class="gen g2">GEN 2</span>
+        <span class="me">M/E</span>
+        <span class="pump p1">SW PUMP</span>
+        <span class="pump p2">FO BOOSTER</span>
+        <span class="tank">BILGE ${bilgeLevel}%</span>
+        <i class="line l1"></i><i class="line l2"></i><i class="line l3"></i><i class="line l4"></i>
+      </div>
+      <div class="ecr-annunciator-row">
+        <em class="ok">GEN BUS</em><em class="${coolingTemp>84?'warn':'ok'}">J.C.W.</em><em class="${bilgeLevel>45?'warn':'ok'}">BILGE</em><em class="ok">PURIFIER</em><em class="${alarmClass}">ALARM</em>
+      </div>
+    </div>
+    <div class="ecr-check-grid">${rows.map(([a,b])=>`<button onclick="markEngineCheck('${a.replace(/'/g,"\\'")}')"><b>${a}</b><small>${b}</small></button>`).join('')}</div>
+  </div>`;
 }
 
 function markEngineCheck(item){
