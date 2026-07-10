@@ -9589,7 +9589,7 @@ function getCinematicOverlay(sc){
 }
 
 function getCinematicFlowLines(sc){
-  const rawText = typeof sc?.text === 'function' ? sc.text(pn,sn) : (sc?.text || '');
+  const rawText = sanitizeSceneCrewNames(typeof sc?.text === 'function' ? sc.text(pn,sn) : (sc?.text || ''), sc);
   const textLines = String(rawText).split(/\n\s*\n/).map(line=>line.trim()).filter(Boolean).slice(0,3);
   const beatLines = (Array.isArray(sc?.cinematicBeats) ? sc.cinematicBeats : []).slice(0,4);
   return [...textLines, ...beatLines].filter(Boolean);
@@ -10045,7 +10045,7 @@ function getLocalizedScenarioCue(sc, kind){
 }
 
 function getLocalizedSceneNarrative(text, sc){
-  const raw=String(text || '');
+  const raw=sanitizeSceneCrewNames(String(text || ''), sc);
   if(gameLanguage==='tr') return raw;
   const kind=getSceneLanguageKind(sc, raw);
   const loc=getLocalizedSceneLocation(sc);
@@ -10066,10 +10066,11 @@ ${t('scene.task','Your task')}: ${task}
 ${t('scene.cue','Scenario cue')}: ${cue}`;
 }
 function localizeChoiceText(choice){
-  if(gameLanguage==='tr') return String(choice?.text ?? choice ?? '');
-  const text=String(choice?.text ?? choice ?? '');
+  const scene = sceneQueue?.[currentIdx] || null;
+  const text=sanitizeSceneCrewNames(String(choice?.text ?? choice ?? ''), scene);
+  if(gameLanguage==='tr') return text;
   const tag=choice?.tag || '';
-  const kind=getSceneLanguageKind(sceneQueue?.[currentIdx] || null, text);
+  const kind=getSceneLanguageKind(scene, text);
   const choiceText={
     en:{
       kritik:'Follow the full procedure, verify facts, report clearly and log the action.',
@@ -12431,8 +12432,8 @@ function handleSceneChoice(sc, c2, ch){
     ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
   }
   const speakerPortrait = getSceneSpeakerPortrait(sc);
-  pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, typeof sc.text==='function'?sc.text(pn,sn):sc.text);
-  pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', c2.text);
+  pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, sanitizeSceneCrewNames(typeof sc.text==='function'?sc.text(pn,sn):sc.text, sc));
+  pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', sanitizeSceneCrewNames(c2.text, sc));
   maybePushDialogueInterjection(sc,c2);
   showReplyBubble(c2);
   const pressure=evaluateDecisionPressure(sc,c2);
@@ -14665,7 +14666,7 @@ function renderScene(idx){
   updateVoyagePressure(sc);
   updateLiveVoyageState(sc);
   updatePortOpsChain(sc);
-  document.getElementById('scene-sub').textContent=gameLanguage==='tr' ? (sc.sub || '') : getLocalizedScenarioCue(sc, getSceneLanguageKind(sc, sc.text || ''));
+  document.getElementById('scene-sub').textContent=gameLanguage==='tr' ? sanitizeSceneCrewNames(sc.sub || '', sc) : getLocalizedScenarioCue(sc, getSceneLanguageKind(sc, sc.text || ''));
   const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
@@ -16062,6 +16063,59 @@ function getCrewDisplay(who){
     return {name:def.name, icon:def.icon, title:def.title};
   }
   return CREW[who] || CREW.anlatici;
+}
+
+function getCrewNameParts(fullName=''){
+  const clean = String(fullName || '').replace(/\s+/g,' ').trim();
+  const prefixes = [
+    'Gaz Kontrol Subayı','Navigasyon Subayı','Telsiz Subayı','Elektrik Zabiti',
+    'Çevresel İşler Subayı','Bunkering Zabiti','Konteyner Zabiti','Dökme Yük Zabiti',
+    'Hidrografik Araştırmacı','Deniz Biyoloğu','ROV Teknisyeni','Hotel Müdürü',
+    'Güvenlik Zabiti','Makine Reisi Fitter','Kaynakçı Usta','Gemi Hekimi',
+    'Baş Mühendis','2. Mühendis','3. Mühendis','1. Zabit','2. Zabit','3. Zabit',
+    'Chief Engineer','Chief Cook','Motorman','Pumpman','Stewardess','Steward',
+    'Lostromo','Silici','Yağcıbaşı','Yağcı','Aşçı','Tayfa','Kaptan','AB'
+  ].sort((a,b)=>b.length-a.length);
+  const prefix = prefixes.find(p=>clean.toLocaleLowerCase('tr-TR').startsWith(p.toLocaleLowerCase('tr-TR') + ' '));
+  if(!prefix) return {full:clean, role:'', personal:clean};
+  return {full:clean, role:prefix, personal:clean.slice(prefix.length).trim() || clean};
+}
+
+function addCrewNameReplacement(map, source, target, allowShort=false){
+  const from = String(source || '').replace(/\s+/g,' ').trim();
+  const to = String(target || '').replace(/\s+/g,' ').trim();
+  if(!from || !to) return;
+  if(!allowShort && from.length < 4) return;
+  map.set(from, to);
+  const lower = from.toLocaleLowerCase('tr-TR');
+  if(lower !== from) map.set(lower, to.toLocaleLowerCase('tr-TR'));
+}
+
+function replaceCrewNameToken(text, source, target){
+  const letters = '0-9A-Za-zÇĞİÖŞÜçğıöşüÂâÎîÛû';
+  const suffix = `[A-Za-zÇĞİÖŞÜçğıöşüÂâÎîÛû']{0,10}`;
+  const re = new RegExp(`(^|[^${letters}])(${escapeRegExp(source)})(${suffix})(?=$|[^${letters}])`, 'g');
+  return String(text || '').replace(re, (_all, boundary, _name, ending)=>`${boundary}${target}${ending || ''}`);
+}
+
+function sanitizeSceneCrewNames(text, sc=null){
+  let out = String(text ?? '');
+  const key = getCrewKeyFromWho(sc?.who);
+  if(!key || !CREW_DEFS[key] || !out) return out;
+  const active = getCrewNameParts(getCrewDisplay(sc?.who).name || CREW_DEFS[key].name);
+  const replacements = new Map();
+  const pool = Array.isArray(CREW_NAME_POOLS?.[key]) ? CREW_NAME_POOLS[key] : [];
+  const legacy = [CREW_DEFS[key]?.name, CREW?.[key]?.name, ...(pool || [])].filter(Boolean);
+  legacy.forEach(name=>{
+    const parts = getCrewNameParts(name);
+    addCrewNameReplacement(replacements, parts.full, active.full, true);
+    addCrewNameReplacement(replacements, parts.personal, active.personal, false);
+  });
+  [...replacements.entries()]
+    .filter(([from,to])=>from && to && from !== to)
+    .sort((a,b)=>b[0].length-a[0].length)
+    .forEach(([from,to])=>{ out = replaceCrewNameToken(out, from, to); });
+  return out;
 }
 
 function getCrewRoleAtlasPanel(type=selType, opts={}){

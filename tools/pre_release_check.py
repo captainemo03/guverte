@@ -551,6 +551,15 @@ def check_scene_balance_and_text() -> None:
     if "tag:\"hileli\"" not in JS and "tag:'hileli'" not in JS:
         fail(section, "No hileli shortcut choices found.")
 
+    for token in (
+        "function sanitizeSceneCrewNames",
+        "function getCrewNameParts",
+        "sanitizeSceneCrewNames(sc.sub",
+        "sanitizeSceneCrewNames(typeof sc.text",
+        "sanitizeSceneCrewNames(c2.text",
+    ):
+        require_token(section, token)
+
     writing_tokens = len(re.findall(r"<textarea|documentTrainingState|input type=\"text\"", JS))
     if writing_tokens < 3:
         warn(section, "Few document/writing-mode tokens found; form QA may be incomplete.")
@@ -565,9 +574,9 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=164",
-        "index.css?v=140",
-        "release-quality.js?v=9",
+        "index.js?v=165",
+        "index.css?v=141",
+        "release-quality.js?v=10",
         "normalizePlayerAppearance",
         "getSetupReadinessDetails",
         "getPremiumAccessSummary",
