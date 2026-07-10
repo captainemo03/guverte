@@ -253,6 +253,11 @@
         <div class="quality-controls" data-quality-controls></div>
         <small data-quality-status>Dengeli canli grafik profili</small>
       </div>
+      <label class="home-option-block clean-hud-toggle">
+        <span>Temiz Oyun Ekrani</span>
+        <input type="checkbox" data-clean-hud-toggle onchange="setCleanHudMode(this.checked)">
+        <small data-clean-hud-status>Standart ekran: gorev, vardiya, rota ve stat panelleri gorunur.</small>
+      </label>
       <button type="button" class="sound-option-btn" onclick="openTesterFeedback()">Tester Geri Bildirimi</button>
       <div class="audio-mixer" data-audio-mixer="home"></div>
     </div>
@@ -495,6 +500,14 @@
         <div class="quality-controls" data-quality-controls></div>
         <small data-quality-status>Dengeli canli grafik profili</small>
       </div>
+      <div class="game-settings-card">
+        <b>Temiz HUD</b>
+        <label class="clean-hud-toggle inline">
+          <input type="checkbox" data-clean-hud-toggle onchange="setCleanHudMode(this.checked)">
+          <span>Sahne odakli ekran</span>
+        </label>
+        <small data-clean-hud-status>Standart ekran: gorev, vardiya, rota ve stat panelleri gorunur.</small>
+      </div>
       <div class="game-settings-card game-settings-actions">
         <b data-i18n="ui.gameActions" data-i18n-fallback="Oyun">Oyun</b>
         <button type="button" class="game-settings-action primary" onclick="saveGameState(true)" data-i18n="save.saveGame" data-i18n-fallback="Oyunu Kaydet">Oyunu Kaydet</button>
@@ -718,6 +731,7 @@
       <input id="tester-feedback-diagnostics" type="checkbox" checked>
       Cihaz, sahne, kayit sagligi ve son yerel hata kayitlarini rapora ekle
     </label>
+    <div id="release-hardening-summary" class="release-hardening-summary"></div>
     <div class="tester-feedback-actions">
       <button type="button" class="primary" onclick="copyTesterReport()">Raporu Kopyala</button>
       <button type="button" onclick="downloadTesterReport()">JSON Indir</button>
@@ -728,7 +742,7 @@
   </div>
 </div>
 
-<script src="./index.js?v=156"></script>
-<script src="./release-quality.js?v=1"></script>
+<script src="./index.js?v=157"></script>
+<script src="./release-quality.js?v=2"></script>
 </body>
 </html>

@@ -166,6 +166,7 @@
 
   function buildReleaseDiagnosticReport(){
     const logs = getReleaseDiagnostics();
+    const hardening = getReleaseHardeningChecks(false);
     const products = {
       billingBridge:!!(window.GuverteBillingNative || window.GuverteBilling),
       adsBridge:!!window.GuverteAdsNative,
@@ -176,15 +177,119 @@
     return {
       generatedAt:new Date().toISOString(),
       app:'Guverte',
-      webBuild:'index-155/release-quality-1',
+      webBuild:'index-157/release-quality-2',
       device:getDeviceSummary(),
       scene:getSceneDiagnostic(),
       save:getSaveHealth(),
       products,
+      hardening,
       visualQuality,
       native:nativeDiagnosticStatus,
       diagnostics:logs.slice(0,12)
     };
+  }
+
+  function releaseCheck(status, title, detail){
+    return {status, title, detail:String(detail || '').slice(0,260)};
+  }
+
+  function getReleaseHardeningChecks(applyFixes){
+    const checks = [];
+    const push = (status, title, detail)=>checks.push(releaseCheck(status, title, detail));
+    try{
+      if(typeof refreshMonetizationState === 'function') refreshMonetizationState();
+      const premiumState = typeof premiumUnlocked === 'boolean' ? premiumUnlocked : false;
+      const lockedScenes = !premiumState && Array.isArray(sceneQueue) && typeof isPremiumContentScene === 'function'
+        ? sceneQueue.filter(sc=>isPremiumContentScene(sc)).length
+        : 0;
+      const premiumShip = !premiumState && typeof isPremiumShipType === 'function' && typeof selType !== 'undefined' && isPremiumShipType(selType);
+      if((lockedScenes || premiumShip) && applyFixes && typeof enforcePremiumAccessGuards === 'function'){
+        enforcePremiumAccessGuards('release_self_test');
+      }
+      push(lockedScenes || premiumShip ? 'fail' : 'pass', 'Premium guard', lockedScenes || premiumShip
+        ? `Ucretsiz akista premium iz var: ${lockedScenes} sahne, gemi=${premiumShip}`
+        : `Premium kilidi temiz. ID: ${typeof PREMIUM_PRODUCT_ID !== 'undefined' ? PREMIUM_PRODUCT_ID : 'premium_full_pack'}`);
+      push(typeof ADS_REMOVAL_PRODUCT_ID !== 'undefined' && ADS_REMOVAL_PRODUCT_ID === 'remove_ads' ? 'pass' : 'warn', 'Remove ads product', `ID: ${typeof ADS_REMOVAL_PRODUCT_ID !== 'undefined' ? ADS_REMOVAL_PRODUCT_ID : 'yok'} · durum ${typeof adsRemoved === 'boolean' && adsRemoved ? 'aktif' : 'kilitli'}`);
+    }catch(error){
+      push('fail', 'Premium / ads guard', compactError(error).message);
+    }
+
+    try{
+      const fixed = applyFixes && typeof sanitizeCrewPortraitRoster === 'function' ? sanitizeCrewPortraitRoster('release_self_test') : 0;
+      let mismatches = 0;
+      if(typeof CREW_DEFS !== 'undefined' && typeof inferPortraitBase === 'function' && typeof crewPortraits !== 'undefined'){
+        Object.keys(CREW_DEFS).forEach(key=>{
+          const expected = inferPortraitBase(CREW_DEFS[key]);
+          const current = crewPortraits[key];
+          const sheet = String(current?.portraitSheet || '');
+          const wrongSheet = expected === 'female'
+            ? /support-style-male|support-male/i.test(sheet)
+            : /support-style-female|support-female/i.test(sheet);
+          const wrongBase = current && current.__base && current.__base !== expected;
+          const femaleBeard = expected === 'female' && current?.beard && current.beard !== 'clean';
+          if(!current || wrongSheet || wrongBase || femaleBeard) mismatches += 1;
+        });
+      }
+      push(mismatches ? 'fail' : fixed ? 'warn' : 'pass', 'Character gender QA', mismatches
+        ? `${mismatches} karakterde isim/cinsiyet/portre uyumsuzlugu kaldi.`
+        : fixed ? `${fixed} eski portre otomatik yenilendi.` : 'Kadin/erkek isimleri ve portre base eslesmesi temiz.');
+    }catch(error){
+      push('fail', 'Character gender QA', compactError(error).message);
+    }
+
+    try{
+      const taskCount = typeof MAP_TASKS !== 'undefined' && Array.isArray(MAP_TASKS) ? MAP_TASKS.length : 0;
+      let currentOk = false;
+      let tolerance = 0;
+      if(taskCount && typeof getCurrentMapTask === 'function' && typeof ensureSelectedPortChart === 'function' && typeof getMapTaskTarget === 'function' && typeof getMapTaskEffectiveTolerance === 'function'){
+        const task = getCurrentMapTask();
+        const port = ensureSelectedPortChart();
+        const target = task && port ? getMapTaskTarget(task, port) : null;
+        tolerance = target ? getMapTaskEffectiveTolerance(task, target) : 0;
+        currentOk = !!(target && Number.isFinite(target.x) && Number.isFinite(target.y) && tolerance >= 20);
+      }
+      push(taskCount >= 10 && currentOk ? 'pass' : taskCount >= 6 ? 'warn' : 'fail', 'Map / ECDIS tasks', `${taskCount} gorev · aktif hitbox toleransi ${Math.round(tolerance)}px · chart ${currentOk ? 'tiklanabilir' : 'kontrol istiyor'}`);
+    }catch(error){
+      push('fail', 'Map / ECDIS tasks', compactError(error).message);
+    }
+
+    try{
+      const deviceCount = typeof DEVICE_TRAINER !== 'undefined' && Array.isArray(DEVICE_TRAINER) ? DEVICE_TRAINER.length : 0;
+      const menuCount = typeof DEVICE_MENU_TREE !== 'undefined' ? Object.keys(DEVICE_MENU_TREE).length : 0;
+      const practiceCount = typeof DEVICE_PRACTICE !== 'undefined' ? Object.keys(DEVICE_PRACTICE).length : 0;
+      push(deviceCount >= 8 && menuCount >= 8 && practiceCount >= 6 ? 'pass' : 'warn', 'Device simulator', `${deviceCount} cihaz · ${menuCount} menu agaci · ${practiceCount} pratik zinciri`);
+    }catch(error){
+      push('fail', 'Device simulator', compactError(error).message);
+    }
+
+    try{
+      const mobileWidth = Math.min(window.innerWidth || 0, screen.width || 0);
+      const clean = typeof cleanHudMode === 'boolean' ? cleanHudMode : false;
+      push(mobileWidth && mobileWidth <= 480 && !clean ? 'warn' : 'pass', 'Screen breathing', clean ? 'Temiz HUD acik.' : `Standart HUD · viewport ${window.innerWidth}x${window.innerHeight}`);
+    }catch(error){
+      push('warn', 'Screen breathing', compactError(error).message);
+    }
+
+    try{
+      const save = getSaveHealth();
+      push(save.main || save.backup ? 'pass' : 'warn', 'Save safety', save.main ? 'Ana kayit hazir.' : save.backup ? 'Yedek kayit hazir.' : 'Henuz kayit yok.');
+    }catch(error){
+      push('fail', 'Save safety', compactError(error).message);
+    }
+
+    return checks;
+  }
+
+  function renderReleaseHardeningSummary(){
+    const box = document.getElementById('release-hardening-summary');
+    if(!box) return;
+    const checks = getReleaseHardeningChecks(true);
+    box.innerHTML = checks.map(check=>`
+      <div class="release-check-card ${check.status}">
+        <em>${check.status}</em>
+        <b>${check.title}</b>
+        <small>${check.detail}</small>
+      </div>`).join('');
   }
 
   function feedbackText(){
@@ -280,6 +385,7 @@
       ['Tanilama', `${report.diagnostics.length} kayit`],
       ['Grafik', qualityLabel(visualQuality)]
     ].map(([key,value])=>`<span><b>${key}</b><em>${value}</em></span>`).join('');
+    renderReleaseHardeningSummary();
   }
 
   function exportSaveBackup(){
@@ -345,7 +451,8 @@
     try{ window.GuverteBillingNative?.checkProducts?.(); }catch(e){ recordReleaseDiagnostic('billing_test_error', e); }
     try{ window.GuverteAdsNative?.getStatus?.(); }catch(e){ recordReleaseDiagnostic('ads_test_error', e); }
     try{ window.GuverteDiagnosticsNative?.getStatus?.(); }catch(e){ recordReleaseDiagnostic('native_diagnostics_error', e); }
-    recordReleaseDiagnostic('release_self_test', '', {storageOk, device:getDeviceSummary()});
+    const hardening = getReleaseHardeningChecks(true);
+    recordReleaseDiagnostic('release_self_test', '', {storageOk, device:getDeviceSummary(), hardening});
     renderReleaseHealthSummary();
     openTesterFeedback();
     if(typeof showNotif === 'function') showNotif('QA', 'Yayin Testi Tamam', storageOk ? 'Kayit, cihaz ve kopru kontrolleri calisti.' : 'Yerel kayit testi basarisiz.');
@@ -364,6 +471,8 @@
   window.downloadTesterReport = downloadTesterReport;
   window.openGitHubFeedback = openGitHubFeedback;
   window.clearReleaseDiagnostics = clearReleaseDiagnostics;
+  window.getReleaseHardeningChecks = getReleaseHardeningChecks;
+  window.renderReleaseHardeningSummary = renderReleaseHardeningSummary;
   window.exportSaveBackup = exportSaveBackup;
   window.triggerSaveImport = triggerSaveImport;
   window.handleSaveImport = handleSaveImport;

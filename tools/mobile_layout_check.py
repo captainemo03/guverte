@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JS = (ROOT / "www" / "index.js").read_text(encoding="utf-8")
 CSS = (ROOT / "www" / "index.css").read_text(encoding="utf-8")
 HTML = (ROOT / "www" / "index.html").read_text(encoding="utf-8")
+RELEASE_QUALITY = (ROOT / "www" / "release-quality.js").read_text(encoding="utf-8")
 
 
 REQUIRED = {
@@ -45,7 +46,7 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=156",
+        "index.js?v=157",
         "index.css?v=133",
     ],
     "4k dynamic background": [
@@ -167,6 +168,12 @@ REQUIRED = {
         "cinema-mode",
         "toggleCinemaMode",
         "primary-tool",
+        "CLEAN_HUD_KEY",
+        "setCleanHudMode",
+        "data-clean-hud-toggle",
+        "clean-hud",
+        "release-hardening-summary",
+        "getReleaseHardeningChecks",
     ],
     "mobile creator portrait fit": [
         "creator-mobile-portrait-fit",
@@ -208,7 +215,7 @@ REQUIRED = {
 
 
 def main() -> int:
-    blob = "\n".join([JS, CSS, HTML])
+    blob = "\n".join([JS, CSS, HTML, RELEASE_QUALITY])
     missing: list[str] = []
     for group, needles in REQUIRED.items():
         for needle in needles:

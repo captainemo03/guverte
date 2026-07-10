@@ -33,10 +33,14 @@ def main() -> int:
     errors += require(js, [
         "SAVE_BACKUP_KEY", "SAVE_RECOVERY_KEY", "recoverSavedGame",
         "isValidSavedGamePayload", "guverte-visual-quality-change",
+        "CLEAN_HUD_KEY", "setCleanHudMode", "enforcePremiumAccessGuards",
+        "sanitizeCrewPortraitRoster",
     ], "save-quality")
     errors += require(html + css + quality, [
         "tester-feedback-panel", "release-health-summary", "data-quality-controls",
         "runReleaseSelfTest", "exportSaveBackup", "handleSaveImport",
+        "release-hardening-summary", "getReleaseHardeningChecks",
+        "data-clean-hud-toggle", "clean-hud",
     ], "tester-ui")
     errors += require(activity + diagnostics, [
         "GuverteDiagnosticsNative", "installCrashHandler", "recordWebDiagnostic",

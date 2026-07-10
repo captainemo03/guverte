@@ -587,6 +587,11 @@ const PREMIUM_PACKAGE_CATALOG = [
   'Premium hareketli 3D operasyonlar',
   'Premium chart paketleri: offshore DP, arastirma ROV, kruvaziyer medevac, proje yuk lift, buz seyri'
 ];
+function refreshMonetizationState(){
+  premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
+  adsRemoved = readPurchasedFlag(ADS_REMOVAL_KEY);
+  return {premiumUnlocked, adsRemoved};
+}
 function isPremiumShipType(typeKey){
   return !!STYPES.find(x=>x.key===typeKey && x.premium);
 }
@@ -603,14 +608,48 @@ function isPremiumContentScene(sc){
   return !!sc.premium || sc.cinematicKey === 'cruiseMedevac' || isPremiumSceneId(sc.id) || /^Premium\b/i.test(String(sc.day || ''));
 }
 function requirePremiumAccess(reason='Bu ozel gemi, rota veya operasyon premium pakete dahildir.'){
-  premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
+  refreshMonetizationState();
   if(premiumUnlocked) return true;
   showNotif('🔒','Premium Gerekli', reason);
   return false;
 }
 function filterPremiumLockedScenes(scenes){
+  refreshMonetizationState();
   if(premiumUnlocked) return scenes;
   return (scenes || []).filter(sc=>!isPremiumContentScene(sc));
+}
+function enforcePremiumAccessGuards(context='runtime'){
+  refreshMonetizationState();
+  let changed = false;
+  if(!premiumUnlocked){
+    if(isPremiumShipType(selType)){
+      selType = 'kuru';
+      sn = sn || 'M/V Ege Meltem';
+      changed = true;
+    }
+    if(Array.isArray(sceneQueue)){
+      const before = sceneQueue.length;
+      sceneQueue = filterPremiumLockedScenes(sceneQueue);
+      if(sceneQueue.length !== before){
+        currentIdx = Math.min(currentIdx, Math.max(0, sceneQueue.length - 1));
+        changed = true;
+      }
+    }
+    if(Array.isArray(shipOffers)){
+      const beforeOffers = shipOffers.length;
+      shipOffers = shipOffers.filter(o=>!isPremiumShipType(o.type));
+      if(shipOffers.length !== beforeOffers) changed = true;
+    }
+    if(activeVoyageRoute && /premium|cruise|research|offshore|ice|cable|pipe|shuttle|project|proje|rov|dp/i.test(`${activeVoyageRoute.key || ''} ${activeVoyageRoute.trade || ''}`)){
+      const fallback = selectVoyageRouteForShipType('kuru');
+      if(fallback) activateVoyageRoute(fallback);
+      changed = true;
+    }
+  }
+  if(changed && typeof recordReleaseDiagnostic === 'function'){
+    recordReleaseDiagnostic('premium_guard_applied', '', {context, selType, sceneCount:Array.isArray(sceneQueue)?sceneQueue.length:0});
+  }
+  return !changed;
 }
 function getPremiumBillingBridge(){
   if(window.GuverteBilling && typeof window.GuverteBilling.purchasePremium === 'function') return window.GuverteBilling;
@@ -14090,6 +14129,7 @@ function renderScene(idx){
   toggleMoreTools(false);
   if(idx>='end'||currentIdx>=sceneQueue.length){showEnd();return;}
   maybePrioritizeRecoveryScene();
+  enforcePremiumAccessGuards('render_scene');
   const sc=sceneQueue[currentIdx];
   const prevSc = currentIdx>0 ? sceneQueue[currentIdx-1] : null;
   if(!sc){showEnd();return;}
@@ -15407,6 +15447,36 @@ function getCrewPortraitForKey(key){
   return crewPortraits[key];
 }
 
+function sanitizeCrewPortraitRoster(context='runtime'){
+  let fixed = 0;
+  Object.keys(CREW_DEFS).forEach(key=>{
+    const def = CREW_DEFS[key];
+    const expectedBase = inferPortraitBase(def);
+    const current = crewPortraits[key];
+    const sheet = String(current?.portraitSheet || '');
+    const wrongGenderSheet = expectedBase === 'female'
+      ? /support-style-male|support-male/i.test(sheet)
+      : /support-style-female|support-female/i.test(sheet);
+    const stale = !current
+      || current.__portraitVersion !== CREW_PORTRAIT_VERSION
+      || current.__roleKey !== key
+      || current.__base !== expectedBase
+      || current.__name !== (def.name || '')
+      || wrongGenderSheet;
+    if(stale){
+      crewPortraits[key] = makeCrewPortrait(key, def);
+      fixed += 1;
+    }
+    if(expectedBase === 'female' && crewPortraits[key]){
+      crewPortraits[key].beard = 'clean';
+    }
+  });
+  if(fixed && typeof recordReleaseDiagnostic === 'function'){
+    recordReleaseDiagnostic('crew_portrait_roster_sanitized', '', {context, fixed});
+  }
+  return fixed;
+}
+
 function randomizeCrewRoster(lang){
   const activeLang = lang || (typeof gameLanguage !== 'undefined' ? gameLanguage : 'tr');
   const pools = getCrewNamePoolForLanguage(activeLang);
@@ -15420,6 +15490,7 @@ let crewTrust = {};
 let crewUnlocked = {};
 
 function initCrewSystem(){
+  sanitizeCrewPortraitRoster('init');
   Object.keys(CREW_DEFS).forEach(k => {
     crewTrust[k] = CREW_DEFS[k].trust;
     crewUnlocked[k] = 0;
@@ -15504,6 +15575,7 @@ function getCrewRoleAtlasPanel(type=selType, opts={}){
 function renderCrewCards(){
   const c = document.getElementById('crew-cards');
   if(!c) return;
+  sanitizeCrewPortraitRoster('render');
   c.innerHTML = getCrewRoleAtlasPanel(typeof selType !== 'undefined' ? selType : 'kuru', {compact:true});
   getActiveCrewKeysForShipType(typeof selType !== 'undefined' ? selType : 'kuru').forEach(key => {
     const def = CREW_DEFS[key];
@@ -16876,12 +16948,14 @@ Object.assign(WORLD_MAP_POINT_LOOKUP, {
 const SAVE_KEY = 'guverte-save-v1';
 const SAVE_BACKUP_KEY = 'guverte-save-backup-v1';
 const SAVE_RECOVERY_KEY = 'guverte-save-recovery-v1';
+const CLEAN_HUD_KEY = 'guverte-clean-hud-v1';
 const PLAY_MODE_DEFS = {
   simple:{label:'Basit', desc:'Hikaye, temel secimler ve az ekran kalabaligi.', level:0},
   realistic:{label:'Gercekci', desc:'Cihaz, harita ve logbook yavas yavas acilir.', level:1},
   expert:{label:'Uzman', desc:'CPA, UKC, PSC, tanker ve premium detaylar acik.', level:2}
 };
 let gameplayMode = 'realistic';
+let cleanHudMode = (()=>{try{return localStorage.getItem(CLEAN_HUD_KEY) === '1';}catch(e){return false;}})();
 let introMenuPage = 'play';
 let homeMenuPage = 'play';
 let savePanelOpen = false;
@@ -16891,6 +16965,32 @@ let moreToolsOpen = false;
 let cinemaMode = false;
 let missionDirectorState = {sceneId:'', title:'', steps:[], completed:[]};
 
+function syncCleanHudControls(){
+  document.querySelectorAll('[data-clean-hud-toggle]').forEach(input=>{
+    input.checked = !!cleanHudMode;
+  });
+  document.querySelectorAll('[data-clean-hud-status]').forEach(el=>{
+    el.textContent = cleanHudMode
+      ? translateGameText('Temiz ekran acik: sahne, karakter, konusma ve secimler one cikiyor.')
+      : translateGameText('Standart ekran: gorev, vardiya, rota ve stat panelleri gorunur.');
+  });
+}
+
+function setCleanHudMode(enabled, notify=true){
+  cleanHudMode = !!enabled;
+  try{ localStorage.setItem(CLEAN_HUD_KEY, cleanHudMode ? '1' : '0'); }catch(e){}
+  document.getElementById('game')?.classList.toggle('clean-hud', cleanHudMode);
+  document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
+  syncCleanHudControls();
+  if(notify && typeof showNotif === 'function'){
+    showNotif('HUD', cleanHudMode ? 'Temiz Ekran' : 'Standart Ekran', cleanHudMode ? 'Oyun alani ferahladi; detaylar ayarlar ve modlarda kalir.' : 'Tum vardiya ve gorev panelleri geri geldi.');
+  }
+}
+
+function toggleCleanHudMode(){
+  setCleanHudMode(!cleanHudMode);
+}
+
 function getGameplayModeDef(){
   return PLAY_MODE_DEFS[gameplayMode] || PLAY_MODE_DEFS.realistic;
 }
@@ -16899,12 +16999,14 @@ function setGameplayMode(mode){
   gameplayMode = PLAY_MODE_DEFS[mode] ? mode : 'realistic';
   renderPlayModeSelector();
   updateFeatureVisibility(sceneQueue[currentIdx] || null);
+  syncCleanHudControls();
 }
 
 function setAppScreen(screen='home'){
   const normalized = ['home','setup','game'].includes(screen) ? screen : 'home';
   document.body.classList.remove('screen-home','screen-setup','screen-game');
   document.body.classList.add(`screen-${normalized}`);
+  document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
   document.querySelectorAll('.app-screen').forEach(el=>el.classList.remove('active'));
   const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : 'game';
   const active = document.getElementById(activeId);
@@ -16952,6 +17054,7 @@ function openShipSelectScreen(){
 
 function openGameScreen(){
   stopIntroMaritimeTheme();
+  enforcePremiumAccessGuards('open_game');
   setAppScreen('game');
   const g=document.getElementById('game');
   if(g){
@@ -16959,7 +17062,10 @@ function openGameScreen(){
     g.style.flexDirection='column';
     g.classList.toggle('stats-collapsed', !statsExpanded);
     g.classList.toggle('cinema-mode', cinemaMode);
+    g.classList.toggle('clean-hud', cleanHudMode);
   }
+  document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
+  syncCleanHudControls();
   window.scrollTo?.(0,0);
 }
 
@@ -17001,6 +17107,7 @@ function setHomeMenuPage(page='play'){
     panel.classList.toggle('active', panel.dataset.homePage === homeMenuPage);
   });
   renderAudioMixer();
+  syncCleanHudControls();
 }
 
 function setIntroMenuPage(page='play'){
@@ -17031,6 +17138,7 @@ function setIntroMenuPage(page='play'){
   if(saveActions) saveActions.style.display = introMenuPage === 'play' || introMenuPage === 'ship' ? 'flex' : 'none';
   renderSetupOnboardingGuide();
   renderAudioMixer();
+  syncCleanHudControls();
 }
 
 function renderPlayModeSelector(){
@@ -17405,6 +17513,7 @@ function toggleGameSettings(force){
     renderPlayModeSelector();
     renderAudioMixer();
     applyLanguageUI();
+    syncCleanHudControls();
   }
 }
 
@@ -17448,6 +17557,7 @@ function buildSavePayload(){
     savedAt:new Date().toISOString(),
     gameLanguage,
     gameplayMode,
+    cleanHudMode,
     missionDirectorState,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
@@ -17596,6 +17706,8 @@ function applyLoadedGameState(data){
   gameLanguage = GAME_LANGUAGES[data.gameLanguage] ? data.gameLanguage : gameLanguage;
   try{localStorage.setItem('guverte-language',gameLanguage);}catch(e){}
   gameplayMode = PLAY_MODE_DEFS[data.gameplayMode] ? data.gameplayMode : 'realistic';
+  cleanHudMode = typeof data.cleanHudMode === 'boolean' ? data.cleanHudMode : cleanHudMode;
+  try{ localStorage.setItem(CLEAN_HUD_KEY, cleanHudMode ? '1' : '0'); }catch(e){}
   missionDirectorState = data.missionDirectorState && typeof data.missionDirectorState === 'object'
     ? {sceneId:'', title:'', steps:[], completed:[], ...data.missionDirectorState}
     : {sceneId:'', title:'', steps:[], completed:[]};
@@ -17736,6 +17848,8 @@ function applyLoadedGameState(data){
   }else{
     Object.keys(CREW_DEFS).forEach(key=>{ crewPortraits[key] = makeCrewPortrait(key, CREW_DEFS[key]); });
   }
+  sanitizeCrewPortraitRoster('load');
+  enforcePremiumAccessGuards('load_save');
   const sys = data.systemState || {};
   SYSTEM_STATE.consecutiveMistakes = sys.consecutiveMistakes || 0;
   SYSTEM_STATE.totalMistakes = sys.totalMistakes || 0;

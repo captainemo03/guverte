@@ -304,6 +304,8 @@ def check_character_portraits() -> None:
     require_token(section, "if(out.base === 'female') out.beard = 'clean';", JS)
     require_token(section, "support-style-female-cutout.png", JS)
     require_token(section, "support-style-male-cutout.png", JS)
+    require_token(section, "sanitizeCrewPortraitRoster", JS)
+    require_token(section, "crew_portrait_roster_sanitized", JS)
     require_token(section, "CREW_NAME_POOLS_BY_LANG", JS)
     require_token(section, "getCrewNamePoolForLanguage", JS)
     require_token(section, "Captain Emily Carter", JS)
@@ -500,6 +502,8 @@ def check_billing_products() -> None:
         fail(section, "Cruise premium cinematic is bypassing the premium gate.")
     for token in ("requirePremiumAccess", "filterPremiumLockedScenes", "isPremiumContentScene"):
         require_token(section, token, JS)
+    for token in ("refreshMonetizationState", "enforcePremiumAccessGuards", "premium_guard_applied"):
+        require_token(section, token, JS)
     for token in ("GuverteAdsNative", "syncNativeAdsState", "openAdPrivacyOptions", "showInterstitial"):
         require_token(section, token, JS)
     ads_bridge = ROOT / "android" / "app" / "src" / "main" / "java" / "com" / "captainemo" / "guverte" / "GuverteAdsBridge.java"
@@ -560,7 +564,7 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=156",
+        "index.js?v=157",
         "index.css?v=133",
     ]:
         require_token(section, token)

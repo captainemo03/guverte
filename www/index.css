@@ -3240,6 +3240,28 @@ animation:straitFlow 2.8s linear infinite;}
   box-shadow:inset 0 0 0 1px rgba(150,231,255,.18),0 0 14px rgba(44,168,221,.14);
 }
 [data-quality-status]{display:block;color:#789ab4;font-size:10px;line-height:1.45;}
+.clean-hud-toggle{position:relative;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+.clean-hud-toggle.inline{grid-template-columns:auto 1fr;}
+.clean-hud-toggle input{width:22px;height:22px;accent-color:#55d3ff;cursor:pointer;}
+.clean-hud-toggle small{grid-column:1/-1;color:#789ab4;font-size:10px;line-height:1.45;}
+#game.clean-hud #contract-bar,
+#game.clean-hud #weather-bar,
+#game.clean-hud #opsbar,
+#game.clean-hud #live-watch-feed,
+#game.clean-hud #mission-director,
+#game.clean-hud #statrow,
+#game.clean-hud #psychrow{
+  display:none!important;
+}
+#game.clean-hud #guidance-strip{
+  margin:8px 12px 0;
+  border-color:rgba(111,168,220,.16);
+  background:rgba(5,14,24,.58);
+}
+#game.clean-hud #scene-area{margin-top:8px;}
+#game.clean-hud #story{margin-top:8px;}
+#game.clean-hud #toolbar{opacity:.88;}
+#game.clean-hud #stats-summary{display:flex;}
 
 #tester-feedback-panel{
   position:fixed;
@@ -3283,6 +3305,14 @@ animation:straitFlow 2.8s linear infinite;}
 .release-health-summary span{display:grid;gap:4px;min-width:0;border:1px solid rgba(87,149,195,.2);border-radius:6px;padding:8px;background:rgba(1,15,27,.7);}
 .release-health-summary b{color:#7193ac;font-size:8px;text-transform:uppercase;}
 .release-health-summary em{overflow:hidden;color:#cce9fa;font:normal 10px/1.2 "Share Tech Mono",monospace;text-overflow:ellipsis;white-space:nowrap;}
+.release-hardening-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0;}
+.release-check-card{border:1px solid rgba(111,168,220,.18);border-radius:8px;background:rgba(5,14,24,.64);padding:8px;display:grid;gap:4px;}
+.release-check-card.pass{border-color:rgba(93,191,138,.3);}
+.release-check-card.warn{border-color:rgba(232,184,75,.35);background:rgba(42,28,8,.32);}
+.release-check-card.fail{border-color:rgba(207,98,98,.4);background:rgba(54,16,20,.36);}
+.release-check-card b{font-size:10px;color:#eff8ff;}
+.release-check-card small{font-size:9px;color:#9dbdd5;line-height:1.35;}
+.release-check-card em{font-style:normal;font:8px 'Share Tech Mono',monospace;color:#d4a017;text-transform:uppercase;}
 .tester-feedback-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:10px;}
 .tester-feedback-grid label,.tester-feedback-description{display:grid;gap:6px;color:#9fbed4;font-size:10px;letter-spacing:.04em;}
 .tester-feedback-dialog select,.tester-feedback-dialog input,.tester-feedback-dialog textarea{
@@ -3322,6 +3352,7 @@ html[data-visual-quality="high"] .home-cinematic-stage{image-rendering:auto;}
   #tester-feedback-panel{place-items:start center;padding:8px;}
   .tester-feedback-dialog{max-height:none;padding:13px;}
   .release-health-summary{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .release-hardening-summary{grid-template-columns:1fr;}
   .tester-feedback-grid{grid-template-columns:1fr;}
   .tester-feedback-actions{display:grid;grid-template-columns:1fr 1fr;}
   .tester-feedback-actions button{width:100%;}
@@ -3331,6 +3362,7 @@ html[data-visual-quality="high"] .home-cinematic-stage{image-rendering:auto;}
   .quality-controls{grid-template-columns:1fr;}
   .quality-controls button{min-height:38px;}
   .release-health-summary{grid-template-columns:1fr 1fr;}
+  .release-hardening-summary{grid-template-columns:1fr;}
   .tester-feedback-actions{grid-template-columns:1fr;}
 }
 
