@@ -11,6 +11,50 @@
 <link rel="stylesheet" href="./index.css?v=141">
 </head>
 <body>
+<script>
+(function(){
+  window.__guverteBootErrors = [];
+  function recordBootError(type, detail){
+    try{
+      window.__guverteBootErrors.push({
+        type:type,
+        detail:String(detail && (detail.message || detail) || ''),
+        at:Date.now()
+      });
+      localStorage.setItem('guverte-last-boot-error', JSON.stringify(window.__guverteBootErrors.slice(-5)));
+    }catch(e){}
+  }
+  function showBootRecovery(message){
+    if(document.getElementById('guverte-boot-recovery')) return;
+    var box = document.createElement('div');
+    box.id = 'guverte-boot-recovery';
+    box.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#061321;color:#dcecff;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Arial,sans-serif;';
+    box.innerHTML = '<div style="max-width:420px;border:1px solid #2f5f8d;border-radius:16px;background:#0b1d31;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)"><h2 style="margin:0 0 10px;color:#f3c04d">Guverte acilis kurtarma</h2><p style="line-height:1.45;margin:0 0 16px">'+message+'</p><button id="guverte-reload-btn" style="width:100%;padding:12px;margin:4px 0;border-radius:10px;border:1px solid #4b83b8;background:#147bd1;color:white;font-weight:700">Tekrar dene</button><button id="guverte-clear-btn" style="width:100%;padding:12px;margin:8px 0 0;border-radius:10px;border:1px solid #7b3440;background:#36131a;color:#ffd9df;font-weight:700">Kaydi temizle ve ac</button><small style="display:block;margin-top:12px;color:#8eb0cf">Bu ekran siyah ekran yerine hatayi toparlamak icin gosterilir.</small></div>';
+    document.body.appendChild(box);
+    document.getElementById('guverte-reload-btn').onclick = function(){ location.reload(); };
+    document.getElementById('guverte-clear-btn').onclick = function(){
+      try{
+        localStorage.removeItem('guverte-save-v2');
+        localStorage.removeItem('guverte-save-v2-backup');
+        localStorage.removeItem('guverte-save-v2-recovery');
+      }catch(e){}
+      location.reload();
+    };
+  }
+  window.addEventListener('error', function(event){
+    recordBootError('error', event.error || event.message);
+  });
+  window.addEventListener('unhandledrejection', function(event){
+    recordBootError('unhandledrejection', event.reason || 'Promise rejected');
+  });
+  window.setTimeout(function(){
+    var activeScreen = document.querySelector('.app-screen.active') || document.querySelector('#game[style*="block"]');
+    if(!window.__guverteAppReady && !activeScreen){
+      showBootRecovery('Oyun ekrani zamaninda acilmadi. Yerel kayit bozulduysa kaydi temizleyerek acabilirsin.');
+    }
+  }, 9000);
+})();
+</script>
 <canvas id="bg-canvas" style="pointer-events:none;touch-action:none;"></canvas>
 <div id="notifover"><div id="notifbox"><div id="notifico">📊</div><div id="notiftt"></div><div id="notifbd"></div></div></div>
 <div id="app">
@@ -749,7 +793,7 @@
   </div>
 </div>
 
-<script src="./index.js?v=165"></script>
+<script src="./index.js?v=166"></script>
 <script src="./release-quality.js?v=10"></script>
 </body>
 </html>

@@ -574,7 +574,7 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=165",
+        "index.js?v=166",
         "index.css?v=141",
         "release-quality.js?v=10",
         "normalizePlayerAppearance",

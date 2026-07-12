@@ -29970,3 +29970,4 @@ document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },
 initializeAdSystem();
 buildIntro();
 openHomeScreen();
+window.__guverteAppReady = true;
