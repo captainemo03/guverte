@@ -508,9 +508,9 @@ input[type=text]::placeholder{color:var(--text3);}
 #gfx-actor[data-mode="storm"]{width:154px;opacity:.9;}
 #gfx-actor[data-mode="engine"]{width:126px;right:-6px;opacity:.82;}
 #gfx-actor[data-mode="strait"]{width:138px;opacity:.88;}
-#gfx-3d{position:absolute;inset:0;z-index:3;pointer-events:none;perspective:520px;overflow:hidden;opacity:0;transition:opacity .32s ease;}
-#gfx-3d.active{opacity:.94;}
-.three-bridge-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;opacity:.82;filter:saturate(1.05) contrast(1.04);}
+#gfx-3d{position:absolute;inset:0;z-index:3;pointer-events:none;perspective:640px;overflow:hidden;opacity:0;transition:opacity .32s ease;}
+#gfx-3d.active{opacity:1;}
+.three-bridge-canvas{position:absolute;inset:-2%;width:104%;height:104%;z-index:0;display:block;opacity:.96;filter:saturate(1.12) contrast(1.1) brightness(1.03);transform:translateZ(0);}
 #gfx-foreground{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:.34;}
 .live-4k-grade{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;mix-blend-mode:screen;}
 .live-4k-grade>div{position:absolute;inset:0;pointer-events:none;}
@@ -1402,14 +1402,48 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 @keyframes modernTelegraphPulse{0%,100%{transform:rotate(-4deg);filter:brightness(.88)}50%{transform:rotate(7deg);filter:brightness(1.2)}}
 @keyframes bridgeWiperSweep{0%,78%,100%{transform:rotate(-24deg);opacity:.34}84%{transform:rotate(7deg);opacity:.86}91%{transform:rotate(-18deg);opacity:.6}}
 .bridge3d{position:absolute;inset:0;transform-style:preserve-3d;animation:bridge3dBreathe 7s ease-in-out infinite;}
+.bridge3d-immersive{
+  transform-origin:50% 62%;
+  filter:saturate(1.08) contrast(1.06);
+}
+.bridge3d-immersive::before{
+  content:"";
+  position:absolute;
+  left:-5%;
+  right:-5%;
+  bottom:-8%;
+  height:40%;
+  z-index:3;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 14% 76%,rgba(127,195,255,.12),transparent 22%),
+    radial-gradient(ellipse at 86% 72%,rgba(255,216,120,.1),transparent 20%),
+    linear-gradient(180deg,transparent,rgba(0,0,0,.3));
+  mix-blend-mode:screen;
+  animation:bridgeConsoleGlow 4.8s ease-in-out infinite;
+}
+.bridge3d-immersive::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:7;
+  pointer-events:none;
+  background:
+    linear-gradient(108deg,transparent 0 18%,rgba(230,246,255,.1) 23%,transparent 31%,rgba(230,246,255,.055) 52%,transparent 64%),
+    radial-gradient(ellipse at 50% 6%,rgba(127,195,255,.12),transparent 28%);
+  mix-blend-mode:screen;
+  opacity:.72;
+  animation:bridgeGlassAlive 7.5s ease-in-out infinite;
+}
 .bridge3d .sky{position:absolute;inset:0 0 38% 0;background:linear-gradient(180deg,rgba(26,54,82,.92),rgba(9,24,42,.72));}
 .bridge3d .sea{position:absolute;left:-12%;right:-12%;bottom:25%;height:34%;background:repeating-linear-gradient(0deg,rgba(28,86,126,.5) 0 2px,rgba(7,34,64,.42) 2px 9px);transform:rotateX(62deg) translateZ(-56px);transform-origin:50% 100%;animation:bridge3dSea 4.4s linear infinite;}
 .bridge3d .window{position:absolute;top:7%;bottom:39%;width:20%;border:2px solid rgba(156,192,220,.35);background:linear-gradient(180deg,rgba(206,229,242,.12),rgba(74,142,186,.08));box-shadow:inset 0 0 18px rgba(210,232,246,.08);overflow:hidden;}
 .bridge3d .window::before{content:"";position:absolute;left:14%;right:14%;top:22%;height:52%;background:linear-gradient(112deg,transparent 0 27%,rgba(224,242,255,.22) 38%,rgba(224,242,255,.08) 48%,transparent 62%);transform:skewX(-8deg);mix-blend-mode:screen;opacity:.72;}
 .bridge3d .window::after{content:"";position:absolute;left:24%;right:24%;top:42%;height:1px;background:linear-gradient(90deg,transparent,rgba(230,244,255,.35),transparent);opacity:.62;}
 .bridge3d .window.w1{left:8%;transform:skewX(-10deg)}.bridge3d .window.w2{left:31%;transform:skewX(-5deg)}.bridge3d .window.w3{left:54%;transform:skewX(5deg)}.bridge3d .window.w4{left:77%;transform:skewX(10deg)}
-.bridge3d .console{position:absolute;left:5%;right:5%;bottom:-7%;height:46%;background:linear-gradient(180deg,#263442,#08111c 72%,#03070d);border:1px solid rgba(127,167,196,.2);border-radius:22px 22px 0 0;transform:rotateX(62deg);transform-origin:50% 100%;box-shadow:0 -16px 46px rgba(0,0,0,.28),inset 0 18px 34px rgba(255,255,255,.03);}
+.bridge3d .console{position:absolute;left:3%;right:3%;bottom:-9%;height:50%;background:linear-gradient(180deg,#314354 0%,#101d2b 55%,#03070d 100%);border:1px solid rgba(127,167,196,.24);border-radius:28px 28px 0 0;transform:rotateX(62deg);transform-origin:50% 100%;box-shadow:0 -22px 54px rgba(0,0,0,.36),inset 0 22px 40px rgba(255,255,255,.04),inset 0 -18px 34px rgba(0,0,0,.44);}
 .bridge3d .console::before{content:"";position:absolute;left:4%;right:4%;top:12%;height:22%;border-radius:16px;background:linear-gradient(90deg,rgba(255,255,255,.05),transparent 38%,rgba(127,195,255,.07));}
+.bridge3d .console::after{content:"";position:absolute;left:12%;right:12%;top:40%;height:1px;background:linear-gradient(90deg,transparent,rgba(127,195,255,.28),transparent);box-shadow:0 18px 0 rgba(127,195,255,.08),0 34px 0 rgba(255,216,120,.06);animation:consoleScan3D 3.4s ease-in-out infinite;}
 .bridge3d-overhead{position:absolute;left:11%;right:11%;top:3.5%;height:27px;border:1px solid rgba(127,195,255,.18);border-radius:0 0 12px 12px;background:linear-gradient(180deg,rgba(28,40,53,.94),rgba(6,12,19,.88));box-shadow:0 14px 24px rgba(0,0,0,.22),inset 0 -1px 0 rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;gap:7px;z-index:5;transform:translateZ(70px);}
 .bridge3d-overhead span{min-width:34px;height:13px;display:grid;place-items:center;border-radius:4px;border:1px solid rgba(127,195,255,.22);background:rgba(2,10,18,.72);color:#bde7ff;font:5.8px 'Share Tech Mono',monospace;letter-spacing:.5px;}
 .bridge3d-overhead span:nth-child(2){color:#a8f5c2;border-color:rgba(93,191,138,.34);box-shadow:0 0 8px rgba(93,191,138,.12);}
@@ -1455,6 +1489,11 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 .bridge3d-vhf .rx{position:absolute;left:13px;right:12px;bottom:9px;height:6px;background:repeating-linear-gradient(90deg,rgba(127,195,255,.8) 0 8px,transparent 8px 13px);animation:vhfBars 1.1s ease-in-out infinite;}
 .bridge3d-harbor .sky{background:linear-gradient(180deg,rgba(33,57,75,.9),rgba(14,26,40,.78));}.bridge3d-harbor .sea::after{content:"";position:absolute;left:10%;right:10%;top:8px;height:3px;background:repeating-linear-gradient(90deg,rgba(255,196,88,.8) 0 6px,transparent 6px 22px);filter:blur(.4px);animation:terminalTwinkle 2.5s infinite;}
 .bridge3d-storm{animation:bridge3dStorm 1.6s ease-in-out infinite;}.bridge3d-storm .sky{background:linear-gradient(180deg,rgba(18,25,36,.96),rgba(5,9,16,.86));}.bridge3d-storm::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(105deg,rgba(230,240,255,.13) 0 1px,transparent 2px 16px);animation:rainSweep .45s linear infinite;mix-blend-mode:screen;}
+.bridge3d-engine .sky{background:linear-gradient(180deg,rgba(31,24,18,.96),rgba(5,9,13,.88));}
+.bridge3d-engine .sea{opacity:.22;background:repeating-linear-gradient(90deg,rgba(255,170,90,.08) 0 3px,transparent 3px 18px);animation:heatHaze 1.2s ease-in-out infinite;}
+.bridge3d-engine .window{border-color:rgba(255,170,90,.18);background:linear-gradient(180deg,rgba(70,42,26,.16),rgba(18,10,6,.18));}
+.bridge3d-engine .console{background:linear-gradient(180deg,#3a2e26,#15120f 58%,#050506);box-shadow:0 -20px 56px rgba(0,0,0,.38),inset 0 18px 34px rgba(255,170,90,.04);}
+.bridge3d-engine .console::after{background:linear-gradient(90deg,transparent,rgba(255,170,90,.28),transparent);}
 .bridge3d-tug{position:absolute;left:8%;bottom:31%;width:54px;height:20px;border-radius:18px 22px 8px 8px;background:linear-gradient(180deg,#1d3a55,#07131f);box-shadow:0 0 18px rgba(127,195,255,.12);transform:translateZ(70px) rotateX(8deg);animation:bridge3dTug 7.5s ease-in-out infinite;z-index:3;}
 .bridge3d-tug i{position:absolute;left:20px;top:-11px;width:18px;height:13px;border-radius:4px 4px 2px 2px;background:#d8e6ee;box-shadow:inset 0 -5px 0 rgba(48,76,96,.32);}
 .bridge3d-tug b{position:absolute;right:3px;top:3px;width:5px;height:5px;border-radius:50%;background:#ffd783;box-shadow:0 0 13px rgba(255,216,120,.8);animation:alarm-flash 1s infinite;}
@@ -1566,6 +1605,9 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 @keyframes bridge3dTug{0%,100%{transform:translate3d(0,0,70px) rotateX(8deg) scale(.9);}50%{transform:translate3d(120px,-7px,70px) rotateX(8deg) scale(1.08);}}
 @keyframes bridge3dWave{0%,100%{transform:translateX(0) scaleY(.8);opacity:.35;}50%{transform:translateX(36px) scaleY(1.18);opacity:.82;}}
 @keyframes bridge3dLightning{0%,87%,92%,100%{background:rgba(210,230,255,0);}88%,90%{background:rgba(210,230,255,.2);}}
+@keyframes bridgeConsoleGlow{0%,100%{opacity:.42;transform:translateY(0);}50%{opacity:.78;transform:translateY(-3px);}}
+@keyframes bridgeGlassAlive{0%,100%{opacity:.48;transform:translateX(-2px);}50%{opacity:.78;transform:translateX(6px);}}
+@keyframes consoleScan3D{0%,100%{opacity:.28;transform:translateX(-4%);}50%{opacity:.76;transform:translateX(4%);}}
 @keyframes satDishAim{0%,100%{transform:rotate(-12deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-1px);}}
 @keyframes satBeamPulse{0%,100%{opacity:.18;transform:scale(.94);}50%{opacity:.58;transform:scale(1.08);}}
 @keyframes heliDrift{0%,100%{transform:translate3d(0,0,48px) rotateY(8deg);}50%{transform:translate3d(34px,8px,48px) rotateY(8deg);}}
@@ -3283,6 +3325,10 @@ animation:straitFlow 2.8s linear infinite;}
   .pval{font-size:8px;}
   #scene-area{flex:0 0 auto;}
   #scene-graphic{min-height:clamp(100px,28svh,170px);}
+  #gfx-3d{perspective:520px;}
+  .three-bridge-canvas{inset:-1%;width:102%;height:102%;opacity:.9;}
+  .bridge3d-immersive::before{bottom:-13%;height:34%;opacity:.55;}
+  .bridge3d-immersive::after{opacity:.48;}
   #scene-sub{padding:3px 10px 4px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bdg{font-size:7px;padding:2px 6px;}
   #lbd{bottom:18px;}
@@ -3348,6 +3394,10 @@ animation:straitFlow 2.8s linear infinite;}
 /* mobile-landscape-fit: keep short phone/tablet landscape sessions playable. */
 @media (orientation: landscape) and (max-height: 500px) and (max-width: 960px){
   .modern-bridge-overlay{opacity:.62;}
+  #gfx-3d{perspective:420px;}
+  .three-bridge-canvas{inset:-1%;width:102%;height:102%;opacity:.86;}
+  .bridge3d-immersive::before{display:none;}
+  .bridge3d-immersive::after{opacity:.36;}
   .bridge3d-overhead{left:16%;right:16%;top:2%;height:20px;gap:4px;}
   .bridge3d-overhead span{min-width:26px;height:10px;font-size:4.8px;}
   .bridge3d-wipers{top:8%;bottom:45%;opacity:.55;}

@@ -8911,7 +8911,7 @@ function getScene3DBridgeOverlay(sc){
   const telegraph = flags.harborApproach ? 'DEAD SLOW AHEAD' : flags.storm ? 'HALF AHEAD' : flags.engineRoom ? 'STAND BY' : 'FULL AWAY';
   const cpa = isDistress ? '0.7' : flags.harborApproach ? '1.1' : flags.storm ? '1.4' : '2.8';
   const tcpa = isDistress ? '08' : flags.harborApproach ? '14' : flags.storm ? '19' : '31';
-  const cls = ['bridge3d',
+  const cls = ['bridge3d','bridge3d-immersive',
     flags.harborApproach?'bridge3d-harbor':'',
     flags.storm?'bridge3d-storm':'',
     flags.engineRoom?'bridge3d-engine':'',
@@ -9003,6 +9003,75 @@ function addThreeCylinder(THREE, scene, radius, depth, pos, color, emissive=0x00
   return mesh;
 }
 
+function addThreeShipModel(THREE, scene, pos, scale=1, hullColor=0x18344a, cabinColor=0xdce8ef, lightColor=0xffd783){
+  const group = new THREE.Group();
+  const hullMat = new THREE.MeshStandardMaterial({color:hullColor, emissive:0x02070a, roughness:.56, metalness:.24});
+  const deckMat = new THREE.MeshStandardMaterial({color:0x7f95a5, emissive:0x071018, roughness:.45, metalness:.16});
+  const cabinMat = new THREE.MeshStandardMaterial({color:cabinColor, emissive:0x102033, roughness:.36, metalness:.12});
+  const lampMat = new THREE.MeshStandardMaterial({color:lightColor, emissive:lightColor, roughness:.18});
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(.62,.12,.18), hullMat);
+  const bow = new THREE.Mesh(new THREE.ConeGeometry(.105,.24,4), hullMat);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(.48,.035,.16), deckMat);
+  const house = new THREE.Mesh(new THREE.BoxGeometry(.22,.16,.14), cabinMat);
+  const stack = new THREE.Mesh(new THREE.BoxGeometry(.055,.17,.055), deckMat);
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(.026, 12, 8), lampMat);
+  hull.position.set(0,0,0);
+  bow.position.set(.42,0,0);
+  bow.rotation.z = -Math.PI/2;
+  bow.rotation.y = Math.PI/4;
+  deck.position.set(-.02,.08,0);
+  house.position.set(.06,.19,0);
+  stack.position.set(-.18,.24,0);
+  lamp.position.set(.26,.25,.045);
+  group.add(hull,bow,deck,house,stack,lamp);
+  group.position.set(pos[0], pos[1], pos[2]);
+  group.scale.setScalar(scale);
+  scene.add(group);
+  return group;
+}
+
+function addThreeBridgeBow(THREE, scene, flags){
+  const group = new THREE.Group();
+  const deckMat = new THREE.MeshStandardMaterial({color:flags.storm?0x172638:0x203448, emissive:0x030912, roughness:.62, metalness:.2, transparent:true, opacity:.9});
+  const railMat = new THREE.MeshStandardMaterial({color:0x9fb6c5, emissive:0x13283a, roughness:.34, metalness:.34});
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(1.55,.045,1.18), deckMat);
+  deck.position.set(0,-.08,0);
+  deck.rotation.x = -.08;
+  group.add(deck);
+  [-.58,.58].forEach((x)=>{
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(.025,.26,1.05), railMat);
+    rail.position.set(x,.08,-.04);
+    rail.rotation.z = x < 0 ? -.05 : .05;
+    group.add(rail);
+  });
+  for(let i=0;i<4;i++){
+    const stanchion = new THREE.Mesh(new THREE.BoxGeometry(.028,.24,.028), railMat);
+    stanchion.position.set(-.55+i*.37,.09,-.46);
+    group.add(stanchion);
+  }
+  const center = new THREE.Mesh(new THREE.BoxGeometry(.055,.1,.72), railMat);
+  center.position.set(0,.02,-.18);
+  group.add(center);
+  group.position.set(0,-.64,-.95);
+  group.rotation.x = -.18;
+  scene.add(group);
+  return group;
+}
+
+function addThreeRadarSweep(THREE, scene, center, rotationY=-.18, rotationX=-.08){
+  const pivot = new THREE.Group();
+  const sweepGeo = new THREE.BoxGeometry(.25,.01,.01);
+  sweepGeo.translate(.125,0,0);
+  const sweepMat = new THREE.MeshStandardMaterial({color:0x81f7b8, emissive:0x3ddf8a, roughness:.35, metalness:.12});
+  const sweep = new THREE.Mesh(sweepGeo, sweepMat);
+  pivot.position.set(center[0], center[1], center[2]);
+  pivot.rotation.y = rotationY;
+  pivot.rotation.x = rotationX;
+  pivot.add(sweep);
+  scene.add(pivot);
+  return pivot;
+}
+
 async function renderThreeBridgeScene(sc){
   const mount = document.getElementById('gfx-3d');
   const canvas = mount?.querySelector('.three-bridge-canvas');
@@ -9030,23 +9099,28 @@ async function renderThreeBridgeScene(sc){
   threeBridgeRuntime.renderer = renderer;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, width/height, .1, 100);
-  camera.position.set(0, .92, 4.2);
-  camera.lookAt(0, -.08, .05);
+  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
+  const flags = getScene3DFeatureFlags(sc);
+  const ecrFocus = flags.engineRoom && !flags.harborApproach && !flags.storm;
+  const storm = flags.storm;
+  const harbor = flags.harborApproach;
+  const cinematicScale = width > 900 ? 1 : width > 560 ? .92 : .82;
+  const camera = new THREE.PerspectiveCamera(ecrFocus ? 35 : 38, width/height, .1, 100);
+  const cameraBase = {x:ecrFocus ? -.55 : 0, y:ecrFocus ? .84 : .82, z:ecrFocus ? 3.45 : 3.55};
+  const cameraTarget = new THREE.Vector3(ecrFocus ? -1.05 : 0, ecrFocus ? -.08 : -.12, ecrFocus ? -.52 : -.04);
+  camera.position.set(cameraBase.x, cameraBase.y, cameraBase.z);
+  camera.lookAt(cameraTarget);
   scene.add(new THREE.HemisphereLight(0xbddfff, 0x0a1018, 1.8));
   const key = new THREE.DirectionalLight(0x9fd4ff, 1.2);
   key.position.set(-2, 3, 4);
   scene.add(key);
 
-  const blob = `${sc?.id||''} ${sc?.gfx||''} ${sc?.loc||''} ${sc?.sub||''} ${sc?.text||''}`.toLowerCase();
-  const flags = getScene3DFeatureFlags(sc);
   const hot = /mayday|distress|alarm|yangin|fire|blackout|korsan|pirate/.test(blob);
-  const storm = flags.storm;
-  const harbor = flags.harborApproach;
   const tugOps = flags.harborApproach || flags.mooring;
   const stormObjects = [];
   const harborObjects = [];
   const trainingObjects = [];
+  const ambientObjects = [];
 
   const seaGeo = new THREE.PlaneGeometry(9, 4, 18, 5);
   const seaMat = new THREE.MeshStandardMaterial({color:storm?0x102236:harbor?0x173854:0x174a72, roughness:.9, metalness:.02, transparent:true, opacity:.72});
@@ -9054,6 +9128,19 @@ async function renderThreeBridgeScene(sc){
   sea.rotation.x = -Math.PI/2.6;
   sea.position.set(0, -.58, -2.2);
   scene.add(sea);
+
+  const bridgeBow = addThreeBridgeBow(THREE, scene, flags);
+  bridgeBow.scale.setScalar(cinematicScale);
+  ambientObjects.push({mesh:bridgeBow, kind:'ownBow', phase:.1, baseY:bridgeBow.position.y});
+  [
+    {pos:[-2.75,-.38,-2.75], scale:.52, delay:0, color:0x153c5a},
+    {pos:[2.45,-.42,-2.45], scale:.42, delay:1.7, color:0x3d5363},
+    {pos:[.35,-.47,-3.05], scale:.34, delay:3.1, color:0x24384a}
+  ].forEach((cfg, i)=>{
+    const ship = addThreeShipModel(THREE, scene, cfg.pos, cfg.scale, cfg.color, i===1?0xeaf2f7:0xdce8ef, i===2?0x81f7b8:0xffd783);
+    ship.rotation.y = i===1 ? Math.PI + .08 : -.12;
+    ambientObjects.push({mesh:ship, kind:'trafficShip', phase:cfg.delay, baseX:ship.position.x, baseY:ship.position.y, drift:i===1?-1:1});
+  });
 
   for(let i=-2;i<=2;i++){
     const frame = addThreeBox(THREE, scene, [.035, 1.55, .035], [i*.72, .28, -1.25], 0x284056);
@@ -9091,8 +9178,7 @@ async function renderThreeBridgeScene(sc){
   radarDisc.rotation.y = -.18;
   radarDisc.rotation.x = -.08;
   scene.add(radarDisc);
-  const sweep = addThreeBox(THREE, scene, [.26, .01, .01], [1.15, -.47, -.01], 0x81f7b8, 0x3ddf8a);
-  sweep.rotation.y = -.18;
+  const radarSweep = addThreeRadarSweep(THREE, scene, [1.07, -.47, -.012], -.18, -.08);
 
   const conning = addThreeBox(THREE, scene, [.94, .38, .08], [0, -.32, -.17], 0x081521, 0x082238);
   conning.rotation.x = -.1;
@@ -9112,6 +9198,20 @@ async function renderThreeBridgeScene(sc){
   trainingObjects.push({mesh:telegraphLever, kind:'telegraph', phase:.4, baseZ:telegraphLever.rotation.z});
 
   if(harbor){
+    const crane = new THREE.Group();
+    const craneMat = new THREE.MeshStandardMaterial({color:0xffc458, emissive:0x4a2b08, roughness:.5, metalness:.22});
+    const mast = new THREE.Mesh(new THREE.BoxGeometry(.045,.82,.045), craneMat);
+    const boom = new THREE.Mesh(new THREE.BoxGeometry(.74,.035,.035), craneMat);
+    const hookLine = new THREE.Mesh(new THREE.BoxGeometry(.009,.42,.009), craneMat);
+    mast.position.set(0,0,0);
+    boom.position.set(.34,.32,0);
+    boom.rotation.z = -.18;
+    hookLine.position.set(.62,.08,0);
+    crane.add(mast,boom,hookLine);
+    crane.position.set(2.42,-.16,-1.72);
+    crane.rotation.y = -.38;
+    scene.add(crane);
+    harborObjects.push({mesh:crane, kind:'crane', phase:.3, baseY:crane.position.y});
     for(let i=0;i<7;i++){
       const light = addThreeBox(THREE, scene, [.035,.035,.035], [-2.1+i*.7, .04, -1.62], 0xffc458, 0xffa52b);
       light.scale.set(1,1,1);
@@ -9333,17 +9433,30 @@ async function renderThreeBridgeScene(sc){
   const animate = (now)=>{
     if(token !== threeBridgeRuntime.token) return;
     const t = (now - started) / 1000;
-    sweep.rotation.z = t * 2.2;
+    radarSweep.rotation.z = t * 2.35;
     sea.position.x = Math.sin(t*.7) * .05;
     sea.position.y = -.58 + Math.sin(t*1.3) * (storm ? .035 : .012);
     consoleBase.rotation.z = Math.sin(t*.8) * (storm ? .012 : .003);
     if(storm){
       camera.rotation.z = Math.sin(t*1.6) * .012;
-      camera.position.y = .92 + Math.sin(t*1.25) * .035;
+      camera.position.y = cameraBase.y + Math.sin(t*1.25) * .035;
+      camera.position.x = cameraBase.x + Math.sin(t*.9) * .025;
     }else{
       camera.rotation.z = Math.sin(t*.45) * .003;
-      camera.position.y = .92 + Math.sin(t*.65) * .006;
+      camera.position.y = cameraBase.y + Math.sin(t*.65) * (ecrFocus ? .003 : .006);
+      camera.position.x = cameraBase.x + Math.sin(t*.45) * (ecrFocus ? .006 : .01);
     }
+    camera.lookAt(cameraTarget);
+    ambientObjects.forEach((obj)=>{
+      if(obj.kind === 'ownBow'){
+        obj.mesh.position.y = obj.baseY + Math.sin(t*1.15 + obj.phase) * (storm ? .035 : .012);
+        obj.mesh.rotation.z = Math.sin(t*.9 + obj.phase) * (storm ? .018 : .006);
+      }else if(obj.kind === 'trafficShip'){
+        obj.mesh.position.x = obj.baseX + Math.sin(t*.22 + obj.phase) * .18 + obj.drift * t * .012;
+        obj.mesh.position.y = obj.baseY + Math.sin(t*.85 + obj.phase) * .018;
+        obj.mesh.rotation.z = Math.sin(t*.75 + obj.phase) * .012;
+      }
+    });
     stormObjects.forEach((obj)=>{
       if(obj.kind === 'flash'){
         obj.mesh.material.opacity = (Math.sin(t*2.4) > .985) ? .34 : 0;
@@ -9367,6 +9480,9 @@ async function renderThreeBridgeScene(sc){
       }else if(obj.kind === 'towline'){
         obj.mesh.position.x = obj.baseX + Math.sin(t*.55)*.18;
         obj.mesh.rotation.z = .08 + Math.sin(t*2.2)*.025;
+      }else if(obj.kind === 'crane'){
+        obj.mesh.position.y = obj.baseY + Math.sin(t*.9 + obj.phase)*.018;
+        obj.mesh.rotation.z = Math.sin(t*.55 + obj.phase)*.018;
       }
     });
     trainingObjects.forEach((obj)=>{
