@@ -1501,10 +1501,33 @@ button.hitbox-standard::after,.interaction-hotspot.hitbox-standard::after,.devic
 .bridge3d-wave{position:absolute;left:-20%;right:-20%;height:22px;border-top:2px solid rgba(220,238,255,.42);border-radius:50%;filter:blur(.2px);z-index:3;animation:bridge3dWave 3.2s ease-in-out infinite;}
 .bridge3d-wave.w1{bottom:31%;animation-delay:-.8s}.bridge3d-wave.w2{bottom:38%;opacity:.7;animation-delay:-1.8s}
 .bridge3d-lightning{position:absolute;inset:0;background:rgba(210,230,255,0);z-index:5;mix-blend-mode:screen;animation:bridge3dLightning 5.6s steps(1,end) infinite;}
-.bridge3d-ecr,.bridge3d-mooring-deck,.bridge3d-survival-station,.bridge3d-fire-room,.bridge3d-route-table,.bridge3d-manifold-panel,.bridge3d-premium-ops,.bridge3d-starlink,.bridge3d-helicopter,.bridge3d-helipad,.bridge3d-cargo-lift{position:absolute;border:1px solid rgba(127,195,255,.24);border-radius:10px;background:linear-gradient(180deg,rgba(10,18,28,.84),rgba(2,7,12,.76));box-shadow:0 12px 26px rgba(0,0,0,.24),inset 0 0 0 1px rgba(255,255,255,.035);z-index:4;pointer-events:none;overflow:hidden;}
+.bridge3d-ecr,.bridge3d-mooring-deck,.bridge3d-survival-station,.bridge3d-fire-room,.bridge3d-route-table,.bridge3d-manifold-panel,.bridge3d-premium-ops,.bridge3d-starlink,.bridge3d-helicopter,.bridge3d-helipad,.bridge3d-cargo-lift,.bridge3d-watch-traffic,.bridge3d-deckops-panel,.bridge3d-life-space{position:absolute;border:1px solid rgba(127,195,255,.24);border-radius:10px;background:linear-gradient(180deg,rgba(10,18,28,.84),rgba(2,7,12,.76));box-shadow:0 12px 26px rgba(0,0,0,.24),inset 0 0 0 1px rgba(255,255,255,.035);z-index:4;pointer-events:none;overflow:hidden;}
 .bridge3d-ecr{left:7%;top:18%;width:126px;height:74px;padding:9px;display:flex;align-items:end;gap:7px;transform:rotateY(14deg) translateZ(40px);}
-.bridge3d-ecr b,.bridge3d-route-table b,.bridge3d-manifold-panel b,.bridge3d-premium-ops b,.bridge3d-survival-station b,.bridge3d-fire-room b,.bridge3d-mooring-deck b,.bridge3d-starlink b,.bridge3d-helicopter b,.bridge3d-cargo-lift b{position:absolute;left:8px;top:6px;color:#bde7ff;font:7px 'Share Tech Mono',monospace;letter-spacing:.7px;}
+.bridge3d-ecr b,.bridge3d-route-table b,.bridge3d-manifold-panel b,.bridge3d-premium-ops b,.bridge3d-survival-station b,.bridge3d-fire-room b,.bridge3d-mooring-deck b,.bridge3d-starlink b,.bridge3d-helicopter b,.bridge3d-cargo-lift b,.bridge3d-deckops-panel b,.bridge3d-life-space b{position:absolute;left:8px;top:6px;color:#bde7ff;font:7px 'Share Tech Mono',monospace;letter-spacing:.7px;}
 .bridge3d-ecr span{width:18px;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,#ff6b6b,#ffd45a);animation:engineGauge 1s ease-in-out infinite;}.bridge3d-ecr span:nth-child(2){height:22px}.bridge3d-ecr span:nth-child(3){height:38px;animation-delay:.14s}.bridge3d-ecr span:nth-child(4){height:30px;animation-delay:.28s}.bridge3d-ecr i{position:absolute;right:11px;top:11px;width:10px;height:10px;border-radius:50%;background:#ff5858;box-shadow:0 0 16px rgba(255,88,88,.55);animation:alarm-flash .7s infinite;}
+.bridge3d-watch .sky{background:linear-gradient(180deg,rgba(20,44,70,.94),rgba(6,18,32,.8));}
+.bridge3d-watch-traffic{left:7%;top:18%;width:134px;height:70px;transform:rotateY(13deg) translateZ(42px);}
+.bridge3d-watch-traffic .note{position:absolute;left:8px;top:7px;color:#bde7ff;font:7px 'Share Tech Mono',monospace;letter-spacing:.7px;}
+.bridge3d-watch-traffic .tgt{position:absolute;width:7px;height:7px;border-radius:50%;background:#81f7b8;box-shadow:0 0 10px rgba(129,247,184,.55);animation:aisDrift 4.2s ease-in-out infinite;}
+.bridge3d-watch-traffic .tgt.a{left:34px;top:42px}.bridge3d-watch-traffic .tgt.b{right:28px;top:30px;animation-delay:-1.2s;background:#ffd783;box-shadow:0 0 10px rgba(255,216,120,.5);}
+.bridge3d-watch-traffic i{position:absolute;left:16px;right:16px;bottom:14px;height:1px;background:linear-gradient(90deg,transparent,rgba(129,247,184,.72),transparent);animation:radarSweepLive 2.6s linear infinite;}
+.bridge3d-deckops .console{background:linear-gradient(180deg,#2d3b44,#0e1720 60%,#03070d);}
+.bridge3d-deckops-panel{left:9%;right:9%;bottom:23%;height:76px;transform:rotateX(58deg) translateZ(52px);background:linear-gradient(180deg,rgba(35,46,55,.92),rgba(7,13,19,.84));}
+.bridge3d-deckops-panel b{color:#ffd783;}
+.bridge3d-deckops-panel .hold{position:absolute;left:14%;right:14%;bottom:12px;height:26px;border:1px solid rgba(127,195,255,.2);border-radius:6px;background:repeating-linear-gradient(90deg,rgba(90,114,132,.72) 0 26px,rgba(33,47,60,.82) 26px 30px);}
+.bridge3d-deckops-panel .box{position:absolute;bottom:41px;width:32px;height:18px;border-radius:3px;background:#2d5f96;box-shadow:0 0 10px rgba(127,195,255,.12);animation:containerPulse 2.8s ease-in-out infinite;}
+.bridge3d-deckops-panel .b1{left:27%;background:#9b3b34}.bridge3d-deckops-panel .b2{left:43%;animation-delay:.3s}.bridge3d-deckops-panel .b3{left:59%;background:#c78331;animation-delay:.6s}
+.bridge3d-deckops-panel .lash{position:absolute;left:22%;right:22%;height:2px;background:linear-gradient(90deg,transparent,#d6c49b,#ff6b6b,#d6c49b,transparent);box-shadow:0 0 8px rgba(255,216,120,.16);animation:lineStrain .68s ease-in-out infinite;}
+.bridge3d-deckops-panel .l1{bottom:37px;transform:rotate(-5deg)}.bridge3d-deckops-panel .l2{bottom:31px;transform:rotate(5deg);animation-delay:.25s}
+.bridge3d-life .sky{background:linear-gradient(180deg,rgba(36,27,20,.95),rgba(7,10,14,.86));}
+.bridge3d-life .window{border-color:rgba(255,216,120,.16);background:linear-gradient(180deg,rgba(80,56,32,.13),rgba(14,10,6,.16));}
+.bridge3d-life-space{right:8%;top:16%;width:150px;height:86px;transform:rotateY(-13deg) translateZ(48px);background:linear-gradient(180deg,rgba(36,28,21,.9),rgba(8,8,10,.78));border-color:rgba(255,216,120,.26);}
+.bridge3d-life-space b{color:#ffe2a2;}
+.bridge3d-life-space .table{position:absolute;left:16px;right:14px;bottom:18px;height:14px;border-radius:50%;background:linear-gradient(180deg,#60442c,#1b120b);box-shadow:0 10px 18px rgba(0,0,0,.28);}
+.bridge3d-life-space .cup{position:absolute;left:52px;bottom:31px;width:14px;height:16px;border-radius:3px 3px 6px 6px;background:#f2e2c4;box-shadow:0 0 10px rgba(255,216,120,.14);}
+.bridge3d-life-space .bunk{position:absolute;right:18px;bottom:34px;width:46px;height:16px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#2d5f96,#172638);}
+.bridge3d-life-space .steam{position:absolute;left:57px;bottom:50px;width:7px;height:22px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(230,240,255,.38),transparent 70%);filter:blur(1px);animation:steamRise 2.2s ease-in-out infinite;}
+.bridge3d-life-space .s2{left:64px;animation-delay:.6s;}
 .bridge3d-ecr-pro{
   left:5%;
   top:14%;
@@ -1878,6 +1901,7 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes sprayPulse{0%,100%{opacity:.14;}50%{opacity:.28;}}
 @keyframes radarSweepLive{0%{transform:translateX(-34px);}100%{transform:translateX(86px);}}
 @keyframes aisDrift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(10px,-6px) scale(1.08);}}
+@keyframes containerPulse{0%,100%{filter:brightness(.9);transform:translateY(0)}50%{filter:brightness(1.18);transform:translateY(-1px)}}
 @keyframes wetDeckShimmer{0%,100%{opacity:.16;transform:translateX(0);}50%{opacity:.32;transform:translateX(10px);}}
 @keyframes saltStreaks{0%{transform:translateX(0);}100%{transform:translateX(-18px);}}
 
@@ -3412,6 +3436,20 @@ animation:straitFlow 2.8s linear infinite;}
   .bridge3d-ais-list{display:none;}
   .bridge3d-button-bank{left:25%;right:25%;bottom:13%;gap:4px;}
   .bridge3d-button-bank i{width:12px;height:7px;}
+  .bridge3d-watch-traffic{left:5%;top:16%;width:92px;height:50px;transform:rotateY(13deg) translateZ(28px);}
+  .bridge3d-watch-traffic .note{font-size:5.2px;}
+  .bridge3d-deckops-panel{left:14%;right:14%;bottom:20%;height:48px;transform:rotateX(58deg) translateZ(36px);}
+  .bridge3d-deckops-panel b,.bridge3d-life-space b{font-size:5.2px;}
+  .bridge3d-deckops-panel .hold{height:16px;bottom:8px;}
+  .bridge3d-deckops-panel .box{width:22px;height:11px;bottom:28px;}
+  .bridge3d-deckops-panel .lash{height:1px;}
+  .bridge3d-deckops-panel .l1{bottom:24px}.bridge3d-deckops-panel .l2{bottom:20px}
+  .bridge3d-life-space{right:5%;top:14%;width:102px;height:58px;transform:rotateY(-13deg) translateZ(32px);}
+  .bridge3d-life-space .table{left:11px;right:10px;bottom:12px;height:9px;}
+  .bridge3d-life-space .cup{left:37px;bottom:21px;width:9px;height:11px;}
+  .bridge3d-life-space .bunk{right:12px;bottom:23px;width:31px;height:10px;}
+  .bridge3d-life-space .steam{left:40px;bottom:34px;width:5px;height:14px;}
+  .bridge3d-life-space .s2{left:46px;}
   .modern-bridge-window-grid{top:4%;height:42%;}
   .modern-bridge-console{bottom:3%;height:42%;grid-template-columns:1.2fr 1fr 1fr;gap:5px;padding:7px;}
   .modern-bridge-panel{min-height:44px;}
