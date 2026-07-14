@@ -8,7 +8,7 @@
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=143">
+<link rel="stylesheet" href="./index.css?v=147">
 </head>
 <body>
 <script>
@@ -298,6 +298,7 @@
         </select>
       </div>
       <button id="home-sound-btn" class="sound-option-btn" onclick="toggleSound()">🔊 Ses Acik</button>
+      <button id="home-vibration-btn" class="sound-option-btn" onclick="toggleVibration()">VIB Titresim Acik</button>
       <button type="button" class="sound-option-btn privacy-option-btn" onclick="openAdPrivacyOptions()">Reklam Gizlilik Tercihleri</button>
       <div class="home-option-block release-quality-option">
         <span data-i18n="quality.title" data-i18n-fallback="Gorsel Kalite">Gorsel Kalite</span>
@@ -460,6 +461,7 @@
   <div class="fcard intro-audio-card">
     <div class="fcard-t">Ses Ayari</div>
     <button id="sound-btn" class="sound-option-btn" onclick="toggleSound()">🔊 Ses Acik</button>
+    <button id="vibration-btn" class="sound-option-btn" onclick="toggleVibration()">VIB Titresim Acik</button>
     <div class="audio-mixer" data-audio-mixer="setup"></div>
     <div class="mode-hint">Ortam sesi, VHF cizirtisi, alarm ve sahne efektlerini buradan acip kapat.</div>
   </div>
@@ -527,6 +529,7 @@
       <div class="game-settings-card">
         <b data-i18n="ui.audioSettings" data-i18n-fallback="Ses">Ses</b>
         <button id="game-settings-sound-btn" class="sound-option-btn compact" onclick="toggleSound()">🔊 Ses Acik</button>
+        <button id="game-settings-vibration-btn" class="sound-option-btn compact" onclick="toggleVibration()">VIB Titresim Acik</button>
         <div class="audio-mixer" data-audio-mixer="game"></div>
       </div>
       <div class="game-settings-card">
@@ -793,7 +796,7 @@
   </div>
 </div>
 
-<script src="./index.js?v=168"></script>
+<script src="./index.js?v=172"></script>
 <script src="./release-quality.js?v=10"></script>
 </body>
 </html>

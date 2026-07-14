@@ -10143,6 +10143,42 @@ const DYNAMIC_TRANSLATIONS={
     ['Mesaj','消息'],['Rehber','联系人'],['Uygulama','应用'],['Son kayit','最近存档'],['Sahne','场景'],['SAHNE','场景'],['sahne','场景'],['ay','月'],['mod','模式'],['Yok','无'],['Gemi','船舶'],['Kayitli gemi','已保存船舶']
   ]
 };
+Object.assign(I18N.en, {
+  'ui.vibration':'Danger Vibration',
+  'ui.vibrationOn':'Danger Vibration On',
+  'ui.vibrationOff':'Danger Vibration Off',
+  'ui.vibrationHint':'The phone vibrates during alarms, emergencies and critical danger moments.'
+});
+Object.assign(I18N.es, {
+  'ui.vibration':'Vibracion de peligro',
+  'ui.vibrationOn':'Vibracion de peligro activada',
+  'ui.vibrationOff':'Vibracion de peligro desactivada',
+  'ui.vibrationHint':'El telefono vibra durante alarmas, emergencias y momentos criticos.'
+});
+Object.assign(I18N.de, {
+  'ui.vibration':'Gefahr-Vibration',
+  'ui.vibrationOn':'Gefahr-Vibration an',
+  'ui.vibrationOff':'Gefahr-Vibration aus',
+  'ui.vibrationHint':'Das Telefon vibriert bei Alarmen, Notfallen und kritischen Gefahrmomenten.'
+});
+Object.assign(I18N.fr, {
+  'ui.vibration':'Vibration de danger',
+  'ui.vibrationOn':'Vibration de danger activee',
+  'ui.vibrationOff':'Vibration de danger coupee',
+  'ui.vibrationHint':'Le telephone vibre pendant les alarmes, urgences et moments critiques.'
+});
+Object.assign(I18N.zh, {
+  'ui.vibration':'危险振动',
+  'ui.vibrationOn':'危险振动开启',
+  'ui.vibrationOff':'危险振动关闭',
+  'ui.vibrationHint':'警报、紧急情况和关键危险时刻手机会振动。'
+});
+Object.assign(I18N.ru, {
+  'ui.vibration':'Вибрация при опасности',
+  'ui.vibrationOn':'Вибрация при опасности включена',
+  'ui.vibrationOff':'Вибрация при опасности выключена',
+  'ui.vibrationHint':'Телефон вибрирует при тревоге, аварии и критической опасности.'
+});
 function t(key,fallback=''){
   if(gameLanguage==='tr') return fallback || key;
   return I18N[gameLanguage]?.[key] || I18N.en?.[key] || fallback || key;
@@ -12537,6 +12573,7 @@ function applyEffect(e,opts={}){
   ];
   dangerChecks.forEach(d=>{
     if(d.val<=20 && d.prev>20){
+      vibrateDanger('danger', 1600);
       setTimeout(()=>showNotif('!','TEHLIKE!', d.name+' kritik seviyede - '+d.val+' kaldi!'), 300);
     }
   });
@@ -14722,6 +14759,9 @@ function applyLanguageUI(){
   document.querySelectorAll('#sound-btn,#home-sound-btn,#game-settings-sound-btn').forEach(btn=>{
     if(btn) btn.textContent = soundEnabled ? `🔊 ${t('ui.soundOn','Ses Acik')}` : `🔇 ${t('ui.soundOff','Ses Kapali')}`;
   });
+  document.querySelectorAll('#vibration-btn,#home-vibration-btn,#game-settings-vibration-btn').forEach(btn=>{
+    if(btn) btn.textContent = vibrationEnabled ? `VIB ${t('ui.vibrationOn','Titresim Acik')}` : `VIB ${t('ui.vibrationOff','Titresim Kapali')}`;
+  });
   localizeAndSetText('continue-btn','ui.continue','Kayittan Devam Et');
   localizeAndSetText('delete-save-btn','ui.deleteSave','Kaydi Sil');
   localizeAndSetText('home-continue-btn','ui.continue','Kayittan Devam Et');
@@ -14797,6 +14837,7 @@ function applyOneShotSceneFx(fx, hold=950, keepSchedule=false){
   if(sceneArea) sceneArea.classList.add(fx);
   if(sceneGraphic && /rope-snap|fire-pulse|storm-hit|engine-hit|vhf-burst|sensor-glow/.test(fx)) sceneGraphic.classList.add(fx);
   if(gfxSvg && fx === 'oneshot-sensor-glow') gfxSvg.classList.add(fx);
+  vibrateDanger(fx, keepSchedule ? 1900 : 650);
   const cleaner = setTimeout(()=>{
     if(sceneArea) sceneArea.classList.remove(fx);
     if(sceneGraphic) sceneGraphic.classList.remove(fx);
@@ -14989,6 +15030,7 @@ function renderScene(idx){
 function showCrisis(key){
   clearSceneChoiceTimer();
   stopAllMusic();sfxFail();
+  vibrateDanger('crisis', 300);
   document.getElementById('game').style.display='none';
   const cs=document.getElementById('crisis');cs.style.display='flex';
   const c=CRISIS_ENDS[key];
@@ -25722,8 +25764,10 @@ function renderPhoneSettings(){
     <div class="phone-setting-row"><b>AILE grubu</b><small>Okunmamis: ${familyUnread}</small></div>
     <div class="phone-setting-row"><b>Vardiya</b><small>${watchState.code} · ${watchState.label}</small></div>
     <div class="phone-setting-row"><b>Reklam</b><small>${adsRemoved?'Reklamlar kaldirildi':'Yalnizca dogal gecis noktalarinda interstitial reklam'}</small></div>
+    <div class="phone-setting-row"><b>${t('ui.vibration','Tehlike titresimi')}</b><small>${vibrationEnabled ? t('ui.vibrationOn','Titresim acik') : t('ui.vibrationOff','Titresim kapali')}</small></div>
     <div class="phone-setting-row"><b>Kayit</b><small>Oyunu telefondan manuel kaydedebilirsin.</small></div>
     <button class="phone-wide-btn" onclick="openAdPrivacyOptions()">Reklam gizlilik tercihleri</button>
+    <button class="phone-wide-btn" onclick="toggleVibration()">${vibrationEnabled ? t('ui.vibrationOff','Titresim kapali') : t('ui.vibrationOn','Titresim acik')}</button>
     <button class="phone-wide-btn" onclick="saveGameState(true)">Oyunu kaydet</button>
   </div>`;
 }
@@ -25945,37 +25989,414 @@ function renderCabin(){
     <div class="life-card"><b>Tank Sounding</b>Tank ve tuketim takibi.<button onclick="doFreeTimeAction('sounding'); renderCabin()">Sounding al</button></div>
   </div>`;
 }
+const SHIPWALK_ZONES = [
+  {id:'bridge', label:'Kopruustu', detail:'Radar, ECDIS, VHF, gece emirleri', x:50, y:17},
+  {id:'deck', label:'Guverte', detail:'Halat, snap-back, safety round', x:23, y:43},
+  {id:'port', label:'Liman Manevra', detail:'Pilot, römorkör, telegraph, all fast', x:50, y:45},
+  {id:'engine', label:'Makine', detail:'Alarm paneli, generator, pompa', x:76, y:43},
+  {id:'cabin', label:'Kamara', detail:'Uyku, ders, aile, takvim', x:35, y:76},
+  {id:'mess', label:'Messroom', detail:'Moral, ekip sohbeti, dedikodu', x:58, y:76},
+  {id:'galley', label:'Galley', detail:'Asci, menu, cay', x:78, y:72},
+  {id:'premiumOps', label:'Premium Ops', detail:'DP, ROV, medevac, proje lift, buz', x:88, y:22, premium:true}
+];
+const BRIDGE_WALK_STATIONS = [
+  {id:'ecdis', label:'ECDIS', device:'ecdis', detail:'Route check, safety contour, alarm list', x:22, y:38},
+  {id:'vhf', label:'VHF / DSC', device:'vhf', detail:'CH16, working channel, distress menu', x:50, y:32},
+  {id:'radar', label:'RADAR / ARPA', device:'radar', detail:'Target acquire, CPA/TCPA, EBL/VRM', x:78, y:38},
+  {id:'ais', label:'AIS', device:'ais', detail:'Target detail, voyage data, CPA sort', x:28, y:62},
+  {id:'conning', label:'CONNING', device:'autopilot', detail:'Heading, speed, autopilot standby', x:50, y:66},
+  {id:'bnwas', label:'BNWAS', device:'bnwas', detail:'Watch alarm acknowledge, timer, log', x:72, y:62}
+];
+const SHIP_OPERATION_MODES = {
+  deck3d:{
+    title:'3D Guverte / Mooring',
+    subtitle:'Halat istasyonlari, snap-back alanlari ve guvenli durus',
+    className:'deck',
+    back:'Gemi ici haritaya don',
+    coach:'Halata degil once guvenli stand-by bolgesine git. Snap-back alanini kirmizi zone gibi dusun.',
+    stations:[
+      {id:'safe', label:'SAFE STAND-BY', detail:'Snap-back disinda rapor ver', x:50, y:74, action:'safe'},
+      {id:'head', label:'HEAD LINE', detail:'Bas halati, forward station', x:18, y:34, action:'line', line:'Head line'},
+      {id:'spring', label:'FORE SPRING', detail:'Gemi ileri/geri kontrolu', x:38, y:42, action:'line', line:'Fore spring'},
+      {id:'breast', label:'BREAST LINE', detail:'Rıhtıma mesafe tutar', x:62, y:42, action:'line', line:'Breast line'},
+      {id:'stern', label:'STERN LINE', detail:'Kic halati, after station', x:82, y:34, action:'line', line:'Stern line'},
+      {id:'snap', label:'SNAP-BACK', detail:'Tehlikeli alan, icinde durma', x:50, y:52, action:'danger'}
+    ]
+  },
+  engine3d:{
+    title:'3D Makine Kontrol Odasi',
+    subtitle:'Alarm paneli, generator, pump, purifier ve tank transfer',
+    className:'engine',
+    back:'Gemi ici haritaya don',
+    coach:'Alarmda ilk is dogru paneli okumak; sonra generator, cooling water, bilge veya fuel transfer zincirini teyit et.',
+    stations:[
+      {id:'alarm', label:'ALARM PANEL', detail:'Ana alarm ve acknowledgement', x:50, y:25, action:'engine', check:'Alarm panel acknowledged'},
+      {id:'generator', label:'GENERATOR', detail:'Load sharing / standby gen', x:20, y:50, action:'engine', check:'Standby generator checked'},
+      {id:'cooling', label:'COOLING WATER', detail:'Temperature, pump, valve', x:38, y:64, action:'engine', check:'Cooling water trend checked'},
+      {id:'bilge', label:'BILGE', detail:'Bilge alarm / transfer', x:63, y:64, action:'engine', check:'Bilge alarm route checked'},
+      {id:'fuel', label:'FUEL TRANSFER', detail:'Service tank / purifier', x:82, y:50, action:'engine', check:'Fuel transfer line checked'}
+    ]
+  },
+  port3d:{
+    title:'3D Liman Yanasma',
+    subtitle:'Pilot, tug order, telegraph, VHF ve all fast zinciri',
+    className:'port',
+    back:'Gemi ici haritaya don',
+    coach:'Yanasma tek tus degil: pilot komutu, telegraph, tug order, speed/heading ve VHF raporu birlikte akar.',
+    stations:[
+      {id:'pilot', label:'PILOT', detail:'MPX / pilot order', x:50, y:24, action:'port', step:'Pilot exchange confirmed'},
+      {id:'vhf', label:'VHF CH14', detail:'Pilot / port ops channel', x:25, y:42, action:'device', device:'vhf'},
+      {id:'telegraph', label:'TELEGRAPH', detail:'Dead slow / stop engine', x:50, y:58, action:'port', step:'Engine telegraph order repeated'},
+      {id:'tug', label:'TUG ORDER', detail:'Forward/aft tug pull direction', x:75, y:42, action:'port', step:'Tug order confirmed'},
+      {id:'allfast', label:'ALL FAST', detail:'Final mooring report', x:50, y:78, action:'port', step:'All fast report ready'}
+    ]
+  },
+  premium3d:{
+    title:'Premium 3D Operasyon Hangari',
+    subtitle:'Offshore DP, ROV, helideck medevac, proje lift ve buz seyri',
+    className:'premium',
+    back:'Gemi ici haritaya don',
+    premium:true,
+    coach:'Bu alan premium paketle acilir; her istasyon ozel gemi tipi icin ayri uzmanlik egitimi verir.',
+    stations:[
+      {id:'dp', label:'OFFSHORE DP', detail:'500m zone, thruster load, abort point', x:18, y:42, action:'premium', area:'rov'},
+      {id:'rov', label:'ROV SURVEY', detail:'Camera, tether tension, seabed grid', x:38, y:62, action:'premium', area:'rov'},
+      {id:'medevac', label:'MEDEVAC', detail:'Helideck clear, MRCC, stretcher', x:62, y:62, action:'premium', area:'helideck'},
+      {id:'lift', label:'PROJECT LIFT', detail:'COG, sling angle, sea fastening', x:82, y:42, action:'premium', area:'lifting'},
+      {id:'ice', label:'ICE NAV', detail:'Icebreaker wake, convoy, icing', x:50, y:26, action:'premium', area:'ice'}
+    ]
+  }
+};
+let shipWalkMode = 'ship';
+let shipWalkAvatar = {x:50,y:76};
+let bridgeWalkAvatar = {x:50,y:84};
+let operationWalkAvatar = {x:50,y:84};
+
 function openShipWalk(){
   if(!canUseFeature('shipwalk')) return;
+  completeMissionFromFeature('shipwalk');
   document.getElementById('shipwalk-panel')?.classList.add('show');
   renderShipWalk();
+}
+function clampShipWalkPoint(value){
+  return Math.max(8, Math.min(92, Number(value) || 50));
+}
+function setShipWalkAvatar(x,y){
+  shipWalkAvatar.x = clampShipWalkPoint(x);
+  shipWalkAvatar.y = clampShipWalkPoint(y);
+  renderShipWalk();
+}
+function moveShipWalkAvatar(dx,dy){
+  setShipWalkAvatar(shipWalkAvatar.x + dx, shipWalkAvatar.y + dy);
+}
+function moveShipWalkAvatarToPointer(ev){
+  const stage = ev.currentTarget;
+  if(!stage || ev.target?.closest?.('button')) return;
+  const rect = stage.getBoundingClientRect();
+  const x = ((ev.clientX - rect.left) / Math.max(rect.width,1)) * 100;
+  const y = ((ev.clientY - rect.top) / Math.max(rect.height,1)) * 100;
+  setShipWalkAvatar(x,y);
+}
+function getNearestShipWalkZone(){
+  let best = null;
+  SHIPWALK_ZONES.forEach(z=>{
+    const dx = shipWalkAvatar.x - z.x;
+    const dy = shipWalkAvatar.y - z.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...z, distance};
+  });
+  return best;
+}
+function interactShipWalkZone(){
+  const nearest = getNearestShipWalkZone();
+  if(!nearest) return;
+  if(nearest.distance > 17){
+    showNotif('GEMI', 'Yaklas', `${nearest.label} icin biraz daha yaklas.`);
+    return;
+  }
+  visitShipZone(nearest.id);
+}
+function isOperationWalkMode(){
+  return !!SHIP_OPERATION_MODES[shipWalkMode];
+}
+function handleShipWalkKeydown(e){
+  if(!panelIsOpen('shipwalk-panel')) return;
+  if(e.target && /input|textarea|select/i.test(e.target.tagName || '')) return;
+  const step = e.shiftKey ? 13 : 8;
+  const key = String(e.key || '').toLowerCase();
+  const mover = shipWalkMode === 'bridge3d' ? moveBridgeWalkAvatar : isOperationWalkMode() ? moveOperationWalkAvatar : moveShipWalkAvatar;
+  const interactor = shipWalkMode === 'bridge3d' ? interactBridgeWalkStation : isOperationWalkMode() ? interactOperationWalkStation : interactShipWalkZone;
+  if(key === 'arrowup' || key === 'w'){ e.preventDefault(); mover(0,-step); }
+  else if(key === 'arrowdown' || key === 's'){ e.preventDefault(); mover(0,step); }
+  else if(key === 'arrowleft' || key === 'a'){ e.preventDefault(); mover(-step,0); }
+  else if(key === 'arrowright' || key === 'd'){ e.preventDefault(); mover(step,0); }
+  else if(key === 'enter' || key === 'e'){ e.preventDefault(); interactor(); }
 }
 function visitShipZone(zone){
   const actions={
     bridge:['Kopruustu','Radar sweep, VHF cizirtisi ve ECDIS rota kontrolu canli.','logbook'],
     deck:['Lostromo','Guvartede halat, islak zemin ve snap-back kontrolu var.','deck'],
+    port:['Pilot','Pilot ladder, tug order ve all fast zinciri basliyor.','logbook'],
     engine:['Makine','Ana makine sicaklik trendi ve alarm paneli kontrol edildi.','engine'],
     cabin:['Kamara','Kisa mola ve kisisel not zamani.','sleep'],
     mess:['Crew Chat','Messroomda ekip yorgun ama sohbet ediyor.','cook'],
-    galley:['Asci','Bugunku menu ve cay vardiya moralini toparladi.','cook']
+    galley:['Asci','Bugunku menu ve cay vardiya moralini toparladi.','cook'],
+    premiumOps:['Premium Ops','Ozel gemi operasyon hangari acilmak isteniyor.','premium']
   };
   const a=actions[zone]; if(!a) return;
   pushPhoneMessage(a[0],a[1]);
   addWatchFeed(a[1], zone==='engine'?'warn':zone==='mess'||zone==='galley'?'good':'');
+  if(zone === 'bridge'){
+    openBridgeWalk3D();
+    return;
+  }
+  if(zone === 'deck'){
+    openShipOperation3D('deck3d');
+    return;
+  }
+  if(zone === 'engine'){
+    openShipOperation3D('engine3d');
+    return;
+  }
+  if(zone === 'port'){
+    openShipOperation3D('port3d');
+    return;
+  }
+  if(zone === 'premiumOps'){
+    openShipOperation3D('premium3d');
+    return;
+  }
   if(a[2]) doFreeTimeAction(a[2]);
   renderShipWalk();
 }
+function openBridgeWalk3D(){
+  shipWalkMode = 'bridge3d';
+  bridgeWalkAvatar = {x:50,y:84};
+  addLiveLogbook('KOPRUUSTU 3D', 'Stajyer kopruustu cihaz masasina girdi; radar/ECDIS/VHF istasyonlari yakindan kontrol edilebilir.', true);
+  renderShipWalk();
+}
+function exitBridgeWalk3D(){
+  shipWalkMode = 'ship';
+  renderShipWalk();
+}
+function setBridgeWalkAvatar(x,y){
+  bridgeWalkAvatar.x = clampShipWalkPoint(x);
+  bridgeWalkAvatar.y = clampShipWalkPoint(y);
+  renderShipWalk();
+}
+function moveBridgeWalkAvatar(dx,dy){
+  setBridgeWalkAvatar(bridgeWalkAvatar.x + dx, bridgeWalkAvatar.y + dy);
+}
+function moveBridgeWalkAvatarToPointer(ev){
+  const stage = ev.currentTarget;
+  if(!stage || ev.target?.closest?.('button')) return;
+  const rect = stage.getBoundingClientRect();
+  const x = ((ev.clientX - rect.left) / Math.max(rect.width,1)) * 100;
+  const y = ((ev.clientY - rect.top) / Math.max(rect.height,1)) * 100;
+  setBridgeWalkAvatar(x,y);
+}
+function getNearestBridgeWalkStation(){
+  let best = null;
+  BRIDGE_WALK_STATIONS.forEach(st=>{
+    const dx = bridgeWalkAvatar.x - st.x;
+    const dy = bridgeWalkAvatar.y - st.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...st, distance};
+  });
+  return best;
+}
+function openBridgeWalkDevice(deviceKey){
+  const actual = deviceKey === 'conning' ? 'autopilot' : deviceKey;
+  document.getElementById('shipwalk-panel')?.classList.remove('show');
+  openRealBridgeConsole(actual);
+}
+function interactBridgeWalkStation(){
+  const nearest = getNearestBridgeWalkStation();
+  if(!nearest) return;
+  if(nearest.distance > 16){
+    showNotif('KOPRUUSTU', 'Yaklas', `${nearest.label} konsolu icin biraz daha yaklas.`);
+    return;
+  }
+  openBridgeWalkDevice(nearest.device);
+}
+function renderBridgeWalk3D(){
+  const nearest = getNearestBridgeWalkStation();
+  return `<div class="bridge-walk-3d-shell">
+    <div class="bridge-walk-3d-scene" onclick="moveBridgeWalkAvatarToPointer(event)" aria-label="3D kopruustu karakter kontrolu">
+      <div class="bridge3d-sky"></div>
+      <div class="bridge3d-window-row"><i></i><i></i><i></i><i></i></div>
+      <div class="bridge3d-sea"><span></span><span></span><span></span></div>
+      <div class="bridge3d-console-rack">
+        ${BRIDGE_WALK_STATIONS.slice(0,3).map(st=>`<button class="bridge3d-console station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small><em></em></button>`).join('')}
+      </div>
+      <div class="bridge3d-floor">
+        ${BRIDGE_WALK_STATIONS.slice(3).map(st=>`<button class="bridge3d-floor-station station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small></button>`).join('')}
+        <div class="bridge3d-player" style="left:${bridgeWalkAvatar.x}%;top:${bridgeWalkAvatar.y}%"><span></span></div>
+      </div>
+    </div>
+    <div class="bridge-walk-control-panel">
+      <button class="bridge-back-btn" onclick="exitBridgeWalk3D()">Gemi ici haritaya don</button>
+      <div><b>3D Kopruustu kontrolu</b><small>WASD / ok tuslari ya da mobil yon pedleriyle cihazlara yaklas. E / Enter veya Etkiles ile cihaz ekranina zoom acilir.</small></div>
+      <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${nearest?.label || 'Konsol'}</b><small>${nearest?.distance<=16?'Cihaz zoom hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      <div class="ship-control-pad" aria-label="3D kopruustu mobil karakter yon kontrolu">
+        <button onclick="moveBridgeWalkAvatar(0,-8)">↑</button>
+        <button onclick="moveBridgeWalkAvatar(-8,0)">←</button>
+        <button class="primary" onclick="interactBridgeWalkStation()">Cihaza Gir</button>
+        <button onclick="moveBridgeWalkAvatar(8,0)">→</button>
+        <button onclick="moveBridgeWalkAvatar(0,8)">↓</button>
+      </div>
+    </div>
+  </div>`;
+}
+function openShipOperation3D(mode){
+  const cfg = SHIP_OPERATION_MODES[mode];
+  if(!cfg) return;
+  if(cfg.premium && !premiumUnlocked){
+    requirePremiumAccess('Bu 3D premium operasyon alani premium paketle acilir.');
+    previewPremiumDemo?.('dp');
+    return;
+  }
+  shipWalkMode = mode;
+  operationWalkAvatar = {x:50,y:84};
+  addLiveLogbook('3D OPERASYON', `${cfg.title}: karakter kontrollu operasyon modu acildi.`, true);
+  renderShipWalk();
+}
+function exitShipOperation3D(){
+  shipWalkMode = 'ship';
+  renderShipWalk();
+}
+function setOperationWalkAvatar(x,y){
+  operationWalkAvatar.x = clampShipWalkPoint(x);
+  operationWalkAvatar.y = clampShipWalkPoint(y);
+  renderShipWalk();
+}
+function moveOperationWalkAvatar(dx,dy){
+  setOperationWalkAvatar(operationWalkAvatar.x + dx, operationWalkAvatar.y + dy);
+}
+function moveOperationWalkAvatarToPointer(ev){
+  const stage = ev.currentTarget;
+  if(!stage || ev.target?.closest?.('button')) return;
+  const rect = stage.getBoundingClientRect();
+  const x = ((ev.clientX - rect.left) / Math.max(rect.width,1)) * 100;
+  const y = ((ev.clientY - rect.top) / Math.max(rect.height,1)) * 100;
+  setOperationWalkAvatar(x,y);
+}
+function getNearestOperationWalkStation(){
+  const cfg = SHIP_OPERATION_MODES[shipWalkMode];
+  if(!cfg) return null;
+  let best = null;
+  cfg.stations.forEach(st=>{
+    const dx = operationWalkAvatar.x - st.x;
+    const dy = operationWalkAvatar.y - st.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...st, distance, cfg};
+  });
+  return best;
+}
+function interactOperationWalkStation(){
+  const nearest = getNearestOperationWalkStation();
+  if(!nearest) return;
+  if(nearest.distance > 16){
+    showNotif('3D', 'Yaklas', `${nearest.label} icin biraz daha yaklas.`);
+    return;
+  }
+  if(nearest.action === 'danger'){
+    vibrateDanger('oneshot-rope-snap', 300);
+    showNotif('MOORING','Snap-back tehlikesi','Bu alan icinde durulmaz. SAFE STAND-BY noktasina gec.');
+    applyEffect({bilgi:-1,dinclik:-1},{skipContractTick:true});
+    addWatchFeed('Snap-back zone ihlali egitimde yakalandi.', 'warn');
+    return;
+  }
+  if(nearest.action === 'safe'){
+    addWatchFeed('Mooring: guvenli stand-by bolgesi dogru secildi.', 'good');
+    applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
+  }else if(nearest.action === 'line'){
+    markMooringLine(nearest.line || nearest.label);
+    addLiveLogbook('MOORING LINE', `${nearest.line || nearest.label} karakter kontrol modunda hazirlandi.`, true);
+  }else if(nearest.action === 'engine'){
+    markEngineCheck(nearest.check || nearest.label);
+    addLiveLogbook('ECR CHECK', `${nearest.check || nearest.label} karakter kontrol modunda tamamlandi.`, true);
+  }else if(nearest.action === 'port'){
+    addWatchFeed(`Liman yanasma: ${nearest.step || nearest.label}`, 'good');
+    addLiveLogbook('PORT APPROACH', `${nearest.step || nearest.label} karakter kontrol modunda tamamlandi.`, true);
+    applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true});
+  }else if(nearest.action === 'device'){
+    document.getElementById('shipwalk-panel')?.classList.remove('show');
+    openRealBridgeConsole(nearest.device || 'vhf');
+    return;
+  }else if(nearest.action === 'premium'){
+    openThreeTrainingArea(nearest.area || 'rov');
+  }
+  renderShipWalk();
+}
+function renderOperationWalk3D(){
+  const cfg = SHIP_OPERATION_MODES[shipWalkMode];
+  if(!cfg) return '';
+  const nearest = getNearestOperationWalkStation();
+  return `<div class="operation-walk-shell mode-${cfg.className}">
+    <div class="operation-walk-stage" onclick="moveOperationWalkAvatarToPointer(event)" aria-label="${phoneSafe(cfg.title)}">
+      <div class="operation-bg sea"></div>
+      <div class="operation-bg deck"></div>
+      <div class="operation-bg machinery"></div>
+      <div class="operation-bg port"></div>
+      <div class="operation-bg premium"></div>
+      <div class="operation-risk-zone"></div>
+      ${cfg.stations.map(st=>`<button class="operation-station action-${st.action} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setOperationWalkAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(st.detail)}</small></button>`).join('')}
+      <div class="operation-npc npc-one"><span></span><b>${cfg.className==='engine'?'ÇARKÇI':cfg.className==='deck'?'LOSTROMO':cfg.className==='port'?'PILOT':'UZMAN'}</b></div>
+      <div class="operation-player" style="left:${operationWalkAvatar.x}%;top:${operationWalkAvatar.y}%"><span></span></div>
+    </div>
+    <div class="operation-control-panel">
+      <button class="bridge-back-btn" onclick="exitShipOperation3D()">${phoneSafe(cfg.back)}</button>
+      <div><b>${phoneSafe(cfg.title)}</b><small>${phoneSafe(cfg.subtitle)}</small></div>
+      <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${phoneSafe(nearest?.label || 'Istasyon')}</b><small>${nearest?.distance<=16?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      <div class="operation-coach">${phoneSafe(cfg.coach)}</div>
+      <div class="ship-control-pad" aria-label="${phoneSafe(cfg.title)} mobil karakter yon kontrolu">
+        <button onclick="moveOperationWalkAvatar(0,-8)">↑</button>
+        <button onclick="moveOperationWalkAvatar(-8,0)">←</button>
+        <button class="primary" onclick="interactOperationWalkStation()">Etkiles</button>
+        <button onclick="moveOperationWalkAvatar(8,0)">→</button>
+        <button onclick="moveOperationWalkAvatar(0,8)">↓</button>
+      </div>
+    </div>
+  </div>`;
+}
 function renderShipWalk(){
   const body=document.getElementById('shipwalk-body'); if(!body) return;
-  const zones=[
-    ['bridge','Köprüüstü','Radar, ECDIS, VHF, gece emirleri'],
-    ['deck','Güverte','Halat, snap-back, safety round'],
-    ['engine','Makine','Alarm paneli, generator, pompa'],
-    ['cabin','Kamara','Uyku, ders, aile, takvim'],
-    ['mess','Messroom','Moral, ekip sohbeti, dedikodu'],
-    ['galley','Galley','Aşçı, menü, çay']
-  ];
-  body.innerHTML = `<div class="shipwalk-map">${zones.map(z=>`<button class="ship-zone" onclick="visitShipZone('${z[0]}')"><b>${z[1]}</b>${z[2]}</button>`).join('')}</div>
+  if(shipWalkMode === 'bridge3d'){
+    body.innerHTML = renderBridgeWalk3D();
+    return;
+  }
+  if(isOperationWalkMode()){
+    body.innerHTML = renderOperationWalk3D();
+    return;
+  }
+  const nearest = getNearestShipWalkZone();
+  body.innerHTML = `<div class="ship-control-shell">
+    <div class="ship-control-stage" onclick="moveShipWalkAvatarToPointer(event)" aria-label="Kontrol edilebilir gemi ici alan">
+      <div class="ship-control-gridline vertical"></div>
+      <div class="ship-control-gridline horizontal"></div>
+      <div class="ship-control-corridor bridge"></div>
+      <div class="ship-control-corridor deck"></div>
+      <div class="ship-control-corridor engine"></div>
+      ${SHIPWALK_ZONES.map(z=>{
+        const inRange = nearest && nearest.id === z.id && nearest.distance <= 17;
+        return `<button class="ship-control-hotspot ${inRange?'active':''}" style="left:${z.x}%;top:${z.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b><small>${z.detail}</small></button>`;
+      }).join('')}
+      <div class="shipwalk-avatar" style="left:${shipWalkAvatar.x}%;top:${shipWalkAvatar.y}%;" aria-hidden="true"><span></span></div>
+    </div>
+    <div class="ship-control-panel">
+      <div><b>Karakter kontrolu</b><small>WASD / ok tuslari ya da asagidaki yon pedleriyle yuruyebilirsin. Noktaya yaklasinca Etkiles.</small></div>
+      <div class="ship-control-status ${nearest?.distance<=17?'ready':''}"><b>${nearest?.label || 'Gemi'}</b><small>${nearest?.distance<=17?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      <div class="ship-control-pad" aria-label="Mobil karakter yon kontrolu">
+        <button onclick="moveShipWalkAvatar(0,-8)">↑</button>
+        <button onclick="moveShipWalkAvatar(-8,0)">←</button>
+        <button class="primary" onclick="interactShipWalkZone()">Etkiles</button>
+        <button onclick="moveShipWalkAvatar(8,0)">→</button>
+        <button onclick="moveShipWalkAvatar(0,8)">↓</button>
+      </div>
+    </div>
+  </div>
+  <div class="shipwalk-map quick">${SHIPWALK_ZONES.map(z=>`<button class="ship-zone" onclick="setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b>${z.detail}</button>`).join('')}</div>
     <div class="life-card"><b>Ekip yorgunluğu</b>Güverte ${Math.round(crewFatigueState.deck)} · Makine ${Math.round(crewFatigueState.engine)} · Köprüüstü ${Math.round(crewFatigueState.bridge)} · Galley ${Math.round(crewFatigueState.galley)}</div>`;
 }
 
@@ -27538,7 +27959,8 @@ function getThreeAreaLauncherPanel(){
     ['manifold','3D tanker manifold','valve, ESD, pressure, drip tray'],
     ['rov','3D ROV / DP arastirma','kamera, tether, DP offset'],
     ['helideck','3D helideck medevac','clear deck, MRCC, stretcher'],
-    ['lifting','3D proje yuk lift','COG, sling angle, sea fastening']
+    ['lifting','3D proje yuk lift','COG, sling angle, sea fastening'],
+    ['ice','3D buz seyri','ice chart, convoy, icing']
   ];
   return `<div class="three-area-launcher">
     <div class="sim-mini-title">3D EGITIM ALANLARI</div>
@@ -27557,27 +27979,27 @@ function openThreeTrainingArea(area){
     fire:'3D yangin: alarm zone, duman ve dogru sondurucu sirasi',
     lifeboat:'3D filika: davit, can sali ve kurtarma ekipmani',
     manifold:'3D manifold: ESD, pressure gauge, valve line-up',
+    dp:'3D offshore DP: platform 500 m zone, thruster load ve abort point',
     rov:'3D arastirma: ROV kamera, tether tension ve DP offset',
     helideck:'3D kruvaziyer: helideck medevac ve MRCC koordinasyonu',
-    lifting:'3D proje yuk: COG, sling angle ve sea fastening'
+    lifting:'3D proje yuk: COG, sling angle ve sea fastening',
+    ice:'3D buz seyri: icebreaker izi, konvoy ve icing uyarisi'
   };
-  if(['rov','helideck','lifting'].includes(area) && !premiumUnlocked){
+  if(['dp','rov','helideck','lifting','ice'].includes(area) && !premiumUnlocked){
     addWatchFeed('Premium 3D operasyon kilitli: once premium paketi ac.', 'warn');
-    showNotif('PREMIUM','3D Operasyon Kilitli', 'ROV, medevac ve proje yuk 3D egitimleri premium paketle acilir.');
+    showNotif('PREMIUM','3D Operasyon Kilitli', 'DP, ROV, medevac, proje yuk ve buz seyri 3D egitimleri premium paketle acilir.');
     openPremiumPurchase?.();
     return;
   }
   addWatchFeed(labels[area] || '3D egitim alani acildi', area==='engine'?'warn':'good');
   addLiveLogbook('3D EGITIM', labels[area] || '3D egitim alani acildi', true);
-  if(area === 'bridge') openRealBridgeConsole('radar');
+  if(area === 'bridge') { openShipWalk?.(); openBridgeWalk3D?.(); }
   else if(area === 'route3d') { openMap?.(); completeMissionStep('route','3D ECDIS rota masasi'); }
-  else if(area === 'deck') { markMooringLine('3D deck line handling'); openShipWalk?.(); }
-  else if(area === 'engine') markEngineCheck('3D engine control room');
+  else if(area === 'deck') { openShipWalk?.(); openShipOperation3D?.('deck3d'); }
+  else if(area === 'engine') { openShipWalk?.(); openShipOperation3D?.('engine3d'); }
   else if(area === 'fire') { triggerRealEventChain('incident'); pushPhoneMessage('Egitim', labels[area], {open:false}); }
   else if(area === 'manifold') markCargoCheck('3D tanker manifold line-up');
-  else if(area === 'rov') { triggerRealEventChain('vhf'); progressRetentionMission?.('device'); }
-  else if(area === 'helideck') { triggerRealEventChain('vhf'); applyEffect({sayginlik:1,bilgi:1},{skipContractTick:true}); }
-  else if(area === 'lifting') { markCargoCheck('3D project cargo lifting'); applyEffect({bilgi:2},{skipContractTick:true}); }
+  else if(area === 'dp' || area === 'rov' || area === 'helideck' || area === 'lifting' || area === 'ice') { openShipWalk?.(); openShipOperation3D?.('premium3d'); }
   else pushPhoneMessage('Egitim', labels[area] || '3D egitim alani acildi', {open:false});
   showNotif('3D','Egitim Alani', labels[area] || '3D egitim alani hazir.');
 }
@@ -29723,7 +30145,20 @@ let introRecordedTrack = null;
 let introRecordedTrackFadeTimer = null;
 let introRecordedTrackFailed = false;
 
-
+const VIBRATION_PREF_KEY = 'guverte-vibration-enabled';
+const VIBRATION_PATTERNS = {
+  'oneshot-mob-flash':[180,80,180,80,260],
+  'oneshot-rope-snap':[90,45,180,40,80],
+  'oneshot-fire-pulse':[120,80,120,80,240],
+  'oneshot-storm-hit':[80,70,80],
+  'oneshot-engine-hit':[160,90,260],
+  'oneshot-vhf-burst':[45,45,45,100,90],
+  'oneshot-sensor-glow':[35],
+  crisis:[220,90,220,90,320],
+  danger:[120,70,160]
+};
+let vibrationEnabled = (()=>{try{return localStorage.getItem(VIBRATION_PREF_KEY) !== '0';}catch(e){return true;}})();
+let lastVibrationAt = 0;
 let soundEnabled = true;
 let audioLevels = {music:.48, effects:.92, ambiance:.78};
 function toggleSound(){
@@ -29734,6 +30169,39 @@ function toggleSound(){
   if(!soundEnabled) stopAllMusic();
   else maybeStartIntroMaritimeTheme();
   renderAudioMixer();
+}
+
+function canVibrateDevice(){
+  return vibrationEnabled && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+}
+
+function stopDeviceVibration(){
+  try{
+    if(typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') navigator.vibrate(0);
+  }catch(e){}
+}
+
+function vibrateDanger(pattern='danger', minGap=900){
+  if(!canVibrateDevice()) return false;
+  const now = Date.now();
+  if(now - lastVibrationAt < minGap) return false;
+  const value = Array.isArray(pattern) ? pattern : (VIBRATION_PATTERNS[pattern] || VIBRATION_PATTERNS.danger);
+  try{
+    navigator.vibrate(value);
+    lastVibrationAt = now;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function toggleVibration(force){
+  vibrationEnabled = typeof force === 'boolean' ? force : !vibrationEnabled;
+  try{localStorage.setItem(VIBRATION_PREF_KEY, vibrationEnabled ? '1' : '0');}catch(e){}
+  if(!vibrationEnabled) stopDeviceVibration();
+  applyLanguageUI();
+  if(phoneOpen) renderPhone();
+  showNotif('VIB', t('ui.vibration','Tehlike titresimi'), vibrationEnabled ? t('ui.vibrationOn','Titresim acik') : t('ui.vibrationOff','Titresim kapali'));
 }
 
 function clampAudioLevel(value){
@@ -30413,6 +30881,7 @@ function playSceneAudio(sc){
 // ===== BAŞLATMA =====
 document.getElementById('nameinp').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shipnameinp').focus();});
 document.getElementById('shipnameinp').addEventListener('keydown',e=>{if(e.key==='Enter')beginGame();});
+document.addEventListener('keydown',handleShipWalkKeydown);
 document.addEventListener('pointerdown',()=>{ maybeStartIntroMaritimeTheme(); },{passive:true});
 initializeAdSystem();
 buildIntro();
