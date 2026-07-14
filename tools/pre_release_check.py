@@ -438,6 +438,13 @@ def check_map_and_ecdis() -> None:
         "renderMobInteractionVisual",
         "interaction-guide-card",
         "interaction-replay",
+        "MAP_ECDIS_DETAIL_POLICY",
+        "getMapEcdisPerformanceProfile",
+        "createLiveVoyageWaypointEvent",
+        "getLiveVoyageEventPanel",
+        "buildContractEndReport",
+        "getContractCinematicReportPanel",
+        "contract-cinematic-report",
         "mooring-operation-console",
         "mooring-snap-zone",
         "mooring-safe-zone",
@@ -553,12 +560,20 @@ def check_scene_balance_and_text() -> None:
 
     for token in (
         "function sanitizeSceneCrewNames",
+        "function personalizeSceneSpeakerText",
         "function getCrewNameParts",
-        "sanitizeSceneCrewNames(sc.sub",
-        "sanitizeSceneCrewNames(typeof sc.text",
-        "sanitizeSceneCrewNames(c2.text",
+        "personalizeSceneSpeakerText(sc.sub",
+        "personalizeSceneSpeakerText(typeof sc.text",
+        "personalizeSceneSpeakerText(c2.text",
     ):
         require_token(section, token)
+
+    for stale_pair in (
+        ("who:\"hasan\"", "Hasan bu kez seni"),
+        ("who:'hasan'", "Hasan bu kez seni"),
+    ):
+        if stale_pair[0] in JS and stale_pair[1] in JS and "personalizeSceneSpeakerText" not in JS:
+            fail(section, "Crew dialogue personalization is missing while hard-coded crew names exist.")
 
     writing_tokens = len(re.findall(r"<textarea|documentTrainingState|input type=\"text\"", JS))
     if writing_tokens < 3:
@@ -574,8 +589,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=166",
-        "index.css?v=141",
+        "index.js?v=168",
+        "index.css?v=143",
         "release-quality.js?v=10",
         "normalizePlayerAppearance",
         "getSetupReadinessDetails",

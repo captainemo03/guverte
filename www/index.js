@@ -10255,7 +10255,7 @@ function getLocalizedScenarioCue(sc, kind){
 }
 
 function getLocalizedSceneNarrative(text, sc){
-  const raw=sanitizeSceneCrewNames(String(text || ''), sc);
+  const raw=personalizeSceneSpeakerText(String(text || ''), sc);
   if(gameLanguage==='tr') return raw;
   const kind=getSceneLanguageKind(sc, raw);
   const loc=getLocalizedSceneLocation(sc);
@@ -10277,7 +10277,7 @@ ${t('scene.cue','Scenario cue')}: ${cue}`;
 }
 function localizeChoiceText(choice){
   const scene = sceneQueue?.[currentIdx] || null;
-  const text=sanitizeSceneCrewNames(String(choice?.text ?? choice ?? ''), scene);
+  const text=personalizeSceneSpeakerText(String(choice?.text ?? choice ?? ''), scene);
   if(gameLanguage==='tr') return text;
   const tag=choice?.tag || '';
   const kind=getSceneLanguageKind(scene, text);
@@ -10859,6 +10859,8 @@ let playerBondState={
   signatureMoments:[],
   monthlyReviews:[]
 };
+let contractReportState={lastContract:0,reports:[]};
+let liveVoyageEventState={lastKey:'',events:[]};
 let sceneChoiceTimer=null;
 let sceneChoiceAutoPick=false;
 let sceneLiveSequenceTimers=[];
@@ -12642,8 +12644,8 @@ function handleSceneChoice(sc, c2, ch){
     ch.querySelectorAll('.cbtn').forEach(x=>{x.disabled=true;x.style.opacity='.4';});
   }
   const speakerPortrait = getSceneSpeakerPortrait(sc);
-  pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, sanitizeSceneCrewNames(typeof sc.text==='function'?sc.text(pn,sn):sc.text, sc));
-  pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', sanitizeSceneCrewNames(c2.text, sc));
+  pushDialogueEntry('left', speakerPortrait, getCrewDisplay(sc.who).name, personalizeSceneSpeakerText(typeof sc.text==='function'?sc.text(pn,sn):sc.text, sc));
+  pushDialogueEntry('right', getPlayerPortraitConfig(), pn || 'Stajyer', personalizeSceneSpeakerText(c2.text, sc));
   maybePushDialogueInterjection(sc,c2);
   showReplyBubble(c2);
   const pressure=evaluateDecisionPressure(sc,c2);
@@ -14345,8 +14347,12 @@ function createCinematicScene(key){
   const def = CINEMATIC_SCENES[key];
   if(!def) return null;
   const premiumKeys = new Set(['cruiseMedevac','researchRov']);
+  const narrative = key === 'contractEnd' && typeof buildContractEndCinematicNarrative === 'function'
+    ? buildContractEndCinematicNarrative()
+    : def.text;
   return {
     ...def,
+    text:narrative,
     cinematic:true,
     cinematicType:def.type || key,
     cinematicKey:key,
@@ -14876,7 +14882,7 @@ function renderScene(idx){
   updateVoyagePressure(sc);
   updateLiveVoyageState(sc);
   updatePortOpsChain(sc);
-  document.getElementById('scene-sub').textContent=gameLanguage==='tr' ? sanitizeSceneCrewNames(sc.sub || '', sc) : getLocalizedScenarioCue(sc, getSceneLanguageKind(sc, sc.text || ''));
+  document.getElementById('scene-sub').textContent=gameLanguage==='tr' ? personalizeSceneSpeakerText(sc.sub || '', sc) : getLocalizedScenarioCue(sc, getSceneLanguageKind(sc, sc.text || ''));
   const speakerPortraitCfg = getSceneSpeakerPortrait(sc);
   document.getElementById('spkico').innerHTML = renderPortraitSprite(speakerPortraitCfg, 'speaker');
   renderSpeechPortrait(speakerPortraitCfg);
@@ -15050,6 +15056,91 @@ function calculatePromotionReport(){
   return {eligible, avg:Math.round(avg), required, nextRank};
 }
 
+function buildContractEndReport(){
+  const promo = calculatePromotionReport();
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const bondScore = typeof getPlayerBondScore === 'function' ? getPlayerBondScore() : 0;
+  const strongArea = typeof getTopSpecialtyLabel === 'function' ? getTopSpecialtyLabel() : getCareerSpecialization().top;
+  const weakChoices = choicesMade.filter(c=>c.tag === 'korkak' || c.tag === 'hileli' || c.tag === 'itaatkar').length;
+  const strongChoices = choicesMade.filter(c=>c.tag === 'kritik' || c.tag === 'akilli').length;
+  const trustAvg = Math.round(Object.values(crewTrust || {}).reduce((a,b)=>a+b,0) / Math.max(1,Object.values(crewTrust || {}).length));
+  const moneyDue = Math.round((careerState.salary || 1200) * Math.max(1, getContractTotalMonths()));
+  const offerPreview = (shipOffers.length ? shipOffers : buildShipOffers()).slice(0,3).map(o=>o.label).join(' / ');
+  const captainTone = promo.eligible
+    ? `${promo.nextRank} icin dosyan guclu. Yine de cihaz ve logbook disiplinini birakma.`
+    : weakChoices > strongChoices / 2
+      ? 'Gelistirme alani net: hata zincirini erken kes, raporu geciktirme, tekrar pratiklerini kapat.'
+      : 'Kontrat kabul edilebilir. Bir sonraki gemide daha net sorumluluk alman bekleniyor.';
+  const familyLine = stats.dinclik < 35
+    ? 'Aile: Sesin yorgun geliyor, limanda kendine zaman ayir.'
+    : 'Aile: Donus tarihini bekliyoruz, bir fotograf daha atmayi unutma.';
+  return {
+    contract:careerState.contracts + (careerState.lastContractClosed ? 0 : 1),
+    route:route?.name || 'Aktif rota',
+    ship:sn,
+    rank:getRankName(),
+    strongArea,
+    weakChoices,
+    strongChoices,
+    trustAvg,
+    bondScore,
+    moneyDue,
+    offerPreview,
+    captainTone,
+    familyLine,
+    photos:photos.length,
+    routeProgress:getVoyageLegProgress ? getVoyageLegProgress() : 0,
+    ts:Date.now()
+  };
+}
+
+function ensureContractEndReport(reason='manual'){
+  const contractNo = careerState.contracts + (careerState.lastContractClosed ? 0 : 1);
+  if(contractReportState.lastContract === contractNo && contractReportState.reports?.length) return contractReportState.reports[0];
+  const report = buildContractEndReport();
+  report.reason = reason;
+  contractReportState.lastContract = contractNo;
+  contractReportState.reports = [report, ...(contractReportState.reports || [])].slice(0,6);
+  return report;
+}
+
+function buildContractEndCinematicNarrative(){
+  const report = buildContractEndReport();
+  return `Telefon albumunde ${report.photos} hatira karti birikti. ${report.ship} uzerindeki bu kontrat sadece sahne sayisi degil; rota, ekip, aile ve yaptigin kararlarin izi.
+
+Kaptan dosyayi kapatmadan once son yorumu yaziyor:
+"${report.captainTone}"
+
+Sirket teklifleri hazir: ${report.offerPreview || 'ayni gemide devam'}.
+Guclu alanin: ${report.strongArea}. Ekip guveni: ${report.trustAvg}/100. Rota ilerleyisi: %${report.routeProgress}.
+
+Simdi rapor ekrani acilacak: kaptan yorumu, aile mesaji, album, maas ve yeni rota/gemi secimi ayni akista gorunecek.`;
+}
+
+function getContractCinematicReportPanel(){
+  const report = (contractReportState.reports || [])[0] || buildContractEndReport();
+  return `<div class="contract-cinematic-report">
+    <div class="contract-report-hero">
+      <div><b>KONTRAT SONU SINEMATIK RAPOR</b><small>${phoneSafe(report.ship)} · ${phoneSafe(report.route)} · ${phoneSafe(report.rank)}</small></div>
+      <span>${phoneSafe(String(report.bondScore))}/100</span>
+    </div>
+    <div class="contract-report-grid">
+      <div><b>Kaptan yorumu</b><small>${phoneSafe(report.captainTone)}</small></div>
+      <div><b>Guclu alan</b><small>${phoneSafe(report.strongArea)}</small></div>
+      <div><b>Ekip guveni</b><small>${phoneSafe(String(report.trustAvg))}/100</small></div>
+      <div><b>Album</b><small>${phoneSafe(String(report.photos))} hatira karti</small></div>
+      <div><b>Maas / bakiye</b><small>$${phoneSafe(String(report.moneyDue))} kontrat tahmini · bakiye $${phoneSafe(String(careerState.money || 0))}</small></div>
+      <div><b>Sirket teklifi</b><small>${phoneSafe(report.offerPreview || 'Ayni gemide devam / yeni rota')}</small></div>
+    </div>
+    <div class="contract-report-family">${phoneSafe(report.familyLine)}</div>
+    <div class="sim-actions compact">
+      <button onclick="openAlbum()">Albumu ac</button>
+      <button onclick="openCareer()">Gemi teklifleri</button>
+      <button onclick="buildPassageDebrief(); renderSimCenter()">Passage debrief</button>
+    </div>
+  </div>`;
+}
+
 function closeContractCareerBooks(){
   if(careerState.lastContractClosed) return;
   updateSpecialtyFromContract();
@@ -15080,6 +15171,7 @@ function closeContractCareerBooks(){
   progressRetentionMission('contract', {shipType:selType, score:boardScore});
   careerState.lastContractClosed = true;
   shipOffers = buildShipOffers();
+  ensureContractEndReport('contract_close');
 }
 
 function buildShipOffers(){
@@ -15255,6 +15347,7 @@ function renderCareerPanel(){
     <div class="career-card"><b>Şirket Görüşü</b><strong>${careerState.companyOpinion}/100</strong><br>Kontrat: ${careerState.contracts}<br>Deniz ayi: ${careerState.seaMonths}</div>
     <div class="career-card"><b>Uzmanlık</b><strong>${getTopSpecialtyLabel()}</strong><br>Referans: ${careerState.referenceLetters.length}</div>
   </div>
+  ${getContractCinematicReportPanel()}
   <div class="career-card"><b>Serbest Zaman</b><div class="career-actions">
     <button class="career-btn" onclick="doFreeTimeAction('study')">Kamarada Ders<small>Bilgi artar, biraz yorulursun.</small></button>
     <button class="career-btn" onclick="doFreeTimeAction('sleep')">Kisa Uyku<small>Dinçlik ciddi toparlar.</small></button>
@@ -15555,6 +15648,8 @@ function beginGame(){
   specialtyXP={container:0,tanker:0,bulk:0,lng:0,offshore:0,roro:0,safety:0,navigation:0,people:0};
   shipOffers=[];
   familyUnread=0;
+  contractReportState={lastContract:0,reports:[]};
+  liveVoyageEventState={lastKey:'',events:[]};
   activateVoyageRoute(activeVoyageRoute || selectVoyageRouteForShipType(selType));
   scenesSinceEvent=0;
   nextEventAt=5+Math.floor(Math.random()*4);
@@ -16314,14 +16409,40 @@ function sanitizeSceneCrewNames(text, sc=null){
   if(!key || !CREW_DEFS[key] || !out) return out;
   const active = getCrewNameParts(getCrewDisplay(sc?.who).name || CREW_DEFS[key].name);
   const replacements = new Map();
-  const pool = Array.isArray(CREW_NAME_POOLS?.[key]) ? CREW_NAME_POOLS[key] : [];
-  const legacy = [CREW_DEFS[key]?.name, CREW?.[key]?.name, ...(pool || [])].filter(Boolean);
+  const localizedPools = typeof getCrewNamePoolForLanguage === 'function' ? getCrewNamePoolForLanguage(gameLanguage) : CREW_NAME_POOLS;
+  const pool = Array.isArray(localizedPools?.[key]) ? localizedPools[key] : [];
+  const basePool = Array.isArray(CREW_NAME_POOLS?.[key]) ? CREW_NAME_POOLS[key] : [];
+  const legacy = [CREW_DEFS[key]?.name, CREW?.[key]?.name, ...(pool || []), ...(basePool || [])].filter(Boolean);
   legacy.forEach(name=>{
     const parts = getCrewNameParts(name);
     addCrewNameReplacement(replacements, parts.full, active.full, true);
     addCrewNameReplacement(replacements, parts.personal, active.personal, false);
   });
   [...replacements.entries()]
+    .filter(([from,to])=>from && to && from !== to)
+    .sort((a,b)=>b[0].length-a[0].length)
+    .forEach(([from,to])=>{ out = replaceCrewNameToken(out, from, to); });
+  return out;
+}
+
+function personalizeSceneSpeakerText(text, sc=null){
+  let out = sanitizeSceneCrewNames(text, sc);
+  const key = getCrewKeyFromWho(sc?.who);
+  if(!key || !CREW_DEFS[key] || !out) return out;
+  const active = getCrewNameParts(getCrewDisplay(sc?.who).name || CREW_DEFS[key].name);
+  const role = normalizeTrAscii(active.role || '');
+  if(!role || !active.personal) return out;
+  const replacementMap = new Map();
+  const sameRoleNames = Object.values(CREW_DEFS || {})
+    .map(def=>def?.name)
+    .filter(Boolean)
+    .filter(name=>normalizeTrAscii(getCrewNameParts(name).role || '') === role);
+  sameRoleNames.forEach(name=>{
+    const parts = getCrewNameParts(name);
+    addCrewNameReplacement(replacementMap, parts.full, active.full, true);
+    addCrewNameReplacement(replacementMap, parts.personal, active.personal, false);
+  });
+  [...replacementMap.entries()]
     .filter(([from,to])=>from && to && from !== to)
     .sort((a,b)=>b[0].length-a[0].length)
     .forEach(([from,to])=>{ out = replaceCrewNameToken(out, from, to); });
@@ -18422,6 +18543,8 @@ function buildSavePayload(){
     dialogueHistory,
     livingShipState,
     playerBondState,
+    contractReportState,
+    liveVoyageEventState,
     watchState,
     voyagePressure,
     consequenceTrace,
@@ -18607,6 +18730,12 @@ function applyLoadedGameState(data){
     : {score:0,decisions:0,lastHookKey:'',lastAiScene:'',lastCaptainReviewMonth:0,signatureMoments:[],monthlyReviews:[]};
   playerBondState.signatureMoments = Array.isArray(playerBondState.signatureMoments) ? playerBondState.signatureMoments : [];
   playerBondState.monthlyReviews = Array.isArray(playerBondState.monthlyReviews) ? playerBondState.monthlyReviews : [];
+  contractReportState = data.contractReportState && typeof data.contractReportState === 'object'
+    ? {lastContract:0,reports:[], ...data.contractReportState, reports:Array.isArray(data.contractReportState.reports) ? data.contractReportState.reports : []}
+    : {lastContract:0,reports:[]};
+  liveVoyageEventState = data.liveVoyageEventState && typeof data.liveVoyageEventState === 'object'
+    ? {lastKey:'',events:[], ...data.liveVoyageEventState, events:Array.isArray(data.liveVoyageEventState.events) ? data.liveVoyageEventState.events : []}
+    : {lastKey:'',events:[]};
   watchState = data.watchState || {code:'0000-0400', label:'Gece Seyri', handover:false, morning:false, portPrep:false, logbook:false};
   voyagePressure = data.voyagePressure || {swell:'Dusuk', visibility:'Acik', current:'Zayif', vhf:'Sakin', speed:'Sea speed', caution:0};
   consequenceTrace = data.consequenceTrace || {office:0, psc:0, trust:0};
@@ -18720,7 +18849,7 @@ function loadSavedGame(){
 }
 let mapView = 'world';
 let selectedPortChart = 'İzmir';
-let portChartZoom = 1;
+let portChartZoom = 1.6;
 let portChartPanX = null;
 let portChartPanY = null;
 let portChartDragState = null;
@@ -18937,6 +19066,7 @@ function setMapView(view){
 function selectPortChart(name){
   selectedPortChart = name;
   mapRouteDraftPoints = [];
+  portChartZoom = Math.max(portChartZoom || 1, 1.6);
   if(mapView !== 'library') mapView = 'library';
   invalidateMapRenderCache('port');
   renderMap();
@@ -18963,6 +19093,7 @@ function autoOpenVoyageChart(sc){
   if(!wp) return;
   selectedPortChart = wp.chart || route.chart || selectedPortChart;
   mapView = 'library';
+  portChartZoom = Math.max(portChartZoom || 1, 1.6);
   const sceneKey = `${sc.id}-${selectedPortChart}`;
   if(lastAutoVoyageChartScene !== sceneKey){
     lastAutoVoyageChartScene = sceneKey;
@@ -18991,9 +19122,28 @@ function getPortChartDetailLabel(){
     : 'ECDIS Overview';
 }
 
+const MAP_ECDIS_DETAIL_POLICY = {
+  overview:{label:'ECDIS Overview', objects:'route line, coastline, TSS and main hazards', hint:'Uzak zoomda chart sade kalir; once rota ve genel emniyet alanini oku.'},
+  approach:{label:'Approach Detail', objects:'pilot station, berth approach, reporting point, soundings', hint:'Yaklasma zoomunda pilot/VTS/UKC ve approach channel ayrintisi acilir.'},
+  close:{label:'Close Detail', objects:'soundings, buoys, notes, cables, no anchoring, sector lights', hint:'Yakin zoomda sounding, buoy, note ve no-go ayrintilari gorunur; gorev tiklamasi burada daha net olur.'}
+};
+
 function getPortChartDetailBucket(){
   const zoom = getPortChartEffectiveZoom();
   return zoom >= 3.2 ? 'close' : zoom >= 1.7 ? 'approach' : 'overview';
+}
+
+function getMapEcdisPerformanceProfile(){
+  const bucket = getPortChartDetailBucket();
+  const policy = MAP_ECDIS_DETAIL_POLICY[bucket] || MAP_ECDIS_DETAIL_POLICY.overview;
+  return {
+    bucket,
+    label:policy.label,
+    objects:policy.objects,
+    hint:policy.hint,
+    zoom:getPortChartEffectiveZoom(),
+    renderMode:bucket === 'close' ? 'full-detail' : bucket === 'approach' ? 'approach-layered' : 'overview-fast'
+  };
 }
 
 function getWorldMapDetailBucket(){
@@ -19157,7 +19307,7 @@ function openChartIndexSheet(sheet, sourcePort){
   selectedPortChart = target.name;
   mapView = 'library';
   visitedPorts.add(target.name);
-  portChartZoom = Math.max(portChartZoom || 1, 1.45);
+  portChartZoom = Math.max(portChartZoom || 1, 1.6);
   showNotif('CHART FOLIO', `${sheet.no} paftasi acildi`, `${target.name} detay chart yuklendi.`);
   addLiveLogbook('CHART FOLIO', `${sourcePort?.name || 'Atlas'} ${sheet.no} paftasindan ${target.name} chartina gecildi.`, true);
   renderMap();
@@ -19720,18 +19870,15 @@ function getSyntheticVoyageChartEntries(){
 }
 
 function renderContractCinematicReport(){
-  const best = getTopSpecialtyLabel ? getTopSpecialtyLabel() : 'vardiya disiplini';
+  const report = ensureContractEndReport('final_screen');
   const weakest = stats.dinclik < 40 ? 'dinçlik / uyku baskısı' : stats.bilgi < 45 ? 'cihaz ve teknik bilgi' : consequenceTrace.office > 2 ? 'ofis ve belge disiplini' : 'stres altında süre yönetimi';
-  const album = photos.slice(-4).map(p=>p.title || 'hatıra').join(', ') || 'henüz büyük fotoğraf anı yok';
-  const captain = avgCrewTrustForReport() >= 60 ? 'Kaptan referans verir: kritik anlarda büyüdün.' : 'Kaptan şartlı referans verir: bir sonraki kontratta daha net disiplin bekler.';
-  const company = careerState.companyOpinion >= 60 ? 'Şirket yeni kontrat/terfi görüşmesine açık.' : 'Şirket önce performans ve belge disiplininde toparlanma ister.';
-  const family = familyConversationMemory.lastUserMessage ? 'Aile son mesajını hatırlıyor ve dönüş tarihini soruyor.' : 'Aileden kontrat sonu mesajı bekleniyor.';
+  const album = photos.slice(-4).map(p=>p.title || 'hatıra').join(', ') || `${report.photos} kayıtlı hatıra`;
   return `<br><br><strong>Kontrat Sonu Sinematik Akis:</strong>
     <br>• Album: ${phoneSafe(album)}
-    <br>• Kaptan yorumu: ${phoneSafe(captain)}
-    <br>• Ekip vedasi: en guclu alan ${phoneSafe(best)}, zayif alan ${phoneSafe(weakest)}
-    <br>• Sirket teklifi: ${phoneSafe(company)}
-    <br>• Aile mesaji: ${phoneSafe(family)}`;
+    <br>• Kaptan yorumu: ${phoneSafe(report.captainTone)}
+    <br>• Ekip vedasi: en guclu alan ${phoneSafe(report.strongArea)}, zayif alan ${phoneSafe(weakest)}
+    <br>• Sirket teklifi: ${phoneSafe(report.offerPreview || 'Ayni gemide devam')}
+    <br>• Aile mesaji: ${phoneSafe(report.familyLine)}`;
 }
 
 function renderFinalCinematicBlock(opts={}){
@@ -19927,12 +20074,12 @@ function buildLiveVoyageTelemetryOverlay(chartName){
   const fill = warn ? 'rgba(70,12,18,.92)' : 'rgba(5,16,28,.92)';
   const stroke = warn ? '#ff8d8d' : '#7fc3ff';
   return `<g class="live-voyage-telemetry">
-    <rect x="18" y="16" width="244" height="42" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="1"/>
-    <text x="28" y="30" fill="${warn ? '#ffc0c0' : '#cfeaff'}" font-size="7" font-family="monospace">LIVE ROUTE · ${phoneSafe(st.route).slice(0,34)}</text>
-    <text x="28" y="43" fill="#fff4bf" font-size="7" font-family="monospace">ETA ${st.eta} · SOG ${st.sog}kt · WP ${phoneSafe(st.nextWp).slice(0,18)}</text>
-    <text x="28" y="54" fill="${warn ? '#ffc0c0' : '#8fd8ab'}" font-size="7" font-family="monospace">CPA ${st.cpa}nm / TCPA ${st.tcpa}m · UKC ${st.ukc}m · ${st.progress}%</text>
-    <rect x="278" y="20" width="130" height="10" rx="5" fill="rgba(7,19,36,.88)" stroke="#385f86" stroke-width=".8"/>
-    <rect x="280" y="22" width="${Math.max(3, Math.min(126, st.progress*1.26))}" height="6" rx="3" fill="${warn ? '#ff8d8d' : '#81f7b8'}"/>
+    <rect x="18" y="16" width="176" height="33" rx="6" fill="${fill}" stroke="${stroke}" stroke-width=".8" opacity=".9"/>
+    <text x="26" y="28" fill="${warn ? '#ffc0c0' : '#cfeaff'}" font-size="5.6" font-family="monospace">LIVE ROUTE · ${phoneSafe(st.route).slice(0,24)}</text>
+    <text x="26" y="39" fill="#fff4bf" font-size="5.7" font-family="monospace">ETA ${st.eta} · SOG ${st.sog} · WP ${phoneSafe(st.nextWp).slice(0,13)}</text>
+    <text x="26" y="47" fill="${warn ? '#ffc0c0' : '#8fd8ab'}" font-size="5.5" font-family="monospace">CPA ${st.cpa} / TCPA ${st.tcpa} · UKC ${st.ukc}</text>
+    <rect x="306" y="22" width="88" height="8" rx="4" fill="rgba(7,19,36,.78)" stroke="#385f86" stroke-width=".65" opacity=".86"/>
+    <rect x="308" y="24" width="${Math.max(3, Math.min(84, st.progress*.84))}" height="4" rx="2" fill="${warn ? '#ff8d8d' : '#81f7b8'}" opacity=".9"/>
   </g>`;
 }
 
@@ -19940,6 +20087,7 @@ function buildEcdisChartControlOverlay(chartName){
   const route = getActiveVoyageRoute();
   const wp = getVoyageWaypoint();
   const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const detailProfile = getMapEcdisPerformanceProfile();
   const chartSet = getActiveVoyageChartSet();
   const showForChart = !chartSet.size || chartSet.has(chartName) || chartName === selectedPortChart || route?.chart === chartName;
   if(!showForChart && chartName !== selectedPortChart) return '';
@@ -19947,15 +20095,16 @@ function buildEcdisChartControlOverlay(chartName){
   const contour = chartName && /kanal|bogazi|strait|suez|panama|malakka|hurmuz|dover/i.test(chartName) ? '10m' : '20m';
   const wpName = phoneSafe(wp?.name || chartName || 'ACTIVE WP').slice(0,24);
   return `<g class="ecdis-control-overlay">
-    <rect x="274" y="58" width="144" height="74" rx="6" fill="rgba(245,248,232,.92)" stroke="#1b3550" stroke-width=".9"/>
-    <text x="282" y="71" fill="#17324c" font-size="6.4" font-family="monospace">ECDIS ROUTE CHECK</text>
-    <text x="282" y="84" fill="#7b3550" font-size="6.2" font-family="monospace">SAFETY CONTOUR ${contour} · NO-GO ON</text>
-    <text x="282" y="96" fill="${alert?'#b34242':'#287b57'}" font-size="6.2" font-family="monospace">ALARM ACK ${alert?'REQ':'OK'} · SENSOR OK</text>
-    <text x="282" y="108" fill="#17324c" font-size="6.2" font-family="monospace">AIS TARGET / RADAR OVERLAY ${deviceChartOverlayState?.radar || deviceChartOverlayState?.ais ? 'ON':'STBY'}</text>
-    <text x="282" y="120" fill="#17324c" font-size="6.1" font-family="monospace">NEXT WP ${wpName}</text>
-    <path d="M294 126 H390" stroke="#94333a" stroke-width="1.4" stroke-dasharray="7,4"/>
-    <circle cx="326" cy="126" r="3.2" fill="#ffd45a" stroke="#17324c" stroke-width=".8"/>
-    <circle cx="374" cy="118" r="4.2" fill="none" stroke="${alert?'#b34242':'#287b57'}" stroke-width="1.2"/>
+    <rect x="300" y="58" width="118" height="63" rx="6" fill="rgba(245,248,232,.86)" stroke="#1b3550" stroke-width=".75"/>
+    <text x="307" y="70" fill="#17324c" font-size="5.4" font-family="monospace">ECDIS ROUTE CHECK</text>
+    <text x="307" y="80" fill="#7b3550" font-size="5.2" font-family="monospace">CONTOUR ${contour} · NO-GO ON</text>
+    <text x="307" y="90" fill="${alert?'#b34242':'#287b57'}" font-size="5.2" font-family="monospace">ACK ${alert?'REQ':'OK'} · SENSOR OK</text>
+    <text x="307" y="100" fill="#17324c" font-size="4.8" font-family="monospace">AIS TARGET / RADAR OVERLAY ${deviceChartOverlayState?.radar || deviceChartOverlayState?.ais ? 'ON':'STBY'}</text>
+    <text x="307" y="109" fill="#17324c" font-size="4.8" font-family="monospace">NEXT ${wpName.slice(0,13)}</text>
+    <text x="307" y="118" fill="#315e7a" font-size="4.7" font-family="monospace">${phoneSafe(detailProfile.label).slice(0,18)} · ${phoneSafe(detailProfile.renderMode).slice(0,16)}</text>
+    <path d="M354 112 H384" stroke="#94333a" stroke-width="1" stroke-dasharray="6,4"/>
+    <circle cx="366" cy="112" r="2.6" fill="#ffd45a" stroke="#17324c" stroke-width=".65"/>
+    <circle cx="394" cy="100" r="3.5" fill="none" stroke="${alert?'#b34242':'#287b57'}" stroke-width="1"/>
   </g>`;
 }
 
@@ -19978,9 +20127,9 @@ function buildLiveVoyageRouteMotionOverlay(chartName){
     <path d="M${(x-6).toFixed(1)} ${(y+4).toFixed(1)} L${x.toFixed(1)} ${(y-8).toFixed(1)} L${(x+6).toFixed(1)} ${(y+4).toFixed(1)} Z" fill="#fff4bf" stroke="#07131f" stroke-width=".8">
       <animateTransform attributeName="transform" type="translate" values="0 0; 2 -1; 0 0" dur="1.8s" repeatCount="indefinite"/>
     </path>
-    <rect x="${Math.min(326, x+12).toFixed(1)}" y="${Math.max(72, y-30).toFixed(1)}" width="92" height="30" rx="5" fill="rgba(5,16,28,.92)" stroke="${warn?'#ff8d8d':'#7fc3ff'}" stroke-width=".8"/>
-    <text x="${Math.min(334, x+18).toFixed(1)}" y="${Math.max(84, y-17).toFixed(1)}" fill="#cfeaff" font-size="6.4" font-family="monospace">SOG ${st.sog} COG ${Math.round(58+pct*38)}°</text>
-    <text x="${Math.min(334, x+18).toFixed(1)}" y="${Math.max(96, y-5).toFixed(1)}" fill="${warn?'#ffc0c0':'#a8f5c2'}" font-size="6.4" font-family="monospace">CPA ${st.cpa} TCPA ${st.tcpa} UKC ${st.ukc}</text>
+    <rect x="${Math.min(336, x+12).toFixed(1)}" y="${Math.max(72, y-25).toFixed(1)}" width="72" height="23" rx="5" fill="rgba(5,16,28,.86)" stroke="${warn?'#ff8d8d':'#7fc3ff'}" stroke-width=".7"/>
+    <text x="${Math.min(342, x+17).toFixed(1)}" y="${Math.max(83, y-14).toFixed(1)}" fill="#cfeaff" font-size="5.3" font-family="monospace">SOG ${st.sog} COG ${Math.round(58+pct*38)}°</text>
+    <text x="${Math.min(342, x+17).toFixed(1)}" y="${Math.max(93, y-5).toFixed(1)}" fill="${warn?'#ffc0c0':'#a8f5c2'}" font-size="5.2" font-family="monospace">CPA ${st.cpa} UKC ${st.ukc}</text>
   </g>`;
 }
 
@@ -21289,7 +21438,7 @@ function handleWorldMapClick(svg, ev){
       selectedPortChart = target.name;
       visitedPorts.add(target.name);
       mapView = 'library';
-      portChartZoom = Math.max(portChartZoom || 1, 1.35);
+      portChartZoom = Math.max(portChartZoom || 1, 1.6);
       showNotif('DUNYA ATLASI', `${folioSheet.no} paftasi`, `${target.name} chart dosyasi acildi.`);
       addLiveLogbook('DUNYA ATLASI', `${folioSheet.no} paftasi uzerinden ${target.name} chartina gecildi.`, true);
       renderMap();
@@ -24623,8 +24772,58 @@ function advanceVoyageRoute(step=1, reason='seyir'){
     if(wp.chart) selectedPortChart = wp.chart;
     addLiveLogbook('ROUTE MONITOR', `${route.name}: ${wp.name} · ${wp.note}`, true);
     addWatchFeed(`Rota ilerledi: ${wp.name}`, /security|weather|traffic|tss/i.test(wp.risk||'') ? 'warn' : '');
+    createLiveVoyageWaypointEvent(wp, route, reason);
   }
   return wp;
+}
+
+function getVoyageWaypointEventType(wp={}, route={}){
+  const blob = `${wp.name || ''} ${wp.note || ''} ${wp.risk || ''} ${route.name || ''} ${route.trade || ''}`.toLowerCase();
+  if(/pilot|berth|approach|port|terminal/.test(blob)) return 'pilot';
+  if(/tss|traffic|strait|channel|dover|malacca|suez|panama|hormuz|bosphorus|dardanelles/.test(blob)) return 'vts';
+  if(/weather|swell|monsoon|storm|atlantic|ice|icing/.test(blob)) return 'weather';
+  if(/ukc|draft|shallow|canal|river|squat/.test(blob)) return 'ukc';
+  if(/security|piracy|aden|bab|high risk/.test(blob)) return 'security';
+  return 'cpa';
+}
+
+function createLiveVoyageWaypointEvent(wp, route, reason='route'){
+  if(!wp || !route) return null;
+  const key = `${route.key || route.name}-${activeVoyageProgress}-${wp.name}`;
+  if(liveVoyageEventState.lastKey === key) return null;
+  liveVoyageEventState.lastKey = key;
+  const type = getVoyageWaypointEventType(wp, route);
+  const st = computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const templates = {
+    pilot:{title:'Pilot / Approach Event', msg:`${wp.name}: pilot station, VHF channel, speed reduction and ladder readiness must be checked.`, action:'openMap()'},
+    vts:{title:'VTS / Traffic Event', msg:`${wp.name}: reporting point, TSS lane, CPA/TCPA and VHF watch are now active.`, action:'openDevices()'},
+    weather:{title:'Weather Routing Event', msg:`${wp.name}: swell/weather note is active; route margin, speed and watch handover need a short report.`, action:'openMap()'},
+    ukc:{title:'UKC / Squat Event', msg:`${wp.name}: draft, UKC, tide window and safety contour should be reviewed before next leg.`, action:'openMap()'},
+    security:{title:'Security Watch Event', msg:`${wp.name}: BMP/ISPS watch, door control, radar targets and VHF readiness must be confirmed.`, action:'openDevices()'},
+    cpa:{title:'CPA Watch Event', msg:`${wp.name}: ARPA acquire, AIS compare, ECDIS route monitor and logbook note are expected.`, action:'openDevices()'}
+  };
+  const event = {
+    key,
+    type,
+    title:templates[type].title,
+    msg:templates[type].msg,
+    action:templates[type].action,
+    route:route.name,
+    chart:wp.chart || route.chart || selectedPortChart,
+    progress:getVoyageLegProgress(),
+    eta:st.eta,
+    cpa:st.cpa,
+    ukc:st.ukc,
+    reason,
+    ts:Date.now()
+  };
+  liveVoyageEventState.events = [event, ...(liveVoyageEventState.events || [])].slice(0,8);
+  addWatchFeed(`${event.title}: ${event.msg}`, ['weather','security','ukc'].includes(type) ? 'warn' : 'good');
+  addLiveLogbook('WAYPOINT EVENT', `${event.route}: ${event.msg} ETA ${event.eta}, CPA ${event.cpa}, UKC ${event.ukc}.`, true);
+  pushPhoneMessage(type === 'pilot' ? 'Acenta' : type === 'vts' ? 'VTS' : type === 'security' ? 'Kaptan' : 'Kopruustu', event.msg, {open:false});
+  if(event.chart) selectedPortChart = event.chart;
+  if(panelIsOpen('sim-panel')) renderSimCenter();
+  return event;
 }
 function makeVoyageScene(route, wp, idx){
   const isFirst = idx === 0;
@@ -26650,6 +26849,38 @@ function getPassageDebriefPanel(){
   </div>`;
 }
 
+function getLiveVoyageEventPanel(){
+  const events = liveVoyageEventState.events || [];
+  const route = getActiveVoyageRoute ? getActiveVoyageRoute() : null;
+  const wp = getVoyageWaypoint ? getVoyageWaypoint() : null;
+  const st = liveVoyageState?.route ? liveVoyageState : computeLiveVoyageState(sceneQueue[currentIdx] || {});
+  const empty = {
+    title:'Canli sefer beklemede',
+    msg:`${route?.name || 'Rota'} uzerinde sonraki waypoint: ${wp?.name || 'WP bekleniyor'}. Harita, radar/ECDIS ve VHF olaylari waypoint gecislerinde acilir.`,
+    type:'standby',
+    chart:wp?.chart || route?.chart || selectedPortChart,
+    progress:getVoyageLegProgress ? getVoyageLegProgress() : 0,
+    eta:st?.eta || '--:--',
+    cpa:st?.cpa || '--',
+    ukc:st?.ukc || '--',
+    action:'openMap()'
+  };
+  const visible = events.length ? events.slice(0,4) : [empty];
+  return `<div class="live-voyage-event-panel">
+    <div class="live-voyage-event-head">
+      <b>CANLI SEFER AKISI</b>
+      <span>${phoneSafe(route?.name || 'Aktif rota')} · ${phoneSafe(String(empty.progress))}% · ${phoneSafe(empty.chart || 'ENC')}</span>
+    </div>
+    <div class="live-voyage-event-grid">
+      ${visible.map((event,idx)=>`<button class="live-voyage-event-card ${phoneSafe(event.type || '')} ${idx===0?'active':''}" onclick="${event.action || 'openMap()'}">
+        <b>${phoneSafe(event.title)}</b>
+        <small>${phoneSafe(event.msg)}</small>
+        <em>Chart ${phoneSafe(event.chart || 'ENC')} · ETA ${phoneSafe(event.eta || '--:--')} · CPA ${phoneSafe(event.cpa || '--')} · UKC ${phoneSafe(event.ukc || '--')}</em>
+      </button>`).join('')}
+    </div>
+  </div>`;
+}
+
 function openSimCenter(){
   if(!canUseFeature('sim')) return;
   completeMissionFromFeature('sim');
@@ -27381,6 +27612,9 @@ function renderSimCenter(){
       ${getPlayerBondPanel()}
     </div>
     <div class="sim-section wide">
+      ${getContractCinematicReportPanel()}
+    </div>
+    <div class="sim-section wide">
       ${getRealismDirectorPanel()}
     </div>
     <div class="sim-section wide">
@@ -27396,6 +27630,9 @@ function renderSimCenter(){
         <span class="sim-chip ${voyagePressure.current==='Kuvvetli'?'warn':''}">Akinti ${phoneSafe(voyagePressure.current)}</span>
         <span class="sim-chip">${phoneSafe(route?.name || 'Rota yok')} · ${phoneSafe(wp?.name || 'WP bekleniyor')}</span>
       </div>
+    </div>
+    <div class="sim-section wide">
+      ${getLiveVoyageEventPanel()}
     </div>
     <div class="sim-section">
       <div class="sim-head"><span>DURUM</span><span>${phoneSafe(getRankName())}</span></div>

@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=166",
-        "index.css?v=141",
+        "index.js?v=168",
+        "index.css?v=143",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -81,17 +81,18 @@ REQUIRED = {
         "getClickedWorldChartIndexSheet",
     ],
     "expanded map workspace": [
-        "#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1900px,calc(100vw - 16px));height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);padding:12px;position:relative;overflow:auto;",
+        "#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1920px,calc(100vw - 12px));height:calc(100dvh - 12px);max-height:calc(100dvh - 12px);padding:8px;position:relative;overflow:hidden;",
         "overscroll-behavior:contain",
         "#map-world-view{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;}",
         "#map-svg{width:100%;height:calc(100dvh - 126px);",
-        "#port-chart-svg{width:100%;height:calc(100dvh - 166px);",
+        "#port-chart-box{border:1px solid var(--border2);border-radius:10px;background:rgba(7,19,36,0.55);padding:8px;display:grid;",
+        "#port-chart-svg{width:100%;height:clamp(620px,calc(100dvh - 184px),920px);",
         'preserveAspectRatio="xMidYMid meet"',
         "map-task-touch-area",
         "showMapTapFeedback",
         "focusCurrentMapTask",
         "touch-action:pan-y pinch-zoom",
-        "#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:10px;max-height:none;",
+        "#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:8px;max-height:none;",
     ],
     "political world atlas": [
         "political-atlas",

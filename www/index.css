@@ -2144,17 +2144,17 @@ animation:straitFlow 2.8s linear infinite;}
 .crew-btn:hover{color:var(--text);border-color:var(--accent);}
 
 /* ===== ROTA HARİTASI ===== */
-#map-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;align-items:center;justify-content:center;padding:8px;}
+#map-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:60;align-items:center;justify-content:center;padding:6px;}
 #map-panel.show{display:flex;}
-#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1900px,calc(100vw - 16px));height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);padding:12px;position:relative;overflow:auto;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.035);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
-#map-title{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;}
-#map-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+#map-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:min(1920px,calc(100vw - 12px));height:calc(100dvh - 12px);max-height:calc(100dvh - 12px);padding:8px;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.035);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+#map-title{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;}
+#map-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px;flex:0 0 auto;}
 .map-tab{background:var(--navy3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--text3);cursor:pointer;font-family:'Share Tech Mono',monospace;}
 .map-tab.active,.map-tab:hover{border-color:var(--gold);color:var(--text);background:rgba(24,48,76,0.95);}
 #map-world-view{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;}
 #world-map-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:9px;border:1px solid rgba(111,146,178,.18);border-radius:8px;background:rgba(5,17,30,.48);padding:7px 8px;}
 #world-map-scale-label{min-width:158px;color:#d9eef8;font-size:10px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
-#map-library-view{display:none;grid-template-columns:minmax(168px,12vw) minmax(0,1fr);gap:10px;align-items:stretch;flex:1 1 auto;min-height:0;}
+#map-library-view{display:none;grid-template-columns:minmax(178px,240px) minmax(0,1fr);gap:8px;align-items:stretch;flex:1 1 auto;min-height:0;overflow:hidden;}
 #map-panel.library #map-world-view{display:none;}
 #map-panel.library #map-library-view{display:grid;}
 #map-svg{width:100%;height:calc(100dvh - 126px);min-height:460px;max-height:none;aspect-ratio:22/13;border-radius:8px;background:#d8eef7;border:1px solid rgba(74,112,152,.34);display:block;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),0 14px 38px rgba(0,0,0,.22);cursor:grab;touch-action:pan-y pinch-zoom;flex:1 1 auto;}
@@ -2199,7 +2199,7 @@ animation:straitFlow 2.8s linear infinite;}
 #map-svg .natural-earth-atlas .ne-country:hover{filter:brightness(1.08) saturate(1.08);}
 #map-svg .world-lane{filter:drop-shadow(0 0 2px rgba(155,49,81,.18));}
 #map-close{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;color:var(--text2);font-size:11px;cursor:pointer;}
-#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:10px;max-height:none;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:7px;}
+#map-files{border:1px solid var(--border2);border-radius:8px;background:rgba(7,19,36,0.55);padding:8px;max-height:none;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain;}
 .map-file{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(8,22,40,.95);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text2);font-size:11px;cursor:pointer;font-family:'Share Tech Mono',monospace;text-align:left;}
 .map-file:hover,.map-file.active{border-color:var(--accent);color:var(--text);background:rgba(20,44,70,0.95);}
 .map-file-main{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -2208,8 +2208,8 @@ animation:straitFlow 2.8s linear infinite;}
 .map-file-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .map-file-sub{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .map-file-tag{font-size:9px;color:var(--text3);border:1px solid rgba(138,176,200,.2);border-radius:999px;padding:3px 6px;}
-#port-chart-box{border:1px solid var(--border2);border-radius:10px;background:rgba(7,19,36,0.55);padding:10px;display:flex;flex-direction:column;min-height:0;}
-#port-chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+#port-chart-box{border:1px solid var(--border2);border-radius:10px;background:rgba(7,19,36,0.55);padding:8px;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;min-height:0;height:100%;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+#port-chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(7,19,36,.98),rgba(7,19,36,.82));padding-bottom:5px;}
 #port-chart-title{font-size:11px;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:8px;letter-spacing:1px;}
 #port-chart-head #port-chart-title{margin-bottom:0;}
 #port-chart-zoom-controls{display:flex;align-items:center;gap:6px;}
@@ -2217,27 +2217,27 @@ animation:straitFlow 2.8s linear infinite;}
 .chart-zoom-btn{background:rgba(8,23,39,.95);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;color:var(--text);font-size:12px;cursor:pointer;font-family:'Share Tech Mono',monospace;line-height:1;}
 .chart-zoom-btn:hover{border-color:var(--gold);color:var(--gold);}
 #port-chart-zoom-label{min-width:44px;text-align:center;color:var(--text3);font-size:10px;font-family:'Share Tech Mono',monospace;}
-#port-chart-svg{width:100%;height:calc(100dvh - 166px);min-height:520px;max-height:none;aspect-ratio:22/13;border-radius:8px;background:#d8eef7;border:1px solid rgba(74,112,152,.34);display:block;cursor:grab;touch-action:pan-y pinch-zoom;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),0 14px 38px rgba(0,0,0,.22);flex:1 1 auto;}
-#port-chart-box{position:relative;overflow:hidden;}
+#port-chart-svg{width:100%;height:clamp(620px,calc(100dvh - 184px),920px);min-height:620px;max-height:none;aspect-ratio:auto;border-radius:8px;background:#d8eef7;border:1px solid rgba(74,112,152,.34);display:block;cursor:grab;touch-action:pan-y pinch-zoom;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),0 14px 38px rgba(0,0,0,.22);flex:0 0 auto;}
+#port-chart-box{position:relative;}
 #port-chart-box::after{content:"";position:absolute;left:12px;right:12px;top:52px;height:1px;background:linear-gradient(90deg,transparent,rgba(129,247,184,.52),transparent);pointer-events:none;animation:scanLine4K 4.2s linear infinite;opacity:.55;}
 #port-chart-svg text{letter-spacing:0;}
 #port-chart-svg.dragging{cursor:grabbing;}
-#port-chart-meta{margin-top:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-.chart-meta-card{border:1px solid rgba(111,146,178,0.22);border-radius:8px;background:rgba(8,22,40,.88);padding:8px 9px;}
-.chart-meta-label{font-size:9px;color:var(--gold);font-family:'Share Tech Mono',monospace;letter-spacing:.7px;margin-bottom:4px;text-transform:uppercase;}
-.chart-meta-value{font-size:10px;line-height:1.55;color:var(--text2);font-family:'Share Tech Mono',monospace;}
-#port-chart-taskbox{margin-top:10px;border:1px solid var(--border2);border-radius:8px;background:rgba(8,22,40,.95);padding:9px 10px;}
+#port-chart-meta{margin-top:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:82px;overflow:auto;overscroll-behavior:contain;}
+.chart-meta-card{border:1px solid rgba(111,146,178,0.22);border-radius:7px;background:rgba(8,22,40,.88);padding:6px 7px;min-width:0;}
+.chart-meta-label{font-size:7.5px;color:var(--gold);font-family:'Share Tech Mono',monospace;letter-spacing:.5px;margin-bottom:3px;text-transform:uppercase;}
+.chart-meta-value{font-size:8px;line-height:1.35;color:var(--text2);font-family:'Share Tech Mono',monospace;}
+#port-chart-taskbox{margin-top:8px;border:1px solid var(--border2);border-radius:8px;background:rgba(8,22,40,.96);padding:8px 9px;max-height:150px;overflow:auto;overscroll-behavior:contain;}
 #port-chart-taskhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace;}
 .map-task-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
-#port-chart-tasklist{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 9px;}
-.map-task-chip{border:1px solid rgba(111,168,220,.22);border-radius:999px;background:rgba(7,19,36,.82);color:#9cc8ef;padding:5px 8px;font-size:9px;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:transform .15s ease,border-color .15s ease,background .15s ease,color .15s ease;}
+#port-chart-tasklist{display:flex;gap:6px;flex-wrap:nowrap;margin:6px 0 7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin;}
+.map-task-chip{border:1px solid rgba(111,168,220,.22);border-radius:999px;background:rgba(7,19,36,.82);color:#9cc8ef;padding:5px 8px;font-size:8.5px;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:transform .15s ease,border-color .15s ease,background .15s ease,color .15s ease;white-space:nowrap;flex:0 0 auto;}
 .map-task-chip:hover{transform:translateY(-1px);border-color:rgba(212,160,23,.36);color:#fff4bf;}
 .map-task-chip.active{border-color:rgba(212,160,23,.58);background:rgba(212,160,23,.13);color:#ffd45a;}
 .map-task-chip.done{border-color:rgba(93,191,138,.38);color:#a8f5c2;}
 .map-task-chip.disabled{opacity:.38;border-style:dashed;cursor:not-allowed;}
 .map-task-chip small{opacity:.72;margin-left:4px;}
-#port-chart-tasktitle{font-size:11px;color:var(--text);font-weight:600;margin-bottom:4px;}
-#port-chart-taskdesc{font-size:10px;color:var(--text3);line-height:1.55;}
+#port-chart-tasktitle{font-size:10px;color:var(--text);font-weight:600;margin-bottom:3px;}
+#port-chart-taskdesc{font-size:9px;color:var(--text3);line-height:1.4;}
 .map-reading-cue{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;border:1px solid rgba(127,195,255,.2);border-radius:8px;background:rgba(7,28,47,.62);padding:8px 9px;margin:7px 0;color:#bde7ff;font:9.5px/1.45 'Share Tech Mono',monospace;}
 .map-reading-cue i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(212,160,23,.36);background:rgba(45,33,10,.68);display:flex;align-items:center;justify-content:center;color:#ffd98a;font-style:normal;}
 .map-reading-cue b{color:#fff4bf;font-weight:700;}
@@ -2288,18 +2288,19 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes routeOwnshipPulse{0%,100%{opacity:.72}50%{opacity:1;filter:drop-shadow(0 0 6px rgba(255,212,90,.45));}}
 @media (max-width: 760px){
   #map-panel{padding:5px;}
-  #map-box{width:calc(100vw - 10px);height:calc(100dvh - 10px);max-height:calc(100dvh - 10px);padding:8px;border-radius:10px;overflow:auto;}
+  #map-box{width:calc(100vw - 10px);height:calc(100dvh - 10px);max-height:calc(100dvh - 10px);padding:7px;border-radius:10px;overflow:hidden;}
   #map-title{margin-bottom:7px;gap:8px;align-items:center;}
   #map-tabs{margin-bottom:7px;}
   #map-library-view{grid-template-columns:1fr;}
-  #map-files{max-height:18dvh;min-height:82px;}
+  #map-files{max-height:12dvh;min-height:58px;}
   #map-svg{height:calc(100dvh - 112px);min-height:340px;max-height:none;flex:1 1 auto;}
   #world-map-controls{gap:5px;}
   #world-map-scale-label{min-width:120px;font-size:9px;}
-  #port-chart-box{min-height:0;}
+  #port-chart-box{min-height:0;height:100%;grid-template-rows:auto minmax(0,1fr) auto;overflow:auto;}
   #port-chart-head{align-items:flex-start;flex-direction:column;gap:6px;}
-  #port-chart-svg{height:60dvh;min-height:360px;max-height:none;flex:1 1 auto;}
-  #port-chart-meta{grid-template-columns:1fr;}
+  #port-chart-svg{height:calc(100dvh - 220px);min-height:470px;max-height:none;flex:0 0 auto;}
+  #port-chart-meta{grid-template-columns:repeat(2,minmax(0,1fr));max-height:74px;}
+  #port-chart-taskbox{max-height:128px;}
   .map-task-actions{width:100%;justify-content:space-between;}
 }
 
@@ -2955,6 +2956,21 @@ animation:straitFlow 2.8s linear infinite;}
 .sim-notebook ul{margin:0;padding-left:16px;color:#9dbdd5;font-size:10px;line-height:1.45;}
 .sim-debrief-grid p{grid-column:1/-1;margin:0;color:#cfeaff;font-size:11px;line-height:1.45;}
 .sim-debrief-grid button{grid-column:1/-1;justify-self:start;}
+.contract-cinematic-report,.live-voyage-event-panel{display:grid;gap:10px;border:1px solid rgba(127,195,255,.22);border-radius:12px;background:linear-gradient(135deg,rgba(6,18,32,.88),rgba(8,30,48,.72));padding:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);}
+.contract-report-hero,.live-voyage-event-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid rgba(111,146,178,.16);padding-bottom:8px;}
+.contract-report-hero b,.live-voyage-event-head b{display:block;color:#fff;font:12px 'Share Tech Mono',monospace;letter-spacing:.8px;}
+.contract-report-hero small,.live-voyage-event-head span{display:block;margin-top:3px;color:#9dbdd5;font-size:9px;line-height:1.35;}
+.contract-report-hero>span{display:grid;place-items:center;min-width:56px;height:34px;border:1px solid rgba(212,160,23,.34);border-radius:999px;background:rgba(42,28,8,.7);color:#ffe2a2;font:11px 'Share Tech Mono',monospace;}
+.contract-report-grid,.live-voyage-event-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.contract-report-grid div,.live-voyage-event-card{border:1px solid rgba(111,146,178,.16);border-radius:9px;background:rgba(5,14,24,.72);padding:9px;text-align:left;}
+.contract-report-grid b,.live-voyage-event-card b{display:block;color:#fff;font:10px 'Share Tech Mono',monospace;margin-bottom:5px;}
+.contract-report-grid small,.live-voyage-event-card small{display:block;color:#a9c9de;font-size:9px;line-height:1.35;}
+.contract-report-family{border:1px solid rgba(93,191,138,.22);border-radius:9px;background:rgba(7,36,23,.5);color:#bdf8d0;padding:8px;font-size:10px;line-height:1.45;}
+.live-voyage-event-card{cursor:pointer;color:#dff1ff;min-height:86px;}
+.live-voyage-event-card:hover,.live-voyage-event-card.active{border-color:rgba(212,160,23,.42);transform:translateY(-1px);}
+.live-voyage-event-card em{display:block;margin-top:7px;color:#ffe2a2;font:8px 'Share Tech Mono',monospace;font-style:normal;line-height:1.35;}
+.live-voyage-event-card.weather,.live-voyage-event-card.security,.live-voyage-event-card.ukc{border-color:rgba(255,196,88,.28);background:linear-gradient(180deg,rgba(42,28,8,.42),rgba(5,14,24,.72));}
+.live-voyage-event-card.pilot,.live-voyage-event-card.vts{border-color:rgba(127,195,255,.26);}
 .sim-charter-panel{display:grid;gap:10px;}
 .charter-case-head{border:1px solid rgba(212,160,23,.22);border-radius:9px;background:linear-gradient(180deg,rgba(42,28,8,.5),rgba(5,14,24,.72));padding:9px;display:grid;gap:4px;}
 .charter-case-head b{color:#fff;font:11px 'Share Tech Mono',monospace;}
@@ -3086,9 +3102,9 @@ animation:straitFlow 2.8s linear infinite;}
 .scenario-preview{border:1px dashed rgba(127,195,255,.22);border-radius:9px;background:rgba(5,14,24,.58);padding:9px;color:#cfeaff;font-size:10px;line-height:1.45;}
 .scenario-preview b,.scenario-preview small{display:block;}
 @keyframes simSweep{0%{transform:translateX(0) rotate(18deg);opacity:.2}50%{opacity:1}100%{transform:translateX(230%) rotate(18deg);opacity:.2}}
-@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.mission2-grid,.sim-upgrade-grid,.specialty-tree,.bridge-console-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry,.sim-upgrade-telemetry,.story-director-flow,.event-chain-grid,.three-area-grid,.work-rest-bars{grid-template-columns:1fr 1fr;}.realism-director-grid{grid-template-columns:1fr;}.crew-atlas:not(.compact) .crew-atlas-cards{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media (max-width:820px){.sim-dashboard{grid-template-columns:1fr}.sim-device-grid,.sim-actions,.sim-memory-grid,.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.contract-report-grid,.live-voyage-event-grid,.mission2-grid,.sim-upgrade-grid,.specialty-tree,.bridge-console-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr 1fr;}.mission2-chain,.mission2-telemetry,.sim-upgrade-telemetry,.story-director-flow,.event-chain-grid,.three-area-grid,.work-rest-bars{grid-template-columns:1fr 1fr;}.realism-director-grid{grid-template-columns:1fr;}.crew-atlas:not(.compact) .crew-atlas-cards{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media (max-width:820px){.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip{grid-template-columns:1fr 1fr;}.billing-debug-grid{grid-template-columns:1fr 1fr;}.charter-form-grid,.document-form-grid{grid-template-columns:1fr;}}
-@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.sim-upgrade-grid,.sim-upgrade-telemetry,.specialty-tree,.story-director-flow,.billing-debug-grid,.bridge-console-grid,.event-chain-grid,.three-area-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.work-rest-bars,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr;}.mission2-top,.mission2-consequence,.story-director-head,.billing-debug-head,.realism-director-head,.player-bond-head,.crew-atlas-head,.watch3-head,.work-rest-head,.brm3-head,.inspection3-head{align-items:flex-start;flex-direction:column;}.mission2-badge,.story-director-head span,.realism-director-head span,.watch3-head span,.work-rest-head span,.brm3-head span,.inspection3-head span{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}.crew-atlas:not(.compact) .crew-atlas-cards,.crew-atlas.compact .crew-atlas-cards{grid-template-columns:1fr 1fr;}.crew-atlas-card{min-height:124px;}}
+@media (max-width:560px){.sim-training-grid,.sim-plan-grid,.sim-debrief-grid,.contract-report-grid,.live-voyage-event-grid,.sim-role-grid,.sim-command-grid,.sim-line-grid,.sim-control-grid,.sim-actions.compact,.charter-sof,.premium-product-grid,.premium-sim-grid,.training-roadmap,.premium-preview-strip,.mission2-chain,.mission2-telemetry,.mission2-grid,.sim-upgrade-grid,.sim-upgrade-telemetry,.specialty-tree,.story-director-flow,.billing-debug-grid,.bridge-console-grid,.event-chain-grid,.three-area-grid,.watch-flow-mini,.voyage-live-grid,.player-bond-grid,.player-bond-moments,.watch3-steps,.watch3-telemetry,.work-rest-bars,.brm3-grid,.inspection3-list,.certificate3-grid,.clean-mode-panel,.editable-report-grid,.scenario-editor-grid{grid-template-columns:1fr;}.mission2-top,.mission2-consequence,.story-director-head,.billing-debug-head,.realism-director-head,.player-bond-head,.crew-atlas-head,.watch3-head,.work-rest-head,.brm3-head,.inspection3-head,.contract-report-hero,.live-voyage-event-head{align-items:flex-start;flex-direction:column;}.mission2-badge,.story-director-head span,.realism-director-head span,.watch3-head span,.work-rest-head span,.brm3-head span,.inspection3-head span{white-space:normal;}.document-form-head{align-items:flex-start;flex-direction:column;}.document-practice-tabs button{flex:1 1 45%;}.crew-atlas:not(.compact) .crew-atlas-cards,.crew-atlas.compact .crew-atlas-cards{grid-template-columns:1fr 1fr;}.crew-atlas-card{min-height:124px;}}
 @media (max-width:560px){
   #home-screen{justify-content:flex-start;padding:18px 12px 28px;}
   .home-ship{font-size:48px;}
