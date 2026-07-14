@@ -261,6 +261,8 @@ CHECKS = {
         "renderOperationWalk3D",
         "operation-walk-stage",
         "openShipOperation3D",
+        "openCurrentSceneControlWalk",
+        "bridge3d-control-launcher",
         "interactOperationWalkStation",
     ],
     "mission director and training": [

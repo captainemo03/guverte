@@ -8981,6 +8981,9 @@ function getScene3DBridgeOverlay(sc){
     ${flags.starlink ? `<div class="bridge3d-starlink"><span class="dish"></span><span class="beam b1"></span><span class="beam b2"></span><b>${starlinkStatus.online?'LINK OK':'LINK DEG'}</b><i>${Number(starlinkStatus.latency||0)} ms</i></div>` : ''}
     ${flags.helicopter ? '<div class="bridge3d-helicopter"><span></span><i></i><b>MED</b></div><div class="bridge3d-helipad">CLEAR DECK</div>' : ''}
     ${flags.cargoLift ? '<div class="bridge3d-cargo-lift"><span class="hook"></span><span class="load"></span><i></i><b>COG</b></div>' : ''}
+    <button class="bridge3d-control-launcher" onclick="event.stopPropagation(); openCurrentSceneControlWalk()">
+      <b>Karakterle Kontrol Et</b><small>WASD / yon tuslari / mobil pad</small>
+    </button>
   </div>`;
 }
 
@@ -26072,21 +26075,29 @@ let shipWalkAvatar = {x:50,y:76};
 let bridgeWalkAvatar = {x:50,y:84};
 let operationWalkAvatar = {x:50,y:84};
 
-function openShipWalk(){
-  if(!canUseFeature('shipwalk')) return;
-  completeMissionFromFeature('shipwalk');
-  document.getElementById('shipwalk-panel')?.classList.add('show');
+function openShipWalk(force=false){
+  if(!force && !canUseFeature('shipwalk')) return false;
+  if(!force) completeMissionFromFeature('shipwalk');
+  const panel = document.getElementById('shipwalk-panel');
+  panel?.classList.add('show');
   renderShipWalk();
+  requestAnimationFrame(()=>panel?.focus?.({preventScroll:true}));
+  return true;
 }
 function clampShipWalkPoint(value){
   return Math.max(8, Math.min(92, Number(value) || 50));
+}
+function stopShipWalkControlEvent(ev){
+  ev?.preventDefault?.();
+  ev?.stopPropagation?.();
 }
 function setShipWalkAvatar(x,y){
   shipWalkAvatar.x = clampShipWalkPoint(x);
   shipWalkAvatar.y = clampShipWalkPoint(y);
   renderShipWalk();
 }
-function moveShipWalkAvatar(dx,dy){
+function moveShipWalkAvatar(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
   setShipWalkAvatar(shipWalkAvatar.x + dx, shipWalkAvatar.y + dy);
 }
 function moveShipWalkAvatarToPointer(ev){
@@ -26118,6 +26129,25 @@ function interactShipWalkZone(){
 }
 function isOperationWalkMode(){
   return !!SHIP_OPERATION_MODES[shipWalkMode];
+}
+function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
+  const flags = getScene3DFeatureFlags(sc || {});
+  if(flags.engineRoom) return 'engine3d';
+  if(flags.harborApproach) return 'port3d';
+  if(flags.mooring || flags.deckOps || flags.survival || flags.fire) return 'deck3d';
+  if(flags.premiumOps || flags.helicopter || flags.cargoLift) return 'premium3d';
+  return 'bridge3d';
+}
+function openCurrentSceneControlWalk(){
+  const mode = getCurrentSceneControlMode();
+  if(mode === 'premium3d' && !premiumUnlocked){
+    openShipOperation3D('premium3d');
+    return;
+  }
+  openShipWalk(true);
+  if(mode === 'bridge3d') openBridgeWalk3D();
+  else openShipOperation3D(mode);
+  showNotif('KONTROL', 'Karakter kontrolu acildi', 'WASD, ok tuslari veya mobil yon pedleriyle yuruyebilirsin.');
 }
 function handleShipWalkKeydown(e){
   if(!panelIsOpen('shipwalk-panel')) return;
@@ -26184,7 +26214,8 @@ function setBridgeWalkAvatar(x,y){
   bridgeWalkAvatar.y = clampShipWalkPoint(y);
   renderShipWalk();
 }
-function moveBridgeWalkAvatar(dx,dy){
+function moveBridgeWalkAvatar(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
   setBridgeWalkAvatar(bridgeWalkAvatar.x + dx, bridgeWalkAvatar.y + dy);
 }
 function moveBridgeWalkAvatarToPointer(ev){
@@ -26239,11 +26270,11 @@ function renderBridgeWalk3D(){
       <div><b>3D Kopruustu kontrolu</b><small>WASD / ok tuslari ya da mobil yon pedleriyle cihazlara yaklas. E / Enter veya Etkiles ile cihaz ekranina zoom acilir.</small></div>
       <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${nearest?.label || 'Konsol'}</b><small>${nearest?.distance<=16?'Cihaz zoom hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
       <div class="ship-control-pad" aria-label="3D kopruustu mobil karakter yon kontrolu">
-        <button onclick="moveBridgeWalkAvatar(0,-8)">↑</button>
-        <button onclick="moveBridgeWalkAvatar(-8,0)">←</button>
-        <button class="primary" onclick="interactBridgeWalkStation()">Cihaza Gir</button>
-        <button onclick="moveBridgeWalkAvatar(8,0)">→</button>
-        <button onclick="moveBridgeWalkAvatar(0,8)">↓</button>
+        <button onclick="moveBridgeWalkAvatar(0,-8,event)">↑</button>
+        <button onclick="moveBridgeWalkAvatar(-8,0,event)">←</button>
+        <button class="primary" onclick="event.stopPropagation(); interactBridgeWalkStation()">Cihaza Gir</button>
+        <button onclick="moveBridgeWalkAvatar(8,0,event)">→</button>
+        <button onclick="moveBridgeWalkAvatar(0,8,event)">↓</button>
       </div>
     </div>
   </div>`;
@@ -26270,7 +26301,8 @@ function setOperationWalkAvatar(x,y){
   operationWalkAvatar.y = clampShipWalkPoint(y);
   renderShipWalk();
 }
-function moveOperationWalkAvatar(dx,dy){
+function moveOperationWalkAvatar(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
   setOperationWalkAvatar(operationWalkAvatar.x + dx, operationWalkAvatar.y + dy);
 }
 function moveOperationWalkAvatarToPointer(ev){
@@ -26351,11 +26383,11 @@ function renderOperationWalk3D(){
       <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${phoneSafe(nearest?.label || 'Istasyon')}</b><small>${nearest?.distance<=16?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
       <div class="operation-coach">${phoneSafe(cfg.coach)}</div>
       <div class="ship-control-pad" aria-label="${phoneSafe(cfg.title)} mobil karakter yon kontrolu">
-        <button onclick="moveOperationWalkAvatar(0,-8)">↑</button>
-        <button onclick="moveOperationWalkAvatar(-8,0)">←</button>
-        <button class="primary" onclick="interactOperationWalkStation()">Etkiles</button>
-        <button onclick="moveOperationWalkAvatar(8,0)">→</button>
-        <button onclick="moveOperationWalkAvatar(0,8)">↓</button>
+        <button onclick="moveOperationWalkAvatar(0,-8,event)">↑</button>
+        <button onclick="moveOperationWalkAvatar(-8,0,event)">←</button>
+        <button class="primary" onclick="event.stopPropagation(); interactOperationWalkStation()">Etkiles</button>
+        <button onclick="moveOperationWalkAvatar(8,0,event)">→</button>
+        <button onclick="moveOperationWalkAvatar(0,8,event)">↓</button>
       </div>
     </div>
   </div>`;
@@ -26388,11 +26420,11 @@ function renderShipWalk(){
       <div><b>Karakter kontrolu</b><small>WASD / ok tuslari ya da asagidaki yon pedleriyle yuruyebilirsin. Noktaya yaklasinca Etkiles.</small></div>
       <div class="ship-control-status ${nearest?.distance<=17?'ready':''}"><b>${nearest?.label || 'Gemi'}</b><small>${nearest?.distance<=17?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
       <div class="ship-control-pad" aria-label="Mobil karakter yon kontrolu">
-        <button onclick="moveShipWalkAvatar(0,-8)">↑</button>
-        <button onclick="moveShipWalkAvatar(-8,0)">←</button>
-        <button class="primary" onclick="interactShipWalkZone()">Etkiles</button>
-        <button onclick="moveShipWalkAvatar(8,0)">→</button>
-        <button onclick="moveShipWalkAvatar(0,8)">↓</button>
+        <button onclick="moveShipWalkAvatar(0,-8,event)">↑</button>
+        <button onclick="moveShipWalkAvatar(-8,0,event)">←</button>
+        <button class="primary" onclick="event.stopPropagation(); interactShipWalkZone()">Etkiles</button>
+        <button onclick="moveShipWalkAvatar(8,0,event)">→</button>
+        <button onclick="moveShipWalkAvatar(0,8,event)">↓</button>
       </div>
     </div>
   </div>
@@ -27993,13 +28025,13 @@ function openThreeTrainingArea(area){
   }
   addWatchFeed(labels[area] || '3D egitim alani acildi', area==='engine'?'warn':'good');
   addLiveLogbook('3D EGITIM', labels[area] || '3D egitim alani acildi', true);
-  if(area === 'bridge') { openShipWalk?.(); openBridgeWalk3D?.(); }
+  if(area === 'bridge') { openShipWalk?.(true); openBridgeWalk3D?.(); }
   else if(area === 'route3d') { openMap?.(); completeMissionStep('route','3D ECDIS rota masasi'); }
-  else if(area === 'deck') { openShipWalk?.(); openShipOperation3D?.('deck3d'); }
-  else if(area === 'engine') { openShipWalk?.(); openShipOperation3D?.('engine3d'); }
+  else if(area === 'deck') { openShipWalk?.(true); openShipOperation3D?.('deck3d'); }
+  else if(area === 'engine') { openShipWalk?.(true); openShipOperation3D?.('engine3d'); }
   else if(area === 'fire') { triggerRealEventChain('incident'); pushPhoneMessage('Egitim', labels[area], {open:false}); }
   else if(area === 'manifold') markCargoCheck('3D tanker manifold line-up');
-  else if(area === 'dp' || area === 'rov' || area === 'helideck' || area === 'lifting' || area === 'ice') { openShipWalk?.(); openShipOperation3D?.('premium3d'); }
+  else if(area === 'dp' || area === 'rov' || area === 'helideck' || area === 'lifting' || area === 'ice') { openShipWalk?.(true); openShipOperation3D?.('premium3d'); }
   else pushPhoneMessage('Egitim', labels[area] || '3D egitim alani acildi', {open:false});
   showNotif('3D','Egitim Alani', labels[area] || '3D egitim alani hazir.');
 }

@@ -589,8 +589,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=172",
-        "index.css?v=147",
+        "index.js?v=173",
+        "index.css?v=148",
         "release-quality.js?v=10",
         "game-settings-vibration-btn",
         "toggleVibration",
@@ -622,6 +622,8 @@ def check_mobile_and_hitboxes() -> None:
         "SHIP_OPERATION_MODES",
         "operation-walk-stage",
         "openShipOperation3D",
+        "openCurrentSceneControlWalk",
+        "bridge3d-control-launcher",
     ]:
         require_token(section, token)
 
