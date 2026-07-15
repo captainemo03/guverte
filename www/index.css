@@ -2756,6 +2756,22 @@ animation:straitFlow 2.8s linear infinite;}
 .ship-control-pad button{min-height:42px;border:1px solid rgba(127,195,255,.28);border-radius:9px;background:#102944;color:#dff2ff;font:11px 'Share Tech Mono',monospace;cursor:pointer;touch-action:manipulation;user-select:none;}
 .ship-control-pad button:first-child,.ship-control-pad button:last-child{grid-column:2;}
 .ship-control-pad .primary{border-color:rgba(212,160,23,.5);background:linear-gradient(180deg,#5b3c12,#1c2b34);color:#ffe2a2;font-weight:700;}
+.walk-joystick{position:absolute;left:14px;bottom:14px;z-index:28;width:122px;height:122px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px;padding:7px;border:1px solid rgba(127,195,255,.24);border-radius:18px;background:rgba(3,12,22,.78);backdrop-filter:blur(8px);box-shadow:0 14px 34px rgba(0,0,0,.36);touch-action:none;}
+.walk-joystick button{border:1px solid rgba(127,195,255,.34);border-radius:11px;background:linear-gradient(180deg,rgba(17,45,72,.95),rgba(6,18,32,.95));color:#dff2ff;font:16px 'Share Tech Mono',monospace;cursor:pointer;touch-action:manipulation;user-select:none;}
+.walk-joystick .up{grid-column:2;grid-row:1;}
+.walk-joystick .left{grid-column:1;grid-row:2;}
+.walk-joystick .right{grid-column:3;grid-row:2;}
+.walk-joystick .down{grid-column:2;grid-row:3;}
+.walk-interact{position:absolute;right:14px;bottom:18px;z-index:29;min-width:118px;min-height:54px;border:1px solid rgba(212,160,23,.62);border-radius:16px;background:linear-gradient(180deg,#684714,#172737);color:#ffe2a2;font:12px 'Share Tech Mono',monospace;font-weight:800;letter-spacing:.8px;box-shadow:0 14px 34px rgba(0,0,0,.38),0 0 0 5px rgba(212,160,23,.08);cursor:pointer;touch-action:manipulation;user-select:none;}
+.walk-task-panel{border:1px solid rgba(127,195,255,.18);border-radius:10px;background:rgba(4,13,24,.72);padding:8px;display:grid;gap:7px;}
+.walk-task-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff;font:10px 'Share Tech Mono',monospace;letter-spacing:.6px;}
+.walk-task-head span{border:1px solid rgba(129,247,184,.24);border-radius:999px;background:rgba(9,36,25,.7);color:#a8f5c2;padding:3px 7px;}
+.walk-task-list{display:grid;gap:5px;max-height:174px;overflow:auto;padding-right:2px;}
+.walk-task-list div{border:1px solid rgba(111,146,178,.16);border-radius:8px;background:rgba(8,22,40,.72);padding:6px 7px;color:#bdd5e8;}
+.walk-task-list div.active{border-color:rgba(212,160,23,.46);background:rgba(43,29,8,.72);color:#ffe2a2;}
+.walk-task-list div.done{border-color:rgba(93,191,138,.34);background:rgba(8,38,26,.66);color:#a8f5c2;}
+.walk-task-list b{display:block;color:inherit;font:9px 'Share Tech Mono',monospace;letter-spacing:.5px;}
+.walk-task-list small{display:block;margin-top:2px;color:rgba(211,233,247,.72);font-size:8px;line-height:1.25;}
 .shipwalk-map.quick{grid-template-columns:repeat(6,minmax(0,1fr));}
 .shipwalk-map.quick .ship-zone{min-height:58px;font-size:10px;}
 .bridge-walk-3d-shell{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.5fr);gap:10px;align-items:stretch;}
@@ -3230,6 +3246,7 @@ animation:straitFlow 2.8s linear infinite;}
   .intro-premium-grid,.intro-premium-actions{grid-template-columns:1fr;}
 }
 @media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}.ship-control-shell,.bridge-walk-3d-shell,.operation-walk-shell{grid-template-columns:1fr;}.ship-control-stage{min-height:300px;}.ship-control-hotspot{width:104px;min-height:50px;padding:7px;}.shipwalk-map.quick{grid-template-columns:1fr 1fr;}.ship-control-pad button{min-height:44px;}.bridge-walk-3d-scene,.operation-walk-stage{min-height:360px;}.bridge3d-console,.operation-station{width:112px;min-height:58px;padding:7px;}.bridge3d-floor-station{width:104px;min-height:54px;padding:7px;}.bridge3d-console small,.bridge3d-floor-station small,.operation-station small{display:none;}.operation-control-panel{min-height:auto;}}
+@media (max-width:720px){.walk-joystick{width:104px;height:104px;left:10px;bottom:10px;padding:6px;border-radius:16px;}.walk-joystick button{font-size:14px;border-radius:10px;}.walk-interact{right:10px;bottom:14px;min-width:98px;min-height:50px;font-size:10px;}.walk-task-list{max-height:128px;}.bridge3d-control-launcher{left:10px;right:10px;bottom:10px;min-width:0;text-align:center;}}
 
 @media (max-width:520px){
   html,body{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto;}

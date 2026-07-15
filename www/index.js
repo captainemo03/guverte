@@ -26074,6 +26074,7 @@ let shipWalkMode = 'ship';
 let shipWalkAvatar = {x:50,y:76};
 let bridgeWalkAvatar = {x:50,y:84};
 let operationWalkAvatar = {x:50,y:84};
+let walkTaskState = {mode:'ship', done:{}};
 
 function openShipWalk(force=false){
   if(!force && !canUseFeature('shipwalk')) return false;
@@ -26130,6 +26131,57 @@ function interactShipWalkZone(){
 function isOperationWalkMode(){
   return !!SHIP_OPERATION_MODES[shipWalkMode];
 }
+function getWalkTaskItems(mode=shipWalkMode){
+  if(mode === 'bridge3d') return BRIDGE_WALK_STATIONS.map(st=>({id:st.id, label:st.label, detail:st.detail}));
+  if(SHIP_OPERATION_MODES[mode]){
+    return SHIP_OPERATION_MODES[mode].stations
+      .filter(st=>st.action !== 'danger')
+      .map(st=>({id:st.id, label:st.label, detail:st.detail}));
+  }
+  return SHIPWALK_ZONES.map(z=>({id:z.id, label:z.label, detail:z.detail}));
+}
+function ensureWalkTaskMode(mode=shipWalkMode){
+  if(walkTaskState.mode !== mode){
+    walkTaskState = {mode, done:{}};
+  }
+  return walkTaskState;
+}
+function markWalkTaskDone(id, label=''){
+  const st = ensureWalkTaskMode(shipWalkMode);
+  if(!id || st.done[id]) return;
+  st.done[id] = true;
+  addWatchFeed(`Karakter kontrol: ${label || id} tamamlandi.`, 'good');
+  const items = getWalkTaskItems(shipWalkMode);
+  const doneCount = items.filter(item=>st.done[item.id]).length;
+  if(items.length && doneCount >= items.length){
+    completeMissionStep('device', `${shipWalkMode} karakter kontrol gorevi tamamlandi`);
+    addLiveLogbook('KARAKTER KONTROL', `${shipWalkMode}: tum istasyonlar tamamlandi.`, true);
+    showNotif('KONTROL','Gorev Tamam', 'Bu alandaki karakter kontrol gorevleri tamamlandi.');
+  }
+}
+function renderWalkTaskPanel(mode=shipWalkMode, nearest=null){
+  const state = ensureWalkTaskMode(mode);
+  const items = getWalkTaskItems(mode);
+  const doneCount = items.filter(item=>state.done[item.id]).length;
+  const activeId = nearest?.id;
+  return `<div class="walk-task-panel">
+    <div class="walk-task-head"><b>Yuruyus Gorevi</b><span>${doneCount}/${items.length}</span></div>
+    <div class="walk-task-list">
+      ${items.map(item=>`<div class="${state.done[item.id]?'done':''} ${activeId===item.id?'active':''}">
+        <b>${phoneSafe(item.label)}</b><small>${phoneSafe(item.detail)}</small>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function renderWalkJoystick(moveFn, interactFn, label='Etkiles'){
+  return `<div class="walk-joystick" onclick="event.stopPropagation()" aria-label="Mobil yuruyus joystick">
+    <button class="up" onclick="${moveFn}(0,-8,event)">↑</button>
+    <button class="left" onclick="${moveFn}(-8,0,event)">←</button>
+    <button class="right" onclick="${moveFn}(8,0,event)">→</button>
+    <button class="down" onclick="${moveFn}(0,8,event)">↓</button>
+  </div>
+  <button class="walk-interact" onclick="event.stopPropagation(); ${interactFn}()">${phoneSafe(label)}</button>`;
+}
 function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
   const flags = getScene3DFeatureFlags(sc || {});
   if(flags.engineRoom) return 'engine3d';
@@ -26174,6 +26226,7 @@ function visitShipZone(zone){
     premiumOps:['Premium Ops','Ozel gemi operasyon hangari acilmak isteniyor.','premium']
   };
   const a=actions[zone]; if(!a) return;
+  markWalkTaskDone(zone, a[0]);
   pushPhoneMessage(a[0],a[1]);
   addWatchFeed(a[1], zone==='engine'?'warn':zone==='mess'||zone==='galley'?'good':'');
   if(zone === 'bridge'){
@@ -26202,6 +26255,7 @@ function visitShipZone(zone){
 function openBridgeWalk3D(){
   shipWalkMode = 'bridge3d';
   bridgeWalkAvatar = {x:50,y:84};
+  ensureWalkTaskMode(shipWalkMode);
   addLiveLogbook('KOPRUUSTU 3D', 'Stajyer kopruustu cihaz masasina girdi; radar/ECDIS/VHF istasyonlari yakindan kontrol edilebilir.', true);
   renderShipWalk();
 }
@@ -26238,6 +26292,7 @@ function getNearestBridgeWalkStation(){
 }
 function openBridgeWalkDevice(deviceKey){
   const actual = deviceKey === 'conning' ? 'autopilot' : deviceKey;
+  markWalkTaskDone(deviceKey, getDeviceDef(actual).name);
   document.getElementById('shipwalk-panel')?.classList.remove('show');
   openRealBridgeConsole(actual);
 }
@@ -26251,6 +26306,7 @@ function interactBridgeWalkStation(){
   openBridgeWalkDevice(nearest.device);
 }
 function renderBridgeWalk3D(){
+  ensureWalkTaskMode(shipWalkMode);
   const nearest = getNearestBridgeWalkStation();
   return `<div class="bridge-walk-3d-shell">
     <div class="bridge-walk-3d-scene" onclick="moveBridgeWalkAvatarToPointer(event)" aria-label="3D kopruustu karakter kontrolu">
@@ -26264,11 +26320,13 @@ function renderBridgeWalk3D(){
         ${BRIDGE_WALK_STATIONS.slice(3).map(st=>`<button class="bridge3d-floor-station station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small></button>`).join('')}
         <div class="bridge3d-player" style="left:${bridgeWalkAvatar.x}%;top:${bridgeWalkAvatar.y}%"><span></span></div>
       </div>
+      ${renderWalkJoystick('moveBridgeWalkAvatar','interactBridgeWalkStation','Cihaza Gir')}
     </div>
     <div class="bridge-walk-control-panel">
       <button class="bridge-back-btn" onclick="exitBridgeWalk3D()">Gemi ici haritaya don</button>
       <div><b>3D Kopruustu kontrolu</b><small>WASD / ok tuslari ya da mobil yon pedleriyle cihazlara yaklas. E / Enter veya Etkiles ile cihaz ekranina zoom acilir.</small></div>
       <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${nearest?.label || 'Konsol'}</b><small>${nearest?.distance<=16?'Cihaz zoom hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      ${renderWalkTaskPanel(shipWalkMode, nearest)}
       <div class="ship-control-pad" aria-label="3D kopruustu mobil karakter yon kontrolu">
         <button onclick="moveBridgeWalkAvatar(0,-8,event)">↑</button>
         <button onclick="moveBridgeWalkAvatar(-8,0,event)">←</button>
@@ -26289,6 +26347,7 @@ function openShipOperation3D(mode){
   }
   shipWalkMode = mode;
   operationWalkAvatar = {x:50,y:84};
+  ensureWalkTaskMode(shipWalkMode);
   addLiveLogbook('3D OPERASYON', `${cfg.title}: karakter kontrollu operasyon modu acildi.`, true);
   renderShipWalk();
 }
@@ -26340,23 +26399,29 @@ function interactOperationWalkStation(){
     return;
   }
   if(nearest.action === 'safe'){
+    markWalkTaskDone(nearest.id, nearest.label);
     addWatchFeed('Mooring: guvenli stand-by bolgesi dogru secildi.', 'good');
     applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
   }else if(nearest.action === 'line'){
+    markWalkTaskDone(nearest.id, nearest.label);
     markMooringLine(nearest.line || nearest.label);
     addLiveLogbook('MOORING LINE', `${nearest.line || nearest.label} karakter kontrol modunda hazirlandi.`, true);
   }else if(nearest.action === 'engine'){
+    markWalkTaskDone(nearest.id, nearest.label);
     markEngineCheck(nearest.check || nearest.label);
     addLiveLogbook('ECR CHECK', `${nearest.check || nearest.label} karakter kontrol modunda tamamlandi.`, true);
   }else if(nearest.action === 'port'){
+    markWalkTaskDone(nearest.id, nearest.label);
     addWatchFeed(`Liman yanasma: ${nearest.step || nearest.label}`, 'good');
     addLiveLogbook('PORT APPROACH', `${nearest.step || nearest.label} karakter kontrol modunda tamamlandi.`, true);
     applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true});
   }else if(nearest.action === 'device'){
+    markWalkTaskDone(nearest.id, nearest.label);
     document.getElementById('shipwalk-panel')?.classList.remove('show');
     openRealBridgeConsole(nearest.device || 'vhf');
     return;
   }else if(nearest.action === 'premium'){
+    markWalkTaskDone(nearest.id, nearest.label);
     openThreeTrainingArea(nearest.area || 'rov');
   }
   renderShipWalk();
@@ -26364,6 +26429,7 @@ function interactOperationWalkStation(){
 function renderOperationWalk3D(){
   const cfg = SHIP_OPERATION_MODES[shipWalkMode];
   if(!cfg) return '';
+  ensureWalkTaskMode(shipWalkMode);
   const nearest = getNearestOperationWalkStation();
   return `<div class="operation-walk-shell mode-${cfg.className}">
     <div class="operation-walk-stage" onclick="moveOperationWalkAvatarToPointer(event)" aria-label="${phoneSafe(cfg.title)}">
@@ -26376,12 +26442,14 @@ function renderOperationWalk3D(){
       ${cfg.stations.map(st=>`<button class="operation-station action-${st.action} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setOperationWalkAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(st.detail)}</small></button>`).join('')}
       <div class="operation-npc npc-one"><span></span><b>${cfg.className==='engine'?'ÇARKÇI':cfg.className==='deck'?'LOSTROMO':cfg.className==='port'?'PILOT':'UZMAN'}</b></div>
       <div class="operation-player" style="left:${operationWalkAvatar.x}%;top:${operationWalkAvatar.y}%"><span></span></div>
+      ${renderWalkJoystick('moveOperationWalkAvatar','interactOperationWalkStation','Etkiles')}
     </div>
     <div class="operation-control-panel">
       <button class="bridge-back-btn" onclick="exitShipOperation3D()">${phoneSafe(cfg.back)}</button>
       <div><b>${phoneSafe(cfg.title)}</b><small>${phoneSafe(cfg.subtitle)}</small></div>
       <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${phoneSafe(nearest?.label || 'Istasyon')}</b><small>${nearest?.distance<=16?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
       <div class="operation-coach">${phoneSafe(cfg.coach)}</div>
+      ${renderWalkTaskPanel(shipWalkMode, nearest)}
       <div class="ship-control-pad" aria-label="${phoneSafe(cfg.title)} mobil karakter yon kontrolu">
         <button onclick="moveOperationWalkAvatar(0,-8,event)">↑</button>
         <button onclick="moveOperationWalkAvatar(-8,0,event)">←</button>
@@ -26402,6 +26470,7 @@ function renderShipWalk(){
     body.innerHTML = renderOperationWalk3D();
     return;
   }
+  ensureWalkTaskMode(shipWalkMode);
   const nearest = getNearestShipWalkZone();
   body.innerHTML = `<div class="ship-control-shell">
     <div class="ship-control-stage" onclick="moveShipWalkAvatarToPointer(event)" aria-label="Kontrol edilebilir gemi ici alan">
@@ -26415,10 +26484,12 @@ function renderShipWalk(){
         return `<button class="ship-control-hotspot ${inRange?'active':''}" style="left:${z.x}%;top:${z.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b><small>${z.detail}</small></button>`;
       }).join('')}
       <div class="shipwalk-avatar" style="left:${shipWalkAvatar.x}%;top:${shipWalkAvatar.y}%;" aria-hidden="true"><span></span></div>
+      ${renderWalkJoystick('moveShipWalkAvatar','interactShipWalkZone','Etkiles')}
     </div>
     <div class="ship-control-panel">
       <div><b>Karakter kontrolu</b><small>WASD / ok tuslari ya da asagidaki yon pedleriyle yuruyebilirsin. Noktaya yaklasinca Etkiles.</small></div>
       <div class="ship-control-status ${nearest?.distance<=17?'ready':''}"><b>${nearest?.label || 'Gemi'}</b><small>${nearest?.distance<=17?'Etkilesime hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      ${renderWalkTaskPanel(shipWalkMode, nearest)}
       <div class="ship-control-pad" aria-label="Mobil karakter yon kontrolu">
         <button onclick="moveShipWalkAvatar(0,-8,event)">↑</button>
         <button onclick="moveShipWalkAvatar(-8,0,event)">←</button>
