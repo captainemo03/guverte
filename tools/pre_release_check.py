@@ -589,8 +589,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=174",
-        "index.css?v=149",
+        "index.js?v=175",
+        "index.css?v=150",
         "release-quality.js?v=10",
         "game-settings-vibration-btn",
         "toggleVibration",
@@ -627,6 +627,12 @@ def check_mobile_and_hitboxes() -> None:
         "walkAvatarMotion",
         "getWalkAvatarMotionClass",
         "bridge3d-live-cadet",
+        "WALK_MISSION_CHAINS",
+        "queueWalkMission",
+        "walk-mission-panel",
+        "BRIDGE_WALK_NPCS",
+        "bridge3d-npc",
+        "ship-control-door",
     ]:
         require_token(section, token)
 

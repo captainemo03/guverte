@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=174",
-        "index.css?v=149",
+        "index.js?v=175",
+        "index.css?v=150",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -145,6 +145,12 @@ REQUIRED = {
         "walkAvatarMotion",
         "getWalkAvatarMotionClass",
         "bridge3d-live-cadet",
+        "WALK_MISSION_CHAINS",
+        "queueWalkMission",
+        "walk-mission-panel",
+        "BRIDGE_WALK_NPCS",
+        "bridge3d-npc",
+        "ship-control-door",
     ],
     "intro route selector": [
         "route-select-grid",

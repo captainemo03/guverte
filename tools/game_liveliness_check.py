@@ -266,6 +266,12 @@ CHECKS = {
         "walkAvatarMotion",
         "getWalkAvatarMotionClass",
         "bridge3d-live-cadet",
+        "WALK_MISSION_CHAINS",
+        "queueWalkMission",
+        "walk-mission-panel",
+        "BRIDGE_WALK_NPCS",
+        "bridge3d-npc",
+        "ship-control-door",
         "interactOperationWalkStation",
     ],
     "mission director and training": [

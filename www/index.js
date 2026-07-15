@@ -15685,6 +15685,8 @@ function beginGame(){
   devicePracticeScore={ok:0,total:0};
   starlinkStatus={online:true, latency:42, obstruction:3, plan:'Crew + operational data', lastCheck:'--:--'};
   missionDirectorState={sceneId:'', title:'', steps:[], completed:[]};
+  walkMissionState={sceneId:'', kind:'watch', step:0, completed:false, reason:''};
+  walkTaskState={mode:'ship', done:{}};
   statsExpanded=false;
   moreToolsOpen=false;
   cinemaMode=false;
@@ -18549,6 +18551,7 @@ function buildSavePayload(){
     gameplayMode,
     cleanHudMode,
     missionDirectorState,
+    walkMissionState,
     pn,sn,selYear,selType,selKontrat,
     contractDays,contractTotal,
     currentIdx,
@@ -18704,6 +18707,9 @@ function applyLoadedGameState(data){
   missionDirectorState = data.missionDirectorState && typeof data.missionDirectorState === 'object'
     ? {sceneId:'', title:'', steps:[], completed:[], ...data.missionDirectorState}
     : {sceneId:'', title:'', steps:[], completed:[]};
+  walkMissionState = data.walkMissionState && typeof data.walkMissionState === 'object'
+    ? {sceneId:'', kind:'watch', step:0, completed:false, reason:'', ...data.walkMissionState}
+    : {sceneId:'', kind:'watch', step:0, completed:false, reason:''};
   pn = data.pn || 'Stajyer';
   sn = data.sn || 'M/V Ege Meltem';
   premiumUnlocked = readPurchasedFlag(PREMIUM_KEY);
@@ -19747,6 +19753,7 @@ function handlePortChartTaskClick(svg, ev, port){
       status.textContent = `Dogru secim. ${training.correct}`;
     }
     completeMissionStep('map', 'Harita gorevi tamamlandi');
+    queueWalkMission('map', `Harita gorevi tamamlandi: ${task.title}`);
     applyEffect({bilgi:2,sayginlik:1},{skipContractTick:true});
     if(!alreadyDone){
       awardMetaXp(14, `Harita gorevi: ${task.title}`, 'map');
@@ -19771,6 +19778,7 @@ function handlePortChartTaskClick(svg, ev, port){
         : `Hedef bu degil. ${training.wrong} Ceza yok; ${Math.max(0, 3-wrongCount)} uzak deneme sonra kucuk egitim cezasi gelir.`;
     status.innerHTML = `${phoneSafe(retryText)} <button class="map-retry-btn" onclick="ensureTaskPort(getCurrentMapTask()); renderMap();">Dogru charti ac / tekrar dene</button>`;
     addWatchFeed(`Harita egitimi: ${near?'yaklastin':'yanlis bolge'} - ${training.focus || training.wrong}`, near?'warn':'');
+    queueWalkMission('map', `Harita tekrar: ${task.title}`);
     if(penaltyNow){
       applyEffect({bilgi:-1},{skipContractTick:true});
       addLiveLogbook('HARITA HATASI', `${task.title}: ${training.wrong}`, true);
@@ -26003,14 +26011,78 @@ const SHIPWALK_ZONES = [
   {id:'galley', label:'Galley', detail:'Asci, menu, cay', x:78, y:72},
   {id:'premiumOps', label:'Premium Ops', detail:'DP, ROV, medevac, proje lift, buz', x:88, y:22, premium:true}
 ];
+const SHIPWALK_DOORS = [
+  {zone:'bridge', label:'Kopruye cik', x:50, y:8},
+  {zone:'deck', label:'Guverteye cik', x:8, y:48},
+  {zone:'engine', label:'Makineye in', x:92, y:50},
+  {zone:'cabin', label:'Kamaraya don', x:30, y:92},
+  {zone:'mess', label:'Messroom', x:60, y:92}
+];
 const BRIDGE_WALK_STATIONS = [
   {id:'ecdis', label:'ECDIS', device:'ecdis', detail:'Route check, safety contour, alarm list', x:22, y:38},
   {id:'vhf', label:'VHF / DSC', device:'vhf', detail:'CH16, working channel, distress menu', x:50, y:32},
   {id:'radar', label:'RADAR / ARPA', device:'radar', detail:'Target acquire, CPA/TCPA, EBL/VRM', x:78, y:38},
   {id:'ais', label:'AIS', device:'ais', detail:'Target detail, voyage data, CPA sort', x:28, y:62},
-  {id:'conning', label:'CONNING', device:'autopilot', detail:'Heading, speed, autopilot standby', x:50, y:66},
-  {id:'bnwas', label:'BNWAS', device:'bnwas', detail:'Watch alarm acknowledge, timer, log', x:72, y:62}
+  {id:'conning', label:'CONNING', device:'autopilot', detail:'Heading, speed, autopilot standby', x:50, y:66, minRank:1},
+  {id:'bnwas', label:'BNWAS', device:'bnwas', detail:'Watch alarm acknowledge, timer, log', x:72, y:62, minRank:1}
 ];
+const BRIDGE_WALK_NPCS = [
+  {id:'captain', label:'KAPTAN', detail:'Gece emri / BRM', x:12, y:70, line:'Once cihaz, sonra rapor. VHF duyarsan radari ve ECDIS rotayi birlikte kontrol et.'},
+  {id:'oow', label:'VARDIYA ZABITI', detail:'Radar gozetimi', x:88, y:70, line:'Hedefi sadece AIS isminden okuma. Radar izi, CPA ve rota niyetini birlikte teyit et.'},
+  {id:'lookout', label:'GOZCU', detail:'Pruva raporu', x:18, y:54, line:'Isik gordugunde aci ve hareket soyle. Emin degilsen tekrar bak, gec kalma.'}
+];
+const WALK_MISSION_CHAINS = {
+  watch:{
+    title:'Canli vardiya zinciri',
+    desc:'VHF cagrisi -> radar hedef -> ECDIS rota -> logbook disiplini',
+    steps:[
+      {mode:'bridge3d', id:'vhf', label:'VHF cagrısını al'},
+      {mode:'bridge3d', id:'radar', label:'Radar hedefini acquire et'},
+      {mode:'bridge3d', id:'ecdis', label:'ECDIS rota alarmını kontrol et'},
+      {mode:'ship', id:'bridge', label:'Kopruustu vardiya notunu tamamla'}
+    ]
+  },
+  map:{
+    title:'Harita / ECDIS takip zinciri',
+    desc:'Harita alarmi gelince once ECDIS, sonra radar ve rota teyidi',
+    steps:[
+      {mode:'bridge3d', id:'ecdis', label:'ECDIS route check ac'},
+      {mode:'bridge3d', id:'radar', label:'CPA/TCPA hedefini teyit et'},
+      {mode:'bridge3d', id:'ais', label:'AIS bilgisini karsilastir'}
+    ]
+  },
+  mooring:{
+    title:'Guvende mooring zinciri',
+    desc:'Once guvenli stand-by, sonra halat sirasi',
+    steps:[
+      {mode:'deck3d', id:'safe', label:'Snap-back disinda dur'},
+      {mode:'deck3d', id:'head', label:'Head line kontrol et'},
+      {mode:'deck3d', id:'spring', label:'Spring hattini teyit et'},
+      {mode:'deck3d', id:'stern', label:'Stern line raporla'}
+    ]
+  },
+  engine:{
+    title:'Makine alarm zinciri',
+    desc:'Alarm paneli -> generator -> cooling/bilge/fuel kontrolu',
+    steps:[
+      {mode:'engine3d', id:'alarm', label:'Alarm panelini acknowledge et'},
+      {mode:'engine3d', id:'generator', label:'Standby generator durumunu oku'},
+      {mode:'engine3d', id:'cooling', label:'Cooling water trendini kontrol et'},
+      {mode:'engine3d', id:'bilge', label:'Bilge alarm yolunu teyit et'}
+    ]
+  },
+  port:{
+    title:'Pilot / tug / all fast zinciri',
+    desc:'Pilot emri, VHF, telegraph, tug order ve all fast tek akista',
+    steps:[
+      {mode:'port3d', id:'pilot', label:'Pilot exchange dinle'},
+      {mode:'port3d', id:'vhf', label:'VHF CH14 uzerinden teyit et'},
+      {mode:'port3d', id:'telegraph', label:'Engine telegraph tekrar et'},
+      {mode:'port3d', id:'tug', label:'Tug order dogrula'},
+      {mode:'port3d', id:'allfast', label:'All fast raporu ver'}
+    ]
+  }
+};
 const SHIP_OPERATION_MODES = {
   deck3d:{
     title:'3D Guverte / Mooring',
@@ -26077,6 +26149,7 @@ let bridgeWalkAvatar = {x:50,y:84};
 let operationWalkAvatar = {x:50,y:84};
 let walkTaskState = {mode:'ship', done:{}};
 let walkAvatarMotion = {dir:'down', moving:false, timer:null};
+let walkMissionState = {sceneId:'', kind:'watch', step:0, completed:false, reason:''};
 
 function openShipWalk(force=false){
   if(!force && !canUseFeature('shipwalk')) return false;
@@ -26110,6 +26183,91 @@ function rememberWalkAvatarMotion(oldX, oldY, newX, newY){
 }
 function getWalkAvatarMotionClass(){
   return `${walkAvatarMotion.moving ? 'is-moving' : 'is-idle'} dir-${walkAvatarMotion.dir || 'down'}`;
+}
+function getWalkRankName(minRank=0){
+  return CAREER_RANKS?.[minRank] || 'Zabit';
+}
+function canUseWalkItem(item={}){
+  if(item.premium && !premiumUnlocked) return false;
+  const minRank = Number(item.minRank || 0);
+  return (careerState?.rankIndex || 0) >= minRank;
+}
+function explainWalkLock(item={}){
+  if(item.premium && !premiumUnlocked) return 'Bu alan premium paketle acilir.';
+  const minRank = Number(item.minRank || 0);
+  if((careerState?.rankIndex || 0) < minRank) return `${item.label || 'Bu istasyon'} icin en az ${getWalkRankName(minRank)} rutbesi gerekir.`;
+  return '';
+}
+function inferWalkMissionKind(sc=sceneQueue?.[currentIdx]){
+  const mapTask = typeof getCurrentMapTask === 'function' ? getCurrentMapTask() : null;
+  if(mapTask && !completedMapTasks.has(mapTask.id)) return 'map';
+  const flags = getScene3DFeatureFlags(sc || {});
+  if(flags.engineRoom) return 'engine';
+  if(flags.mooring || flags.deckOps || flags.survival || flags.fire) return 'mooring';
+  if(flags.harborApproach) return 'port';
+  if(flags.routeTable) return 'map';
+  return 'watch';
+}
+function queueWalkMission(kind='watch', reason=''){
+  const nextKind = WALK_MISSION_CHAINS[kind] ? kind : 'watch';
+  walkMissionState = {
+    sceneId: sceneQueue?.[currentIdx]?.id || '',
+    kind: nextKind,
+    step: 0,
+    completed: false,
+    reason
+  };
+  addWatchFeed(`Yuruyus zinciri: ${WALK_MISSION_CHAINS[nextKind].title}`, 'warn');
+  if(panelIsOpen('shipwalk-panel')) renderShipWalk();
+}
+function ensureWalkMission(kind=inferWalkMissionKind()){
+  const sceneId = sceneQueue?.[currentIdx]?.id || '';
+  if(!WALK_MISSION_CHAINS[walkMissionState.kind] || walkMissionState.sceneId !== sceneId || (walkMissionState.completed && walkMissionState.kind !== kind)){
+    queueWalkMission(kind, 'scene');
+  }
+  return walkMissionState;
+}
+function getCurrentWalkMissionStep(){
+  const mission = ensureWalkMission();
+  const chain = WALK_MISSION_CHAINS[mission.kind] || WALK_MISSION_CHAINS.watch;
+  return chain.steps[Math.min(mission.step || 0, chain.steps.length - 1)];
+}
+function progressWalkMission(mode, id, label=''){
+  const mission = ensureWalkMission();
+  if(mission.completed) return;
+  const chain = WALK_MISSION_CHAINS[mission.kind] || WALK_MISSION_CHAINS.watch;
+  const step = chain.steps[mission.step || 0];
+  if(!step) return;
+  if(step.mode === mode && step.id === id){
+    mission.step += 1;
+    addWatchFeed(`Yuruyus gorevi ${mission.step}/${chain.steps.length}: ${label || step.label}`, 'good');
+    if(mission.step >= chain.steps.length){
+      mission.completed = true;
+      applyEffect({bilgi:1,sayginlik:1},{skipContractTick:true});
+      addLiveLogbook('YURUYUS ZINCIRI', `${chain.title} tamamlandi.`, true);
+      showNotif('KONTROL','Zincir Tamam', `${chain.title} tamamlandi.`);
+    }
+  }else if(step.mode === mode){
+    addWatchFeed(`Yuruyus ipucu: once ${step.label}. Yanlis istasyon cezalandirilmaz.`, 'warn');
+  }
+}
+function renderWalkMissionPanel(){
+  const mission = ensureWalkMission();
+  const chain = WALK_MISSION_CHAINS[mission.kind] || WALK_MISSION_CHAINS.watch;
+  return `<div class="walk-mission-panel ${mission.completed?'complete':''}">
+    <div class="walk-mission-head"><b>${phoneSafe(chain.title)}</b><span>${Math.min(mission.step, chain.steps.length)}/${chain.steps.length}</span></div>
+    <small>${phoneSafe(chain.desc)}</small>
+    <div class="walk-mission-steps">
+      ${chain.steps.map((step,i)=>`<span class="${i<mission.step?'done':i===mission.step&&!mission.completed?'active':''}">${phoneSafe(step.label)}</span>`).join('')}
+    </div>
+  </div>`;
+}
+function showWalkNpcDialogue(npc){
+  if(!npc) return;
+  addWatchFeed(`${npc.label}: ${npc.line}`, 'good');
+  pushPhoneMessage(npc.label, npc.line, {open:false});
+  showNotif(npc.label, 'Konusma', npc.line);
+  applyEffect({sayginlik:1},{skipContractTick:true});
 }
 function setShipWalkAvatar(x,y){
   const nx = clampShipWalkPoint(x);
@@ -26170,6 +26328,7 @@ function ensureWalkTaskMode(mode=shipWalkMode){
 }
 function markWalkTaskDone(id, label=''){
   const st = ensureWalkTaskMode(shipWalkMode);
+  progressWalkMission(shipWalkMode, id, label);
   if(!id || st.done[id]) return;
   st.done[id] = true;
   addWatchFeed(`Karakter kontrol: ${label || id} tamamlandi.`, 'good');
@@ -26187,6 +26346,7 @@ function renderWalkTaskPanel(mode=shipWalkMode, nearest=null){
   const doneCount = items.filter(item=>state.done[item.id]).length;
   const activeId = nearest?.id;
   return `<div class="walk-task-panel">
+    ${renderWalkMissionPanel()}
     <div class="walk-task-head"><b>Yuruyus Gorevi</b><span>${doneCount}/${items.length}</span></div>
     <div class="walk-task-list">
       ${items.map(item=>`<div class="${state.done[item.id]?'done':''} ${activeId===item.id?'active':''}">
@@ -26204,6 +26364,13 @@ function renderWalkJoystick(moveFn, interactFn, label='Etkiles'){
   </div>
   <button class="walk-interact" onclick="event.stopPropagation(); ${interactFn}()">${phoneSafe(label)}</button>`;
 }
+function renderShipWalkDoors(nearest=null){
+  return SHIPWALK_DOORS.map(door=>{
+    const zone = SHIPWALK_ZONES.find(z=>z.id === door.zone) || {};
+    const active = nearest?.id === door.zone && nearest.distance <= 17;
+    return `<button class="ship-control-door ${active?'active':''} ${!canUseWalkItem(zone)?'locked':''}" style="left:${door.x}%;top:${door.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${zone.x||door.x},${zone.y||door.y})"><b>${phoneSafe(door.label)}</b></button>`;
+  }).join('');
+}
 function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
   const flags = getScene3DFeatureFlags(sc || {});
   if(flags.engineRoom) return 'engine3d';
@@ -26213,6 +26380,7 @@ function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
   return 'bridge3d';
 }
 function openCurrentSceneControlWalk(){
+  ensureWalkMission(inferWalkMissionKind());
   const mode = getCurrentSceneControlMode();
   if(mode === 'premium3d' && !premiumUnlocked){
     openShipOperation3D('premium3d');
@@ -26248,6 +26416,12 @@ function visitShipZone(zone){
     premiumOps:['Premium Ops','Ozel gemi operasyon hangari acilmak isteniyor.','premium']
   };
   const a=actions[zone]; if(!a) return;
+  const zoneDef = SHIPWALK_ZONES.find(z=>z.id === zone);
+  if(zoneDef && !canUseWalkItem(zoneDef)){
+    showNotif('KILIT','Yetki / Paket', explainWalkLock(zoneDef));
+    addWatchFeed(`Kilitli alan: ${zoneDef.label} - ${explainWalkLock(zoneDef)}`, 'warn');
+    return;
+  }
   markWalkTaskDone(zone, a[0]);
   pushPhoneMessage(a[0],a[1]);
   addWatchFeed(a[1], zone==='engine'?'warn':zone==='mess'||zone==='galley'?'good':'');
@@ -26277,6 +26451,7 @@ function visitShipZone(zone){
 function openBridgeWalk3D(){
   shipWalkMode = 'bridge3d';
   bridgeWalkAvatar = {x:50,y:84};
+  if(!walkMissionState.sceneId) ensureWalkMission(inferWalkMissionKind());
   ensureWalkTaskMode(shipWalkMode);
   addLiveLogbook('KOPRUUSTU 3D', 'Stajyer kopruustu cihaz masasina girdi; radar/ECDIS/VHF istasyonlari yakindan kontrol edilebilir.', true);
   renderShipWalk();
@@ -26315,6 +26490,16 @@ function getNearestBridgeWalkStation(){
   });
   return best;
 }
+function getNearestBridgeWalkNpc(){
+  let best = null;
+  BRIDGE_WALK_NPCS.forEach(npc=>{
+    const dx = bridgeWalkAvatar.x - npc.x;
+    const dy = bridgeWalkAvatar.y - npc.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...npc, distance};
+  });
+  return best;
+}
 function openBridgeWalkDevice(deviceKey){
   const actual = deviceKey === 'conning' ? 'autopilot' : deviceKey;
   markWalkTaskDone(deviceKey, getDeviceDef(actual).name);
@@ -26323,7 +26508,17 @@ function openBridgeWalkDevice(deviceKey){
 }
 function interactBridgeWalkStation(){
   const nearest = getNearestBridgeWalkStation();
+  const nearestNpc = getNearestBridgeWalkNpc();
+  if(nearestNpc && nearestNpc.distance <= 14 && (!nearest || nearestNpc.distance <= nearest.distance)){
+    showWalkNpcDialogue(nearestNpc);
+    return;
+  }
   if(!nearest) return;
+  if(!canUseWalkItem(nearest)){
+    showNotif('RUTBE','Yetki yok', explainWalkLock(nearest));
+    addWatchFeed(`Yetki kilidi: ${explainWalkLock(nearest)}`, 'warn');
+    return;
+  }
   if(nearest.distance > 16){
     showNotif('KOPRUUSTU', 'Yaklas', `${nearest.label} konsolu icin biraz daha yaklas.`);
     return;
@@ -26332,17 +26527,20 @@ function interactBridgeWalkStation(){
 }
 function renderBridgeWalk3D(){
   ensureWalkTaskMode(shipWalkMode);
-  const nearest = getNearestBridgeWalkStation();
+  const nearestStation = getNearestBridgeWalkStation();
+  const nearestNpc = getNearestBridgeWalkNpc();
+  const nearest = nearestNpc && nearestNpc.distance < (nearestStation?.distance || 999) ? {...nearestNpc, type:'npc'} : nearestStation;
   return `<div class="bridge-walk-3d-shell">
     <div class="bridge-walk-3d-scene" onclick="moveBridgeWalkAvatarToPointer(event)" aria-label="3D kopruustu karakter kontrolu">
       <div class="bridge3d-sky"></div>
       <div class="bridge3d-window-row"><i></i><i></i><i></i><i></i></div>
       <div class="bridge3d-sea"><span></span><span></span><span></span></div>
       <div class="bridge3d-console-rack">
-        ${BRIDGE_WALK_STATIONS.slice(0,3).map(st=>`<button class="bridge3d-console station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small><em></em></button>`).join('')}
+        ${BRIDGE_WALK_STATIONS.slice(0,3).map(st=>`<button class="bridge3d-console station-${st.id} ${nearestStation?.id===st.id&&nearestStation.distance<=16?'active':''} ${!canUseWalkItem(st)?'locked':''}" style="left:${st.x}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small><em></em></button>`).join('')}
       </div>
       <div class="bridge3d-floor">
-        ${BRIDGE_WALK_STATIONS.slice(3).map(st=>`<button class="bridge3d-floor-station station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small></button>`).join('')}
+        ${BRIDGE_WALK_STATIONS.slice(3).map(st=>`<button class="bridge3d-floor-station station-${st.id} ${nearestStation?.id===st.id&&nearestStation.distance<=16?'active':''} ${!canUseWalkItem(st)?'locked':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small></button>`).join('')}
+        ${BRIDGE_WALK_NPCS.map(npc=>`<button class="bridge3d-npc npc-${npc.id} ${nearestNpc?.id===npc.id&&nearestNpc.distance<=14?'active':''}" style="left:${npc.x}%;top:${npc.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${npc.x},${npc.y})"><span></span><b>${phoneSafe(npc.label)}</b></button>`).join('')}
         <div class="bridge3d-player ${getWalkAvatarMotionClass()}" style="left:${bridgeWalkAvatar.x}%;top:${bridgeWalkAvatar.y}%"><span></span></div>
       </div>
       ${renderWalkJoystick('moveBridgeWalkAvatar','interactBridgeWalkStation','Cihaza Gir')}
@@ -26350,7 +26548,7 @@ function renderBridgeWalk3D(){
     <div class="bridge-walk-control-panel">
       <button class="bridge-back-btn" onclick="exitBridgeWalk3D()">Gemi ici haritaya don</button>
       <div><b>3D Kopruustu kontrolu</b><small>WASD / ok tuslari ya da mobil yon pedleriyle cihazlara yaklas. E / Enter veya Etkiles ile cihaz ekranina zoom acilir.</small></div>
-      <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${nearest?.label || 'Konsol'}</b><small>${nearest?.distance<=16?'Cihaz zoom hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
+      <div class="ship-control-status ${nearest?.distance<=16?'ready':''}"><b>${nearest?.label || 'Konsol'}</b><small>${nearest?.type==='npc'&&nearest.distance<=14?'Konusmaya hazir':nearest?.distance<=16?'Cihaz zoom hazir':'Yaklas: '+Math.round(nearest?.distance || 0)}</small></div>
       ${renderWalkTaskPanel(shipWalkMode, nearest)}
       <div class="ship-control-pad" aria-label="3D kopruustu mobil karakter yon kontrolu">
         <button onclick="moveBridgeWalkAvatar(0,-8,event)">↑</button>
@@ -26372,6 +26570,8 @@ function openShipOperation3D(mode){
   }
   shipWalkMode = mode;
   operationWalkAvatar = {x:50,y:84};
+  const missionByMode = {deck3d:'mooring', engine3d:'engine', port3d:'port'};
+  if(missionByMode[mode]) queueWalkMission(missionByMode[mode], `${cfg.title} acildi`);
   ensureWalkTaskMode(shipWalkMode);
   addLiveLogbook('3D OPERASYON', `${cfg.title}: karakter kontrollu operasyon modu acildi.`, true);
   renderShipWalk();
@@ -26417,6 +26617,11 @@ function interactOperationWalkStation(){
   if(!nearest) return;
   if(nearest.distance > 16){
     showNotif('3D', 'Yaklas', `${nearest.label} icin biraz daha yaklas.`);
+    return;
+  }
+  if(!canUseWalkItem(nearest)){
+    showNotif('RUTBE','Yetki yok', explainWalkLock(nearest));
+    addWatchFeed(`Yetki kilidi: ${explainWalkLock(nearest)}`, 'warn');
     return;
   }
   if(nearest.action === 'danger'){
@@ -26467,7 +26672,7 @@ function renderOperationWalk3D(){
       <div class="operation-bg port"></div>
       <div class="operation-bg premium"></div>
       <div class="operation-risk-zone"></div>
-      ${cfg.stations.map(st=>`<button class="operation-station action-${st.action} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setOperationWalkAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(st.detail)}</small></button>`).join('')}
+      ${cfg.stations.map(st=>`<button class="operation-station action-${st.action} ${nearest?.id===st.id&&nearest.distance<=16?'active':''} ${!canUseWalkItem(st)?'locked':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setOperationWalkAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(st.detail)}</small></button>`).join('')}
       <div class="operation-npc npc-one"><span></span><b>${cfg.className==='engine'?'ÇARKÇI':cfg.className==='deck'?'LOSTROMO':cfg.className==='port'?'PILOT':'UZMAN'}</b></div>
       <div class="operation-player ${getWalkAvatarMotionClass()}" style="left:${operationWalkAvatar.x}%;top:${operationWalkAvatar.y}%"><span></span></div>
       ${renderWalkJoystick('moveOperationWalkAvatar','interactOperationWalkStation','Etkiles')}
@@ -26507,9 +26712,10 @@ function renderShipWalk(){
       <div class="ship-control-corridor bridge"></div>
       <div class="ship-control-corridor deck"></div>
       <div class="ship-control-corridor engine"></div>
+      ${renderShipWalkDoors(nearest)}
       ${SHIPWALK_ZONES.map(z=>{
         const inRange = nearest && nearest.id === z.id && nearest.distance <= 17;
-        return `<button class="ship-control-hotspot ${inRange?'active':''}" style="left:${z.x}%;top:${z.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b><small>${z.detail}</small></button>`;
+        return `<button class="ship-control-hotspot ${inRange?'active':''} ${!canUseWalkItem(z)?'locked':''}" style="left:${z.x}%;top:${z.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b><small>${z.detail}</small></button>`;
       }).join('')}
       <div class="shipwalk-avatar ${getWalkAvatarMotionClass()}" style="left:${shipWalkAvatar.x}%;top:${shipWalkAvatar.y}%;" aria-hidden="true"><span></span></div>
       ${renderWalkJoystick('moveShipWalkAvatar','interactShipWalkZone','Etkiles')}
@@ -26527,7 +26733,7 @@ function renderShipWalk(){
       </div>
     </div>
   </div>
-  <div class="shipwalk-map quick">${SHIPWALK_ZONES.map(z=>`<button class="ship-zone" onclick="setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b>${z.detail}</button>`).join('')}</div>
+  <div class="shipwalk-map quick">${SHIPWALK_ZONES.map(z=>`<button class="ship-zone ${!canUseWalkItem(z)?'locked':''}" onclick="setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b>${z.detail}</button>`).join('')}</div>
     <div class="life-card"><b>Ekip yorgunluğu</b>Güverte ${Math.round(crewFatigueState.deck)} · Makine ${Math.round(crewFatigueState.engine)} · Köprüüstü ${Math.round(crewFatigueState.bridge)} · Galley ${Math.round(crewFatigueState.galley)}</div>`;
 }
 
@@ -28069,6 +28275,8 @@ function triggerRealEventChain(kind='vhf'){
     sceneLiveSequenceTimers.push(setTimeout(()=>addWatchFeed(`Zincir ${i+1}/${lines.length}: ${line}`, i===0 || i===lines.length-1 ? 'warn' : 'good'), 180 + i*620));
   });
   const deviceKey = kind === 'engine' ? 'gyro' : kind === 'pilot' ? 'ecdis' : kind === 'incident' ? 'radar' : kind === 'inspection' ? 'ecdis' : 'vhf';
+  const walkKind = kind === 'engine' ? 'engine' : kind === 'pilot' ? 'port' : kind === 'inspection' || kind === 'incident' ? 'map' : 'watch';
+  queueWalkMission(walkKind, `${kind} olay zinciri`);
   devicePracticeProgress[deviceKey] = 0;
   activeDeviceKey = deviceKey;
   addLiveLogbook('OLAY ZINCIRI', lines.join(' -> '), true);

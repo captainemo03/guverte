@@ -2744,6 +2744,10 @@ animation:straitFlow 2.8s linear infinite;}
 .ship-control-hotspot b{display:block;color:#fff;font:11px 'Share Tech Mono',monospace;letter-spacing:.5px;}
 .ship-control-hotspot small{display:block;color:#9fc0d8;font-size:8px;line-height:1.25;margin-top:3px;}
 .ship-control-hotspot.active{border-color:rgba(129,247,184,.72);box-shadow:0 0 0 4px rgba(129,247,184,.08),0 0 24px rgba(129,247,184,.18);background:rgba(8,35,28,.9);}
+.ship-control-hotspot.locked,.ship-zone.locked,.bridge3d-console.locked,.bridge3d-floor-station.locked,.operation-station.locked{opacity:.58;border-style:dashed;filter:saturate(.65);}
+.ship-control-hotspot.locked::before,.ship-zone.locked::before,.bridge3d-console.locked::before,.bridge3d-floor-station.locked::before,.operation-station.locked::before{content:"KILIT";position:absolute;right:6px;top:5px;border:1px solid rgba(255,196,88,.32);border-radius:999px;background:rgba(35,22,7,.86);color:#ffe2a2;font:7px 'Share Tech Mono',monospace;padding:2px 5px;letter-spacing:.5px;}
+.ship-control-door{position:absolute;transform:translate(-50%,-50%);z-index:4;border:1px solid rgba(212,160,23,.3);border-radius:999px;background:rgba(41,28,8,.78);color:#ffe2a2;min-height:28px;padding:5px 9px;font:8px 'Share Tech Mono',monospace;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.24);}
+.ship-control-door.active{border-color:rgba(129,247,184,.62);background:rgba(8,35,28,.86);color:#baffd4;box-shadow:0 0 0 4px rgba(129,247,184,.08);}
 .shipwalk-avatar{position:absolute;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 45% 35%,#ffe1bd,#b46d3f 62%,#442215 100%);border:2px solid rgba(255,226,162,.92);box-shadow:0 0 0 5px rgba(212,160,23,.14),0 0 26px rgba(212,160,23,.28);z-index:5;transition:left .16s ease,top .16s ease;}
 .shipwalk-avatar span{width:12px;height:15px;border-radius:45% 45% 35% 35%;background:#071324;box-shadow:0 15px 0 -2px #0b2742;}
 .shipwalk-avatar::after{content:"STAJYER";position:absolute;top:-21px;left:50%;transform:translateX(-50%);font:8px 'Share Tech Mono',monospace;color:#ffe2a2;background:rgba(3,11,19,.82);border:1px solid rgba(212,160,23,.32);border-radius:999px;padding:3px 6px;letter-spacing:.7px;white-space:nowrap;}
@@ -2779,6 +2783,15 @@ animation:straitFlow 2.8s linear infinite;}
 .walk-task-list div.done{border-color:rgba(93,191,138,.34);background:rgba(8,38,26,.66);color:#a8f5c2;}
 .walk-task-list b{display:block;color:inherit;font:9px 'Share Tech Mono',monospace;letter-spacing:.5px;}
 .walk-task-list small{display:block;margin-top:2px;color:rgba(211,233,247,.72);font-size:8px;line-height:1.25;}
+.walk-mission-panel{border:1px solid rgba(212,160,23,.24);border-radius:10px;background:linear-gradient(135deg,rgba(41,28,8,.72),rgba(5,15,27,.88));padding:8px;display:grid;gap:6px;}
+.walk-mission-panel.complete{border-color:rgba(93,191,138,.36);background:linear-gradient(135deg,rgba(8,38,26,.74),rgba(5,15,27,.88));}
+.walk-mission-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff;font:10px 'Share Tech Mono',monospace;letter-spacing:.6px;}
+.walk-mission-head span{border:1px solid rgba(212,160,23,.26);border-radius:999px;background:rgba(3,12,22,.72);color:#ffe2a2;padding:3px 7px;}
+.walk-mission-panel small{color:#b9d2e6;font-size:9px;line-height:1.35;}
+.walk-mission-steps{display:grid;gap:4px;}
+.walk-mission-steps span{border:1px solid rgba(111,146,178,.14);border-radius:7px;background:rgba(5,14,24,.58);color:#95b7d0;padding:5px 6px;font:8px 'Share Tech Mono',monospace;}
+.walk-mission-steps span.active{border-color:rgba(212,160,23,.44);background:rgba(48,31,8,.72);color:#ffe2a2;animation:softPulse 1.5s ease-in-out infinite;}
+.walk-mission-steps span.done{border-color:rgba(93,191,138,.28);background:rgba(8,38,26,.64);color:#a8f5c2;}
 .shipwalk-map.quick{grid-template-columns:repeat(6,minmax(0,1fr));}
 .shipwalk-map.quick .ship-zone{min-height:58px;font-size:10px;}
 .bridge-walk-3d-shell{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.5fr);gap:10px;align-items:stretch;}
@@ -2811,6 +2824,12 @@ animation:straitFlow 2.8s linear infinite;}
 .bridge3d-player::before{content:"";position:absolute;left:7px;right:7px;bottom:0;height:25px;border-radius:8px 8px 5px 5px;background:linear-gradient(180deg,#13273f,#05101d);border:1px solid rgba(212,160,23,.38);}
 .bridge3d-player span{position:absolute;left:50%;top:0;width:18px;height:18px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 45% 34%,#ffe1bd,#b46d3f 66%,#442215);border:1px solid rgba(255,226,162,.75);}
 .bridge3d-player::after{content:"STJ";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);font:8px 'Share Tech Mono',monospace;color:#ffe2a2;background:rgba(3,11,19,.88);border:1px solid rgba(212,160,23,.3);border-radius:999px;padding:2px 5px;}
+.bridge3d-npc{position:absolute;width:42px;min-height:54px;transform:translate(-50%,-50%) rotateX(-58deg);z-index:6;border:1px solid rgba(127,195,255,.2);border-radius:10px;background:rgba(4,13,24,.72);color:#cfeaff;display:grid;place-items:center;padding:4px;cursor:pointer;animation:npcIdle 3.6s ease-in-out infinite;}
+.bridge3d-npc span{width:24px;height:30px;border-radius:10px 10px 5px 5px;background:linear-gradient(180deg,#f5f0df,#14233a);border:1px solid rgba(255,255,255,.14);display:block;}
+.bridge3d-npc b{font:6.5px 'Share Tech Mono',monospace;color:#ffe2a2;margin-top:3px;white-space:nowrap;}
+.bridge3d-npc.active{border-color:rgba(129,247,184,.6);background:rgba(8,35,28,.84);box-shadow:0 0 0 4px rgba(129,247,184,.08),0 0 22px rgba(129,247,184,.18);}
+.bridge3d-npc.npc-oow span{background:linear-gradient(180deg,#172c45,#07111e);}
+.bridge3d-npc.npc-lookout span{background:linear-gradient(180deg,#1d4663,#07111e);}
 .bridge3d-control-launcher{position:absolute;right:12px;bottom:12px;z-index:24;border:1px solid rgba(212,160,23,.62);border-radius:11px;background:linear-gradient(180deg,rgba(45,31,9,.94),rgba(7,18,30,.94));color:#ffe2a2;padding:9px 11px;min-width:172px;text-align:left;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.38),0 0 0 4px rgba(212,160,23,.08);touch-action:manipulation;}
 .bridge3d-control-launcher b{display:block;font:11px 'Share Tech Mono',monospace;letter-spacing:.7px;color:#fff;}
 .bridge3d-control-launcher small{display:block;margin-top:3px;font-size:9px;color:#cfeaff;}
@@ -3261,7 +3280,7 @@ animation:straitFlow 2.8s linear infinite;}
   .intro-premium-grid,.intro-premium-actions{grid-template-columns:1fr;}
 }
 @media (max-width:720px){.life-grid,.shipwalk-map{grid-template-columns:1fr 1fr;}.log-row{grid-template-columns:1fr;}.ship-control-shell,.bridge-walk-3d-shell,.operation-walk-shell{grid-template-columns:1fr;}.ship-control-stage{min-height:300px;}.ship-control-hotspot{width:104px;min-height:50px;padding:7px;}.shipwalk-map.quick{grid-template-columns:1fr 1fr;}.ship-control-pad button{min-height:44px;}.bridge-walk-3d-scene,.operation-walk-stage{min-height:360px;}.bridge3d-console,.operation-station{width:112px;min-height:58px;padding:7px;}.bridge3d-floor-station{width:104px;min-height:54px;padding:7px;}.bridge3d-console small,.bridge3d-floor-station small,.operation-station small{display:none;}.operation-control-panel{min-height:auto;}}
-@media (max-width:720px){.walk-joystick{width:104px;height:104px;left:10px;bottom:10px;padding:6px;border-radius:16px;}.walk-joystick button{font-size:14px;border-radius:10px;}.walk-interact{right:10px;bottom:14px;min-width:98px;min-height:50px;font-size:10px;}.walk-task-list{max-height:128px;}.bridge3d-control-launcher{left:10px;right:10px;bottom:10px;min-width:0;text-align:center;}}
+@media (max-width:720px){.walk-joystick{width:104px;height:104px;left:10px;bottom:10px;padding:6px;border-radius:16px;}.walk-joystick button{font-size:14px;border-radius:10px;}.walk-interact{right:10px;bottom:14px;min-width:98px;min-height:50px;font-size:10px;}.walk-task-list{max-height:128px;}.walk-mission-steps span{font-size:7px;padding:4px 5px;}.ship-control-door{font-size:7px;min-height:24px;padding:4px 7px;}.bridge3d-npc{width:34px;min-height:48px;}.bridge3d-npc b{display:none;}.bridge3d-control-launcher{left:10px;right:10px;bottom:10px;min-width:0;text-align:center;}}
 
 @media (max-width:520px){
   html,body{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto;}
