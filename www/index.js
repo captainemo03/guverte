@@ -6,11 +6,12 @@
   const cx=cv.getContext('2d');
   let W,H,t=0,DPR=1;
   const getBackdropProfile=()=>window.__bgBackdropProfile||'opensea';
+  const isPerf=()=>document.body?.classList?.contains('performance-mode') || document.documentElement.dataset.visualQuality === 'low';
   function resize(){
     W=window.innerWidth;
     H=window.innerHeight;
     const quality=document.documentElement.dataset.visualQuality || 'balanced';
-    const qualityCap=quality==='low' ? 1 : quality==='high' ? (W < 900 ? 1.75 : 2.5) : (W < 900 ? 1.5 : 2);
+    const qualityCap=quality==='low' ? .75 : quality==='high' ? (W < 900 ? 1.75 : 2.5) : (W < 900 ? 1.35 : 1.75);
     DPR=Math.min(window.devicePixelRatio || 1, qualityCap);
     cv.width=Math.max(1,Math.round(W*DPR));
     cv.height=Math.max(1,Math.round(H*DPR));
@@ -18,9 +19,14 @@
     cv.style.height=H+'px';
     cx.setTransform(DPR,0,0,DPR,0,0);
     window.__bgRenderScale = DPR;
-    window.__bgCanvasQuality = DPR >= 1.9 ? '4k-dpr' : 'hires-dpr';
+    window.__bgCanvasQuality = quality==='low' ? 'performance' : DPR >= 1.9 ? '4k-dpr' : 'hires-dpr';
   }
   function draw(){
+    if(isPerf() && t % 2 === 1){
+      t++;
+      requestAnimationFrame(draw);
+      return;
+    }
     cx.setTransform(DPR,0,0,DPR,0,0);
     cx.clearRect(0,0,W,H);
     const profile=getBackdropProfile();
@@ -14757,7 +14763,9 @@ function applyLanguageUI(){
     const key = el.getAttribute('data-i18n-placeholder');
     if(key) el.setAttribute('placeholder', t(key, el.getAttribute('placeholder') || ''));
   });
+  localizeAndSetText('quick-map-btn','ui.map','HARITA');
   localizeAndSetText('save-btn','ui.save','KAYDET');
+  localizeAndSetText('control-walk-btn','ui.control','KONTROL');
   localizeAndSetText('game-settings-btn','ui.settings','AYARLAR');
   localizeAndSetText('replbl','ui.rep','ITIBAR');
   document.querySelectorAll('#sound-btn,#home-sound-btn,#game-settings-sound-btn').forEach(btn=>{
@@ -14975,13 +14983,15 @@ function renderScene(idx){
     photo.style.opacity = profile==='storm' ? '.5' : profile==='night' ? '.36' : profile==='harbor' ? '.46' : '.42';
   }
   if(parallax){
-    parallax.innerHTML = getDynamicSceneTrafficOverlay(sc);
+    parallax.innerHTML = isPerformanceModeActive() ? '' : getDynamicSceneTrafficOverlay(sc);
   }
   if(bridge3d){
     const bridge3dMarkup = getScene3DBridgeOverlay(sc);
-    bridge3d.innerHTML = bridge3dMarkup ? `<canvas class="three-bridge-canvas"></canvas>${bridge3dMarkup}` : '';
+    const renderHeavy3d = !!bridge3dMarkup && !isPerformanceModeActive();
+    bridge3d.innerHTML = bridge3dMarkup ? `${renderHeavy3d ? '<canvas class="three-bridge-canvas"></canvas>' : ''}${bridge3dMarkup}` : '';
     bridge3d.classList.toggle('active', !!bridge3dMarkup);
-    if(bridge3dMarkup) renderThreeBridgeScene(sc);
+    bridge3d.classList.toggle('lite', !!bridge3dMarkup && !renderHeavy3d);
+    if(renderHeavy3d) renderThreeBridgeScene(sc);
     else stopThreeBridgeScene();
   }
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
@@ -17909,14 +17919,30 @@ Object.assign(WORLD_MAP_POINT_LOOKUP, {
 const SAVE_KEY = 'guverte-save-v1';
 const SAVE_BACKUP_KEY = 'guverte-save-backup-v1';
 const SAVE_RECOVERY_KEY = 'guverte-save-recovery-v1';
-const CLEAN_HUD_KEY = 'guverte-clean-hud-v1';
+const CLEAN_HUD_KEY = 'guverte-clean-hud-v2';
+const PERFORMANCE_MODE_KEY = 'guverte-performance-mode-v1';
+const VISUAL_QUALITY_KEY = 'guverte-visual-quality-v1';
 const PLAY_MODE_DEFS = {
   simple:{label:'Basit', desc:'Hikaye, temel secimler ve az ekran kalabaligi.', level:0},
   realistic:{label:'Gercekci', desc:'Cihaz, harita ve logbook yavas yavas acilir.', level:1},
   expert:{label:'Uzman', desc:'CPA, UKC, PSC, tanker ve premium detaylar acik.', level:2}
 };
 let gameplayMode = 'realistic';
-let cleanHudMode = (()=>{try{return localStorage.getItem(CLEAN_HUD_KEY) === '1';}catch(e){return false;}})();
+let cleanHudMode = (()=>{try{const saved=localStorage.getItem(CLEAN_HUD_KEY); return saved == null ? true : saved === '1';}catch(e){return true;}})();
+function detectPerformanceDefault(){
+  try{
+    const mem = Number(navigator.deviceMemory || 0);
+    const cores = Number(navigator.hardwareConcurrency || 0);
+    const coarse = matchMedia?.('(pointer: coarse)')?.matches;
+    const narrow = Math.min(window.innerWidth || 9999, window.innerHeight || 9999) < 760;
+    return !!(coarse || narrow || (mem && mem <= 4) || (cores && cores <= 4));
+  }catch(e){
+    return false;
+  }
+}
+let performanceMode = (()=>{try{const saved=localStorage.getItem(PERFORMANCE_MODE_KEY); return saved == null ? detectPerformanceDefault() : saved === '1';}catch(e){return detectPerformanceDefault();}})();
+let visualQuality = (()=>{try{return localStorage.getItem(VISUAL_QUALITY_KEY) || (performanceMode ? 'low' : 'balanced');}catch(e){return performanceMode ? 'low' : 'balanced';}})();
+document.documentElement.dataset.visualQuality = visualQuality;
 let introMenuPage = 'play';
 let homeMenuPage = 'play';
 let savePanelOpen = false;
@@ -17937,11 +17963,81 @@ function syncCleanHudControls(){
   });
 }
 
+function getVisualQuality(){
+  return ['low','balanced','high'].includes(visualQuality) ? visualQuality : 'balanced';
+}
+
+function renderVisualQualityControls(){
+  document.querySelectorAll('[data-quality-controls]').forEach(root=>{
+    root.innerHTML='';
+    ['low','balanced','high'].forEach(q=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className=q===getVisualQuality() ? 'active' : '';
+      btn.textContent=t(`quality.${q}`, q==='low'?'Performans':q==='high'?'Yuksek':'Dengeli');
+      btn.onclick=()=>setVisualQuality(q);
+      root.appendChild(btn);
+    });
+  });
+  document.querySelectorAll('[data-quality-status]').forEach(el=>{
+    const q=getVisualQuality();
+    el.textContent = q==='low'
+      ? translateGameText('Performans profili: 3D, parallax ve agir efektler hafifletildi.')
+      : q==='high'
+        ? translateGameText('Yuksek kalite profili: daha keskin arka plan ve cihaz katmanlari.')
+        : translateGameText('Dengeli canli grafik profili');
+  });
+}
+
+function setVisualQuality(q='balanced', notify=true){
+  visualQuality = ['low','balanced','high'].includes(q) ? q : 'balanced';
+  document.documentElement.dataset.visualQuality = visualQuality;
+  document.body.classList.toggle('visual-quality-low', visualQuality === 'low');
+  document.body.classList.toggle('visual-quality-high', visualQuality === 'high');
+  try{localStorage.setItem(VISUAL_QUALITY_KEY, visualQuality);}catch(e){}
+  renderVisualQualityControls();
+  window.dispatchEvent(new CustomEvent('guverte-visual-quality-change',{detail:{quality:visualQuality}}));
+  if(notify && typeof showNotif === 'function'){
+    showNotif('GRAFIK', t(`quality.${visualQuality}`,'Gorsel Kalite'), visualQuality==='low' ? 'Kasma azaltildi; agir katmanlar kisildi.' : 'Gorsel kalite guncellendi.');
+  }
+}
+
+function syncPerformanceControls(){
+  const active = !!performanceMode || getVisualQuality() === 'low';
+  document.body.classList.toggle('performance-mode', active);
+  document.documentElement.classList.toggle('performance-mode', active);
+  document.getElementById('game')?.classList.toggle('performance-mode', active);
+  document.querySelectorAll('[data-performance-mode-toggle]').forEach(input=>{ input.checked = !!performanceMode; });
+  document.querySelectorAll('[data-performance-mode-status]').forEach(el=>{
+    el.textContent = active
+      ? translateGameText('Kasma azaltma acik: 3D, parallax ve agir harita efektleri hafifletilir.')
+      : translateGameText('Tam canli mod: tum animasyon ve 3D katmanlari calisir.');
+  });
+}
+
+function setPerformanceMode(enabled, notify=true){
+  performanceMode = !!enabled;
+  try{localStorage.setItem(PERFORMANCE_MODE_KEY, performanceMode ? '1' : '0');}catch(e){}
+  if(performanceMode && getVisualQuality() !== 'low') setVisualQuality('low', false);
+  if(!performanceMode && getVisualQuality() === 'low') setVisualQuality('balanced', false);
+  syncPerformanceControls();
+  window.dispatchEvent(new CustomEvent('guverte-performance-mode-change',{detail:{enabled:performanceMode}}));
+  if(notify && typeof showNotif === 'function'){
+    showNotif('PERFORMANS', performanceMode ? 'Kasma Azaltma Acik' : 'Tam Canli Mod', performanceMode ? 'Mobilde daha akici oyun icin agir katmanlar kisildi.' : 'Tum gorsel katmanlar tekrar acildi.');
+  }
+  if(document.body.classList.contains('screen-game') && sceneQueue?.length) renderScene(currentIdx);
+}
+
+function isPerformanceModeActive(){
+  return !!performanceMode || getVisualQuality() === 'low';
+}
+
 function setCleanHudMode(enabled, notify=true){
   cleanHudMode = !!enabled;
   try{ localStorage.setItem(CLEAN_HUD_KEY, cleanHudMode ? '1' : '0'); }catch(e){}
   document.getElementById('game')?.classList.toggle('clean-hud', cleanHudMode);
   document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
+  syncPerformanceControls();
   syncCleanHudControls();
   if(notify && typeof showNotif === 'function'){
     showNotif('HUD', cleanHudMode ? 'Temiz Ekran' : 'Standart Ekran', cleanHudMode ? 'Oyun alani ferahladi; detaylar ayarlar ve modlarda kalir.' : 'Tum vardiya ve gorev panelleri geri geldi.');
@@ -17968,6 +18064,7 @@ function setAppScreen(screen='home'){
   document.body.classList.remove('screen-home','screen-setup','screen-game');
   document.body.classList.add(`screen-${normalized}`);
   document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
+  syncPerformanceControls();
   document.querySelectorAll('.app-screen').forEach(el=>el.classList.remove('active'));
   const activeId = normalized === 'home' ? 'home-screen' : normalized === 'setup' ? 'intro' : 'game';
   const active = document.getElementById(activeId);
@@ -18026,9 +18123,12 @@ function openGameScreen(){
     g.classList.toggle('stats-collapsed', !statsExpanded);
     g.classList.toggle('cinema-mode', cinemaMode);
     g.classList.toggle('clean-hud', cleanHudMode);
+    g.classList.toggle('performance-mode', isPerformanceModeActive());
   }
   document.body.classList.toggle('clean-hud-enabled', cleanHudMode);
+  syncPerformanceControls();
   syncCleanHudControls();
+  renderVisualQualityControls();
   window.scrollTo?.(0,0);
 }
 
@@ -26390,6 +26490,7 @@ function openCurrentSceneControlWalk(){
   if(mode === 'bridge3d') openBridgeWalk3D();
   else openShipOperation3D(mode);
   showNotif('KONTROL', 'Karakter kontrolu acildi', 'WASD, ok tuslari veya mobil yon pedleriyle yuruyebilirsin.');
+  addWatchFeed('Karakter kontrol acildi: sahnede bos alana tikla veya yon pedleriyle stajyeri yurut, Etkiles ile cihaz/alan ac.', 'good');
 }
 function handleShipWalkKeydown(e){
   if(!panelIsOpen('shipwalk-panel')) return;

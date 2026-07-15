@@ -8,7 +8,7 @@
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=151">
+<link rel="stylesheet" href="./index.css?v=154">
 </head>
 <body>
 <script>
@@ -168,7 +168,7 @@
 
 <div id="shipwalk-panel" tabindex="-1">
   <div class="life-box">
-    <div class="life-title"><span>GEMI ICI MINI HARITA</span><button onclick="closeLifePanel('shipwalk-panel')">Kapat</button></div>
+    <div class="life-title"><span>KARAKTER KONTROL</span><button onclick="closeLifePanel('shipwalk-panel')">Kapat</button></div>
     <div id="shipwalk-body"></div>
   </div>
 </div>
@@ -511,6 +511,8 @@
       <div id="shipinfo">—</div>
     </div>
     <div id="topright">
+      <button id="quick-map-btn" class="quick-map-btn" onclick="openMap()">HARITA</button>
+      <button id="control-walk-btn" class="control-walk-btn" onclick="openCurrentSceneControlWalk()">KONTROL</button>
       <button id="game-settings-btn" onclick="toggleGameSettings()" data-i18n="ui.settings" data-i18n-fallback="AYARLAR">AYARLAR</button>
       <button id="save-btn" onclick="toggleSavePanel()">KAYDET</button>
       <div id="repwrap"><div id="replbl">İTİBAR</div><div id="repstars">⭐⭐⭐</div></div>
@@ -561,6 +563,14 @@
           <span>Sahne odakli ekran</span>
         </label>
         <small data-clean-hud-status>Standart ekran: gorev, vardiya, rota ve stat panelleri gorunur.</small>
+      </div>
+      <div class="game-settings-card">
+        <b>Performans</b>
+        <label class="clean-hud-toggle inline">
+          <input type="checkbox" data-performance-mode-toggle onchange="setPerformanceMode(this.checked)">
+          <span>Kasma azaltma modu</span>
+        </label>
+        <small data-performance-mode-status>Kasma azaltma acik: 3D, parallax ve agir harita efektleri hafifletilir.</small>
       </div>
       <div class="game-settings-card game-settings-actions">
         <b data-i18n="ui.gameActions" data-i18n-fallback="Oyun">Oyun</b>
@@ -796,7 +806,7 @@
   </div>
 </div>
 
-<script src="./index.js?v=176"></script>
+<script src="./index.js?v=179"></script>
 <script src="./release-quality.js?v=10"></script>
 </body>
 </html>
