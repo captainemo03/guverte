@@ -589,8 +589,8 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=173",
-        "index.css?v=148",
+        "index.js?v=174",
+        "index.css?v=149",
         "release-quality.js?v=10",
         "game-settings-vibration-btn",
         "toggleVibration",
@@ -624,6 +624,9 @@ def check_mobile_and_hitboxes() -> None:
         "openShipOperation3D",
         "openCurrentSceneControlWalk",
         "bridge3d-control-launcher",
+        "walkAvatarMotion",
+        "getWalkAvatarMotionClass",
+        "bridge3d-live-cadet",
     ]:
         require_token(section, token)
 

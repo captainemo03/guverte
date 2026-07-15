@@ -2747,6 +2747,13 @@ animation:straitFlow 2.8s linear infinite;}
 .shipwalk-avatar{position:absolute;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 45% 35%,#ffe1bd,#b46d3f 62%,#442215 100%);border:2px solid rgba(255,226,162,.92);box-shadow:0 0 0 5px rgba(212,160,23,.14),0 0 26px rgba(212,160,23,.28);z-index:5;transition:left .16s ease,top .16s ease;}
 .shipwalk-avatar span{width:12px;height:15px;border-radius:45% 45% 35% 35%;background:#071324;box-shadow:0 15px 0 -2px #0b2742;}
 .shipwalk-avatar::after{content:"STAJYER";position:absolute;top:-21px;left:50%;transform:translateX(-50%);font:8px 'Share Tech Mono',monospace;color:#ffe2a2;background:rgba(3,11,19,.82);border:1px solid rgba(212,160,23,.32);border-radius:999px;padding:3px 6px;letter-spacing:.7px;white-space:nowrap;}
+.shipwalk-avatar.is-moving,.bridge3d-player.is-moving,.operation-player.is-moving{box-shadow:0 0 0 6px rgba(129,247,184,.08),0 0 28px rgba(129,247,184,.18);filter:drop-shadow(0 14px 16px rgba(0,0,0,.35)) brightness(1.08);}
+.shipwalk-avatar.is-moving span,.bridge3d-player.is-moving span,.operation-player.is-moving span{animation:walkHeadBob .32s ease;}
+.bridge3d-player.is-moving::before,.operation-player.is-moving::before{animation:walkBodyBob .32s ease;}
+.shipwalk-avatar.dir-left span,.bridge3d-player.dir-left span,.operation-player.dir-left span{margin-left:-3px;}
+.shipwalk-avatar.dir-right span,.bridge3d-player.dir-right span,.operation-player.dir-right span{margin-left:3px;}
+.shipwalk-avatar.dir-up span,.bridge3d-player.dir-up span,.operation-player.dir-up span{margin-top:-2px;}
+.shipwalk-avatar.dir-down span,.bridge3d-player.dir-down span,.operation-player.dir-down span{margin-top:2px;}
 .ship-control-panel{display:flex;flex-direction:column;gap:9px;border:1px solid rgba(111,146,178,.2);border-radius:12px;background:rgba(6,17,31,.82);padding:10px;color:#cfeaff;}
 .ship-control-panel b{display:block;color:#fff;font:12px 'Share Tech Mono',monospace;letter-spacing:.5px;margin-bottom:4px;}
 .ship-control-panel small{display:block;color:#9ebbd3;font-size:10px;line-height:1.35;}
@@ -2808,6 +2815,11 @@ animation:straitFlow 2.8s linear infinite;}
 .bridge3d-control-launcher b{display:block;font:11px 'Share Tech Mono',monospace;letter-spacing:.7px;color:#fff;}
 .bridge3d-control-launcher small{display:block;margin-top:3px;font-size:9px;color:#cfeaff;}
 .bridge3d-control-launcher:hover{border-color:#ffe2a2;transform:translateY(-1px);}
+.bridge3d-live-cadet{position:absolute;left:18%;bottom:15%;z-index:23;width:38px;height:58px;filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));animation:bridgeCadetPatrol 8.5s ease-in-out infinite;}
+.bridge3d-live-cadet::before{content:"";position:absolute;left:8px;right:8px;bottom:5px;height:34px;border-radius:9px 9px 5px 5px;background:linear-gradient(180deg,#162c45,#07111e);border:1px solid rgba(212,160,23,.38);box-shadow:inset 0 -8px 12px rgba(0,0,0,.22);}
+.bridge3d-live-cadet span{position:absolute;left:50%;top:0;width:20px;height:20px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 43% 34%,#ffe1bd,#b46d3f 66%,#442215);border:1px solid rgba(255,226,162,.75);animation:walkHeadBob 1.3s ease-in-out infinite;}
+.bridge3d-live-cadet i{position:absolute;left:13px;right:13px;bottom:0;height:8px;border-radius:50%;background:rgba(0,0,0,.34);filter:blur(1px);}
+.bridge3d-live-cadet b{position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);font:7px 'Share Tech Mono',monospace;color:#ffe2a2;background:rgba(3,11,19,.86);border:1px solid rgba(212,160,23,.25);border-radius:999px;padding:2px 5px;letter-spacing:.6px;}
 .bridge-walk-control-panel{display:flex;flex-direction:column;gap:9px;border:1px solid rgba(111,146,178,.2);border-radius:12px;background:rgba(6,17,31,.84);padding:10px;color:#cfeaff;}
 .bridge-walk-control-panel b{display:block;color:#fff;font:12px 'Share Tech Mono',monospace;letter-spacing:.5px;margin-bottom:4px;}
 .bridge-walk-control-panel small{display:block;color:#9ebbd3;font-size:10px;line-height:1.35;}
@@ -2850,6 +2862,9 @@ animation:straitFlow 2.8s linear infinite;}
 @keyframes alarmPanelPulse{0%,100%{opacity:.72;}50%{opacity:1;filter:brightness(1.4);}}
 @keyframes tugBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
 @keyframes npcIdle{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+@keyframes walkHeadBob{0%,100%{translate:0 0;}45%{translate:0 -3px;}72%{translate:0 1px;}}
+@keyframes walkBodyBob{0%,100%{translate:0 0;}50%{translate:0 2px;}}
+@keyframes bridgeCadetPatrol{0%,100%{left:18%;translate:0 0;}25%{left:30%;translate:0 -2px;}50%{left:47%;translate:0 0;}75%{left:34%;translate:0 -2px;}}
 .achievement{border-color:rgba(212,160,23,.25);background:rgba(42,28,8,.56);}
 .achievement.done{border-color:rgba(93,191,138,.35);background:rgba(10,31,20,.72);}
 .sim-box{width:min(1180px,97vw);}

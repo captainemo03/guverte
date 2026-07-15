@@ -8981,6 +8981,7 @@ function getScene3DBridgeOverlay(sc){
     ${flags.starlink ? `<div class="bridge3d-starlink"><span class="dish"></span><span class="beam b1"></span><span class="beam b2"></span><b>${starlinkStatus.online?'LINK OK':'LINK DEG'}</b><i>${Number(starlinkStatus.latency||0)} ms</i></div>` : ''}
     ${flags.helicopter ? '<div class="bridge3d-helicopter"><span></span><i></i><b>MED</b></div><div class="bridge3d-helipad">CLEAR DECK</div>' : ''}
     ${flags.cargoLift ? '<div class="bridge3d-cargo-lift"><span class="hook"></span><span class="load"></span><i></i><b>COG</b></div>' : ''}
+    <div class="bridge3d-live-cadet"><span></span><i></i><b>STAJYER</b></div>
     <button class="bridge3d-control-launcher" onclick="event.stopPropagation(); openCurrentSceneControlWalk()">
       <b>Karakterle Kontrol Et</b><small>WASD / yon tuslari / mobil pad</small>
     </button>
@@ -26075,6 +26076,7 @@ let shipWalkAvatar = {x:50,y:76};
 let bridgeWalkAvatar = {x:50,y:84};
 let operationWalkAvatar = {x:50,y:84};
 let walkTaskState = {mode:'ship', done:{}};
+let walkAvatarMotion = {dir:'down', moving:false, timer:null};
 
 function openShipWalk(force=false){
   if(!force && !canUseFeature('shipwalk')) return false;
@@ -26092,9 +26094,29 @@ function stopShipWalkControlEvent(ev){
   ev?.preventDefault?.();
   ev?.stopPropagation?.();
 }
+function rememberWalkAvatarMotion(oldX, oldY, newX, newY){
+  const dx = Number(newX) - Number(oldX);
+  const dy = Number(newY) - Number(oldY);
+  if(Math.abs(dx) < .3 && Math.abs(dy) < .3) return;
+  walkAvatarMotion.dir = Math.abs(dx) > Math.abs(dy)
+    ? (dx > 0 ? 'right' : 'left')
+    : (dy > 0 ? 'down' : 'up');
+  walkAvatarMotion.moving = true;
+  if(walkAvatarMotion.timer) clearTimeout(walkAvatarMotion.timer);
+  walkAvatarMotion.timer = setTimeout(()=>{
+    walkAvatarMotion.moving = false;
+    if(panelIsOpen('shipwalk-panel')) renderShipWalk();
+  }, 320);
+}
+function getWalkAvatarMotionClass(){
+  return `${walkAvatarMotion.moving ? 'is-moving' : 'is-idle'} dir-${walkAvatarMotion.dir || 'down'}`;
+}
 function setShipWalkAvatar(x,y){
-  shipWalkAvatar.x = clampShipWalkPoint(x);
-  shipWalkAvatar.y = clampShipWalkPoint(y);
+  const nx = clampShipWalkPoint(x);
+  const ny = clampShipWalkPoint(y);
+  rememberWalkAvatarMotion(shipWalkAvatar.x, shipWalkAvatar.y, nx, ny);
+  shipWalkAvatar.x = nx;
+  shipWalkAvatar.y = ny;
   renderShipWalk();
 }
 function moveShipWalkAvatar(dx,dy,ev){
@@ -26264,8 +26286,11 @@ function exitBridgeWalk3D(){
   renderShipWalk();
 }
 function setBridgeWalkAvatar(x,y){
-  bridgeWalkAvatar.x = clampShipWalkPoint(x);
-  bridgeWalkAvatar.y = clampShipWalkPoint(y);
+  const nx = clampShipWalkPoint(x);
+  const ny = clampShipWalkPoint(y);
+  rememberWalkAvatarMotion(bridgeWalkAvatar.x, bridgeWalkAvatar.y, nx, ny);
+  bridgeWalkAvatar.x = nx;
+  bridgeWalkAvatar.y = ny;
   renderShipWalk();
 }
 function moveBridgeWalkAvatar(dx,dy,ev){
@@ -26318,7 +26343,7 @@ function renderBridgeWalk3D(){
       </div>
       <div class="bridge3d-floor">
         ${BRIDGE_WALK_STATIONS.slice(3).map(st=>`<button class="bridge3d-floor-station station-${st.id} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setBridgeWalkAvatar(${st.x},${st.y})"><b>${st.label}</b><small>${st.detail}</small></button>`).join('')}
-        <div class="bridge3d-player" style="left:${bridgeWalkAvatar.x}%;top:${bridgeWalkAvatar.y}%"><span></span></div>
+        <div class="bridge3d-player ${getWalkAvatarMotionClass()}" style="left:${bridgeWalkAvatar.x}%;top:${bridgeWalkAvatar.y}%"><span></span></div>
       </div>
       ${renderWalkJoystick('moveBridgeWalkAvatar','interactBridgeWalkStation','Cihaza Gir')}
     </div>
@@ -26356,8 +26381,11 @@ function exitShipOperation3D(){
   renderShipWalk();
 }
 function setOperationWalkAvatar(x,y){
-  operationWalkAvatar.x = clampShipWalkPoint(x);
-  operationWalkAvatar.y = clampShipWalkPoint(y);
+  const nx = clampShipWalkPoint(x);
+  const ny = clampShipWalkPoint(y);
+  rememberWalkAvatarMotion(operationWalkAvatar.x, operationWalkAvatar.y, nx, ny);
+  operationWalkAvatar.x = nx;
+  operationWalkAvatar.y = ny;
   renderShipWalk();
 }
 function moveOperationWalkAvatar(dx,dy,ev){
@@ -26441,7 +26469,7 @@ function renderOperationWalk3D(){
       <div class="operation-risk-zone"></div>
       ${cfg.stations.map(st=>`<button class="operation-station action-${st.action} ${nearest?.id===st.id&&nearest.distance<=16?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setOperationWalkAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(st.detail)}</small></button>`).join('')}
       <div class="operation-npc npc-one"><span></span><b>${cfg.className==='engine'?'ÇARKÇI':cfg.className==='deck'?'LOSTROMO':cfg.className==='port'?'PILOT':'UZMAN'}</b></div>
-      <div class="operation-player" style="left:${operationWalkAvatar.x}%;top:${operationWalkAvatar.y}%"><span></span></div>
+      <div class="operation-player ${getWalkAvatarMotionClass()}" style="left:${operationWalkAvatar.x}%;top:${operationWalkAvatar.y}%"><span></span></div>
       ${renderWalkJoystick('moveOperationWalkAvatar','interactOperationWalkStation','Etkiles')}
     </div>
     <div class="operation-control-panel">
@@ -26483,7 +26511,7 @@ function renderShipWalk(){
         const inRange = nearest && nearest.id === z.id && nearest.distance <= 17;
         return `<button class="ship-control-hotspot ${inRange?'active':''}" style="left:${z.x}%;top:${z.y}%;" onclick="event.stopPropagation(); setShipWalkAvatar(${z.x},${z.y})"><b>${z.label}</b><small>${z.detail}</small></button>`;
       }).join('')}
-      <div class="shipwalk-avatar" style="left:${shipWalkAvatar.x}%;top:${shipWalkAvatar.y}%;" aria-hidden="true"><span></span></div>
+      <div class="shipwalk-avatar ${getWalkAvatarMotionClass()}" style="left:${shipWalkAvatar.x}%;top:${shipWalkAvatar.y}%;" aria-hidden="true"><span></span></div>
       ${renderWalkJoystick('moveShipWalkAvatar','interactShipWalkZone','Etkiles')}
     </div>
     <div class="ship-control-panel">

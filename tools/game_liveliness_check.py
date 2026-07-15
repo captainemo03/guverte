@@ -263,6 +263,9 @@ CHECKS = {
         "openShipOperation3D",
         "openCurrentSceneControlWalk",
         "bridge3d-control-launcher",
+        "walkAvatarMotion",
+        "getWalkAvatarMotionClass",
+        "bridge3d-live-cadet",
         "interactOperationWalkStation",
     ],
     "mission director and training": [
