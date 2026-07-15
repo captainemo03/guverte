@@ -8938,7 +8938,7 @@ function getScene3DBridgeOverlay(sc){
     flags.helicopter?'bridge3d-heli':'',
     flags.cargoLift?'bridge3d-lift':'',
   ].filter(Boolean).join(' ');
-  return `<div class="${cls}">
+  return `<div class="${cls}" onclick="if(!event.target.closest('button')) openCurrentSceneControlWalk()">
     <div class="sky"></div>
     <div class="sea"></div>
     ${flags.harborApproach ? '<div class="bridge3d-tug"><i></i><b></b></div><div class="bridge3d-berth-lights"></div>' : ''}
@@ -8981,7 +8981,7 @@ function getScene3DBridgeOverlay(sc){
     ${flags.starlink ? `<div class="bridge3d-starlink"><span class="dish"></span><span class="beam b1"></span><span class="beam b2"></span><b>${starlinkStatus.online?'LINK OK':'LINK DEG'}</b><i>${Number(starlinkStatus.latency||0)} ms</i></div>` : ''}
     ${flags.helicopter ? '<div class="bridge3d-helicopter"><span></span><i></i><b>MED</b></div><div class="bridge3d-helipad">CLEAR DECK</div>' : ''}
     ${flags.cargoLift ? '<div class="bridge3d-cargo-lift"><span class="hook"></span><span class="load"></span><i></i><b>COG</b></div>' : ''}
-    <div class="bridge3d-live-cadet"><span></span><i></i><b>STAJYER</b></div>
+    <div class="bridge3d-control-hint">Karakter kontrolu icin sahneye tikla</div>
     <button class="bridge3d-control-launcher" onclick="event.stopPropagation(); openCurrentSceneControlWalk()">
       <b>Karakterle Kontrol Et</b><small>WASD / yon tuslari / mobil pad</small>
     </button>
