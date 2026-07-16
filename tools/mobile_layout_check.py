@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=180",
-        "index.css?v=155",
+        "index.js?v=182",
+        "index.css?v=157",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -142,6 +142,10 @@ REQUIRED = {
         "operation-walk-stage",
         "openShipOperation3D",
         "openCurrentSceneControlWalk",
+        "shipwalk: true",
+        "gfx-control",
+        "scene-control-player",
+        "interactSceneControlStation",
         "bridge3d-control-launcher",
         "walkAvatarMotion",
         "getWalkAvatarMotionClass",

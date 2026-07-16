@@ -14997,6 +14997,7 @@ function renderScene(idx){
   if(foreground) foreground.innerHTML = getLiveSceneOverlay(sc);
   svg.innerHTML=getSafeSceneMarkup(sc);
   renderSceneActor(sc, null);
+  renderMainSceneControlOverlay(sc);
 
   playSceneAudio(sc);
   updateSceneNoteHints(sc);
@@ -18235,7 +18236,7 @@ function getFeatureUnlocks(sc){
     devices: !simple && (sceneNo >= 9 - bonus || forced.devices || forced.vhf),
     logbook: !simple && (sceneNo >= 10 - bonus || forced.logbook || assist),
     cabin: !simple && sceneNo >= 12 - bonus,
-    shipwalk: !simple && sceneNo >= 14 - bonus,
+    shipwalk: true,
     sim: mode.level >= 1 && sceneNo >= 16 - bonus,
     career: sceneNo >= 10,
     album: sceneNo >= 8,
@@ -18255,6 +18256,7 @@ function featureLockedMessage(feature){
 }
 
 function canUseFeature(feature, sc=sceneQueue[currentIdx] || null, notify=true){
+  if(feature === 'shipwalk') return true;
   const u = getFeatureUnlocks(sc);
   const ok = !!u[feature];
   if(!ok && notify) showNotif('KILIT', 'Yavas Aciliyor', featureLockedMessage(feature));
@@ -26053,6 +26055,7 @@ function maybeShowAdBreak(reason='safe_point'){
 }
 function closeLifePanel(id){
   document.getElementById(id)?.classList.remove('show');
+  if(id === 'shipwalk-panel') document.body.classList.remove('shipwalk-control-active');
   if(id === 'sim-panel') maybeShowAdBreak('sim_exit');
 }
 function openLiveLogbook(){
@@ -26250,12 +26253,114 @@ let operationWalkAvatar = {x:50,y:84};
 let walkTaskState = {mode:'ship', done:{}};
 let walkAvatarMotion = {dir:'down', moving:false, timer:null};
 let walkMissionState = {sceneId:'', kind:'watch', step:0, completed:false, reason:''};
+let sceneControlActive = false;
+let sceneControlAvatar = {x:50,y:78};
+
+function isSceneControlAvailable(sc=sceneQueue?.[currentIdx]){
+  if(!sc) return false;
+  const flags = getScene3DFeatureFlags(sc || {});
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''}`.toLowerCase();
+  return !!(flags.modernBridge || flags.bridge || flags.harborApproach || flags.routeTable || /bridge|kopru|köprü|radar|ecdis|vhf|pilot|seyir|watch|vardiya/.test(blob));
+}
+
+function clampSceneControlPoint(value){
+  return Math.max(8, Math.min(92, Number(value) || 50));
+}
+
+function getSceneControlStations(){
+  return BRIDGE_WALK_STATIONS.map(st=>({
+    ...st,
+    x: st.id === 'ecdis' ? 23 : st.id === 'vhf' ? 50 : st.id === 'radar' ? 77 : st.id === 'ais' ? 31 : st.id === 'conning' ? 50 : 70,
+    y: st.id === 'ecdis' ? 45 : st.id === 'vhf' ? 40 : st.id === 'radar' ? 45 : st.id === 'ais' ? 66 : st.id === 'conning' ? 70 : 66
+  }));
+}
+
+function getNearestSceneControlStation(){
+  let best = null;
+  getSceneControlStations().forEach(st=>{
+    const dx = sceneControlAvatar.x - st.x;
+    const dy = sceneControlAvatar.y - st.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...st, distance};
+  });
+  return best;
+}
+
+function setSceneControlAvatar(x,y){
+  const nx = clampSceneControlPoint(x);
+  const ny = clampSceneControlPoint(y);
+  rememberWalkAvatarMotion(sceneControlAvatar.x, sceneControlAvatar.y, nx, ny);
+  sceneControlAvatar.x = nx;
+  sceneControlAvatar.y = ny;
+  renderMainSceneControlOverlay();
+}
+
+function moveSceneControlAvatar(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
+  setSceneControlAvatar(sceneControlAvatar.x + dx, sceneControlAvatar.y + dy);
+}
+
+function moveSceneControlAvatarToPointer(ev){
+  const stage = ev.currentTarget;
+  if(!stage || ev.target?.closest?.('button')) return;
+  const rect = stage.getBoundingClientRect();
+  setSceneControlAvatar(
+    ((ev.clientX - rect.left) / Math.max(rect.width,1)) * 100,
+    ((ev.clientY - rect.top) / Math.max(rect.height,1)) * 100
+  );
+}
+
+function interactSceneControlStation(){
+  if(!sceneControlActive) return;
+  const nearest = getNearestSceneControlStation();
+  if(!nearest) return;
+  if(nearest.distance > 17){
+    showNotif('KONTROL','Yaklas', `${nearest.label} icin biraz daha yaklas.`);
+    return;
+  }
+  markWalkTaskDone(nearest.id, nearest.label);
+  progressWalkMission('bridge3d', nearest.id, nearest.label);
+  openRealBridgeConsole(nearest.device);
+}
+
+function setSceneControlActive(enabled=true, notify=true){
+  sceneControlActive = !!enabled;
+  document.getElementById('game')?.classList.toggle('scene-control-active', sceneControlActive);
+  renderMainSceneControlOverlay();
+  if(notify) showNotif('KONTROL', sceneControlActive ? 'Sahne ici kontrol acildi' : 'Sahne ici kontrol kapandi', sceneControlActive ? 'WASD / ok tuslariyla yuruyup E ile cihaza gir.' : 'Normal sahne akisina donuldu.');
+}
+
+function renderMainSceneControlOverlay(sc=sceneQueue?.[currentIdx]){
+  const root = document.getElementById('gfx-control');
+  if(!root) return;
+  if(!sceneControlActive || !isSceneControlAvailable(sc)){
+    root.innerHTML = '';
+    root.classList.remove('active');
+    return;
+  }
+  root.classList.add('active');
+  const nearest = getNearestSceneControlStation();
+  const ready = nearest && nearest.distance <= 17;
+  root.innerHTML = `<div class="scene-control-stage" onclick="moveSceneControlAvatarToPointer(event)">
+    <div class="scene-control-hint">${ready ? `${phoneSafe(nearest.label)} hazir · E / Etkiles` : 'WASD / oklarla yurume · E ile cihaz'}</div>
+    ${getSceneControlStations().map(st=>`<button class="scene-control-station station-${st.id} ${nearest?.id===st.id&&ready?'active':''}" style="left:${st.x}%;top:${st.y}%;" onclick="event.stopPropagation(); setSceneControlAvatar(${st.x},${st.y})"><b>${phoneSafe(st.label)}</b></button>`).join('')}
+    <div class="scene-control-player ${getWalkAvatarMotionClass()}" style="left:${sceneControlAvatar.x}%;top:${sceneControlAvatar.y}%"><span></span></div>
+    <button class="scene-control-interact ${ready?'ready':''}" onclick="event.stopPropagation(); interactSceneControlStation()">${ready ? phoneSafe(nearest.label) : 'Yaklas'}</button>
+    <div class="scene-control-pad" onclick="event.stopPropagation()">
+      <button class="up" onclick="moveSceneControlAvatar(0,-8,event)">↑</button>
+      <button class="left" onclick="moveSceneControlAvatar(-8,0,event)">←</button>
+      <button class="right" onclick="moveSceneControlAvatar(8,0,event)">→</button>
+      <button class="down" onclick="moveSceneControlAvatar(0,8,event)">↓</button>
+    </div>
+  </div>`;
+}
 
 function openShipWalk(force=false){
   if(!force && !canUseFeature('shipwalk')) return false;
   if(!force) completeMissionFromFeature('shipwalk');
   const panel = document.getElementById('shipwalk-panel');
   panel?.classList.add('show');
+  document.body.classList.add('shipwalk-control-active');
   renderShipWalk();
   requestAnimationFrame(()=>panel?.focus?.({preventScroll:true}));
   return true;
@@ -26481,6 +26586,11 @@ function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
 }
 function openCurrentSceneControlWalk(){
   ensureWalkMission(inferWalkMissionKind());
+  if(isSceneControlAvailable()){
+    setSceneControlActive(!sceneControlActive);
+    addWatchFeed(sceneControlActive ? 'Ana sahne kontrol acildi: karakteri kopruustunde yurut, cihazlara yaklas ve E ile ac.' : 'Ana sahne kontrol kapatildi.', sceneControlActive ? 'good' : '');
+    return;
+  }
   const mode = getCurrentSceneControlMode();
   if(mode === 'premium3d' && !premiumUnlocked){
     openShipOperation3D('premium3d');
@@ -26493,10 +26603,19 @@ function openCurrentSceneControlWalk(){
   addWatchFeed('Karakter kontrol acildi: sahnede bos alana tikla veya yon pedleriyle stajyeri yurut, Etkiles ile cihaz/alan ac.', 'good');
 }
 function handleShipWalkKeydown(e){
-  if(!panelIsOpen('shipwalk-panel')) return;
+  if(!panelIsOpen('shipwalk-panel') && !sceneControlActive) return;
   if(e.target && /input|textarea|select/i.test(e.target.tagName || '')) return;
   const step = e.shiftKey ? 13 : 8;
   const key = String(e.key || '').toLowerCase();
+  if(sceneControlActive && !panelIsOpen('shipwalk-panel')){
+    if(key === 'escape'){ e.preventDefault(); setSceneControlActive(false); return; }
+    if(key === 'arrowup' || key === 'w'){ e.preventDefault(); moveSceneControlAvatar(0,-step); }
+    else if(key === 'arrowdown' || key === 's'){ e.preventDefault(); moveSceneControlAvatar(0,step); }
+    else if(key === 'arrowleft' || key === 'a'){ e.preventDefault(); moveSceneControlAvatar(-step,0); }
+    else if(key === 'arrowright' || key === 'd'){ e.preventDefault(); moveSceneControlAvatar(step,0); }
+    else if(key === 'enter' || key === 'e'){ e.preventDefault(); interactSceneControlStation(); }
+    return;
+  }
   const mover = shipWalkMode === 'bridge3d' ? moveBridgeWalkAvatar : isOperationWalkMode() ? moveOperationWalkAvatar : moveShipWalkAvatar;
   const interactor = shipWalkMode === 'bridge3d' ? interactBridgeWalkStation : isOperationWalkMode() ? interactOperationWalkStation : interactShipWalkZone;
   if(key === 'arrowup' || key === 'w'){ e.preventDefault(); mover(0,-step); }
