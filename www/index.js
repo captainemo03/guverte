@@ -19003,7 +19003,7 @@ function loadSavedGame(){
 }
 let mapView = 'world';
 let selectedPortChart = 'İzmir';
-let portChartZoom = 1.6;
+let portChartZoom = 1.18;
 let portChartPanX = null;
 let portChartPanY = null;
 let portChartDragState = null;
@@ -19220,7 +19220,7 @@ function setMapView(view){
 function selectPortChart(name){
   selectedPortChart = name;
   mapRouteDraftPoints = [];
-  portChartZoom = Math.max(portChartZoom || 1, 1.6);
+  portChartZoom = Math.max(portChartZoom || 1, 1.18);
   if(mapView !== 'library') mapView = 'library';
   invalidateMapRenderCache('port');
   renderMap();
@@ -19247,7 +19247,7 @@ function autoOpenVoyageChart(sc){
   if(!wp) return;
   selectedPortChart = wp.chart || route.chart || selectedPortChart;
   mapView = 'library';
-  portChartZoom = Math.max(portChartZoom || 1, 1.6);
+  portChartZoom = Math.max(portChartZoom || 1, 1.18);
   const sceneKey = `${sc.id}-${selectedPortChart}`;
   if(lastAutoVoyageChartScene !== sceneKey){
     lastAutoVoyageChartScene = sceneKey;
@@ -19326,7 +19326,7 @@ function fastUpdatePortChartViewport(){
   const chartZoomLabel = document.getElementById('port-chart-zoom-label');
   const chartDetailLabel = document.getElementById('port-chart-detail-label');
   if(chartSvg){
-    chartSvg.setAttribute('preserveAspectRatio', 'none');
+    chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     chartSvg.setAttribute('viewBox', getPortChartViewBox());
   }
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
@@ -19461,7 +19461,7 @@ function openChartIndexSheet(sheet, sourcePort){
   selectedPortChart = target.name;
   mapView = 'library';
   visitedPorts.add(target.name);
-  portChartZoom = Math.max(portChartZoom || 1, 1.6);
+  portChartZoom = Math.max(portChartZoom || 1, 1.18);
   showNotif('CHART FOLIO', `${sheet.no} paftasi acildi`, `${target.name} detay chart yuklendi.`);
   addLiveLogbook('CHART FOLIO', `${sourcePort?.name || 'Atlas'} ${sheet.no} paftasindan ${target.name} chartina gecildi.`, true);
   renderMap();
@@ -21289,7 +21289,7 @@ function renderMapLibrary(){
   const profile = getPortChartProfile(active);
   const region = profile.region;
   chartSvg.classList.add('shodb-style');
-  chartSvg.setAttribute('preserveAspectRatio', 'none');
+  chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
   chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
   const portKey = [
     active.name,
@@ -21594,7 +21594,7 @@ function handleWorldMapClick(svg, ev){
       selectedPortChart = target.name;
       visitedPorts.add(target.name);
       mapView = 'library';
-      portChartZoom = Math.max(portChartZoom || 1, 1.6);
+      portChartZoom = Math.max(portChartZoom || 1, 1.18);
       showNotif('DUNYA ATLASI', `${folioSheet.no} paftasi`, `${target.name} chart dosyasi acildi.`);
       addLiveLogbook('DUNYA ATLASI', `${folioSheet.no} paftasi uzerinden ${target.name} chartina gecildi.`, true);
       renderMap();
