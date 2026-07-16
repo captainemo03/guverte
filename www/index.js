@@ -19324,7 +19324,7 @@ function fastUpdatePortChartViewport(){
   const chartZoomLabel = document.getElementById('port-chart-zoom-label');
   const chartDetailLabel = document.getElementById('port-chart-detail-label');
   if(chartSvg){
-    chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    chartSvg.setAttribute('preserveAspectRatio', 'none');
     chartSvg.setAttribute('viewBox', getPortChartViewBox());
   }
   if(chartZoomLabel) chartZoomLabel.textContent = `${Math.round(portChartZoom*100)}%`;
@@ -21287,7 +21287,7 @@ function renderMapLibrary(){
   const profile = getPortChartProfile(active);
   const region = profile.region;
   chartSvg.classList.add('shodb-style');
-  chartSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  chartSvg.setAttribute('preserveAspectRatio', 'none');
   chartTitle.textContent = `${active.name} · ${getPortChartTitleLabel(active.kind)}`;
   const portKey = [
     active.name,

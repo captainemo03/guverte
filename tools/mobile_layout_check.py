@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=179",
-        "index.css?v=154",
+        "index.js?v=180",
+        "index.css?v=155",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -86,9 +86,9 @@ REQUIRED = {
         "#map-world-view{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;}",
         "#map-svg{width:100%;height:calc(100dvh - 126px);",
         "#port-chart-box{border:1px solid var(--border2);border-radius:10px;background:rgba(7,19,36,0.55);padding:7px;display:grid;",
-        "#port-chart-svg{width:100%;height:100%;min-height:0;",
-        "#port-chart-taskbox{position:absolute;right:16px;bottom:16px;",
-        'preserveAspectRatio="xMidYMid meet"',
+        "#port-chart-svg{width:100%;height:100%;min-height:360px;",
+        "#port-chart-taskbox{position:relative;left:auto;right:auto;bottom:auto;width:100%;",
+        'preserveAspectRatio="none"',
         "map-task-touch-area",
         "showMapTapFeedback",
         "focusCurrentMapTask",
