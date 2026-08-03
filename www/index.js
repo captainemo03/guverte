@@ -26305,6 +26305,11 @@ function isFirstPersonAvailable(sc=sceneQueue?.[currentIdx]){
 }
 const FIRST_PERSON_AREA_DEFS = {
   bridge:{title:'KOPRUUSTU', className:'area-bridge', prompt:'Radar, ECDIS, VHF ve kopruustu ekibine yuruyerek yaklas.',
+    stations:[
+      {id:'bridge-wing-port',label:'ISKELE KANAT',detail:'trafik / pilot bot',x:16,y:48,action:'seaLook',look:'port'},
+      {id:'bridge-wing-stbd',label:'SANCAK KANAT',detail:'gecis mesafesi / swell',x:84,y:48,action:'seaLook',look:'starboard'},
+      {id:'bridge-binoculars',label:'DURBUN',detail:'uzak trafik / fenerler',x:50,y:46,action:'binocularLook',look:'bow'}
+    ],
     doors:[
       {id:'door-deck',label:'GUVERTEYE CIK',detail:'pilot ladder / mooring',x:18,y:88,targetArea:'deck'},
       {id:'door-engine',label:'MAKINEYE IN',detail:'ECR / alarm paneli',x:82,y:88,targetArea:'engine'},
@@ -26404,6 +26409,7 @@ function getFirstPersonStations(){
     return [
       ...BRIDGE_WALK_STATIONS.map(st=>({...st,type:'station'})),
       ...BRIDGE_WALK_NPCS.map(npc=>({...npc,type:'npc',device:''})),
+      ...(def.stations || []).map(st=>({...st,type:st.type || 'station'})),
       ...(def.doors || []).map(door=>({...door,type:'door'})),
       ...getFirstPersonRoamingNpcs('bridge')
     ];
@@ -26522,6 +26528,21 @@ function handleFirstPersonPointerUp(ev){
 function jumpFirstPersonTo(x,y,ev){
   setFirstPersonDestination(x,y,ev);
 }
+function openFirstPersonBinocularLook(view='bow'){
+  const root = document.getElementById('firstperson-stage');
+  const overlay = document.createElement('div');
+  overlay.className = 'fp-sea-look-overlay binocular-mode';
+  overlay.innerHTML = `<div class="fp-sea-look fp-binocular ${view}">
+    <button onclick="this.closest('.fp-sea-look-overlay')?.remove()">KAPAT</button>
+    <b>DURBUN GOZLEMI</b>
+    <span>Uzak trafik, ufuk hattı, sis bankı ve seyir fenerleri tarandı. Gozlem logbook icin isaretlendi.</span>
+    <i class="ship-light a"></i><i class="ship-light b"></i><i class="ship-light c"></i>
+    <em></em><em></em><em></em>
+  </div>`;
+  root?.appendChild(overlay);
+  addWatchFeed('Durbun gozlemi: uzak trafik, ufuk hatti ve seyir fenerleri tarandi.', 'good');
+  showNotif('GOZLEM', 'Durbun', 'Uzak trafik ve gorus kontrolu kayda gecti.');
+}
 function openFirstPersonSeaLook(view='bow'){
   const labels = {port:'Iskele borda', starboard:'Sancak borda', bow:'Pruva'};
   const notes = {
@@ -26559,6 +26580,10 @@ function handleFirstPersonAction(st){
   if(st.action === 'map'){
     openMap();
     showNotif('HARITA', label, 'Rota ve ECDIS haritasi acildi.');
+    return;
+  }
+  if(st.action === 'binocularLook'){
+    openFirstPersonBinocularLook(st.look || 'bow');
     return;
   }
   if(st.action === 'seaLook'){
@@ -26687,7 +26712,7 @@ function getFirstPersonDirectorHtml(){
   return `<div class="fp-director"><b>SERBEST DOLASIM</b><strong>${phoneSafe(getFirstPersonAreaDef().title)}</strong><span>Yakindaki cihaz veya karaktere yaklas, E ile kullan.</span></div>`;
 }
 function renderFirstPersonFallback(error){
-  const root = document.getElementById('firstperson-stage');
+  const {stage: root} = ensureFirstPersonHost();
   if(!root) return;
   const safeError = String(error?.message || error || 'render').slice(0,120);
   root.innerHTML = `<div class="fp-shell fp-fallback-shell">
@@ -26721,7 +26746,7 @@ function renderFirstPersonMode(){
   }
 }
 function renderFirstPersonModeUnsafe(){
-  const root = document.getElementById('firstperson-stage');
+  const {stage: root} = ensureFirstPersonHost();
   if(!root || !firstPersonActive) return;
   const area = getFirstPersonAreaDef();
   const nearest = getNearestFirstPersonStation();
@@ -26734,7 +26759,8 @@ function renderFirstPersonModeUnsafe(){
     const depth = Math.max(0, Math.min(1, 1 - ((st.y - 26) / 72)));
     const top = 24 + st.y * .52;
     const scale = .76 + depth * .42;
-    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${ready && nearest?.id === st.id ? 'active' : ''}`;
+    const isObjective = director?.id === st.id || (st.type === 'door' && director?.area !== firstPersonArea && st.targetArea === director?.area);
+    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${st.roaming ? 'roaming' : ''} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
     return `<button class="fp-hotspot ${cls}" style="left:${relX}%;top:${top}%;--fp-scale:${scale};" onclick="jumpFirstPersonTo(${st.x},${st.y},event)"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(subtitle)}</small></button>`;
   }).join('');
@@ -26749,6 +26775,7 @@ function renderFirstPersonModeUnsafe(){
       <div class="fp-room-props"><i></i><i></i><i></i></div>
       <div class="fp-deck-view"><i></i><i></i><i></i><span></span><span></span></div>
       <div class="fp-floor"></div>
+      ${destinationMarker}
       ${stations}
       <div class="fp-crosshair"></div>
       <div class="fp-minimap"><b>${phoneSafe(area.title)}</b><span style="left:${firstPersonPlayer.x}%;top:${firstPersonPlayer.y}%"></span></div>

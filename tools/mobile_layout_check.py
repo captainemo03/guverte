@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=194",
-        "index.css?v=169",
+        "index.js?v=196",
+        "index.css?v=171",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -138,6 +138,8 @@ REQUIRED = {
         "game-settings-panel",
         "game-settings-grid",
         "exitToHomeFromGame",
+    ],
+    "3d and first person control": [
         "ship-control-stage",
         "ship-control-pad",
         "shipwalk-avatar",
@@ -199,6 +201,11 @@ REQUIRED = {
         "fp-deck-view",
         "deck-sea-port",
         "deck-bow-view",
+        "bridge-wing-port",
+        "bridge-wing-stbd",
+        "bridge-binoculars",
+        "openFirstPersonBinocularLook",
+        "fp-binocular",
         "renderFirstPersonModeUnsafe",
         "fp-fallback-shell",
         "firstperson-btn",

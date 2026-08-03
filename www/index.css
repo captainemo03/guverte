@@ -4371,3 +4371,14 @@ body.firstperson-active #game{filter:brightness(.72);}
 @keyframes fpShipLightPass{from{transform:translateX(0);opacity:.25}50%{opacity:.9}to{transform:translateX(-80px);opacity:.35}}
 @keyframes fpLightBlink{50%{opacity:.25}}
 @media (max-width:760px){.fp-sea-look{width:94vw;height:64vh;border-radius:14px}.fp-sea-look b{font-size:12px}.fp-sea-look span{font-size:11px;padding:10px}.fp-deck-view span{height:30px}}
+.binocular-mode{background:rgba(0,0,0,.62);}
+.fp-binocular{border-radius:22px;background:radial-gradient(circle at 28% 48%,rgba(31,102,145,.95) 0 29%,transparent 30%),radial-gradient(circle at 72% 48%,rgba(31,102,145,.95) 0 29%,transparent 30%),#02060a;box-shadow:inset 0 0 0 999px rgba(0,0,0,.18),0 30px 80px rgba(0,0,0,.62);}
+.fp-binocular::before{left:4%;right:4%;top:40%;height:28%;background:repeating-linear-gradient(170deg,rgba(235,250,255,.34) 0 2px,transparent 2px 34px),linear-gradient(180deg,rgba(42,133,176,.9),rgba(4,32,55,.95));}
+.fp-binocular::after{left:12%;right:12%;top:36%;height:2px;background:rgba(235,250,255,.58);box-shadow:0 0 18px rgba(127,195,255,.5),0 42px 0 rgba(255,255,255,.08);}
+.fp-binocular b{left:50%;transform:translateX(-50%);text-align:center;background:rgba(2,9,16,.72);border:1px solid rgba(127,195,255,.22);border-radius:999px;padding:7px 14px;}
+.fp-binocular span{left:50%;right:auto;bottom:20px;width:min(620px,82%);transform:translateX(-50%);text-align:center;}
+.fp-binocular .ship-light{width:10px;height:10px;}
+.fp-binocular em{height:12px;width:104px;}
+.fp-world.area-bridge .fp-deck-view{display:block;opacity:.32;}
+.fp-world.area-bridge .fp-deck-view::before{top:9%;height:25%;background:linear-gradient(180deg,rgba(150,205,235,.12),rgba(40,100,134,.22));}
+.fp-world.area-bridge .fp-deck-view::after{top:29%;height:12%;opacity:.22;}
