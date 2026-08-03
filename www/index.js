@@ -26267,6 +26267,7 @@ let sceneControlAvatar = {x:50,y:78};
 let firstPersonActive = false;
 let firstPersonPlayer = {x:50,y:78,yaw:0};
 let firstPersonPointer = {down:false,lastX:0,lastY:0};
+let firstPersonInput = {dx:0,dy:0,raf:0,destination:null};
 
 function isFirstPersonAvailable(sc=sceneQueue?.[currentIdx]){
   return true;
@@ -26367,7 +26368,58 @@ function setFirstPersonPlayer(x,y){
 }
 function moveFirstPerson(dx,dy,ev){
   stopShipWalkControlEvent(ev);
+  firstPersonInput.destination = null;
   setFirstPersonPlayer(firstPersonPlayer.x + dx, firstPersonPlayer.y + dy);
+}
+function startFirstPersonMove(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
+  firstPersonInput.destination = null;
+  firstPersonInput.dx = dx;
+  firstPersonInput.dy = dy;
+  tickFirstPersonMove();
+}
+function stopFirstPersonMove(ev){
+  stopShipWalkControlEvent(ev);
+  firstPersonInput.dx = 0;
+  firstPersonInput.dy = 0;
+}
+function setFirstPersonDestination(x,y,ev){
+  stopShipWalkControlEvent(ev);
+  firstPersonInput.destination = {x:Math.max(8, Math.min(92, x)), y:Math.max(24, Math.min(92, y))};
+  firstPersonInput.dx = 0;
+  firstPersonInput.dy = 0;
+  tickFirstPersonMove();
+}
+function tickFirstPersonMove(){
+  if(firstPersonInput.raf || !firstPersonActive) return;
+  const step = ()=>{
+    firstPersonInput.raf = 0;
+    if(!firstPersonActive) return;
+    let dx = firstPersonInput.dx;
+    let dy = firstPersonInput.dy;
+    const dest = firstPersonInput.destination;
+    if(dest){
+      const vx = dest.x - firstPersonPlayer.x;
+      const vy = dest.y - firstPersonPlayer.y;
+      const dist = Math.sqrt(vx*vx + vy*vy);
+      if(dist < 1.2){
+        firstPersonInput.destination = null;
+        dx = 0;
+        dy = 0;
+      }else{
+        dx = vx / dist;
+        dy = vy / dist;
+      }
+    }
+    if(dx || dy){
+      const speed = firstPersonPointer.down ? 1.55 : 1.25;
+      setFirstPersonPlayer(firstPersonPlayer.x + dx * speed, firstPersonPlayer.y + dy * speed);
+      firstPersonInput.raf = requestAnimationFrame(step);
+    }else{
+      renderFirstPersonMode();
+    }
+  };
+  firstPersonInput.raf = requestAnimationFrame(step);
 }
 function moveFirstPersonTowardScreen(clientX, clientY, ev){
   stopShipWalkControlEvent(ev);
@@ -26378,9 +26430,7 @@ function moveFirstPersonTowardScreen(clientX, clientY, ev){
   const ny = ((clientY - rect.top) / Math.max(1, rect.height)) * 100;
   const targetX = Math.max(8, Math.min(92, nx));
   const targetY = Math.max(24, Math.min(92, 38 + (ny * .58)));
-  const dx = Math.max(-10, Math.min(10, (targetX - firstPersonPlayer.x) * .42));
-  const dy = Math.max(-10, Math.min(10, (targetY - firstPersonPlayer.y) * .42));
-  setFirstPersonPlayer(firstPersonPlayer.x + dx, firstPersonPlayer.y + dy);
+  setFirstPersonDestination(targetX, targetY, ev);
 }
 function handleFirstPersonPointerDown(ev){
   if(ev?.target?.closest?.('button')) return;
@@ -26556,6 +26606,7 @@ function renderFirstPersonMode(){
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
     return `<button class="fp-hotspot ${cls}" style="left:${relX}%;top:${top}%;--fp-scale:${scale};" onclick="jumpFirstPersonTo(${st.x},${st.y},event)"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(subtitle)}</small></button>`;
   }).join('');
+  const destinationMarker = firstPersonInput.destination ? `<div class="fp-destination" style="left:${firstPersonInput.destination.x}%;top:${firstPersonInput.destination.y}%"></div>` : "";
   const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="setFirstPersonArea('${st.targetArea || 'bridge'}')">${phoneSafe(st.label)}</button>`).join('');
   root.innerHTML = `<div class="fp-shell" style="--fp-yaw:${firstPersonPlayer.yaw}deg;--fp-x:${firstPersonPlayer.x};--fp-y:${firstPersonPlayer.y};">
     <div class="fp-hud"><b>1. SAHIS · ${phoneSafe(area.title)}</b><span>X ${Math.round(firstPersonPlayer.x)} · Y ${Math.round(firstPersonPlayer.y)}</span><button onclick="closeFirstPersonMode()">CIK</button></div>
@@ -26574,10 +26625,10 @@ function renderFirstPersonMode(){
       <div class="fp-director-wrap">${directorHtml}</div>
       <div class="fp-mission">${mission}</div>
       <div class="walk-joystick fp-joy" onclick="event.stopPropagation()">
-        <button class="up" onclick="moveFirstPerson(0,-8,event)">↑</button>
-        <button class="left" onclick="moveFirstPerson(-8,0,event)">←</button>
-        <button class="right" onclick="moveFirstPerson(8,0,event)">→</button>
-        <button class="down" onclick="moveFirstPerson(0,8,event)">↓</button>
+        <button class="up" onpointerdown="startFirstPersonMove(0,-1,event)" onpointerup="stopFirstPersonMove(event)" onpointerleave="stopFirstPersonMove(event)" onclick="moveFirstPerson(0,-8,event)">↑</button>
+        <button class="left" onpointerdown="startFirstPersonMove(-1,0,event)" onpointerup="stopFirstPersonMove(event)" onpointerleave="stopFirstPersonMove(event)" onclick="moveFirstPerson(-8,0,event)">←</button>
+        <button class="right" onpointerdown="startFirstPersonMove(1,0,event)" onpointerup="stopFirstPersonMove(event)" onpointerleave="stopFirstPersonMove(event)" onclick="moveFirstPerson(8,0,event)">→</button>
+        <button class="down" onpointerdown="startFirstPersonMove(0,1,event)" onpointerup="stopFirstPersonMove(event)" onpointerleave="stopFirstPersonMove(event)" onclick="moveFirstPerson(0,8,event)">↓</button>
       </div>
       <button class="walk-interact fp-use ${ready?'ready':''}" onclick="interactFirstPerson()">${ready ? 'KULLAN' : 'YAKLAS'}</button>
     </div>

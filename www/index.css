@@ -4325,3 +4325,10 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-director button{border:1px solid rgba(129,247,184,.38);border-radius:9px;background:linear-gradient(180deg,rgba(22,75,51,.94),rgba(8,23,34,.92));color:#caffdd;font:9px 'Share Tech Mono',monospace;padding:8px 10px;cursor:pointer;min-height:34px;}
 .fp-director button:hover{border-color:rgba(129,247,184,.8);}
 @media (max-width:760px){.fp-director-wrap{left:auto;right:8px;top:54px;width:calc(100% - 124px);}.fp-director{padding:8px}.fp-director b{font-size:7px}.fp-director strong{font-size:10px}.fp-director span{display:none}.fp-director button{min-height:30px;padding:6px 8px}.fp-hotspot.objective::after{display:none}}
+.fp-destination{position:absolute;z-index:14;width:44px;height:44px;transform:translate(-50%,-50%) rotateX(56deg);border:2px solid rgba(129,247,184,.82);border-radius:50%;background:radial-gradient(circle,rgba(129,247,184,.22),rgba(129,247,184,.04) 58%,transparent 60%);box-shadow:0 0 22px rgba(129,247,184,.35);pointer-events:none;animation:fpDestinationPulse .7s ease-in-out infinite alternate;}
+.fp-destination::before,.fp-destination::after{content:'';position:absolute;left:50%;top:50%;background:#81f7b8;transform:translate(-50%,-50%);border-radius:4px;}
+.fp-destination::before{width:24px;height:2px}.fp-destination::after{width:2px;height:24px}
+.fp-joy button{touch-action:none;user-select:none;}
+.fp-joy button:active{transform:scale(.96);filter:brightness(1.18);}
+@keyframes fpDestinationPulse{from{opacity:.58;transform:translate(-50%,-50%) rotateX(56deg) scale(.86)}to{opacity:1;transform:translate(-50%,-50%) rotateX(56deg) scale(1.12)}}
+@media (max-width:760px){.fp-destination{width:34px;height:34px}.fp-destination::before{width:18px}.fp-destination::after{height:18px}}
