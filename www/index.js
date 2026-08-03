@@ -26268,6 +26268,7 @@ let firstPersonActive = false;
 let firstPersonPlayer = {x:50,y:78,yaw:0};
 let firstPersonPointer = {down:false,lastX:0,lastY:0};
 let firstPersonInput = {dx:0,dy:0,raf:0,destination:null};
+let firstPersonNpcTimer = null;
 
 function ensureFirstPersonHost(){
   let panel = document.getElementById('firstperson-panel');
@@ -26315,6 +26316,9 @@ const FIRST_PERSON_AREA_DEFS = {
       {id:'deck-mooring',label:'MOORING WINCH',detail:'halat gerilimi',x:24,y:66,action:'deck3d'},
       {id:'deck-safe',label:'SNAP-BACK SAFE',detail:'emniyetli bekleme',x:50,y:58,action:'walkTask'},
       {id:'deck-pilot',label:'PILOT LADDER',detail:'pilot boarding hazirligi',x:72,y:62,action:'deck3d'},
+      {id:'deck-sea-port',label:'ISKELEDEN DENIZE BAK',detail:'ufuk / trafik / swell',x:16,y:48,action:'seaLook',look:'port'},
+      {id:'deck-sea-stbd',label:'SANCAKTAN DENIZE BAK',detail:'seyir fenerleri / dalga',x:84,y:48,action:'seaLook',look:'starboard'},
+      {id:'deck-bow-view',label:'PRUVAYA BAK',detail:'bas dalga / rota',x:50,y:38,action:'seaLook',look:'bow'},
       {id:'deck-bosun',label:'LOSTROMO',detail:'forward station ready',x:38,y:80,type:'npc',line:'Halati gormeden komut verme. Once snap-back alanina bak.'}
     ],
     doors:[
@@ -26363,18 +26367,51 @@ function setFirstPersonArea(area){
   firstPersonPlayer = {x:50,y:78,yaw:0};
   renderFirstPersonMode();
 }
+const FIRST_PERSON_ROAMING_NPCS = {
+  bridge:[
+    {id:'fp-oow',label:'VARDIYA ZABITI',detail:'rota / CPA kontrolu',baseX:38,baseY:62,ampX:9,ampY:5,phase:.2,line:'Radar hedefini sadece AIS adina gore okuma. CPA/TCPA degerini de kontrol et.'},
+    {id:'fp-lookout',label:'GOZCU',detail:'iskele kanat',baseX:68,baseY:66,ampX:7,ampY:4,phase:1.6,line:'Iskele omuzlukta zayif bir isik var. Radarda da kucuk iz dusuyor.'}
+  ],
+  deck:[
+    {id:'fp-bosun-roam',label:'LOSTROMO',detail:'halat kontrolu',baseX:30,baseY:70,ampX:13,ampY:5,phase:.5,line:'Snap-back hattini gozunle gormeden halata yaklasma.'},
+    {id:'fp-ab-roam',label:'USTA GEMICI',detail:'pilot ladder',baseX:70,baseY:72,ampX:10,ampY:4,phase:2.2,line:'Pilot merdiveni hazir ama borda aydinlatmasini tekrar kontrol edelim.'}
+  ],
+  engine:[
+    {id:'fp-chief-roam',label:'BAS MUHENDIS',detail:'ECR turu',baseX:32,baseY:70,ampX:10,ampY:5,phase:.9,line:'Alarmi susturmak cozum degil. Once trendi oku, sonra kopruye rapor ver.'},
+    {id:'fp-oiler-roam',label:'YAGCI',detail:'pompa basinda',baseX:72,baseY:72,ampX:8,ampY:4,phase:2.8,line:'Bilge seviyesi artiyor gibi. Pompa emisini kontrol ettim, sen panelden teyit et.'}
+  ],
+  cabin:[
+    {id:'fp-roommate',label:'ODA ARKADASI',detail:'vardiya sonrasi',baseX:30,baseY:76,ampX:7,ampY:3,phase:1.2,line:'Biraz uyu. Yorgunken VHF cumlesini bile yanlis okuyorsun.'}
+  ],
+  mess:[
+    {id:'fp-cook-roam',label:'ASCI',detail:'cay servisi',baseX:34,baseY:72,ampX:8,ampY:3,phase:.4,line:'Cay taze. Ama yemekten sonra logbooku unutma.'},
+    {id:'fp-doctor-roam',label:'GEMI DOKTORU',detail:'moral kontrolu',baseX:70,baseY:70,ampX:8,ampY:4,phase:2.1,line:'Yorgunlugu saklamak gemide kahramanlik degil, risk yonetimidir.'}
+  ]
+};
+function getFirstPersonRoamingNpcs(areaKey=firstPersonArea){
+  const t = Date.now() / 1000;
+  return (FIRST_PERSON_ROAMING_NPCS[areaKey] || []).map((npc,idx)=>({
+    ...npc,
+    type:'npc',
+    roaming:true,
+    x:Math.max(10, Math.min(90, npc.baseX + Math.sin(t * .55 + npc.phase + idx) * npc.ampX)),
+    y:Math.max(34, Math.min(88, npc.baseY + Math.cos(t * .42 + npc.phase + idx) * npc.ampY))
+  }));
+}
 function getFirstPersonStations(){
   const def = getFirstPersonAreaDef();
   if(firstPersonArea === 'bridge'){
     return [
       ...BRIDGE_WALK_STATIONS.map(st=>({...st,type:'station'})),
       ...BRIDGE_WALK_NPCS.map(npc=>({...npc,type:'npc',device:''})),
-      ...(def.doors || []).map(door=>({...door,type:'door'}))
+      ...(def.doors || []).map(door=>({...door,type:'door'})),
+      ...getFirstPersonRoamingNpcs('bridge')
     ];
   }
   return [
     ...(def.stations || []).map(st=>({...st,type:st.type || 'station'})),
-    ...(def.doors || []).map(door=>({...door,type:'door'}))
+    ...(def.doors || []).map(door=>({...door,type:'door'})),
+    ...getFirstPersonRoamingNpcs(firstPersonArea)
   ];
 }
 function getNearestFirstPersonStation(){
@@ -26485,6 +26522,27 @@ function handleFirstPersonPointerUp(ev){
 function jumpFirstPersonTo(x,y,ev){
   setFirstPersonDestination(x,y,ev);
 }
+function openFirstPersonSeaLook(view='bow'){
+  const labels = {port:'Iskele borda', starboard:'Sancak borda', bow:'Pruva'};
+  const notes = {
+    port:'Iskele tarafta ufuk tarandi. Dalga omuzluktan geliyor; gorev zabitine swell yonu raporlandi.',
+    starboard:'Sancak tarafta uzak trafik isiklari ve deniz durumu kontrol edildi.',
+    bow:'Pruvada bas dalga, rota hattı ve gorus durumu gozlemlendi.'
+  };
+  const root = document.getElementById('firstperson-stage');
+  const overlay = document.createElement('div');
+  overlay.className = 'fp-sea-look-overlay';
+  overlay.innerHTML = `<div class="fp-sea-look ${view}">
+    <button onclick="this.closest('.fp-sea-look-overlay')?.remove()">KAPAT</button>
+    <b>${phoneSafe(labels[view] || labels.bow)}</b>
+    <span>${phoneSafe(notes[view] || notes.bow)}</span>
+    <i class="ship-light a"></i><i class="ship-light b"></i><i class="ship-light c"></i>
+    <em></em><em></em><em></em>
+  </div>`;
+  root?.appendChild(overlay);
+  addWatchFeed(notes[view] || notes.bow, 'good');
+  showNotif('GUVERTEDESIN', labels[view] || labels.bow, 'Deniz, ufuk ve trafik gozlemi kayda gecti.');
+}
 function handleFirstPersonAction(st){
   if(!st) return;
   const label = st.label || 'Istasyon';
@@ -26501,6 +26559,10 @@ function handleFirstPersonAction(st){
   if(st.action === 'map'){
     openMap();
     showNotif('HARITA', label, 'Rota ve ECDIS haritasi acildi.');
+    return;
+  }
+  if(st.action === 'seaLook'){
+    openFirstPersonSeaLook(st.look || 'bow');
     return;
   }
   if(st.action === 'deck3d'){
@@ -26558,17 +26620,22 @@ function interactFirstPerson(){
   handleFirstPersonAction(nearest);
 }
 function openFirstPersonMode(){
+  const host = ensureFirstPersonHost();
   firstPersonActive = true;
   sceneControlActive = false;
   ensureWalkMission(inferWalkMissionKind());
   document.body.classList.add('firstperson-active');
-  document.getElementById('firstperson-panel')?.classList.add('show');
-  renderFirstPersonMode();
+  host.panel.classList.add('show');
+  renderFirstPersonBootScreen();
+  requestAnimationFrame(()=>renderFirstPersonMode());
   requestAnimationFrame(()=>host.panel?.focus?.({preventScroll:true}));
-  showNotif('1. ŞAHIS','Gemi içindesin','WASD / oklarla yürü, E ile cihazı kullan, Esc ile çık.');
+  if(firstPersonNpcTimer) clearInterval(firstPersonNpcTimer);
+  firstPersonNpcTimer = setInterval(()=>{ if(firstPersonActive) renderFirstPersonMode(); }, 1100);
+  showNotif('1. SAHIS','Gemi icindesin','WASD / oklarla yuru, kapilardan mahal degistir, E ile konus/kullan, Esc ile cik.');
 }
 function closeFirstPersonMode(){
   stopFirstPersonMove();
+  if(firstPersonNpcTimer){ clearInterval(firstPersonNpcTimer); firstPersonNpcTimer = null; }
   firstPersonInput.destination = null;
   firstPersonActive = false;
   document.body.classList.remove('firstperson-active');
@@ -26680,6 +26747,7 @@ function renderFirstPersonModeUnsafe(){
       <div class="fp-sea"><span></span><span></span><span></span></div>
       <div class="fp-console-bank"><i class="radar"></i><i class="ecdis"></i><i class="vhf"></i></div>
       <div class="fp-room-props"><i></i><i></i><i></i></div>
+      <div class="fp-deck-view"><i></i><i></i><i></i><span></span><span></span></div>
       <div class="fp-floor"></div>
       ${stations}
       <div class="fp-crosshair"></div>

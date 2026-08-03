@@ -4335,3 +4335,39 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-fallback-shell .fallback-ready{background:linear-gradient(180deg,#0c2742 0 38%,#103654 39% 55%,#07111f 56% 100%);}
 .fp-fallback-shell .fp-hotspot{pointer-events:auto;}
 .fp-fallback-shell .fp-prompt{max-width:calc(100% - 40px);white-space:normal;border-color:rgba(129,247,184,.6);}
+.fp-hotspot.roaming{min-width:118px;padding-left:38px;animation:fpNpcDrift 1.8s ease-in-out infinite alternate;}
+.fp-hotspot.roaming::before{content:'';position:absolute;left:10px;top:50%;width:19px;height:28px;transform:translateY(-50%);border-radius:10px 10px 6px 6px;background:linear-gradient(180deg,#d8aa7f 0 25%,#13253a 26% 100%);border:1px solid rgba(255,255,255,.14);box-shadow:0 9px 16px rgba(0,0,0,.28);}
+.fp-hotspot.roaming::after{content:'KONUS';position:absolute;right:8px;top:-18px;border:1px solid rgba(129,247,184,.38);border-radius:999px;background:rgba(4,28,21,.9);color:#caffdd;font:7px 'Share Tech Mono',monospace;padding:3px 6px;letter-spacing:.7px;}
+.fp-hotspot.roaming.active{transform:translate(-50%,-50%) scale(calc(var(--fp-scale) + .08));}
+.fp-hotspot.door{min-width:136px;text-align:center;}
+.fp-hotspot.door small::after{content:' / GECIS';color:#ffd66b;}
+@keyframes fpNpcDrift{from{filter:brightness(.92);margin-top:-2px}to{filter:brightness(1.08);margin-top:3px}}
+@media (max-width:760px){.fp-hotspot.roaming{padding-left:30px;min-width:104px}.fp-hotspot.roaming::before{left:8px;width:15px;height:23px}.fp-hotspot.roaming::after{display:none}.fp-hotspot.door{min-width:108px}}
+.fp-deck-view{display:none;position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.fp-world.area-deck .fp-deck-view{display:block;}
+.fp-deck-view::before{content:'';position:absolute;left:-10%;right:-10%;top:14%;height:38%;background:linear-gradient(180deg,rgba(120,184,220,.22),rgba(18,79,116,.5) 45%,rgba(8,42,70,.72));box-shadow:inset 0 -18px 40px rgba(255,255,255,.05);}
+.fp-deck-view::after{content:'';position:absolute;left:-14%;right:-14%;top:44%;height:20%;background:repeating-linear-gradient(170deg,rgba(220,244,255,.26) 0 2px,transparent 2px 46px);opacity:.52;animation:fpDeckSeaMove 6.5s linear infinite;}
+.fp-deck-view i{position:absolute;z-index:3;display:block;}
+.fp-deck-view i:nth-child(1){left:8%;top:52%;width:28%;height:8px;border-radius:999px;background:linear-gradient(90deg,transparent,#b7d9e7,transparent);animation:fpDeckSeaMove 4.2s linear infinite;}
+.fp-deck-view i:nth-child(2){left:42%;top:47%;width:34%;height:7px;border-radius:999px;background:linear-gradient(90deg,transparent,#e3f5ff,transparent);animation:fpDeckSeaMove 5.4s linear infinite reverse;}
+.fp-deck-view i:nth-child(3){right:8%;top:28%;width:46px;height:10px;border-radius:50%;background:rgba(255,230,146,.48);box-shadow:0 0 18px rgba(255,230,146,.35);animation:fpShipLightPass 9s linear infinite;}
+.fp-deck-view span{position:absolute;z-index:4;bottom:30%;height:44px;border-radius:2px;background:linear-gradient(180deg,#26384a,#0b1420);border:1px solid rgba(127,195,255,.16);box-shadow:0 12px 22px rgba(0,0,0,.34);}
+.fp-deck-view span:nth-of-type(1){left:18%;width:9px;transform:rotate(-8deg)}
+.fp-deck-view span:nth-of-type(2){right:17%;width:9px;transform:rotate(8deg)}
+.fp-sea-look-overlay{position:absolute;inset:0;z-index:60;background:rgba(1,7,14,.38);backdrop-filter:blur(1px);display:grid;place-items:center;}
+.fp-sea-look{position:relative;width:min(860px,92vw);height:min(500px,72vh);overflow:hidden;border:1px solid rgba(127,195,255,.34);border-radius:18px;background:linear-gradient(180deg,#153958 0 36%,#1a5b83 37% 57%,#06243d 58% 100%);box-shadow:0 30px 80px rgba(0,0,0,.55);}
+.fp-sea-look::before{content:'';position:absolute;left:-12%;right:-12%;top:45%;height:34%;background:repeating-linear-gradient(170deg,rgba(235,250,255,.28) 0 2px,transparent 2px 50px),linear-gradient(180deg,rgba(36,115,158,.76),rgba(3,33,58,.92));animation:fpDeckSeaMove 5.2s linear infinite;}
+.fp-sea-look::after{content:'';position:absolute;left:0;right:0;top:34%;height:2px;background:rgba(230,245,255,.45);box-shadow:0 0 20px rgba(127,195,255,.32);}
+.fp-sea-look button{position:absolute;right:14px;top:14px;z-index:8;border:1px solid rgba(255,214,107,.45);border-radius:9px;background:rgba(40,28,9,.9);color:#ffe7a6;font:10px 'Share Tech Mono',monospace;padding:8px 11px;cursor:pointer;}
+.fp-sea-look b{position:absolute;left:18px;top:18px;z-index:8;color:#fff;font:15px 'Share Tech Mono',monospace;letter-spacing:1px;}
+.fp-sea-look span{position:absolute;left:18px;right:18px;bottom:18px;z-index:8;border:1px solid rgba(127,195,255,.22);border-radius:12px;background:rgba(3,12,22,.72);color:#dff2ff;padding:12px;font-size:13px;line-height:1.45;}
+.fp-sea-look em{position:absolute;z-index:5;display:block;width:72px;height:8px;border-radius:50%;background:rgba(255,234,160,.44);box-shadow:0 0 16px rgba(255,234,160,.32);animation:fpShipLightPass 8s linear infinite;}
+.fp-sea-look em:nth-of-type(1){left:8%;top:31%;}.fp-sea-look em:nth-of-type(2){left:54%;top:39%;animation-duration:11s}.fp-sea-look em:nth-of-type(3){left:78%;top:28%;animation-duration:13s}
+.fp-sea-look .ship-light{position:absolute;z-index:6;width:7px;height:7px;border-radius:50%;background:#fff0a6;box-shadow:0 0 15px #fff0a6;animation:fpLightBlink 1.4s steps(2,end) infinite;}
+.fp-sea-look .ship-light.a{left:24%;top:33%;}.fp-sea-look .ship-light.b{left:62%;top:42%;animation-delay:.4s}.fp-sea-look .ship-light.c{left:84%;top:31%;animation-delay:.8s}
+.fp-sea-look.port{background:linear-gradient(180deg,#102d4c 0 35%,#174b74 36% 56%,#05233d 57% 100%);}
+.fp-sea-look.starboard{background:linear-gradient(180deg,#18354f 0 35%,#1d607f 36% 56%,#06233c 57% 100%);}
+@keyframes fpDeckSeaMove{from{background-position:0 0,0 0;transform:translateX(0)}to{background-position:160px 0,0 0;transform:translateX(-4%)}}
+@keyframes fpShipLightPass{from{transform:translateX(0);opacity:.25}50%{opacity:.9}to{transform:translateX(-80px);opacity:.35}}
+@keyframes fpLightBlink{50%{opacity:.25}}
+@media (max-width:760px){.fp-sea-look{width:94vw;height:64vh;border-radius:14px}.fp-sea-look b{font-size:12px}.fp-sea-look span{font-size:11px;padding:10px}.fp-deck-view span{height:30px}}
