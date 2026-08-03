@@ -26269,6 +26269,36 @@ let firstPersonPlayer = {x:50,y:78,yaw:0};
 let firstPersonPointer = {down:false,lastX:0,lastY:0};
 let firstPersonInput = {dx:0,dy:0,raf:0,destination:null};
 
+function ensureFirstPersonHost(){
+  let panel = document.getElementById('firstperson-panel');
+  if(!panel){
+    panel = document.createElement('div');
+    panel.id = 'firstperson-panel';
+    panel.tabIndex = -1;
+    document.body.appendChild(panel);
+  }
+  let stage = document.getElementById('firstperson-stage');
+  if(!stage){
+    stage = document.createElement('div');
+    stage.id = 'firstperson-stage';
+    panel.appendChild(stage);
+  }
+  return {panel, stage};
+}
+function renderFirstPersonBootScreen(){
+  const {stage} = ensureFirstPersonHost();
+  stage.innerHTML = `<div class="fp-shell fp-fallback-shell">
+    <div class="fp-hud"><b>1. SAHIS · GEMI ICI</b><span>Serbest dolasim yukleniyor</span><button onclick="closeFirstPersonMode()">CIK</button></div>
+    <div class="fp-world area-bridge fallback-ready">
+      <div class="fp-window"><i></i><i></i><i></i><i></i></div>
+      <div class="fp-sea"><span></span><span></span><span></span></div>
+      <div class="fp-console-bank"><i class="radar"></i><i class="ecdis"></i><i class="vhf"></i></div>
+      <div class="fp-floor"></div>
+      <div class="fp-body"><i></i><i></i><b></b></div>
+      <div class="fp-prompt ready">Kontrol hazirlanıyor · birazdan gemi ici gorunur</div>
+    </div>
+  </div>`;
+}
 function isFirstPersonAvailable(sc=sceneQueue?.[currentIdx]){
   return true;
 }
@@ -26453,8 +26483,7 @@ function handleFirstPersonPointerUp(ev){
   firstPersonPointer.down = false;
 }
 function jumpFirstPersonTo(x,y,ev){
-  stopShipWalkControlEvent(ev);
-  setFirstPersonPlayer(x,y);
+  setFirstPersonDestination(x,y,ev);
 }
 function handleFirstPersonAction(st){
   if(!st) return;
@@ -26535,10 +26564,12 @@ function openFirstPersonMode(){
   document.body.classList.add('firstperson-active');
   document.getElementById('firstperson-panel')?.classList.add('show');
   renderFirstPersonMode();
-  requestAnimationFrame(()=>document.getElementById('firstperson-panel')?.focus?.({preventScroll:true}));
+  requestAnimationFrame(()=>host.panel?.focus?.({preventScroll:true}));
   showNotif('1. ŞAHIS','Gemi içindesin','WASD / oklarla yürü, E ile cihazı kullan, Esc ile çık.');
 }
 function closeFirstPersonMode(){
+  stopFirstPersonMove();
+  firstPersonInput.destination = null;
   firstPersonActive = false;
   document.body.classList.remove('firstperson-active');
   document.getElementById('firstperson-panel')?.classList.remove('show');
@@ -26588,7 +26619,41 @@ function getFirstPersonDirectorHtml(){
   }
   return `<div class="fp-director"><b>SERBEST DOLASIM</b><strong>${phoneSafe(getFirstPersonAreaDef().title)}</strong><span>Yakindaki cihaz veya karaktere yaklas, E ile kullan.</span></div>`;
 }
+function renderFirstPersonFallback(error){
+  const root = document.getElementById('firstperson-stage');
+  if(!root) return;
+  const safeError = String(error?.message || error || 'render').slice(0,120);
+  root.innerHTML = `<div class="fp-shell fp-fallback-shell">
+    <div class="fp-hud"><b>1. SAHIS · GEMI ICI</b><span>Kontrol ekrani acildi</span><button onclick="closeFirstPersonMode()">CIK</button></div>
+    <div class="fp-world area-bridge fallback-ready">
+      <div class="fp-window"><i></i><i></i><i></i><i></i></div>
+      <div class="fp-sea"><span></span><span></span><span></span></div>
+      <div class="fp-console-bank"><i class="radar"></i><i class="ecdis"></i><i class="vhf"></i></div>
+      <div class="fp-floor"></div>
+      <button class="fp-hotspot station active" style="left:24%;top:48%;--fp-scale:1" onclick="openRealBridgeConsole('ecdis')"><b>ECDIS</b><small>route check</small></button>
+      <button class="fp-hotspot station" style="left:50%;top:45%;--fp-scale:1" onclick="openRealBridgeConsole('vhf')"><b>VHF</b><small>channel / DSC</small></button>
+      <button class="fp-hotspot station" style="left:76%;top:48%;--fp-scale:1" onclick="openRealBridgeConsole('radar')"><b>RADAR</b><small>CPA / ARPA</small></button>
+      <div class="fp-body"><i></i><i></i><b></b></div>
+      <div class="fp-prompt ready">Kontrol hazir · WASD / ok · E kullan · ${phoneSafe(safeError)}</div>
+      <div class="walk-joystick fp-joy" onclick="event.stopPropagation()">
+        <button class="up" onpointerdown="startFirstPersonMove(0,-1,event)" onpointerup="stopFirstPersonMove(event)" onclick="moveFirstPerson(0,-8,event)">↑</button>
+        <button class="left" onpointerdown="startFirstPersonMove(-1,0,event)" onpointerup="stopFirstPersonMove(event)" onclick="moveFirstPerson(-8,0,event)">←</button>
+        <button class="right" onpointerdown="startFirstPersonMove(1,0,event)" onpointerup="stopFirstPersonMove(event)" onclick="moveFirstPerson(8,0,event)">→</button>
+        <button class="down" onpointerdown="startFirstPersonMove(0,1,event)" onpointerup="stopFirstPersonMove(event)" onclick="moveFirstPerson(0,8,event)">↓</button>
+      </div>
+      <button class="walk-interact fp-use ready" onclick="interactFirstPerson()">KULLAN</button>
+    </div>
+  </div>`;
+}
 function renderFirstPersonMode(){
+  try{
+    renderFirstPersonModeUnsafe();
+  }catch(err){
+    console.error('first person render failed', err);
+    renderFirstPersonFallback(err);
+  }
+}
+function renderFirstPersonModeUnsafe(){
   const root = document.getElementById('firstperson-stage');
   if(!root || !firstPersonActive) return;
   const area = getFirstPersonAreaDef();

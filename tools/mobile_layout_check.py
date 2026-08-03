@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=190",
-        "index.css?v=165",
+        "index.js?v=192",
+        "index.css?v=167",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -186,6 +186,11 @@ REQUIRED = {
         "startFirstPersonMove",
         "setFirstPersonDestination",
         "fp-destination",
+        "renderFirstPersonFallback",
+        "ensureFirstPersonHost",
+        "renderFirstPersonBootScreen",
+        "renderFirstPersonModeUnsafe",
+        "fp-fallback-shell",
         "firstperson-btn",
         "area-engine",
         "area-deck",

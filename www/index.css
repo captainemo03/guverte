@@ -4332,3 +4332,6 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-joy button:active{transform:scale(.96);filter:brightness(1.18);}
 @keyframes fpDestinationPulse{from{opacity:.58;transform:translate(-50%,-50%) rotateX(56deg) scale(.86)}to{opacity:1;transform:translate(-50%,-50%) rotateX(56deg) scale(1.12)}}
 @media (max-width:760px){.fp-destination{width:34px;height:34px}.fp-destination::before{width:18px}.fp-destination::after{height:18px}}
+.fp-fallback-shell .fallback-ready{background:linear-gradient(180deg,#0c2742 0 38%,#103654 39% 55%,#07111f 56% 100%);}
+.fp-fallback-shell .fp-hotspot{pointer-events:auto;}
+.fp-fallback-shell .fp-prompt{max-width:calc(100% - 40px);white-space:normal;border-color:rgba(129,247,184,.6);}
