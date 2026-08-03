@@ -1,4 +1,4 @@
-﻿
+
 // ===== CANLI ARKA PLAN =====
 (function(){
   const cv=document.getElementById('bg-canvas');
@@ -9995,7 +9995,7 @@ const I18N={
   tr:{},
   en:{
     'ui.language':'Language','ui.languageHint':'Choose the language used for menus, guidance, choices and the live translation layer.','ui.save':'SAVE','ui.sound':'Sound','ui.rep':'REPUTATION','ui.settings':'SETTINGS','ui.gameSettings':'GAME SETTINGS','ui.gameSettingsSubtitle':'Sound, language, play style and exit settings.','ui.close':'Close','ui.audioSettings':'Audio','ui.gameLanguage':'Game Language','ui.playStyle':'Play Style','ui.gameActions':'Game','ui.saveAndMenu':'Save and Return to Menu','ui.soundOn':'Sound On','ui.soundOff':'Sound Off','quality.title':'Visual Quality','quality.low':'Performance','quality.balanced':'Balanced','quality.high':'High',
-    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CHART','ui.devices':'DEVICES','ui.sim':'SIM','ui.career':'CAREER','ui.ship':'SHIP','ui.cabin':'CABIN','ui.logbook':'LOGBOOK','ui.phone':'PHONE','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
+    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.glossary':'GLOSSARY','ui.map':'CHART','ui.devices':'DEVICES','ui.sim':'SIM','ui.career':'CAREER','ui.ship':'SHIP','ui.cabin':'CABIN','ui.logbook':'LOGBOOK','ui.phone':'PHONE','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
     'ui.continue':'Continue Saved Game','ui.deleteSave':'Delete Save','ui.startShip':'Join Ship','ui.mode':'Mode','ui.open':'Open','ui.basicStory':'Only story and basic choices.','ui.unlocked':'Open','ui.assist':'Assist mode is on: guidance is more instructional.','ui.slowUnlock':'New systems unlock gradually.',
     'mode.simple':'Simple','mode.simpleDesc':'Story, core decisions and a cleaner screen.','mode.realistic':'Realistic','mode.realisticDesc':'Devices, charts and logbook unlock gradually.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker and premium details are active.',
     'tag.cesur':'Bold','tag.akilli':'Smart','tag.itaatkar':'Procedural','tag.korkak':'Unsafe','tag.sosyal':'Social','tag.kritik':'CRITICAL',
@@ -10013,7 +10013,7 @@ const I18N={
   },
   es:{
     'ui.language':'Idioma','ui.languageHint':'Elige el idioma de menus, guia, opciones y la capa de traduccion en vivo.','ui.save':'GUARDAR','ui.sound':'Sonido','ui.rep':'REPUTACION','ui.settings':'AJUSTES','ui.gameSettings':'AJUSTES DEL JUEGO','ui.gameSettingsSubtitle':'Sonido, idioma, estilo de juego y salida.','ui.close':'Cerrar','ui.audioSettings':'Audio','ui.gameLanguage':'Idioma del juego','ui.playStyle':'Estilo de juego','ui.gameActions':'Juego','ui.saveAndMenu':'Guardar y volver al menu','ui.soundOn':'Sonido activado','ui.soundOff':'Sonido desactivado','quality.title':'Calidad visual','quality.low':'Rendimiento','quality.balanced':'Equilibrado','quality.high':'Alta',
-    'ui.colreg':'COLREG','ui.notes':'NOTAS','ui.map':'CARTA','ui.devices':'EQUIPOS','ui.sim':'SIM','ui.career':'CARRERA','ui.ship':'BUQUE','ui.cabin':'CAMAROTE','ui.logbook':'DIARIO','ui.phone':'TELEFONO','ui.journal':'BITACORA','ui.album':'ALBUM','ui.crew':'TRIPULACION',
+    'ui.colreg':'COLREG','ui.notes':'NOTAS','ui.glossary':'GLOSARIO','ui.map':'CARTA','ui.devices':'EQUIPOS','ui.sim':'SIM','ui.career':'CARRERA','ui.ship':'BUQUE','ui.cabin':'CAMAROTE','ui.logbook':'DIARIO','ui.phone':'TELEFONO','ui.journal':'BITACORA','ui.album':'ALBUM','ui.crew':'TRIPULACION',
     'ui.continue':'Continuar partida','ui.deleteSave':'Borrar partida','ui.startShip':'Embarcar','ui.mode':'Modo','ui.open':'Abierto','ui.basicStory':'Solo historia y decisiones basicas.','ui.unlocked':'Abierto','ui.assist':'Modo ayuda activo: la guia es mas instructiva.','ui.slowUnlock':'Los sistemas nuevos se abren gradualmente.',
     'mode.simple':'Simple','mode.simpleDesc':'Historia, decisiones basicas y pantalla mas limpia.','mode.realistic':'Realista','mode.realisticDesc':'Equipos, cartas y diario se abren gradualmente.','mode.expert':'Experto','mode.expertDesc':'CPA, UKC, PSC, tanquero y detalles premium activos.',
     'tag.cesur':'Valiente','tag.akilli':'Inteligente','tag.itaatkar':'Procedimiento','tag.korkak':'Inseguro','tag.sosyal':'Social','tag.kritik':'CRITICO',
@@ -10031,7 +10031,7 @@ const I18N={
   },
   de:{
     'ui.language':'Sprache','ui.languageHint':'Wahle die Sprache fur Menus, Hinweise, Optionen und die Live-Ubersetzungsebene.','ui.save':'SPEICHERN','ui.sound':'Ton','ui.rep':'ANSEHEN','ui.settings':'EINSTELLUNGEN','ui.gameSettings':'SPIELEINSTELLUNGEN','ui.gameSettingsSubtitle':'Ton, Sprache, Spielstil und Beenden.','ui.close':'Schliessen','ui.audioSettings':'Audio','ui.gameLanguage':'Spielsprache','ui.playStyle':'Spielstil','ui.gameActions':'Spiel','ui.saveAndMenu':'Speichern und zum Menu','ui.soundOn':'Ton an','ui.soundOff':'Ton aus','quality.title':'Grafikqualitat','quality.low':'Leistung','quality.balanced':'Ausgewogen','quality.high':'Hoch',
-    'ui.colreg':'KVR','ui.notes':'NOTIZEN','ui.map':'KARTE','ui.devices':'GERATE','ui.sim':'SIM','ui.career':'KARRIERE','ui.ship':'SCHIFF','ui.cabin':'KAMMER','ui.logbook':'LOGBUCH','ui.phone':'TELEFON','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
+    'ui.colreg':'KVR','ui.notes':'NOTIZEN','ui.glossary':'WOERTERBUCH','ui.map':'KARTE','ui.devices':'GERATE','ui.sim':'SIM','ui.career':'KARRIERE','ui.ship':'SCHIFF','ui.cabin':'KAMMER','ui.logbook':'LOGBUCH','ui.phone':'TELEFON','ui.journal':'JOURNAL','ui.album':'ALBUM','ui.crew':'CREW',
     'ui.continue':'Spielstand laden','ui.deleteSave':'Spielstand loschen','ui.startShip':'An Bord gehen','ui.mode':'Modus','ui.open':'Offen','ui.basicStory':'Nur Geschichte und Grundentscheidungen.','ui.unlocked':'Offen','ui.assist':'Hilfsmodus aktiv: die Hinweise sind lehrreicher.','ui.slowUnlock':'Neue Systeme werden schrittweise freigeschaltet.',
     'mode.simple':'Einfach','mode.simpleDesc':'Geschichte, Kernentscheidungen und weniger Bildschirmfullung.','mode.realistic':'Realistisch','mode.realisticDesc':'Gerate, Karten und Logbuch werden schrittweise freigeschaltet.','mode.expert':'Experte','mode.expertDesc':'CPA, UKC, PSC, Tanker und Premiumdetails sind aktiv.',
     'tag.cesur':'Mutig','tag.akilli':'Klug','tag.itaatkar':'Prozedural','tag.korkak':'Unsicher','tag.sosyal':'Sozial','tag.kritik':'KRITISCH',
@@ -10049,7 +10049,7 @@ const I18N={
   },
   fr:{
     'ui.language':'Langue','ui.languageHint':'Choisis la langue des menus, consignes, choix et de la couche de traduction en direct.','ui.save':'SAUVER','ui.sound':'Son','ui.rep':'REPUTATION','ui.settings':'PARAMETRES','ui.gameSettings':'PARAMETRES DU JEU','ui.gameSettingsSubtitle':'Son, langue, style de jeu et sortie.','ui.close':'Fermer','ui.audioSettings':'Audio','ui.gameLanguage':'Langue du jeu','ui.playStyle':'Style de jeu','ui.gameActions':'Jeu','ui.saveAndMenu':'Sauver et retour menu','ui.soundOn':'Son active','ui.soundOff':'Son coupe','quality.title':'Qualite visuelle','quality.low':'Performance','quality.balanced':'Equilibree','quality.high':'Elevee',
-    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.map':'CARTE','ui.devices':'APPAREILS','ui.sim':'SIM','ui.career':'CARRIERE','ui.ship':'NAVIRE','ui.cabin':'CABINE','ui.logbook':'JOURNAL','ui.phone':'TELEPHONE','ui.journal':'CARNET','ui.album':'ALBUM','ui.crew':'EQUIPAGE',
+    'ui.colreg':'COLREG','ui.notes':'NOTES','ui.glossary':'GLOSSARY','ui.map':'CARTE','ui.devices':'APPAREILS','ui.sim':'SIM','ui.career':'CARRIERE','ui.ship':'NAVIRE','ui.cabin':'CABINE','ui.logbook':'JOURNAL','ui.phone':'TELEPHONE','ui.journal':'CARNET','ui.album':'ALBUM','ui.crew':'EQUIPAGE',
     'ui.continue':'Continuer la sauvegarde','ui.deleteSave':'Supprimer la sauvegarde','ui.startShip':'Monter a bord','ui.mode':'Mode','ui.open':'Ouvert','ui.basicStory':'Seulement histoire et choix de base.','ui.unlocked':'Ouvert','ui.assist':'Mode assistance actif : les consignes sont plus pedagogiques.','ui.slowUnlock':'Les nouveaux systemes se debloquent progressivement.',
     'mode.simple':'Simple','mode.simpleDesc':'Histoire, decisions principales et ecran plus clair.','mode.realistic':'Realiste','mode.realisticDesc':'Appareils, cartes et journal se debloquent progressivement.','mode.expert':'Expert','mode.expertDesc':'CPA, UKC, PSC, tanker et details premium actifs.',
     'tag.cesur':'Courageux','tag.akilli':'Prudent','tag.itaatkar':'Procedural','tag.korkak':'Risque','tag.sosyal':'Social','tag.kritik':'CRITIQUE',
@@ -10067,7 +10067,7 @@ const I18N={
   },
   zh:{
     'ui.language':'语言','ui.languageHint':'选择菜单、提示、选项和实时翻译层使用的语言。','ui.save':'保存','ui.sound':'声音','ui.rep':'声望','ui.settings':'设置','ui.gameSettings':'游戏设置','ui.gameSettingsSubtitle':'声音、语言、玩法和退出设置。','ui.close':'关闭','ui.audioSettings':'音频','ui.gameLanguage':'游戏语言','ui.playStyle':'玩法模式','ui.gameActions':'游戏','ui.saveAndMenu':'保存并返回菜单','ui.soundOn':'声音开启','ui.soundOff':'声音关闭','quality.title':'画面质量','quality.low':'性能','quality.balanced':'均衡','quality.high':'高',
-    'ui.colreg':'避碰规则','ui.notes':'笔记','ui.map':'海图','ui.devices':'设备','ui.sim':'模拟','ui.career':'职业','ui.ship':'船舶','ui.cabin':'舱室','ui.logbook':'日志','ui.phone':'电话','ui.journal':'航海日志','ui.album':'相册','ui.crew':'船员',
+    'ui.colreg':'避碰规则','ui.notes':'笔记','ui.glossary':'词典','ui.map':'海图','ui.devices':'设备','ui.sim':'模拟','ui.career':'职业','ui.ship':'船舶','ui.cabin':'舱室','ui.logbook':'日志','ui.phone':'电话','ui.journal':'航海日志','ui.album':'相册','ui.crew':'船员',
     'ui.continue':'继续存档','ui.deleteSave':'删除存档','ui.startShip':'登船','ui.mode':'模式','ui.open':'已开放','ui.basicStory':'仅故事和基础选择。','ui.unlocked':'已开放','ui.assist':'辅助模式已开启：提示会更教学化。','ui.slowUnlock':'新系统会逐步解锁。',
     'mode.simple':'简单','mode.simpleDesc':'故事、核心决策和更清爽的界面。','mode.realistic':'真实','mode.realisticDesc':'设备、海图和日志逐步解锁。','mode.expert':'专家','mode.expertDesc':'CPA、UKC、PSC、油轮和高级细节开启。',
     'tag.cesur':'果断','tag.akilli':'明智','tag.itaatkar':'程序化','tag.korkak':'不安全','tag.sosyal':'沟通','tag.kritik':'关键',
@@ -10086,7 +10086,7 @@ const I18N={
 };
 I18N.ru={
   'ui.language':'Язык','ui.languageHint':'Выберите язык меню, подсказок, вариантов ответа и живого перевода.','ui.save':'СОХРАНИТЬ','ui.sound':'Звук','ui.rep':'РЕПУТАЦИЯ','ui.settings':'НАСТРОЙКИ','ui.gameSettings':'НАСТРОЙКИ ИГРЫ','ui.gameSettingsSubtitle':'Звук, язык, стиль игры и выход.','ui.close':'Закрыть','ui.audioSettings':'Аудио','ui.gameLanguage':'Язык игры','ui.playStyle':'Стиль игры','ui.gameActions':'Игра','ui.saveAndMenu':'Сохранить и в меню','ui.soundOn':'Звук включен','ui.soundOff':'Звук выключен','quality.title':'Качество графики','quality.low':'Производительность','quality.balanced':'Баланс','quality.high':'Высокое',
-  'ui.colreg':'МППСС','ui.notes':'ЗАМЕТКИ','ui.map':'КАРТА','ui.devices':'ПРИБОРЫ','ui.sim':'ТРЕНАЖЕР','ui.career':'КАРЬЕРА','ui.ship':'СУДНО','ui.cabin':'КАЮТА','ui.logbook':'ЖУРНАЛ','ui.phone':'ТЕЛЕФОН','ui.journal':'ДНЕВНИК','ui.album':'АЛЬБОМ','ui.crew':'ЭКИПАЖ',
+  'ui.colreg':'МППСС','ui.notes':'ЗАМЕТКИ','ui.glossary':'СЛОВАРЬ','ui.map':'КАРТА','ui.devices':'ПРИБОРЫ','ui.sim':'ТРЕНАЖЕР','ui.career':'КАРЬЕРА','ui.ship':'СУДНО','ui.cabin':'КАЮТА','ui.logbook':'ЖУРНАЛ','ui.phone':'ТЕЛЕФОН','ui.journal':'ДНЕВНИК','ui.album':'АЛЬБОМ','ui.crew':'ЭКИПАЖ',
   'ui.continue':'Продолжить сохранение','ui.deleteSave':'Удалить сохранение','ui.startShip':'Войти на судно','ui.mode':'Режим','ui.open':'Открыто','ui.basicStory':'Только история и базовые решения.','ui.unlocked':'Открыто','ui.assist':'Режим помощи включен: подсказки подробнее.','ui.slowUnlock':'Новые системы открываются постепенно.',
   'mode.simple':'Простой','mode.simpleDesc':'История, основные решения и более чистый экран.','mode.realistic':'Реалистичный','mode.realisticDesc':'Приборы, карты и журнал открываются постепенно.','mode.expert':'Эксперт','mode.expertDesc':'CPA, UKC, PSC, танкер и премиум-детали активны.',
   'tag.cesur':'Решительно','tag.akilli':'Разумно','tag.itaatkar':'По процедуре','tag.korkak':'Небезопасно','tag.sosyal':'Коммуникация','tag.kritik':'КРИТИЧНО',
@@ -14781,7 +14781,7 @@ function applyLanguageUI(){
   localizeAndSetText('go-btn','ui.startShip','Gemiye Bin');
   localizeAndSetText('phone-fab','ui.phone','TEL');
   [
-    ['openNotes()','ui.notes','NOTLARIM'],['openMap()','ui.map','HARITA'],['openDevices()','ui.devices','CIHAZLAR'],
+    ['openNotes()','ui.notes','NOTLARIM'],['openGlossary()','ui.glossary','SÖZLÜK'],['openMap()','ui.map','HARITA'],['openDevices()','ui.devices','CIHAZLAR'],
     ['openCareer()','ui.career','KARIYER'],['openShipWalk()','ui.ship','GEMI'],['openCabin()','ui.cabin','KAMARA'],
     ['openLiveLogbook()','ui.logbook','DEFTER'],['togglePhone()','ui.phone','TEL'],['openJournal()','ui.journal','GUNLUK'],
     ['toggleCrew()','ui.crew','EKIP']
@@ -24178,7 +24178,14 @@ function openJournal(){
   renderJournal();
 }
 function closeJournal(){ document.getElementById('journal-panel').classList.remove('show'); }
-function openNotes(){
+function openNotes(tab){
+  if(tab) notesTab = tab;
+  document.getElementById('notes-panel').classList.add('show');
+  renderNotes();
+}
+function openGlossary(){
+  notesTab = 'sozluk';
+  notesSearch = '';
   document.getElementById('notes-panel').classList.add('show');
   renderNotes();
 }
@@ -25869,6 +25876,7 @@ function renderPhoneNotesApp(){
     <div class="phone-setting-row"><b>Kisa not</b><small>Notlarim ana ekranina gecmeden telefondaki son vardiya satirlarini gor.</small></div>
     ${recent.map(e=>`<div class="phone-setting-row"><b>${phoneSafe(e.type)}</b><small>${phoneSafe(e.text)}</small></div>`).join('')}
     <button class="phone-wide-btn" onclick="openNotes()">Notlarim panelini ac</button>
+    <button class="phone-wide-btn" onclick="openGlossary()">Sözlük panelini ac</button>
   </div>`;
 }
 function renderPhoneSettings(){
@@ -26256,6 +26264,341 @@ let walkMissionState = {sceneId:'', kind:'watch', step:0, completed:false, reaso
 let sceneControlActive = false;
 let sceneControlAvatar = {x:50,y:78};
 
+let firstPersonActive = false;
+let firstPersonPlayer = {x:50,y:78,yaw:0};
+let firstPersonPointer = {down:false,lastX:0,lastY:0};
+
+function isFirstPersonAvailable(sc=sceneQueue?.[currentIdx]){
+  return true;
+}
+const FIRST_PERSON_AREA_DEFS = {
+  bridge:{title:'KOPRUUSTU', className:'area-bridge', prompt:'Radar, ECDIS, VHF ve kopruustu ekibine yuruyerek yaklas.',
+    doors:[
+      {id:'door-deck',label:'GUVERTEYE CIK',detail:'pilot ladder / mooring',x:18,y:88,targetArea:'deck'},
+      {id:'door-engine',label:'MAKINEYE IN',detail:'ECR / alarm paneli',x:82,y:88,targetArea:'engine'},
+      {id:'door-cabin',label:'KAMARAYA GIT',detail:'dinlenme / notlar',x:9,y:62,targetArea:'cabin'},
+      {id:'door-mess',label:'MESSROOM',detail:'asci / crew chat',x:91,y:62,targetArea:'mess'}
+    ]},
+  deck:{title:'GUVERTEDESIN', className:'area-deck', prompt:'Halat, pilot merdiveni ve guvenli bolge noktalarina yaklas.',
+    stations:[
+      {id:'deck-mooring',label:'MOORING WINCH',detail:'halat gerilimi',x:24,y:66,action:'deck3d'},
+      {id:'deck-safe',label:'SNAP-BACK SAFE',detail:'emniyetli bekleme',x:50,y:58,action:'walkTask'},
+      {id:'deck-pilot',label:'PILOT LADDER',detail:'pilot boarding hazirligi',x:72,y:62,action:'deck3d'},
+      {id:'deck-bosun',label:'LOSTROMO',detail:'forward station ready',x:38,y:80,type:'npc',line:'Halati gormeden komut verme. Once snap-back alanina bak.'}
+    ],
+    doors:[
+      {id:'door-bridge-from-deck',label:'KOPRUUSTU',detail:'radar / VHF',x:50,y:88,targetArea:'bridge'},
+      {id:'door-engine-from-deck',label:'MAKINE GIRISI',detail:'ECR',x:88,y:80,targetArea:'engine'}
+    ]},
+  engine:{title:'MAKINE DAIRESI', className:'area-engine', prompt:'ECR paneline, jeneratore ve alarm istasyonlarina yaklas.',
+    stations:[
+      {id:'engine-ecr',label:'ECR ALARM PANEL',detail:'acknowledge / trend',x:34,y:56,action:'engine3d'},
+      {id:'engine-gen',label:'GENERATOR PANEL',detail:'load / frequency',x:62,y:58,action:'engine3d'},
+      {id:'engine-bilge',label:'BILGE ALARM',detail:'sounding / pump',x:76,y:72,action:'engine3d'},
+      {id:'engine-chief',label:'BAS MUHENDIS',detail:'alarm raporu',x:24,y:78,type:'npc',line:'Once alarm kaynagini teyit et, sonra kopruye net rapor ver.'}
+    ],
+    doors:[
+      {id:'door-bridge-from-engine',label:'KOPRUYE CIK',detail:'OOW raporu',x:50,y:88,targetArea:'bridge'},
+      {id:'door-deck-from-engine',label:'GUVERTEDEN CIK',detail:'acil cikis',x:12,y:80,targetArea:'deck'}
+    ]},
+  cabin:{title:'KAMARADASIN', className:'area-cabin', prompt:'Dinlen, notlarini ac, telefonla aile/crew chat kontrol et.',
+    stations:[
+      {id:'cabin-phone',label:'TELEFON',detail:'aile / mail / Starlink',x:34,y:68,action:'phone'},
+      {id:'cabin-notes',label:'NOT DEFTERI',detail:'notlarim / sozluk',x:58,y:66,action:'notes'},
+      {id:'cabin-bed',label:'YATAK',detail:'dinclik toparla',x:78,y:76,action:'rest'},
+      {id:'cabin-ai',label:'AI MATE',detail:'hizli yardim',x:20,y:78,action:'ai'}
+    ],
+    doors:[
+      {id:'door-bridge-from-cabin',label:'KOPRUUSTUNE DON',detail:'vardiya',x:50,y:88,targetArea:'bridge'},
+      {id:'door-mess-from-cabin',label:'MESSROOM',detail:'cay / ekip',x:88,y:76,targetArea:'mess'}
+    ]},
+  mess:{title:'MESSROOM', className:'area-mess', prompt:'Aşçı, ekip konuşmaları ve serbest zaman etkilerini burada yönet.',
+    stations:[
+      {id:'mess-cook',label:'ASCI',detail:'menu / moral',x:32,y:70,type:'npc',line:'Cay hazir. Ama once yorgunluk durumunu saklama.'},
+      {id:'mess-crew',label:'CREW CHAT',detail:'ekip havasi',x:58,y:66,action:'phone'},
+      {id:'mess-tea',label:'CAY MOLASI',detail:'moral + dinclik',x:76,y:76,action:'rest'}
+    ],
+    doors:[
+      {id:'door-bridge-from-mess',label:'KOPRUUSTU',detail:'vardiya',x:50,y:88,targetArea:'bridge'},
+      {id:'door-cabin-from-mess',label:'KAMARA',detail:'dinlenme',x:16,y:78,targetArea:'cabin'}
+    ]}
+};
+function getFirstPersonAreaDef(){
+  return FIRST_PERSON_AREA_DEFS[firstPersonArea] || FIRST_PERSON_AREA_DEFS.bridge;
+}
+function setFirstPersonArea(area){
+  if(!FIRST_PERSON_AREA_DEFS[area]) return;
+  firstPersonArea = area;
+  firstPersonPlayer = {x:50,y:78,yaw:0};
+  renderFirstPersonMode();
+}
+function getFirstPersonStations(){
+  const def = getFirstPersonAreaDef();
+  if(firstPersonArea === 'bridge'){
+    return [
+      ...BRIDGE_WALK_STATIONS.map(st=>({...st,type:'station'})),
+      ...BRIDGE_WALK_NPCS.map(npc=>({...npc,type:'npc',device:''})),
+      ...(def.doors || []).map(door=>({...door,type:'door'}))
+    ];
+  }
+  return [
+    ...(def.stations || []).map(st=>({...st,type:st.type || 'station'})),
+    ...(def.doors || []).map(door=>({...door,type:'door'}))
+  ];
+}
+function getNearestFirstPersonStation(){
+  let best = null;
+  getFirstPersonStations().forEach(st=>{
+    const dx = firstPersonPlayer.x - st.x;
+    const dy = firstPersonPlayer.y - st.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if(!best || distance < best.distance) best = {...st,distance};
+  });
+  return best;
+}
+function setFirstPersonPlayer(x,y){
+  const nx = clampShipWalkPoint(x);
+  const ny = clampShipWalkPoint(y);
+  rememberWalkAvatarMotion(firstPersonPlayer.x, firstPersonPlayer.y, nx, ny);
+  firstPersonPlayer.yaw = Math.max(-38, Math.min(38, (nx - 50) * .75));
+  firstPersonPlayer.x = nx;
+  firstPersonPlayer.y = ny;
+  renderFirstPersonMode();
+}
+function moveFirstPerson(dx,dy,ev){
+  stopShipWalkControlEvent(ev);
+  setFirstPersonPlayer(firstPersonPlayer.x + dx, firstPersonPlayer.y + dy);
+}
+function moveFirstPersonTowardScreen(clientX, clientY, ev){
+  stopShipWalkControlEvent(ev);
+  const world = document.querySelector('#firstperson-stage .fp-world');
+  if(!world) return;
+  const rect = world.getBoundingClientRect();
+  const nx = ((clientX - rect.left) / Math.max(1, rect.width)) * 100;
+  const ny = ((clientY - rect.top) / Math.max(1, rect.height)) * 100;
+  const targetX = Math.max(8, Math.min(92, nx));
+  const targetY = Math.max(24, Math.min(92, 38 + (ny * .58)));
+  const dx = Math.max(-10, Math.min(10, (targetX - firstPersonPlayer.x) * .42));
+  const dy = Math.max(-10, Math.min(10, (targetY - firstPersonPlayer.y) * .42));
+  setFirstPersonPlayer(firstPersonPlayer.x + dx, firstPersonPlayer.y + dy);
+}
+function handleFirstPersonPointerDown(ev){
+  if(ev?.target?.closest?.('button')) return;
+  firstPersonPointer.down = true;
+  firstPersonPointer.lastX = ev.clientX || ev.touches?.[0]?.clientX || 0;
+  firstPersonPointer.lastY = ev.clientY || ev.touches?.[0]?.clientY || 0;
+  moveFirstPersonTowardScreen(firstPersonPointer.lastX, firstPersonPointer.lastY, ev);
+}
+function handleFirstPersonPointerMove(ev){
+  if(!firstPersonPointer.down) return;
+  const x = ev.clientX || ev.touches?.[0]?.clientX || firstPersonPointer.lastX;
+  const y = ev.clientY || ev.touches?.[0]?.clientY || firstPersonPointer.lastY;
+  const deltaX = x - firstPersonPointer.lastX;
+  firstPersonPointer.lastX = x;
+  firstPersonPointer.lastY = y;
+  firstPersonPlayer.yaw = Math.max(-42, Math.min(42, firstPersonPlayer.yaw + deltaX * .12));
+  moveFirstPersonTowardScreen(x, y, ev);
+}
+function handleFirstPersonPointerUp(ev){
+  firstPersonPointer.down = false;
+}
+function jumpFirstPersonTo(x,y,ev){
+  stopShipWalkControlEvent(ev);
+  setFirstPersonPlayer(x,y);
+}
+function handleFirstPersonAction(st){
+  if(!st) return;
+  const label = st.label || 'Istasyon';
+  if(st.action === 'phone'){
+    togglePhone();
+    showNotif('TELEFON', label, 'Telefon acildi. Mesaj, mail ve aile grubunu buradan yonet.');
+    return;
+  }
+  if(st.action === 'notes'){
+    openNotes();
+    showNotif('NOTLAR', label, 'Notlarim ve sozluk paneli acildi.');
+    return;
+  }
+  if(st.action === 'map'){
+    openMap();
+    showNotif('HARITA', label, 'Rota ve ECDIS haritasi acildi.');
+    return;
+  }
+  if(st.action === 'deck3d'){
+    openShipOperation3D('mooring3d');
+    showNotif('GUVERTEDESIN', label, 'Guvete operasyon paneli acildi.');
+    return;
+  }
+  if(st.action === 'engine3d'){
+    openShipOperation3D('engine3d');
+    showNotif('MAKINE', label, 'Makine kontrol odasi paneli acildi.');
+    return;
+  }
+  if(st.action === 'rest'){
+    addWatchFeed(`${label}: kisa mola alindi; dinclik ve moral dengesi toparlaniyor.`, 'good');
+    showNotif('SERBEST ZAMAN', label, 'Kisa dinlenme etkisi kaydedildi.');
+    return;
+  }
+  if(st.action === 'ai'){
+    showNotif('AI MATE', 'Yardimci acildi', 'Sahne hedefini ve riskleri kisa not olarak takip et.');
+    addWatchFeed('AI Mate: mevcut sahnede once cihaz/konum hedefini bul, sonra rapor ver.', 'good');
+    return;
+  }
+  if(st.action === 'walkTask'){
+    markWalkTaskDone(st.id, label);
+    progressWalkMission(firstPersonArea, st.id, label);
+    showNotif('GOREV', label, 'Dogru bolge/istasyon isaretlendi.');
+    return;
+  }
+  if(st.device){
+    markWalkTaskDone(st.id, label);
+    progressWalkMission('bridge3d', st.id, label);
+    openRealBridgeConsole(st.device);
+  }
+}
+function interactFirstPerson(){
+  if(!firstPersonActive) return;
+  const nearest = getNearestFirstPersonStation();
+  if(!nearest) return;
+  if(nearest.distance > 18){
+    showNotif('1. SAHIS','Yaklas', `${nearest.label} icin biraz daha yaklas.`);
+    return;
+  }
+  if(nearest.type === 'door'){
+    const target = nearest.targetArea || 'bridge';
+    setFirstPersonArea(target);
+    addWatchFeed(`${nearest.label}: ${getFirstPersonAreaDef().title} alanina gecildi.`, 'good');
+    showNotif('GEMI ICI', nearest.label, `${getFirstPersonAreaDef().title} alanina gectin.`);
+    return;
+  }
+  if(nearest.type === 'npc'){
+    showWalkNpcDialogue(nearest);
+    showNotif(getFirstPersonAreaDef().title, nearest.label, nearest.line || 'Seni izliyor.');
+    return;
+  }
+  handleFirstPersonAction(nearest);
+}
+function openFirstPersonMode(){
+  firstPersonActive = true;
+  sceneControlActive = false;
+  ensureWalkMission(inferWalkMissionKind());
+  document.body.classList.add('firstperson-active');
+  document.getElementById('firstperson-panel')?.classList.add('show');
+  renderFirstPersonMode();
+  requestAnimationFrame(()=>document.getElementById('firstperson-panel')?.focus?.({preventScroll:true}));
+  showNotif('1. ŞAHIS','Gemi içindesin','WASD / oklarla yürü, E ile cihazı kullan, Esc ile çık.');
+}
+function closeFirstPersonMode(){
+  firstPersonActive = false;
+  document.body.classList.remove('firstperson-active');
+  document.getElementById('firstperson-panel')?.classList.remove('show');
+}
+function getFirstPersonDirectorTarget(){
+  const sc = sceneQueue?.[currentIdx] || {};
+  const mode = getCurrentSceneControlMode(sc);
+  const flags = getScene3DFeatureFlags(sc || {});
+  const blob = `${sc.id||''} ${sc.gfx||''} ${sc.loc||''} ${sc.sub||''} ${sc.text||''}`.toLowerCase();
+  if(mode === 'engine3d' || flags.engineRoom || /engine|makine|ecr|alarm|generator|jenerator/.test(blob)){
+    return {area:'engine', id:'engine-ecr', label:'ECR ALARM PANEL', reason:'Makine alarmi / ECR kontrolu'};
+  }
+  if(mode === 'deck3d' || flags.mooring || flags.deckOps || /mooring|halat|pilot ladder|guverte|snap|all fast/.test(blob)){
+    return {area:'deck', id: flags.mooring ? 'deck-safe' : 'deck-pilot', label: flags.mooring ? 'SNAP-BACK SAFE' : 'PILOT LADDER', reason:'Guverte operasyonu'};
+  }
+  if(/phone|aile|mail|starlink|mesaj|crew chat/.test(blob)){
+    return {area:'cabin', id:'cabin-phone', label:'TELEFON', reason:'Telefon / haberlesme'};
+  }
+  if(/not|sozluk|ders|dinlen|mola|kamara/.test(blob)){
+    return {area:'cabin', id:'cabin-notes', label:'NOT DEFTERI', reason:'Notlar / serbest zaman'};
+  }
+  if(/vhf|mayday|distress|vts|kanal/.test(blob)){
+    return {area:'bridge', id:'vhf', label:'VHF DSC', reason:'VHF haberlesme'};
+  }
+  if(/radar|cpa|tcpa|arpa|target/.test(blob)){
+    return {area:'bridge', id:'radar', label:'RADAR ARPA', reason:'Radar hedef kontrolu'};
+  }
+  if(/ecdis|route|rota|waypoint|ukc|chart|harita/.test(blob)){
+    return {area:'bridge', id:'ecdis', label:'ECDIS ROUTE', reason:'Rota / harita kontrolu'};
+  }
+  return {area:firstPersonArea, id:'', label:getFirstPersonAreaDef().title, reason:'Serbest dolasim'};
+}
+function getFirstPersonDirectorHtml(){
+  const target = getFirstPersonDirectorTarget();
+  const stations = getFirstPersonStations();
+  const local = stations.find(st=>st.id === target.id);
+  const door = stations.find(st=>st.type === 'door' && st.targetArea === target.area);
+  const nearest = getNearestFirstPersonStation();
+  const distanceText = nearest ? `${Math.round(nearest.distance)}m` : '--';
+  if(target.area !== firstPersonArea){
+    return `<div class="fp-director"><b>SIRADAKI HEDEF</b><strong>${phoneSafe(target.reason)}</strong><span>${phoneSafe(target.area.toUpperCase())} mahalline gec.</span><button onclick="${door ? `jumpFirstPersonTo(${door.x},${door.y},event)` : `setFirstPersonArea('${target.area}')`}">${door ? phoneSafe(door.label) : 'MAHALE GEC'}</button></div>`;
+  }
+  if(local){
+    const dx = Math.round(local.x - firstPersonPlayer.x);
+    const dy = Math.round(local.y - firstPersonPlayer.y);
+    return `<div class="fp-director"><b>SIRADAKI HEDEF</b><strong>${phoneSafe(target.label)}</strong><span>${phoneSafe(target.reason)} · yakin hedef ${distanceText} · X ${dx} / Y ${dy}</span><button onclick="jumpFirstPersonTo(${local.x},${local.y},event)">HEDEFE YURU</button></div>`;
+  }
+  return `<div class="fp-director"><b>SERBEST DOLASIM</b><strong>${phoneSafe(getFirstPersonAreaDef().title)}</strong><span>Yakindaki cihaz veya karaktere yaklas, E ile kullan.</span></div>`;
+}
+function renderFirstPersonMode(){
+  const root = document.getElementById('firstperson-stage');
+  if(!root || !firstPersonActive) return;
+  const area = getFirstPersonAreaDef();
+  const nearest = getNearestFirstPersonStation();
+  const ready = nearest && nearest.distance <= 18;
+  const mission = renderWalkMissionPanel();
+  const director = getFirstPersonDirectorTarget();
+  const directorHtml = getFirstPersonDirectorHtml();
+  const stations = getFirstPersonStations().map(st=>{
+    const relX = 50 + ((st.x - firstPersonPlayer.x) * 1.15);
+    const depth = Math.max(0, Math.min(1, 1 - ((st.y - 26) / 72)));
+    const top = 24 + st.y * .52;
+    const scale = .76 + depth * .42;
+    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${ready && nearest?.id === st.id ? 'active' : ''}`;
+    const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
+    return `<button class="fp-hotspot ${cls}" style="left:${relX}%;top:${top}%;--fp-scale:${scale};" onclick="jumpFirstPersonTo(${st.x},${st.y},event)"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(subtitle)}</small></button>`;
+  }).join('');
+  const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="setFirstPersonArea('${st.targetArea || 'bridge'}')">${phoneSafe(st.label)}</button>`).join('');
+  root.innerHTML = `<div class="fp-shell" style="--fp-yaw:${firstPersonPlayer.yaw}deg;--fp-x:${firstPersonPlayer.x};--fp-y:${firstPersonPlayer.y};">
+    <div class="fp-hud"><b>1. SAHIS · ${phoneSafe(area.title)}</b><span>X ${Math.round(firstPersonPlayer.x)} · Y ${Math.round(firstPersonPlayer.y)}</span><button onclick="closeFirstPersonMode()">CIK</button></div>
+    <div class="fp-world ${area.className || 'area-bridge'} ${walkAvatarMotion.moving ? 'moving' : ''}" onpointerdown="handleFirstPersonPointerDown(event)" onpointermove="handleFirstPersonPointerMove(event)" onpointerup="handleFirstPersonPointerUp(event)" onpointercancel="handleFirstPersonPointerUp(event)">
+      <div class="fp-window"><i></i><i></i><i></i><i></i></div>
+      <div class="fp-sea"><span></span><span></span><span></span></div>
+      <div class="fp-console-bank"><i class="radar"></i><i class="ecdis"></i><i class="vhf"></i></div>
+      <div class="fp-room-props"><i></i><i></i><i></i></div>
+      <div class="fp-floor"></div>
+      ${stations}
+      <div class="fp-crosshair"></div>
+      <div class="fp-minimap"><b>${phoneSafe(area.title)}</b><span style="left:${firstPersonPlayer.x}%;top:${firstPersonPlayer.y}%"></span></div>
+      <div class="fp-body"><i></i><i></i><b></b></div>
+      <div class="fp-area-strip">${doorStrip}</div>
+      <div class="fp-prompt ${ready?'ready':''}">${ready ? `${phoneSafe(nearest.label)} · E ile kullan` : phoneSafe(area.prompt || 'Yuruyerek hedefe yaklas.')}</div>
+      <div class="fp-director-wrap">${directorHtml}</div>
+      <div class="fp-mission">${mission}</div>
+      <div class="walk-joystick fp-joy" onclick="event.stopPropagation()">
+        <button class="up" onclick="moveFirstPerson(0,-8,event)">↑</button>
+        <button class="left" onclick="moveFirstPerson(-8,0,event)">←</button>
+        <button class="right" onclick="moveFirstPerson(8,0,event)">→</button>
+        <button class="down" onclick="moveFirstPerson(0,8,event)">↓</button>
+      </div>
+      <button class="walk-interact fp-use ${ready?'ready':''}" onclick="interactFirstPerson()">${ready ? 'KULLAN' : 'YAKLAS'}</button>
+    </div>
+  </div>`;
+}
+function handleFirstPersonKeydown(e){
+  if(!firstPersonActive) return false;
+  if(e.target && /input|textarea|select/i.test(e.target.tagName || '')) return false;
+  const key = String(e.key || '').toLowerCase();
+  const step = e.shiftKey ? 13 : 8;
+  if(key === 'escape'){ e.preventDefault(); closeFirstPersonMode(); return true; }
+  if(key === 'm'){ e.preventDefault(); openMap(); return true; }
+  if(key === 'n'){ e.preventDefault(); openNotes(); return true; }
+  if(key === 'p'){ e.preventDefault(); togglePhone(); return true; }
+  if(key === 'arrowup' || key === 'w'){ e.preventDefault(); moveFirstPerson(0,-step); return true; }
+  if(key === 'arrowdown' || key === 's'){ e.preventDefault(); moveFirstPerson(0,step); return true; }
+  if(key === 'arrowleft' || key === 'a'){ e.preventDefault(); moveFirstPerson(-step,0); return true; }
+  if(key === 'arrowright' || key === 'd'){ e.preventDefault(); moveFirstPerson(step,0); return true; }
+  if(key === 'enter' || key === 'e'){ e.preventDefault(); interactFirstPerson(); return true; }
+  return false;
+}
 function isSceneControlAvailable(sc=sceneQueue?.[currentIdx]){
   if(!sc) return false;
   const flags = getScene3DFeatureFlags(sc || {});
@@ -26586,11 +26929,9 @@ function getCurrentSceneControlMode(sc=sceneQueue?.[currentIdx]){
 }
 function openCurrentSceneControlWalk(){
   ensureWalkMission(inferWalkMissionKind());
-  if(isSceneControlAvailable()){
-    setSceneControlActive(!sceneControlActive);
-    addWatchFeed(sceneControlActive ? 'Ana sahne kontrol acildi: karakteri kopruustunde yurut, cihazlara yaklas ve E ile ac.' : 'Ana sahne kontrol kapatildi.', sceneControlActive ? 'good' : '');
-    return;
-  }
+  openFirstPersonMode();
+  addWatchFeed('Birinci sahis serbest dolasim acildi: gemi icinde yuruyebilir, mahal degistirebilir ve cihazlara E ile girebilirsin.', 'good');
+  return;
   const mode = getCurrentSceneControlMode();
   if(mode === 'premium3d' && !premiumUnlocked){
     openShipOperation3D('premium3d');
@@ -26603,6 +26944,7 @@ function openCurrentSceneControlWalk(){
   addWatchFeed('Karakter kontrol acildi: sahnede bos alana tikla veya yon pedleriyle stajyeri yurut, Etkiles ile cihaz/alan ac.', 'good');
 }
 function handleShipWalkKeydown(e){
+  if(handleFirstPersonKeydown(e)) return;
   if(!panelIsOpen('shipwalk-panel') && !sceneControlActive) return;
   if(e.target && /input|textarea|select/i.test(e.target.tagName || '')) return;
   const step = e.shiftKey ? 13 : 8;
