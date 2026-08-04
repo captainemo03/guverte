@@ -26,6 +26,8 @@ ASSET_OPTIMIZATION_MANIFEST = TOOLS / "asset_optimization_manifest.json"
 INDEX_JS = WWW / "index.js"
 INDEX_CSS = WWW / "index.css"
 INDEX_HTML = WWW / "index.html"
+FIRST_PERSON_JS = WWW / "first-person-world.js"
+FIRST_PERSON_CSS = WWW / "first-person-world.css"
 PACKAGE_JSON = ROOT / "package.json"
 ANDROID_BILLING = (
     ROOT
@@ -45,10 +47,12 @@ ANDROID_MANIFEST = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.
 JS = INDEX_JS.read_text(encoding="utf-8")
 CSS = INDEX_CSS.read_text(encoding="utf-8")
 HTML = INDEX_HTML.read_text(encoding="utf-8")
+FP_JS = FIRST_PERSON_JS.read_text(encoding="utf-8")
+FP_CSS = FIRST_PERSON_CSS.read_text(encoding="utf-8")
 PACKAGE = PACKAGE_JSON.read_text(encoding="utf-8")
 ANDROID = ANDROID_BILLING.read_text(encoding="utf-8") if ANDROID_BILLING.exists() else ""
 MANIFEST = ANDROID_MANIFEST.read_text(encoding="utf-8") if ANDROID_MANIFEST.exists() else ""
-ALL_SOURCE = "\n".join([JS, CSS, HTML, PACKAGE, ANDROID, MANIFEST])
+ALL_SOURCE = "\n".join([JS, CSS, FP_JS, FP_CSS, HTML, PACKAGE, ANDROID, MANIFEST])
 
 ERRORS: list[str] = []
 WARNINGS: list[str] = []
@@ -589,9 +593,11 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=196",
+        "index.js?v=197",
         "index.css?v=171",
         "release-quality.js?v=10",
+        "first-person-world.js?v=2",
+        "first-person-world.css?v=2",
         "game-settings-vibration-btn",
         "toggleVibration",
         "navigator.vibrate",

@@ -26265,6 +26265,7 @@ let sceneControlActive = false;
 let sceneControlAvatar = {x:50,y:78};
 
 let firstPersonActive = false;
+let firstPersonArea = 'bridge';
 let firstPersonPlayer = {x:50,y:78,yaw:0};
 let firstPersonPointer = {down:false,lastX:0,lastY:0};
 let firstPersonInput = {dx:0,dy:0,raf:0,destination:null};

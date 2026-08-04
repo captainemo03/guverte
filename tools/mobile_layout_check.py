@@ -12,8 +12,8 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
-JS = (ROOT / "www" / "index.js").read_text(encoding="utf-8")
-CSS = (ROOT / "www" / "index.css").read_text(encoding="utf-8")
+JS = (ROOT / "www" / "index.js").read_text(encoding="utf-8") + "\n" + (ROOT / "www" / "first-person-world.js").read_text(encoding="utf-8")
+CSS = (ROOT / "www" / "index.css").read_text(encoding="utf-8") + "\n" + (ROOT / "www" / "first-person-world.css").read_text(encoding="utf-8")
 HTML = (ROOT / "www" / "index.html").read_text(encoding="utf-8")
 RELEASE_QUALITY = (ROOT / "www" / "release-quality.js").read_text(encoding="utf-8")
 
@@ -46,7 +46,7 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=196",
+        "index.js?v=197",
         "index.css?v=171",
         "release-quality.js?v=10",
     ],
@@ -214,6 +214,20 @@ REQUIRED = {
         "area-cabin",
         "area-mess",
         "firstperson-panel",
+    ],
+    "first person WebGL world": [
+        "__GUVERTE_FP3D",
+        "new T.PerspectiveCamera",
+        "new T.WebGLRenderer",
+        "updateMovement",
+        "createNpc",
+        "fp3d-stick",
+        "fp3d-use",
+        "fp3d-dialogue",
+        "GMDSS ODASI",
+        "YÜK KONTROL ODASI",
+        "first-person-world.js?v=2",
+        "first-person-world.css?v=2",
     ],
     "intro route selector": [
         "route-select-grid",
