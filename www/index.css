@@ -4352,6 +4352,26 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-hotspot.door small::after{content:' / GECIS';color:#ffd66b;}
 @keyframes fpNpcDrift{from{filter:brightness(.92);margin-top:-2px}to{filter:brightness(1.08);margin-top:3px}}
 @media (max-width:760px){.fp-hotspot.roaming{padding-left:30px;min-width:104px}.fp-hotspot.roaming::before{left:8px;width:15px;height:23px}.fp-hotspot.roaming::after{display:none}.fp-hotspot.door{min-width:108px}}
+
+/* 1. sahis NPC rolleri: karakterler meslegine gore okunur. */
+.fp-hotspot.npc.officer::before{background:radial-gradient(circle at 50% 10%,#d7a77d 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#071c34 23% 66%,#06101f 67% 100%);box-shadow:0 12px 20px rgba(0,0,0,.34),inset 0 13px 0 rgba(242,202,98,.38),0 0 0 3px rgba(242,202,98,.08);}
+.fp-hotspot.npc.deck::before{background:radial-gradient(circle at 50% 10%,#c98f6a 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#173c55 23% 58%,#ef8b2d 59% 68%,#071422 69% 100%);}
+.fp-hotspot.npc.engine::before{background:radial-gradient(circle at 50% 10%,#b87958 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#222d35 23% 58%,#f07828 59% 68%,#0b1118 69% 100%);box-shadow:0 12px 20px rgba(0,0,0,.34),0 0 0 3px rgba(240,120,40,.09);}
+.fp-hotspot.npc.cook::before{background:radial-gradient(circle at 50% 10%,#d8aa7f 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 20%,#f4f7f4 21% 66%,#22282d 67% 100%);}
+.fp-hotspot.npc.medical::before{background:radial-gradient(circle at 50% 10%,#d6a77d 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#59a7b2 23% 66%,#eef7f7 67% 100%);}
+.fp-hotspot.npc.cadet::before{background:radial-gradient(circle at 50% 10%,#c9906f 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#123456 23% 66%,#d7edf8 67% 100%);}
+.fp-hotspot.npc.officer b{color:#ffe29a}.fp-hotspot.npc.deck b{color:#bce7ff}.fp-hotspot.npc.engine b{color:#ffd0a4}.fp-hotspot.npc.cook b{color:#f7fbff}.fp-hotspot.npc.medical b{color:#c8f9ff}.fp-hotspot.npc.cadet b{color:#d7edf8}
+
+.fp-npc-dialogue-card{position:absolute;left:50%;bottom:112px;z-index:70;width:min(560px,calc(100% - 28px));transform:translateX(-50%);display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;border:1px solid rgba(127,195,255,.32);border-radius:12px;background:rgba(4,15,25,.96);box-shadow:0 24px 70px rgba(0,0,0,.52);padding:10px;color:#e8f5fa;animation:fpDialogueIn .22s ease;}
+.fp-npc-dialogue-card>i{width:42px;height:52px;border-radius:22px 22px 8px 8px;background:radial-gradient(circle at 50% 13%,#d8aa7f 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 30%,#163451 31% 100%);border:1px solid rgba(255,255,255,.16);}
+.fp-npc-dialogue-card b{display:block;color:#ffe29a;font:700 11px 'Share Tech Mono',monospace;letter-spacing:.6px}.fp-npc-dialogue-card small{display:block;margin-top:2px;color:#90b4c7;font-size:8px}.fp-npc-dialogue-card p{margin:6px 0 0;color:#e8f5fa;font-size:12px;line-height:1.35}.fp-npc-dialogue-card button{border:1px solid rgba(224,100,86,.34);border-radius:8px;background:#271313;color:#ffc5bd;padding:8px 9px;font:8px 'Share Tech Mono',monospace;cursor:pointer;}
+.fp-npc-dialogue-card.officer>i{background:radial-gradient(circle at 50% 13%,#d7a77d 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 30%,#071c34 31% 76%,#f0ca62 77% 86%,#06101f 87%)}
+.fp-npc-dialogue-card.deck>i{background:radial-gradient(circle at 50% 13%,#c98f6a 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 30%,#173c55 31% 70%,#ef8b2d 71% 82%,#071422 83%)}
+.fp-npc-dialogue-card.engine>i{background:radial-gradient(circle at 50% 13%,#b87958 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 30%,#222d35 31% 70%,#f07828 71% 82%,#0b1118 83%)}
+.fp-npc-dialogue-card.cook>i{background:radial-gradient(circle at 50% 13%,#d8aa7f 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 28%,#f4f7f4 29% 76%,#25292c 77%)}
+.fp-npc-dialogue-card.medical>i{background:radial-gradient(circle at 50% 13%,#d6a77d 0 9px,transparent 9.5px),linear-gradient(180deg,transparent 0 30%,#58a3af 31% 76%,#ffffff 77% 86%,#1a3840 87%)}
+@keyframes fpDialogueIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (max-width:760px){.fp-npc-dialogue-card{bottom:154px;grid-template-columns:36px 1fr;}.fp-npc-dialogue-card>i{width:32px;height:42px}.fp-npc-dialogue-card button{grid-column:1/-1;min-height:34px}.fp-npc-dialogue-card p{font-size:11px}}
 /* Roaming NPC kurali eski hotspot stilinden sonra tekrar sabitlenir. */
 .fp-hotspot.npc.roaming::before{left:10px;top:auto;bottom:8px;width:24px;height:42px;transform:none;border-radius:13px 13px 6px 6px;background:radial-gradient(circle at 50% 10%,#d8aa7f 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#163451 23% 66%,#0b1725 67% 100%);}
 @media (max-width:760px){.fp-hotspot.npc.roaming::before{left:8px;width:18px;height:32px}}

@@ -811,7 +811,7 @@
     state.ui.dialogue.classList.add('show');
     state.ui.dialogue.innerHTML=
       '<div class="fp3d-dialogue-card"><button class="fp3d-dialogue-close" type="button">KAPAT</button>'+
-      '<div class="fp3d-dialogue-person"><i></i><span><b>'+item.label+'</b><small>'+item.detail+'</small></span></div>'+
+      '<div class="fp3d-dialogue-person '+(item.uniform||'crew')+'"><i></i><span><b>'+item.label+'</b><small>'+item.detail+'</small></span></div>'+
       '<p>'+item.line+'</p><div class="fp3d-dialogue-actions">'+
       '<button type="button" data-tone="professional">“Anlaşıldı, kontrol edip raporlayacağım.”</button>'+
       '<button type="button" data-tone="question">“Dikkat etmem gereken en kritik nokta ne?”</button></div></div>';
@@ -837,7 +837,11 @@
     if(manual)state.autoTarget=null;
     if(state.autoTarget&&!manual){
       const p=state.autoTarget.item.object.position,dx=p.x-state.player.x,dz=p.z-state.player.z,dist=Math.hypot(dx,dz);
-      if(dist<2.05){state.autoTarget=null;}else{
+      if(dist<2.05){
+        const arrived = state.autoTarget.item;
+        state.autoTarget=null;
+        if(arrived) setTimeout(()=>interact(arrived), 0);
+      }else{
         const desired=Math.atan2(dx,-dz),delta=Math.atan2(Math.sin(desired-state.yaw),Math.cos(desired-state.yaw));
         state.yaw+=delta*clamp(dt*4,0,1);forward=1;strafe=0;
       }
@@ -961,6 +965,9 @@
     if(key==='shift')state.keys.shift=false;
     else state.keys[key]=false;
   }
+  document.addEventListener('keydown',ev=>{
+    if(state.active && handleKeydown(ev)) ev.stopImmediatePropagation();
+  },true);
   window.addEventListener('keyup',handleKeyup,{passive:true});
   window.addEventListener('blur',()=>{state.keys=Object.create(null);state.stick.x=0;state.stick.y=0;});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.active)startLoop();});

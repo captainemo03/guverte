@@ -26764,6 +26764,16 @@ function renderFirstPersonMode(){
     renderFirstPersonFallback(err);
   }
 }
+function getFirstPersonNpcRole(st){
+  const blob = `${st?.id||''} ${st?.label||''} ${st?.detail||''}`.toLowerCase();
+  if(/kaptan|zabit|oow|vardiya/.test(blob)) return 'officer';
+  if(/lostromo|bosun|guverte|usta gemici|gozcu|gözcü|halat|deck/.test(blob)) return 'deck';
+  if(/muhendis|mühendis|makine|engine|yagci|yağcı|ecr|alarm/.test(blob)) return 'engine';
+  if(/asci|aşçı|cook|cay|çay|menu/.test(blob)) return 'cook';
+  if(/doktor|doctor|medical|revir|saglik|sağlık/.test(blob)) return 'medical';
+  if(/stajyer|cadet|oda arkadasi|arkada/.test(blob)) return 'cadet';
+  return 'crew';
+}
 function renderFirstPersonModeUnsafe(){
   const {stage: root} = ensureFirstPersonHost();
   if(!root || !firstPersonActive) return;
@@ -27046,6 +27056,15 @@ function showWalkNpcDialogue(npc){
   pushPhoneMessage(npc.label, npc.line, {open:false});
   showNotif(npc.label, 'Konusma', npc.line);
   applyEffect({sayginlik:1},{skipContractTick:true});
+  const root = document.getElementById('firstperson-stage');
+  if(root){
+    root.querySelector('.fp-npc-dialogue-card')?.remove();
+    const card = document.createElement('div');
+    card.className = `fp-npc-dialogue-card ${getFirstPersonNpcRole(npc)}`;
+    card.innerHTML = `<i></i><div><b>${phoneSafe(npc.label)}</b><small>${phoneSafe(npc.detail || 'crew')}</small><p>${phoneSafe(npc.line || '')}</p></div><button onclick="this.closest('.fp-npc-dialogue-card')?.remove()">KAPAT</button>`;
+    root.appendChild(card);
+    setTimeout(()=>card.remove(), 5200);
+  }
 }
 function setShipWalkAvatar(x,y){
   const nx = clampShipWalkPoint(x);
@@ -27174,6 +27193,10 @@ function openCurrentSceneControlWalk(){
   addWatchFeed('Karakter kontrol acildi: sahnede bos alana tikla veya yon pedleriyle stajyeri yurut, Etkiles ile cihaz/alan ac.', 'good');
 }
 function handleShipWalkKeydown(e){
+  if(document.body.classList.contains('firstperson-3d-active') && window.__GUVERTE_FP3D?.state?.active){
+    if(typeof window.handleFirstPersonKeydown === 'function' && window.handleFirstPersonKeydown(e)) return;
+    return;
+  }
   if(handleFirstPersonKeydown(e)) return;
   if(!panelIsOpen('shipwalk-panel') && !sceneControlActive) return;
   if(e.target && /input|textarea|select/i.test(e.target.tagName || '')) return;
