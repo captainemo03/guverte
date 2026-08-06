@@ -3539,7 +3539,7 @@ choices:[
 {id:"s115",gfx:"cabin",alert:false,day:"Gun 12",time:"00:40",loc:"Stajyer Kabini",sub:"Aile ozlemi ve ic ses",who:"anlatici",
 text:`Gece ilerledikce gemi sesi buyuyor, oda ise kuculuyor gibi.
 
-Telefon ekrani karanlik. Mesaj yok. Bir an icinde kendi sesinle bas basa kaldin:
+Telefon ekrani karanlik. Mesaj yok. Koridorun icinden sanki biri cok uzakta agliyormus gibi kirik bir ses geldi. Bir an icinde kendi sesinle bas basa kaldin:
 
 "Dayan diye geldin. Peki ne kadar dayanacaksin? Herkes uyuyor, sen neden bu kadar uzaksin?"
 
@@ -3552,7 +3552,7 @@ choices:[
 {id:"s116",gfx:"cabin",alert:false,day:"Gun 12",time:"23:55",loc:"Stajyer Kabini",sub:"Derin yalnizlik ve ic monolog",who:"anlatici",
 text:`Aile fotogrfina uzun uzun baktin. Gemi bir yere gidiyor ama sen sanki icinde sabit kalmissin.
 
-Ic sesin yine geldi:
+Koridor sessiz ama sacin arasindan gelen ince inilti aglama sesi gibi uzuyor. Ic sesin yine geldi:
 
 "Herkes seni calisirken goruyor ama kimse ne kadar yoruldugunu bilmiyor. Eve donsen rahatlar misin, yoksa bunu yarim birakmak daha mi agir gelir?"
 
@@ -5521,6 +5521,11 @@ let scenes=[], currentIdx=0, choicesMade=[];
 let contractDays=0, contractTotal=6;
 const CONTRACT_SCENES_PER_MONTH = 10;
 let sceneQueue=[], usedScenes=new Set();
+const REQUIRED_TRAINING_SCENE_IDS = [
+  's151','s152','s153','s154','s155','s156',
+  's166','s167','s168','s169','s170','s171','s172','s173','s174',
+  's115','s116'
+];
 const START_PORTS=[
   {name:"İzmir", dock:"İzmir Limanı — İskele", office:"İzmir Limanı — Limancı Ofisi", departureLine:"İzmir Körfezi geride kaldı", x:85, y:130},
   {name:"İstanbul", dock:"İstanbul Limanı — Rıhtım", office:"İstanbul Limanı — Limancı Ofisi", departureLine:"Marmara ufku geride kaldı", x:180, y:85},
@@ -14012,6 +14017,19 @@ function buildSceneQueue(pool, totalDays, yr=selYear){
   const shuffledRegular=[...regular].sort(()=>Math.random()-0.5);
   const needed=Math.max(5, totalDays - selectedCrisis.length - 2 - extraRouteScenes.length - extraEquipmentScenes.length - documentChain.length - voyageScenes.length);
   let selectedRegular=shuffledRegular.slice(0,needed);
+
+  // Yeni egitim paketleri kullanicinin istedigi konulari oyunda garanti gorunur kilar.
+  const requiredTrainingScenes = REQUIRED_TRAINING_SCENE_IDS
+    .map(id=>regular.find(s=>s.id===id))
+    .filter(Boolean)
+    .filter(sc=>!selectedRegular.some(s=>s.id===sc.id));
+  if(requiredTrainingScenes.length){
+    const removableCount = Math.max(0, selectedRegular.length - Math.max(5, needed - requiredTrainingScenes.length));
+    selectedRegular = [
+      ...requiredTrainingScenes,
+      ...selectedRegular.slice(0, Math.max(0, selectedRegular.length - removableCount))
+    ];
+  }
 
   // Dinclik toparlanma sahneleri kuyrukta gercekten yer bulsun.
   const minRecoveryCount = Math.min(6, Math.max(3, Math.floor(totalDays/7)));
@@ -31788,6 +31806,17 @@ function sfxClick(){
   playTone(800, 'sine', 0.05, 0.08);
 }
 
+function sfxMorseSOS(){
+  const unit = 0.12;
+  const marks = [unit,unit,unit, unit*3,unit*3,unit*3, unit,unit,unit];
+  let t = 0;
+  marks.forEach((duration, i)=>{
+    playTone(720, 'sine', duration, 0.055, t);
+    const letterGap = (i===2 || i===5) ? unit*3 : unit;
+    t += duration + letterGap;
+  });
+}
+
 let lastSceneGfx = '';
 function sfxSceneTransition(gfx){
   if(!gfx || gfx===lastSceneGfx) return;
@@ -31908,7 +31937,11 @@ function playHomesickAmbiance(sc){
   sfxDistantEngineHum();
   setTimeout(sfxLonelyShipCreak, 260);
   const sfx = Math.random() > 0.45 ? sfxHomesickCry : sfxHomesickSigh;
-  setTimeout(sfx, 420);
+  sceneAudioLoopTimers.push(setTimeout(sfx, 420));
+  sceneAudioLoopTimers.push(setTimeout(()=>{
+    sfxHomesickCry();
+    sfxLonelyShipCreak();
+  }, 1850));
 }
 
 function playSceneAmbientLayers(sc){
@@ -31981,6 +32014,9 @@ function playSceneAudio(sc){
   }
   if(/vhf|dsc alert|distress|sahil guvenlik|secu?rite|mayday|pan-pan/.test(sceneBlob)){
     sceneAudioLoopTimers.push(setTimeout(sfxVHF, 40));
+  }
+  if(sc?.sfx === 'morse' || /mors|morse|aldis|s-o-s|\bsos\b/.test(sceneBlob)){
+    sceneAudioLoopTimers.push(setTimeout(sfxMorseSOS, 360));
   }
   if(gfx === 'engine_fault'){
     sceneAudioLoopTimers.push(setTimeout(()=>{

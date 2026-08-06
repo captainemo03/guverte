@@ -4335,6 +4335,15 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-fallback-shell .fallback-ready{background:linear-gradient(180deg,#0c2742 0 38%,#103654 39% 55%,#07111f 56% 100%);}
 .fp-fallback-shell .fp-hotspot{pointer-events:auto;}
 .fp-fallback-shell .fp-prompt{max-width:calc(100% - 40px);white-space:normal;border-color:rgba(129,247,184,.6);}
+
+/* 1. sahis fallback modunda NPC'ler sadece etiket degil, gorunur karakter olsun. */
+.fp-hotspot.npc{padding-left:46px;min-height:58px;overflow:visible;}
+.fp-hotspot.npc::before{content:'';position:absolute;left:12px;bottom:8px;width:24px;height:42px;border-radius:13px 13px 6px 6px;background:radial-gradient(circle at 50% 10%,#d8aa7f 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#163451 23% 66%,#0b1725 67% 100%);border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 20px rgba(0,0,0,.34),0 0 0 3px rgba(129,247,184,.08);}
+.fp-hotspot.npc::after{content:'KONUS';position:absolute;right:8px;top:-18px;border:1px solid rgba(129,247,184,.38);border-radius:999px;background:rgba(4,28,21,.9);color:#caffdd;font:7px 'Share Tech Mono',monospace;padding:3px 6px;letter-spacing:.7px;}
+.fp-hotspot.npc.active::before,.fp-hotspot.npc.objective::before{box-shadow:0 14px 24px rgba(0,0,0,.42),0 0 0 5px rgba(129,247,184,.13),0 0 24px rgba(129,247,184,.28);}
+.fp-hotspot.npc.roaming::before{left:10px;top:auto;bottom:8px;width:24px;height:42px;transform:none;}
+.fp-hotspot.npc.roaming::after{right:8px;top:-18px;}
+@media (max-width:760px){.fp-hotspot.npc{padding-left:34px;min-height:48px}.fp-hotspot.npc::before{left:8px;width:18px;height:32px}.fp-hotspot.npc::after{display:none}}
 .fp-hotspot.roaming{min-width:118px;padding-left:38px;animation:fpNpcDrift 1.8s ease-in-out infinite alternate;}
 .fp-hotspot.roaming::before{content:'';position:absolute;left:10px;top:50%;width:19px;height:28px;transform:translateY(-50%);border-radius:10px 10px 6px 6px;background:linear-gradient(180deg,#d8aa7f 0 25%,#13253a 26% 100%);border:1px solid rgba(255,255,255,.14);box-shadow:0 9px 16px rgba(0,0,0,.28);}
 .fp-hotspot.roaming::after{content:'KONUS';position:absolute;right:8px;top:-18px;border:1px solid rgba(129,247,184,.38);border-radius:999px;background:rgba(4,28,21,.9);color:#caffdd;font:7px 'Share Tech Mono',monospace;padding:3px 6px;letter-spacing:.7px;}
@@ -4343,6 +4352,9 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-hotspot.door small::after{content:' / GECIS';color:#ffd66b;}
 @keyframes fpNpcDrift{from{filter:brightness(.92);margin-top:-2px}to{filter:brightness(1.08);margin-top:3px}}
 @media (max-width:760px){.fp-hotspot.roaming{padding-left:30px;min-width:104px}.fp-hotspot.roaming::before{left:8px;width:15px;height:23px}.fp-hotspot.roaming::after{display:none}.fp-hotspot.door{min-width:108px}}
+/* Roaming NPC kurali eski hotspot stilinden sonra tekrar sabitlenir. */
+.fp-hotspot.npc.roaming::before{left:10px;top:auto;bottom:8px;width:24px;height:42px;transform:none;border-radius:13px 13px 6px 6px;background:radial-gradient(circle at 50% 10%,#d8aa7f 0 7px,transparent 7.5px),linear-gradient(180deg,transparent 0 22%,#163451 23% 66%,#0b1725 67% 100%);}
+@media (max-width:760px){.fp-hotspot.npc.roaming::before{left:8px;width:18px;height:32px}}
 .fp-deck-view{display:none;position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
 .fp-world.area-deck .fp-deck-view{display:block;}
 .fp-deck-view::before{content:'';position:absolute;left:-10%;right:-10%;top:14%;height:38%;background:linear-gradient(180deg,rgba(120,184,220,.22),rgba(18,79,116,.5) 45%,rgba(8,42,70,.72));box-shadow:inset 0 -18px 40px rgba(255,255,255,.05);}

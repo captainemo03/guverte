@@ -637,17 +637,48 @@
     const map={officer:[0x0b1b2c,0xf0ca62],deck:[0x102b3e,0xef8b2d],engine:[0x172c38,0xf07828],cadet:[0x12243a,0xd7edf8],cook:[0xf0f3f2,0x25292c],medical:[0x58a3af,0xffffff]};
     return map[kind]||map.deck;
   }
+
+  function createNpcNameplate(label){
+    const T=state.THREE,canvas=document.createElement('canvas');
+    canvas.width=256;canvas.height=80;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,256,80);
+    ctx.fillStyle='rgba(3,14,23,.86)';
+    ctx.strokeStyle='rgba(118,230,166,.72)';
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(8,14,240,48,12);
+    else ctx.rect(8,14,240,48);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle='#eafff2';
+    ctx.font='700 22px monospace';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(String(label||'CREW').slice(0,18),128,39);
+    const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;
+    const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false}));
+    sprite.position.set(0,2.72,0);
+    sprite.scale.set(1.8,.56,1);
+    sprite.renderOrder=20;
+    return sprite;
+  }
   function createNpc(def,index){
     const T=state.THREE,g=new T.Group(),colors=uniformColors(def.uniform);
     const skin=material(index%3===0?0x9a6248:index%3===1?0xd0a07d:0x6f4838,{roughness:.88});
     const cloth=material(colors[0],{roughness:.72});const trim=material(colors[1],{emissiveIntensity:.35});
-    const torso=box(g,[.64,.9,.34],[0,1.25,0],cloth);
-    const head=new T.Mesh(new T.SphereGeometry(.27,20,14),skin);head.position.set(0,1.95,0);g.add(head);
-    const leftLeg=box(g,[.22,.78,.24],[-.18,.45,0],cloth);const rightLeg=box(g,[.22,.78,.24],[.18,.45,0],cloth);
-    const leftArm=box(g,[.18,.78,.2],[-.43,1.27,0],cloth);const rightArm=box(g,[.18,.78,.2],[.43,1.27,0],cloth);
-    box(g,[.52,.08,.36],[0,1.67,0],trim);
-    if(def.uniform==='officer') cylinder(g,.29,.08,[0,2.2,0],material(0xf0f0e7),[0,0,0]);
-    if(def.uniform==='cook') cylinder(g,.34,.25,[0,2.25,0],material(0xffffff),[0,0,0]);
+    const torso=box(g,[.76,1.02,.42],[0,1.28,0],cloth);
+    const head=new T.Mesh(new T.SphereGeometry(.32,24,16),skin);head.position.set(0,2.06,0);g.add(head);
+    const leftLeg=box(g,[.25,.84,.26],[-.21,.48,0],cloth);const rightLeg=box(g,[.25,.84,.26],[.21,.48,0],cloth);
+    const leftArm=box(g,[.2,.86,.22],[-.52,1.31,0],cloth);const rightArm=box(g,[.2,.86,.22],[.52,1.31,0],cloth);
+    box(g,[.62,.09,.42],[0,1.76,0],trim);
+    const eyeMat=material(0x071016,{roughness:.5});
+    box(g,[.055,.035,.025],[-.1,2.1,-.29],eyeMat);
+    box(g,[.055,.035,.025],[.1,2.1,-.29],eyeMat);
+    if(def.uniform==='officer') cylinder(g,.34,.09,[0,2.34,0],material(0xf0f0e7),[0,0,0]);
+    if(def.uniform==='cook') cylinder(g,.38,.28,[0,2.38,0],material(0xffffff),[0,0,0]);
+    const ring=new T.Mesh(new T.TorusGeometry(.58,.035,10,36),new T.MeshBasicMaterial({color:0x72e4a6,transparent:true,opacity:.5,depthWrite:false}));
+    ring.rotation.x=Math.PI/2;ring.position.y=.035;g.add(ring);
+    g.add(createNpcNameplate(def.label));
+    g.scale.setScalar(1.12);
     g.position.set(def.x,0,def.z);state.scene.add(g);
     const item=registerInteraction(def,g);
     item.anim={path:def.path||[[def.x,def.z],[def.x,def.z]],speed:def.speed||.15,phase:index*.37,leftLeg,rightLeg,leftArm,rightArm,torso};
