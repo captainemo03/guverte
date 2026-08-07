@@ -4414,3 +4414,65 @@ body.firstperson-active #game{filter:brightness(.72);}
 .fp-world.area-bridge .fp-deck-view{display:block;opacity:.32;}
 .fp-world.area-bridge .fp-deck-view::before{top:9%;height:25%;background:linear-gradient(180deg,rgba(150,205,235,.12),rgba(40,100,134,.22));}
 .fp-world.area-bridge .fp-deck-view::after{top:29%;height:12%;opacity:.22;}
+/* First-person fallback cleanup: keep the 2D bridge view readable instead of flooding the screen. */
+.fp-hotspot{min-width:96px;max-width:132px;min-height:36px;padding:7px 8px;border-radius:8px;box-shadow:0 10px 22px rgba(0,0,0,.32);}
+.fp-hotspot b{font-size:9px;letter-spacing:.45px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fp-hotspot small{display:none;font-size:7px;line-height:1.2;}
+.fp-hotspot.active small,.fp-hotspot.objective small{display:block;}
+.fp-hotspot.npc{min-width:102px;max-width:126px;min-height:50px;padding-left:38px;}
+.fp-hotspot.npc::before{left:9px;bottom:7px;width:20px;height:34px;}
+.fp-hotspot.npc::after{display:none;}
+.fp-hotspot.door{min-width:104px;max-width:130px;min-height:34px;padding:7px 9px;}
+.fp-hotspot.objective::after{top:-18px;font-size:6px;padding:2px 6px;}
+.fp-director-wrap{left:12px;top:116px;width:min(260px,26vw);}
+.fp-director{padding:8px;border-radius:8px;}
+.fp-director b{font-size:7px;margin-bottom:4px;letter-spacing:1px;}
+.fp-director strong{font-size:10px;margin-bottom:3px;}
+.fp-director span{font-size:8px;margin-bottom:7px;}
+.fp-director button{min-height:30px;padding:6px 8px;font-size:8px;border-radius:7px;}
+.fp-mission{right:12px;top:58px;width:min(260px,27vw);max-height:154px;overflow:hidden;}
+.fp-mission .walk-mission-panel{padding:7px;gap:5px;border-radius:8px;background:rgba(4,13,24,.82);}
+.fp-mission .walk-mission-panel>small{display:none;}
+.fp-mission .walk-mission-head{font-size:8px;}
+.fp-mission .walk-mission-steps span{display:none;font-size:7px;padding:4px 5px;}
+.fp-mission .walk-mission-steps span.active,.fp-mission .walk-mission-steps span.done{display:block;}
+.fp-area-strip{left:154px;right:150px;bottom:16px;max-width:none;justify-content:center;gap:6px;}
+.fp-area-strip button{font-size:7px;min-height:32px;padding:5px 8px;}
+.fp-minimap{width:118px;height:84px;}
+.fp-prompt{bottom:18px;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:760px){
+  .fp-hotspot{min-width:82px;max-width:98px;min-height:32px;padding:6px;font-size:8px;}
+  .fp-hotspot b{font-size:7px}.fp-hotspot small{display:none!important}
+  .fp-hotspot.npc{min-width:84px;min-height:42px;padding-left:30px}.fp-hotspot.npc::before{left:7px;width:16px;height:28px}
+  .fp-director-wrap{left:auto;right:8px;top:54px;width:calc(100% - 124px)}
+  .fp-area-strip{left:8px;right:8px;bottom:145px;gap:5px}.fp-area-strip button{font-size:7px;padding:5px 6px}
+  .fp-prompt{max-width:none;white-space:normal;}
+}
+/* Grounded NPC characters for fallback first-person mode. NPCs are bodies now, not floating labels. */
+.fp-hotspot.npc{width:78px!important;min-width:78px!important;max-width:78px!important;height:112px!important;min-height:112px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible;text-align:center;transform:translate(-50%,-100%) scale(var(--fp-scale));transform-origin:center bottom;}
+.fp-hotspot.npc::before,.fp-hotspot.npc::after,.fp-hotspot.roaming::before,.fp-hotspot.roaming::after{content:none!important;display:none!important;}
+.fp-npc-shadow{position:absolute;left:50%;bottom:-4px;width:54px;height:15px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.48),rgba(0,0,0,.08) 62%,transparent 70%);filter:blur(.4px);}
+.fp-npc-figure{position:absolute;left:50%;bottom:7px;width:48px;height:88px;transform:translateX(-50%);filter:drop-shadow(0 13px 12px rgba(0,0,0,.42));animation:fpNpcBreathe 1.9s ease-in-out infinite alternate;animation-delay:var(--npc-delay,0s);}
+.fp-npc-figure .head{position:absolute;left:50%;top:0;width:24px;height:24px;border-radius:50%;transform:translateX(-50%);background:radial-gradient(circle at 42% 34%,#f1c39d,#b77753 70%,#6e3a25);border:1px solid rgba(255,236,210,.22);}
+.fp-npc-figure .head::before{content:'';position:absolute;left:7px;top:9px;width:3px;height:3px;border-radius:50%;background:#07111f;box-shadow:8px 0 0 #07111f;}
+.fp-npc-figure .head::after{content:'';position:absolute;left:8px;top:16px;width:9px;height:3px;border-radius:0 0 9px 9px;border-bottom:1px solid rgba(7,17,31,.75);}
+.fp-npc-figure .torso{position:absolute;left:50%;top:23px;width:30px;height:36px;border-radius:12px 12px 7px 7px;transform:translateX(-50%);background:linear-gradient(180deg,#17314e,#071321);border:1px solid rgba(255,255,255,.15);}
+.fp-npc-figure .torso::after{content:'';position:absolute;left:3px;right:3px;top:21px;height:4px;border-radius:999px;background:rgba(255,255,255,.18);}
+.fp-npc-figure .arm{position:absolute;top:28px;width:8px;height:36px;border-radius:999px;background:linear-gradient(180deg,#17314e,#071321);transform-origin:top center;border:1px solid rgba(255,255,255,.1);}
+.fp-npc-figure .arm.left{left:3px;transform:rotate(10deg)}.fp-npc-figure .arm.right{right:3px;transform:rotate(-10deg)}
+.fp-npc-figure .leg{position:absolute;top:57px;width:10px;height:28px;border-radius:999px;background:linear-gradient(180deg,#091929,#030912);transform-origin:top center;}
+.fp-npc-figure .leg.left{left:12px}.fp-npc-figure .leg.right{right:12px}
+.fp-npc-figure .leg::after{content:'';position:absolute;bottom:-3px;width:15px;height:5px;border-radius:999px;background:#02070d;}
+.fp-npc-figure .leg.left::after{right:-1px}.fp-npc-figure .leg.right::after{left:-1px}
+.fp-hotspot.npc.moving .fp-npc-figure .leg.left,.fp-hotspot.npc.roaming .fp-npc-figure .leg.left{animation:fpNpcLegLeft .42s ease-in-out infinite alternate;animation-delay:var(--npc-delay,0s)}
+.fp-hotspot.npc.moving .fp-npc-figure .leg.right,.fp-hotspot.npc.roaming .fp-npc-figure .leg.right{animation:fpNpcLegRight .42s ease-in-out infinite alternate;animation-delay:var(--npc-delay,0s)}
+.fp-hotspot.npc.moving .fp-npc-figure .arm.left,.fp-hotspot.npc.roaming .fp-npc-figure .arm.left{animation:fpNpcArmLeft .42s ease-in-out infinite alternate;animation-delay:var(--npc-delay,0s)}
+.fp-hotspot.npc.moving .fp-npc-figure .arm.right,.fp-hotspot.npc.roaming .fp-npc-figure .arm.right{animation:fpNpcArmRight .42s ease-in-out infinite alternate;animation-delay:var(--npc-delay,0s)}
+.fp-hotspot.npc.face-left .fp-npc-figure{transform:translateX(-50%) scaleX(-1)}
+.fp-npc-label{position:absolute;left:50%;bottom:100px;min-width:104px;max-width:132px;transform:translateX(-50%);border:1px solid rgba(127,195,255,.24);border-radius:8px;background:rgba(4,14,25,.9);box-shadow:0 10px 22px rgba(0,0,0,.32);padding:5px 7px;text-align:center;}
+.fp-npc-label b{display:block;color:#fff;font:700 8px 'Share Tech Mono',monospace;letter-spacing:.45px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fp-npc-label small{display:none;margin-top:2px;color:#9fbdd4;font-size:7px;line-height:1.2;}.fp-hotspot.npc.active .fp-npc-label small,.fp-hotspot.npc.objective .fp-npc-label small{display:block;}
+.fp-hotspot.npc.active .fp-npc-label,.fp-hotspot.npc.objective .fp-npc-label{border-color:rgba(129,247,184,.7);box-shadow:0 0 0 4px rgba(129,247,184,.1),0 10px 24px rgba(0,0,0,.36);}
+.fp-hotspot.npc.officer .torso{background:linear-gradient(180deg,#071c34,#05101f)}.fp-hotspot.npc.officer .torso::after{background:#f0ca62}.fp-hotspot.npc.deck .torso{background:linear-gradient(180deg,#173c55,#071422)}.fp-hotspot.npc.deck .torso::after{background:#ef8b2d}.fp-hotspot.npc.engine .torso{background:linear-gradient(180deg,#222d35,#0b1118)}.fp-hotspot.npc.engine .torso::after{background:#f07828}.fp-hotspot.npc.cook .torso{background:linear-gradient(180deg,#f4f7f4,#cfd8dc);}.fp-hotspot.npc.cook .leg{background:#25292c}.fp-hotspot.npc.medical .torso{background:linear-gradient(180deg,#58a3af,#1d4750)}.fp-hotspot.npc.medical .torso::after{background:#fff}.fp-hotspot.npc.cadet .torso{background:linear-gradient(180deg,#123456,#071422)}.fp-hotspot.npc.cadet .torso::after{background:#d7edf8}
+@keyframes fpNpcBreathe{from{bottom:7px}to{bottom:10px}}@keyframes fpNpcLegLeft{from{transform:rotate(-13deg)}to{transform:rotate(14deg)}}@keyframes fpNpcLegRight{from{transform:rotate(14deg)}to{transform:rotate(-13deg)}}@keyframes fpNpcArmLeft{from{transform:rotate(17deg)}to{transform:rotate(-10deg)}}@keyframes fpNpcArmRight{from{transform:rotate(-17deg)}to{transform:rotate(10deg)}}
+@media (max-width:760px){.fp-hotspot.npc{width:62px!important;min-width:62px!important;height:90px!important;min-height:90px!important}.fp-npc-figure{width:38px;height:70px}.fp-npc-figure .head{width:20px;height:20px}.fp-npc-figure .torso{top:19px;width:25px;height:29px}.fp-npc-figure .arm{top:23px;height:29px}.fp-npc-figure .leg{top:47px;height:22px;width:8px}.fp-npc-label{bottom:80px;min-width:82px;max-width:102px}.fp-npc-label b{font-size:7px}.fp-npc-shadow{width:42px}}

@@ -26674,7 +26674,7 @@ function openFirstPersonMode(){
   requestAnimationFrame(()=>renderFirstPersonMode());
   requestAnimationFrame(()=>host.panel?.focus?.({preventScroll:true}));
   if(firstPersonNpcTimer) clearInterval(firstPersonNpcTimer);
-  firstPersonNpcTimer = setInterval(()=>{ if(firstPersonActive) renderFirstPersonMode(); }, 1100);
+  firstPersonNpcTimer = setInterval(()=>{ if(firstPersonActive) renderFirstPersonMode(); }, 180);
   showNotif('1. SAHIS','Gemi icindesin','WASD / oklarla yuru, kapilardan mahal degistir, E ile konus/kullan, Esc ile cik.');
 }
 function closeFirstPersonMode(){
@@ -26783,15 +26783,26 @@ function renderFirstPersonModeUnsafe(){
   const mission = renderWalkMissionPanel();
   const director = getFirstPersonDirectorTarget();
   const directorHtml = getFirstPersonDirectorHtml();
-  const stations = getFirstPersonStations().map(st=>{
+  const visibleStations = getFirstPersonStations().map(st=>{
     const relX = 50 + ((st.x - firstPersonPlayer.x) * 1.15);
     const depth = Math.max(0, Math.min(1, 1 - ((st.y - 26) / 72)));
     const top = 24 + st.y * .52;
     const scale = .76 + depth * .42;
+    const distance = Math.hypot(st.x - firstPersonPlayer.x, st.y - firstPersonPlayer.y);
     const isObjective = director?.id === st.id || (st.type === 'door' && director?.area !== firstPersonArea && st.targetArea === director?.area);
+    const inFrame = relX > 8 && relX < 92 && top > 27 && top < 76;
+    const nearLimit = st.type === 'npc' ? 24 : st.type === 'door' ? 18 : 29;
+    const show = isObjective || (ready && nearest?.id === st.id) || (inFrame && distance <= nearLimit) || (inFrame && st.type !== 'door' && Math.abs(relX - 50) < 22 && top < 64);
     const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${st.roaming ? 'roaming' : ''} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
-    return `<button class="fp-hotspot ${cls}" style="left:${relX}%;top:${top}%;--fp-scale:${scale};" onclick="jumpFirstPersonTo(${st.x},${st.y},event)"><b>${phoneSafe(st.label)}</b><small>${phoneSafe(subtitle)}</small></button>`;
+    return {st,relX,top,scale,distance,isObjective,show,cls,subtitle};
+  }).filter(v=>v.show).sort((a,b)=>(b.isObjective-a.isObjective)||((ready&&nearest?.id===b.st.id)-(ready&&nearest?.id===a.st.id))||a.distance-b.distance).slice(0,8);
+  const stations = visibleStations.map(v=>{
+    if(v.st.type === 'npc'){
+      const delay = ((v.st.phase || 0) + (v.st.x || 0) * .03).toFixed(2);
+      return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;--fp-scale:${v.scale};--npc-delay:${delay}s;" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><span class="fp-npc-shadow"></span><span class="fp-npc-figure"><i class="head"></i><i class="torso"></i><i class="arm left"></i><i class="arm right"></i><i class="leg left"></i><i class="leg right"></i></span><span class="fp-npc-label"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></span></button>`;
+    }
+    return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;--fp-scale:${v.scale};" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></button>`;
   }).join('');
   const destinationMarker = firstPersonInput.destination ? `<div class="fp-destination" style="left:${firstPersonInput.destination.x}%;top:${firstPersonInput.destination.y}%"></div>` : "";
   const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="setFirstPersonArea('${st.targetArea || 'bridge'}')">${phoneSafe(st.label)}</button>`).join('');
