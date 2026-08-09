@@ -26784,27 +26784,33 @@ function renderFirstPersonModeUnsafe(){
   const director = getFirstPersonDirectorTarget();
   const directorHtml = getFirstPersonDirectorHtml();
   const visibleStations = getFirstPersonStations().map(st=>{
-    const relX = 50 + ((st.x - firstPersonPlayer.x) * 1.15);
-    const depth = Math.max(0, Math.min(1, 1 - ((st.y - 26) / 72)));
-    const top = 24 + st.y * .52;
-    const scale = .76 + depth * .42;
-    const distance = Math.hypot(st.x - firstPersonPlayer.x, st.y - firstPersonPlayer.y);
+    const dx = st.x - firstPersonPlayer.x;
+    const dy = st.y - firstPersonPlayer.y;
+    const distance = Math.hypot(dx, dy);
+    const forwardDepth = Math.max(0, Math.min(1, (dy + 42) / 88));
+    const sideSpread = .82 + forwardDepth * .72;
+    const relX = 50 + dx * sideSpread;
+    const top = 57 + dy * .48 + forwardDepth * 18;
+    const scale = Math.max(.54, Math.min(1.34, .62 + forwardDepth * .72));
     const isObjective = director?.id === st.id || (st.type === 'door' && director?.area !== firstPersonArea && st.targetArea === director?.area);
-    const inFrame = relX > 8 && relX < 92 && top > 27 && top < 76;
-    const nearLimit = st.type === 'npc' ? 24 : st.type === 'door' ? 18 : 29;
-    const show = isObjective || (ready && nearest?.id === st.id) || (inFrame && distance <= nearLimit) || (inFrame && st.type !== 'door' && Math.abs(relX - 50) < 22 && top < 64);
-    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${st.roaming ? 'roaming' : ''} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
+    const inFrame = relX > 7 && relX < 93 && top > 29 && top < 89;
+    const nearLimit = st.type === 'npc' ? 30 : st.type === 'door' ? 24 : 34;
+    const show = isObjective || (ready && nearest?.id === st.id) || (inFrame && distance <= nearLimit) || (inFrame && st.type !== 'door' && Math.abs(relX - 50) < 24 && distance <= 42);
+    const roleClass = st.type === 'npc' ? getFirstPersonNpcRole(st) : '';
+    const facingClass = st.type === 'npc' ? (dx >= 0 ? 'face-right' : 'face-left') : '';
+    const motionClass = st.type === 'npc' && (st.roaming || distance > 10) ? 'moving' : '';
+    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${roleClass} ${facingClass} ${st.roaming ? 'roaming' : ''} ${motionClass} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
-    return {st,relX,top,scale,distance,isObjective,show,cls,subtitle};
-  }).filter(v=>v.show).sort((a,b)=>(b.isObjective-a.isObjective)||((ready&&nearest?.id===b.st.id)-(ready&&nearest?.id===a.st.id))||a.distance-b.distance).slice(0,8);
+    return {st,relX,top,scale,distance,isObjective,show,cls,subtitle,depth:forwardDepth};
+  }).filter(v=>v.show).sort((a,b)=>(b.isObjective-a.isObjective)||((ready&&nearest?.id===b.st.id)-(ready&&nearest?.id===a.st.id))||a.distance-b.distance).slice(0,9);
   const stations = visibleStations.map(v=>{
+    const z = 14 + Math.round(v.depth * 10);
     if(v.st.type === 'npc'){
       const delay = ((v.st.phase || 0) + (v.st.x || 0) * .03).toFixed(2);
-      return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;--fp-scale:${v.scale};--npc-delay:${delay}s;" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><span class="fp-npc-shadow"></span><span class="fp-npc-figure"><i class="head"></i><i class="torso"></i><i class="arm left"></i><i class="arm right"></i><i class="leg left"></i><i class="leg right"></i></span><span class="fp-npc-label"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></span></button>`;
+      return `<button class="fp-actor ${v.cls}" aria-label="${phoneSafe(v.st.label)}" style="left:${v.relX}%;top:${v.top}%;z-index:${z};--fp-scale:${v.scale};--npc-delay:${delay}s;" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><span class="fp-npc-shadow"></span><span class="fp-npc-figure"><i class="head"></i><i class="neck"></i><i class="torso"></i><i class="arm left"></i><i class="arm right"></i><i class="leg left"></i><i class="leg right"></i></span><span class="fp-npc-label"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></span></button>`;
     }
-    return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;--fp-scale:${v.scale};" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></button>`;
-  }).join('');
-  const destinationMarker = firstPersonInput.destination ? `<div class="fp-destination" style="left:${firstPersonInput.destination.x}%;top:${firstPersonInput.destination.y}%"></div>` : "";
+    return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;z-index:${z};--fp-scale:${v.scale};" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></button>`;
+  }).join('');  const destinationMarker = firstPersonInput.destination ? `<div class="fp-destination" style="left:${firstPersonInput.destination.x}%;top:${firstPersonInput.destination.y}%"></div>` : "";
   const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="setFirstPersonArea('${st.targetArea || 'bridge'}')">${phoneSafe(st.label)}</button>`).join('');
   root.innerHTML = `<div class="fp-shell" style="--fp-yaw:${firstPersonPlayer.yaw}deg;--fp-x:${firstPersonPlayer.x};--fp-y:${firstPersonPlayer.y};">
     <div class="fp-hud"><b>1. SAHIS · ${phoneSafe(area.title)}</b><span>X ${Math.round(firstPersonPlayer.x)} · Y ${Math.round(firstPersonPlayer.y)}</span><button onclick="closeFirstPersonMode()">CIK</button></div>
