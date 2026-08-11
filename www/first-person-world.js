@@ -4,6 +4,21 @@
 
   const STORAGE_KEY = 'guverte-first-person-world-v2';
   const MOBILE = matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+  const SCRIPT_URL = (()=>{
+    try{
+      const scripts=Array.from(document.scripts||[]).reverse();
+      const own=scripts.find(s=>/first-person-world\.js/i.test(s.src||''));
+      return own?.src || '';
+    }catch(_err){return '';}
+  })();
+  const assetUrl = path=>{
+    const clean=String(path||'').replace(/^\.\//,'');
+    const bases=[SCRIPT_URL,document.baseURI,location.href].filter(Boolean).filter(base=>!/^about:blank/i.test(base));
+    for(const base of bases){
+      try{return new URL(clean,base).href;}catch(_err){}
+    }
+    return './'+clean;
+  };
   const clamp = (value,min,max)=>Math.max(min,Math.min(max,value));
   const callGame = (name,...args)=>{
     try{
@@ -233,17 +248,43 @@
   }
   restoreState();
 
+  function importThreeViaModuleScript(url){
+    return new Promise((resolve,reject)=>{
+      const key='__guverteThreeLoader_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      const script=document.createElement("script");
+      const cleanup=()=>{try{delete window[key];script.remove();}catch(_err){}};
+      const timer=setTimeout(()=>{cleanup();reject(new Error("Three module loader timeout"));},4500);
+      window[key]={resolve:mod=>{clearTimeout(timer);cleanup();resolve(mod);},reject:err=>{clearTimeout(timer);cleanup();reject(err);}};
+      script.type="module";
+      script.textContent=`import * as THREE from ${JSON.stringify(url)}; window[${JSON.stringify(key)}].resolve(THREE);`;
+      script.onerror=()=>{clearTimeout(timer);cleanup();reject(new Error("Three module script failed: "+url));};
+      document.head.appendChild(script);
+    });
+  }
+
   function loadThree(){
     if(state.THREE) return Promise.resolve(state.THREE);
     if(!state.loading){
-      state.loading = import('./vendor/three.module.js').then(mod=>{
-        state.THREE = mod;
-        return mod;
-      });
+      state.loading=(async()=>{
+        const urls=Array.from(new Set([assetUrl('./vendor/three.module.js'),assetUrl('vendor/three.module.js'),'./vendor/three.module.js','vendor/three.module.js']));
+        let lastErr=null;
+        for(const url of urls){
+          try{
+            const mod=await import(url);
+            state.THREE=mod;return mod;
+          }catch(err){
+            lastErr=err;
+            try{
+              const mod=await importThreeViaModuleScript(url);
+              state.THREE=mod;return mod;
+            }catch(scriptErr){lastErr=scriptErr;}
+          }
+        }
+        throw lastErr || new Error("Three module could not be loaded");
+      })();
     }
     return state.loading;
   }
-
   function ensureHost(){
     let panel = document.getElementById('firstperson-panel');
     if(!panel){
