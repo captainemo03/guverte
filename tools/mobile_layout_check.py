@@ -226,8 +226,8 @@ REQUIRED = {
         "fp3d-dialogue",
         "GMDSS ODASI",
         "YÜK KONTROL ODASI",
-        "first-person-world.js?v=3",
-        "first-person-world.css?v=3",
+        "first-person-world.js?v=15",
+        "first-person-world.css?v=15",
     ],
     "intro route selector": [
         "route-select-grid",

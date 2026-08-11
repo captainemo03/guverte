@@ -200,7 +200,7 @@
     stick:{x:0,y:0,pointerId:null},look:{active:false,pointerId:null,x:0,y:0},runLock:false,
     autoTarget:null,autoNav:{lastDist:0,stuck:0,strafeDir:1,lastX:0,lastZ:0,lastPulse:0},interactions:[],npcs:[],animatedScreens:[],waves:[],distantShips:[],ambientFx:[],colliders:[],discoveries:Object.create(null),visitedAreas:Object.create(null),
     animationId:0,lastFrame:0,elapsed:0,screenTick:0,nearest:null,currentDialogue:null,
-    resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,streak:0,bestStreak:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,areaNavFallbackTimer:0,areaArrivalTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{}
+    resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,streak:0,bestStreak:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,areaNavFallbackTimer:0,areaArrivalTimer:0,actionBannerTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{}
   };
 
   function currentIncidentShift(minutes){
@@ -266,7 +266,14 @@
     if(state.THREE) return Promise.resolve(state.THREE);
     if(!state.loading){
       state.loading=(async()=>{
-        const urls=Array.from(new Set([assetUrl('./vendor/three.module.js'),assetUrl('vendor/three.module.js'),'./vendor/three.module.js','vendor/three.module.js']));
+        if(window.__GUVERTE_THREE){state.THREE=window.__GUVERTE_THREE;return state.THREE;}
+        if(window.__GUVERTE_THREE_READY){
+          try{
+            const mod=await Promise.race([window.__GUVERTE_THREE_READY,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Three bridge timeout")),5000))]);
+            if(mod){state.THREE=mod;return mod;}
+          }catch(err){console.warn("Three bridge failed",err);}
+        }
+        const urls=Array.from(new Set([assetUrl('./vendor/three.module.js'),assetUrl('vendor/three.module.js')]));
         let lastErr=null;
         for(const url of urls){
           try{
@@ -320,6 +327,8 @@
           '</nav>'+
         '</header>'+
         '<nav class="fp3d-area-nav" aria-label="Gemi mahalleri"></nav>'+
+        '<nav class="fp3d-jump-dock" aria-label="Hizli kompartiman gecisi"><button type="button" data-area="bridge">1 KOPRU</button><button type="button" data-area="engine">2 MAKINE</button><button type="button" data-area="deck">3 GUVERTE</button><button type="button" data-area="deck" data-look="bow">4 DENIZ</button><button type="button" data-area="corridor">0 KORIDOR</button><button type="button" data-area="radio">Q GMDSS</button><button type="button" data-area="cargo">Z YUK</button><button type="button" data-area="cabin">X KAMARA</button><button type="button" data-area="mess">V MESS</button><button type="button" data-area="galley">B KAMBUZ</button><button type="button" data-area="infirmary">H REVIR</button></nav>'+
+        '<nav class="fp3d-action-dock" aria-label="Dogrudan eylemler"><button type="button" data-fp-action="ecdis">5 ECDIS</button><button type="button" data-fp-action="engine">6 MAKINE</button><button type="button" data-fp-action="sea">7 DENIZ</button><button type="button" data-fp-action="gmdss">8 GMDSS</button><button type="button" data-fp-action="cargo">9 YUK</button></nav>'+
         '<aside class="fp3d-mission-dock" aria-live="polite">'+
           '<div class="fp3d-route-head"><small>GÖREV DİREKTÖRÜ</small><b id="fp3d-route-title">Serbest dolaşım</b></div>'+
           '<p id="fp3d-route-reason">Yakındaki cihaz, kapı veya mürettebata yaklaş.</p>'+
@@ -331,6 +340,7 @@
         '<div class="fp3d-risk-meter"><b>RISK</b><span id="fp3d-risk-text">Rutin</span><small id="fp3d-risk-note">Normal vardiya</small><i><em id="fp3d-risk-fill"></em></i></div>'+
         '<div class="fp3d-duty-chain"><b>VARDIYA AKISI</b><span id="fp3d-duty-step">Gorev hazirlaniyor</span><small id="fp3d-duty-progress">0/0</small><i id="fp3d-duty-xp">XP 0</i><em id="fp3d-duty-streak">Seri x0</em></div>'+ 
         '<div class="fp3d-crew-bark"><b id="fp3d-bark-name">MURETTEBAT</b><span id="fp3d-bark-line">Gemi rutini basliyor</span></div>'+ 
+        '<div class="fp3d-action-banner" aria-live="polite"><b id="fp3d-action-banner-title">GECIS</b><span id="fp3d-action-banner-text">Hazir</span></div>'+
         '<div class="fp3d-field-log"><b>SAHA GUNLUGU</b><span id="fp3d-field-log-line">Gemi hazir</span></div>'+ 
         '<div class="fp3d-scene-report" aria-live="polite"></div>'+ 
         '<div class="fp3d-marker-layer"></div>'+
@@ -338,8 +348,9 @@
         '<div class="fp3d-prompt"><small>ETKİLEŞİM</small><b id="fp3d-prompt-text">Bir istasyona yaklaş</b><span id="fp3d-distance"></span></div>'+
         '<div class="fp3d-minimap"><b id="fp3d-map-title">GEMİ</b><div class="fp3d-map-grid"></div><i id="fp3d-map-route"></i><i id="fp3d-map-player"></i><span id="fp3d-map-npcs"></span></div>'+
         '<div class="fp3d-compass"><b id="fp3d-heading">000</b><i id="fp3d-compass-needle"></i><span id="fp3d-bearing">HEDEF --</span><small id="fp3d-openwork">OLAY 0</small></div>'+
-        '<div class="fp3d-help"><b>WASD</b> Yürü <b>Fare</b> Bak <b>E</b> Kullan <b>F</b> Hedef <b>R</b> Toparla</div>'+
+        '<div class="fp3d-help"><b>WASD</b> Yuru <b>1-4</b> Gecis <b>0/Q/Z/X/V/B/H</b> Mahal <b>5-9</b> Panel <b>E</b> Kullan</div>'+
         '<div class="fp3d-hands"><i></i><i></i></div>'+
+        '<div class="fp3d-body"><b></b><i></i><i></i></div>'+
         '<div class="fp3d-look-zone" aria-hidden="true"></div>'+
         '<div class="fp3d-stick" aria-label="Hareket kontrolü"><span></span></div>'+
         '<button class="fp3d-use" type="button"><span>KULLAN</span><small>E</small></button>'+
@@ -354,6 +365,8 @@
       loading:host.stage.querySelector('.fp3d-loading'),
       markers:host.stage.querySelector('.fp3d-marker-layer'),
       areaNav:host.stage.querySelector('.fp3d-area-nav'),
+      quickTravel:host.stage.querySelector('.fp3d-jump-dock'),
+      actionDock:host.stage.querySelector('.fp3d-action-dock'),
       missionDock:host.stage.querySelector('.fp3d-mission-dock'),
       routeTitle:host.stage.querySelector('#fp3d-route-title'),
       routeReason:host.stage.querySelector('#fp3d-route-reason'),
@@ -380,6 +393,9 @@
       crewBark:host.stage.querySelector('.fp3d-crew-bark'),
       barkName:host.stage.querySelector('#fp3d-bark-name'),
       barkLine:host.stage.querySelector('#fp3d-bark-line'),
+      actionBanner:host.stage.querySelector('.fp3d-action-banner'),
+      actionBannerTitle:host.stage.querySelector('#fp3d-action-banner-title'),
+      actionBannerText:host.stage.querySelector('#fp3d-action-banner-text'),
       fieldLog:host.stage.querySelector('.fp3d-field-log'),
       fieldLogLine:host.stage.querySelector('#fp3d-field-log-line'),
       sceneReport:host.stage.querySelector('.fp3d-scene-report'),
@@ -425,6 +441,15 @@
     ['pointerup','pointercancel','pointerleave'].forEach(type=>state.ui.use.addEventListener(type,()=>state.ui.use.classList.remove('pressed')));
     state.ui.use.addEventListener('click',interact);
     state.ui.routeAction?.addEventListener('click',walkToDirectorTarget);
+    state.ui.quickTravel?.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',ev=>{
+      ev.preventDefault();ev.stopPropagation();
+      const target=btn.dataset.area;
+      directCompartmentAction(target,btn.dataset.look);
+    }));
+    state.ui.actionDock?.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',ev=>{
+      ev.preventDefault();ev.stopPropagation();
+      directWorldAction(btn.dataset.fpAction);
+    }));
     state.ui.run.addEventListener('click',()=>{if(!MOBILE)return;state.runLock=!state.runLock;state.keys.shift=state.runLock;state.ui.run.classList.toggle('locked',state.runLock);state.ui.run.classList.toggle('active',state.runLock);hapticPulse(state.runLock?'good':'tap');});
     state.ui.run.addEventListener('pointerdown',()=>{if(MOBILE)return;state.keys.shift=true;state.ui.run.classList.add('active');});
     ['pointerup','pointercancel','pointerleave'].forEach(type=>state.ui.run.addEventListener(type,()=>{if(state.runLock)return;state.keys.shift=false;state.ui.run.classList.remove('active');}));
@@ -560,6 +585,7 @@
     saveState();
     const nextQuest=getActiveWorldQuest();
     updateDutyChain();
+    updateQuickTravelDock();
     flashDutyChain(quest,nextQuest);
     if(state.ui.worldDiscovery) state.ui.worldDiscovery.textContent=state.lastDiscovery;
     pushFieldLog('Gorev tamam: '+quest.title+(nextQuest?' / Siradaki: '+nextQuest.title:''),'good');
@@ -644,6 +670,19 @@
   function nearestActiveIncident(){
     return activeIncidentItems().map(item=>({item,dist:Math.hypot(item.object.position.x-state.player.x,item.object.position.z-state.player.z)})).sort((a,b)=>a.dist-b.dist)[0]||null;
   }
+
+  const AREA_BRIEFINGS = {
+    bridge:{title:'Kopruustu vardiya',meta:'Seyir / trafik / cihaz teyidi',steps:['ECDIS rota ve alarm zincirini kontrol et.','Radar/AIS/visual gozlemi ayni hedefte birlestir.','Kopru kanadindan deniz ve trafik gozlemini tamamla.']},
+    corridor:{title:'Ana koridor',meta:'Gecis / acil rol / yasam mahalli',steps:['Kapilardan hedef mahale dogrudan gec.','Muster ve yangin planini gor.','Yorgun ekip veya riskli zemin sinyalini not et.']},
+    deck:{title:'Dis guverte',meta:'Deniz / mooring / pilot / boya',steps:['Bordadan deniz ve fener gozlemi yap.','Snap-back alani ve halat yonunu kontrol et.','Pilot/flama ve raspa-boya emniyetini tamamla.']},
+    engine:{title:'Makine vardiyasi',meta:'ECR / alarm / yardimci sistemler',steps:['Alarm trendini ECR panelinden oku.','Bilge, jeneratör ve sogutma kaynaklarini ayir.','Kopruye net durum raporu hazirla.']},
+    radio:{title:'GMDSS odasi',meta:'DSC / VHF / MF-HF / NAVTEX',steps:['Distress zincirinde konum ve tehlike turunu netlestir.','Mors/SOS ve NAVTEX mesajini kayda bagla.','EPIRB/SART test modunu emniyetli kullan.']},
+    cargo:{title:'Yuk kontrol',meta:'Cargo / ballast / gelgit',steps:['Ballast transferini trim/list etkisiyle oku.','Gelgit penceresi, draft ve UKC payini hesapla.','Yuk planini SF/BM ve liman sirasiyla izle.']},
+    cabin:{title:'Kamara',meta:'Dinlenme / aile / notlar',steps:['Aile mesajini oku ama vardiya dikkatini toparla.','Yorgunluk ve moral notunu saklama.','Notlar ve sozlukle eksik konuyu kapat.']},
+    mess:{title:'Messroom',meta:'Ekip morali / mola',steps:['Ekipten gece vardiyasi havasi al.','Yorgunluk ve guverte riski sinyallerini dinle.','Kisa molayi vardiya disiplinine bagla.']},
+    galley:{title:'Kambuz',meta:'Sicak yuzey / yag yangini / iaşe',steps:['Sicak yuzey ve yag yangini riskini ayir.','Dogru sondurucu ve yangin battaniyesini bul.','Erzak ve hijyen duzenini kontrol et.']},
+    infirmary:{title:'Revir',meta:'Ilk yardim / oksijen / TMAS',steps:['Sahne guvenligini kur.','Bilinç, solunum ve oksijen ekipmanini kontrol et.','TMAS/MRCC icin bulgulari sirala.']} 
+  };
 
   function incidentToneLine(item){
     const tone=item?.tone||'info';
@@ -797,7 +836,7 @@
     state.ui.drill.querySelectorAll('[data-answer]').forEach(btn=>btn.onclick=()=>answerTrainingDrill(Number(btn.dataset.answer)));
     playAreaPulse('drill');return true;
   }
-  function closeTrainingDrill(){state.pendingDrill=null;if(!state.ui.drill)return;state.ui.drill.classList.remove('show');state.ui.drill.innerHTML='';}
+    state.ui.drill.innerHTML='<div class="fp3d-drill-card"><button class="fp3d-drill-close" type="button">KAPAT</button><small>EĞİTİM MODÜLÜ</small><b>'+drill.title+'</b><p>'+drill.q+'</p><div>'+drill.opts.map((opt,i)=>'<button type="button" data-answer="'+i+'">'+opt+'</button>').join('')+'</div></div>';
   function answerTrainingDrill(answer){
     const pending=state.pendingDrill;if(!pending)return;const ok=answer===pending.drill.a;
     if(ok){state.completedDrills[pending.item.id]=true;triggerUsePulse(pending.item,'drill');awardWorldProgress({id:'drill-'+pending.item.id,once:true},5);advanceWorldQuest(pending.item);pushFieldLog('Egitim tamam: '+pending.drill.title+' / Seri x'+state.streak,'good');callGame('applyEffect',pending.drill.effect||{bilgi:1},{skipContractTick:true});callGame('markWalkTaskDone',pending.item.id,pending.item.label);callGame('addWatchFeed',pending.drill.title+': dogru uygulama tamamlandi.','good');callGame('showNotif','EGITIM',pending.drill.title,'Dogru cevap kaydedildi.');clearLiveEventIfHandled(pending.item);closeTrainingDrill();}
@@ -806,7 +845,7 @@
   function getExplorationTarget(){
     const incident=nearestActiveIncident();
     if(incident) return {area:state.area,id:incident.item.id,label:'Saha olayi: '+incident.item.label,reason:incident.item.detail+' noktasini kontrol et ve rapora bagla.',explore:true,incident:true};
-    const local=(state.interactions||[]).find(item=>!state.discoveries[item.id] && item.type!=='door' && item.kind!=='incident');
+    const local=(state.interactions||[]).find(item=>!item.ambient && !state.discoveries[item.id] && item.type!=='door' && item.kind!=='incident');
     if(local) return {area:state.area,id:local.id,label:'Kesif: '+local.label,reason:local.label+' istasyonunu incele ve gemi hafizasina ekle.',explore:true};
     const unseenArea=Object.keys(AREAS).find(id=>!state.visitedAreas[id]);
     if(unseenArea){
@@ -897,6 +936,72 @@
     resetInputState();
     pushFieldLog((reason||'Mahale gecis')+': '+AREAS[target].title,'info');
     setArea(target);
+  }
+
+  function updateQuickTravelDock(){
+    let dockTarget=null;
+    try{dockTarget=getDirectorTarget();}catch(_err){}
+    const targetArea=dockTarget&&dockTarget.area;
+    const eventArea=state.liveEvent&&state.liveEvent.area;
+    if(state.ui.quickTravel){
+      state.ui.quickTravel.querySelectorAll('button').forEach(btn=>{
+        const active=btn.dataset.area===state.area && !btn.dataset.look;
+        const seaReady=btn.dataset.look && state.area==='deck';
+        btn.classList.toggle('active',active);
+        btn.classList.toggle('ready',!!seaReady);
+        btn.classList.toggle('target',!!targetArea&&btn.dataset.area===targetArea&&!btn.dataset.look);
+        btn.classList.toggle('event',!!eventArea&&btn.dataset.area===eventArea&&!btn.dataset.look);
+        if(btn.classList.contains('target'))btn.title='Siradaki hedef: '+(dockTarget?.label||AREAS[targetArea]?.title||targetArea);
+        else if(btn.classList.contains('event'))btn.title='Canli olay: '+(state.liveEvent?.title||AREAS[eventArea]?.title||eventArea);
+        else btn.removeAttribute('title');
+      });
+    }
+    if(state.ui.actionDock){
+      const actionArea={ecdis:'bridge',engine:'engine',sea:'deck',gmdss:'radio',cargo:'cargo'};
+      state.ui.actionDock.querySelectorAll('button').forEach(btn=>{
+        const area=actionArea[btn.dataset.fpAction];
+        const active=area===state.area;
+        btn.classList.toggle('active',active);
+        btn.classList.toggle('ready',btn.dataset.fpAction==='sea'&&state.area==='deck');
+      });
+    }
+  }
+
+  function showActionBanner(title,text,tone){
+    if(!state.ui.actionBanner)return;
+    state.ui.actionBanner.dataset.tone=tone||'info';
+    state.ui.actionBannerTitle.textContent=title||'GECIS';
+    state.ui.actionBannerText.textContent=text||'Hazir';
+    state.ui.actionBanner.classList.remove('show');
+    void state.ui.actionBanner.offsetWidth;
+    state.ui.actionBanner.classList.add('show');
+    clearTimeout(state.actionBannerTimer);
+    state.actionBannerTimer=setTimeout(()=>state.ui.actionBanner&&state.ui.actionBanner.classList.remove('show'),1550);
+  }
+
+  function directCompartmentAction(target,look){
+    const changing=target&&target!==state.area;
+    if(target) jumpToArea(target,'Hizli gecis');
+    if(target&&AREAS[target])showActionBanner(look?'DENIZ BAKISI':AREAS[target].title,look?'Guverte / ufuk gozlemi':'Hizli gecis',look?'deck':'area');
+    if(look){pushFieldLog('Deniz gozlemi aciliyor','info');callGame('showNotif','GUVERTEDESIN','Deniz bakisi','Guverteye cikip deniz gozlemi aciliyor.');}
+    if(look) setTimeout(()=>callGame('openFirstPersonSeaLook',look),changing?460:80);
+  }
+
+
+  function directWorldAction(action){
+    const run=(area,label,fn)=>{
+      const changing=area&&area!==state.area;
+      if(area) jumpToArea(area,'Eylem gecisi');
+      pushFieldLog(label+' aciliyor','info');
+      showActionBanner(label,'Panel dogrudan aciliyor','action');
+      callGame('showNotif','DOGRU EYLEM',label,'Kompartiman ve panel dogrudan aciliyor.');
+      setTimeout(fn,changing?470:90);
+    };
+    if(action==='ecdis')return run('bridge','ECDIS',()=>callGame('openRealBridgeConsole','ecdis'));
+    if(action==='engine')return run('engine','Makine paneli',()=>callGame('openShipOperation3D','engine3d'));
+    if(action==='sea')return run('deck','Deniz bakisi',()=>callGame('openFirstPersonSeaLook','bow'));
+    if(action==='gmdss')return run('radio','GMDSS / VHF',()=>callGame('openRealBridgeConsole','vhf'));
+    if(action==='cargo')return run('cargo','Yuk paneli',()=>callGame('openShipOperation3D','cargo3d'));
   }
 
   function walkToDirectorTarget(){
@@ -1127,6 +1232,7 @@
       else if(fx.type==='steam'){const t=(state.elapsed*.45+fx.phase)%1;m.position.y=(fx.baseY||.3)+t*2.4;m.scale.setScalar(.8+t*2.6);m.material.opacity=.16*(1-t);}
       else if(fx.type==='spray'){m.position.y+=dt*(fx.speed||1);m.position.z+=dt*.55;if(m.position.y>2.4){m.position.y=.25;m.position.z=-8+Math.random()*12;}m.material.opacity=.18+.22*Math.sin(state.elapsed*4+fx.phase)*.5+.11;}
       else if(fx.type==='floorPulse'){const s=1+Math.sin(state.elapsed*2.4+fx.phase)*.22;m.scale.setScalar(s);m.material.opacity=.18+.14*Math.abs(Math.sin(state.elapsed*2.2+fx.phase));}
+      else if(fx.type==='seaWake'){const fade=m.position.z>(fx.fadeStart??0)?0.45:1;m.position.z+=dt*(fx.speed||2.2);m.position.x=(fx.baseX||0)+Math.sin(state.elapsed*.8+fx.phase)*.18;m.material.opacity=(.16+.1*Math.sin(state.elapsed*2.2+fx.phase))*fade;if(m.position.z>(fx.resetZ||18)){m.position.z=fx.startZ||-42;m.position.x=fx.baseX||0;}}
     });
   }
 
@@ -1151,6 +1257,7 @@
     area.stations.forEach(def=>createStation(def,area));
     area.doors.forEach(def=>createDoor(def,area));
     area.npcs.forEach((def,index)=>createNpc(def,index));
+    createAmbientCrew(area);
     createDynamicIncidents(area);
     createAmbientFx(area);
     createRouteGuides();
@@ -1254,11 +1361,62 @@
       ship.position.set(-28+i*12,.15,deckMode?-44-i*8:-66-i*10);
       state.scene.add(ship);state.distantShips.push({object:ship,speed:.12+i*.025,start:ship.position.x,lamp});
     }
+    const wakeMat=new T.MeshBasicMaterial({color:0xdaf7ff,transparent:true,opacity:.18,depthWrite:false});
+    for(let i=0;i<(deckMode?(MOBILE?5:9):(MOBILE?3:5));i++){
+      const wake=new T.Mesh(new T.PlaneGeometry(deckMode?7:5,.045),wakeMat.clone());
+      wake.rotation.x=-Math.PI/2;
+      const baseX=-18+i*(deckMode?4.6:8);
+      wake.position.set(baseX,deckMode?-.55:-1.25,deckMode?-38-i*3.2:-78-i*5);
+      state.scene.add(wake);state.ambientFx.push({type:'seaWake',mesh:wake,baseX,startZ:wake.position.z,resetZ:deckMode?20:-28,fadeStart:deckMode?6:-42,speed:deckMode?2.7:1.5,phase:i*.6});
+    }
+  }
+
+  function addAreaIdentityProps(area){
+    const T=state.THREE;
+    const brass=material(0xd7b75a,{metalness:.42,roughness:.34,emissive:0x3b2a08,emissiveIntensity:.18});
+    const steel=material(0x70828d,{metalness:.64,roughness:.34});
+    if(area.theme==="bridge"){
+      const table=box(state.scene,[3.8,.16,1.9],[-3.1,.92,-.6],material(0x263746,{metalness:.18,roughness:.7}));
+      box(state.scene,[3.3,.025,.045],[-3.1,1.03,-.6],material(0xffd66b,{emissive:0x5b3d07,emissiveIntensity:.35}),[0,.38,0]);
+      [[-4.2,-1.08],[-3.2,-.25],[-2.1,.16]].forEach((p,i)=>cylinder(state.scene,.055,.08,[p[0],1.08,p[1]],material(i===1?0x70e9a8:0x76cce8,{emissive:i===1?0x1b6b3c:0x17455a,emissiveIntensity:.9})));
+    }else if(area.theme==="deck"){
+      cylinder(state.scene,.045,2.5,[-4.55,1.25,5.8],steel);
+      box(state.scene,[.62,.32,.035],[-4.28,2.15,5.8],material(0xffdd4a,{roughness:.55}));
+      box(state.scene,[.62,.32,.035],[-4.28,1.78,5.8],material(0x244bff,{roughness:.55}));
+      box(state.scene,[.62,.32,.035],[-4.28,1.41,5.8],material(0xd84a3a,{roughness:.55}));
+      box(state.scene,[2.8,.035,.12],[-3.2,.08,4.2],material(0xffd66b,{emissive:0x5a4510,emissiveIntensity:.35}),[0,.18,0]);
+    }else if(area.theme==="engine"){
+      for(let z=-5;z<=5;z+=2.5){box(state.scene,[1.4,.045,.08],[-7.2,.08,z],material(0xff6a3c,{emissive:0x5a1407,emissiveIntensity:.45}),[0,.4,0]);}
+      cylinder(state.scene,.09,15,[0,3.05,-7.6],material(0xff6a3c,{metalness:.52,roughness:.38}),[0,Math.PI/2,Math.PI/2]);
+      cylinder(state.scene,.08,13,[0,2.62,-8.2],material(0x3a8fb6,{metalness:.5,roughness:.4}),[0,Math.PI/2,Math.PI/2]);
+    }else if(area.theme==="radio"){
+      cylinder(state.scene,.035,2.8,[-4.25,1.4,-1.8],steel);
+      cylinder(state.scene,.035,2.8,[4.25,1.4,-1.8],steel);
+      box(state.scene,[1.7,.08,.12],[0,2.35,-3.9],material(0x8ebcff,{emissive:0x203e82,emissiveIntensity:.7}));
+      box(state.scene,[.9,1.3,.12],[-4.4,.75,1.7],material(0xf3f2df,{roughness:.42,emissive:0xffe08a,emissiveIntensity:.25}));
+    }else if(area.theme==="cargo"){
+      [-3.8,0,3.8].forEach((x,i)=>{box(state.scene,[2.3,.04,1.25],[x,.08,2.6],material(i===1?0xddb957:0x3a8fb6,{emissive:i===1?0x5b3d07:0x10364a,emissiveIntensity:.25}));cylinder(state.scene,.18,.08,[x,.18,2.6],brass);});
+      box(state.scene,[7.8,.04,.08],[0,.16,2.6],material(0xffd66b,{emissive:0x5b3d07,emissiveIntensity:.36}));
+    }else if(area.theme==="cabin"){
+      box(state.scene,[1.2,.7,.05],[-3.55,1.7,.25],material(0x244bff,{roughness:.72}));
+      box(state.scene,[.9,.5,.04],[-3.55,1.7,.21],material(0xd7edf8,{roughness:.65}));
+    }else if(area.theme==="mess"){
+      box(state.scene,[1.2,.08,.08],[0,1.65,-4.45],material(0x72e4a6,{emissive:0x1f5b3c,emissiveIntensity:.45}));
+      box(state.scene,[3.4,.04,1.2],[0,.96,2.4],material(0x52606a,{roughness:.62}));
+    }else if(area.theme==="galley"){
+      for(let x=-4;x<=4;x+=2)cylinder(state.scene,.12,.08,[x,1.26,-3.55],material(0xff6a3c,{emissive:0x5a1407,emissiveIntensity:.6}),[Math.PI/2,0,0]);
+      box(state.scene,[.9,1.1,.08],[-5.15,1.35,-.5],material(0xe85a51,{emissive:0x4c0905,emissiveIntensity:.35}));
+    }else if(area.theme==="infirmary"){
+      box(state.scene,[.18,1.2,.08],[-4.6,1.55,.5],material(0xe85a51,{emissive:0x4c0905,emissiveIntensity:.25}));
+      box(state.scene,[1.2,.18,.08],[-4.6,1.55,.5],material(0xe85a51,{emissive:0x4c0905,emissiveIntensity:.25}));
+      cylinder(state.scene,.14,.9,[-3.8,.55,2.3],material(0xd8e4e6,{metalness:.38,roughness:.42}));
+    }
   }
 
   function buildRoomDetails(area){
     const steel=material(0x70828d,{metalness:.64,roughness:.34});
     const dark=material(0x15232e,{metalness:.28,roughness:.62});
+    addAreaIdentityProps(area);
     if(area.theme==='bridge'){
       box(state.scene,[18,.9,2.1],[0,.45,-5.1],dark,[0,0,0]);
       box(state.scene,[7,.8,1.5],[0,.4,-2.4],dark);
@@ -1528,7 +1686,7 @@
     const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;
     const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false,opacity:.92}));
     sprite.position.set(0,3.16,.02);sprite.scale.set(2.25,.75,1);sprite.renderOrder=34;sprite.visible=false;
-    sprite.userData.bubble={canvas,ctx,tex,lastText:'',lastTone:''};
+    sprite.userData.bubble={canvas,ctx,tex,lastText:',lastTone:'};
     return sprite;
   }
 
@@ -1661,6 +1819,28 @@
     registerCollider(g,.62);
     item.anim={path:def.path||[[def.x,def.z]],speed:def.speed||.15,phase:index*.37,targetIndex:1,wait:.2+index*.16,root,spine,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,speech,lastX:def.x,lastZ:def.z,attention:0,gesture:0};
     state.npcs.push(item);
+  }
+
+  function createAmbientCrew(area){
+    const areaId=state.area;
+    const sets={
+      bridge:[['nav-cadet','SEYIR STAJYERI','Harita masasinda rota kontrolu','Kerteriz ve CPA notlarini zabite hazirliyorum.',-3.8,2.2,[[-4.6,2.2],[-2.1,-1.6],[-5.3,-2.5]],.18,'cadet']],
+      corridor:[['cleaner-watch','KAMAROT','Yaşam mahalli turu','Koridoru bos tut; acil rolde bu yol kilitlenmemeli.',-1.8,5.8,[[-1.8,5.8],[1.8,1.5],[-1.2,-5.4]],.16,'crew'],['oiler-transit','YAGCI','Makine vardiyasina gecis','ECR yolundayim, sicak yuzey ve kacagi raporlayacagim.',1.8,-4.8,[[1.8,-4.8],[-1.8,-1.2],[2.2,6]],.17,'engine']],
+      deck:[['deck-hand-round','GUVERTACI','Halat ve borda turu','Snap-back alanindan cikmadan halat kontrolu yapma.',-3.6,-9,[[-3.6,-9],[-4,2],[-1.2,7]],.2,'deck'],['pilot-watch','PILOT WATCH','Borda ve ladder gozlemi','Pilot tarafi, borda isigi ve can simidi hazir.',3.9,5.2,[[3.9,5.2],[4.2,-2.5],[2.6,-8]],.18,'deck']],
+      engine:[['engine-oiler-live','YAGCI','Pompa ve bilge turu','Alarmi susturmadan once sizinti kaynagini bulmak lazim.',-4.6,2.6,[[-4.6,2.6],[-1.4,-3.2],[5,2.2]],.17,'engine'],['electrician-live','ELEKTRIKCI','Panel kontrolu','Jenerator yuk paylasimi ve izolasyon degerini okuyorum.',4.8,-2.8,[[4.8,-2.8],[1.4,3.2],[-3.8,-1.8]],.15,'engine']],
+      radio:[['gmdss-cadet','GMDSS STAJYERI','Dinleme vardiyasi','DSC alarm gelirse once konum ve tehlike turu net yazilir.',-2.2,1.8,[[-2.2,1.8],[2.4,1.2],[1.8,-2.2]],.13,'cadet']],
+      cargo:[['cargo-cadet-live','YUK STAJYERI','Ballast ve trim turu','Gelgit penceresi draft ve UKC ile birlikte okunur.',-3.6,2.2,[[-3.6,2.2],[2.8,-2.8],[5.2,1.8]],.15,'cadet'],['pumpman-live','POMPACI','Tank ve valf kontrolu','Transfer baslamadan once valf sirasi ve scupper kapali mi bakilir.',4.8,-3.2,[[4.8,-3.2],[1.2,2.8],[-4.8,-1.6]],.16,'deck']],
+      cabin:[['cadet-room-live','STAJYER','Vardiya oncesi hazirlik','Aileyi ozlemek normal; yorgunluk artarsa vardiya zabitine soyle.',-2.2,-1.2,[[-2.2,-1.2],[1.8,1.4],[-3.2,2.4]],.1,'cadet']],
+      mess:[['mess-steward-live','STEWARD','Messroom servisi','Ekip morali dusunce vardiya dikkati de duser.',-2.2,1.6,[[-2.2,1.6],[2.4,-1.6],[3,1.8]],.12,'cook']],
+      galley:[['galley-hand-live','KAMBUZCU','Sicak yuzey kontrolu','Yag yangininda su yok; dogru sondurucu hazir.',-2.8,-1.8,[[-2.8,-1.8],[2.4,-2.4],[1.2,1.5]],.12,'cook']],
+      infirmary:[['med-cadet-live','SAGLIK STAJYERI','Revir stok kontrolu','Oksijen tupu, maske ve sedye yolu hazir tutulur.',-2.2,1.2,[[-2.2,1.2],[2.2,-1.2],[1.6,1.8]],.1,'medical']]
+    };
+    const list=(sets[areaId]||[]).slice(0,MOBILE?1:2);
+    list.forEach((row,index)=>{
+      const def=npc('ambient-'+areaId+'-'+row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]);
+      def.kind='ambient';def.ambient=true;def.tone=area.theme||'info';
+      createNpc(def,20+index);
+    });
   }
 
   function pulseRouteTarget(target){
@@ -1919,7 +2099,7 @@
       const btn=document.createElement('button');
       const roleClass=item.type==='npc'?(' '+(item.uniform||'crew')):'';
       const routeItem=getDirectorLocalItem(objective);
-      btn.className='fp3d-marker '+item.type+roleClass+(item.kind?' '+item.kind:'')+toneClassForItem(item)+((objective.id===item.id || (routeItem&&routeItem.id===item.id))?' objective':'');
+      btn.className=['fp3d-marker',item.type,roleClass.trim(),item.kind||'',toneClassForItem(item).trim(),(objective.id===item.id||(routeItem&&routeItem.id===item.id))?'objective':''].filter(Boolean).join(' ');
       btn.dataset.id=item.id;
       btn.innerHTML='<i></i><b>'+item.label+'</b><small>'+item.detail+'</small><em></em>';
       btn.addEventListener('click',ev=>{ev.stopPropagation();item.type==='door'?walkToDoorWithFallback(item,item.target):walkTo(item);});
@@ -1948,12 +2128,17 @@
     state.interactions.forEach(item=>{
       item.object.getWorldPosition(v);
       const dx=v.x-state.player.x,dz=v.z-state.player.z,dist=Math.hypot(dx,dz);
-      if(!nearest||dist<nearest.distance) nearest=Object.assign({},item,{distance:dist,world:{x:v.x,z:v.z}});
-      if(dist<4.2) discover(item);
+      const nearestEligible=!item.ambient||dist<3.2;
+      if(nearestEligible&&(!nearest||dist<nearest.distance)) nearest=Object.assign({},item,{distance:dist,world:{x:v.x,z:v.z}});
+      if(dist<4.2&&!item.ambient) discover(item);
       const projected=v.clone();projected.y+=item.type==='npc'?2.45:1.75;projected.project(state.camera);
-      const visible=projected.z>-1&&projected.z<1&&Math.abs(projected.x)<1.18&&Math.abs(projected.y)<1.15&&dist<15;
+      const baseVisible=projected.z>-1&&projected.z<1&&Math.abs(projected.x)<1.18&&Math.abs(projected.y)<1.15&&dist<15;
+      const important=!!((objective.id===item.id)||(mapTarget&&mapTarget.id===item.id));
+      const visible=baseVisible&&(!item.ambient||dist<5.6||important);
       const aim=Math.hypot(projected.x,projected.y);
-      if(visible&&dist<6.2&&aim<.28){
+      const aimLimit=item.ambient?0.18:0.28;
+      const aimDist=item.ambient?4.1:6.2;
+      if(visible&&dist<aimDist&&aim<aimLimit){
         const score=aim+dist*.035;
         if(!aimed||score<aimed.aimScore) aimed=Object.assign({},item,{distance:dist,aimScore:score,world:{x:v.x,z:v.z}});
       }
@@ -2006,11 +2191,19 @@
     return target.label||target.reason||'Serbest kesif';
   }
 
+  function showAreaBriefing(areaId,summary){
+    const area=AREAS[areaId],brief=AREA_BRIEFINGS[areaId];
+    if(!area||!brief)return;
+    showSceneReport({id:"area-"+areaId,label:brief.title,detail:brief.meta,report:{title:brief.title,meta:(brief.meta+" / Hedef: "+(summary||"Serbest kesif")),steps:brief.steps}},area.theme||"info");
+  }
+
   function announceAreaArrival(areaId){
     const area=AREAS[areaId];
     if(!area)return;
     const summary=summarizeCurrentTarget();
     pushFieldLog(area.title+' varis / Hedef: '+summary,'info');
+    showActionBanner(area.title,'Mahale girildi / hedef: '+summary,area.theme||'area');
+    showAreaBriefing(areaId,summary);
     if(state.ui.root){
       state.ui.root.classList.remove('area-arrival');
       void state.ui.root.offsetWidth;
@@ -2046,6 +2239,7 @@
     buildAreaNav();
     updateMissionDock();
     updateDutyChain();
+    updateQuickTravelDock();
   }
 
   function setArea(next){
@@ -2319,6 +2513,8 @@
     });
   }
   function npcDutyTarget(item,index,eventItem){
+    if(item&&item.ambient&&!eventItem)return null;
+    if(item&&item.ambient&&eventItem&&index%2)return null;
     let target=eventItem;
     if(!target){
       const objective=getDirectorLocalItem(getDirectorTarget());
@@ -2425,7 +2621,10 @@
       }
       const playerDist=Math.hypot(item.object.position.x-state.player.x,item.object.position.z-state.player.z);
       a.attention+=( (eventItem||playerDist<4.2?1:0)-a.attention)*clamp(dt*4,0,1);
-      const speechText=eventItem?(eventItem.label+': '+incidentToneLine(eventItem)):(duty&&a.attention>.35?('Gorev noktasi: '+duty.label):(playerDist<4.2?String(item.detail||item.line||'Vardiya takipte.').slice(0,58):''));
+      let speechText='';
+      if(eventItem) speechText=eventItem.label+': '+incidentToneLine(eventItem);
+      else if(duty&&a.attention>.35) speechText='Gorev noktasi: '+duty.label;
+      else if(playerDist<4.2) speechText=String(item.detail||item.line||'Vardiya takipte.').slice(0,58);
       if(a.speech){
         a.speech.visible=!!speechText;
         if(speechText) updateNpcSpeechBubble(a.speech,speechText,eventItem?.tone||duty?.tone||item.uniform||'info');
@@ -2552,6 +2751,22 @@
       return true;
     }
     if(key==='e'||key==='enter'){ev.preventDefault();interact();return true;}
+    if(key==='1'){ev.preventDefault();directCompartmentAction('bridge');return true;}
+    if(key==='2'){ev.preventDefault();directCompartmentAction('engine');return true;}
+    if(key==='3'){ev.preventDefault();directCompartmentAction('deck');return true;}
+    if(key==='4'){ev.preventDefault();directCompartmentAction('deck','bow');return true;}
+    if(key==='0'){ev.preventDefault();directCompartmentAction('corridor');return true;}
+    if(key==='q'){ev.preventDefault();directCompartmentAction('radio');return true;}
+    if(key==='z'){ev.preventDefault();directCompartmentAction('cargo');return true;}
+    if(key==='x'){ev.preventDefault();directCompartmentAction('cabin');return true;}
+    if(key==='v'){ev.preventDefault();directCompartmentAction('mess');return true;}
+    if(key==='b'){ev.preventDefault();directCompartmentAction('galley');return true;}
+    if(key==='h'){ev.preventDefault();directCompartmentAction('infirmary');return true;}
+    if(key==='5'){ev.preventDefault();directWorldAction('ecdis');return true;}
+    if(key==='6'){ev.preventDefault();directWorldAction('engine');return true;}
+    if(key==='7'){ev.preventDefault();directWorldAction('sea');return true;}
+    if(key==='8'){ev.preventDefault();directWorldAction('gmdss');return true;}
+    if(key==='9'){ev.preventDefault();directWorldAction('cargo');return true;}
     if(key==='m'){ev.preventDefault();callGame('openMap');return true;} 
     if(key==='r'){ev.preventDefault();resetPlayerToSpawn();return true;} 
     if(key==='f'){ev.preventDefault();walkToDirectorTarget();return true;}

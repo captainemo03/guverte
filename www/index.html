@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
 <link rel="stylesheet" href="./index.css?v=171">
-<link rel="stylesheet" href="./first-person-world.css?v=3">
+<link rel="stylesheet" href="./first-person-world.css?v=15">
 </head>
 <body>
 <script>
@@ -814,8 +814,22 @@
   </div>
 </div>
 
+<script>
+window.__GUVERTE_THREE_READY = new Promise(function(resolve,reject){
+  window.__GUVERTE_THREE_RESOLVE = resolve;
+  window.__GUVERTE_THREE_REJECT = reject;
+});
+</script>
+<script type="module">
+import * as THREE from './vendor/three.module.js';
+window.__GUVERTE_THREE = THREE;
+if(window.__GUVERTE_THREE_RESOLVE) window.__GUVERTE_THREE_RESOLVE(THREE);
+</script>
+<script nomodule>
+if(window.__GUVERTE_THREE_REJECT) window.__GUVERTE_THREE_REJECT(new Error('Module scripts are not supported'));
+</script>
 <script src="./index.js?v=197"></script>
-<script src="./first-person-world.js?v=3"></script>
+<script src="./first-person-world.js?v=15"></script>
 <script src="./release-quality.js?v=10"></script>
 </body>
 </html>
