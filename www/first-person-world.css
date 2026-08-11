@@ -370,3 +370,23 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
 .fp3d-use.pressed{transform:translateY(2px) scale(.96);filter:brightness(1.08);box-shadow:0 0 0 7px rgba(105,228,160,.12),0 8px 20px rgba(0,0,0,.42)}
 .fp3d-use{transition:transform .09s ease,filter .09s ease,box-shadow .12s ease,background .12s ease,border-color .12s ease}
 @media (max-width:820px),(pointer:coarse){.fp3d-stick.active{box-shadow:0 0 0 5px rgba(112,233,168,.1),0 10px 24px rgba(0,0,0,.34)}}
+
+.fp3d-root.area-arrival .fp3d-hud{border-color:rgba(255,214,107,.62);box-shadow:0 0 0 4px rgba(255,214,107,.12),0 18px 44px rgba(0,0,0,.42);}
+.fp3d-root.area-arrival .fp3d-location>i{border-color:#ffd66b;background:radial-gradient(circle,#ffd66b 0 3px,transparent 4px),repeating-radial-gradient(circle,rgba(255,214,107,.28) 0 1px,transparent 1px 7px);}
+.fp3d-root.area-arrival .fp3d-location b{color:#ffe7a0;}
+.fp3d-duty-chain em{display:block;margin-top:4px;color:#ffe7a0;font:700 8px "Share Tech Mono",monospace;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-duty-chain.reward{border-color:rgba(255,214,107,.72);box-shadow:0 0 0 4px rgba(255,214,107,.13),0 18px 44px rgba(0,0,0,.42);}
+.fp3d-duty-chain.reward i,.fp3d-duty-chain.reward em{color:#ffd66b;}
+@media (max-width:820px),(pointer:coarse){.fp3d-duty-chain em{font-size:7px;margin-top:3px}}
+/* Panic cleanup pass: make area travel obvious and reduce HUD clutter. */
+.fp3d-area-nav{top:68px;z-index:45;gap:7px;max-width:min(96vw,980px);padding:7px;background:rgba(2,10,16,.9);border-color:rgba(255,214,107,.32);}
+.fp3d-area-nav button{min-height:36px;min-width:72px;padding:0 11px;font-size:9px;border-color:rgba(255,214,107,.3);background:rgba(13,29,39,.92);color:#eaf6fb;}
+.fp3d-area-nav button.direct{box-shadow:inset 0 -2px 0 rgba(255,214,107,.22);}
+.fp3d-area-nav button.active{background:#103928;border-color:#69e4a0;color:#dfffe9;}
+.fp3d-mission-dock,.fp3d-duty-chain{background:rgba(3,12,20,.62);box-shadow:0 10px 24px rgba(0,0,0,.24);}
+.fp3d-mission-dock:not(.ready):not(.far){opacity:.82;}
+.fp3d-world-status,.fp3d-risk-meter{opacity:.78;}
+.fp3d-event-strip.show{display:flex;animation:fp3dEventHit .55s ease-out both;}
+@keyframes fp3dEventHit{0%{transform:translateX(-50%) scale(.96);filter:brightness(1.35)}100%{transform:translateX(-50%) scale(1);filter:brightness(1)}}
+@media (max-width:820px),(pointer:coarse){.fp3d-area-nav{top:50px;left:6px;right:6px;max-width:none;transform:none;padding:6px}.fp3d-area-nav button{min-width:62px;min-height:34px;font-size:8px}.fp3d-mission-dock{bottom:max(104px,calc(env(safe-area-inset-bottom) + 84px));}.fp3d-duty-chain{bottom:max(166px,calc(env(safe-area-inset-bottom) + 146px));}}
+@media (max-height:500px) and (orientation:landscape){.fp3d-area-nav{top:44px}.fp3d-area-nav button{min-height:28px;min-width:54px;font-size:7px}.fp3d-duty-chain{display:none}.fp3d-world-status,.fp3d-risk-meter{display:none}}

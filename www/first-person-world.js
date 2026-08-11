@@ -185,7 +185,7 @@
     stick:{x:0,y:0,pointerId:null},look:{active:false,pointerId:null,x:0,y:0},runLock:false,
     autoTarget:null,autoNav:{lastDist:0,stuck:0,strafeDir:1,lastX:0,lastZ:0,lastPulse:0},interactions:[],npcs:[],animatedScreens:[],waves:[],distantShips:[],ambientFx:[],colliders:[],discoveries:Object.create(null),visitedAreas:Object.create(null),
     animationId:0,lastFrame:0,elapsed:0,screenTick:0,nearest:null,currentDialogue:null,
-    resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{}
+    resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,streak:0,bestStreak:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,areaNavFallbackTimer:0,areaArrivalTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{}
   };
 
   function currentIncidentShift(minutes){
@@ -214,6 +214,8 @@
       if(Number.isFinite(saved.questIndex)) state.questIndex = saved.questIndex;
       if(saved.questDone && typeof saved.questDone === 'object') state.questDone = saved.questDone;
       if(Number.isFinite(saved.worldXp)) state.worldXp = saved.worldXp;
+      if(Number.isFinite(saved.streak)) state.streak = saved.streak;
+      if(Number.isFinite(saved.bestStreak)) state.bestStreak = saved.bestStreak;
       if(saved.badges && typeof saved.badges === 'object') state.badges = saved.badges;
       if(saved.discoveries && typeof saved.discoveries === 'object') state.discoveries = saved.discoveries;
       if(saved.visitedAreas && typeof saved.visitedAreas === 'object') state.visitedAreas = saved.visitedAreas;
@@ -226,7 +228,7 @@
   function saveState(){
     try{
       state.positions[state.area] = {x:state.player.x,z:state.player.z,yaw:state.yaw};
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({area:state.area,positions:state.positions,yaw:state.yaw,questIndex:state.questIndex,questDone:state.questDone,worldXp:state.worldXp,badges:state.badges,discoveries:state.discoveries,visitedAreas:state.visitedAreas,completedIncidents:state.completedIncidents,incidentShift:state.incidentShift,watchMinutes:state.watchMinutes}));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({area:state.area,positions:state.positions,yaw:state.yaw,questIndex:state.questIndex,questDone:state.questDone,worldXp:state.worldXp,streak:state.streak,bestStreak:state.bestStreak,badges:state.badges,discoveries:state.discoveries,visitedAreas:state.visitedAreas,completedIncidents:state.completedIncidents,incidentShift:state.incidentShift,watchMinutes:state.watchMinutes}));
     }catch(_err){}
   }
   restoreState();
@@ -286,7 +288,7 @@
         '<div class="fp3d-event-strip"><b id="fp3d-event-title">GEMİ SAKİN</b><span id="fp3d-event-text">Rutin vardiya akışı.</span></div>'+ 
         '<div class="fp3d-world-status"><b>ACIK DUNYA</b><span id="fp3d-world-clock">06:12</span><span id="fp3d-world-weather">Sakin deniz</span><small id="fp3d-world-discovery">Gemi icinde serbest dolas</small></div>'+ 
         '<div class="fp3d-risk-meter"><b>RISK</b><span id="fp3d-risk-text">Rutin</span><small id="fp3d-risk-note">Normal vardiya</small><i><em id="fp3d-risk-fill"></em></i></div>'+
-        '<div class="fp3d-duty-chain"><b>VARDIYA AKISI</b><span id="fp3d-duty-step">Gorev hazirlaniyor</span><small id="fp3d-duty-progress">0/0</small><i id="fp3d-duty-xp">XP 0</i></div>'+ 
+        '<div class="fp3d-duty-chain"><b>VARDIYA AKISI</b><span id="fp3d-duty-step">Gorev hazirlaniyor</span><small id="fp3d-duty-progress">0/0</small><i id="fp3d-duty-xp">XP 0</i><em id="fp3d-duty-streak">Seri x0</em></div>'+ 
         '<div class="fp3d-crew-bark"><b id="fp3d-bark-name">MURETTEBAT</b><span id="fp3d-bark-line">Gemi rutini basliyor</span></div>'+ 
         '<div class="fp3d-field-log"><b>SAHA GUNLUGU</b><span id="fp3d-field-log-line">Gemi hazir</span></div>'+ 
         '<div class="fp3d-scene-report" aria-live="polite"></div>'+ 
@@ -333,6 +335,7 @@
       dutyStep:host.stage.querySelector('#fp3d-duty-step'),
       dutyProgress:host.stage.querySelector('#fp3d-duty-progress'),
       dutyXp:host.stage.querySelector('#fp3d-duty-xp'),
+      dutyStreak:host.stage.querySelector('#fp3d-duty-streak'),
       crewBark:host.stage.querySelector('.fp3d-crew-bark'),
       barkName:host.stage.querySelector('#fp3d-bark-name'),
       barkLine:host.stage.querySelector('#fp3d-bark-line'),
@@ -457,11 +460,25 @@
     return 'Yeni Stajyer';
   }
 
-  function awardWorldProgress(quest){
-    if(!quest || state.badges[quest.id]) return;
-    state.worldXp+=10;
-    state.badges[quest.id]=true;
+  function updateRewardHud(){
     if(state.ui.dutyXp) state.ui.dutyXp.textContent=getWorldRank()+' · XP '+state.worldXp;
+    if(state.ui.dutyStreak) state.ui.dutyStreak.textContent='Seri x'+state.streak+' · Rekor '+state.bestStreak;
+  }
+
+  function awardWorldProgress(source,amount){
+    const key=source?.id || source?.label || String(source||'progress');
+    if(source&&source.once&&state.badges[key]) return false;
+    state.worldXp+=amount||4;
+    state.streak+=1;
+    state.bestStreak=Math.max(state.bestStreak,state.streak);
+    if(source&&source.once) state.badges[key]=true;
+    updateRewardHud();
+    if(state.ui.dutyChain){
+      state.ui.dutyChain.classList.add('pulse','reward');
+      setTimeout(()=>state.ui.dutyChain&&state.ui.dutyChain.classList.remove('reward'),900);
+    }
+    saveState();
+    return true;
   }
   function getActiveWorldQuest(){
     return WORLD_QUESTS[Math.min(state.questIndex,WORLD_QUESTS.length-1)] || null;
@@ -475,12 +492,12 @@
     if(!quest || doneCount>=WORLD_QUESTS.length){
       state.ui.dutyStep.textContent='Serbest vardiya: gemiyi kesfetmeye devam et';
       state.ui.dutyProgress.textContent=WORLD_QUESTS.length+'/'+WORLD_QUESTS.length;
-      if(state.ui.dutyXp) state.ui.dutyXp.textContent=getWorldRank()+' · XP '+state.worldXp;
+      updateRewardHud();
       return;
     }
     state.ui.dutyStep.textContent=quest.title;
     state.ui.dutyProgress.textContent=doneCount+'/'+WORLD_QUESTS.length;
-    if(state.ui.dutyXp) state.ui.dutyXp.textContent=getWorldRank()+' · XP '+state.worldXp;
+      updateRewardHud();
   }
 
   function flashDutyChain(done,nextQuest){
@@ -496,6 +513,7 @@
     const match=quest.target===item.id || quest.target===item.device || quest.target===item.action;
     if(!match) return false;
     state.questDone[quest.id]=true;
+    awardWorldProgress({id:quest.id,once:true},14);
     state.questIndex=Math.min(state.questIndex+1,WORLD_QUESTS.length);
     state.lastDiscovery='Gorev tamamlandi: '+quest.title;
     saveState();
@@ -602,13 +620,13 @@
     state.ui.fieldLogLine.textContent=entry.text;
   }
   function updateCrewBarks(){
-    if(!state.ui.crewBark || state.elapsed-state.crewBarkTick<12) return;
+    if(!state.ui.crewBark || state.elapsed-state.crewBarkTick<7) return;
     state.crewBarkTick=state.elapsed;
     const nearNpc=state.npcs.map(item=>({item,dist:Math.hypot(item.object.position.x-state.player.x,item.object.position.z-state.player.z)})).sort((a,b)=>a.dist-b.dist)[0];
     const incident=nearestActiveIncident();
     const pool=CREW_BARKS[state.area]||CREW_BARKS.corridor;
-    let line=nearNpc&&nearNpc.dist<6&&nearNpc.item.line?nearNpc.item.line:pool[Math.floor(Math.random()*pool.length)];
-    let name=nearNpc&&nearNpc.dist<6?nearNpc.item.label:'GEMI RUTINI';
+    let line=nearNpc&&nearNpc.dist<7&&nearNpc.item.line?nearNpc.item.line:pool[Math.floor(Math.random()*pool.length)];
+    let name=nearNpc&&nearNpc.dist<7?nearNpc.item.label:'GEMI RUTINI';
     if(incident&&incident.dist<8){
       name=nearNpc&&nearNpc.dist<7?nearNpc.item.label:'SAHA OLAYI';
       line=incident.item.label+': '+incidentToneLine(incident.item);
@@ -705,12 +723,26 @@
     playTone(base,.18,state.area==='engine'?'sawtooth':'sine',state.area==='deck' ? .045 : .032);
     if(state.area==='cabin' && Math.floor(state.elapsed/15)%2===0) setTimeout(()=>playTone(230,.45,'sine',.025),220);
   }
-  function updateEventStrip(){if(!state.ui.eventStrip)return;const ev=state.liveEvent;state.ui.eventStrip.classList.toggle('show',!!ev);if(ev){state.ui.eventTitle.textContent=ev.title;state.ui.eventText.textContent=ev.text;}}
+  function updateEventStrip(){if(!state.ui.eventStrip)return;const ev=state.liveEvent;state.ui.eventStrip.classList.toggle('show',!!ev);if(ev){const left=Math.max(0,Math.ceil(55-(state.elapsed-(ev.started||state.elapsed))));state.ui.eventTitle.textContent=ev.title;state.ui.eventText.textContent=ev.text+' / sure '+left+' sn';}}
+  function updateLiveEventPressure(){
+    if(!state.liveEvent)return;
+    const age=state.elapsed-(state.liveEvent.started||state.elapsed);
+    if(age>55){
+      pushFieldLog('Olay kacirildi: '+state.liveEvent.title+' / Seri sifirlandi','warn');
+      callGame('addWatchFeed','Acik dunya olayi kacirildi: '+state.liveEvent.title,'warn');
+      callGame('showNotif','VARDIYA BASKISI',state.liveEvent.title,'Olay gec kaldi. Seri sifirlandi, yeni olaya hazirlan.');
+      state.streak=0;updateRewardHud();saveState();
+      state.liveEvent=null;state.nextEventAt=state.elapsed+8+Math.random()*8;updateEventStrip();
+      playAreaPulse('warn');
+    }else if(Math.floor(age)%5===0){
+      updateEventStrip();
+    }
+  }
   function maybeTriggerLiveEvent(){
     if(state.liveEvent || state.elapsed<state.nextEventAt)return;
     const pool=FP_EVENTS.filter(ev=>ev.area===state.area || Math.random()<.28);
     const ev=pool[Math.floor(Math.random()*Math.max(1,pool.length))] || FP_EVENTS[0];
-    state.liveEvent={...ev,started:state.elapsed};state.nextEventAt=state.elapsed+32+Math.random()*20;
+    state.liveEvent={...ev,started:state.elapsed};state.nextEventAt=state.elapsed+10+Math.random()*8;
     pushFieldLog(ev.title+': hedef rotaya alindi',ev.kind==='urgent'||ev.kind==='engine'?'warn':'info');
     callGame('addWatchFeed',ev.title+': '+ev.text, ev.kind==='urgent'||ev.kind==='engine'?'warn':'good');
     callGame('showNotif',ev.title,'1. Şahıs Olayı',ev.text);playAreaPulse(ev.kind);if(ev.kind==='life')setTimeout(playHomesickSob,320);if(ev.id==='radio-mf')setTimeout(playMorseSOS,260);updateEventStrip();
@@ -727,8 +759,8 @@
   function closeTrainingDrill(){state.pendingDrill=null;if(!state.ui.drill)return;state.ui.drill.classList.remove('show');state.ui.drill.innerHTML='';}
   function answerTrainingDrill(answer){
     const pending=state.pendingDrill;if(!pending)return;const ok=answer===pending.drill.a;
-    if(ok){state.completedDrills[pending.item.id]=true;triggerUsePulse(pending.item,'drill');advanceWorldQuest(pending.item);pushFieldLog('Egitim tamam: '+pending.drill.title,'good');callGame('applyEffect',pending.drill.effect||{bilgi:1},{skipContractTick:true});callGame('markWalkTaskDone',pending.item.id,pending.item.label);callGame('addWatchFeed',pending.drill.title+': dogru uygulama tamamlandi.','good');callGame('showNotif','EGITIM',pending.drill.title,'Dogru cevap kaydedildi.');clearLiveEventIfHandled(pending.item);closeTrainingDrill();}
-    else{hapticPulse('warn');pushFieldLog('Tekrar dene: '+pending.drill.title,'warn');callGame('addWatchFeed',pending.drill.title+': yanlis secim, tekrar dene.','warn');callGame('showNotif','EGITIM','Tekrar dene','Ipucu: gemide once emniyet, sonra dogrulama, sonra rapor.');playAreaPulse('warn');}
+    if(ok){state.completedDrills[pending.item.id]=true;triggerUsePulse(pending.item,'drill');awardWorldProgress({id:'drill-'+pending.item.id,once:true},5);advanceWorldQuest(pending.item);pushFieldLog('Egitim tamam: '+pending.drill.title+' / Seri x'+state.streak,'good');callGame('applyEffect',pending.drill.effect||{bilgi:1},{skipContractTick:true});callGame('markWalkTaskDone',pending.item.id,pending.item.label);callGame('addWatchFeed',pending.drill.title+': dogru uygulama tamamlandi.','good');callGame('showNotif','EGITIM',pending.drill.title,'Dogru cevap kaydedildi.');clearLiveEventIfHandled(pending.item);closeTrainingDrill();}
+    else{state.streak=0;updateRewardHud();saveState();hapticPulse('warn');pushFieldLog('Tekrar dene: '+pending.drill.title+' / Seri sifirlandi','warn');callGame('addWatchFeed',pending.drill.title+': yanlis secim, tekrar dene.','warn');callGame('showNotif','EGITIM','Tekrar dene','Ipucu: gemide once emniyet, sonra dogrulama, sonra rapor.');playAreaPulse('warn');}
   }
   function getExplorationTarget(){
     const incident=nearestActiveIncident();
@@ -804,11 +836,33 @@
     if(target.area && target.area!==state.area)return findDoorTowardArea(target.area);
     return findInteractionById(target.id) || findDoorToArea(target.area);
   }
+  function walkToDoorWithFallback(doorItem,desiredArea){
+    if(!doorItem)return;
+    clearTimeout(state.areaNavFallbackTimer);
+    walkTo(doorItem);
+    state.areaNavFallbackTimer=setTimeout(()=>{
+      if(!state.active||state.area===desiredArea)return;
+      const stillWalking=state.autoTarget&&state.autoTarget.item&&state.autoTarget.item.id===doorItem.id;
+      if(stillWalking||doorItem.type==='door'){
+        pushFieldLog('Gecis guvenceye alindi: '+doorItem.label,'info');
+        setArea((desiredArea&&AREAS[desiredArea])?desiredArea:doorItem.target);
+      }
+    },2400);
+  }
+
+  function jumpToArea(target,reason){
+    if(!target||!AREAS[target]||target===state.area)return;
+    clearTimeout(state.areaNavFallbackTimer);
+    resetInputState();
+    pushFieldLog((reason||'Mahale gecis')+': '+AREAS[target].title,'info');
+    setArea(target);
+  }
+
   function walkToDirectorTarget(){
     const target=getDirectorTarget();
     if(target&&target.area&&target.area!==state.area){
       const doorItem=findDoorTowardArea(target.area);
-      if(doorItem){walkTo(doorItem);return;}
+      if(doorItem){jumpToArea(target.area,'Rota gecisi');return;}
       callGame('showNotif','ROTA YOK','Kapi baglantisi bulunamadi','Harita uzerinden uygun gecisi sec.');return;
     }
     const item=getDirectorLocalItem(target) || state.nearest;
@@ -853,25 +907,17 @@
   function buildAreaNav(){
     if(!state.ui.areaNav)return;
     const order=['bridge','corridor','deck','engine','radio','cargo','cabin','mess','galley','infirmary'];
-    const doors=(AREAS[state.area]?.doors||[]);
+    const navLabels={bridge:'KOPRU',corridor:'KORIDOR',deck:'GUVERTE',engine:'MAKINE',radio:'GMDSS',cargo:'YUK',cabin:'KAMARA',mess:'MESS',galley:'KAMBUZ',infirmary:'REVIR'};
     state.ui.areaNav.innerHTML=order.filter(id=>AREAS[id]).map(id=>{
       const area=AREAS[id];
-      const linked=doors.find(d=>d.target===id);
-      const route=findAreaRoute(id);
-      const routed=!linked && route.length>1;
-      const reachable=id===state.area || !!linked || routed;
-      const cls=(id===state.area?'active ':'')+(linked?'linked ':routed?'routed ':'locked ');
-      const navLabels={bridge:'KOPRU',corridor:'KORIDOR',deck:'GUVERTE',engine:'MAKINE',radio:'GMDSS',cargo:'YUK',cabin:'KAMARA',mess:'MESS',galley:'KAMBUZ',infirmary:'REVIR'};
+      const cls=id===state.area?'active':'direct';
       const label=navLabels[id] || area.title;
-      const routeTitle=route.length>1?' title="Rota: '+formatAreaRoute(route)+'"':'';
-      return '<button type="button" data-area="'+id+'" class="'+cls+'" '+(!reachable?'disabled':'')+routeTitle+'>'+label+'</button>';
-    }).join('');
+      return `<button type="button" data-area="${id}" class="${cls}" title="Mahale gec: ${area.title}">${label}</button>`;
+    }).join("");
     state.ui.areaNav.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
       const target=btn.dataset.area;
       if(target===state.area) return;
-      const doorItem=findDoorTowardArea(target);
-      if(doorItem){pushFieldLog('Rota hedefi: '+(AREAS[target]?.title||target),'info');walkTo(doorItem);return;}
-      callGame('showNotif','ROTA YOK','Gecis bulunamadi','Bu mahal icin kapi zinciri henuz yok.');
+      jumpToArea(target,'Mahalle secimi');
     }));
   }
   function bindStick(){
@@ -1676,7 +1722,7 @@
     if(!item || state.discoveries[item.id]) return;
     state.discoveries[item.id]=true;
     state.lastDiscovery=item.label;
-    state.worldXp+=1;
+    awardWorldProgress({id:'discover-'+item.id,once:true},2);
     if(state.ui.worldDiscovery) state.ui.worldDiscovery.textContent='Kesfedildi: '+item.label;
     updateDutyChain();saveState();
     pushFieldLog('Kesif: '+item.label,'good');
@@ -1724,7 +1770,7 @@
     const area=AREAS[areaId];
     if(!area||state.visitedAreas[areaId])return;
     state.visitedAreas[areaId]=true;
-    state.worldXp+=3;
+    awardWorldProgress({id:'area-'+areaId,once:true},5);
     state.lastDiscovery='Yeni mahal: '+area.title;
     if(state.ui.worldDiscovery) state.ui.worldDiscovery.textContent=state.lastDiscovery;
     updateDutyChain();saveState();
@@ -1835,7 +1881,7 @@
       btn.className='fp3d-marker '+item.type+roleClass+(item.kind?' '+item.kind:'')+toneClassForItem(item)+((objective.id===item.id || (routeItem&&routeItem.id===item.id))?' objective':'');
       btn.dataset.id=item.id;
       btn.innerHTML='<i></i><b>'+item.label+'</b><small>'+item.detail+'</small><em></em>';
-      btn.addEventListener('click',ev=>{ev.stopPropagation();walkTo(item);});
+      btn.addEventListener('click',ev=>{ev.stopPropagation();item.type==='door'?walkToDoorWithFallback(item,item.target):walkTo(item);});
       state.ui.markers.appendChild(btn);item.marker=btn;
     });
   }
@@ -1924,6 +1970,13 @@
     if(!area)return;
     const summary=summarizeCurrentTarget();
     pushFieldLog(area.title+' varis / Hedef: '+summary,'info');
+    if(state.ui.root){
+      state.ui.root.classList.remove('area-arrival');
+      void state.ui.root.offsetWidth;
+      state.ui.root.classList.add('area-arrival');
+      clearTimeout(state.areaArrivalTimer);
+      state.areaArrivalTimer=setTimeout(()=>state.ui.root&&state.ui.root.classList.remove('area-arrival'),1100);
+    }
     callGame('showNotif','MAHAL GIRISI',area.title,'Yeni hedef: '+summary);
   }
   function resetPlayerToSpawn(){
@@ -1956,6 +2009,7 @@
 
   function setArea(next){
     if(!AREAS[next]||next===state.area)return;
+    clearTimeout(state.areaNavFallbackTimer);state.autoTarget=null;resetAutoNav(null,0);
     saveState();state.previousArea=state.area;state.entryFrom=state.area;state.area=next;
     state.positions[next]=null;
     state.ui.fade.classList.add('active');
@@ -1995,8 +2049,9 @@
     if(action==='incident'){
       hapticPulse('good');
       state.completedIncidents[item.id]=true;
+      awardWorldProgress({id:item.id,once:true},7);
       saveState();
-      pushFieldLog('Mini olay tamam: '+item.label,'good');
+      pushFieldLog('Mini olay tamam: '+item.label+' / Seri x'+state.streak,'good');
       callGame('applyEffect',{bilgi:1,sayginlik:1},{skipContractTick:true});
       callGame('addWatchFeed','Acik dunya mini olay: '+item.label+' tamamlandi.','good');
       callGame('showNotif','ACIK DUNYA OLAYI',item.label,'Saha kontrolu tamamlandi ve kayda gecti.');
@@ -2107,6 +2162,12 @@
           if(arrived) setTimeout(()=>interact(arrived), 0);
         }else{
           if(progress<.012 && moved<.035) state.autoNav.stuck+=dt; else state.autoNav.stuck=Math.max(0,state.autoNav.stuck-dt*1.8);
+          if(item.type==='door'&&state.autoNav.stuck>1.35){
+            pushFieldLog('Kapi rotasi takildi, gecis tamamlandi: '+item.label,'info');
+            state.autoTarget=null;resetAutoNav(null,0);
+            setArea(item.target);
+            return;
+          }
           if(state.autoNav.stuck>.9){state.autoNav.strafeDir*=-1;state.autoNav.stuck=.28;}
           state.autoNav.lastDist=dist;state.autoNav.lastX=state.player.x;state.autoNav.lastZ=state.player.z;
           const desired=Math.atan2(dx,-dz),delta=Math.atan2(Math.sin(desired-state.yaw),Math.cos(desired-state.yaw));
@@ -2216,6 +2277,25 @@
       }
     });
   }
+  function npcDutyTarget(item,index,eventItem){
+    let target=eventItem;
+    if(!target){
+      const objective=getDirectorLocalItem(getDirectorTarget());
+      if(objective&&objective.type!=='door')target=objective;
+    }
+    if(!target||!target.object||target.id===item.id)return null;
+    const p=target.object.position;
+    const angle=index*2.399+(target.id.length%5)*.42;
+    const radius=target.kind==='incident'?1.45:target.type==='npc'?1.8:1.25;
+    const area=AREAS[state.area]||AREAS.bridge;
+    return {
+      x:clamp(p.x+Math.cos(angle)*radius,-area.bounds[0]+.75,area.bounds[0]-.75),
+      z:clamp(p.z+Math.sin(angle)*radius,-area.bounds[1]+.75,area.bounds[1]-.75),
+      label:target.label,
+      tone:target.tone||target.kind||'info'
+    };
+  }
+
   function updateWorld(dt){
     const T=state.THREE;
     state.waves.forEach(w=>{
@@ -2242,8 +2322,17 @@
     state.npcs.forEach((item,index)=>{
       const a=item.anim,p=a.path&&a.path.length?a.path:[[item.object.position.x,item.object.position.z]];
       const prevX=item.object.position.x,prevZ=item.object.position.z;
+      const duty=npcDutyTarget(item,index,eventItem);
       let moving=false;
-      if(p.length>1){
+      if(duty){
+        const dx=duty.x-item.object.position.x,dz=duty.z-item.object.position.z,dist=Math.hypot(dx,dz);
+        if(dist>.2){
+          const step=Math.min(dist,(a.speed||.15)*3.75*dt);
+          item.object.position.x+=(dx/dist)*step;item.object.position.z+=(dz/dist)*step;moving=true;
+        }else{
+          a.wait=Math.max(a.wait,.16);
+        }
+      }else if(p.length>1){
         if(a.wait>0){
           a.wait=Math.max(0,a.wait-dt);
         }else{
@@ -2295,10 +2384,10 @@
       }
       const playerDist=Math.hypot(item.object.position.x-state.player.x,item.object.position.z-state.player.z);
       a.attention+=( (eventItem||playerDist<4.2?1:0)-a.attention)*clamp(dt*4,0,1);
-      const speechText=eventItem?(eventItem.label+': '+incidentToneLine(eventItem)):(playerDist<4.2?String(item.detail||item.line||'Vardiya takipte.').slice(0,58):'');
+      const speechText=eventItem?(eventItem.label+': '+incidentToneLine(eventItem)):(duty&&a.attention>.35?('Gorev noktasi: '+duty.label):(playerDist<4.2?String(item.detail||item.line||'Vardiya takipte.').slice(0,58):''));
       if(a.speech){
         a.speech.visible=!!speechText;
-        if(speechText) updateNpcSpeechBubble(a.speech,speechText,eventItem?.tone||item.uniform||'info');
+        if(speechText) updateNpcSpeechBubble(a.speech,speechText,eventItem?.tone||duty?.tone||item.uniform||'info');
         a.speech.position.y=3.08+Math.sin(state.elapsed*1.8+index)*.045;
         if(a.speech.material)a.speech.material.opacity=clamp(.35+a.attention*.75,.35,.98);
       }
@@ -2319,6 +2408,7 @@
       if(a.rightBoot)a.rightBoot.rotation.x=clamp(swing*.22,-.16,.16);
       a.leftArm.rotation.x=-swing*.85-a.attention*.18+Math.sin(a.gesture+index)*.045;
       a.rightArm.rotation.x=swing*.85-a.attention*.12+Math.cos(a.gesture*.8+index)*.04;
+      if(duty&&!moving&&a.attention>.5){a.rightArm.rotation.z=-.38-Math.sin(a.gesture*1.4)*.08;a.leftArm.rotation.z=.18;}else{a.rightArm.rotation.z=0;a.leftArm.rotation.z=0;}
       a.spine.position.y=1.18+breath+(moving?Math.abs(Math.sin(gait))*.035:Math.sin(state.elapsed*1.2+index)*.01);
       a.spine.rotation.x=a.attention*.045+clamp(Math.sin(gait)*.025,-.025,.025);
       const faceYaw=Math.atan2(state.player.x-item.object.position.x,-(state.player.z-item.object.position.z));
@@ -2340,7 +2430,7 @@
     if(!state.active){state.animationId=0;return;}
     const now=time*.001,dt=clamp(state.lastFrame?now-state.lastFrame:.016,.001,.05);
     state.lastFrame=now;state.elapsed+=dt;
-    updateMovement(dt);updateWorld(dt);updateWorldStatus(dt);maybeTriggerLiveEvent();updateCrewBarks();pulseAmbient();updateMarkers();updateRouteGuides();updateUsePulses();updateFieldLog(false);updateRiskMeter();
+    updateMovement(dt);updateWorld(dt);updateWorldStatus(dt);maybeTriggerLiveEvent();updateLiveEventPressure();updateCrewBarks();pulseAmbient();updateMarkers();updateRouteGuides();updateUsePulses();updateFieldLog(false);updateRiskMeter();
     state.renderer.render(state.scene,state.camera);
     state.animationId=requestAnimationFrame(loop);
   }
@@ -2353,6 +2443,7 @@
   async function openWorld(){
     const host=ensureHost();
     state.active=true;
+    state.nextEventAt=Math.min(state.nextEventAt||999,state.elapsed+5);
     try{firstPersonActive=true;firstPersonArea=state.area;}catch(_err){}
     document.body.classList.add('firstperson-active','firstperson-3d-active');
     host.panel.classList.add('show');host.panel.focus({preventScroll:true});
@@ -2402,7 +2493,7 @@
   }
 
   function closeWorld(){
-    saveState();state.active=false;state.keys=Object.create(null);state.stick.x=0;state.stick.y=0;state.autoTarget=null;state.runLock=false;state.ui.run?.classList.remove('locked','active');closeDialogue();
+    saveState();state.active=false;resetInputState();closeDialogue();
     if(state.animationId)cancelAnimationFrame(state.animationId);state.animationId=0;
     try{firstPersonActive=false;}catch(_err){} 
     closeTrainingDrill();
@@ -2441,7 +2532,8 @@
     if(state.active && handleKeydown(ev)) ev.stopImmediatePropagation();
   },true);
   window.addEventListener('keyup',handleKeyup,{passive:true});
-  window.addEventListener('blur',pauseWorldForBackground);
+  window.addEventListener('blur',()=>{saveState();resetInputState();});
+  window.addEventListener('focus',resumeWorldFromBackground);
   window.addEventListener('pagehide',pauseWorldForBackground);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseWorldForBackground();else resumeWorldFromBackground();});
 
@@ -2449,6 +2541,7 @@
   window.openFirstPersonMode=openWorld;
   window.closeFirstPersonMode=closeWorld;
   window.setFirstPersonArea=setArea;
+  window.jumpFirstPersonArea=area=>jumpToArea(area,'Dis komut');
   window.interactFirstPerson=interact;
   window.handleFirstPersonKeydown=handleKeydown;
   window.fp3dRespond=respondDialogue;
