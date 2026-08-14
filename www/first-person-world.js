@@ -976,17 +976,37 @@
     void state.ui.actionBanner.offsetWidth;
     state.ui.actionBanner.classList.add('show');
     clearTimeout(state.actionBannerTimer);
-    state.actionBannerTimer=setTimeout(()=>state.ui.actionBanner&&state.ui.actionBanner.classList.remove('show'),1550);
+    state.actionBannerTimer=setTimeout(()=>state.ui.actionBanner&&state.ui.actionBanner.classList.remove('show'),1850);
   }
 
+  function compartmentArrivalText(areaId){
+    const map={
+      bridge:'Kopruustu: radar, ECDIS, AIS ve vardiya zinciri',
+      corridor:'Ana koridor: kamaralar, GMDSS, yuk kontrol ve makine girisleri',
+      deck:'Dis guverte: halat, pilot merdiveni, fenerler ve deniz gozlemi',
+      engine:'Makine dairesi: ECR, jenerator, bilge ve sogutma turu',
+      radio:'GMDSS odasi: VHF, DSC, NAVTEX, EPIRB ve mors sahneleri',
+      cargo:'Yuk kontrol: ballast, trim/list, gelgit ve yuk plani',
+      cabin:'Kamara: dinlenme, aile mesaji ve yorgunluk yonetimi',
+      mess:'Messroom: ekip molasi ve vardiya morali',
+      galley:'Kambuz: yangin emniyeti ve sicak yuzey kontrolu',
+      infirmary:'Revir: ilk yardim, TMAS ve sedye hazirligi'
+    };
+    return map[areaId]||'Mahale girildi';
+  }
   function directCompartmentAction(target,look){
     const changing=target&&target!==state.area;
+    if(target===state.area && !look){
+      showActionBanner(AREAS[target].title,'Zaten bu mahaldesin / hareket ve etkilesim aktif',AREAS[target].theme||'area');
+      pushFieldLog('Mevcut mahal: '+AREAS[target].title,'info');
+      updateMissionDock();
+      return;
+    }
     if(target) jumpToArea(target,'Hizli gecis');
-    if(target&&AREAS[target])showActionBanner(look?'DENIZ BAKISI':AREAS[target].title,look?'Guverte / ufuk gozlemi':'Hizli gecis',look?'deck':'area');
+    if(target&&AREAS[target])showActionBanner(look?'DENIZ BAKISI':AREAS[target].title,look?'Guverte / ufuk gozlemi':compartmentArrivalText(target),look?'deck':(AREAS[target].theme||'area'));
     if(look){pushFieldLog('Deniz gozlemi aciliyor','info');callGame('showNotif','GUVERTEDESIN','Deniz bakisi','Guverteye cikip deniz gozlemi aciliyor.');}
     if(look) setTimeout(()=>callGame('openFirstPersonSeaLook',look),changing?460:80);
   }
-
 
   function directWorldAction(action){
     const run=(area,label,fn)=>{
@@ -1163,7 +1183,11 @@
     parent.add(mesh);return mesh;
   }
   function disposeScene(){
-    if(!state.scene) return;
+    if(state.ui.markers) state.ui.markers.innerHTML='';
+    if(!state.scene){
+      state.interactions=[];state.npcs=[];state.animatedScreens=[];state.waves=[];state.distantShips=[];state.ambientFx=[];state.colliders=[];state.routeGuides=[];state.routeBeacon=null;state.usePulses=[];state.lights={};
+      return;
+    }
     state.scene.traverse(obj=>{
       if(obj.geometry) obj.geometry.dispose();
       if(obj.material){
@@ -1173,7 +1197,6 @@
     });
     state.interactions=[];state.npcs=[];state.animatedScreens=[];state.waves=[];state.distantShips=[];state.ambientFx=[];state.colliders=[];state.routeGuides=[];state.routeBeacon=null;state.usePulses=[];state.lights={};
   }
-
   function spawnForArea(area){
     const from=state.entryFrom;
     if(from){
@@ -1413,10 +1436,88 @@
     }
   }
 
-  function buildRoomDetails(area){
+
+  function addHeavyCompartmentSetDressing(area){
+    const T=state.THREE;
+    const steel=material(0x687c86,{metalness:.68,roughness:.32});
+    const darkSteel=material(0x121b22,{metalness:.52,roughness:.46});
+    const rubber=material(0x03080d,{roughness:.86,metalness:.16});
+    const warning=material(0xffc845,{emissive:0x5a3b05,emissiveIntensity:.42,roughness:.42});
+    const red=material(0xd64d39,{emissive:0x4c0904,emissiveIntensity:.35,roughness:.48});
+    const green=material(0x4bd184,{emissive:0x0b4725,emissiveIntensity:.32,roughness:.42});
+    if(area.theme==='engine'){
+      box(state.scene,[4.6,1.1,2.2],[0,.7,1.15],material(0x263039,{metalness:.48,roughness:.42}));
+      cylinder(state.scene,.62,4.8,[0,1.28,1.15],material(0x3a464e,{metalness:.62,roughness:.34}),[0,0,Math.PI/2]);
+      for(let x=-1.8;x<=1.8;x+=.9){
+        cylinder(state.scene,.18,1.25,[x,2.03,1.15],material(0x4b5860,{metalness:.62,roughness:.34}));
+        cylinder(state.scene,.075,3.6,[x,2.72,-.45],material(0xff6a3c,{metalness:.54,roughness:.36}),[Math.PI/2,0,0]);
+      }
+      [-5.8,5.8].forEach(x=>{
+        box(state.scene,[1.9,1.15,1.15],[x,.72,-2.7],material(0x303941,{metalness:.5,roughness:.4}));
+        cylinder(state.scene,.42,1.95,[x,1.08,-2.7],material(0x1a242b,{metalness:.65,roughness:.35}),[0,0,Math.PI/2]);
+        box(state.scene,[1.25,.05,1.35],[x,1.48,-2.7],warning);
+      });
+      box(state.scene,[13.2,.12,1.1],[0,1.72,-5.85],darkSteel);
+      for(let x=-6;x<=6;x+=1.5)cylinder(state.scene,.045,1.7,[x,.88,-5.85],steel);
+      [-6.6,6.6].forEach(x=>cylinder(state.scene,.045,5.8,[x,1.85,-5.85],steel,[Math.PI/2,0,0]));
+      for(let x=-5.4;x<=5.4;x+=1.8){
+        const gauge=new T.Mesh(new T.CircleGeometry(.18,24),new T.MeshBasicMaterial({color:0xe8f6ff,side:T.DoubleSide}));
+        gauge.position.set(x,2.28,-7.88);gauge.rotation.y=0;state.scene.add(gauge);
+        const needle=box(state.scene,[.025,.14,.015],[x+.035,2.29,-7.9],red,[0,0,.65]);
+      }
+      for(let z=-6;z<=5;z+=2){
+        box(state.scene,[.12,.035,1.1],[-7.75,.08,z],warning,[0,.5,0]);
+        box(state.scene,[.12,.035,1.1],[7.75,.08,z],warning,[0,-.5,0]);
+      }
+    }else if(area.theme==='deck'){
+      [-2.6,2.6].forEach(x=>{
+        cylinder(state.scene,.46,.9,[x,.46,-8.8],darkSteel,[0,0,Math.PI/2]);
+        cylinder(state.scene,.16,1.25,[x,.47,-8.8],material(0x8b6742,{metalness:.3,roughness:.38}),[0,0,Math.PI/2]);
+        for(let r=.68;r<=1.08;r+=.2){
+          const line=new T.Mesh(new T.TorusGeometry(r,.018,8,42),material(0xc09a62,{roughness:.68}));
+          line.position.set(x,.5,-8.8);line.rotation.y=Math.PI/2;state.scene.add(line);
+        }
+      });
+      box(state.scene,[5.6,.08,.16],[0,.08,-7.6],warning);
+      box(state.scene,[.12,2.4,.12],[4.55,1.2,6.4],steel);
+      for(let y=.45;y<=1.95;y+=.38)box(state.scene,[.95,.045,.08],[4.08,y,6.4],steel);
+      box(state.scene,[1.2,.18,.08],[3.72,2.28,6.4],material(0xd7edf8,{emissive:0x42616d,emissiveIntensity:.2}));
+      cylinder(state.scene,.32,.12,[-3.4,.28,5.9],red,[Math.PI/2,0,0]);
+      cylinder(state.scene,.22,.11,[-3.4,.28,5.9],material(0xf5f5ef,{roughness:.42}),[Math.PI/2,0,0]);
+      for(let z=-10;z<=8;z+=3){
+        box(state.scene,[.08,.04,1.6],[-4.7,.13,z],material(0xffe17a,{emissive:0x5a4510,emissiveIntensity:.26}),[0,.12,0]);
+        box(state.scene,[.08,.04,1.6],[4.7,.13,z],material(0xffe17a,{emissive:0x5a4510,emissiveIntensity:.26}),[0,-.12,0]);
+      }
+    }else if(area.theme==='bridge'){
+      box(state.scene,[9.2,.55,1.4],[0,.82,-4.1],material(0x111f2b,{metalness:.38,roughness:.46}));
+      for(let x=-3.6;x<=3.6;x+=1.8){
+        box(state.scene,[1.35,.08,.72],[x,1.25,-3.65],material(0x06131d,{emissive:0x0b3145,emissiveIntensity:.45,roughness:.3}),[-.25,0,0]);
+        box(state.scene,[.52,.04,.1],[x-.32,1.32,-4.02],green);
+        box(state.scene,[.2,.04,.1],[x+.42,1.32,-4.02],red);
+      }
+      box(state.scene,[2.4,.09,1.2],[3.9,.98,.95],material(0x293b48,{metalness:.22,roughness:.68}));
+      for(let i=0;i<5;i++)cylinder(state.scene,.035,.12,[3.1+i*.38,1.08,.72+i*.04],i%2?green:warning);
+    }else if(area.theme==='radio'){
+      [-3.6,-1.2,1.2,3.6].forEach((x,i)=>{
+        box(state.scene,[1.2,1.85,.65],[x,1.02,-2.8],material(0x182637,{metalness:.35,roughness:.5}));
+        box(state.scene,[.88,.08,.08],[x,1.62,-3.16],i%2?green:warning);
+        box(state.scene,[.7,.38,.045],[x,1.1,-3.2],material(0x06131d,{emissive:0x102c41,emissiveIntensity:.55,roughness:.3}));
+      });
+      cylinder(state.scene,.045,4.4,[0,2.86,-2.9],steel,[0,Math.PI/2,Math.PI/2]);
+      for(let x=-4;x<=4;x+=2)cylinder(state.scene,.025,2.2,[x,2.15,-2.92],steel,[0,0,.32]);
+    }else if(area.theme==='cargo'){
+      for(let x=-5;x<=5;x+=2.5){
+        box(state.scene,[1.6,.9,1.9],[x,.52,1.2],material(0x24384a,{metalness:.38,roughness:.52}));
+        box(state.scene,[1.25,.05,1.35],[x,1.02,1.2],material(0xddb957,{emissive:0x5b3d07,emissiveIntensity:.25,roughness:.42}));
+      }
+      box(state.scene,[11,.05,.12],[0,.12,-1.2],warning);
+      [-5.5,5.5].forEach(x=>cylinder(state.scene,.065,6.5,[x,.68,-1.2],material(0x3a8fb6,{metalness:.5,roughness:.4}),[Math.PI/2,0,0]));
+    }
+  }  function buildRoomDetails(area){
     const steel=material(0x70828d,{metalness:.64,roughness:.34});
     const dark=material(0x15232e,{metalness:.28,roughness:.62});
     addAreaIdentityProps(area);
+    addHeavyCompartmentSetDressing(area);
     if(area.theme==='bridge'){
       box(state.scene,[18,.9,2.1],[0,.45,-5.1],dark,[0,0,0]);
       box(state.scene,[7,.8,1.5],[0,.4,-2.4],dark);
@@ -1749,6 +1850,54 @@
     sprite.renderOrder=28;
     return sprite;
   }
+  function addNpcRealismKit(root,spine,headGroup,leftLeg,rightLeg,leftArm,rightArm,def,index,skin,cloth,trim,boot){
+    const T=state.THREE;
+    const steel=material(0x6e7f88,{metalness:.62,roughness:.34});
+    const rubber=material(0x02070c,{roughness:.86,metalness:.12});
+    const safety=material(def.uniform==='engine'?0xff7a2f:def.uniform==='deck'?0xffc94a:0x72e4a6,{roughness:.42,metalness:.12,emissive:def.uniform==='engine'?0x552008:0x173b24,emissiveIntensity:.22});
+    const dark=material(0x07111c,{roughness:.7,metalness:.16});
+    box(root,[.96,.12,.46],[0,1.82,-.01],trim);
+    box(root,[.76,.08,.48],[0,1.09,-.01],rubber);
+    box(spine,[.18,.28,.055],[.27,.28,-.235],dark);
+    box(spine,[.05,.18,.06],[.27,.3,-.27],material(0x76cce8,{emissive:0x17455a,emissiveIntensity:.8,roughness:.35}));
+    box(leftLeg,[.25,.11,.29],[0,-.5,-.13],safety);
+    box(rightLeg,[.25,.11,.29],[0,-.5,-.13],safety);
+    box(leftArm,[.2,.11,.21],[0,-.38,-.03],trim);
+    box(rightArm,[.2,.11,.21],[0,-.38,-.03],trim);
+    box(leftLeg,[.39,.075,.56],[.05,-.98,-.11],rubber);
+    box(rightLeg,[.39,.075,.56],[-.05,-.98,-.11],rubber);
+    if(def.uniform==='deck'||def.uniform==='engine'||def.uniform==='cadet'){
+      cylinder(headGroup,.35,.1,[0,.31,0],safety);
+      box(headGroup,[.58,.07,.22],[0,.27,-.18],safety);
+    }
+    if(def.uniform==='engine'){
+      box(root,[.72,.045,.05],[0,1.52,-.27],material(0xff9d4d,{emissive:0x552008,emissiveIntensity:.35,roughness:.5}));
+      cylinder(headGroup,.055,.18,[-.36,.03,0],dark,[0,0,Math.PI/2]);
+      cylinder(headGroup,.055,.18,[.36,.03,0],dark,[0,0,Math.PI/2]);
+      cylinder(rightArm,.035,.58,[.02,-.83,-.16],steel,[Math.PI/2,0,.35]);
+    }else if(def.uniform==='deck'){
+      box(spine,[.05,.86,.05],[-.24,.1,-.25],safety,[0,0,.28]);
+      box(spine,[.05,.86,.05],[.24,.1,-.25],safety,[0,0,-.28]);
+      cylinder(rightArm,.025,.5,[.02,-.83,-.18],material(0xc9a25a,{metalness:.4,roughness:.38}),[Math.PI/2,0,.2]);
+    }else if(def.uniform==='officer'){
+      box(spine,[.22,.045,.48],[-.28,.63,0],trim);
+      box(spine,[.22,.045,.48],[.28,.63,0],trim);
+      box(leftArm,[.2,.055,.21],[0,-.12,-.04],trim);
+      box(rightArm,[.2,.055,.21],[0,-.12,-.04],trim);
+    }else if(def.uniform==='cook'){
+      box(spine,[.54,.72,.045],[0,.08,-.235],material(0xffffff,{roughness:.76}));
+      box(spine,[.06,.66,.05],[-.21,.09,-.27],dark);
+      box(spine,[.06,.66,.05],[.21,.09,-.27],dark);
+    }else if(def.uniform==='medical'){
+      box(spine,[.11,.38,.055],[0,.24,-.245],material(0xe85a51,{emissive:0x4a0904,emissiveIntensity:.35,roughness:.5}));
+      box(spine,[.36,.11,.055],[0,.24,-.25],material(0xe85a51,{emissive:0x4a0904,emissiveIntensity:.35,roughness:.5}));
+    }else if(def.uniform==='cadet'){
+      box(spine,[.5,.045,.05],[0,.42,-.25],material(0xd7edf8,{roughness:.5,emissive:0x24485a,emissiveIntensity:.22}));
+    }
+    const badge=new T.Mesh(new T.SphereGeometry(.055,12,8),material(0xffd66b,{emissive:0x5b3d07,emissiveIntensity:.6,roughness:.32}));
+    badge.position.set(-.28,1.55,-.24);root.add(badge);
+    root.userData.realismBadge=badge;
+  }
   function createNpc(def,index){
     const T=state.THREE,g=new T.Group(),colors=uniformColors(def.uniform);
     const skin=material(index%3===0?0x9a6248:index%3===1?0xd0a07d:0x6f4838,{roughness:.88,metalness:.02});
@@ -1799,8 +1948,9 @@
     const rightBoot=box(rightLeg.group,[.32,.12,.46],[-.03,-.88,-.09],boot);
     const leftSole=box(leftLeg.group,[.36,.035,.5],[.04,-.965,-.1],boot);
     const rightSole=box(rightLeg.group,[.36,.035,.5],[-.04,-.965,-.1],boot);
+    addNpcRealismKit(root,spine,headGroup,leftLeg.group,rightLeg.group,leftArm.group,rightArm.group,def,index,skin,cloth,trim,boot);
 
-    const shadow=new T.Mesh(new T.CircleGeometry(.62,28),new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28,depthWrite:false}));
+    const shadow=new T.Mesh(new T.CircleGeometry(.72,32),new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.34,depthWrite:false}));
     shadow.rotation.x=-Math.PI/2;shadow.position.y=.018;root.add(shadow);
     const footShadowMat=new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.22,depthWrite:false});
     const leftFootShadow=new T.Mesh(new T.CircleGeometry(.18,18),footShadowMat.clone());
@@ -1814,7 +1964,7 @@
     const plate=createNpcNameplate(def.label);
     plate.position.set(0,2.72,0);plate.scale.set(1.45,.45,1);g.add(plate);
     const speech=createNpcSpeechBubble();g.add(speech);
-    g.position.set(def.x,0,def.z);g.scale.setScalar(1.05);state.scene.add(g);
+    g.position.set(def.x,0,def.z);g.scale.setScalar(1.16);state.scene.add(g);
     const item=registerInteraction(def,g);
     registerCollider(g,.62);
     item.anim={path:def.path||[[def.x,def.z]],speed:def.speed||.15,phase:index*.37,targetIndex:1,wait:.2+index*.16,root,spine,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,speech,lastX:def.x,lastZ:def.z,attention:0,gesture:0};
@@ -1824,18 +1974,18 @@
   function createAmbientCrew(area){
     const areaId=state.area;
     const sets={
-      bridge:[['nav-cadet','SEYIR STAJYERI','Harita masasinda rota kontrolu','Kerteriz ve CPA notlarini zabite hazirliyorum.',-3.8,2.2,[[-4.6,2.2],[-2.1,-1.6],[-5.3,-2.5]],.18,'cadet']],
+      bridge:[['nav-cadet','SEYIR STAJYERI','Harita masasinda rota kontrolu','Kerteriz ve CPA notlarini zabite hazirliyorum.',-3.8,2.2,[[-4.6,2.2],[-2.1,-1.6],[-5.3,-2.5]],.18,'cadet'],['helmsman-live','DUMENCI','Dumen ve rota takibi','Otomatik pilot hazir, elle kumanda icin kopru emri bekliyorum.',2.8,1.6,[[2.8,1.6],[1.2,-2.4],[4.8,-1.2]],.14,'officer']],
       corridor:[['cleaner-watch','KAMAROT','Yaşam mahalli turu','Koridoru bos tut; acil rolde bu yol kilitlenmemeli.',-1.8,5.8,[[-1.8,5.8],[1.8,1.5],[-1.2,-5.4]],.16,'crew'],['oiler-transit','YAGCI','Makine vardiyasina gecis','ECR yolundayim, sicak yuzey ve kacagi raporlayacagim.',1.8,-4.8,[[1.8,-4.8],[-1.8,-1.2],[2.2,6]],.17,'engine']],
       deck:[['deck-hand-round','GUVERTACI','Halat ve borda turu','Snap-back alanindan cikmadan halat kontrolu yapma.',-3.6,-9,[[-3.6,-9],[-4,2],[-1.2,7]],.2,'deck'],['pilot-watch','PILOT WATCH','Borda ve ladder gozlemi','Pilot tarafi, borda isigi ve can simidi hazir.',3.9,5.2,[[3.9,5.2],[4.2,-2.5],[2.6,-8]],.18,'deck']],
       engine:[['engine-oiler-live','YAGCI','Pompa ve bilge turu','Alarmi susturmadan once sizinti kaynagini bulmak lazim.',-4.6,2.6,[[-4.6,2.6],[-1.4,-3.2],[5,2.2]],.17,'engine'],['electrician-live','ELEKTRIKCI','Panel kontrolu','Jenerator yuk paylasimi ve izolasyon degerini okuyorum.',4.8,-2.8,[[4.8,-2.8],[1.4,3.2],[-3.8,-1.8]],.15,'engine']],
-      radio:[['gmdss-cadet','GMDSS STAJYERI','Dinleme vardiyasi','DSC alarm gelirse once konum ve tehlike turu net yazilir.',-2.2,1.8,[[-2.2,1.8],[2.4,1.2],[1.8,-2.2]],.13,'cadet']],
+      radio:[['gmdss-cadet','GMDSS STAJYERI','Dinleme vardiyasi','DSC alarm gelirse once konum ve tehlike turu net yazilir.',-2.2,1.8,[[-2.2,1.8],[2.4,1.2],[1.8,-2.2]],.13,'cadet'],['radio-watch-live','TELSIZCI','GMDSS log','NAVTEX, DSC ve VHF kaydini vardiya defteriyle eslestiriyorum.',2.6,-1.4,[[2.6,-1.4],[-2.6,-1.2],[1.6,2.2]],.12,'officer']],
       cargo:[['cargo-cadet-live','YUK STAJYERI','Ballast ve trim turu','Gelgit penceresi draft ve UKC ile birlikte okunur.',-3.6,2.2,[[-3.6,2.2],[2.8,-2.8],[5.2,1.8]],.15,'cadet'],['pumpman-live','POMPACI','Tank ve valf kontrolu','Transfer baslamadan once valf sirasi ve scupper kapali mi bakilir.',4.8,-3.2,[[4.8,-3.2],[1.2,2.8],[-4.8,-1.6]],.16,'deck']],
       cabin:[['cadet-room-live','STAJYER','Vardiya oncesi hazirlik','Aileyi ozlemek normal; yorgunluk artarsa vardiya zabitine soyle.',-2.2,-1.2,[[-2.2,-1.2],[1.8,1.4],[-3.2,2.4]],.1,'cadet']],
       mess:[['mess-steward-live','STEWARD','Messroom servisi','Ekip morali dusunce vardiya dikkati de duser.',-2.2,1.6,[[-2.2,1.6],[2.4,-1.6],[3,1.8]],.12,'cook']],
       galley:[['galley-hand-live','KAMBUZCU','Sicak yuzey kontrolu','Yag yangininda su yok; dogru sondurucu hazir.',-2.8,-1.8,[[-2.8,-1.8],[2.4,-2.4],[1.2,1.5]],.12,'cook']],
       infirmary:[['med-cadet-live','SAGLIK STAJYERI','Revir stok kontrolu','Oksijen tupu, maske ve sedye yolu hazir tutulur.',-2.2,1.2,[[-2.2,1.2],[2.2,-1.2],[1.6,1.8]],.1,'medical']]
     };
-    const list=(sets[areaId]||[]).slice(0,MOBILE?1:2);
+    const list=(sets[areaId]||[]).slice(0,MOBILE?2:3);
     list.forEach((row,index)=>{
       const def=npc('ambient-'+areaId+'-'+row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]);
       def.kind='ambient';def.ambient=true;def.tone=area.theme||'info';
@@ -2202,7 +2352,7 @@
     if(!area)return;
     const summary=summarizeCurrentTarget();
     pushFieldLog(area.title+' varis / Hedef: '+summary,'info');
-    showActionBanner(area.title,'Mahale girildi / hedef: '+summary,area.theme||'area');
+    showActionBanner(area.title,compartmentArrivalText(areaId)+' / Hedef: '+summary,area.theme||'area');
     showAreaBriefing(areaId,summary);
     if(state.ui.root){
       state.ui.root.classList.remove('area-arrival');
@@ -2242,9 +2392,23 @@
     updateQuickTravelDock();
   }
 
+  function clearTransitionOverlays(){
+    if(state.ui.markers) state.ui.markers.innerHTML='';
+    if(state.ui.sceneReport){state.ui.sceneReport.classList.remove('show');state.ui.sceneReport.innerHTML='';}
+    if(state.ui.fieldLog){state.ui.fieldLog.classList.remove('show');}
+    if(state.ui.crewBark){state.ui.crewBark.classList.remove('show');}
+    if(state.ui.dialogue){state.ui.dialogue.classList.remove('show');state.ui.dialogue.innerHTML='';}
+    closeTrainingDrill();
+    state.currentDialogue=null;state.dialogueIncidentId='';state.nearest=null;state.autoTarget=null;
+    clearTimeout(state.sceneReportTimer);clearTimeout(state.crewBarkTimer);
+  }
   function setArea(next){
     if(!AREAS[next]||next===state.area)return;
     clearTimeout(state.areaNavFallbackTimer);state.autoTarget=null;resetAutoNav(null,0);
+    const targetArea=AREAS[next];
+    clearTransitionOverlays();
+    if(state.scene) state.scene.visible=false;
+    if(state.ui.root)state.ui.root.classList.add('area-changing');
     saveState();state.previousArea=state.area;state.entryFrom=state.area;state.area=next;
     state.positions[next]=null;
     state.ui.fade.classList.add('active');
@@ -2254,10 +2418,12 @@
       hapticPulse('door');
       announceAreaArrival(next);
       callGame('addWatchFeed',AREAS[next].title+': mahal gecisi tamamlandi.','good');
-      requestAnimationFrame(()=>state.ui.fade.classList.remove('active'));
+      requestAnimationFrame(()=>{
+        state.ui.fade.classList.remove('active');
+        state.ui.root?.classList.remove('area-changing');
+      });
     },180);
   }
-
   function interact(forced){
     const item=forced&&forced.id?forced:state.nearest;
     if(!item)return;

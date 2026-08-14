@@ -134,8 +134,8 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
 @keyframes fp3dHandLeft{to{transform:rotate(12deg) translateY(12px)}}@keyframes fp3dHandRight{to{transform:rotate(-12deg) translateY(12px)}}
 
 .fp3d-stick,.fp3d-use,.fp3d-run,.fp3d-look-zone{display:none;}
-.fp3d-fade{position:absolute;inset:0;z-index:70;background:#01060b;opacity:0;pointer-events:none;transition:opacity .18s;}
-.fp3d-fade.active{opacity:1;}
+.fp3d-fade{position:absolute;inset:0;z-index:160;background:#01060b;opacity:0;pointer-events:none;transition:opacity .18s;}
+.fp3d-fade.active{opacity:1;pointer-events:auto;}
 
 .fp3d-dialogue{position:absolute;inset:0;z-index:60;display:none;place-items:end center;padding:0 18px max(22px,env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent 0 30%,rgba(0,0,0,.64));}
 .fp3d-dialogue.show{display:grid;}
@@ -469,3 +469,23 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
 .fp3d-jump-dock button.event:not(.active)::after{content:"OLAY";display:block;margin-top:2px;color:#ffb1a6;font:700 7px "Share Tech Mono",monospace;letter-spacing:0;}
 @keyframes fp3dJumpEvent{to{filter:brightness(1.24);box-shadow:0 0 0 5px rgba(232,90,81,.16),0 0 20px rgba(232,90,81,.22),inset 0 -3px 0 rgba(232,90,81,.22);}}
 @media (max-width:820px),(pointer:coarse){.fp3d-jump-dock button.target:not(.active)::after,.fp3d-jump-dock button.event:not(.active)::after{font-size:6px;margin-top:1px}.fp3d-jump-dock button.event:not(.active),.fp3d-jump-dock button.target:not(.active){box-shadow:inset 0 -2px 0 rgba(255,214,107,.18)!important;}}
+/* serious-transition-and-crew */
+.fp3d-root.area-changing .fp3d-vignette{animation:fp3dAreaChange .42s ease-out both;}
+.fp3d-root.area-changing .fp3d-motion-lines{opacity:.32;}
+.fp3d-root.area-arrival .fp3d-vignette::after{animation:fp3dArrivalScan .9s ease-out both;}
+.fp3d-marker.npc.near{border-color:rgba(255,214,107,.56);background:rgba(7,25,22,.92);}
+.fp3d-marker.npc.near b{color:#fff1b0;}
+.fp3d-marker.npc.objective,.fp3d-marker.npc.aim-focus{box-shadow:0 0 0 4px rgba(112,233,168,.13),0 14px 34px rgba(0,0,0,.38);}
+@keyframes fp3dAreaChange{0%{box-shadow:inset 0 0 120px rgba(0,0,0,.52),inset 0 -70px 100px rgba(0,0,0,.32)}55%{box-shadow:inset 0 0 240px rgba(0,0,0,.92),inset 0 0 120px rgba(255,214,107,.12)}100%{box-shadow:inset 0 0 120px rgba(0,0,0,.52),inset 0 -70px 100px rgba(0,0,0,.32)}}
+@keyframes fp3dArrivalScan{0%{background:linear-gradient(180deg,rgba(255,214,107,.18),transparent 18%,transparent 76%,rgba(1,6,11,.36))}100%{background:linear-gradient(180deg,rgba(1,7,12,.34),transparent 18%,transparent 76%,rgba(1,6,11,.36))}}
+@media (max-width:820px),(pointer:coarse){.fp3d-root.area-changing .fp3d-motion-lines{opacity:.18}.fp3d-marker.npc.near b{font-size:8px}}
+/* compartment-isolation-fix */
+.fp3d-root.area-changing .fp3d-marker-layer,
+.fp3d-root.area-changing .fp3d-scene-report,
+.fp3d-root.area-changing .fp3d-field-log,
+.fp3d-root.area-changing .fp3d-crew-bark,
+.fp3d-root.area-changing .fp3d-jump-dock,
+.fp3d-root.area-changing .fp3d-action-dock,
+.fp3d-root.area-changing .fp3d-mission-dock,
+.fp3d-root.area-changing .fp3d-duty-chain{opacity:0!important;pointer-events:none!important;}
+.fp3d-root.area-changing .fp3d-hands,.fp3d-root.area-changing .fp3d-body{opacity:0!important;}
