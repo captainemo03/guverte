@@ -19020,6 +19020,18 @@ function loadSavedGame(){
   }
 }
 let mapView = 'world';
+const SHIP_MAP_COMPARTMENTS = [
+  {id:'bridge',label:'KOPRUUSTU',detail:'Radar / ECDIS / vardiya',x:356,y:56,w:208,h:78,tone:'#265f82'},
+  {id:'radio',label:'GMDSS',detail:'VHF / DSC / NAVTEX',x:586,y:74,w:120,h:62,tone:'#233f7a'},
+  {id:'deck',label:'ACIK GÜVERTE',detail:'Deniz / halat / pilot',x:90,y:160,w:740,h:86,tone:'#1f6b82'},
+  {id:'corridor',label:'ANA KORIDOR',detail:'Tum mahallere gecis',x:290,y:262,w:340,h:54,tone:'#344554'},
+  {id:'engine',label:'MAKINE DAIRESI',detail:'ECR / jenerator / bilge',x:640,y:252,w:186,h:98,tone:'#6b2e22'},
+  {id:'cargo',label:'YUK KONTROL',detail:'Ballast / trim / plan',x:104,y:252,w:170,h:98,tone:'#665018'},
+  {id:'cabin',label:'KAMARA',detail:'Dinlenme / aile',x:306,y:332,w:112,h:54,tone:'#24446a'},
+  {id:'mess',label:'MESSROOM',detail:'Ekip molasi',x:430,y:332,w:112,h:54,tone:'#31584d'},
+  {id:'galley',label:'KAMBUZ',detail:'Yangin / sicak yuzey',x:554,y:332,w:112,h:54,tone:'#60442b'},
+  {id:'infirmary',label:'REVIR',detail:'Ilk yardim / TMAS',x:680,y:332,w:112,h:54,tone:'#4f7d82'}
+];
 let selectedPortChart = 'İzmir';
 let portChartZoom = 1.18;
 let portChartPanX = null;
@@ -19227,6 +19239,7 @@ function getMapTaskTraining(taskId){
 function openMap(){
   if(!canUseFeature('map')) return;
   completeMissionFromFeature('map');
+  mapView = 'ship';
   document.getElementById('map-panel').classList.add('show');
   renderMap();
 }
@@ -21686,16 +21699,112 @@ function getWorldMapLegendText(){
   return `Aktif sefer: ${getActiveVoyageRoute()?.name || 'rota yok'} · ${getVoyageLegProgress()}% · Nokta/liman/gecit uzerine tiklayinca chart acilir · 🟢 Ugranan/aktif WP  🔵 Planlanan nokta  🔷 Kanal/bogaz  🟡 ${sn||'Gemimiz'} — ${visitedPorts.size} nokta islendi`;
 }
 
-function renderMap(){
+function currentShipMapArea(){
+  return window.__GUVERTE_FP3D?.state?.area || (typeof firstPersonArea !== 'undefined' ? firstPersonArea : 'bridge') || 'bridge';
+}
+function shipMapCompartmentTitle(areaId){
+  return SHIP_MAP_COMPARTMENTS.find(c=>c.id===areaId)?.label || String(areaId||'GEMI').toUpperCase();
+}
+async function enterShipCompartmentFromMap(areaId){
+  const area = SHIP_MAP_COMPARTMENTS.find(c=>c.id===areaId);
+  if(!area) return;
+  closeMap();
+  showNotif('GEMI PLANI', area.label, 'Kompartmana giriliyor.');
+  try{
+    if(window.__GUVERTE_FP3D?.open){
+      await window.__GUVERTE_FP3D.open();
+      if(window.__GUVERTE_FP3D.state?.area !== areaId) window.__GUVERTE_FP3D.setArea(areaId);
+      return;
+    }
+  }catch(err){
+    console.warn('ship map 3D entry failed', err);
+  }
+  if(typeof setFirstPersonArea === 'function') setFirstPersonArea(areaId);
+  if(typeof openFirstPersonMode === 'function') openFirstPersonMode();
+}
+function renderShipMap(){
+  const svg = document.getElementById('ship-map-svg');
+  const status = document.getElementById('ship-map-status');
+  if(!svg) return;
+  const active = currentShipMapArea();
+  const activeRoute = typeof getActiveVoyageRoute === 'function' ? getActiveVoyageRoute() : null;
+  const sogBase = typeof activeVoyageProgress === 'number' ? 10.8 + ((activeVoyageProgress % 9) * 0.18) : 12.4;
+  const sog = Math.max(5.2, Math.min(16.8, sogBase)).toFixed(1);
+  if(status) status.textContent = `Aktif mahal: ${shipMapCompartmentTitle(active)} · SOG ${sog} kn · ustten takip`;
+  const zones = SHIP_MAP_COMPARTMENTS.map(c=>{
+    const activeClass = c.id===active ? ' active' : '';
+    return `<g class="ship-map-zone${activeClass}" tabindex="0" role="button" aria-label="${phoneSafe(c.label)}" onclick="enterShipCompartmentFromMap('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();enterShipCompartmentFromMap('${c.id}')}">
+      <rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="10" fill="${c.tone}" fill-opacity=".78" stroke="rgba(169,217,236,.72)" stroke-width="1.4"/>
+      <rect x="${c.x+8}" y="${c.y+8}" width="${Math.max(8,c.w-16)}" height="${Math.max(8,c.h-16)}" rx="6" fill="rgba(255,255,255,.045)" stroke="rgba(255,255,255,.08)" stroke-width=".8"/>
+      <text class="ship-map-title" x="${c.x+c.w/2}" y="${c.y+c.h/2-3}" text-anchor="middle">${phoneSafe(c.label)}</text>
+      <text class="ship-map-detail" x="${c.x+c.w/2}" y="${c.y+c.h/2+17}" text-anchor="middle">${phoneSafe(c.detail)}</text>
+      ${c.id===active?`<circle class="ship-map-player-dot" cx="${c.x+c.w-18}" cy="${c.y+18}" r="7" fill="#ffd66b"/>`:''}
+    </g>`;
+  }).join('');
+  const seaLines = Array.from({length:15},(_,i)=>{
+    const y = 38 + i*26;
+    const delay = (i%5)*-.42;
+    const width = 120 + (i%4)*46;
+    const x = -170 + (i%3)*58;
+    return `<line class="ship-map-sea-line" x1="${x}" y1="${y}" x2="${x+width}" y2="${y-12}" style="animation-delay:${delay}s"/>`;
+  }).join('');
+  const trackDots = Array.from({length:7},(_,i)=>`<circle class="ship-map-track-dot" cx="${150+i*86}" cy="${374 + (i%2?5:-5)}" r="2.6" style="animation-delay:${i*.18}s"/>`).join('');
+  svg.innerHTML = `<defs>
+    <linearGradient id="shipHullGrad" x1="0" x2="1"><stop offset="0" stop-color="#0b2233"/><stop offset=".52" stop-color="#123d55"/><stop offset="1" stop-color="#0b2233"/></linearGradient>
+    <radialGradient id="shipSeaGlow" cx="50%" cy="44%" r="64%"><stop offset="0" stop-color="#164b64" stop-opacity=".68"/><stop offset=".68" stop-color="#071725" stop-opacity=".84"/><stop offset="1" stop-color="#030b13" stop-opacity="1"/></radialGradient>
+    <filter id="shipMapShadow"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#000" flood-opacity=".42"/></filter>
+  </defs>
+  <rect x="0" y="0" width="920" height="420" fill="url(#shipSeaGlow)"/>
+  <g class="ship-map-sea-motion">
+    ${seaLines}
+    <path class="ship-map-current" d="M-50 104 C118 70 230 146 390 112 S688 74 970 122"/>
+    <path class="ship-map-current alt" d="M-70 306 C120 340 250 260 410 302 S730 342 990 286"/>
+  </g>
+  <path class="ship-map-route-line" d="M96 374 C220 348 348 398 472 372 S704 342 828 364"/>
+  ${trackDots}
+  <g class="ship-map-wake-group">
+    <path class="ship-map-wake wide" d="M68 186 C-18 156 -42 124 -74 92"/>
+    <path class="ship-map-wake" d="M62 210 C-16 210 -50 206 -94 194"/>
+    <path class="ship-map-wake wide" d="M68 234 C-18 264 -42 296 -74 328"/>
+  </g>
+  <g class="ship-map-vessel">
+    <ellipse class="ship-map-vessel-shadow" cx="460" cy="224" rx="402" ry="143"/>
+    <path d="M52 210 Q78 92 192 62 H704 Q816 90 868 210 Q816 330 704 360 H192 Q78 328 52 210Z" fill="url(#shipHullGrad)" stroke="#86cbe7" stroke-width="2.2" filter="url(#shipMapShadow)"/>
+    <path d="M92 210 H834" stroke="rgba(255,214,107,.34)" stroke-width="2" stroke-dasharray="10 8"/>
+    <path d="M194 76 V346 M706 76 V346 M452 56 V386" stroke="rgba(201,234,246,.18)" stroke-width="1.4"/>
+    <path class="ship-map-deck-flow" d="M120 136 C220 106 700 106 800 136"/>
+    <path class="ship-map-deck-flow alt" d="M120 282 C220 312 700 312 800 282"/>
+    <path class="ship-map-bow-ripple" d="M842 176 C890 184 906 196 920 210 C906 224 890 236 842 244"/>
+    <text x="82" y="44" fill="#ffd66b" font-size="16" font-family="Share Tech Mono, monospace">USTTEN HAREKETLI GEMI PLANI</text>
+    <text x="82" y="64" fill="#a9c8d9" font-size="10" font-family="Share Tech Mono, monospace">Kompartmana tikla: 3D birinci sahis mahaline giris yapar</text>
+    <text x="84" y="214" fill="#7ebdd4" font-size="11" font-family="Share Tech Mono, monospace" transform="rotate(-90 84 214)">PRUVA</text>
+    <text x="838" y="214" fill="#7ebdd4" font-size="11" font-family="Share Tech Mono, monospace" transform="rotate(90 838 214)">KIC</text>
+    ${zones}
+    <g class="ship-map-prop-wake">
+      <path d="M72 198 C34 190 14 176 -18 156"/>
+      <path d="M72 222 C34 230 14 244 -18 264"/>
+    </g>
+    <g class="ship-map-scan">
+      <circle cx="460" cy="210" r="7"/>
+      <path d="M460 210 L800 126"/>
+    </g>
+  </g>
+  <text x="456" y="404" fill="#7ea6bb" font-size="10" font-family="Share Tech Mono, monospace" text-anchor="middle">${phoneSafe(activeRoute?.name || 'Canli ustten takip')} · ESC/KAPAT ile cik, haritadan bolgeye tekrar girebilirsin</text>`;
+}function renderMap(){
   const panel = document.getElementById('map-panel');
   const tabs = document.querySelectorAll('.map-tab');
   if(panel){
     panel.classList.toggle('library', mapView === 'library');
+    panel.classList.toggle('ship', mapView === 'ship');
   }
   tabs.forEach(btn=>{
-    const wants = btn.textContent.toLowerCase().includes('haritalarim') ? 'library' : 'world';
+    const wants = btn.dataset.mapView || (btn.textContent.toLowerCase().includes('haritalarim') ? 'library' : btn.textContent.toLowerCase().includes('gemi') ? 'ship' : 'world');
     btn.classList.toggle('active', wants===mapView);
   });
+  if(mapView === 'ship'){
+    renderShipMap();
+    return;
+  }
   if(mapView === 'library'){
     renderMapLibrary();
     return;
@@ -26331,6 +26440,7 @@ const FIRST_PERSON_AREA_DEFS = {
     ],
     doors:[
       {id:'door-deck',label:'GUVERTEYE CIK',detail:'pilot ladder / mooring',x:18,y:88,targetArea:'deck'},
+      {id:'door-corridor-main',label:'ANA KORIDOR',detail:'gemi ici gecis',x:50,y:88,targetArea:'corridor'},
       {id:'door-engine',label:'MAKINEYE IN',detail:'ECR / alarm paneli',x:82,y:88,targetArea:'engine'},
       {id:'door-cabin',label:'KAMARAYA GIT',detail:'dinlenme / notlar',x:9,y:62,targetArea:'cabin'},
       {id:'door-mess',label:'MESSROOM',detail:'asci / crew chat',x:91,y:62,targetArea:'mess'}
@@ -26380,6 +26490,69 @@ const FIRST_PERSON_AREA_DEFS = {
     doors:[
       {id:'door-bridge-from-mess',label:'KOPRUUSTU',detail:'vardiya',x:50,y:88,targetArea:'bridge'},
       {id:'door-cabin-from-mess',label:'KAMARA',detail:'dinlenme',x:16,y:78,targetArea:'cabin'}
+    ]},
+  corridor:{title:'ANA KORIDOR', className:'area-corridor', prompt:'Dar koridorda kapilara yaklas; GMDSS, yuk kontrol, revir ve makine buradan baglanir.',
+    stations:[
+      {id:'corridor-muster',label:'MUSTER LIST',detail:'acil rol / toplanma',x:28,y:58,action:'notes'},
+      {id:'corridor-fire',label:'FIRE PLAN',detail:'yangin zonlari',x:72,y:58,action:'notes'},
+      {id:'corridor-wet',label:'ISLAK ZEMIN',detail:'kayma riski',x:50,y:72,action:'walkTask'}
+    ],
+    doors:[
+      {id:'door-bridge-from-corridor',label:'KOPRUUSTU',detail:'seyir merkezi',x:50,y:28,targetArea:'bridge'},
+      {id:'door-cabin-from-corridor',label:'KAMARA',detail:'dinlenme',x:18,y:46,targetArea:'cabin'},
+      {id:'door-mess-from-corridor',label:'MESSROOM',detail:'yemek / ekip',x:82,y:46,targetArea:'mess'},
+      {id:'door-galley-from-corridor',label:'KAMBUZ',detail:'mutfak / yangin riski',x:82,y:60,targetArea:'galley'},
+      {id:'door-infirmary-from-corridor',label:'REVIR',detail:'ilk yardim',x:18,y:64,targetArea:'infirmary'},
+      {id:'door-radio-from-corridor',label:'GMDSS ODASI',detail:'VHF / NAVTEX / EPIRB',x:20,y:80,targetArea:'radio'},
+      {id:'door-cargo-from-corridor',label:'YUK KONTROL',detail:'ballast / stowage',x:80,y:80,targetArea:'cargo'},
+      {id:'door-engine-from-corridor',label:'MAKINE DAIRESI',detail:'ECR / jeneratör',x:50,y:88,targetArea:'engine'}
+    ]},
+  radio:{title:'GMDSS ODASI', className:'area-radio', prompt:'VHF, MF/HF, NAVTEX ve EPIRB kabinine yaklas; acil haberlesme burada.',
+    stations:[
+      {id:'radio-vhf',label:'VHF / DSC',detail:'CH16 / distress',x:28,y:58,action:'device'},
+      {id:'radio-mf',label:'MF / HF',detail:'DSC / working channel',x:50,y:56,action:'device'},
+      {id:'radio-navtex',label:'NAVTEX',detail:'MSI mesajlari',x:72,y:58,action:'device'},
+      {id:'radio-epirb',label:'EPIRB KABINI',detail:'self-test / HRU',x:26,y:76,action:'device'},
+      {id:'radio-sart',label:'SART',detail:'test / yerlesim',x:74,y:76,action:'device'},
+      {id:'radio-officer-fp',label:'TELSIZCI',detail:'GMDSS log',x:50,y:76,type:'npc',line:'Distress mesajinda konum, tehlike turu ve istenen yardim net yazilir.'}
+    ],
+    doors:[
+      {id:'door-corridor-from-radio',label:'ANA KORIDOR',detail:'gemi ici gecis',x:50,y:88,targetArea:'corridor'},
+      {id:'door-bridge-from-radio',label:'KOPRUUSTU',detail:'vardiya bildirimi',x:18,y:82,targetArea:'bridge'}
+    ]},
+  cargo:{title:'YUK KONTROL ODASI', className:'area-cargo', prompt:'Cargo mimic, ballast paneli ve stowage planina yaklas.',
+    stations:[
+      {id:'cargo-main',label:'CARGO MIMIC',detail:'loading sequence',x:30,y:58,action:'cargo'},
+      {id:'cargo-ballast',label:'BALLAST PANEL',detail:'list / trim',x:50,y:56,action:'cargo'},
+      {id:'cargo-reefer',label:'REEFER / LASHING',detail:'alarm / securing',x:70,y:58,action:'cargo'},
+      {id:'cargo-plan',label:'STOWAGE PLAN',detail:'bay row tier',x:76,y:75,action:'map'},
+      {id:'cargo-chief-fp',label:'1. ZABIT',detail:'yuk operasyonu',x:32,y:76,type:'npc',line:'Yuk planini trim, shear force ve liman sirasiyla birlikte oku.'}
+    ],
+    doors:[
+      {id:'door-corridor-from-cargo',label:'ANA KORIDOR',detail:'gemi ici gecis',x:50,y:88,targetArea:'corridor'},
+      {id:'door-deck-from-cargo',label:'GUVERTEDEN CIK',detail:'ambar / borda',x:86,y:82,targetArea:'deck'}
+    ]},
+  galley:{title:'KAMBUZ', className:'area-galley', prompt:'Kuzine, soguk oda ve yangin ekipmanina yaklas.',
+    stations:[
+      {id:'galley-stove',label:'KUZINE',detail:'sicak yuzey',x:28,y:62,action:'notes'},
+      {id:'galley-fridge',label:'SOGUK ODA',detail:'erzak / sicaklik',x:72,y:62,action:'notes'},
+      {id:'galley-fire',label:'YANGIN BATTANIYESI',detail:'yag yangini',x:18,y:78,action:'notes'},
+      {id:'galley-cook-fp',label:'BAS ASCI',detail:'kambuz sorumlusu',x:52,y:76,type:'npc',line:'Yag yangininda su yok; dogru sondurucu hazir olacak.'}
+    ],
+    doors:[
+      {id:'door-mess-from-galley',label:'MESSROOM',detail:'servis alani',x:35,y:88,targetArea:'mess'},
+      {id:'door-corridor-from-galley',label:'ANA KORIDOR',detail:'gemi ici gecis',x:65,y:88,targetArea:'corridor'}
+    ]},
+  infirmary:{title:'REVIR', className:'area-infirmary', prompt:'Ilk yardim dolabi, oksijen ve muayene yatagina yaklas.',
+    stations:[
+      {id:'medical-locker',label:'ILK YARDIM DOLABI',detail:'bandaj / ilac',x:24,y:62,action:'notes'},
+      {id:'medical-bed',label:'MUAYENE YATAGI',detail:'hasta degerlendirme',x:62,y:68,action:'rest'},
+      {id:'medical-radio',label:'MEDICAL RADIO',detail:'TMAS / MRCC',x:78,y:56,action:'device'},
+      {id:'medical-doctor-fp',label:'GEMI DOKTORU',detail:'saglik sorumlusu',x:38,y:78,type:'npc',line:'Once sahne guvenligi; sonra bilinc, hava yolu, solunum ve dolasim.'}
+    ],
+    doors:[
+      {id:'door-corridor-from-infirmary',label:'ANA KORIDOR',detail:'gemi ici gecis',x:50,y:88,targetArea:'corridor'},
+      {id:'door-mess-from-infirmary',label:'MESSROOM',detail:'moral / ekip',x:84,y:80,targetArea:'mess'}
     ]}
 };
 function getFirstPersonAreaDef(){
@@ -26410,6 +26583,22 @@ const FIRST_PERSON_ROAMING_NPCS = {
   mess:[
     {id:'fp-cook-roam',label:'ASCI',detail:'cay servisi',baseX:34,baseY:72,ampX:8,ampY:3,phase:.4,line:'Cay taze. Ama yemekten sonra logbooku unutma.'},
     {id:'fp-doctor-roam',label:'GEMI DOKTORU',detail:'moral kontrolu',baseX:70,baseY:70,ampX:8,ampY:4,phase:2.1,line:'Yorgunlugu saklamak gemide kahramanlik degil, risk yonetimidir.'}
+  ],
+  corridor:[
+    {id:'fp-cadet-corridor',label:'STAJYER',detail:'vardiyaya gidiyor',baseX:42,baseY:72,ampX:11,ampY:6,phase:.7,line:'Kapi zincirini ezberlemeden gemide hizli hareket edemezsin.'},
+    {id:'fp-electrician-corridor',label:'ELEKTRIKCI',detail:'alarm kontrolu',baseX:64,baseY:68,ampX:8,ampY:5,phase:2.4,line:'ECR trendini okumaya gidiyorum; yol temiz kalmali.'}
+  ],
+  radio:[
+    {id:'fp-radio-watch',label:'TELSIZCI',detail:'GMDSS log',baseX:50,baseY:72,ampX:7,ampY:3,phase:1.1,line:'DSC alarminda once konumu, sonra tehlike turunu netlestir.'}
+  ],
+  cargo:[
+    {id:'fp-chief-officer-cargo',label:'1. ZABIT',detail:'stowage plan',baseX:42,baseY:74,ampX:9,ampY:4,phase:.8,line:'Ballast karari draft, trim ve UKC ile birlikte okunur.'}
+  ],
+  galley:[
+    {id:'fp-chief-cook-galley',label:'BAS ASCI',detail:'kuzine kontrolu',baseX:52,baseY:74,ampX:7,ampY:4,phase:1.5,line:'Sicak yuzey ve yag yangini icin once dogru sondurucu.'}
+  ],
+  infirmary:[
+    {id:'fp-doctor-infirmary',label:'GEMI DOKTORU',detail:'revir turu',baseX:44,baseY:76,ampX:8,ampY:3,phase:2.2,line:'Ilk yardimda panik degil, sirali kontrol hayat kurtarir.'}
   ]
 };
 function getFirstPersonRoamingNpcs(areaKey=firstPersonArea){
@@ -26801,7 +26990,8 @@ function renderFirstPersonModeUnsafe(){
     const motionClass = st.type === 'npc' && (st.roaming || distance > 10) ? 'moving' : '';
     const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${roleClass} ${facingClass} ${st.roaming ? 'roaming' : ''} ${motionClass} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
-    return {st,relX,top,scale,distance,isObjective,show,cls,subtitle,depth:forwardDepth};
+    const anchorTop = st.type === 'npc' ? Math.max(54, Math.min(92, top + 6 + forwardDepth * 5)) : top;
+    return {st,relX,top:anchorTop,scale,distance,isObjective,show,cls,subtitle,depth:forwardDepth};
   }).filter(v=>v.show).sort((a,b)=>(b.isObjective-a.isObjective)||((ready&&nearest?.id===b.st.id)-(ready&&nearest?.id===a.st.id))||a.distance-b.distance).slice(0,9);
   const stations = visibleStations.map(v=>{
     const z = 14 + Math.round(v.depth * 10);

@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=197",
-        "index.css?v=171",
+        "index.js?v=201",
+        "index.css?v=176",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -226,7 +226,7 @@ REQUIRED = {
         "fp3d-dialogue",
         "GMDSS ODASI",
         "YÜK KONTROL ODASI",
-        "first-person-world.js?v=18",
+        "first-person-world.js?v=21",
         "first-person-world.css?v=18",
     ],
     "intro route selector": [
