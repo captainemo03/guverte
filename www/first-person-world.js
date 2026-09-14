@@ -2027,6 +2027,85 @@
     badge.position.set(-.28,1.55,-.24);root.add(badge);
     root.userData.realismBadge=badge;
   }
+  function addNpcProfessionalRig(root,spine,headGroup,leftLeg,rightLeg,leftArm,rightArm,profile,def,index,skin,cloth,trim,boot){
+    const T=state.THREE;
+    const dark=material(0x06101a,{roughness:.78,metalness:.18});
+    const softBlack=material(0x02060b,{roughness:.88,metalness:.1});
+    const fabric=material(0x203545,{roughness:.82,metalness:.05});
+    const steel=material(0x7d8c94,{roughness:.34,metalness:.62});
+    const glow=material(0x76cce8,{emissive:0x1c5f73,emissiveIntensity:.92,roughness:.32});
+    const amber=material(0xffd66b,{emissive:0x5d4108,emissiveIntensity:.72,roughness:.42});
+    const rig={operatorSeat:null,workKit:null,taskGlow:null,headset:null,rankBars:[]};
+
+    box(spine,[.035,.93,.055],[0,.11,-.255],dark);
+    box(spine,[.42,.035,.058],[0,.48,-.258],trim);
+    box(spine,[.5,.032,.06],[0,-.04,-.26],material(0x0b1823,{roughness:.74,metalness:.18}));
+    const leftShoulder=new T.Mesh(new T.SphereGeometry(.115,14,10),trim);leftShoulder.position.set(-.5*profile.shoulder,1.62,0);root.add(leftShoulder);
+    const rightShoulder=new T.Mesh(new T.SphereGeometry(.115,14,10),trim);rightShoulder.position.set(.5*profile.shoulder,1.62,0);root.add(rightShoulder);
+    const leftElbow=new T.Mesh(new T.SphereGeometry(.075,12,8),cloth);leftElbow.position.set(0,-.56,0);leftArm.add(leftElbow);
+    const rightElbow=new T.Mesh(new T.SphereGeometry(.075,12,8),cloth);rightElbow.position.set(0,-.56,0);rightArm.add(rightElbow);
+    const leftKnee=new T.Mesh(new T.SphereGeometry(.082,12,8),cloth);leftKnee.position.set(0,-.58,-.01);leftLeg.add(leftKnee);
+    const rightKnee=new T.Mesh(new T.SphereGeometry(.082,12,8),cloth);rightKnee.position.set(0,-.58,-.01);rightLeg.add(rightKnee);
+    box(leftArm,[.17,.035,.22],[0,-.64,-.012],trim);
+    box(rightArm,[.17,.035,.22],[0,-.64,-.012],trim);
+    box(leftLeg,[.2,.04,.25],[0,-.66,-.02],dark);
+    box(rightLeg,[.2,.04,.25],[0,-.66,-.02],dark);
+
+    const lanyardLeft=cylinder(spine,.012,.62,[-.095,.33,-.285],trim,[0,0,.32]);
+    const lanyardRight=cylinder(spine,.012,.62,[.095,.33,-.285],trim,[0,0,-.32]);
+    const idCard=box(spine,[.19,.13,.022],[0,.05,-.315],material(0xdfe8ec,{roughness:.5,metalness:.05}));
+    rig.idCard=idCard;rig.lanyardLeft=lanyardLeft;rig.lanyardRight=lanyardRight;
+    for(let i=0;i<(profile.rank||1);i++){
+      const bar=box(spine,[.13,.022,.052],[-.28+i*.065,.66,-.255],amber);
+      rig.rankBars.push(bar);
+    }
+
+    const cheek=material(0xf1c1a0,{roughness:.9,metalness:.01,transparent:true,opacity:.28});
+    box(headGroup,[.075,.026,.016],[-.135,-.045,-.315],cheek);
+    box(headGroup,[.075,.026,.016],[.135,-.045,-.315],cheek);
+    if(def.uniform==='officer'||state.area==='radio'||state.area==='bridge'){
+      rig.headset=new T.Group();headGroup.add(rig.headset);
+      cylinder(rig.headset,.018,.74,[0,.03,.02],softBlack,[0,0,Math.PI/2]);
+      cylinder(rig.headset,.055,.045,[-.34,.0,-.02],softBlack,[Math.PI/2,0,0]);
+      cylinder(rig.headset,.055,.045,[.34,.0,-.02],softBlack,[Math.PI/2,0,0]);
+      cylinder(rig.headset,.012,.34,[.25,-.08,-.18],softBlack,[1.2,0,-.42]);
+      box(rig.headset,[.05,.025,.025],[.15,-.23,-.31],softBlack);
+    }
+
+    if(profile.posture==='operator'){
+      const pod=new T.Group();root.add(pod);pod.visible=false;
+      box(pod,[.88,.16,.74],[0,.5,.24],fabric);
+      box(pod,[.84,.84,.12],[0,.92,.55],fabric,[.18,0,0]);
+      box(pod,[.13,.42,.55],[-.53,.72,.2],dark);
+      box(pod,[.13,.42,.55],[.53,.72,.2],dark);
+      box(pod,[1.12,.16,.5],[0,.91,-.66],dark,[-.18,0,0]);
+      box(pod,[.92,.035,.32],[0,1.03,-.82],glow,[-.18,0,0]);
+      box(pod,[.24,.04,.09],[-.32,1.07,-.54],amber,[-.18,0,0]);
+      box(pod,[.24,.04,.09],[.32,1.07,-.54],glow,[-.18,0,0]);
+      rig.operatorSeat=pod;
+      rig.taskGlow=pod.children[5]||null;
+    }else{
+      const kit=new T.Group();root.add(kit);
+      if(profile.posture==='maintenance'){
+        box(kit,[.72,.22,.36],[.52,.22,-.58],dark);
+        box(kit,[.55,.04,.28],[.52,.36,-.58],amber);
+        cylinder(kit,.055,.68,[.14,.52,-.52],steel,[Math.PI/2,0,.2]);
+        rig.taskGlow=new T.PointLight(0xff9d4d,.45,2.8);rig.taskGlow.position.set(.2,.55,-.62);kit.add(rig.taskGlow);
+      }else if(profile.posture==='deckhand'){
+        cylinder(kit,.035,1.05,[.42,.44,-.42],material(0xc9a25a,{metalness:.32,roughness:.48}),[Math.PI/2,0,.35]);
+        box(kit,[.38,.16,.18],[-.38,.34,-.45],dark);
+      }else if(profile.posture==='service'){
+        box(kit,[.62,.06,.36],[.35,.76,-.48],material(0xf2f2ea,{roughness:.55,metalness:.08}),[-.08,0,0]);
+        cylinder(kit,.07,.16,[.14,.86,-.52],material(0xcfd8dc,{roughness:.42,metalness:.2}));
+      }else if(profile.posture==='clinical'){
+        box(kit,[.46,.28,.08],[.38,.64,-.48],material(0xffffff,{roughness:.54,metalness:.05}),[-.22,0,0]);
+        box(kit,[.08,.2,.085],[.38,.64,-.535],material(0xe85a51,{emissive:0x4a0904,emissiveIntensity:.35,roughness:.5}),[-.22,0,0]);
+        box(kit,[.24,.055,.085],[.38,.64,-.54],material(0xe85a51,{emissive:0x4a0904,emissiveIntensity:.35,roughness:.5}),[-.22,0,0]);
+      }
+      rig.workKit=kit;
+    }
+    return rig;
+  }
   function createNpc(def,index){
     const T=state.THREE,g=new T.Group(),colors=uniformColors(def.uniform),profile=npcBodyProfile(def,index);
     const skin=material(profile.skin,{roughness:.88,metalness:.02});
@@ -2103,6 +2182,7 @@
     const leftSole=box(leftLeg.group,[.36,.035,.5],[.04,-.965,-.1],boot);
     const rightSole=box(rightLeg.group,[.36,.035,.5],[-.04,-.965,-.1],boot);
     addNpcRealismKit(root,spine,headGroup,leftLeg.group,rightLeg.group,leftArm.group,rightArm.group,def,index,skin,cloth,trim,boot);
+    const professionalRig=addNpcProfessionalRig(root,spine,headGroup,leftLeg.group,rightLeg.group,leftArm.group,rightArm.group,profile,def,index,skin,cloth,trim,boot);
     const breatheBadge=new T.Mesh(new T.BoxGeometry(.12,.12,.035),trim);breatheBadge.position.set(.3,1.58,-.245);root.add(breatheBadge);
     const toolSatchel=box(root,[.28,.38,.11],[-.47*profile.shoulder,1.2,.16],material(0x3b2a1d,{roughness:.82,metalness:.08}));
     toolSatchel.rotation.z=.08;
@@ -2123,12 +2203,12 @@
     ring.rotation.x=Math.PI/2;ring.position.y=.04;root.add(ring);
 
     const plate=createNpcNameplate(def.label);
-    plate.position.set(0,2.72,0);plate.scale.set(1.45,.45,1);g.add(plate);
+    plate.position.set(0,2.66,0);plate.scale.set(1.18,.34,1);g.add(plate);
     const speech=createNpcSpeechBubble();g.add(speech);
     g.position.set(def.x,0,def.z);g.scale.set(1.12*profile.width,1.12*profile.height,1.12*profile.depth);state.scene.add(g);
     const item=registerInteraction(def,g);
     registerCollider(g,.62);
-    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,speech,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried};
+    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,plate,speech,professionalRig,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried};
     state.npcs.push(item);
   }
 
@@ -2967,27 +3047,70 @@
       const weightShift=moving?Math.sin(gait)*.032:Math.sin(state.elapsed*.95+a.phase)*.009;
       const talking=!!speechText&&a.attention>.28;
       const blink=(Math.sin(state.elapsed*2.8+a.phase*3.1)>.965)||(Math.sin(state.elapsed*.43+index)>.992);
-      a.root.position.y=.065+(moving?Math.abs(Math.sin(gait*2))*.012:0);
-      a.root.rotation.z=weightShift;
-      a.leftLeg.rotation.x=swing;a.rightLeg.rotation.x=-swing;
-      a.leftLeg.position.y=.94+footLift;a.rightLeg.position.y=.94+otherLift;
-      if(a.leftFootShadow){a.leftFootShadow.material.opacity=moving?(.3-footLift*3.2):.22;a.leftFootShadow.scale.setScalar(1+otherLift*2.1);}
-      if(a.rightFootShadow){a.rightFootShadow.material.opacity=moving?(.3-otherLift*3.2):.22;a.rightFootShadow.scale.setScalar(1+footLift*2.1);}
-      if(a.leftBoot)a.leftBoot.rotation.x=clamp(-swing*.22,-.16,.16);
-      if(a.rightBoot)a.rightBoot.rotation.x=clamp(swing*.22,-.16,.16);
-      a.leftArm.rotation.x=-swing*.85-a.attention*.18+Math.sin(a.gesture+index)*.045;
-      a.rightArm.rotation.x=swing*.85-a.attention*.12+Math.cos(a.gesture*.8+index)*.04;
-      if(duty&&!moving&&a.attention>.5){a.rightArm.rotation.z=-.38-Math.sin(a.gesture*1.4)*.08;a.leftArm.rotation.z=.18;}else{a.rightArm.rotation.z=0;a.leftArm.rotation.z=0;}
-      a.spine.position.y=1.18+breath+(moving?Math.abs(Math.sin(gait))*.04:Math.sin(state.elapsed*1.2+index)*.01);
-      a.spine.rotation.x=a.attention*.052+clamp(Math.sin(gait)*.03,-.03,.03);
+      const posture=a.profile?.posture||'patrol';
+      const operatorLocked=posture==='operator'&&!moving&&!duty;
+      const maintenancePose=posture==='maintenance'&&!moving;
+      const deckPose=posture==='deckhand'&&!moving;
+      const servicePose=posture==='service'&&!moving;
+      const clinicalPose=posture==='clinical'&&!moving;
+      const craftPose=maintenancePose||deckPose||servicePose||clinicalPose;
+      if(a.professionalRig){
+        if(a.professionalRig.operatorSeat)a.professionalRig.operatorSeat.visible=operatorLocked;
+        if(a.professionalRig.workKit)a.professionalRig.workKit.visible=!operatorLocked&&(craftPose||playerDist<7.5||!!eventItem);
+        if(a.professionalRig.taskGlow&&a.professionalRig.taskGlow.intensity!==undefined)a.professionalRig.taskGlow.intensity=(craftPose||eventItem) ? .55+Math.sin(state.elapsed*5+a.phase)*.08 : .24;
+        if(a.professionalRig.idCard)a.professionalRig.idCard.position.y=.05+Math.sin(state.elapsed*2.6+a.phase)*.01;
+        if(a.professionalRig.headset)a.professionalRig.headset.rotation.z=Math.sin(state.elapsed*1.2+a.phase)*.012;
+      }
+      if(a.plate&&a.plate.material){
+        const labelFocus=playerDist<5.2||state.nearest&&state.nearest.id===item.id&&state.nearest.distance<3.5||!!eventItem;
+        a.plate.visible=labelFocus||playerDist<8;
+        a.plate.material.opacity=clamp(labelFocus ? .72 : .24,.18,.82);
+      }
+      if(operatorLocked){
+        a.root.position.y=.035+Math.sin(state.elapsed*1.1+a.phase)*.004;
+        a.root.rotation.z=weightShift*.28;
+        a.leftLeg.rotation.x=-.78+Math.sin(a.gesture*.7)*.035;a.rightLeg.rotation.x=-.74-Math.sin(a.gesture*.65)*.03;
+        a.leftLeg.position.y=.94;a.rightLeg.position.y=.94;
+        a.leftArm.rotation.x=-1.03+Math.sin(a.gesture*1.3)*.045;a.rightArm.rotation.x=-.98+Math.cos(a.gesture*1.1)*.045;
+        a.leftArm.rotation.z=.18+Math.sin(a.gesture*.8)*.025;a.rightArm.rotation.z=-.18+Math.cos(a.gesture*.9)*.025;
+        a.spine.position.y=1.08+breath*.55;
+        a.spine.rotation.x=.16+a.attention*.035+Math.sin(a.gesture*.55)*.018;
+      }else if(craftPose){
+        const taskBob=Math.sin(a.gesture*(maintenancePose?2.4:servicePose?1.7:1.95))*.05;
+        a.root.position.y=.058+Math.abs(taskBob)*.05;
+        a.root.rotation.z=weightShift*.7;
+        a.leftLeg.rotation.x=maintenancePose?-.22+taskBob*.35:deckPose?-.1+taskBob*.18:-.04;
+        a.rightLeg.rotation.x=maintenancePose?.16-taskBob*.28:deckPose?.08-taskBob*.16:.03;
+        a.leftLeg.position.y=.94+Math.max(0,taskBob)*.018;a.rightLeg.position.y=.94+Math.max(0,-taskBob)*.018;
+        a.leftArm.rotation.x=maintenancePose?-.72+taskBob:deckPose?-.38+taskBob*.5:servicePose?-.8+taskBob*.22:-.55+taskBob*.18;
+        a.rightArm.rotation.x=maintenancePose?-1.05-taskBob*.65:deckPose?-.92-taskBob*.42:servicePose?-.72-taskBob*.2:-.35-taskBob*.15;
+        a.leftArm.rotation.z=maintenancePose?.28:deckPose?.22:servicePose?.12:.08;
+        a.rightArm.rotation.z=maintenancePose?-.34:deckPose?-.42:servicePose?-.08:-.1;
+        a.spine.position.y=1.16+breath*.7;
+        a.spine.rotation.x=(maintenancePose?.28:deckPose?.12:servicePose?.07:.1)+a.attention*.035+taskBob*.18;
+      }else{
+        a.root.position.y=.065+(moving?Math.abs(Math.sin(gait*2))*.012:0);
+        a.root.rotation.z=weightShift;
+        a.leftLeg.rotation.x=swing;a.rightLeg.rotation.x=-swing;
+        a.leftLeg.position.y=.94+footLift;a.rightLeg.position.y=.94+otherLift;
+        a.leftArm.rotation.x=-swing*.85-a.attention*.18+Math.sin(a.gesture+index)*.045;
+        a.rightArm.rotation.x=swing*.85-a.attention*.12+Math.cos(a.gesture*.8+index)*.04;
+        if(duty&&!moving&&a.attention>.5){a.rightArm.rotation.z=-.38-Math.sin(a.gesture*1.4)*.08;a.leftArm.rotation.z=.18;}else{a.rightArm.rotation.z=0;a.leftArm.rotation.z=0;}
+        a.spine.position.y=1.18+breath+(moving?Math.abs(Math.sin(gait))*.04:Math.sin(state.elapsed*1.2+index)*.01);
+        a.spine.rotation.x=a.attention*.052+clamp(Math.sin(gait)*.03,-.03,.03);
+      }
+      if(a.leftFootShadow){a.leftFootShadow.material.opacity=moving?(.3-footLift*3.2):operatorLocked ? .28 : .22;a.leftFootShadow.scale.setScalar(1+(operatorLocked ? .35 : otherLift*2.1));}
+      if(a.rightFootShadow){a.rightFootShadow.material.opacity=moving?(.3-otherLift*3.2):operatorLocked ? .28 : .22;a.rightFootShadow.scale.setScalar(1+(operatorLocked ? .35 : footLift*2.1));}
+      if(a.leftBoot)a.leftBoot.rotation.x=operatorLocked ? .18 : craftPose ? clamp(-a.leftLeg.rotation.x*.16,-.14,.18) : clamp(-swing*.22,-.16,.16);
+      if(a.rightBoot)a.rightBoot.rotation.x=operatorLocked ? .18 : craftPose ? clamp(-a.rightLeg.rotation.x*.16,-.14,.18) : clamp(swing*.22,-.16,.16);
       if(a.hips)a.hips.rotation.z=-weightShift*.55;
       if(a.shoulderBar)a.shoulderBar.rotation.z=-weightShift*.5;
       if(a.leftEpaulet)a.leftEpaulet.rotation.z=-weightShift*.34;
       if(a.rightEpaulet)a.rightEpaulet.rotation.z=-weightShift*.34;
       if(a.belt)a.belt.rotation.z=weightShift*.28;
       if(a.pelvis)a.pelvis.rotation.z=-weightShift*.32;
-      if(a.leftHand)a.leftHand.position.y=-.77+(talking?Math.sin(a.gesture*3.1)*.022:0);
-      if(a.rightHand)a.rightHand.position.y=-.77+(talking?Math.cos(a.gesture*2.7)*.024:0);
+      if(a.leftHand)a.leftHand.position.y=-.77+(talking ? Math.sin(a.gesture*3.1)*.022 : operatorLocked ? .04 : 0);
+      if(a.rightHand)a.rightHand.position.y=-.77+(talking ? Math.cos(a.gesture*2.7)*.024 : operatorLocked ? .04 : 0);
       if(a.leftEye)a.leftEye.scale.y=blink?.16:1;
       if(a.rightEye)a.rightEye.scale.y=blink?.16:1;
       if(a.mouth){a.mouth.scale.x=talking?(.78+Math.abs(Math.sin(a.gesture*5.4))*.42):1;a.mouth.scale.y=talking?(1.1+Math.abs(Math.cos(a.gesture*4.2))*.55):1;a.mouth.position.y=-.14+(talking?Math.sin(a.gesture*4.1)*.008:0);}
@@ -2995,7 +3118,7 @@
       if(a.rightBrow)a.rightBrow.rotation.z=.08+a.attention*.08-(eventItem?.tone==='urgent'?.08:0);
       if(a.breatheBadge){a.breatheBadge.position.y=1.58+breath*.9;if(a.breatheBadge.material&&a.breatheBadge.material.emissiveIntensity!==undefined)a.breatheBadge.material.emissiveIntensity=.08+a.attention*.22;}
       if(a.toolSatchel)a.toolSatchel.rotation.z=.08+Math.sin(gait)*.035;
-      if(a.carried)a.carried.rotation.z=Math.sin(gait*.5+a.phase)*.035;
+      if(a.carried)a.carried.rotation.z=Math.sin(gait*.5+a.phase)*.035+(craftPose ? .08 : 0);
       const faceYaw=Math.atan2(state.player.x-item.object.position.x,-(state.player.z-item.object.position.z));
       const faceDelta=Math.atan2(Math.sin(faceYaw-item.object.rotation.y),Math.cos(faceYaw-item.object.rotation.y));
       a.headGroup.rotation.y=clamp(faceDelta,-.5,.5)+Math.sin(state.elapsed*.7+a.phase)*.025;

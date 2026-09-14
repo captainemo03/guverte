@@ -596,7 +596,7 @@ def check_mobile_and_hitboxes() -> None:
         "index.js?v=201",
         "index.css?v=176",
         "release-quality.js?v=10",
-        "first-person-world.js?v=21",
+        "first-person-world.js?v=22",
         "first-person-world.css?v=18",
         "game-settings-vibration-btn",
         "toggleVibration",
