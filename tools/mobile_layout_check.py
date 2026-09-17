@@ -46,8 +46,8 @@ REQUIRED = {
         "TCPA",
     ],
     "cache bumped": [
-        "index.js?v=201",
-        "index.css?v=176",
+        "index.js?v=207",
+        "index.css?v=183",
         "release-quality.js?v=10",
     ],
     "4k dynamic background": [
@@ -226,8 +226,15 @@ REQUIRED = {
         "fp3d-dialogue",
         "GMDSS ODASI",
         "YÜK KONTROL ODASI",
-        "first-person-world.js?v=22",
-        "first-person-world.css?v=18",
+        "first-person-world.js?v=25",
+        "first-person-world.css?v=19",
+        "checkedStations",
+        "completeWorldStation",
+        "fp3d-marker.checked",
+        "FIRST_PERSON_OPERATION_REPORTS",
+        "fp-operation-card",
+        "ship-map-live-pin",
+        "fp-transfer-overlay",
     ],
     "intro route selector": [
         "route-select-grid",

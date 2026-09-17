@@ -21719,8 +21719,9 @@ async function enterShipCompartmentFromMap(areaId){
   }catch(err){
     console.warn('ship map 3D entry failed', err);
   }
-  if(typeof setFirstPersonArea === 'function') setFirstPersonArea(areaId);
   if(typeof openFirstPersonMode === 'function') openFirstPersonMode();
+  if(typeof changeFirstPersonCompartment === 'function') changeFirstPersonCompartment(areaId);
+  else if(typeof setFirstPersonArea === 'function') setFirstPersonArea(areaId);
 }
 function renderShipMap(){
   const svg = document.getElementById('ship-map-svg');
@@ -21741,7 +21742,20 @@ function renderShipMap(){
       ${c.id===active?`<circle class="ship-map-player-dot" cx="${c.x+c.w-18}" cy="${c.y+18}" r="7" fill="#ffd66b"/>`:''}
     </g>`;
   }).join('');
-  const seaLines = Array.from({length:15},(_,i)=>{
+  const corridor = SHIP_MAP_COMPARTMENTS.find(c=>c.id==='corridor') || SHIP_MAP_COMPARTMENTS[0];
+  const hub = {x:corridor.x+corridor.w/2,y:corridor.y+corridor.h/2};
+  const shipMapLinks = SHIP_MAP_COMPARTMENTS.filter(c=>c.id!=='corridor').map((c,i)=>{
+    const cx = c.x+c.w/2, cy = c.y+c.h/2;
+    const activeLink = c.id===active ? ' active' : '';
+    return `<path class="ship-map-compartment-link${activeLink}" d="M${hub.x} ${hub.y} C${hub.x} ${cy}, ${cx} ${hub.y}, ${cx} ${cy}" style="animation-delay:${(i*.09).toFixed(2)}s"/>`;
+  }).join('');
+  const livePins = SHIP_MAP_COMPARTMENTS.map((c,i)=>{
+    const cx = c.x + 18 + ((i*23) % Math.max(24,c.w-36));
+    const cy = c.y + 18 + ((i*17) % Math.max(20,c.h-30));
+    const activePin = c.id===active ? ' active' : '';
+    const label = c.id===active ? 'SEN' : (i%3===0 ? 'NPC' : i%3===1 ? 'ALARM' : 'EKIP');
+    return `<g class="ship-map-live-pin${activePin}" transform="translate(${cx} ${cy})"><circle r="5"/><text x="9" y="3">${label}</text></g>`;
+  }).join('');  const seaLines = Array.from({length:15},(_,i)=>{
     const y = 38 + i*26;
     const delay = (i%5)*-.42;
     const width = 120 + (i%4)*46;
@@ -21779,7 +21793,9 @@ function renderShipMap(){
     <text x="82" y="64" fill="#a9c8d9" font-size="10" font-family="Share Tech Mono, monospace">Kompartmana tikla: 3D birinci sahis mahaline giris yapar</text>
     <text x="84" y="214" fill="#7ebdd4" font-size="11" font-family="Share Tech Mono, monospace" transform="rotate(-90 84 214)">PRUVA</text>
     <text x="838" y="214" fill="#7ebdd4" font-size="11" font-family="Share Tech Mono, monospace" transform="rotate(90 838 214)">KIC</text>
+    ${shipMapLinks}
     ${zones}
+    ${livePins}
     <g class="ship-map-prop-wake">
       <path d="M72 198 C34 190 14 176 -18 156"/>
       <path d="M72 222 C34 230 14 244 -18 264"/>
@@ -26397,6 +26413,9 @@ let firstPersonPlayer = {x:50,y:78,yaw:0};
 let firstPersonPointer = {down:false,lastX:0,lastY:0};
 let firstPersonInput = {dx:0,dy:0,raf:0,destination:null};
 let firstPersonNpcTimer = null;
+let firstPersonTransition = null;
+let firstPersonAreaHistory = [];
+let firstPersonStationMemory = {};
 
 function ensureFirstPersonHost(){
   let panel = document.getElementById('firstperson-panel');
@@ -26555,14 +26574,77 @@ const FIRST_PERSON_AREA_DEFS = {
       {id:'door-mess-from-infirmary',label:'MESSROOM',detail:'moral / ekip',x:84,y:80,targetArea:'mess'}
     ]}
 };
+const FIRST_PERSON_AREA_INTEL = {
+  bridge:{sound:'Vardiya zabiti alçak sesle CPA/TCPA teyidi istiyor.',route:'Köprü kanadı · ECDIS · VHF · radar',feel:'komuta merkezi',danger:'trafik ve rota kararı'},
+  corridor:{sound:'Dar koridorda havalandırma, kapı kilitleri ve ayak sesleri var.',route:'Köprü · kamara · messroom · revir · GMDSS · makine',feel:'gemi içi omurga',danger:'acil kaçış ve yangın kapıları'},
+  deck:{sound:'Rüzgar, baş dalga ve halat gerginliği dış güverteyi canlı tutuyor.',route:'Köprü kanadı · başüstü · borda · pilot ladder',feel:'açık deniz güvertesi',danger:'snap-back, swell ve kaygan zemin'},
+  engine:{sound:'Jeneratör uğultusu ve ECR alarm tonu makine dairesini dolduruyor.',route:'ECR · jeneratör · bilge · purifier · acil çıkış',feel:'sıcak ve gürültülü makine katı',danger:'alarm, sıcak yüzey ve kaçak'},
+  cabin:{sound:'Kamara sessiz; telefonda aile bildirimi ve gemi titreşimi duyuluyor.',route:'Yatak · notlar · telefon · vardiya hazırlığı',feel:'kişisel alan',danger:'yorgunluk ve moral düşüşü'},
+  mess:{sound:'Çay kaşığı, kısa ekip konuşmaları ve vardiya dedikodusu var.',route:'Masa · çay · crew chat · kambuz',feel:'mürettebat yaşam alanı',danger:'dikkat dağınıklığı ve dinçlik'},
+  galley:{sound:'Kuzine fanı, sıcak yüzey uyarısı ve metal tezgah sesleri var.',route:'Kuzine · soğuk oda · yangın battaniyesi · servis',feel:'kambuz operasyonu',danger:'yağ yangını ve sıcak yüzey'},
+  infirmary:{sound:'Revirde oksijen tüpü, ilk yardım dolabı ve sakin bir floresan sesi var.',route:'Dolap · sedye · medical radio · kayıt',feel:'sağlık noktası',danger:'panik ve yanlış ilk yardım'},
+  radio:{sound:'GMDSS odasında DSC bekleme sesi ve NAVTEX kağıt hışırtısı var.',route:'VHF · MF/HF · NAVTEX · EPIRB · SART',feel:'acil haberleşme istasyonu',danger:'eksik distress bilgisi'},
+  cargo:{sound:'Ballast rölesi, mimic panel tıklamaları ve yük alarmı duyuluyor.',route:'Cargo mimic · ballast · stowage · reefer',feel:'yük kontrol odası',danger:'trim, UKC ve stabilite'}
+};
+function getFirstPersonAreaIntel(areaKey=firstPersonArea){
+  return FIRST_PERSON_AREA_INTEL[areaKey] || FIRST_PERSON_AREA_INTEL.bridge;
+}
+function getFirstPersonArrivalLine(areaKey=firstPersonArea){
+  const def = FIRST_PERSON_AREA_DEFS[areaKey] || FIRST_PERSON_AREA_DEFS.bridge;
+  const intel = getFirstPersonAreaIntel(areaKey);
+  return `${def.title}: ${intel.feel}. ${intel.sound}`;
+}
+function renderFirstPersonAtmosphere(areaKey=firstPersonArea){
+  const intel = getFirstPersonAreaIntel(areaKey);
+  const label = (FIRST_PERSON_AREA_DEFS[areaKey]?.title || 'GEMI ICI').toUpperCase();
+  return `<div class="fp-atmosphere fp-atmo-${phoneSafe(areaKey)}" aria-hidden="true"><i></i><i></i><i></i><span class="fp-area-identity"><b>${phoneSafe(label)}</b><small>${phoneSafe(intel.route)}</small></span><span class="fp-risk-chip">${phoneSafe(intel.danger)}</span></div>`;
+}
+function renderFirstPersonTransition(){
+  if(!firstPersonTransition || Date.now() > firstPersonTransition.until) return '';
+  const from = FIRST_PERSON_AREA_DEFS[firstPersonTransition.from]?.title || 'GEMI ICI';
+  const to = FIRST_PERSON_AREA_DEFS[firstPersonTransition.to]?.title || getFirstPersonAreaDef().title;
+  const intel = getFirstPersonAreaIntel(firstPersonTransition.to);
+  return `<div class="fp-transfer-overlay"><div><b>${phoneSafe(from)}</b><strong>${phoneSafe(to)}</strong><span>${phoneSafe(intel.route)}</span></div></div>`;
+}
 function getFirstPersonAreaDef(){
   return FIRST_PERSON_AREA_DEFS[firstPersonArea] || FIRST_PERSON_AREA_DEFS.bridge;
 }
 function setFirstPersonArea(area){
   if(!FIRST_PERSON_AREA_DEFS[area]) return;
+  if(window.__GUVERTE_FP3D?.state?.active && window.__GUVERTE_FP3D?.areas?.[area]){
+    window.__GUVERTE_FP3D.changeCompartment?.(area) || window.__GUVERTE_FP3D.setArea?.(area);
+    return;
+  }
+  if(firstPersonInput?.raf){ cancelAnimationFrame(firstPersonInput.raf); firstPersonInput.raf = 0; }
+  firstPersonInput.destination = null;
+  firstPersonInput.dx = 0;
+  firstPersonInput.dy = 0;
+  const prev = firstPersonArea;
+  const previousDef = FIRST_PERSON_AREA_DEFS[prev] || FIRST_PERSON_AREA_DEFS.bridge;
   firstPersonArea = area;
   firstPersonPlayer = {x:50,y:78,yaw:0};
+  firstPersonTransition = prev !== area ? {from:prev,to:area,started:Date.now(),until:Date.now()+950} : null;
+  if(prev !== area){
+    firstPersonAreaHistory = [area, ...firstPersonAreaHistory.filter(x=>x !== area)].slice(0,6);
+  }
+  const host = document.getElementById('firstperson-stage');
+  if(host) host.classList.add('fp-compartment-changing');
   renderFirstPersonMode();
+  if(prev !== area){
+    const line = getFirstPersonArrivalLine(area);
+    addWatchFeed?.(line, 'good');
+    showNotif?.('GEMI ICI', `${previousDef.title} → ${getFirstPersonAreaDef().title}`, getFirstPersonAreaIntel(area).sound);
+  }
+  setTimeout(()=>document.getElementById('firstperson-stage')?.classList.remove('fp-compartment-changing'), 520);
+}
+function changeFirstPersonCompartment(area, ev){
+  stopShipWalkControlEvent(ev);
+  if(!FIRST_PERSON_AREA_DEFS[area] && !window.__GUVERTE_FP3D?.areas?.[area]) return;
+  if(window.__GUVERTE_FP3D?.state?.active && window.__GUVERTE_FP3D?.areas?.[area]){
+    window.__GUVERTE_FP3D.changeCompartment?.(area) || window.__GUVERTE_FP3D.setArea?.(area);
+    return;
+  }
+  setFirstPersonArea(area);
 }
 const FIRST_PERSON_ROAMING_NPCS = {
   bridge:[
@@ -26772,65 +26854,130 @@ function openFirstPersonSeaLook(view='bow'){
   addWatchFeed(notes[view] || notes.bow, 'good');
   showNotif('GUVERTEDESIN', labels[view] || labels.bow, 'Deniz, ufuk ve trafik gozlemi kayda gecti.');
 }
+const FIRST_PERSON_OPERATION_REPORTS = {
+  phone:{title:'Haberleşme kontrolü',body:'Aile/crew mesajları, mail ve gemi içi bildirimler aynı zincirde toplandı.',effect:{moral:1}},
+  notes:{title:'Not ve prosedür kontrolü',body:'Mahalleye ait risk notu, kısa kontrol listesi ve vardiya hafızası açıldı.',effect:{bilgi:1}},
+  map:{title:'Harita / ECDIS bağlantısı',body:'Üstten gemi planı ve rota takibi açık; kompartman seçimi doğrudan 1. şahıs geçişe bağlandı.',effect:{bilgi:1}},
+  cargo:{title:'Yük kontrol raporu',body:'Cargo mimic, ballast paneli, trim/list ve stowage planı birlikte kontrol edildi.',effect:{bilgi:1,sayginlik:1}},
+  device:{title:'Cihaz kontrol raporu',body:'Cihaz paneli açıldı; alarm, log ve çalışma kanalı teyidi görev zincirine işlendi.',effect:{bilgi:1}},
+  paint:{title:'Raspa / boya işi',body:'KKD, çalışma izni, havalandırma, yüzey hazırlığı ve boya katı sırası kontrol edildi.',effect:{bilgi:1,sayginlik:1}},
+  rest:{title:'Dinçlik toparlandı',body:'Kısa mola kayda geçti; yorgunluk ve moral dengesi vardiya riskine işlendi.',effect:{moral:1}},
+  ai:{title:'AI Mate kısa brifing',body:'Yakındaki hedef, mahal riski ve beklenen rapor tek notta özetlendi.',effect:{bilgi:1}},
+  walkTask:{title:'Saha görevi işaretlendi',body:'Doğru nokta sahada teyit edildi; yürüyüş zinciri ilerletildi.',effect:{sayginlik:1}},
+  engine3d:{title:'Makine kontrol raporu',body:'Alarm acknowledge, jeneratör yükü, bilge trendi ve köprüye rapor zinciri kontrol edildi.',effect:{bilgi:1,sayginlik:1}},
+  deck3d:{title:'Güverte operasyon raporu',body:'Halat yük yönü, snap-back alanı, pilot ladder ve borda emniyeti birlikte teyit edildi.',effect:{bilgi:1,sayginlik:1}},
+  seaLook:{title:'Deniz gözlemi',body:'Ufuk, swell, trafik ışıkları ve pruva/borda durumu vardiya notuna işlendi.',effect:{bilgi:1}},
+  binocularLook:{title:'Dürbün taraması',body:'Uzak trafik, seyir fenerleri ve görüş hattı dürbünle tarandı.',effect:{bilgi:1}}
+};
+function getFirstPersonOperationReport(st){
+  if(!st) return null;
+  if(st.id&&/radio|vhf|navtex|epirb|sart|mf/i.test(st.id)) return {title:'GMDSS haberleşme zinciri',body:'DSC/CH16, working channel, NAVTEX MSI ve acil cihaz yerleşimi teyit edildi.',effect:{bilgi:1,sayginlik:1}};
+  if(st.id&&/medical|revir/i.test(st.id)) return {title:'Revir müdahale zinciri',body:'Sahne güvenliği, bilinç, hava yolu, solunum, dolaşım ve TMAS/MRCC irtibatı kontrol edildi.',effect:{bilgi:1}};
+  if(st.id&&/galley|kuzine|fire/i.test(st.id)) return {title:'Kambuz yangın riski',body:'Sıcak yüzey, yağ yangını, doğru söndürücü ve servis yolu kontrol edildi.',effect:{bilgi:1}};
+  return FIRST_PERSON_OPERATION_REPORTS[st.action] || (st.device ? FIRST_PERSON_OPERATION_REPORTS.device : null);
+}
+function showFirstPersonOperationCard(st,report){
+  if(!st||!report) return;
+  const root = document.getElementById('firstperson-stage');
+  firstPersonStationMemory[st.id || st.label || report.title] = Date.now();
+  addWatchFeed(`${st.label || report.title}: ${report.body}`, 'good');
+  addLiveLogbook?.('GEMI ICI OPERASYON', `${getFirstPersonAreaDef().title} / ${st.label || report.title}: ${report.body}`, true);
+  if(report.effect) applyEffect(report.effect,{skipContractTick:true});
+  if(root){
+    root.querySelector('.fp-operation-card')?.remove();
+    const card = document.createElement('div');
+    card.className = `fp-operation-card ${phoneSafe(firstPersonArea)}`;
+    card.innerHTML = `<b>${phoneSafe(report.title)}</b><strong>${phoneSafe(st.label || getFirstPersonAreaDef().title)}</strong><p>${phoneSafe(report.body)}</p><small>${phoneSafe(getFirstPersonAreaIntel().danger)}</small><button onclick="this.closest('.fp-operation-card')?.remove()">KAPAT</button>`;
+    root.appendChild(card);
+    setTimeout(()=>card.remove(), 5600);
+  }
+}
+function completeFirstPersonStation(st){
+  const report = getFirstPersonOperationReport(st);
+  if(report) showFirstPersonOperationCard(st,report);
+  markWalkTaskDone(st.id || st.action || 'station', st.label || report?.title || 'Istasyon');
+  progressWalkMission(firstPersonArea, st.id || st.action || 'station', st.label || report?.title || 'Istasyon');
+}
 function handleFirstPersonAction(st){
   if(!st) return;
   const label = st.label || 'Istasyon';
   if(st.action === 'phone'){
     togglePhone();
+    completeFirstPersonStation(st);
     showNotif('TELEFON', label, 'Telefon acildi. Mesaj, mail ve aile grubunu buradan yonet.');
     return;
   }
   if(st.action === 'notes'){
     openNotes();
+    completeFirstPersonStation(st);
     showNotif('NOTLAR', label, 'Notlarim ve sozluk paneli acildi.');
     return;
   }
   if(st.action === 'map'){
     openMap();
+    completeFirstPersonStation(st);
     showNotif('HARITA', label, 'Rota ve ECDIS haritasi acildi.');
     return;
   }
   if(st.action === 'binocularLook'){
     openFirstPersonBinocularLook(st.look || 'bow');
+    completeFirstPersonStation(st);
     return;
   }
   if(st.action === 'seaLook'){
     openFirstPersonSeaLook(st.look || 'bow');
+    completeFirstPersonStation(st);
     return;
   }
   if(st.action === 'deck3d'){
     openShipOperation3D('mooring3d');
-    showNotif('GUVERTEDESIN', label, 'Guvete operasyon paneli acildi.');
+    completeFirstPersonStation(st);
+    showNotif('GUVERTEDESIN', label, 'Guverte operasyon paneli acildi.');
     return;
   }
   if(st.action === 'engine3d'){
     openShipOperation3D('engine3d');
+    completeFirstPersonStation(st);
     showNotif('MAKINE', label, 'Makine kontrol odasi paneli acildi.');
     return;
   }
+  if(st.action === 'cargo'){
+    openMap();
+    completeFirstPersonStation(st);
+    showNotif('YUK KONTROL', label, 'Cargo, ballast, trim ve stowage zinciri kayda gecti.');
+    return;
+  }
+  if(st.action === 'device'){
+    openDevices();
+    completeFirstPersonStation(st);
+    showNotif('CIHAZ', label, 'Cihaz paneli ve kontrol zinciri acildi.');
+    return;
+  }
+  if(st.action === 'paint'){
+    completeFirstPersonStation(st);
+    showNotif('RASPA / BOYA', label, 'KKD, izin ve boya sirasi kontrol edildi.');
+    return;
+  }
   if(st.action === 'rest'){
-    addWatchFeed(`${label}: kisa mola alindi; dinclik ve moral dengesi toparlaniyor.`, 'good');
+    completeFirstPersonStation(st);
     showNotif('SERBEST ZAMAN', label, 'Kisa dinlenme etkisi kaydedildi.');
     return;
   }
   if(st.action === 'ai'){
+    completeFirstPersonStation(st);
     showNotif('AI MATE', 'Yardimci acildi', 'Sahne hedefini ve riskleri kisa not olarak takip et.');
-    addWatchFeed('AI Mate: mevcut sahnede once cihaz/konum hedefini bul, sonra rapor ver.', 'good');
     return;
   }
   if(st.action === 'walkTask'){
-    markWalkTaskDone(st.id, label);
-    progressWalkMission(firstPersonArea, st.id, label);
+    completeFirstPersonStation(st);
     showNotif('GOREV', label, 'Dogru bolge/istasyon isaretlendi.');
     return;
   }
   if(st.device){
-    markWalkTaskDone(st.id, label);
-    progressWalkMission('bridge3d', st.id, label);
+    completeFirstPersonStation(st);
     openRealBridgeConsole(st.device);
   }
-}
-function interactFirstPerson(){
+}function interactFirstPerson(){
   if(!firstPersonActive) return;
   const nearest = getNearestFirstPersonStation();
   if(!nearest) return;
@@ -26988,7 +27135,8 @@ function renderFirstPersonModeUnsafe(){
     const roleClass = st.type === 'npc' ? getFirstPersonNpcRole(st) : '';
     const facingClass = st.type === 'npc' ? (dx >= 0 ? 'face-right' : 'face-left') : '';
     const motionClass = st.type === 'npc' && (st.roaming || distance > 10) ? 'moving' : '';
-    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${roleClass} ${facingClass} ${st.roaming ? 'roaming' : ''} ${motionClass} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
+    const checkedClass = firstPersonStationMemory[st.id || st.label] ? 'checked' : '';
+    const cls = `${st.type === 'npc' ? 'npc' : st.type === 'door' ? 'door' : 'station'} ${roleClass} ${facingClass} ${st.roaming ? 'roaming' : ''} ${motionClass} ${checkedClass} ${ready && nearest?.id === st.id ? 'active' : ''} ${isObjective ? 'objective' : ''}`;
     const subtitle = st.type === 'door' ? (st.detail || 'gecis') : st.type === 'npc' ? (st.detail || 'crew') : (st.detail || st.device || st.action || 'device');
     const anchorTop = st.type === 'npc' ? Math.max(54, Math.min(92, top + 6 + forwardDepth * 5)) : top;
     return {st,relX,top:anchorTop,scale,distance,isObjective,show,cls,subtitle,depth:forwardDepth};
@@ -26997,24 +27145,27 @@ function renderFirstPersonModeUnsafe(){
     const z = 14 + Math.round(v.depth * 10);
     if(v.st.type === 'npc'){
       const delay = ((v.st.phase || 0) + (v.st.x || 0) * .03).toFixed(2);
-      return `<button class="fp-actor ${v.cls}" aria-label="${phoneSafe(v.st.label)}" style="left:${v.relX}%;top:${v.top}%;z-index:${z};--fp-scale:${v.scale};--npc-delay:${delay}s;" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><span class="fp-npc-shadow"></span><span class="fp-npc-figure"><i class="head"></i><i class="neck"></i><i class="torso"></i><i class="arm left"></i><i class="arm right"></i><i class="leg left"></i><i class="leg right"></i></span><span class="fp-npc-label"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></span></button>`;
+      const bark = String(v.st.line || v.st.detail || 'Vardiya akisi takipte.').slice(0,72);
+      return `<button class="fp-actor ${v.cls}" aria-label="${phoneSafe(v.st.label)}" style="left:${v.relX}%;top:${v.top}%;z-index:${z};--fp-scale:${v.scale};--npc-delay:${delay}s;" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><span class="fp-npc-shadow"></span><span class="fp-npc-figure"><i class="head"></i><i class="neck"></i><i class="torso"></i><i class="arm left"></i><i class="arm right"></i><i class="leg left"></i><i class="leg right"></i></span><span class="fp-npc-label"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></span><span class="fp-npc-bark">${phoneSafe(bark)}</span></button>`;
     }
     return `<button class="fp-hotspot ${v.cls}" style="left:${v.relX}%;top:${v.top}%;z-index:${z};--fp-scale:${v.scale};" onclick="jumpFirstPersonTo(${v.st.x},${v.st.y},event)"><b>${phoneSafe(v.st.label)}</b><small>${phoneSafe(v.subtitle)}</small></button>`;
   }).join('');  const destinationMarker = firstPersonInput.destination ? `<div class="fp-destination" style="left:${firstPersonInput.destination.x}%;top:${firstPersonInput.destination.y}%"></div>` : "";
-  const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="setFirstPersonArea('${st.targetArea || 'bridge'}')">${phoneSafe(st.label)}</button>`).join('');
+  const doorStrip = getFirstPersonStations().filter(st=>st.type === 'door').map(st=>`<button onclick="changeFirstPersonCompartment('${st.targetArea || 'bridge'}', event)">${phoneSafe(st.label)}</button>`).join('');
   root.innerHTML = `<div class="fp-shell" style="--fp-yaw:${firstPersonPlayer.yaw}deg;--fp-x:${firstPersonPlayer.x};--fp-y:${firstPersonPlayer.y};">
-    <div class="fp-hud"><b>1. SAHIS · ${phoneSafe(area.title)}</b><span>X ${Math.round(firstPersonPlayer.x)} · Y ${Math.round(firstPersonPlayer.y)}</span><button onclick="closeFirstPersonMode()">CIK</button></div>
+    <div class="fp-hud"><b>1. SAHIS · ${phoneSafe(area.title)}</b><span>${phoneSafe(getFirstPersonAreaIntel().feel)} · X ${Math.round(firstPersonPlayer.x)} · Y ${Math.round(firstPersonPlayer.y)}</span><button onclick="openMap()">HARITA</button><button onclick="closeFirstPersonMode()">CIK</button></div>
     <div class="fp-world ${area.className || 'area-bridge'} ${walkAvatarMotion.moving ? 'moving' : ''}" onpointerdown="handleFirstPersonPointerDown(event)" onpointermove="handleFirstPersonPointerMove(event)" onpointerup="handleFirstPersonPointerUp(event)" onpointercancel="handleFirstPersonPointerUp(event)">
       <div class="fp-window"><i></i><i></i><i></i><i></i></div>
       <div class="fp-sea"><span></span><span></span><span></span></div>
       <div class="fp-console-bank"><i class="radar"></i><i class="ecdis"></i><i class="vhf"></i></div>
+      ${renderFirstPersonAtmosphere(firstPersonArea)}
       <div class="fp-room-props"><i></i><i></i><i></i></div>
       <div class="fp-deck-view"><i></i><i></i><i></i><span></span><span></span></div>
       <div class="fp-floor"></div>
+      ${renderFirstPersonTransition()}
       ${destinationMarker}
       ${stations}
       <div class="fp-crosshair"></div>
-      <div class="fp-minimap"><b>${phoneSafe(area.title)}</b><span style="left:${firstPersonPlayer.x}%;top:${firstPersonPlayer.y}%"></span></div>
+      <div class="fp-minimap"><b>${phoneSafe(area.title)}</b><small>${phoneSafe(getFirstPersonAreaIntel().route)}</small><span style="left:${firstPersonPlayer.x}%;top:${firstPersonPlayer.y}%"></span></div>
       <div class="fp-body"><i></i><i></i><b></b></div>
       <div class="fp-area-strip">${doorStrip}</div>
       <div class="fp-prompt ${ready?'ready':''}">${ready ? `${phoneSafe(nearest.label)} · E ile kullan` : phoneSafe(area.prompt || 'Yuruyerek hedefe yaklas.')}</div>

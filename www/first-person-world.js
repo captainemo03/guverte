@@ -198,7 +198,7 @@
     stage:null,canvas:null,ui:{},area:'bridge',previousArea:'corridor',entryFrom:null,positions:{},
     player:{x:0,z:5},yaw:0,pitch:0,roll:0,velocity:{x:0,z:0},keys:Object.create(null),
     stick:{x:0,y:0,pointerId:null},look:{active:false,pointerId:null,x:0,y:0},runLock:false,
-    autoTarget:null,autoNav:{lastDist:0,stuck:0,strafeDir:1,lastX:0,lastZ:0,lastPulse:0},interactions:[],npcs:[],animatedScreens:[],waves:[],distantShips:[],ambientFx:[],colliders:[],discoveries:Object.create(null),visitedAreas:Object.create(null),
+    autoTarget:null,autoNav:{lastDist:0,stuck:0,strafeDir:1,lastX:0,lastZ:0,lastPulse:0},interactions:[],npcs:[],animatedScreens:[],waves:[],distantShips:[],ambientFx:[],colliders:[],discoveries:Object.create(null),visitedAreas:Object.create(null),checkedStations:Object.create(null),
     animationId:0,lastFrame:0,elapsed:0,screenTick:0,nearest:null,currentDialogue:null,
     resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,streak:0,bestStreak:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,areaNavFallbackTimer:0,areaArrivalTimer:0,actionBannerTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{}
   };
@@ -234,6 +234,7 @@
       if(saved.badges && typeof saved.badges === 'object') state.badges = saved.badges;
       if(saved.discoveries && typeof saved.discoveries === 'object') state.discoveries = saved.discoveries;
       if(saved.visitedAreas && typeof saved.visitedAreas === 'object') state.visitedAreas = saved.visitedAreas;
+      if(saved.checkedStations && typeof saved.checkedStations === 'object') state.checkedStations = saved.checkedStations;
       if(Number.isFinite(saved.watchMinutes)) state.watchMinutes = saved.watchMinutes;
       const savedShift=Number.isFinite(saved.incidentShift)?saved.incidentShift:currentIncidentShift(state.watchMinutes);
       state.incidentShift=currentIncidentShift(state.watchMinutes);
@@ -243,7 +244,7 @@
   function saveState(){
     try{
       state.positions[state.area] = {x:state.player.x,z:state.player.z,yaw:state.yaw};
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({area:state.area,positions:state.positions,yaw:state.yaw,questIndex:state.questIndex,questDone:state.questDone,worldXp:state.worldXp,streak:state.streak,bestStreak:state.bestStreak,badges:state.badges,discoveries:state.discoveries,visitedAreas:state.visitedAreas,completedIncidents:state.completedIncidents,incidentShift:state.incidentShift,watchMinutes:state.watchMinutes}));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify({area:state.area,positions:state.positions,yaw:state.yaw,questIndex:state.questIndex,questDone:state.questDone,worldXp:state.worldXp,streak:state.streak,bestStreak:state.bestStreak,badges:state.badges,discoveries:state.discoveries,visitedAreas:state.visitedAreas,checkedStations:state.checkedStations,completedIncidents:state.completedIncidents,incidentShift:state.incidentShift,watchMinutes:state.watchMinutes}));
     }catch(_err){}
   }
   restoreState();
@@ -931,11 +932,11 @@
   }
 
   function jumpToArea(target,reason){
-    if(!target||!AREAS[target]||target===state.area)return;
+    if(!target||!AREAS[target])return Promise.resolve(false);
     clearTimeout(state.areaNavFallbackTimer);
     resetInputState();
     pushFieldLog((reason||'Mahale gecis')+': '+AREAS[target].title,'info');
-    setArea(target);
+    return setArea(target);
   }
 
   function updateQuickTravelDock(){
@@ -1405,6 +1406,9 @@
     const T=state.THREE,canvas=document.createElement('canvas');
     canvas.width=1024;canvas.height=512;
     const ctx=canvas.getContext('2d');
+    if(ctx&&!ctx.roundRect){
+      ctx.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this;};
+    }
     const sky=ctx.createLinearGradient(0,0,0,256);sky.addColorStop(0,'#8fc8e6');sky.addColorStop(.72,'#a9d6e8');sky.addColorStop(1,'#d5ebf3');ctx.fillStyle=sky;ctx.fillRect(0,0,1024,258);
     const sea=ctx.createLinearGradient(0,256,0,512);sea.addColorStop(0,'#277ca5');sea.addColorStop(.35,'#155b86');sea.addColorStop(1,'#07385f');ctx.fillStyle=sea;ctx.fillRect(0,256,1024,256);
     ctx.fillStyle='rgba(239,250,255,.82)';ctx.fillRect(0,254,1024,3);
@@ -1823,6 +1827,9 @@
     const T=state.THREE,canvas=document.createElement('canvas');
     canvas.width=384;canvas.height=128;
     const ctx=canvas.getContext('2d');
+    if(ctx&&!ctx.roundRect){
+      ctx.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this;};
+    }
     const target=AREAS[def.target];
     const title=String(target?.title||def.label||'GECIS').toUpperCase();
     ctx.clearRect(0,0,384,128);
@@ -1889,6 +1896,9 @@
     const T=state.THREE,canvas=document.createElement('canvas');
     canvas.width=256;canvas.height=80;
     const ctx=canvas.getContext('2d');
+    if(ctx&&!ctx.roundRect){
+      ctx.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this;};
+    }
     ctx.clearRect(0,0,256,80);
     ctx.fillStyle='rgba(3,14,23,.86)';
     ctx.strokeStyle='rgba(118,230,166,.72)';
@@ -1913,6 +1923,9 @@
     const T=state.THREE,canvas=document.createElement('canvas');
     canvas.width=384;canvas.height=128;
     const ctx=canvas.getContext('2d');
+    if(ctx&&!ctx.roundRect){
+      ctx.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this;};
+    }
     const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;
     const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false,opacity:.92}));
     sprite.position.set(0,3.16,.02);sprite.scale.set(2.25,.75,1);sprite.renderOrder=34;sprite.visible=false;
@@ -1939,46 +1952,122 @@
     data.tex.needsUpdate=true;
   }
 
-  function createNpcFigureSprite(label, uniform, index){
+  function createNpcFigureSprite(label, uniform, index, profile){
     const T=state.THREE,canvas=document.createElement('canvas');
-    canvas.width=256;canvas.height=384;
+    canvas.width=512;canvas.height=768;
     const ctx=canvas.getContext('2d');
+    if(ctx&&!ctx.roundRect){
+      ctx.roundRect=function(x,y,w,h){this.rect(x,y,w,h);return this;};
+    }
     const palette={
-      officer:['#071c34','#f0ca62'],deck:['#173c55','#ef8b2d'],engine:['#222d35','#f07828'],
-      cadet:['#123456','#d7edf8'],cook:['#f4f7f4','#25292c'],medical:['#58a3af','#ffffff'],crew:['#163451','#72e4a6']
+      officer:['#081c34','#f0ca62','#e9eef2'],deck:['#143c56','#ef8b2d','#ffc94a'],engine:['#202d36','#f07828','#ff9d4d'],
+      cadet:['#123456','#d7edf8','#8ed6ff'],cook:['#f4f7f4','#25292c','#ffffff'],medical:['#58a3af','#ffffff','#e85a51'],crew:['#163451','#72e4a6','#b8ffe0']
     };
     const p=palette[uniform]||palette.crew;
-    const skin=['#9a6248','#d0a07d','#6f4838'][Math.abs(index||0)%3];
-    ctx.clearRect(0,0,256,384);
-    ctx.shadowColor='rgba(0,0,0,.58)';ctx.shadowBlur=18;ctx.shadowOffsetY=14;
-    ctx.fillStyle='rgba(8,20,30,.42)';ctx.beginPath();ctx.ellipse(128,348,52,13,0,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    const skinHex=(profile?.skin||0xd0a07d).toString(16).padStart(6,'0');
+    const hairHex=(profile?.hair||0x24170f).toString(16).padStart(6,'0');
+    const skin='#'+skinHex,hair='#'+hairHex;
+    const cx=256;
+    ctx.clearRect(0,0,512,768);
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=26;ctx.shadowOffsetY=22;
+    ctx.fillStyle='rgba(0,0,0,.38)';ctx.beginPath();ctx.ellipse(cx,714,94,21,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+
+    // Legs and boots
+    ctx.fillStyle='#07111e';
+    ctx.beginPath();ctx.roundRect(cx-58,468,43,190,18);ctx.fill();
+    ctx.beginPath();ctx.roundRect(cx+15,468,43,190,18);ctx.fill();
     ctx.fillStyle=p[0];
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(78,126,100,146,28) : ctx.rect(78,126,100,146);ctx.fill();
-    ctx.fillStyle=p[1];ctx.fillRect(78,178,100,15);
-    ctx.fillStyle=p[0];
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(66,134,24,118,12) : ctx.rect(66,134,24,118);ctx.fill();
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(166,134,24,118,12) : ctx.rect(166,134,24,118);ctx.fill();
-    ctx.fillStyle=p[0];
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(90,258,31,78,12) : ctx.rect(90,258,31,78);ctx.fill();
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(135,258,31,78,12) : ctx.rect(135,258,31,78);ctx.fill();
-    ctx.fillStyle='#07111e';ctx.fillRect(88,330,36,12);ctx.fillRect(132,330,36,12);
-    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(128,82,42,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#06111c';ctx.beginPath();ctx.arc(113,82,4,0,Math.PI*2);ctx.arc(143,82,4,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(6,17,28,.75)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(128,96,15,.1,Math.PI-.1);ctx.stroke();
-    if(uniform==='officer'){ctx.fillStyle='#f2f0e7';ctx.fillRect(88,35,80,18);ctx.fillStyle='#071c34';ctx.fillRect(96,26,64,16);}
-    if(uniform==='cook'){ctx.fillStyle='#ffffff';ctx.beginPath();ctx.roundRect ? ctx.roundRect(82,24,92,34,14) : ctx.rect(82,24,92,34);ctx.fill();}
-    ctx.fillStyle='rgba(3,14,23,.88)';ctx.strokeStyle='rgba(118,230,166,.78)';ctx.lineWidth=2;
-    ctx.beginPath();ctx.roundRect ? ctx.roundRect(34,6,188,28,10) : ctx.rect(34,6,188,28);ctx.fill();ctx.stroke();
-    ctx.fillStyle='#eafff2';ctx.font='700 18px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(String(label||'CREW').slice(0,16),128,20);
+    ctx.globalAlpha=.94;
+    ctx.beginPath();ctx.roundRect(cx-54,462,35,148,15);ctx.fill();
+    ctx.beginPath();ctx.roundRect(cx+19,462,35,148,15);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#02070d';
+    ctx.beginPath();ctx.roundRect(cx-70,638,64,27,13);ctx.fill();
+    ctx.beginPath();ctx.roundRect(cx+6,638,64,27,13);ctx.fill();
+
+    // Torso with collar, belt, rank and pockets
+    const torsoGrad=ctx.createLinearGradient(0,202,0,470);
+    torsoGrad.addColorStop(0,p[0]);torsoGrad.addColorStop(.58,'#102033');torsoGrad.addColorStop(1,'#07111e');
+    if(uniform==='cook'){torsoGrad.addColorStop(0,'#f7faf8');torsoGrad.addColorStop(1,'#cfd8dc');}
+    if(uniform==='medical'){torsoGrad.addColorStop(0,'#62b4c0');torsoGrad.addColorStop(1,'#1d4750');}
+    ctx.fillStyle=torsoGrad;
+    ctx.beginPath();ctx.roundRect(cx-82,218,164,266,38);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=4;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.18)';
+    ctx.beginPath();ctx.moveTo(cx-45,224);ctx.lineTo(cx,268);ctx.lineTo(cx+45,224);ctx.lineTo(cx+25,224);ctx.lineTo(cx,247);ctx.lineTo(cx-25,224);ctx.closePath();ctx.fill();
+    ctx.fillStyle=p[1];ctx.beginPath();ctx.roundRect(cx-78,392,156,16,8);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.roundRect(cx-86,454,172,22,11);ctx.fill();
+    ctx.fillStyle=p[2];
+    const rank=profile?.rank||1;
+    for(let i=0;i<rank;i++){ctx.beginPath();ctx.roundRect(cx-54+i*23,242,16,6,3);ctx.fill();}
+    ctx.fillStyle='rgba(255,255,255,.16)';ctx.beginPath();ctx.roundRect(cx-62,315,38,48,9);ctx.fill();ctx.beginPath();ctx.roundRect(cx+24,315,38,48,9);ctx.fill();
+    if(uniform==='medical'){
+      ctx.fillStyle='#e85a51';ctx.fillRect(cx-9,302,18,64);ctx.fillRect(cx-32,325,64,18);
+    }
+
+    // Arms and hands
+    ctx.strokeStyle=p[0];ctx.lineWidth=31;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx-82,247);ctx.quadraticCurveTo(cx-132,336,cx-111,452);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+82,247);ctx.quadraticCurveTo(cx+132,336,cx+111,452);ctx.stroke();
+    ctx.strokeStyle=p[1];ctx.lineWidth=9;
+    ctx.beginPath();ctx.moveTo(cx-112,390);ctx.lineTo(cx-106,430);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+112,390);ctx.lineTo(cx+106,430);ctx.stroke();
+    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(cx-106,462,18,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(cx+106,462,18,0,Math.PI*2);ctx.fill();
+
+    // Neck and head
+    ctx.fillStyle=skin;ctx.beginPath();ctx.roundRect(cx-22,181,44,45,16);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx,142,58,64,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,231,210,.2)';ctx.beginPath();ctx.ellipse(cx-18,126,18,12,-.4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=hair;
+    ctx.beginPath();ctx.ellipse(cx,92,62,31,0,Math.PI,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.roundRect(cx-56,91,112,30,16);ctx.fill();
+    if(profile?.hasBeard){ctx.beginPath();ctx.roundRect(cx-34,172,68,21,10);ctx.fill();ctx.beginPath();ctx.roundRect(cx-48,143,16,45,8);ctx.fill();ctx.beginPath();ctx.roundRect(cx+32,143,16,45,8);ctx.fill();}
+    ctx.fillStyle='#07111b';ctx.beginPath();ctx.arc(cx-21,143,5,0,Math.PI*2);ctx.arc(cx+21,143,5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=hair;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx-34,128);ctx.lineTo(cx-10,125);ctx.moveTo(cx+10,125);ctx.lineTo(cx+34,128);ctx.stroke();
+    ctx.strokeStyle='rgba(43,17,18,.85)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,164,21,.15,Math.PI-.15);ctx.stroke();
+    if(profile?.hasGlasses){ctx.strokeStyle='rgba(190,220,232,.86)';ctx.lineWidth=4;ctx.strokeRect(cx-38,134,31,19);ctx.strokeRect(cx+7,134,31,19);ctx.beginPath();ctx.moveTo(cx-7,143);ctx.lineTo(cx+7,143);ctx.stroke();}
+
+    // Hats / helmets / headset
+    if(uniform==='officer'){
+      ctx.fillStyle='#f1f0e8';ctx.beginPath();ctx.roundRect(cx-58,72,116,24,10);ctx.fill();
+      ctx.fillStyle='#071c34';ctx.beginPath();ctx.roundRect(cx-44,56,88,30,10);ctx.fill();
+      ctx.fillStyle='#f0ca62';ctx.beginPath();ctx.arc(cx,86,10,0,Math.PI*2);ctx.fill();
+    }else if(uniform==='cook'){
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(cx-66,48,132,54,22);ctx.fill();
+      ctx.beginPath();ctx.arc(cx-38,48,25,0,Math.PI*2);ctx.arc(cx,41,28,0,Math.PI*2);ctx.arc(cx+38,48,25,0,Math.PI*2);ctx.fill();
+    }else if(uniform==='deck'||uniform==='engine'||uniform==='cadet'){
+      ctx.fillStyle=uniform==='engine'?'#ff7a2f':'#ffc94a';ctx.beginPath();ctx.roundRect(cx-61,69,122,30,13);ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(cx-52,94,104,8);
+    }
+    if(uniform==='officer'||uniform==='cadet'){
+      ctx.strokeStyle='#07111b';ctx.lineWidth=7;ctx.beginPath();ctx.arc(cx,136,78,-2.55,-.6);ctx.stroke();
+      ctx.fillStyle='#07111b';ctx.beginPath();ctx.arc(cx+62,145,13,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#07111b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx+52,156);ctx.quadraticCurveTo(cx+35,176,cx+24,190);ctx.stroke();
+    }
+
+    // Equipment varies by role
+    ctx.fillStyle='rgba(5,13,22,.72)';ctx.beginPath();ctx.roundRect(cx+48,260,32,66,8);ctx.fill();
+    ctx.fillStyle='#76cce8';ctx.fillRect(cx+58,273,9,29);
+    if(uniform==='engine'){ctx.strokeStyle='#7d8c94';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(cx+105,452);ctx.lineTo(cx+145,520);ctx.stroke();}
+    if(uniform==='deck'){ctx.strokeStyle='#c9a25a';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(cx+104,455);ctx.lineTo(cx+158,505);ctx.stroke();}
+    if(uniform==='cook'){ctx.fillStyle='#f2f2ea';ctx.beginPath();ctx.roundRect(cx-155,425,82,27,10);ctx.fill();}
+
+    // Subtle outline
+    ctx.globalCompositeOperation='destination-over';
+    ctx.strokeStyle='rgba(1,5,10,.7)';ctx.lineWidth=10;
+    ctx.beginPath();ctx.roundRect(cx-95,52,190,618,52);ctx.stroke();
+    ctx.globalCompositeOperation='source-over';
+
     const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;tex.needsUpdate=true;
-    const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false}));
-    sprite.position.set(0,1.55,-.04);
-    sprite.scale.set(1.45,2.18,1);
-    sprite.renderOrder=28;
+    const sprite=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,depthTest:true,depthWrite:false,alphaTest:.04}));
+    sprite.position.set(0,1.34,-.1);
+    sprite.scale.set(1.42,2.72,1);
+    sprite.renderOrder=29;
     return sprite;
   }
+
   function addNpcRealismKit(root,spine,headGroup,leftLeg,rightLeg,leftArm,rightArm,def,index,skin,cloth,trim,boot){
     const T=state.THREE;
     const steel=material(0x6e7f88,{metalness:.62,roughness:.34});
@@ -2119,6 +2208,16 @@
     const root=new T.Group();
     root.position.y=.065;
     g.add(root);
+    const avatarSprite=createNpcFigureSprite(def.label,def.uniform,index,profile);
+    const avatarDepth=avatarSprite.clone();
+    avatarDepth.material=avatarSprite.material.clone();
+    avatarDepth.material.color.setHex(0x02070d);
+    avatarDepth.material.opacity=.22;
+    avatarDepth.position.set(.07,1.28,.03);
+    avatarDepth.scale.set(1.5,2.76,1);
+    avatarDepth.renderOrder=28;
+    g.add(avatarDepth);
+    g.add(avatarSprite);
 
     const hips=new T.Group();hips.position.set(0,.98,0);root.add(hips);
     const spine=new T.Group();spine.position.set(0,1.18,0);root.add(spine);
@@ -2202,13 +2301,19 @@
     const ring=new T.Mesh(new T.TorusGeometry(.62,.025,10,40),new T.MeshBasicMaterial({color:0x72e4a6,transparent:true,opacity:.34,depthWrite:false}));
     ring.rotation.x=Math.PI/2;ring.position.y=.04;root.add(ring);
 
+    root.traverse(obj=>{
+      if(obj.isMesh&&obj.material){
+        const mats=Array.isArray(obj.material)?obj.material:[obj.material];
+        mats.forEach(mat=>{mat.transparent=true;mat.opacity=Math.min(mat.opacity??1, obj===shadow ? .18 : .16);});
+      }
+    });
     const plate=createNpcNameplate(def.label);
-    plate.position.set(0,2.66,0);plate.scale.set(1.18,.34,1);g.add(plate);
+    plate.position.set(0,2.78,0);plate.scale.set(1.06,.31,1);g.add(plate);
     const speech=createNpcSpeechBubble();g.add(speech);
     g.position.set(def.x,0,def.z);g.scale.set(1.12*profile.width,1.12*profile.height,1.12*profile.depth);state.scene.add(g);
     const item=registerInteraction(def,g);
     registerCollider(g,.62);
-    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,plate,speech,professionalRig,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried};
+    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,ring,shadow,avatarSprite,avatarDepth,plate,speech,professionalRig,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried};
     state.npcs.push(item);
   }
 
@@ -2346,6 +2451,20 @@
     return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');
   }
 
+
+  function completeWorldStation(item,tone){
+    if(!item||item.type==='door')return;
+    state.checkedStations[item.id]=true;
+    if(item.marker)item.marker.classList.add('checked');
+    const report=reportForItem(item);
+    const title=report?.title||item.label;
+    const body=report?.meta||item.detail||'Saha islemi tamamlandi.';
+    awardWorldProgress({id:'checked-'+item.id,once:true},3);
+    pushFieldLog('Teyit: '+item.label,tone||'good');
+    callGame('completeFirstPersonStation',Object.assign({},item,{action:item.action||item.device||'device'}));
+    callGame('addLiveLogbook','3D ACIK DUNYA',AREAS[state.area].title+' / '+title+': '+body,true);
+    saveState();
+  }
   function triggerFirstPersonUse(item){
     if(!state.ui.root)return;
     state.ui.root.classList.remove('using-item','using-door','using-npc');
@@ -2490,7 +2609,7 @@
       const btn=document.createElement('button');
       const roleClass=item.type==='npc'?(' '+(item.uniform||'crew')):'';
       const routeItem=getDirectorLocalItem(objective);
-      btn.className=['fp3d-marker',item.type,roleClass.trim(),item.kind||'',toneClassForItem(item).trim(),(objective.id===item.id||(routeItem&&routeItem.id===item.id))?'objective':''].filter(Boolean).join(' ');
+      btn.className=['fp3d-marker',item.type,roleClass.trim(),item.kind||'',toneClassForItem(item).trim(),(objective.id===item.id||(routeItem&&routeItem.id===item.id))?'objective':'',state.checkedStations[item.id]?'checked':''].filter(Boolean).join(' ');
       btn.dataset.id=item.id;
       btn.innerHTML='<i></i><b>'+item.label+'</b><small>'+item.detail+'</small><em></em>';
       btn.addEventListener('click',ev=>{ev.stopPropagation();item.type==='door'?walkToDoorWithFallback(item,item.target):walkTo(item);});
@@ -2536,6 +2655,7 @@
       item.marker.classList.toggle('visible',visible);
       item.marker.classList.toggle('near',dist<3.1);
       item.marker.classList.toggle('objective',!!((objective.id===item.id)||(mapTarget&&mapTarget.id===item.id)));
+      item.marker.classList.toggle('checked',!!state.checkedStations[item.id]);
       if(visible){
         item.marker.style.left=((projected.x*.5+.5)*100)+'%';
         item.marker.style.top=((-projected.y*.5+.5)*100)+'%';
@@ -2560,7 +2680,7 @@
     updateCompass(mapTarget);
     state.ui.mapNpcs.innerHTML=state.interactions.map(item=>{
       const p=item.object.position;
-      const cls=item.type+(item.kind?' '+item.kind:'')+toneClassForItem(item)+(mapTarget&&mapTarget.id===item.id?' target':'')+(drillForItem(item)&&!state.completedDrills[item.id]?' drill':'');
+      const cls=item.type+(item.kind?' '+item.kind:'')+toneClassForItem(item)+(mapTarget&&mapTarget.id===item.id?' target':'')+(drillForItem(item)&&!state.completedDrills[item.id]?' drill':'')+(state.checkedStations[item.id]?' checked':'');
       return '<i class="'+cls+'" style="left:'+clamp(((p.x+bx)/(bx*2))*100,5,95)+'%;top:'+clamp(((p.z+bz)/(bz*2))*100,5,95)+'%"></i>';
     }).join('');
   }
@@ -2644,26 +2764,35 @@
     clearTimeout(state.sceneReportTimer);clearTimeout(state.crewBarkTimer);
   }
   function setArea(next){
-    if(!AREAS[next]||next===state.area)return;
+    if(!AREAS[next])return Promise.resolve(false);
+    if(next===state.area){
+      updateQuickTravelDock();
+      updateMissionDock();
+      return Promise.resolve(false);
+    }
     clearTimeout(state.areaNavFallbackTimer);state.autoTarget=null;resetAutoNav(null,0);
-    const targetArea=AREAS[next];
+    const previous=state.area;
     clearTransitionOverlays();
     if(state.scene) state.scene.visible=false;
     if(state.ui.root)state.ui.root.classList.add('area-changing');
-    saveState();state.previousArea=state.area;state.entryFrom=state.area;state.area=next;
+    saveState();state.previousArea=previous;state.entryFrom=previous;state.area=next;
     state.positions[next]=null;
-    state.ui.fade.classList.add('active');
-    setTimeout(()=>{
-      buildScene();
-      try{firstPersonArea=next;}catch(_err){}
-      hapticPulse('door');
-      announceAreaArrival(next);
-      callGame('addWatchFeed',AREAS[next].title+': mahal gecisi tamamlandi.','good');
-      requestAnimationFrame(()=>{
-        state.ui.fade.classList.remove('active');
-        state.ui.root?.classList.remove('area-changing');
-      });
-    },180);
+    if(state.ui.fade)state.ui.fade.classList.add('active');
+    return new Promise(resolve=>{
+      setTimeout(()=>{
+        buildScene();
+        try{firstPersonArea=next;}catch(_err){}
+        hapticPulse('door');
+        announceAreaArrival(next);
+        showActionBanner(AREAS[next].title,compartmentArrivalText(next),AREAS[next].theme||'area');
+        callGame('addWatchFeed',AREAS[next].title+': mahal gecisi tamamlandi.','good');
+        requestAnimationFrame(()=>{
+          if(state.ui.fade)state.ui.fade.classList.remove('active');
+          state.ui.root?.classList.remove('area-changing');
+          resolve(true);
+        });
+      },180);
+    });
   }
   function interact(forced){
     const item=forced&&forced.id?forced:state.nearest;
@@ -2675,8 +2804,9 @@
     showSceneReport(item,item.type==='door'?'door':item.type==='npc'?'npc':'info');
     clearLiveEventIfHandled(item);
     if(item.type==='door'){pushFieldLog('Kapi gecisi: '+item.label,'info');setArea(item.target);return;}
-    if(item.type==='npc'){advanceWorldQuest(item);openDialogue(item);return;}
+    if(item.type==='npc'){completeWorldStation(item,'npc');advanceWorldQuest(item);openDialogue(item);return;}
     if(item.device){
+      completeWorldStation(item,'good');
       if(item.id==='radio-mf')playMorseSOS();
       callGame('markWalkTaskDone',item.id,item.label);
       callGame('progressWalkMission','bridge3d',item.id,item.label);
@@ -2700,6 +2830,7 @@
       if(item.object){item.object.visible=false;if(item.marker)item.marker.remove();}
       return;
     }
+    completeWorldStation(item,'good');
     if(action==='phone'){callGame('togglePhone');playHomesickSob();pushFieldLog('Aile mesaji acildi','info');advanceWorldQuest(item);}
     else if(action==='notes'||action==='logbook')callGame(action==='notes'?'openNotes':'openLogbook');
     else if(action==='glossary')callGame('openGlossary');
@@ -3048,11 +3179,13 @@
       const talking=!!speechText&&a.attention>.28;
       const blink=(Math.sin(state.elapsed*2.8+a.phase*3.1)>.965)||(Math.sin(state.elapsed*.43+index)>.992);
       const posture=a.profile?.posture||'patrol';
-      const operatorLocked=posture==='operator'&&!moving&&!duty;
-      const maintenancePose=posture==='maintenance'&&!moving;
-      const deckPose=posture==='deckhand'&&!moving;
-      const servicePose=posture==='service'&&!moving;
-      const clinicalPose=posture==='clinical'&&!moving;
+      const nearDuty=!!duty&&Math.hypot((duty.x||item.object.position.x)-item.object.position.x,(duty.z||item.object.position.z)-item.object.position.z)<.42;
+      const taskReady=!moving||nearDuty||a.wait>.05;
+      const operatorLocked=posture==='operator'&&taskReady;
+      const maintenancePose=posture==='maintenance'&&taskReady;
+      const deckPose=posture==='deckhand'&&taskReady;
+      const servicePose=posture==='service'&&taskReady;
+      const clinicalPose=posture==='clinical'&&taskReady;
       const craftPose=maintenancePose||deckPose||servicePose||clinicalPose;
       if(a.professionalRig){
         if(a.professionalRig.operatorSeat)a.professionalRig.operatorSeat.visible=operatorLocked;
@@ -3065,6 +3198,21 @@
         const labelFocus=playerDist<5.2||state.nearest&&state.nearest.id===item.id&&state.nearest.distance<3.5||!!eventItem;
         a.plate.visible=labelFocus||playerDist<8;
         a.plate.material.opacity=clamp(labelFocus ? .72 : .24,.18,.82);
+      }
+      if(a.avatarSprite){
+        const spriteLean=moving?Math.sin(gait)*.035:operatorLocked ? .045 : craftPose ? .07 : Math.sin(state.elapsed*.9+a.phase)*.012;
+        a.avatarSprite.position.y=1.34+(moving?Math.abs(Math.sin(gait*2))*.025:Math.sin(state.elapsed*1.15+a.phase)*.012);
+        a.avatarSprite.rotation.z=spriteLean;
+        const baseScale=operatorLocked ? .94 : craftPose ? .98 : 1;
+        a.avatarSprite.scale.set(1.42*baseScale,2.72*baseScale,1);
+        if(a.avatarSprite.material)a.avatarSprite.material.opacity=clamp(playerDist<12?1:.72,.64,1);
+        if(a.avatarDepth){
+          a.avatarDepth.position.y=a.avatarSprite.position.y-.05;
+          a.avatarDepth.position.x=.07+Math.sin(state.elapsed*.8+a.phase)*.006;
+          a.avatarDepth.rotation.z=a.avatarSprite.rotation.z*.62;
+          a.avatarDepth.scale.set(a.avatarSprite.scale.x*1.06,a.avatarSprite.scale.y*1.02,1);
+          if(a.avatarDepth.material)a.avatarDepth.material.opacity=clamp(playerDist<12 ? .23 : .14,.12,.24);
+        }
       }
       if(operatorLocked){
         a.root.position.y=.035+Math.sin(state.elapsed*1.1+a.phase)*.004;
@@ -3266,9 +3414,10 @@
   window.openFirstPersonMode=openWorld;
   window.closeFirstPersonMode=closeWorld;
   window.setFirstPersonArea=setArea;
+  window.changeFirstPersonCompartment=area=>jumpToArea(area,'Dis komut');
   window.jumpFirstPersonArea=area=>jumpToArea(area,'Dis komut');
   window.interactFirstPerson=interact;
   window.handleFirstPersonKeydown=handleKeydown;
   window.fp3dRespond=respondDialogue;
-  window.__GUVERTE_FP3D={state,areas:AREAS,open:openWorld,close:closeWorld,setArea,interact};
+  window.__GUVERTE_FP3D={state,areas:AREAS,open:openWorld,close:closeWorld,setArea,changeCompartment:area=>jumpToArea(area,'API gecisi'),interact};
 })();
