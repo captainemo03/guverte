@@ -239,6 +239,13 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
 @media (max-width:820px),(pointer:coarse){.fp3d-crew-bark{left:8px;right:8px;top:88px;max-width:none;transform:translateY(-8px);grid-template-columns:auto 1fr}.fp3d-crew-bark.show{transform:translateY(0)}.fp3d-crew-bark span{font-size:8px}}
 @media (max-height:500px) and (orientation:landscape){.fp3d-crew-bark{display:none}}
 /* Live risk meter for open-world movement. */
+.fp3d-ship-telemetry{position:absolute;left:12px;top:190px;z-index:19;width:188px;border:1px solid rgba(127,195,255,.22);border-radius:8px;background:linear-gradient(180deg,rgba(3,12,20,.78),rgba(3,12,20,.58));box-shadow:0 14px 30px rgba(0,0,0,.3);padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:5px;backdrop-filter:blur(10px);}
+.fp3d-ship-telemetry b{grid-column:1/-1;color:#ffd66b;font:700 8px "Share Tech Mono",monospace;letter-spacing:.6px;}
+.fp3d-ship-telemetry span{min-width:0;border:1px solid rgba(127,195,255,.13);border-radius:5px;background:rgba(8,24,36,.64);color:#dff2ff;padding:4px 5px;font:700 8px "Share Tech Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fp3d-ship-telemetry small{grid-column:1/-1;color:#96b8ca;font:8px/1.25 "Share Tech Mono",monospace;}
+.fp3d-ship-telemetry[data-motion=high]{border-color:rgba(255,214,107,.42);box-shadow:0 0 0 3px rgba(255,214,107,.06),0 14px 30px rgba(0,0,0,.3);}
+.fp3d-ship-telemetry[data-motion=high] span:nth-of-type(2){color:#ffe2a2;border-color:rgba(255,214,107,.28);background:rgba(45,31,8,.62);}
+@media (max-width:820px){.fp3d-ship-telemetry{left:8px;top:auto;bottom:154px;width:154px;padding:6px;gap:4px}.fp3d-ship-telemetry small{display:none}.fp3d-ship-telemetry span{font-size:7px;padding:3px 4px}}
 .fp3d-risk-meter{position:absolute;left:12px;top:286px;z-index:19;width:136px;border:1px solid rgba(125,190,218,.22);border-radius:7px;background:rgba(3,12,20,.68);box-shadow:0 12px 26px rgba(0,0,0,.28);padding:7px 8px;pointer-events:none;backdrop-filter:blur(8px);}
 .fp3d-risk-meter b{display:block;color:#88b7ca;font:700 7px "Share Tech Mono",monospace;margin-bottom:4px;}.fp3d-risk-meter span{display:block;color:#e5f1f6;font:700 10px "Share Tech Mono",monospace;margin-bottom:3px;}.fp3d-risk-meter small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fb0bf;font:700 7px "Share Tech Mono",monospace;margin-bottom:6px;}
 .fp3d-risk-meter i{display:block;height:5px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}.fp3d-risk-meter em{display:block;height:100%;width:20%;border-radius:inherit;background:#69e4a0;transition:width .22s,background .22s;}
@@ -496,3 +503,47 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
 #fp3d-map-npcs i.checked{background:#69e4a0!important;box-shadow:0 0 0 3px rgba(105,228,160,.22),0 0 10px rgba(105,228,160,.72)!important;}
 .fp3d-root .fp3d-marker.checked.objective{border-color:rgba(255,214,107,.78);box-shadow:0 0 0 5px rgba(255,214,107,.13),0 0 24px rgba(105,228,160,.28),0 12px 30px rgba(0,0,0,.38);}
 @media (max-width:820px),(pointer:coarse){.fp3d-marker.checked small::after{display:none}}
+
+/* compartmentIdentityPanel: shows a clear identity for every compartment without blocking play. */
+.fp3d-room-passport{position:absolute;left:154px;top:104px;z-index:22;width:228px;border:1px solid rgba(126,191,221,.25);border-radius:8px;background:linear-gradient(180deg,rgba(3,12,20,.8),rgba(3,12,20,.58));box-shadow:0 16px 36px rgba(0,0,0,.32);padding:8px 9px;pointer-events:none;backdrop-filter:blur(10px);}
+.fp3d-room-passport b{display:block;color:#ffd66b;font:700 8px "Share Tech Mono",monospace;letter-spacing:0;text-transform:uppercase;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-room-passport span{display:block;color:#e5f1f6;font:700 10px "Share Tech Mono",monospace;line-height:1.22;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-room-passport small,.fp3d-room-passport i,.fp3d-room-passport em{display:block;margin-top:5px;color:#93b4c6;font:700 8px "Share Tech Mono",monospace;font-style:normal;line-height:1.22;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-room-passport em{color:#69e4a0;}.fp3d-room-passport[data-incident="active"]{border-color:rgba(232,90,81,.48);box-shadow:0 0 0 4px rgba(232,90,81,.08),0 16px 36px rgba(0,0,0,.32);}.fp3d-room-passport[data-incident="active"] small{color:#ffb1a6;}
+.fp3d-room-passport[data-theme="engine"]{border-color:rgba(255,106,60,.34)}.fp3d-room-passport[data-theme="deck"]{border-color:rgba(118,204,232,.34)}.fp3d-room-passport[data-theme="cargo"]{border-color:rgba(221,185,87,.34)}.fp3d-room-passport[data-theme="radio"]{border-color:rgba(142,188,255,.34)}
+@media (max-width:1100px){.fp3d-room-passport{display:none}}
+@media (max-height:500px) and (orientation:landscape){.fp3d-room-passport{display:none}}
+
+
+/* areaSoundscapeState: compact audio/vibration identity for each compartment. */
+.fp3d-sensory-strip{position:absolute;left:154px;top:218px;z-index:22;width:228px;border:1px solid rgba(126,191,221,.22);border-radius:8px;background:rgba(3,12,20,.64);box-shadow:0 14px 30px rgba(0,0,0,.28);padding:8px 9px;pointer-events:none;backdrop-filter:blur(10px);}
+.fp3d-sensory-strip b{display:block;color:#8fb0bf;font:700 7px "Share Tech Mono",monospace;letter-spacing:0;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-sensory-strip span{display:block;color:#dcecf4;font:700 8px "Share Tech Mono",monospace;line-height:1.24;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-sensory-strip i{display:block;height:5px;margin-top:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.fp3d-sensory-strip em{display:block;height:100%;width:22%;border-radius:inherit;background:#76cce8;transition:width .24s,background .24s;}
+.fp3d-sensory-strip[data-tone="engine"]{border-color:rgba(255,106,60,.36)}.fp3d-sensory-strip[data-tone="engine"] em{background:#ff6a3c}.fp3d-sensory-strip[data-tone="sea"] em,.fp3d-sensory-strip[data-tone="nav"] em{background:#76cce8}.fp3d-sensory-strip[data-tone="radio"] em{background:#8ebcff}.fp3d-sensory-strip[data-tone="cargo"] em{background:#ddb957}.fp3d-sensory-strip[data-tone="life"] em,.fp3d-sensory-strip[data-tone="crew"] em{background:#72e4a6}.fp3d-sensory-strip[data-tone="urgent"] em,.fp3d-sensory-strip[data-tone="warn"] em{background:#e85a51}
+.fp3d-sensory-strip[data-power="high"]{box-shadow:0 0 0 4px rgba(255,214,107,.07),0 14px 30px rgba(0,0,0,.28)}
+@media (max-width:1100px){.fp3d-sensory-strip{display:none}}
+@media (max-height:500px) and (orientation:landscape){.fp3d-sensory-strip{display:none}}
+
+
+/* livingShipSystems: dynamic power, watertight and crew readiness for the open-world ship. */
+.fp3d-ship-systems{position:absolute;left:154px;top:312px;z-index:22;width:228px;border:1px solid rgba(126,191,221,.22);border-radius:8px;background:rgba(3,12,20,.62);box-shadow:0 14px 30px rgba(0,0,0,.26);padding:8px 9px;display:grid;grid-template-columns:1fr 1fr;gap:5px;pointer-events:none;backdrop-filter:blur(10px);}
+.fp3d-ship-systems b{grid-column:1/-1;color:#ffd66b;font:700 7px "Share Tech Mono",monospace;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-ship-systems span{min-width:0;border:1px solid rgba(126,191,221,.14);border-radius:5px;background:rgba(8,24,36,.58);color:#dcecf4;padding:4px 5px;font:700 8px "Share Tech Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fp3d-ship-systems span:nth-of-type(3){grid-column:1/-1}.fp3d-ship-systems small{grid-column:1/-1;color:#92b4c7;font:700 7px/1.25 "Share Tech Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-ship-systems[data-alert="active"]{border-color:rgba(255,214,107,.42);box-shadow:0 0 0 4px rgba(255,214,107,.07),0 14px 30px rgba(0,0,0,.26)}.fp3d-ship-systems[data-alert="active"] b{color:#ffdd7a}.fp3d-ship-systems[data-power="low"] span:first-of-type{color:#ffb1a6;border-color:rgba(232,90,81,.34)}
+@media (max-width:1100px){.fp3d-ship-systems{display:none}}
+@media (max-height:500px) and (orientation:landscape){.fp3d-ship-systems{display:none}}
+
+
+/* compartment transfer: hides the previous room while the next isolated area is built. */
+.fp3d-compartment-transfer{position:absolute;inset:0;z-index:76;display:grid;place-items:center;align-content:center;gap:10px;opacity:0;visibility:hidden;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(24,54,73,.92),rgba(1,7,12,.98) 62%,#01050a 100%);transition:opacity .18s ease,visibility .18s ease;}
+.fp3d-compartment-transfer.show{opacity:1;visibility:visible;}
+.fp3d-compartment-transfer small{min-width:min(520px,82vw);border:1px solid rgba(126,191,221,.22);border-radius:6px;background:rgba(3,14,23,.74);color:#8fb0bf;padding:7px 10px;text-align:center;font:700 8px "Share Tech Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fp3d-compartment-transfer b{color:#fff;font:700 clamp(19px,3.2vw,34px) "Share Tech Mono",monospace;letter-spacing:0;text-align:center;text-transform:uppercase;text-shadow:0 0 18px rgba(118,204,232,.35);}
+.fp3d-compartment-transfer span{max-width:min(620px,86vw);color:#d4e7ef;text-align:center;font:700 12px/1.45 "Share Tech Mono",monospace;}
+.fp3d-compartment-transfer i{width:min(520px,78vw);height:5px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:0 0 0 1px rgba(126,191,221,.18);}
+.fp3d-compartment-transfer i::before{content:"";display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#76cce8,#72e4a6,#ffd66b);animation:fp3dTransferSweep .62s ease-in-out infinite alternate;}
+.fp3d-root.transfer-lock .fp3d-marker-layer,.fp3d-root.transfer-lock .fp3d-prompt,.fp3d-root.transfer-lock .fp3d-crosshair,.fp3d-root.transfer-lock .fp3d-minimap{opacity:0;}
+.fp3d-root.area-changing #fp3d-canvas{filter:brightness(.08) blur(6px);}
+@keyframes fp3dTransferSweep{from{transform:translateX(-18%)}to{transform:translateX(145%)}}

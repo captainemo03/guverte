@@ -28,6 +28,7 @@ INDEX_CSS = WWW / "index.css"
 INDEX_HTML = WWW / "index.html"
 FIRST_PERSON_JS = WWW / "first-person-world.js"
 FIRST_PERSON_CSS = WWW / "first-person-world.css"
+FIRST_PERSON_VISUAL_QA = TOOLS / "first_person_visual_qa.js"
 PACKAGE_JSON = ROOT / "package.json"
 ANDROID_BILLING = (
     ROOT
@@ -49,6 +50,7 @@ CSS = INDEX_CSS.read_text(encoding="utf-8")
 HTML = INDEX_HTML.read_text(encoding="utf-8")
 FP_JS = FIRST_PERSON_JS.read_text(encoding="utf-8")
 FP_CSS = FIRST_PERSON_CSS.read_text(encoding="utf-8")
+VISUAL_QA_JS = FIRST_PERSON_VISUAL_QA.read_text(encoding="utf-8")
 PACKAGE = PACKAGE_JSON.read_text(encoding="utf-8")
 ANDROID = ANDROID_BILLING.read_text(encoding="utf-8") if ANDROID_BILLING.exists() else ""
 MANIFEST = ANDROID_MANIFEST.read_text(encoding="utf-8") if ANDROID_MANIFEST.exists() else ""
@@ -74,6 +76,11 @@ def ok(section: str, detail: str) -> None:
 def require_token(section: str, token: str, source: str = ALL_SOURCE) -> None:
     if token not in source:
         fail(section, f"Missing token: {token}")
+
+
+def forbid_token(section: str, token: str, source: str = ALL_SOURCE) -> None:
+    if token in source:
+        fail(section, f"Forbidden stale token: {token}")
 
 
 def normalize_tr_ascii(value: str = "") -> str:
@@ -586,6 +593,10 @@ def check_scene_balance_and_text() -> None:
 
 def check_mobile_and_hitboxes() -> None:
     section = "mobile"
+    forbid_token(section, "mooring3d", JS + "\n" + FP_JS)
+    drill_outside_function = re.sub(r"function openTrainingDrill\(item\)\{.*?\n  function answerTrainingDrill", "function answerTrainingDrill", FP_JS, flags=re.S)
+    forbid_token(section, "state.ui.drill.innerHTML='", drill_outside_function)
+
     for token in [
         "@media (orientation: landscape)",
         "100svh",
@@ -593,19 +604,121 @@ def check_mobile_and_hitboxes() -> None:
         "hitbox-standard",
         "button.hitbox-standard::after",
         "touch-action:pan-y pinch-zoom",
-        "index.js?v=207",
-        "index.css?v=183",
+        "index.js?v=213",
+        "index.css?v=189",
         "release-quality.js?v=10",
-        "first-person-world.js?v=25",
-        "first-person-world.css?v=19",
+        "first-person-world.js?v=48",
+        "openTrainingDrill(item)",
+        "closeTrainingDrill",
+        "state.ui.drill.innerHTML",
+        "first-person-world.css?v=24",
         "FIRST_PERSON_OPERATION_REPORTS",
         "firstPersonStationMemory",
         "fp-operation-card",
         "ship-map-live-pin",
+        "ship-map-enter",
+        "ship-map-entry-hud",
+        "shipMapEntryRoute",
+        "shipMapPreviewTarget",
+        "renderShipMapIntel",
+        "ship-map-intel",
+        "previewShipCompartmentFromMap",
+        "ship-map-boarding-route",
+        "shipMapBoardingTarget",
+        "shipMapBoardingFlow",
+        "ensureShipMapLiveTimer",
+        "stopShipMapLiveTimer",
+        "canli ustten takip",
+        "fp-npc-equipment",
+        "role-equipment-pass-v3",
+        "fpNpcToolSwing",
+        "GEMI PLANI GIRIS",
         "fp-transfer-overlay",
         "checkedStations",
         "completeWorldStation",
         "fp3d-marker.checked",
+        "spinner",
+        "scanLine",
+        "consoleSweep",
+        "fp3d-ship-telemetry",
+        "shipTelemetryForArea",
+        "openWorldShipMotion",
+        "state.shipMotion",
+        "dataset.shipMotion",
+        "fp3d-ship-speed",
+        "Yakindaki is",
+        "Cikis zinciri",
+        "Canli olay",
+        "addLivingCompartmentWorkLayer",
+        "crewWorkCycle",
+        "humanScaleWorkProps",
+        "groundContactFooting",
+        "professionalGroundContactPads",
+        "updateNpcGroundContact",
+        "professionalCrewMicroMotion",
+        "updateNpcWorkMicroMotion",
+        "professionalCrewRuntimeStates",
+        "stationWorkSeeded",
+        "stationWorkLock",
+        "a.workState",
+        "a.motionSignature",
+        "a.gazeTarget",
+        "a.gazePoint",
+        "professionalStationGaze",
+        "stationHeadDip",
+        "applyProfessionalCrewVisibility",
+        "professionalCrewOpacity",
+        "crewRoutineTarget",
+        "shiftChoreographyLoop",
+        "Vardiya isi",
+        "areaSoundscapeProfile",
+        "shipSystemsForArea",
+        "livingShipSystems",
+        "updateShipSystems",
+        "fp3d-ship-systems",
+        "fp3d-compartment-transfer",
+        "compartmentTransferLine",
+        "showCompartmentTransfer",
+        "verifiedCompartmentTransferOverlay",
+        "showCompartmentTransfer(previous,next);",
+        "hideCompartmentTransfer();",
+        "hideCompartmentTransfer",
+        "areaSoundscapeState",
+        "playAreaSoundscape",
+        "updateSensoryLayer",
+        "fp3d-sensory-strip",
+        "fp3d-room-passport",
+        "roomPassportForArea",
+        "physicalCompartmentIdentity",
+        "addCompartmentIdentityLayer",
+        "compartmentIdentityTexture",
+        "compartmentIdentitySpec",
+        "updateRoomPassport",
+        "addCompartmentEntryVestibule",
+        "sealedCompartmentEntry",
+        "entryVestibuleSeal",
+        "crewTaskLinkColor",
+        "updateNpcTaskLink",
+        "persistentCrewTaskLines",
+        "createNpcTaskBadge",
+        "updateNpcTaskBadge",
+        "liveCrewTaskBadge",
+        "taskLineGeometry",
+        "taskLineMaterial",
+        "taskLine.renderOrder=9",
+        "liveCrewTaskLink",
+        "createCompartmentLiveOperationVignette",
+        "createCompartmentLiveOperationVignette(area);",
+        "compartmentLiveOperationVignettes",
+        "liveOpsBeacon",
+        "liveOpsNeedle",
+        "liveOpsSlide",
+        "bridge-brief",
+        "engine-leak-team",
+        "mooring-lead",
+        "gmdss-watch",
+        "ballast-order",
+        "compartmentIdentityPanel",
         "game-settings-vibration-btn",
         "toggleVibration",
         "navigator.vibrate",
@@ -634,6 +747,10 @@ def check_mobile_and_hitboxes() -> None:
         "BRIDGE_WALK_STATIONS",
         "openBridgeWalkDevice",
         "SHIP_OPERATION_MODES",
+        "cargo3d",
+        "Cargo / ballast kontrol zinciri",
+        "mode-cargo",
+        "markCargoCheck?.(nearest.check",
         "operation-walk-stage",
         "openShipOperation3D",
         "openCurrentSceneControlWalk",
@@ -851,6 +968,67 @@ def check_watch_director_realism() -> None:
         require_token(section, token, JS)
 
 
+
+def check_first_person_visual_qa_tool() -> None:
+    section = "visual-qa"
+    for token in (
+        "pngStatsFromBuffer",
+        "paethPredictor",
+        "method: 'png-zlib'",
+        "first-person-report.json",
+        "movement?.passed",
+        "movementAttempts",
+        "bestMovement.distance > 0.15",
+        "first-person-engine.png",
+        "report.engine",
+        "shipMotion: runtime?.shipMotion",
+        "report.desktop?.shipMotion?.openWorldShipMotion",
+        "report.engine?.area === 'engine'",
+        "liveOpsRuntimeAudit",
+        "fxTypes.liveOpsBeacon",
+        "fxTypes.entryVestibuleSeal",
+        "taskLines",
+        "liveOpsRuntimeAudit?.taskLines >= 1",
+        "visibleTaskBadges",
+        "visibleTaskLinks",
+        "activeCrewStates",
+        "report.desktop?.liveOpsRuntimeAudit?.activeCrewStates >= 2",
+        "motionSignatures",
+        "stationGazes",
+        "crewWorkStates",
+        "liveOpsRuntimeAudit?.visibleTaskBadges >= 1",
+        "liveOpsRuntimeAudit?.beacons >= 1",
+        "liveOpsRuntimeAudit?.vestibules >= 1",
+        "captureTransferAudit",
+        "fp3d-compartment-transfer.show",
+        "report.transfer?.passed",
+        "report.engineTransfer?.toArea === 'engine'",
+        "report.engineTransfer?.beforeArea === 'deck'",
+        "report.engineTransfer?.passed",
+        "report.engineTransfer",
+        "transfer-lock",
+        "hiddenAfter",
+        "page.screenshot",
+        "runShipMapEntryAudit",
+        "runAllCompartmentReachabilityAudit",
+        "report.compartments?.passed",
+        "report.compartments?.results?.every",
+        "item.visibleTaskLinks >= 1",
+        "item.activeCrewStates >= 1",
+        "item.motionSignatures >= 1",
+        "item.stationGazes >= 1",
+        "uniqueSignatures >= 10",
+        "requiredPresent",
+        "waitForCompartmentSettled",
+        "report.shipMap?.passed",
+        "mapEntryArea: after.area",
+        "engine ship-map zone missing",
+        "ship-map-overhead.png",
+        "clickAttempts",
+    ):
+        require_token(section, token, VISUAL_QA_JS)
+
+
 def main() -> int:
     check_languages()
     check_character_portraits()
@@ -862,6 +1040,7 @@ def main() -> int:
     check_assets()
     check_route_generation_hook()
     check_watch_director_realism()
+    check_first_person_visual_qa_tool()
 
     for line in INFO:
         print(f"OK {line}")
