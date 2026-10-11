@@ -3,13 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Güverte — Bir Stajyerin Hikayesi</title>
+<style>
+html.guverte-booting #firstperson-btn{opacity:.55;pointer-events:none;filter:saturate(.45)}
+</style>
+<script>
+(function(){
+  document.documentElement.classList.add('guverte-booting');
+  var devHost = /^(127\.0\.0\.1|localhost)$/i.test(location.hostname);
+  var buildId = '2026-10-11-fp3d-v55';
+  var devBoot = devHost ? String(Date.now()) : buildId;
+  window.__GUVERTE_BUILD_ID = buildId;
+  window.__GUVERTE_DEV_BOOT = devBoot;
+  window.__guverteScriptsReady = false;
+  window.__guverteQueuedFirstPerson = false;
+  window.__guverteAssetUrl = function(path){
+    try{
+      var url = new URL(path, document.baseURI);
+      if(devHost){
+        if(!url.searchParams.get('v')) url.searchParams.set('v', buildId);
+        url.searchParams.set('dev', devBoot);
+      }
+      return url.pathname + url.search + url.hash;
+    }catch(e){
+      return path;
+    }
+  };
+  window.__guverteLoadCss = function(path){
+    document.write('<link rel="stylesheet" href="'+window.__guverteAssetUrl(path).replace(/"/g,'&quot;')+'">');
+  };
+  window.__guverteLoadScript = function(path){
+    return new Promise(function(resolve,reject){
+      var script = document.createElement('script');
+      script.src = window.__guverteAssetUrl(path);
+      script.async = false;
+      script.onload = resolve;
+      script.onerror = function(){ reject(new Error('Script yuklenemedi: '+script.src)); };
+      document.body.appendChild(script);
+    });
+  };
+  document.addEventListener('click', function(event){
+    var target = event.target && event.target.closest ? event.target.closest('#firstperson-btn') : null;
+    if(!target || window.__guverteScriptsReady) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.__guverteQueuedFirstPerson = true;
+    target.disabled = true;
+    target.textContent = 'YUKLENIYOR';
+  }, true);
+})();
+</script>
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<link rel="stylesheet" href="./index.css?v=189">
-<link rel="stylesheet" href="./first-person-world.css?v=26">
+<script>window.__guverteLoadCss('./index.css?v=190');window.__guverteLoadCss('./first-person-world.css?v=27');</script>
 </head>
 <body>
 <script>
@@ -828,15 +879,34 @@ window.__GUVERTE_THREE_READY = new Promise(function(resolve,reject){
 });
 </script>
 <script type="module">
-import * as THREE from './vendor/three.module.js';
-window.__GUVERTE_THREE = THREE;
-if(window.__GUVERTE_THREE_RESOLVE) window.__GUVERTE_THREE_RESOLVE(THREE);
+import(window.__guverteAssetUrl('./vendor/three.module.js')).then(function(THREE){
+  window.__GUVERTE_THREE = THREE;
+  if(window.__GUVERTE_THREE_RESOLVE) window.__GUVERTE_THREE_RESOLVE(THREE);
+}).catch(function(err){
+  if(window.__GUVERTE_THREE_REJECT) window.__GUVERTE_THREE_REJECT(err);
+});
 </script>
 <script nomodule>
 if(window.__GUVERTE_THREE_REJECT) window.__GUVERTE_THREE_REJECT(new Error('Module scripts are not supported'));
 </script>
-<script src="./index.js?v=213"></script>
-<script src="./first-person-world.js?v=54"></script>
-<script src="./release-quality.js?v=10"></script>
+<script>
+window.__guverteLoadScript('./index.js?v=214')
+  .then(function(){ return window.__guverteLoadScript('./first-person-world.js?v=55'); })
+  .then(function(){ return window.__guverteLoadScript('./release-quality.js?v=11'); })
+  .then(function(){
+    window.__guverteScriptsReady = true;
+    document.documentElement.classList.remove('guverte-booting');
+    var btn = document.getElementById('firstperson-btn');
+    if(btn){ btn.disabled = false; btn.textContent = '1. ŞAHIS'; }
+    if(window.__guverteQueuedFirstPerson){
+      window.__guverteQueuedFirstPerson = false;
+      setTimeout(function(){ if(typeof window.openFirstPersonMode === 'function') window.openFirstPersonMode(); }, 0);
+    }
+  })
+  .catch(function(err){
+    console.error('Guverte script boot failed', err);
+    window.dispatchEvent(new ErrorEvent('error', { message: String(err && err.message || err), error: err }));
+  });
+</script>
 </body>
 </html>
