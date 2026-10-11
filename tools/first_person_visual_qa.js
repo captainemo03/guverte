@@ -8,6 +8,10 @@ const OUT = path.join(ROOT, 'tools', 'qa-artifacts');
 const URL = process.env.GUVERTE_QA_URL || 'http://127.0.0.1:4173/';
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 
+function ignoreBrowserNoise(text) {
+  return /ERR_NETWORK_IO_SUSPENDED|ERR_ABORTED/.test(String(text || ''));
+}
+
 function paethPredictor(a, b, c) {
   const p = a + b - c;
   const pa = Math.abs(p - a);
@@ -139,19 +143,33 @@ async function inspectLayout(page) {
       const key = item?.anim?.workState || 'unknown';
       crewWorkStates[key] = (crewWorkStates[key] || 0) + 1;
     });
+    const npcTextMarkers = Array.from(document.querySelectorAll('.fp3d-marker.npc.visible')).filter(node => {
+      return ['b', 'small', 'em'].some(selector => {
+        const child = node.querySelector(selector);
+        if (!child || !child.textContent.trim()) return false;
+        const style = getComputedStyle(child);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+      });
+    }).length;
     const liveOpsRuntimeAudit = {
       beacons: fxTypes.liveOpsBeacon || 0,
       slides: fxTypes.liveOpsSlide || 0,
       needles: fxTypes.liveOpsNeedle || 0,
       vestibules: fxTypes.entryVestibuleSeal || 0,
+      trafficFlows: fxTypes.trafficFlowArrow || 0,
+      trafficSegments: fxTypes.trafficFlowSegment || 0,
       taskLines: (runtime?.npcs || []).filter(item => item?.anim?.taskLine).length,
       taskBadges: (runtime?.npcs || []).filter(item => item?.anim?.taskBadge).length,
       visibleTaskBadges: (runtime?.npcs || []).filter(item => item?.anim?.taskBadge?.visible).length,
       visibleTaskLinks: (runtime?.npcs || []).filter(item => item?.anim?.taskLine?.visible).length,
+      overheadTextSprites: (runtime?.npcs || []).filter(item => item?.anim?.taskBadge?.visible || item?.anim?.plate?.visible || item?.anim?.speech?.visible).length,
+      npcTextMarkers,
       crewWorkStates,
       activeCrewStates: Object.keys(crewWorkStates).filter(key => key !== 'unknown').length,
       motionSignatures: (runtime?.npcs || []).filter(item => (item?.anim?.motionSignature || 0) > 0.02).length,
       stationGazes: (runtime?.npcs || []).filter(item => item?.anim?.professionalStationGaze).length,
+      meshOnlyCrew: (runtime?.npcs || []).filter(item => item?.anim?.professionalMeshOnlyCrew && item?.anim?.avatarSprite?.visible === false).length,
+      groundedCrew: (runtime?.npcs || []).filter(item => item?.anim?.professionalFootGroundLock && (item?.anim?.groundContactScore || 0) >= 0.06 && Math.abs(item?.object?.position?.y || 0) < 0.03).length,
       labels: liveOpsLabels.slice(0, 8)
     };
     return {
@@ -161,6 +179,8 @@ async function inspectLayout(page) {
       objects: runtime?.scene?.children?.length || 0,
       interactions: runtime?.interactions?.length || 0,
       visibleMarkers: document.querySelectorAll('.fp3d-marker.visible').length,
+      areaNavVisible: (() => { const node = document.querySelector('.fp3d-area-nav'); if (!node) return false; const rect = node.getBoundingClientRect(); const style = getComputedStyle(node); return style.display !== 'none' && rect.width > 200 && rect.height > 30; })(),
+      lookControl: runtime?.look || null,
       liveOpsRuntimeAudit,
       shipMotion: runtime?.shipMotion || null,
       webgl: Boolean(document.querySelector('#fp3d-canvas')?.getContext('webgl2') || document.querySelector('#fp3d-canvas')?.getContext('webgl')),
@@ -177,6 +197,7 @@ async function inspectLayout(page) {
 }
 
 async function openWorld(page) {
+  await page.addInitScript(() => { try { localStorage.removeItem('guverte-first-person-world-v2'); } catch (_err) {} });
   await page.goto(URL, { waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForFunction(() => window.__guverteAppReady === true, null, { timeout: 20000 });
   await page.waitForFunction(() => typeof window.__GUVERTE_FP3D?.open === 'function', null, { timeout: 20000 });
@@ -258,7 +279,7 @@ async function runShipMapEntryAudit(page) {
   }
   await page.waitForFunction(() => !document.querySelector('#map-panel')?.classList.contains('show'), null, { timeout: 7000 });
   await page.waitForFunction(() => window.__GUVERTE_FP3D?.state?.area === 'engine', null, { timeout: 9000 });
-  await page.waitForFunction(() => !document.querySelector('.fp3d-root')?.classList.contains('transfer-lock') && !document.querySelector('.fp3d-compartment-transfer')?.classList.contains('show'), null, { timeout: 12000 });
+  await page.waitForFunction(() => !document.querySelector('.fp3d-root')?.classList.contains('transfer-lock') && !document.querySelector('.fp3d-compartment-transfer')?.classList.contains('show'), null, { timeout: 22000 });
   await page.waitForTimeout(250);
   const after = await page.evaluate(() => ({
     area: window.__GUVERTE_FP3D?.state?.area || '',
@@ -278,6 +299,60 @@ async function runShipMapEntryAudit(page) {
   };
 }
 
+async function runDirectCompartmentUiAudit(page) {
+  await page.evaluate(async () => {
+    const api = window.__GUVERTE_FP3D;
+    if (api?.setArea && api.state?.area !== 'bridge') {
+      const result = api.setArea('bridge');
+      if (result && typeof result.then === 'function') await result;
+    }
+  });
+  await page.waitForFunction(() => window.__GUVERTE_FP3D?.state?.area === 'bridge', null, { timeout: 7000 });
+  await waitForCompartmentSettled(page);
+  const before = await page.evaluate(() => {
+    const nav = document.querySelector('.fp3d-area-nav');
+    const engine = document.querySelector('.fp3d-area-nav button[data-area="engine"]');
+    const deck = document.querySelector('.fp3d-area-nav button[data-area="deck"]');
+    const navRect = nav?.getBoundingClientRect();
+    const engineRect = engine?.getBoundingClientRect();
+    return {
+      area: window.__GUVERTE_FP3D?.state?.area || '',
+      navVisible: Boolean(nav && getComputedStyle(nav).display !== 'none' && navRect.width > 200 && navRect.height > 30),
+      engineButtonVisible: Boolean(engine && engineRect.width > 40 && engineRect.height > 24),
+      deckButtonVisible: Boolean(deck),
+      navLabel: nav?.textContent?.replace(/\s+/g, ' ').trim() || ''
+    };
+  });
+  await page.click('.fp3d-area-nav button[data-area="engine"]');
+  await page.waitForFunction(() => document.querySelector('.fp3d-compartment-transfer.show') !== null, null, { timeout: 1500 });
+  const duringEngine = await page.evaluate(() => ({
+    shown: Boolean(document.querySelector('.fp3d-compartment-transfer')?.classList.contains('show')),
+    locked: Boolean(document.querySelector('.fp3d-root')?.classList.contains('transfer-lock')),
+    to: document.querySelector('.fp3d-compartment-transfer')?.dataset?.to || ''
+  }));
+  await page.waitForFunction(() => window.__GUVERTE_FP3D?.state?.area === 'engine', null, { timeout: 9000 });
+  await waitForCompartmentSettled(page);
+  const afterEngine = await page.evaluate(() => ({
+    area: window.__GUVERTE_FP3D?.state?.area || '',
+    navActive: document.querySelector('.fp3d-area-nav button[data-area="engine"]')?.classList.contains('active') || false,
+    rootArea: document.querySelector('.fp3d-root')?.dataset?.area || ''
+  }));
+  await page.click('.fp3d-area-nav button[data-area="deck"]');
+  await page.waitForFunction(() => window.__GUVERTE_FP3D?.state?.area === 'deck', null, { timeout: 9000 });
+  await waitForCompartmentSettled(page);
+  const afterDeck = await page.evaluate(() => ({
+    area: window.__GUVERTE_FP3D?.state?.area || '',
+    navActive: document.querySelector('.fp3d-area-nav button[data-area="deck"]')?.classList.contains('active') || false,
+    rootArea: document.querySelector('.fp3d-root')?.dataset?.area || ''
+  }));
+  return {
+    before,
+    duringEngine,
+    afterEngine,
+    afterDeck,
+    passed: before.navVisible && before.engineButtonVisible && duringEngine.shown && duringEngine.locked && duringEngine.to === 'engine' && afterEngine.area === 'engine' && afterEngine.navActive && afterDeck.area === 'deck' && afterDeck.navActive
+  };
+}
 
 async function waitForCompartmentSettled(page, timeout = 12000) {
   await page.waitForFunction(() => !document.querySelector('.fp3d-root')?.classList.contains('transfer-lock') && !document.querySelector('.fp3d-compartment-transfer')?.classList.contains('show'), null, { timeout });
@@ -306,6 +381,8 @@ async function runAllCompartmentReachabilityAudit(page) {
       const role = document.querySelector('#fp3d-room-role')?.textContent?.trim() || '';
       const risk = document.querySelector('#fp3d-room-risk')?.textContent?.trim() || '';
       const motion = runtime.shipMotion || null;
+      const trafficFlows = (runtime.ambientFx || []).filter(fx => fx?.type === 'trafficFlowArrow').length;
+      const trafficSegments = (runtime.ambientFx || []).filter(fx => fx?.type === 'trafficFlowSegment').length;
       const crewWorkStates = Object.create(null);
       npcs.forEach(item => {
         const key = item?.anim?.workState || 'unknown';
@@ -314,11 +391,21 @@ async function runAllCompartmentReachabilityAudit(page) {
       const taskBadges = npcs.filter(item => item?.anim?.taskBadge).length;
       const visibleTaskBadges = npcs.filter(item => item?.anim?.taskBadge?.visible).length;
       const visibleTaskLinks = npcs.filter(item => item?.anim?.taskLine?.visible).length;
+      const overheadTextSprites = npcs.filter(item => item?.anim?.taskBadge?.visible || item?.anim?.plate?.visible || item?.anim?.speech?.visible).length;
+      const npcTextMarkers = Array.from(document.querySelectorAll('.fp3d-marker.npc.visible')).filter(node => {
+        return ['b', 'small', 'em'].some(selector => {
+          const child = node.querySelector(selector);
+          if (!child || !child.textContent.trim()) return false;
+          const style = getComputedStyle(child);
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        });
+      }).length;
       const activeCrewStates = Object.keys(crewWorkStates).filter(key => key !== 'unknown').length;
       const motionSignatures = npcs.filter(item => (item?.anim?.motionSignature || 0) > 0.02).length;
       const stationGazes = npcs.filter(item => item?.anim?.professionalStationGaze).length;
+      const groundedCrew = npcs.filter(item => item?.anim?.professionalFootGroundLock && (item?.anim?.groundContactScore || 0) >= 0.06 && Math.abs(item?.object?.position?.y || 0) < 0.03).length;
       const signature = [spec.title || '', spec.subtitle || '', role, risk, localItems.map(item => item.label).slice(0, 4).join('|')].join(' / ');
-      const passed = runtime.area === area && runtime.ready && doors.length >= 1 && localItems.length >= 2 && npcs.length >= 1 && taskBadges >= npcs.length && visibleTaskBadges >= 1 && visibleTaskLinks >= 1 && activeCrewStates >= 1 && motionSignatures >= 1 && stationGazes >= 1 && code && role && passport?.dataset?.theme && motion?.openWorldShipMotion;
+      const passed = runtime.area === area && runtime.ready && doors.length >= 1 && localItems.length >= 2 && npcs.length >= 1 && taskBadges >= npcs.length && visibleTaskBadges === 0 && visibleTaskLinks >= 1 && overheadTextSprites === 0 && npcTextMarkers === 0 && activeCrewStates >= 1 && motionSignatures >= 1 && stationGazes >= 1 && groundedCrew >= npcs.length && trafficFlows >= 2 && trafficSegments >= 2 && code && role && passport?.dataset?.theme && motion?.openWorldShipMotion;
       return {
         area,
         title: spec.title || '',
@@ -331,10 +418,15 @@ async function runAllCompartmentReachabilityAudit(page) {
         taskBadges,
         visibleTaskBadges,
         visibleTaskLinks,
+        overheadTextSprites,
+        npcTextMarkers,
         crewWorkStates,
         activeCrewStates,
         motionSignatures,
         stationGazes,
+        groundedCrew,
+        trafficFlows,
+        trafficSegments,
         code,
         role,
         risk,
@@ -360,17 +452,21 @@ async function runDesktop(browser, report) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const page = await context.newPage();
   const errors = [];
-  page.on('pageerror', error => errors.push(String(error.message || error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('pageerror', error => { const text = String(error.message || error); if (!ignoreBrowserNoise(text)) errors.push(text); });
+  page.on('console', message => { if (message.type() === 'error' && !ignoreBrowserNoise(message.text())) errors.push(message.text()); });
   await openWorld(page);
+  await page.evaluate(() => { window.__GUVERTE_FP3D.setArea('bridge'); window.__GUVERTE_FP3D.resetPlayer?.(); });
+  await page.waitForTimeout(180);
   const movementStart = await page.evaluate(() => ({ ...window.__GUVERTE_FP3D.state.player }));
   const movementAttempts = [];
   let bestMovement = { key: '', before: movementStart, after: movementStart, distance: 0 };
   for (const key of ['w', 's', 'a', 'd']) {
     const before = await page.evaluate(() => ({ ...window.__GUVERTE_FP3D.state.player }));
+    await page.keyboard.down('Shift');
     await page.keyboard.down(key);
-    await page.waitForTimeout(820);
+    await page.waitForTimeout(1050);
     await page.keyboard.up(key);
+    await page.keyboard.up('Shift');
     await page.waitForTimeout(140);
     const after = await page.evaluate(() => ({ ...window.__GUVERTE_FP3D.state.player }));
     const distance = Number(Math.hypot(after.x - before.x, after.z - before.z).toFixed(3));
@@ -379,12 +475,35 @@ async function runDesktop(browser, report) {
     if (distance > bestMovement.distance) bestMovement = attempt;
     if (distance > 0.15) break;
   }
+  const lookBefore = await page.evaluate(() => ({ yaw: window.__GUVERTE_FP3D.state.yaw, pitch: window.__GUVERTE_FP3D.state.pitch, delta: window.__GUVERTE_FP3D.state.look?.delta || 0 }));
+  await page.evaluate(() => {
+    const canvas = document.querySelector('#fp3d-canvas');
+    const target = canvas || document.querySelector('.fp3d-root');
+    const rect = target.getBoundingClientRect();
+    const startX = rect.left + rect.width * 0.56;
+    const startY = rect.top + rect.height * 0.56;
+    const opts = { bubbles: true, cancelable: true, pointerId: 77, pointerType: 'mouse', isPrimary: true };
+    target.dispatchEvent(new PointerEvent('pointerdown', { ...opts, clientX: startX, clientY: startY }));
+    target.dispatchEvent(new PointerEvent('pointermove', { ...opts, clientX: startX + 150, clientY: startY - 46 }));
+    target.dispatchEvent(new PointerEvent('pointerup', { ...opts, clientX: startX + 150, clientY: startY - 46 }));
+    window.__GUVERTE_FP3D.lookBy?.(24, -8);
+  });
+  await page.waitForTimeout(120);
+  const lookAfter = await page.evaluate(() => ({ yaw: window.__GUVERTE_FP3D.state.yaw, pitch: window.__GUVERTE_FP3D.state.pitch, delta: window.__GUVERTE_FP3D.state.look?.delta || 0, professionalLookControl: !!window.__GUVERTE_FP3D.state.look?.professionalLookControl }));
+  await page.evaluate(() => document.exitPointerLock?.());
   const desktopBuffer = await page.screenshot({ path: path.join(OUT, 'first-person-desktop.png'), fullPage: false });
   report.desktop = await inspectLayout(page);
   report.desktop.movement = {
     ...bestMovement,
     movementAttempts,
     passed: bestMovement.distance > 0.15
+  };
+  report.desktop.look = {
+    before: lookBefore,
+    after: lookAfter,
+    yawDelta: Number(Math.abs(lookAfter.yaw - lookBefore.yaw).toFixed(4)),
+    pitchDelta: Number(Math.abs(lookAfter.pitch - lookBefore.pitch).toFixed(4)),
+    passed: lookAfter.professionalLookControl && Math.abs(lookAfter.yaw - lookBefore.yaw) > 0.08
   };
   report.desktop.image = await imageStats(desktopBuffer);
   report.transfer = await captureTransferAudit(page, 'deck');
@@ -398,6 +517,7 @@ async function runDesktop(browser, report) {
   report.engine = await inspectLayout(page);
   report.engine.image = await imageStats(engineBuffer);
   report.shipMap = await runShipMapEntryAudit(page);
+  report.directCompartmentUi = await runDirectCompartmentUiAudit(page);
   report.compartments = await runAllCompartmentReachabilityAudit(page);
   report.desktop.errors = errors;
   await context.close();
@@ -407,8 +527,8 @@ async function runMobile(browser, report) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   const errors = [];
-  page.on('pageerror', error => errors.push(String(error.message || error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('pageerror', error => { const text = String(error.message || error); if (!ignoreBrowserNoise(text)) errors.push(text); });
+  page.on('console', message => { if (message.type() === 'error' && !ignoreBrowserNoise(message.text())) errors.push(message.text()); });
   await openWorld(page);
   await page.evaluate(() => window.__GUVERTE_FP3D.setArea('corridor'));
   await page.waitForFunction(() => window.__GUVERTE_FP3D.state.area === 'corridor', null, { timeout: 5000 });
@@ -438,6 +558,7 @@ async function runMobile(browser, report) {
     report.desktop?.ready &&
     report.desktop?.webgl &&
     report.desktop?.movement?.passed &&
+    report.desktop?.look?.passed &&
     report.transfer?.passed &&
     report.engineTransfer?.passed &&
     report.engineTransfer?.beforeArea === 'deck' &&
@@ -447,20 +568,32 @@ async function runMobile(browser, report) {
     report.desktop?.liveOpsRuntimeAudit?.slides >= 1 &&
     report.desktop?.liveOpsRuntimeAudit?.needles >= 1 &&
     report.desktop?.liveOpsRuntimeAudit?.vestibules >= 1 &&
+    report.desktop?.liveOpsRuntimeAudit?.trafficFlows >= 2 &&
+    report.desktop?.liveOpsRuntimeAudit?.trafficSegments >= 2 &&
     report.desktop?.liveOpsRuntimeAudit?.taskLines >= 1 &&
-    report.desktop?.liveOpsRuntimeAudit?.visibleTaskBadges >= 1 &&
+    report.desktop?.liveOpsRuntimeAudit?.visibleTaskBadges === 0 &&
     report.desktop?.liveOpsRuntimeAudit?.visibleTaskLinks >= 1 &&
+    report.desktop?.liveOpsRuntimeAudit?.overheadTextSprites === 0 &&
+    report.desktop?.liveOpsRuntimeAudit?.npcTextMarkers === 0 &&
     report.desktop?.liveOpsRuntimeAudit?.activeCrewStates >= 2 &&
     report.desktop?.liveOpsRuntimeAudit?.motionSignatures >= 1 &&
+    report.desktop?.liveOpsRuntimeAudit?.meshOnlyCrew >= 1 &&
+    report.desktop?.liveOpsRuntimeAudit?.groundedCrew >= report.desktop?.liveOpsRuntimeAudit?.meshOnlyCrew &&
+    report.desktop?.areaNavVisible &&
     report.desktop?.shipMotion?.openWorldShipMotion &&
     Math.abs(report.desktop?.shipMotion?.roll || 0) + Math.abs(report.desktop?.shipMotion?.pitch || 0) + Math.abs(report.desktop?.shipMotion?.heave || 0) > 0.001 &&
     report.deck?.image?.nonBlank &&
     report.deck?.liveOpsRuntimeAudit?.beacons >= 1 &&
     report.deck?.liveOpsRuntimeAudit?.slides >= 1 &&
     report.deck?.liveOpsRuntimeAudit?.taskLines >= 1 &&
-    report.deck?.liveOpsRuntimeAudit?.visibleTaskBadges >= 1 &&
+    report.deck?.liveOpsRuntimeAudit?.trafficFlows >= 2 &&
+    report.deck?.liveOpsRuntimeAudit?.trafficSegments >= 2 &&
+    report.deck?.liveOpsRuntimeAudit?.visibleTaskBadges === 0 &&
     report.deck?.liveOpsRuntimeAudit?.visibleTaskLinks >= 1 &&
+    report.deck?.liveOpsRuntimeAudit?.overheadTextSprites === 0 &&
+    report.deck?.liveOpsRuntimeAudit?.npcTextMarkers === 0 &&
     report.deck?.liveOpsRuntimeAudit?.activeCrewStates >= 2 &&
+    report.deck?.liveOpsRuntimeAudit?.groundedCrew >= report.deck?.liveOpsRuntimeAudit?.meshOnlyCrew &&
     report.deck?.shipMotion?.openWorldShipMotion &&
     report.deck?.shipMotion?.sway > 30 &&
     report.engine?.ready &&
@@ -471,18 +604,26 @@ async function runMobile(browser, report) {
     report.engine?.liveOpsRuntimeAudit?.slides >= 1 &&
     report.engine?.liveOpsRuntimeAudit?.needles >= 1 &&
     report.engine?.liveOpsRuntimeAudit?.taskLines >= 1 &&
-    report.engine?.liveOpsRuntimeAudit?.visibleTaskBadges >= 1 &&
+    report.engine?.liveOpsRuntimeAudit?.trafficFlows >= 2 &&
+    report.engine?.liveOpsRuntimeAudit?.trafficSegments >= 2 &&
+    report.engine?.liveOpsRuntimeAudit?.visibleTaskBadges === 0 &&
     report.engine?.liveOpsRuntimeAudit?.visibleTaskLinks >= 1 &&
+    report.engine?.liveOpsRuntimeAudit?.overheadTextSprites === 0 &&
+    report.engine?.liveOpsRuntimeAudit?.npcTextMarkers === 0 &&
     report.engine?.liveOpsRuntimeAudit?.activeCrewStates >= 2 &&
+    report.engine?.liveOpsRuntimeAudit?.groundedCrew >= report.engine?.liveOpsRuntimeAudit?.meshOnlyCrew &&
     report.engine?.shipMotion?.openWorldShipMotion &&
     report.engine?.shipMotion?.speed > 5 &&
     report.shipMap?.passed &&
     report.shipMap?.mapEntryArea === 'engine' &&
     report.shipMap?.mapClosedAfterEntry &&
+    report.directCompartmentUi?.passed &&
+    report.directCompartmentUi?.afterEngine?.area === 'engine' &&
+    report.directCompartmentUi?.afterDeck?.area === 'deck' &&
     report.compartments?.passed &&
     report.compartments?.total >= 10 &&
     report.compartments?.uniqueSignatures >= 10 &&
-    report.compartments?.results?.every(item => item.visibleTaskLinks >= 1 && item.activeCrewStates >= 1 && item.motionSignatures >= 1 && item.stationGazes >= 1) &&
+    report.compartments?.results?.every(item => item.visibleTaskBadges === 0 && item.visibleTaskLinks >= 1 && item.overheadTextSprites === 0 && item.npcTextMarkers === 0 && item.activeCrewStates >= 1 && item.motionSignatures >= 1 && item.stationGazes >= 1 && item.groundedCrew >= item.npcs && item.trafficFlows >= 2 && item.trafficSegments >= 2) &&
     report.mobile?.ready &&
     report.mobile?.webgl &&
     report.mobile?.image?.nonBlank &&

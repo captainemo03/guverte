@@ -35,7 +35,7 @@
 
   const AREAS = {
     bridge:{
-      title:'KÖPRÜÜSTÜ',subtitle:'Seyir ve kumanda merkezi',theme:'bridge',size:[22,18,5],bounds:[9.6,7.5],spawn:[0,5.4,0],outside:true,
+      title:'KÖPRÜÜSTÜ',subtitle:'Seyir ve kumanda merkezi',theme:'bridge',size:[22,18,5],bounds:[9.6,7.5],spawn:[0,4.2,0],outside:true,
       doors:[
         door('door-corridor','KORİDORA ÇIK','Yaşam mahalli ve alt güverte',0,7.2,'corridor'),
         door('door-deck','KÖPRÜ KANADI / GÜVERTE','Dış güverte ve deniz',-9.2,2.7,'deck')
@@ -197,7 +197,7 @@
     active:false,ready:false,loading:null,THREE:null,renderer:null,scene:null,camera:null,
     stage:null,canvas:null,ui:{},area:'bridge',previousArea:'corridor',entryFrom:null,positions:{},
     player:{x:0,z:5},yaw:0,pitch:0,roll:0,velocity:{x:0,z:0},keys:Object.create(null),
-    stick:{x:0,y:0,pointerId:null},look:{active:false,pointerId:null,x:0,y:0},runLock:false,
+    stick:{x:0,y:0,pointerId:null},look:{active:false,pointerId:null,x:0,y:0,locked:false,delta:0,professionalLookControl:true},runLock:false,
     autoTarget:null,autoNav:{lastDist:0,stuck:0,strafeDir:1,lastX:0,lastZ:0,lastPulse:0},interactions:[],npcs:[],animatedScreens:[],waves:[],distantShips:[],ambientFx:[],colliders:[],discoveries:Object.create(null),visitedAreas:Object.create(null),checkedStations:Object.create(null),
     animationId:0,lastFrame:0,elapsed:0,screenTick:0,nearest:null,currentDialogue:null,
     resizeObserver:null,quality:MOBILE?'mobile':'desktop',liveEvent:null,nextEventAt:18,completedDrills:Object.create(null),completedIncidents:Object.create(null),incidentShift:0,pendingDrill:null,audio:null,audioTick:0,footstepTick:0,sensoryTick:0,worldTick:0,watchMinutes:372,weather:'calm',lastDiscovery:'',questIndex:0,questDone:Object.create(null),worldXp:0,streak:0,bestStreak:0,badges:Object.create(null),crewBarkTick:0,crewBark:null,sobTick:0,fieldLog:[],fieldLogTick:0,sceneReportTimer:0,useReactTimer:0,routePulseTimer:0,areaNavFallbackTimer:0,areaArrivalTimer:0,actionBannerTimer:0,lastAtmosphereNote:'',lastFocusId:'',lastRouteTargetId:'',routeGuides:[],routeBeacon:null,usePulses:[],lights:{},shipMotion:{openWorldShipMotion:false,roll:0,pitch:0,heave:0,sway:0,speed:0,intensity:'low'}
@@ -1154,23 +1154,45 @@
 
   function bindLook(){
     const zone = state.ui.lookZone;
+    const applyLookDelta=(dx,dy)=>{
+      const professionalLookControl=true;
+      if(!Number.isFinite(dx)||!Number.isFinite(dy))return professionalLookControl;
+      state.yaw-=dx*.0042;state.pitch=clamp(state.pitch-dy*.0032,-.72,.62);
+      state.look.delta=(state.look.delta||0)+Math.abs(dx)+Math.abs(dy);
+      state.look.professionalLookControl=professionalLookControl;
+      state.autoTarget=null;
+      return professionalLookControl;
+    };
+    state.applyLookDelta=applyLookDelta;
     const start = ev=>{
       if(ev.target.closest('button')) return;
-      state.look={active:true,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY};
-      zone.setPointerCapture(ev.pointerId);
+      state.look={...state.look,active:true,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,professionalLookControl:true};
+      try{ev.currentTarget.setPointerCapture?.(ev.pointerId);}catch(_err){}
+      if(!MOBILE&&ev.detail>=2&&document.pointerLockElement!==state.canvas){
+        try{state.canvas.requestPointerLock?.({unadjustedMovement:false});}catch(_err){try{state.canvas.requestPointerLock?.();}catch(_ignore){}}
+      }
     };
     const move = ev=>{
       if(!state.look.active || state.look.pointerId!==ev.pointerId) return;
       const dx=ev.clientX-state.look.x,dy=ev.clientY-state.look.y;
       state.look.x=ev.clientX;state.look.y=ev.clientY;
-      state.yaw-=dx*.0042;state.pitch=clamp(state.pitch-dy*.0032,-.72,.62);
-      state.autoTarget=null;
+      applyLookDelta(dx,dy);
     };
     const stop = ev=>{if(!ev || state.look.pointerId===ev.pointerId) state.look.active=false;};
     zone.addEventListener('pointerdown',start);zone.addEventListener('pointermove',move);
     zone.addEventListener('pointerup',stop);zone.addEventListener('pointercancel',stop);
     state.canvas.addEventListener('pointerdown',start);state.canvas.addEventListener('pointermove',move);
     state.canvas.addEventListener('pointerup',stop);state.canvas.addEventListener('pointercancel',stop);
+    state.ui.root.addEventListener('pointerdown',start);state.ui.root.addEventListener('pointermove',move);
+    state.ui.root.addEventListener('pointerup',stop);state.ui.root.addEventListener('pointercancel',stop);
+    if(!state.lookDocBound){
+      state.lookDocBound=true;
+      document.addEventListener('pointerlockchange',()=>{state.look.locked=document.pointerLockElement===state.canvas;});
+      document.addEventListener('mousemove',ev=>{
+        if(document.pointerLockElement!==state.canvas)return;
+        applyLookDelta(ev.movementX||0,ev.movementY||0);
+      });
+    }
   }
 
   function initRenderer(){
@@ -1322,6 +1344,8 @@
       else if(fx.type==='liveOpsNeedle'){const p=Math.sin(state.elapsed*(fx.speed||1.4)+(fx.phase||0));m.rotation.z=(fx.baseRot||0)+p*(fx.amp||.5);}
       else if(fx.type==='liveOpsSlide'){const p=Math.sin(state.elapsed*(fx.speed||1.4)+(fx.phase||0));m.position.x=(fx.baseX||0)+p*(fx.amp||.2);if(m.material&&m.material.opacity!==undefined)m.material.opacity=.48+Math.abs(p)*.32;if(m.material&&m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=.34+Math.abs(p)*.42;}
       else if(fx.type==='seaWake'){const fade=m.position.z>(fx.fadeStart??0)?0.45:1;m.position.z+=dt*(fx.speed||2.2);m.position.x=(fx.baseX||0)+Math.sin(state.elapsed*.8+fx.phase)*.18;m.material.opacity=(.16+.1*Math.sin(state.elapsed*2.2+fx.phase))*fade;if(m.position.z>(fx.resetZ||18)){m.position.z=fx.startZ||-42;m.position.x=fx.baseX||0;}}
+      else if(fx.type==='trafficFlowArrow'){const p=.5+.5*Math.sin(state.elapsed*(fx.speed||1.6)+(fx.phase||0));m.scale.setScalar((fx.baseScale||1)*(1+p*.16));if(m.material){m.material.opacity=clamp((fx.opacity||.32)+p*.34,.18,.82);if(m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=(fx.glow||.28)+p*(fx.glowPulse||.34);}}
+      else if(fx.type==='trafficFlowSegment'){const p=.5+.5*Math.sin(state.elapsed*(fx.speed||1.2)+(fx.phase||0));if(m.material){m.material.opacity=clamp((fx.opacity||.24)+p*.24,.12,.62);if(m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=(fx.glow||.18)+p*(fx.glowPulse||.24);}}
     });
   }
 
@@ -1807,6 +1831,49 @@
     return humanScaleWorkProps;
   }
 
+  function addCompartmentTrafficFlowLayer(area){
+    const professionalCompartmentTrafficFlow=true;
+    if(!area||!state.scene)return professionalCompartmentTrafficFlow;
+    const T=state.THREE,spec=compartmentIdentitySpec(area);
+    const color=spec.hex||0x76cce8;
+    const areaBounds=area.bounds||[5,5];
+    const flowMat=material(color,{emissive:color,emissiveIntensity:.34,roughness:.48,metalness:.18,transparent:true,opacity:.34});
+    const dimMat=material(0x06131d,{roughness:.86,metalness:.16,transparent:true,opacity:.72});
+    const stampMat=material(0xffffff,{emissive:color,emissiveIntensity:.18,roughness:.72,metalness:.04,transparent:true,opacity:.24});
+    const routeSources=(area.doors||[]).slice(0,3).concat((area.stations||[]).slice(0,3));
+    const spawn=area.spawn||[0,0,0];
+    const baseX=clamp(spawn[0]||0,-areaBounds[0]+.9,areaBounds[0]-.9);
+    const baseZ=clamp(spawn[1]||0,-areaBounds[1]+.9,areaBounds[1]-.9);
+    const makeSegment=(x1,z1,x2,z2,index,label)=>{
+      const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz);
+      if(len<.45)return;
+      const cx=(x1+x2)/2,cz=(z1+z2)/2;
+      const seg=box(state.scene,[.075,.026,len],[cx,.082,cz],flowMat.clone(),[0,Math.atan2(dx,dz),0]);
+      seg.userData.trafficFlowSegment=true;
+      state.ambientFx.push({type:'trafficFlowSegment',mesh:seg,phase:index*.52,speed:1.08+(index%3)*.12,opacity:.22,glow:.12,glowPulse:.25,label});
+      const steps=Math.max(1,Math.min(4,Math.floor(len/1.4)));
+      for(let i=1;i<=steps;i++){
+        const t=i/(steps+1);
+        const ax=x1+dx*t,az=z1+dz*t;
+        const arrow=new T.Mesh(new T.CircleGeometry(.22,3),flowMat.clone());
+        arrow.rotation.x=-Math.PI/2;arrow.rotation.z=Math.atan2(dx,dz);arrow.position.set(ax,.11,az);arrow.renderOrder=7;arrow.userData.trafficFlowArrow=true;state.scene.add(arrow);
+        state.ambientFx.push({type:'trafficFlowArrow',mesh:arrow,phase:index*.7+i*.33,speed:1.45+(index%2)*.18,opacity:.22,glow:.2,glowPulse:.38,baseScale:.9,label});
+        const footprint=box(state.scene,[.16,.018,.28],[ax+Math.sin(i)*.18,.075,az+Math.cos(i)*.18],stampMat.clone(),[0,Math.atan2(dx,dz)+((i%2)?-.18:.18),0]);
+        footprint.userData.trafficFootprint=true;
+      }
+    };
+    routeSources.forEach((target,index)=>{
+      const tx=clamp(target.x||0,-areaBounds[0]+.75,areaBounds[0]-.75);
+      const tz=clamp(target.z||0,-areaBounds[1]+.75,areaBounds[1]-.75);
+      makeSegment(baseX,baseZ,tx,tz,index,target.label||area.title);
+    });
+    const statusZ=area.outside?clamp(baseZ-1.4,-areaBounds[1]+.9,areaBounds[1]-.9):clamp(baseZ+.9,-areaBounds[1]+.9,areaBounds[1]-.9);
+    box(state.scene,[1.35,.055,.44],[baseX,.13,statusZ],dimMat);
+    const glow=box(state.scene,[1.05,.04,.07],[baseX,.17,statusZ-.19],flowMat.clone());
+    state.ambientFx.push({type:'trafficFlowSegment',mesh:glow,phase:2.4,speed:1.6,opacity:.42,glow:.22,glowPulse:.42,label:'traffic-status'});
+    return professionalCompartmentTrafficFlow;
+  }
+
 
   function createCompartmentLiveOperationVignette(area){
     const compartmentLiveOperationVignettes=true;
@@ -1888,6 +1955,7 @@
     addAreaIdentityProps(area);
     addHeavyCompartmentSetDressing(area);
     addLivingCompartmentWorkLayer(area);
+    addCompartmentTrafficFlowLayer(area);
     createCompartmentLiveOperationVignette(area);
     if(area.theme==='bridge'){
       addCicBridgeSetDressing(area);
@@ -2557,10 +2625,15 @@
     const avatarDepth=avatarSprite.clone();
     avatarDepth.material=avatarSprite.material.clone();
     avatarDepth.material.color.setHex(0x02070d);
-    avatarDepth.material.opacity=.22;
+    avatarDepth.material.opacity=.12;
     avatarDepth.position.set(.07,1.28,.03);
     avatarDepth.scale.set(1.5,2.76,1);
     avatarDepth.renderOrder=28;
+    const professionalMeshOnlyCrew=true;
+    avatarSprite.visible=false;
+    avatarDepth.visible=false;
+    avatarSprite.userData.professionalMeshOnlyCrew=professionalMeshOnlyCrew;
+    avatarDepth.userData.professionalMeshOnlyCrew=professionalMeshOnlyCrew;
     g.add(avatarDepth);
     g.add(avatarSprite);
 
@@ -2621,10 +2694,10 @@
     const rightHand=new T.Mesh(new T.SphereGeometry(.108,14,10),skin);rightHand.position.set(0,-.77,0);rightArm.group.add(rightHand);
     const leftLeg=limb([-.2*profile.width,.94,0],[.23,.84,.25],[0,-.38,0],cloth);
     const rightLeg=limb([.2*profile.width,.94,0],[.23,.84,.25],[0,-.38,0],cloth);
-    const leftBoot=box(leftLeg.group,[.32,.12,.46],[.03,-.88,-.09],boot);
-    const rightBoot=box(rightLeg.group,[.32,.12,.46],[-.03,-.88,-.09],boot);
-    const leftSole=box(leftLeg.group,[.36,.035,.5],[.04,-.965,-.1],boot);
-    const rightSole=box(rightLeg.group,[.36,.035,.5],[-.04,-.965,-.1],boot);
+    const leftBoot=box(leftLeg.group,[.34,.13,.5],[.03,-.89,-.12],boot);
+    const rightBoot=box(rightLeg.group,[.34,.13,.5],[-.03,-.89,-.12],boot);
+    const leftSole=box(leftLeg.group,[.42,.05,.58],[.04,-.985,-.13],boot);
+    const rightSole=box(rightLeg.group,[.42,.05,.58],[-.04,-.985,-.13],boot);
     addNpcRealismKit(root,spine,headGroup,leftLeg.group,rightLeg.group,leftArm.group,rightArm.group,def,index,skin,cloth,trim,boot);
     const professionalRig=addNpcProfessionalRig(root,spine,headGroup,leftLeg.group,rightLeg.group,leftArm.group,rightArm.group,profile,def,index,skin,cloth,trim,boot);
     const breatheBadge=new T.Mesh(new T.BoxGeometry(.12,.12,.035),trim);breatheBadge.position.set(.3,1.58,-.245);root.add(breatheBadge);
@@ -2666,7 +2739,7 @@
     taskLineGeometry.setAttribute('position',new T.BufferAttribute(new Float32Array([def.x,1.58,def.z,def.x,.16,def.z]),3));
     const taskLineMaterial=new T.LineBasicMaterial({color:0x72e4a6,transparent:true,opacity:0,depthWrite:false});
     const taskLine=new T.Line(taskLineGeometry,taskLineMaterial);taskLine.frustumCulled=false;taskLine.visible=false;taskLine.renderOrder=9;state.scene.add(taskLine);
-    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,leftContactPad,rightContactPad,professionalGroundContactPads,ring,shadow,avatarSprite,avatarDepth,plate,speech,taskBadge,liveCrewTaskBadge:true,professionalRig,taskLine,persistentCrewTaskLines,stationWorkSeeded:false,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried,groundContactFooting:true};
+    item.anim={path:def.path||[[def.x,def.z]],speed:(def.speed||.15)*profile.gait,phase:profile.phase,targetIndex:1,wait:.2+index*.16,root,spine,hips,headGroup,leftLeg:leftLeg.group,rightLeg:rightLeg.group,leftArm:leftArm.group,rightArm:rightArm.group,leftHand,rightHand,leftBoot,rightBoot,leftSole,rightSole,leftFootShadow,rightFootShadow,leftContactPad,rightContactPad,professionalGroundContactPads,ring,shadow,avatarSprite,avatarDepth,professionalMeshOnlyCrew,plate,speech,taskBadge,liveCrewTaskBadge:true,professionalRig,taskLine,persistentCrewTaskLines,stationWorkSeeded:false,lastX:def.x,lastZ:def.z,attention:0,gesture:0,profile,leftEye,rightEye,mouth,leftBrow,rightBrow,shoulderBar,leftEpaulet,rightEpaulet,belt,pelvis,breatheBadge,toolSatchel,carried,groundContactFooting:true};
     state.npcs.push(item);
   }
 
@@ -3301,18 +3374,27 @@
     if(state.ui.fade)state.ui.fade.classList.add('active');
     return new Promise(resolve=>{
       setTimeout(()=>{
-        buildScene();
-        try{firstPersonArea=next;}catch(_err){}
-        hapticPulse('door');
-        announceAreaArrival(next);
-        showActionBanner(AREAS[next].title,compartmentArrivalText(next),AREAS[next].theme||'area');
-        callGame('addWatchFeed',AREAS[next].title+': mahal gecisi tamamlandi.','good');
-        requestAnimationFrame(()=>{
-          if(state.ui.fade)state.ui.fade.classList.remove('active');
-          hideCompartmentTransfer();
-          state.ui.root?.classList.remove('area-changing');
-          resolve(true);
-        });
+        let transitionOk=true;
+        try{
+          buildScene();
+          try{firstPersonArea=next;}catch(_err){}
+          hapticPulse('door');
+          announceAreaArrival(next);
+          showActionBanner(AREAS[next].title,compartmentArrivalText(next),AREAS[next].theme||'area');
+          callGame('addWatchFeed',AREAS[next].title+': mahal gecisi tamamlandi.','good');
+        }catch(err){
+          transitionOk=false;
+          console.error('FP3D compartment transition failed',err);
+          pushFieldLog('Mahal gecisi toparlandi: '+((AREAS[next]||{}).title||next),'warn');
+        }finally{
+          requestAnimationFrame(()=>{
+            if(state.ui.fade)state.ui.fade.classList.remove('active');
+            hideCompartmentTransfer();
+            state.ui.root?.classList.remove('area-changing');
+            if(state.scene)state.scene.visible=true;
+            resolve(transitionOk);
+          });
+        }
       },420);
     });
   }
@@ -3634,17 +3716,26 @@
 
   function updateNpcGroundContact(a,item,moving,gait,footLift,otherLift,operatorLocked,craftPose,dt){
     const groundContactFooting=true;
+    const professionalFootGroundLock=true;
     if(!a||!item||!item.object)return groundContactFooting;
-    item.object.position.y+=(0-item.object.position.y)*clamp(dt*12,0,1);
+    item.object.position.y+=(0-item.object.position.y)*clamp(dt*18,0,1);
+    const rootY=a.root?.position?.y||0;
     const leftPlanted=!moving||Math.sin(gait)<=0;
     const rightPlanted=!moving||Math.sin(gait)>=0;
-    const leftPressure=operatorLocked?.95:leftPlanted?.82:clamp(.28-footLift*2.2,.08,.42);
-    const rightPressure=operatorLocked?.95:rightPlanted?.82:clamp(.28-otherLift*2.2,.08,.42);
-    if(a.leftSole){a.leftSole.scale.set(1+(leftPressure*.18),1,1+(leftPressure*.22));a.leftSole.position.y=-.965-Math.min(.018,leftPressure*.012);}
-    if(a.rightSole){a.rightSole.scale.set(1+(rightPressure*.18),1,1+(rightPressure*.22));a.rightSole.position.y=-.965-Math.min(.018,rightPressure*.012);}
-    if(a.leftContactPad){a.leftContactPad.visible=true;a.leftContactPad.material.opacity=clamp(leftPressure*.24,.04,.28);a.leftContactPad.scale.setScalar(1+leftPressure*.45);}
-    if(a.rightContactPad){a.rightContactPad.visible=true;a.rightContactPad.material.opacity=clamp(rightPressure*.24,.04,.28);a.rightContactPad.scale.setScalar(1+rightPressure*.45);}
-    if(a.shadow){a.shadow.material.opacity=craftPose||operatorLocked?.38:(moving?.3:.34);a.shadow.scale.set(1.04+Math.abs(Math.sin(gait))*.08,1.0+Math.abs(Math.cos(gait))*.05,1);}
+    const leftPressure=operatorLocked?.96:leftPlanted?.88:clamp(.24-footLift*2.4,.06,.36);
+    const rightPressure=operatorLocked?.96:rightPlanted?.88:clamp(.24-otherLift*2.4,.06,.36);
+    const soleBase=-.995;
+    if(a.leftSole){a.leftSole.scale.set(1+(leftPressure*.22),1.04,1+(leftPressure*.28));a.leftSole.position.y=soleBase-Math.min(.026,leftPressure*.018);}
+    if(a.rightSole){a.rightSole.scale.set(1+(rightPressure*.22),1.04,1+(rightPressure*.28));a.rightSole.position.y=soleBase-Math.min(.026,rightPressure*.018);}
+    if(a.leftBoot){a.leftBoot.position.y=-.902-Math.min(.012,leftPressure*.009);}
+    if(a.rightBoot){a.rightBoot.position.y=-.902-Math.min(.012,rightPressure*.009);}
+    if(a.leftFootShadow){a.leftFootShadow.position.y=.021-rootY;a.leftFootShadow.material.opacity=clamp(leftPressure*.34,.08,.32);a.leftFootShadow.scale.setScalar(1.02+leftPressure*.5);}
+    if(a.rightFootShadow){a.rightFootShadow.position.y=.021-rootY;a.rightFootShadow.material.opacity=clamp(rightPressure*.34,.08,.32);a.rightFootShadow.scale.setScalar(1.02+rightPressure*.5);}
+    if(a.leftContactPad){a.leftContactPad.visible=true;a.leftContactPad.position.y=.026-rootY;a.leftContactPad.material.opacity=clamp(leftPressure*.3,.05,.32);a.leftContactPad.scale.setScalar(1+leftPressure*.55);}
+    if(a.rightContactPad){a.rightContactPad.visible=true;a.rightContactPad.position.y=.026-rootY;a.rightContactPad.material.opacity=clamp(rightPressure*.3,.05,.32);a.rightContactPad.scale.setScalar(1+rightPressure*.55);}
+    if(a.shadow){a.shadow.position.y=.016-rootY;a.shadow.material.opacity=craftPose||operatorLocked?.4:(moving?.32:.35);a.shadow.scale.set(1.04+Math.abs(Math.sin(gait))*.06,1.0+Math.abs(Math.cos(gait))*.04,1);}
+    a.professionalFootGroundLock=professionalFootGroundLock;
+    a.groundContactScore=Number(Math.min(leftPressure,rightPressure).toFixed(3));
     return groundContactFooting;
   }
 
@@ -3795,18 +3886,19 @@
       if(eventItem) speechText=eventItem.label+': '+incidentToneLine(eventItem);
       else if(duty&&a.attention>.35) speechText=(duty.routine?'Vardiya isi: ':'Gorev noktasi: ')+duty.label;
       else if(playerDist<4.2) speechText=String(item.detail||item.line||'Vardiya takipte.').slice(0,58);
+      const declutteredNpcOverheadText=true;
       if(a.speech){
-        a.speech.visible=!!speechText;
-        if(speechText) updateNpcSpeechBubble(a.speech,speechText,eventItem?.tone||duty?.tone||item.uniform||'info');
-        a.speech.position.y=3.08+Math.sin(state.elapsed*1.8+index)*.045;
-        if(a.speech.material)a.speech.material.opacity=clamp(.35+a.attention*.75,.35,.98);
+        a.speech.visible=false;
+        a.speech.userData.declutteredNpcOverheadText=declutteredNpcOverheadText;
       }
       if(a.taskBadge){
         const taskBadgeText=eventItem?.label||duty?.label||'';
-        const taskBadgeActive=!!taskBadgeText&&(!!eventItem||!!duty?.routine||playerDist<10.5||a.attention>.28);
-        updateNpcTaskBadge(a.taskBadge,taskBadgeText,eventItem?.tone||duty?.tone||item.uniform||'routine',taskBadgeActive);
+        a.lastTaskBadgeText=taskBadgeText;
+        updateNpcTaskBadge(a.taskBadge,taskBadgeText,eventItem?.tone||duty?.tone||item.uniform||'routine',false);
+        a.taskBadge.visible=false;
+        a.taskBadge.userData.declutteredNpcOverheadText=declutteredNpcOverheadText;
         a.taskBadge.position.y=2.96+Math.sin(state.elapsed*1.6+index)*.035;
-        if(a.taskBadge.material)a.taskBadge.material.opacity=clamp(.42+a.attention*.44,.5,.9);
+        if(a.taskBadge.material)a.taskBadge.material.opacity=0;
       }
       updateNpcTaskLink(item,duty,eventItem,playerDist);
       a.gesture+=dt*(moving?1.9:.75);
@@ -3843,9 +3935,9 @@
         if(a.professionalRig.headset)a.professionalRig.headset.rotation.z=Math.sin(state.elapsed*1.2+a.phase)*.012;
       }
       if(a.plate&&a.plate.material){
-        const labelFocus=playerDist<5.2||state.nearest&&state.nearest.id===item.id&&state.nearest.distance<3.5||!!eventItem;
-        a.plate.visible=labelFocus||playerDist<8;
-        a.plate.material.opacity=clamp(labelFocus ? .72 : .24,.18,.82);
+        a.plate.visible=false;
+        a.plate.material.opacity=0;
+        a.plate.userData.declutteredNpcOverheadText=declutteredNpcOverheadText;
       }
       if(a.avatarSprite){
         const spriteLean=moving?Math.sin(gait)*.035:operatorLocked ? .045 : craftPose ? .07 : Math.sin(state.elapsed*.9+a.phase)*.012;
@@ -3863,7 +3955,7 @@
         }
       }
       if(operatorLocked){
-        a.root.position.y=.026+Math.sin(state.elapsed*1.1+a.phase)*.004;
+        a.root.position.y=.012+Math.sin(state.elapsed*1.1+a.phase)*.002;
         a.root.rotation.z=weightShift*.28;
         a.leftLeg.rotation.x=-.78+Math.sin(a.gesture*.7)*.035;a.rightLeg.rotation.x=-.74-Math.sin(a.gesture*.65)*.03;
         a.leftLeg.position.y=.94;a.rightLeg.position.y=.94;
@@ -3873,11 +3965,11 @@
         a.spine.rotation.x=.16+a.attention*.035+Math.sin(a.gesture*.55)*.018;
       }else if(craftPose){
         const taskBob=Math.sin(a.gesture*(maintenancePose?2.4:servicePose?1.7:1.95))*.05;
-        a.root.position.y=.03+Math.abs(taskBob)*.045;
+        a.root.position.y=.014+Math.abs(taskBob)*.018;
         a.root.rotation.z=weightShift*.7;
         a.leftLeg.rotation.x=maintenancePose?-.22+taskBob*.35:deckPose?-.1+taskBob*.18:-.04;
         a.rightLeg.rotation.x=maintenancePose?.16-taskBob*.28:deckPose?.08-taskBob*.16:.03;
-        a.leftLeg.position.y=.94+Math.max(0,taskBob)*.018;a.rightLeg.position.y=.94+Math.max(0,-taskBob)*.018;
+        a.leftLeg.position.y=.94+Math.max(0,taskBob)*.008;a.rightLeg.position.y=.94+Math.max(0,-taskBob)*.008;
         a.leftArm.rotation.x=maintenancePose?-.72+taskBob:deckPose?-.38+taskBob*.5:servicePose?-.8+taskBob*.22:-.55+taskBob*.18;
         a.rightArm.rotation.x=maintenancePose?-1.05-taskBob*.65:deckPose?-.92-taskBob*.42:servicePose?-.72-taskBob*.2:-.35-taskBob*.15;
         a.leftArm.rotation.z=maintenancePose?.28:deckPose?.22:servicePose?.12:.08;
@@ -3885,7 +3977,7 @@
         a.spine.position.y=1.16+breath*.7;
         a.spine.rotation.x=(maintenancePose?.28:deckPose?.12:servicePose?.07:.1)+a.attention*.035+taskBob*.18;
       }else{
-        a.root.position.y=.034+(moving?Math.abs(Math.sin(gait*2))*.01:0);
+        a.root.position.y=.014+(moving?Math.abs(Math.sin(gait*2))*.004:0);
         a.root.rotation.z=weightShift;
         a.leftLeg.rotation.x=swing;a.rightLeg.rotation.x=-swing;
         a.leftLeg.position.y=.94+footLift;a.rightLeg.position.y=.94+otherLift;
@@ -3896,8 +3988,6 @@
         a.spine.rotation.x=a.attention*.052+clamp(Math.sin(gait)*.03,-.03,.03);
       }
       updateNpcGroundContact(a,item,moving,gait,footLift,otherLift,operatorLocked,craftPose,dt);
-      if(a.leftFootShadow){a.leftFootShadow.material.opacity=moving?(.3-footLift*3.2):operatorLocked ? .28 : .22;a.leftFootShadow.scale.setScalar(1+(operatorLocked ? .35 : otherLift*2.1));}
-      if(a.rightFootShadow){a.rightFootShadow.material.opacity=moving?(.3-otherLift*3.2):operatorLocked ? .28 : .22;a.rightFootShadow.scale.setScalar(1+(operatorLocked ? .35 : footLift*2.1));}
       if(a.leftBoot)a.leftBoot.rotation.x=operatorLocked ? .18 : craftPose ? clamp(-a.leftLeg.rotation.x*.16,-.14,.18) : clamp(-swing*.22,-.16,.16);
       if(a.rightBoot)a.rightBoot.rotation.x=operatorLocked ? .18 : craftPose ? clamp(-a.rightLeg.rotation.x*.16,-.14,.18) : clamp(swing*.22,-.16,.16);
       if(a.hips)a.hips.rotation.z=-weightShift*.55;
@@ -4070,5 +4160,5 @@
   window.interactFirstPerson=interact;
   window.handleFirstPersonKeydown=handleKeydown;
   window.fp3dRespond=respondDialogue;
-  window.__GUVERTE_FP3D={state,areas:AREAS,open:openWorld,close:closeWorld,setArea,changeCompartment:area=>jumpToArea(area,'API gecisi'),interact};
+  window.__GUVERTE_FP3D={state,areas:AREAS,open:openWorld,close:closeWorld,setArea,resetPlayer:resetPlayerToSpawn,lookBy:(dx,dy)=>typeof state.applyLookDelta==='function'?state.applyLookDelta(dx,dy):false,changeCompartment:area=>jumpToArea(area,'API gecisi'),interact};
 })();
