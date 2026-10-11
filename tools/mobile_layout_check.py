@@ -226,7 +226,7 @@ REQUIRED = {
         "fp3d-dialogue",
         "GMDSS ODASI",
         "YÜK KONTROL ODASI",
-        "first-person-world.js?v=53",
+        "first-person-world.js?v=54",
         "openTrainingDrill(item)",
         "closeTrainingDrill",        "state.ui.drill.innerHTML",
         "first-person-world.css?v=26",

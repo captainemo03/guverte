@@ -4057,11 +4057,15 @@
       callGame('addWatchFeed','Birinci şahıs gemi dünyası açıldı: mahal geçişleri, hareketli mürettebat ve cihaz etkileşimi aktif.','good');
     }catch(err){
       console.error('First person 3D failed',err);
-      state.ui.loading.innerHTML='<b>3D GÖRÜNÜM AÇILAMADI</b><small>'+String(err.message||err)+'</small><button type="button">GÜVENLİ GÖRÜNÜME GEÇ</button>';
-      state.ui.loading.querySelector('button').onclick=()=>{
+      const fileProtocolSafeFallback=location.protocol==='file:';
+      state.ui.loading.innerHTML='<b>3D GÖRÜNÜM AÇILAMADI</b><small>'+(fileProtocolSafeFallback?'VS Code dosyayi direkt acti; 3D icin yerel sunucu gerekir. Guvenli gorunume geciliyor.':String(err.message||err))+'</small><button type="button">GÜVENLİ GÖRÜNÜME GEÇ</button>';
+      const openSafeFallback=()=>{
         closeWorld();
         if(typeof legacyOpen==='function')legacyOpen();
+        callGame('showNotif','1. SAHIS','Guvenli gorunum','3D modul acilamadi; oynanabilir guvenli gorunume gecildi.');
       };
+      state.ui.loading.querySelector('button').onclick=openSafeFallback;
+      setTimeout(openSafeFallback,fileProtocolSafeFallback?650:1400);
     }
   }
 
