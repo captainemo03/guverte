@@ -14,7 +14,7 @@ html.guverte-booting #firstperson-btn{opacity:.55;pointer-events:none;filter:sat
 (function(){
   document.documentElement.classList.add('guverte-booting');
   var devHost = /^(127\.0\.0\.1|localhost)$/i.test(location.hostname);
-  var buildId = '2026-10-11-fp3d-v55';
+  var buildId = '2026-10-12-fp3d-v63';
   var devBoot = devHost ? String(Date.now()) : buildId;
   window.__GUVERTE_BUILD_ID = buildId;
   window.__GUVERTE_DEV_BOOT = devBoot;
@@ -60,7 +60,7 @@ html.guverte-booting #firstperson-btn{opacity:.55;pointer-events:none;filter:sat
 <link rel="shortcut icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
 <link rel="preload" href="./assets/audio/groan-of-the-keel.mp3" as="audio" type="audio/mpeg">
-<script>window.__guverteLoadCss('./index.css?v=190');window.__guverteLoadCss('./first-person-world.css?v=27');</script>
+<script>window.__guverteLoadCss('./index.css?v=190');window.__guverteLoadCss('./first-person-world.css?v=31');</script>
 </head>
 <body>
 <script>
@@ -891,7 +891,7 @@ if(window.__GUVERTE_THREE_REJECT) window.__GUVERTE_THREE_REJECT(new Error('Modul
 </script>
 <script>
 window.__guverteLoadScript('./index.js?v=214')
-  .then(function(){ return window.__guverteLoadScript('./first-person-world.js?v=55'); })
+  .then(function(){ return window.__guverteLoadScript('./first-person-world.js?v=62'); })
   .then(function(){ return window.__guverteLoadScript('./release-quality.js?v=11'); })
   .then(function(){
     window.__guverteScriptsReady = true;

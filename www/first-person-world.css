@@ -601,5 +601,79 @@ body.firstperson-3d-active #phone-toast.show{z-index:270;}
   height:28px!important;
   background:rgba(6,39,27,.82)!important;
 }
+
+/* Readability pass: fewer floating labels, less cockpit text noise. */
+.fp3d-marker b,
+.fp3d-marker small,
+.fp3d-marker em{
+  display:none!important;
+}
+.fp3d-marker{
+  width:22px!important;
+  min-width:22px!important;
+  max-width:22px!important;
+  height:22px!important;
+  min-height:22px!important;
+  padding:0!important;
+  border-radius:50%!important;
+}
+.fp3d-marker>i{
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+}
+.fp3d-mission-dock p,
+.fp3d-route-head small,
+.fp3d-duty-chain small,
+.fp3d-duty-chain i,
+.fp3d-field-log b,
+.fp3d-world-status small,
+.fp3d-risk-meter small{
+  display:none!important;
+}
+.fp3d-mission-dock,
+.fp3d-duty-chain,
+.fp3d-field-log,
+.fp3d-scene-report{
+  background:rgba(3,12,20,.58)!important;
+  backdrop-filter:blur(8px);
+}
+.fp3d-route-step,
+.fp3d-duty-chain span,
+.fp3d-field-log span{
+  font-size:8px!important;
+  line-height:1.15!important;
+}
+.fp3d-world-status,
+.fp3d-ship-telemetry,
+.fp3d-ship-systems,
+.fp3d-room-passport,
+.fp3d-sensory-strip,
+.fp3d-risk-meter,
+.fp3d-duty-chain,
+.fp3d-field-log,
+.fp3d-scene-report,
+.fp3d-mission-dock,
+.fp3d-jump-dock,
+.fp3d-action-dock{
+  display:none!important;
+}
+.fp3d-event-strip{
+  max-width:260px!important;
+  padding:8px 10px!important;
+  opacity:.82!important;
+}
+.fp3d-event-strip span{
+  display:none!important;
+}
+.fp3d-prompt small,
+.fp3d-compass small,
+.fp3d-help{
+  display:none!important;
+}
+.fp3d-compass{
+  width:74px!important;
+  min-height:42px!important;
+}
 @media (max-width:820px),(pointer:coarse){.fp3d-area-nav{top:50px;left:6px;right:6px;display:flex!important;overflow:auto}.fp3d-area-nav::before{font-size:7px}.fp3d-area-nav button{min-width:64px}.fp3d-jump-dock,.fp3d-action-dock{top:106px}}
 @media (max-height:500px) and (orientation:landscape){.fp3d-area-nav{top:44px}.fp3d-jump-dock,.fp3d-action-dock{top:82px}}

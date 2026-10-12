@@ -198,7 +198,7 @@ async function inspectLayout(page) {
 
 async function openWorld(page) {
   await page.addInitScript(() => { try { localStorage.removeItem('guverte-first-person-world-v2'); } catch (_err) {} });
-  await page.goto(URL, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForFunction(() => window.__guverteAppReady === true, null, { timeout: 20000 });
   await page.waitForFunction(() => typeof window.__GUVERTE_FP3D?.open === 'function', null, { timeout: 20000 });
   await page.evaluate(() => window.__GUVERTE_FP3D.open());

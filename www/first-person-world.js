@@ -35,7 +35,7 @@
 
   const AREAS = {
     bridge:{
-      title:'KÖPRÜÜSTÜ',subtitle:'Seyir ve kumanda merkezi',theme:'bridge',size:[22,18,5],bounds:[9.6,7.5],spawn:[0,4.2,0],outside:true,
+      title:'KÖPRÜÜSTÜ',subtitle:'Seyir ve kumanda merkezi',theme:'bridge',size:[22,18,5],bounds:[9.6,7.5],spawn:[0,2.6,0],outside:true,
       doors:[
         door('door-corridor','KORİDORA ÇIK','Yaşam mahalli ve alt güverte',0,7.2,'corridor'),
         door('door-deck','KÖPRÜ KANADI / GÜVERTE','Dış güverte ve deniz',-9.2,2.7,'deck')
@@ -94,8 +94,8 @@
         station('deck-sea-stbd','SANCAK BORDA','Seyir fenerleri',4.9,-1,{action:'sea',look:'starboard',kind:'view'})
       ],
       npcs:[
-        npc('bosun','LOSTROMO','Başüstü sorumlusu','Bight içine basma. Halatın yük yönünü ve snap-back alanını önce gör.',-2,-5,[[-3,-8],[2,-5]],.22,'deck'),
-        npc('ab','USTA GEMİCİ','Pilot merdiveni','Merdiven yüksekliği tamam. Borda ışığı ve can simidini son kez kontrol edelim.',3,2,[[3,4],[4,-1]],.19,'deck')
+        npc('bosun','LOSTROMO','Başüstü sorumlusu','Bight içine basma. Halatın yük yönünü ve snap-back alanını önce gör.',-3.8,-7.4,[[-4.15,-9.6],[-4.35,-4.2],[-3.25,-1.4]],.2,'deck'),
+        npc('ab','USTA GEMİCİ','Pilot merdiveni','Merdiven yüksekliği tamam. Borda ışığı ve can simidini son kez kontrol edelim.',4.25,3.8,[[4.35,5.8],[4.55,1.4],[3.35,-2.4]],.17,'deck')
       ]
     },
     engine:{
@@ -1344,6 +1344,7 @@
       else if(fx.type==='liveOpsNeedle'){const p=Math.sin(state.elapsed*(fx.speed||1.4)+(fx.phase||0));m.rotation.z=(fx.baseRot||0)+p*(fx.amp||.5);}
       else if(fx.type==='liveOpsSlide'){const p=Math.sin(state.elapsed*(fx.speed||1.4)+(fx.phase||0));m.position.x=(fx.baseX||0)+p*(fx.amp||.2);if(m.material&&m.material.opacity!==undefined)m.material.opacity=.48+Math.abs(p)*.32;if(m.material&&m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=.34+Math.abs(p)*.42;}
       else if(fx.type==='seaWake'){const fade=m.position.z>(fx.fadeStart??0)?0.45:1;m.position.z+=dt*(fx.speed||2.2);m.position.x=(fx.baseX||0)+Math.sin(state.elapsed*.8+fx.phase)*.18;m.material.opacity=(.16+.1*Math.sin(state.elapsed*2.2+fx.phase))*fade;if(m.position.z>(fx.resetZ||18)){m.position.z=fx.startZ||-42;m.position.x=fx.baseX||0;}}
+      else if(fx.type==='deckMotionCue'){const p=Math.sin(state.elapsed*(fx.speed||1.2)+(fx.phase||0));m.rotation.z=(fx.baseRotZ||0)+p*(fx.rotZ||.04);m.position.y=(fx.baseY||m.position.y)+p*(fx.bob||.025);if(m.material&&m.material.opacity!==undefined)m.material.opacity=clamp((fx.opacity||.72)+Math.abs(p)*.18,.35,1);}
       else if(fx.type==='trafficFlowArrow'){const p=.5+.5*Math.sin(state.elapsed*(fx.speed||1.6)+(fx.phase||0));m.scale.setScalar((fx.baseScale||1)*(1+p*.16));if(m.material){m.material.opacity=clamp((fx.opacity||.32)+p*.34,.18,.82);if(m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=(fx.glow||.28)+p*(fx.glowPulse||.34);}}
       else if(fx.type==='trafficFlowSegment'){const p=.5+.5*Math.sin(state.elapsed*(fx.speed||1.2)+(fx.phase||0));if(m.material){m.material.opacity=clamp((fx.opacity||.24)+p*.24,.12,.62);if(m.material.emissiveIntensity!==undefined)m.material.emissiveIntensity=(fx.glow||.18)+p*(fx.glowPulse||.24);}}
     });
@@ -1452,6 +1453,29 @@
       for(let z=-d/2+2;z<d/2-2;z+=2.4){box(state.scene,[9.2,.025,.08],[0,floorY+.035,z],material(0x93a6af,{roughness:.48,metalness:.42}));}
       [-4.35,4.35].forEach(x=>{for(let z=-d/2+2;z<d/2-1;z+=3.2)cylinder(state.scene,.04,1.7,[x,.86,z],steel);});
       box(state.scene,[3.2,.14,1.7],[0,.25,-d/2+2.2],material(0x233644,{roughness:.62,metalness:.28}));
+      const hull=material(0x172f3f,{roughness:.64,metalness:.34});
+      const hullDark=material(0x071018,{roughness:.76,metalness:.22});
+      const deckPaint=material(0x60727c,{roughness:.58,metalness:.28});
+      const mainHull=box(state.scene,[11.6,.85,d+4.8],[0,-.55,0],hull);mainHull.name='deck-visible-ship-hull';mainHull.userData.deckVisibleShip=true;
+      const lowerHull=box(state.scene,[12.2,.34,d+5.4],[0,-.98,0],hullDark);lowerHull.name='deck-visible-lower-hull';lowerHull.userData.deckVisibleShip=true;
+      const portBulwark=box(state.scene,[1.15,1.25,d+2.6],[-5.72,.48,-.4],hull);portBulwark.name='deck-visible-port-bulwark';portBulwark.userData.deckVisibleShip=true;
+      const stbdBulwark=box(state.scene,[1.15,1.25,d+2.6],[5.72,.48,-.4],hull);stbdBulwark.name='deck-visible-stbd-bulwark';stbdBulwark.userData.deckVisibleShip=true;
+      const foreDeck=box(state.scene,[8.8,.42,3.2],[0,.42,-d/2-.8],deckPaint);foreDeck.name='deck-visible-forecastle';foreDeck.userData.deckVisibleShip=true;
+      const bowHouse=box(state.scene,[5.8,.95,2.1],[0,.92,-d/2-2.1],hull);bowHouse.name='deck-visible-bow-house';bowHouse.userData.deckVisibleShip=true;
+      const bowGlass=box(state.scene,[4.6,.55,1.2],[0,1.55,-d/2-2.95],material(0xd7edf8,{roughness:.52,metalness:.08}));bowGlass.name='deck-visible-bow-window';bowGlass.userData.deckVisibleShip=true;
+      const aftDeck=box(state.scene,[6.8,.32,2.4],[0,.54,d/2+1.1],deckPaint);aftDeck.name='deck-visible-aft-deck';aftDeck.userData.deckVisibleShip=true;
+      const aftHouse=box(state.scene,[4.8,.9,1.6],[0,.98,d/2+2.1],hull);aftHouse.name='deck-visible-aft-house';aftHouse.userData.deckVisibleShip=true;
+      [-5.15,5.15].forEach(x=>{
+        box(state.scene,[.18,.7,d+3.5],[x,1.18,0],material(0xd8e4e6,{roughness:.48,metalness:.3}));
+        for(let z=-d/2-1.4;z<d/2+1.8;z+=2.7)cylinder(state.scene,.035,.92,[x,1.72,z],steel);
+      });
+      [-3.5,-1.2,1.2,3.5].forEach(x=>{
+        box(state.scene,[.32,.18,2.4],[x,.28,-d/2+4.8],material(0x101922,{roughness:.62,metalness:.35}));
+        cylinder(state.scene,.18,1.8,[x,.48,-d/2+4.8],material(0x0e171f,{roughness:.58,metalness:.42}),[Math.PI/2,0,0]);
+      });
+      const life=material(0xff7a2f,{emissive:0x3f1207,emissiveIntensity:.22,roughness:.46});
+      [-5.28,5.28].forEach((x,side)=>[-4.8,3.8].forEach(z=>{cylinder(state.scene,.28,.05,[x,1.62,z],life,[0,Math.PI/2,0]);box(state.scene,[.08,.08,.5],[x,1.62,z],material(0xf5f4e8,{roughness:.5}));}));
+      box(state.scene,[4.2,.08,.12],[0,1.82,-d/2-3.55],material(0xffd66b,{emissive:0x5b3d07,emissiveIntensity:.28,roughness:.44}));
     }else if(theme==='engine'){
       box(state.scene,[w-2,.08,d-2],[0,floorY,0],material(0x11181d,{roughness:.88,metalness:.42}));
       for(let x=-w/2+1.5;x<w/2-1;x+=1.2)box(state.scene,[.045,.035,d-2],[x,floorY+.07,0],steel);
@@ -1655,6 +1679,31 @@
       wake.position.set(baseX,deckMode?-.55:-1.25,deckMode?-38-i*3.2:-78-i*5);
       state.scene.add(wake);state.ambientFx.push({type:'seaWake',mesh:wake,baseX,startZ:wake.position.z,resetZ:deckMode?20:-28,fadeStart:deckMode?6:-42,speed:deckMode?2.7:1.5,phase:i*.6});
     }
+    if(deckMode){
+      const bowFoamMat=new T.MeshBasicMaterial({color:0xf2fbff,transparent:true,opacity:.22,depthWrite:false});
+      [-1,1].forEach((side,sideIndex)=>{
+        for(let i=0;i<(MOBILE?3:6);i++){
+          const foam=new T.Mesh(new T.PlaneGeometry(7.8,.055),bowFoamMat.clone());
+          foam.name='deck-visible-moving-bow-wake';
+          foam.userData.deckMotionCue=true;
+          foam.rotation.x=-Math.PI/2;
+          foam.rotation.z=side*.34;
+          foam.position.set(side*(5.8+i*.58),-.5,-19-i*4.4);
+          state.scene.add(foam);
+          state.ambientFx.push({type:'seaWake',mesh:foam,baseX:foam.position.x,startZ:foam.position.z,resetZ:16,fadeStart:3,speed:3.15+i*.04,phase:i*.5+sideIndex});
+        }
+      });
+      const pressureMat=new T.MeshBasicMaterial({color:0xbdeeff,transparent:true,opacity:.2,depthWrite:false});
+      for(let i=0;i<4;i++){
+        const pulse=new T.Mesh(new T.RingGeometry(1.6+i*.72,1.68+i*.72,32,1,.2,2.72),pressureMat.clone());
+        pulse.name='deck-visible-bow-pressure-wave';
+        pulse.userData.deckMotionCue=true;
+        pulse.rotation.x=-Math.PI/2;
+        pulse.position.set(0,-.49,-21-i*3.6);
+        state.scene.add(pulse);
+        state.ambientFx.push({type:'deckMotionCue',mesh:pulse,baseY:pulse.position.y,bob:.018,rotZ:.018,phase:i*.7,speed:1.65,opacity:.18});
+      }
+    }
   }
 
   function addAreaIdentityProps(area){
@@ -1667,9 +1716,16 @@
       [[-4.2,-1.08],[-3.2,-.25],[-2.1,.16]].forEach((p,i)=>cylinder(state.scene,.055,.08,[p[0],1.08,p[1]],material(i===1?0x70e9a8:0x76cce8,{emissive:i===1?0x1b6b3c:0x17455a,emissiveIntensity:.9})));
     }else if(area.theme==="deck"){
       cylinder(state.scene,.045,2.5,[-4.55,1.25,5.8],steel);
-      box(state.scene,[.62,.32,.035],[-4.28,2.15,5.8],material(0xffdd4a,{roughness:.55}));
-      box(state.scene,[.62,.32,.035],[-4.28,1.78,5.8],material(0x244bff,{roughness:.55}));
-      box(state.scene,[.62,.32,.035],[-4.28,1.41,5.8],material(0xd84a3a,{roughness:.55}));
+      [
+        [0xffdd4a,2.15,0],
+        [0x244bff,1.78,.8],
+        [0xd84a3a,1.41,1.6]
+      ].forEach(([color,y,phase],i)=>{
+        const flag=box(state.scene,[.62,.32,.035],[-4.28,y,5.8],material(color,{roughness:.55,transparent:true,opacity:.88}));
+        flag.name='deck-visible-moving-signal-flag';
+        flag.userData.deckMotionCue=true;
+        state.ambientFx.push({type:'deckMotionCue',mesh:flag,baseY:y,bob:.028,rotZ:.045,phase,speed:1.7+i*.18,opacity:.78});
+      });
       box(state.scene,[2.8,.035,.12],[-3.2,.08,4.2],material(0xffd66b,{emissive:0x5a4510,emissiveIntensity:.35}),[0,.18,0]);
     }else if(area.theme==="engine"){
       for(let z=-5;z<=5;z+=2.5){box(state.scene,[1.4,.045,.08],[-7.2,.08,z],material(0xff6a3c,{emissive:0x5a1407,emissiveIntensity:.45}),[0,.4,0]);}
@@ -2600,11 +2656,12 @@
         const base=mat.opacity??1;
         if(obj===refs?.shadow){mat.transparent=true;mat.opacity=Math.min(base,.26);return;}
         if(obj===refs?.leftFootShadow||obj===refs?.rightFootShadow){mat.transparent=true;mat.opacity=Math.min(base,.28);return;}
-        mat.opacity=Math.min(base,.96);
-        mat.transparent=mat.opacity<.985;
-        if(mat.depthWrite!==undefined) mat.depthWrite=mat.opacity>.82;
+        mat.opacity=base;
+        mat.transparent=base<.985;
+        if(mat.depthWrite!==undefined) mat.depthWrite=base>.82;
       });
     });
+    root.userData.professionalCrewSolidMaterials=true;
     return professionalCrewOpacity;
   }
 
@@ -2748,7 +2805,7 @@
     const sets={
       bridge:[['nav-cadet','SEYIR STAJYERI','Harita masasinda rota kontrolu','Kerteriz ve CPA notlarini zabite hazirliyorum.',-3.8,2.2,[[-4.6,2.2],[-2.1,-1.6],[-5.3,-2.5]],.18,'cadet'],['helmsman-live','DUMENCI','Dumen ve rota takibi','Otomatik pilot hazir, elle kumanda icin kopru emri bekliyorum.',2.8,1.6,[[2.8,1.6],[1.2,-2.4],[4.8,-1.2]],.14,'officer']],
       corridor:[['cleaner-watch','KAMAROT','Yaşam mahalli turu','Koridoru bos tut; acil rolde bu yol kilitlenmemeli.',-1.8,5.8,[[-1.8,5.8],[1.8,1.5],[-1.2,-5.4]],.16,'crew'],['oiler-transit','YAGCI','Makine vardiyasina gecis','ECR yolundayim, sicak yuzey ve kacagi raporlayacagim.',1.8,-4.8,[[1.8,-4.8],[-1.8,-1.2],[2.2,6]],.17,'engine']],
-      deck:[['deck-hand-round','GUVERTACI','Halat ve borda turu','Snap-back alanindan cikmadan halat kontrolu yapma.',-3.6,-9,[[-3.6,-9],[-4,2],[-1.2,7]],.2,'deck'],['pilot-watch','PILOT WATCH','Borda ve ladder gozlemi','Pilot tarafi, borda isigi ve can simidi hazir.',3.9,5.2,[[3.9,5.2],[4.2,-2.5],[2.6,-8]],.18,'deck']],
+      deck:[['deck-hand-round','GUVERTACI','Halat ve borda turu','Snap-back alanindan cikmadan halat kontrolu yapma.',-4.25,-10.2,[[-4.45,-11.2],[-4.55,-6.2],[-3.85,-1.6],[-4.2,4.8]],.18,'deck'],['pilot-watch','PILOT WATCH','Borda ve ladder gozlemi','Pilot tarafi, borda isigi ve can simidi hazir.',4.15,6.4,[[4.55,7.2],[4.65,2.8],[4.05,-2.8],[3.45,-8.8]],.16,'deck']],
       engine:[['engine-oiler-live','YAGCI','Pompa ve bilge turu','Alarmi susturmadan once sizinti kaynagini bulmak lazim.',-4.6,2.6,[[-4.6,2.6],[-1.4,-3.2],[5,2.2]],.17,'engine'],['electrician-live','ELEKTRIKCI','Panel kontrolu','Jenerator yuk paylasimi ve izolasyon degerini okuyorum.',4.8,-2.8,[[4.8,-2.8],[1.4,3.2],[-3.8,-1.8]],.15,'engine']],
       radio:[['gmdss-cadet','GMDSS STAJYERI','Dinleme vardiyasi','DSC alarm gelirse once konum ve tehlike turu net yazilir.',-2.2,1.8,[[-2.2,1.8],[2.4,1.2],[1.8,-2.2]],.13,'cadet'],['radio-watch-live','TELSIZCI','GMDSS log','NAVTEX, DSC ve VHF kaydini vardiya defteriyle eslestiriyorum.',2.6,-1.4,[[2.6,-1.4],[-2.6,-1.2],[1.6,2.2]],.12,'officer']],
       cargo:[['cargo-cadet-live','YUK STAJYERI','Ballast ve trim turu','Gelgit penceresi draft ve UKC ile birlikte okunur.',-3.6,2.2,[[-3.6,2.2],[2.8,-2.8],[5.2,1.8]],.15,'cadet'],['pumpman-live','POMPACI','Tank ve valf kontrolu','Transfer baslamadan once valf sirasi ve scupper kapali mi bakilir.',4.8,-3.2,[[4.8,-3.2],[1.2,2.8],[-4.8,-1.6]],.16,'deck']],
@@ -3201,8 +3258,9 @@
       const projected=v.clone();projected.y+=item.type==='npc'?2.45:1.75;projected.project(state.camera);
       const baseVisible=projected.z>-1&&projected.z<1&&Math.abs(projected.x)<1.18&&Math.abs(projected.y)<1.15&&dist<15;
       const important=!!((objective.id===item.id)||(mapTarget&&mapTarget.id===item.id));
-      const visible=baseVisible&&(!item.ambient||dist<5.6||important);
       const aim=Math.hypot(projected.x,projected.y);
+      const focused=item.type==='npc' ? (dist<4.4||aim<.2) : (dist<5.8||aim<.22);
+      const visible=baseVisible&&(important||focused||state.nearest?.id===item.id);
       const aimLimit=item.ambient?0.18:0.28;
       const aimDist=item.ambient?4.1:6.2;
       if(visible&&dist<aimDist&&aim<aimLimit){
@@ -3217,7 +3275,8 @@
         item.marker.style.left=((projected.x*.5+.5)*100)+'%';
         item.marker.style.top=((-projected.y*.5+.5)*100)+'%';
         item.marker.style.setProperty('--marker-scale',String(clamp(1.34-dist*.045,.72,1.1)));
-        item.marker.querySelector('em').textContent=Math.max(1,Math.round(dist*1.4))+' m';
+        const distanceLabel=item.marker.querySelector('em');
+        if(distanceLabel) distanceLabel.textContent=dist<4.8?Math.max(1,Math.round(dist*1.4))+' m':'';
       }
     });
     if(aimed) nearest=aimed;
@@ -3225,7 +3284,7 @@
     state.interactions.forEach(item=>item.marker&&item.marker.classList.toggle('aim-focus',!!(aimed&&aimed.id===item.id)));
     const ready=nearest&&nearest.distance<approachDistanceForItem(nearest);
     state.ui.prompt.classList.toggle('ready',!!ready);
-    state.ui.promptText.textContent=ready?nearest.label:(aimed?('Bakilan hedef: '+aimed.label):'Bir istasyona yaklas');
+    state.ui.promptText.textContent=ready?nearest.label:(aimed?aimed.label:'Yaklas');
     state.ui.distance.textContent=nearest?Math.max(1,Math.round(nearest.distance*1.4))+' m':'';
     state.ui.use.classList.toggle('ready',!!ready);
     state.ui.use.querySelector('span').textContent=ready?(nearest.type==='door'?'GEC':nearest.type==='npc'?'KONUS':'KULLAN'):(aimed?'ODAK':'YAKLAS');
@@ -3517,7 +3576,7 @@
     const indoor={corridor:.82,cabin:.76,mess:.82,galley:.78,infirmary:.78,radio:.8,cargo:.86,engine:.82};
     const areaId=state.area;
     const mod=area?.outside?1:(indoor[areaId]||.9);
-    const base=run?(area?.outside?4.85:4.05):3.05;
+    const base=run?(area?.outside?5.35:4.45):3.28;
     return base*mod*(MOBILE?.9:1);
   }
   function updateMovement(dt){
@@ -3812,15 +3871,16 @@
       let moving=false;
       if(duty){
         const stationWorkLock=!!duty&&(index%3===0||a.profile?.posture==='operator');
+        const deckCrewSpacing=state.area==='deck'||item.uniform==='deck';
         if(stationWorkLock&&!a.stationWorkSeeded){
           const areaBounds=(AREAS[state.area]||AREAS.bridge).bounds;
-          const offset=.52+(index%4)*.14;
+          const offset=(deckCrewSpacing?.95:.52)+(index%4)*(deckCrewSpacing?.32:.14);
           item.object.position.x=clamp(duty.x+Math.cos(index*1.91)*offset,-areaBounds[0]+.7,areaBounds[0]-.7);
           item.object.position.z=clamp(duty.z+Math.sin(index*1.91)*offset,-areaBounds[1]+.7,areaBounds[1]-.7);
           a.stationWorkSeeded=true;
         }
         const dx=duty.x-item.object.position.x,dz=duty.z-item.object.position.z,dist=Math.hypot(dx,dz);
-        const workRadius=stationWorkLock?1.05:.2;
+        const workRadius=stationWorkLock?(deckCrewSpacing?1.42:1.05):.2;
         if(dist>workRadius){
           const step=Math.min(dist,(a.speed||.15)*(stationWorkLock?2.2:3.75)*dt);
           item.object.position.x+=(dx/dist)*step;item.object.position.z+=(dz/dist)*step;moving=true;
@@ -3846,8 +3906,9 @@
       }
       const avoidX=item.object.position.x-state.player.x,avoidZ=item.object.position.z-state.player.z;
       const avoidDist=Math.hypot(avoidX,avoidZ);
-      if(avoidDist>.001 && avoidDist<1.18){
-        const avoidPush=(1.18-avoidDist)*.42;
+      const playerAvoidRadius=state.area==='deck'?1.46:1.18;
+      if(avoidDist>.001 && avoidDist<playerAvoidRadius){
+        const avoidPush=(playerAvoidRadius-avoidDist)*(state.area==='deck'?.58:.42);
         item.object.position.x+=avoidX/avoidDist*avoidPush;
         item.object.position.z+=avoidZ/avoidDist*avoidPush;
         moving=true;
@@ -3856,8 +3917,9 @@
         if(otherIndex===index||!other.object)return;
         const ox=item.object.position.x-other.object.position.x,oz=item.object.position.z-other.object.position.z;
         const od=Math.hypot(ox,oz);
-        if(od>.001&&od<.92){
-          const push=(.92-od)*.28;
+        const npcAvoidRadius=state.area==='deck'?1.42:1.02;
+        if(od>.001&&od<npcAvoidRadius){
+          const push=(npcAvoidRadius-od)*(state.area==='deck'?.44:.32);
           item.object.position.x+=ox/od*push;item.object.position.z+=oz/od*push;moving=true;
         }
       });
